@@ -6,4 +6,7 @@
      _/ |\__,_|\__,_|\__,_| .__/ \__|_| \_/ \___|
     |__/                  |_|                  
 
-# Rapid Java REST API Builder
+# Rapid REST API Builder
+
+*This project is currently in stealth mode. 
+
