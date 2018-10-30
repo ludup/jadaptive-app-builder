@@ -8,13 +8,16 @@
 
 # Rapid, Adaptive REST API Builder for Java
 
-The goal of this project is to create a web service for Java developers that enables rapid deployment of a resource-based REST API that implements standard CRUD operations without having to write a line of code. All that should be required is a JSON template file that describes the resource required. The project will allow collections of resources to be persisted, managed and searched using a standard REST based API.
+The goal of this project is to create a web service for Java developers that enables rapid deployment of an entity-based REST API that implements standard CRUD and search operations without having to write code. All that should be required is a JSON template file that describes the entity required. The project will allow collections of resources to be persisted, managed and searched using a standard REST based API.
 
-An event model and simple plugin architecture will be provided to enable custom code to be injected in any part of the resource lifecycle and an eco system created to allow the sharing of resource templates and plugins between developers.
+It is envisioned that an event model and simple plugin architecture will be provided to enable custom code to be injected in any part of the entity lifecycle and an eco system created to allow the sharing of templates and plugins between developers.
 
 Key objectives for the alpha release:
 
-- Multiple persistence provider plugins to enable storage in either relational or NoSQL type databases.
+- Persistence provider plugin interface.
+- Implement persistence option for NoSQL databases.
+- Implement CRUD REST operations.
+- Implement search and list operations with paging support.
+- Support for embedding of template defined entity within another entity
 - Deploy as a WAR archive or startup in-built web server.
-- Event model for Create, Read, Update, Delete
 
