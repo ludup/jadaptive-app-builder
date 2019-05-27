@@ -1,0 +1,24 @@
+[{
+ "type": "COLLECTION",
+ "name": "Tenant",
+ "uuid": "tenant",
+ "system": true,
+ "fields": [{
+              "resourceKey": "name",
+              "defaultValue": "",
+              "description": "The name of this tenant",
+              "fieldType": "TEXT",
+              "weight": 0
+ }],
+ "categories": [{
+      "resourceKey": "tenantInformation",
+      "weight": 0,
+       "templates": [{
+              "resourceKey": "hostname",
+              "defaultValue": "",
+              "description": "The hostname of this tenant",
+              "fieldType": "TEXT",
+              "weight": 0
+       }] 
+  }]
+}]

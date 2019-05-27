@@ -1,8 +1,8 @@
 package com.jadaptive.tenant;
 
-import com.jadaptive.entity.repository.AbstractUUIDEntityImpl;
+import com.jadaptive.repository.AbstractUUIDEntity;
 
-public class Tenant extends AbstractUUIDEntityImpl {
+public class Tenant extends AbstractUUIDEntity {
 
 	String name;
 	String hostname;

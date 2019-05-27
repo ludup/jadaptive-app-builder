@@ -1,13 +1,13 @@
 package com.jadaptive.templates;
 
-import com.jadaptive.Version;
 import com.jadaptive.repository.AbstractUUIDRepository;
 import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.utils.Version;
 
 public interface TemplateRepository extends AbstractUUIDRepository<Template> {
 
-	boolean hasProcessed(String resourceKey, String version);
+	boolean hasProcessed(String uuid, String version);
 
-	Version getCurrentVersion(String resourceKey) throws RepositoryException;
+	Version getCurrentVersion(String uuid) throws RepositoryException;
 
 }

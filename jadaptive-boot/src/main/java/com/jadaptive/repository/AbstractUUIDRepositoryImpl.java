@@ -10,18 +10,16 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.AbstractLoggingServiceImpl;
+import com.jadaptive.app.AbstractLoggingServiceImpl;
+import com.jadaptive.datasource.DataSourceEntity;
+import com.jadaptive.datasource.EntityDataSource;
+import com.jadaptive.datasource.RedisDataSource;
 import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.entity.repository.AbstractUUIDEntityImpl;
-import com.jadaptive.entity.repository.DataSourceEntity;
-import com.jadaptive.entity.repository.EntityDataSource;
-import com.jadaptive.entity.repository.RedisDataSource;
-import com.jadaptive.templates.TransactionAdapter;
 import com.jadaptive.tenant.Tenant;
 import com.jadaptive.tenant.TenantService;
 
 
-public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntityImpl> extends AbstractLoggingServiceImpl implements AbstractUUIDRepository<E> {
+public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> extends AbstractLoggingServiceImpl implements AbstractUUIDRepository<E> {
 
 	protected abstract Class<E> getResourceClass();
 	
@@ -61,8 +59,8 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntityImp
 //	@Override
 //	public List<E> list(String resourceKey) throws RepositoryException {
 //		List<E> results = new ArrayList<>();
-//		for(Map<String,String> e : datasource.list(resourceKey))  {
-//			results.add(buildEntity(e));
+//		for(Map<String,String> entityService : datasource.list(resourceKey))  {
+//			results.add(buildEntity(entityService));
 //		}
 //		return results;
 //	}

@@ -2,10 +2,10 @@ package com.jadaptive.templates;
 
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.Version;
 import com.jadaptive.entity.EntityNotFoundException;
 import com.jadaptive.repository.AbstractUUIDRepositoryImpl;
 import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.utils.Version;
 
 @Repository
 public class TemplateRepositoryImpl extends AbstractUUIDRepositoryImpl<Template> implements TemplateRepository {

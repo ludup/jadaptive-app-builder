@@ -5,18 +5,17 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.jadaptive.entity.repository.FieldMetaValue;
 
-public class FieldTemplateSerializer extends StdSerializer<FieldTemplateImpl> {
+public class FieldTemplateSerializer extends StdSerializer<FieldTemplate> {
 
 	private static final long serialVersionUID = 5624312163275460262L;
 
 	public FieldTemplateSerializer() {
-		super(FieldTemplateImpl.class);
+		super(FieldTemplate.class);
 	}
 
 	@Override
-	public void serialize(FieldTemplateImpl value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+	public void serialize(FieldTemplate value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 		
 		gen.writeStartObject();
 		

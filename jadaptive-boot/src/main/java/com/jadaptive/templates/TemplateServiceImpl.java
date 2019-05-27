@@ -13,7 +13,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.AbstractLoggingServiceImpl;
+import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.tenant.TenantService;
 

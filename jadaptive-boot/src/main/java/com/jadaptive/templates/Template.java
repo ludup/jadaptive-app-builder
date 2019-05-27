@@ -5,11 +5,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.jadaptive.Utils;
-import com.jadaptive.entity.repository.AbstractUUIDEntityImpl;
-import com.jadaptive.entity.repository.DataSourceEntity;
+import com.jadaptive.datasource.DataSourceEntity;
+import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.utils.Utils;
 
-public class Template extends AbstractUUIDEntityImpl implements DataSourceEntity {
+public class Template extends AbstractUUIDEntity implements DataSourceEntity {
 
 	String version; 
 	Date timestamp;

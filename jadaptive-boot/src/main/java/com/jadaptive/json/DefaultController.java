@@ -2,6 +2,7 @@ package com.jadaptive.json;
 
 import java.util.Collection;
 
+import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.jadaptive.entity.Entity;
 import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.entity.EntityTemplateService;
-import com.jadaptive.entity.UnknownEntityException;
+import com.jadaptive.entity.EntityService;
+import com.jadaptive.entity.template.EntityTemplateService;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.templates.Template;
 import com.jadaptive.templates.TemplateService;
@@ -24,17 +26,20 @@ import com.jadaptive.templates.TemplateService;
 public class DefaultController {
 
 	@Autowired
-	EntityTemplateService entityService; 
+	EntityTemplateService templateService; 
 	
 	@Autowired
-	TemplateService templateService; 
+	TemplateService versionService; 
+	
+	@Autowired
+	EntityService entityService;
 	
 	@RequestMapping(value="template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public Object doEntityGet(@PathVariable String resourceKey, HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityNotFoundException {
 
-		return entityService.get(resourceKey);
+		return templateService.get(resourceKey);
 	}
 	
 	
@@ -43,7 +48,15 @@ public class DefaultController {
 	@ResponseStatus(value=HttpStatus.OK)
 	public Collection<Template> getTemplateVersions(HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityNotFoundException {
 
-		return templateService.list();
+		return versionService.list();
 	}
 	
+	
+	@RequestMapping(value="{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public Entity getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityNotFoundException {
+
+		return entityService.get(resourceKey, uuid);
+	}
 }

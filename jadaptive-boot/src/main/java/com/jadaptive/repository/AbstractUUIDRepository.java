@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.templates.TransactionAdapter;
 import com.jadaptive.tenant.Tenant;
 
 public interface AbstractUUIDRepository<E> {
