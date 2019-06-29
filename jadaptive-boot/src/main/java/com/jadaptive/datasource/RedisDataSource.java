@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.tenant.Tenant;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -20,7 +19,7 @@ public class RedisDataSource implements EntityDataSource {
 	public RedisDataSource() {
 		
 		 this.redisClient = RedisClient
-				  .create("redis://127.0.0.1:32771/");
+				  .create("redis://127.0.0.1:32768/");
 				
 		this.connection = redisClient.connect();
 	}
@@ -31,7 +30,7 @@ public class RedisDataSource implements EntityDataSource {
 	}
 
 	@Override
-	public void save(Tenant tenant, String resourceKey, String rootUuid, Map<String, Map<String, String>> values) {
+	public void save(String tenant, String resourceKey, String rootUuid, Map<String, Map<String, String>> values) {
 		
 		RedisCommands<String, String> syncCommands = connection.sync();
 		indexObjects(syncCommands, indexRoot(syncCommands, tenant, resourceKey, rootUuid), values);
@@ -47,7 +46,7 @@ public class RedisDataSource implements EntityDataSource {
 		
 	}
 
-	private String indexRoot(RedisCommands<String, String> syncCommands, Tenant tenant, String resourceKey, String rootUuid) {
+	private String indexRoot(RedisCommands<String, String> syncCommands, String tenant, String resourceKey, String rootUuid) {
 		
 		/**
 		 * Add this root object to the tenant's index of objects for type "resourceKey"
@@ -61,16 +60,16 @@ public class RedisDataSource implements EntityDataSource {
 		return getObjectKey(tenant, resourceKey, rootUuid);
 	}
 
-	private String getIndexKey(Tenant tenant, String resourceKey) {
-		return String.format("%s:%s", tenant.getUuid(), resourceKey);
+	private String getIndexKey(String tenant, String resourceKey) {
+		return String.format("%s:%s", tenant, resourceKey);
 	}
 
-	private String getObjectKey(Tenant tenant, String resourceKey, String rootUuid) {
-		return String.format("%s:%s:%s", tenant.getUuid(), resourceKey, rootUuid);
+	private String getObjectKey(String tenant, String resourceKey, String rootUuid) {
+		return String.format("%s:%s:%s", tenant, resourceKey, rootUuid);
 	}
 	
 	@Override
-	public Map<String, Map<String, String>> get(Tenant tenant, String resourceKey, String rootUuid)  throws EntityNotFoundException{
+	public Map<String, Map<String, String>> get(String tenant, String resourceKey, String rootUuid)  throws EntityNotFoundException{
 		
 		RedisCommands<String, String> syncCommands = connection.sync();
 		Map<String,Map<String,String>> result = new HashMap<>();
@@ -86,10 +85,10 @@ public class RedisDataSource implements EntityDataSource {
 	}
 
 	@Override
-	public Collection<String> list(Tenant tenant, String resourceKey) {
+	public Collection<String> list(String tenant, String resourceKey) {
 		
 		RedisCommands<String, String> syncCommands = connection.sync();
-		
+
 		return Collections.unmodifiableCollection(syncCommands.smembers(getIndexKey(tenant, resourceKey)));
 	}
 

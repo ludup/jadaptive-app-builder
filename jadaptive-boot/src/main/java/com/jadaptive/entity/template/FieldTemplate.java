@@ -11,6 +11,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.jadaptive.entity.FieldMetaType;
 import com.jadaptive.entity.FieldType;
+import com.jadaptive.entity.ValidationType;
 import com.jadaptive.repository.AbstractUUIDObject;
 
 @JsonSerialize(using=FieldTemplateSerializer.class)
@@ -24,7 +25,7 @@ public class FieldTemplate extends AbstractUUIDObject {
 	boolean hidden;
 	boolean searchable; 
 	
-	Collection<FieldMetaValue> metadata = new HashSet<FieldMetaValue>();
+	Collection<FieldValidator> validators;
 	
 	public FieldTemplate() {
 	}
@@ -85,6 +86,15 @@ public class FieldTemplate extends AbstractUUIDObject {
 		this.searchable = searchable;
 	}
 
+	
+	public Collection<FieldValidator> getValidators() {
+		return validators;
+	}
+
+	public void setValidators(Collection<FieldValidator> validators) {
+		this.validators = validators;
+	}
+
 	public int hashCode() {
 		return  new HashCodeBuilder(7, 43)
 				.append(getUuid())
@@ -102,40 +112,6 @@ public class FieldTemplate extends AbstractUUIDObject {
 		return false;
 	}
 	
-	public void setMetaValue(String resourceKey, Integer value) {
-		setMetaValue(resourceKey, String.valueOf(value), FieldMetaType.NUMBER);
-	}
-	
-	public void setMetaValue(String resourceKey, Long value) {
-		setMetaValue(resourceKey, String.valueOf(value), FieldMetaType.NUMBER);
-	}
-	
-	public void setMetaValue(String resourceKey, Double value) {
-		setMetaValue(resourceKey, String.valueOf(value), FieldMetaType.DECIMAL);
-	}
-	
-	public void setMetaValue(String resourceKey, Boolean value) {
-		setMetaValue(resourceKey, String.valueOf(value), FieldMetaType.BOOLEAN);
-	}
-	
-	public void setMetaValue(String resourceKey, String value) {
-		setMetaValue(resourceKey, value, FieldMetaType.TEXT);
-	}
-	
-	private void setMetaValue(String resourceKey, String value, FieldMetaType type) {
-		for(FieldMetaValue v : metadata) {
-			if(v.getResourceKey().equals(resourceKey)) {
-				v.setValue(value);
-				return;
-			}
-		}
-		metadata.add(new FieldMetaValue(type, this, resourceKey, value));
-	}
-
-	public Collection<FieldMetaValue> getMetaValues() {
-		return metadata;
-	}
-
 	public void toMap(Map<String,String> properties) {
 		
 		properties.put("resourceKey", resourceKey);

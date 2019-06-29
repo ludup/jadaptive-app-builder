@@ -1,5 +1,6 @@
 package com.jadaptive.repository;
 
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +20,6 @@ public abstract class AbstractUUIDEntity {
 		this.uuid = uuid;
 	}
 
-	
 	public Boolean getSystem() {
 		return system==null ? Boolean.FALSE : system;
 	}
@@ -37,6 +37,7 @@ public abstract class AbstractUUIDEntity {
 	}
 
 	public void toMap(Map<String,String> properties) throws ParseException {
+		
 		properties.put("uuid", getUuid());
 		properties.put("system", String.valueOf(system));
 		properties.put("hidden", String.valueOf(system));

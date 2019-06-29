@@ -5,6 +5,7 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.jadaptive.entity.ValidationType;
 
 public class FieldTemplateSerializer extends StdSerializer<FieldTemplate> {
 
@@ -27,19 +28,15 @@ public class FieldTemplateSerializer extends StdSerializer<FieldTemplate> {
 		gen.writeBooleanField("hidden",  value.getHidden());
 		gen.writeNumberField("weight", value.getWeight());
 		
-		for(FieldMetaValue v : value.getMetaValues()) {
-			switch(v.getType()) {
-			case NUMBER:
-				gen.writeNumberField(v.getResourceKey(), Long.parseLong(v.getValue()));
+		for(ValidationType v : value.getFieldType().getOptions()) {
+			switch(v) {
+			case LENGTH:
 				break;
-			case BOOLEAN:
-				gen.writeBooleanField(v.getResourceKey(), Boolean.valueOf(v.getValue()));
+			case RANGE:
 				break;
-			case DECIMAL:
-				gen.writeNumberField(v.getResourceKey(), Double.parseDouble(v.getValue()));
+			case REGEX:
 				break;
 			default:
-				gen.writeStringField(v.getResourceKey(), v.getValue());
 				break;
 			}
 		}

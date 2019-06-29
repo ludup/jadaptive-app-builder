@@ -19,7 +19,11 @@ import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
 import com.jadaptive.entity.template.FieldCategory;
 import com.jadaptive.entity.template.FieldTemplate;
+import com.jadaptive.entity.template.FieldValidator;
+import com.jadaptive.entity.template.ValidationException;
 import com.jadaptive.repository.RepositoryException;
+
+import javafx.beans.binding.IntegerExpression;
 
 public class EntityDeserializer extends StdDeserializer<Entity> {
 
@@ -86,32 +90,103 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 			Entity e = new Entity();
 			e.load(uuid, properties);
 			return e;
-		} catch (RepositoryException | EntityNotFoundException | ParseException e) {
+		} catch (RepositoryException | EntityNotFoundException | ParseException | ValidationException e) {
 			throw new IOException(e);
 		}
 	}
 
 	private void iterateCategories(JsonNode current, String uuid, Set<FieldCategory> categories,
-			Map<String, Map<String, String>> properties) {
+			Map<String, Map<String, String>> properties) throws IOException, ValidationException {
 		for(FieldCategory c : categories) {
 			iterateCategory(current.findValue(c.getResourceKey()), uuid, c, properties);
 		}
 	}
 
 	private void iterateCategory(JsonNode current, String uuid, FieldCategory c,
-			Map<String, Map<String, String>> properties) {
+			Map<String, Map<String, String>> properties) throws IOException, ValidationException {
 		iterateFields(current, uuid, c.getTemplates(), properties);
 	}
 
-	private void iterateFields(JsonNode current, String uuid, Set<FieldTemplate> fields, Map<String,Map<String,String>> properties) {
+	private void iterateFields(JsonNode current, String uuid, Set<FieldTemplate> fields, Map<String,Map<String,String>> properties) throws IOException, ValidationException {
 		
 		for(FieldTemplate field : fields) {
-			switch(field.getFieldType()) {
-			/**
-			 * TODO support for objects and arrays
-			 */
-			default:
-				setProperty(current, uuid, field.getResourceKey(), field.getDefaultValue(), properties);
+			validateNode(current.findPath(field.getResourceKey()), uuid, field, properties);
+		}
+	}
+
+	private void validateNode(JsonNode node, String uuid, FieldTemplate field,
+			Map<String, Map<String, String>> properties) throws IOException, ValidationException {
+		
+		if(node==null) {
+			throw new IOException(String.format("%s is missing", field.getResourceKey()));
+		}
+		
+		switch(field.getFieldType()) {
+		case BOOLEAN:
+			validateBooleean(node, field);
+			break;
+		case DECIMAL:
+			validateDecimal(node, field);
+			break;
+		case NUMBER:
+			validateNumber(node, field);
+			break;
+		case TEXT:
+		case TEXT_AREA:
+		default:
+			validateText(node, field);
+		}
+		
+		setProperty(node, uuid, field.getResourceKey(), node.asText(field.getDefaultValue()), properties);
+		
+	}
+
+	private void validateNumber(JsonNode node, FieldTemplate field) throws ValidationException {
+		try {
+			Long.parseLong(node.asText());
+		} catch (NumberFormatException e) {
+			throw new ValidationException(String.format("Value %s for field %s is not a number", node.asText(), field.getResourceKey()));
+		}
+	}
+
+	private void validateDecimal(JsonNode node, FieldTemplate field) throws ValidationException {
+		try {
+			Double.parseDouble(node.asText());
+		} catch (NumberFormatException e) {
+			throw new ValidationException(String.format("Value %s for field %s is not a double", node.asText(), field.getResourceKey()));
+		}
+	}
+
+	private void validateBooleean(JsonNode node, FieldTemplate field) throws ValidationException {
+		if(node.isBoolean()) {
+			return;
+		}
+		
+		switch(node.asText()) {
+		case "true":
+		case "TRUE":
+		case "false":
+		case "FALSE":
+			return;
+		default:
+			throw new ValidationException(String.format("Value %s for field %s is not a boolean", node.asText(), field.getResourceKey()));
+		}
+	}
+
+	private void validateText(JsonNode node, FieldTemplate field) throws ValidationException {
+		for(FieldValidator v : field.getValidators()) {
+			switch(v.getType()) {
+			case LENGTH:
+				String value = node.asText();
+				int maxlength = Integer.parseInt(v.getValue());
+				if(value.length() > maxlength) {
+					throw new ValidationException(String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
+				}
+				break;
+			case RANGE:
+				break;
+			case REGEX:
+				break;
 			}
 		}
 	}

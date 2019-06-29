@@ -12,7 +12,10 @@ import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -347,6 +350,17 @@ public class Utils {
 		return b.toString();
 	}
 	
+	public static String csv(Collection<String> items) {
+		StringBuffer b = new StringBuffer();
+		for(String i : items) {
+			if(b.length() > 0) {
+				b.append(",");
+			}
+			b.append(i);
+		}
+		return b.toString();
+	}
+	
 	public static String csv(Object[] items) {
 		StringBuffer b = new StringBuffer();
 		for(Object i : items) {
@@ -399,5 +413,9 @@ public class Utils {
 
 	public static String stripHostname(String uri) {
 		return after(uri, ":");
+	}
+
+	public static List<String> fromCsv(String value) {
+		return new ArrayList<String>(Arrays.asList(value.split(",")));
 	}
 }

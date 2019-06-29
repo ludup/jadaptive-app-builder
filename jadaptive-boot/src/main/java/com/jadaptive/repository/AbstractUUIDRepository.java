@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.tenant.Tenant;
 
 public interface AbstractUUIDRepository<E> {
 
@@ -12,14 +11,8 @@ public interface AbstractUUIDRepository<E> {
 
 	void save(E object, @SuppressWarnings("unchecked") TransactionAdapter<E>... operations) throws RepositoryException;
 
-//	List<E> list(String resourceKey) throws RepositoryException;
-
 	E get(String uuid) throws RepositoryException, EntityNotFoundException;
 
-	Collection<E> list(Tenant tenant) throws RepositoryException;
-	
-//	List<E> list(String resourceKey, QueryParameters parameters) throws RepositoryException;
-
-//	E get(String resourceKey, String column, String value) throws RepositoryException;
+	Collection<E> list() throws RepositoryException;
 
 }

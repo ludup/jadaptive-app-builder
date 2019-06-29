@@ -23,7 +23,7 @@ import com.jadaptive.templates.Template;
 import com.jadaptive.templates.TemplateService;
 
 @Controller
-public class DefaultController {
+public class APIController {
 
 	@Autowired
 	EntityTemplateService templateService; 
@@ -34,7 +34,7 @@ public class DefaultController {
 	@Autowired
 	EntityService entityService;
 	
-	@RequestMapping(value="template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="api/template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public Object doEntityGet(@PathVariable String resourceKey, HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityNotFoundException {
@@ -42,8 +42,7 @@ public class DefaultController {
 		return templateService.get(resourceKey);
 	}
 	
-	
-	@RequestMapping(value="template/versions", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="api/template/versions", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public Collection<Template> getTemplateVersions(HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityNotFoundException {
@@ -52,11 +51,19 @@ public class DefaultController {
 	}
 	
 	
-	@RequestMapping(value="{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public Entity getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityNotFoundException {
 
 		return entityService.get(resourceKey, uuid);
+	}
+	
+	@RequestMapping(value="api/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public Entity getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityNotFoundException {
+
+		return entityService.get(resourceKey);
 	}
 }

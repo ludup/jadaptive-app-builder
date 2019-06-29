@@ -4,7 +4,5 @@ public enum ValidationType {
 
 	RANGE, 
 	LENGTH,
-	LIST,
-	URL,
 	REGEX;
 }

@@ -1,0 +1,9 @@
+[{ 
+  "uuid": "tenantConfig",
+  "resourceKey" : "tenantConfig",
+  "system" : true,
+  "hidden" : false,
+  "applicationIdentity" : {
+    "applicationName" : "JADAPTIVE Entity Builder"
+  }
+}]

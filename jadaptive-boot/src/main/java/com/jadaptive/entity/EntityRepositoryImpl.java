@@ -2,14 +2,15 @@ package com.jadaptive.entity;
 
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.templates.TemplateEnabledUUIDRepositoryImpl;
+import com.jadaptive.repository.TenantAwareUUIDRepositoryImpl;
+import com.jadaptive.templates.SystemTemplates;
 
 @Repository
-public class EntityRepositoryImpl extends TemplateEnabledUUIDRepositoryImpl<Entity> implements EntityRepository {
+public class EntityRepositoryImpl extends TenantAwareUUIDRepositoryImpl<Entity> implements EntityRepository {
 
 	@Override
 	public Integer getWeight() {
-		return 1;
+		return SystemTemplates.ENTITY.ordinal();
 	}
 
 	@Override

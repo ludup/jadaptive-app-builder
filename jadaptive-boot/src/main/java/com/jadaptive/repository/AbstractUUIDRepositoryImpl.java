@@ -8,25 +8,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.datasource.DataSourceEntity;
 import com.jadaptive.datasource.EntityDataSource;
 import com.jadaptive.datasource.RedisDataSource;
 import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.tenant.Tenant;
-import com.jadaptive.tenant.TenantService;
 
 
 public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> extends AbstractLoggingServiceImpl implements AbstractUUIDRepository<E> {
 
+	private static final String SYSTEM_UUID = "system";
+
 	protected abstract Class<E> getResourceClass();
 	
-	EntityDataSource datasource = new RedisDataSource();
-	
-	@Autowired
-	TenantService tenantService; 
+	EntityDataSource datasource = new RedisDataSource(); 
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -46,7 +41,7 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> e
 			}
 			Map<String,Map<String,String>> properties =  new HashMap<>();
 			((DataSourceEntity)e).store(properties);
-			datasource.save(tenantService.getCurrentTenant(), getResourceClass().getName(), e.getUuid(), properties);
+			datasource.save(getTenantUuid(), getResourceClass().getName(), e.getUuid(), properties);
 			
 			for(TransactionAdapter<E> op : operations) {
 				op.afterSave(e);
@@ -65,9 +60,13 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> e
 //		return results;
 //	}
 	
+	protected String getTenantUuid() {
+		return SYSTEM_UUID;
+	}
+	
 	@Override
 	public E get(String uuid) throws RepositoryException, EntityNotFoundException {
-		Map<String,Map<String,String>> e = datasource.get(tenantService.getCurrentTenant(), getResourceClass().getName(), uuid);
+		Map<String,Map<String,String>> e = datasource.get(getTenantUuid(), getResourceClass().getName(), uuid);
 		if(Objects.isNull(e)) {
 			return null;
 		}
@@ -94,12 +93,12 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> e
 	protected abstract E createEntity();
 
 	@Override
-	public Collection<E> list(Tenant tenant) throws RepositoryException {
+	public Collection<E> list() throws RepositoryException {
 		try {
 			List<E> results = new ArrayList<>();
-			for(String uuid : datasource.list(tenant, getResourceClass().getName()))  {
+			for(String uuid : datasource.list(getTenantUuid(), getResourceClass().getName()))  {
 				E e = createEntity();
-				((DataSourceEntity)e).load(uuid, datasource.get(tenant, getResourceClass().getName(), uuid));
+				((DataSourceEntity)e).load(uuid, datasource.get(getTenantUuid(), getResourceClass().getName(), uuid));
 				results.add(e);
 			}
 			return results;

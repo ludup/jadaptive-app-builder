@@ -1,0 +1,21 @@
+[{
+ "type": "SINGLETON",
+ "name": "Tenant Configuration",
+ "uuid": "tenantConfig",
+ "system": true,
+ "categories": [{
+      "resourceKey": "applicationIdentity",
+      "weight": 0,
+       "templates": [{
+              "resourceKey": "applicationName",
+              "defaultValue": "",
+              "description": "The name of this application",
+              "fieldType": "TEXT",
+              "weight": 0,
+              "validators": [{
+              	"type": "LENGTH",
+              	"value": 64
+              }]
+       }] 
+  }]
+}]

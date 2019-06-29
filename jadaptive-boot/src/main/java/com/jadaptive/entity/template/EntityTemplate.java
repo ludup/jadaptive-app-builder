@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.datasource.DataSourceEntity;
 import com.jadaptive.entity.EntityType;
@@ -99,16 +101,22 @@ public class EntityTemplate extends NamedUUIDEntity implements DataSourceEntity 
 		
 		this.type = EntityType.valueOf(m.get("type"));
 		this.fields = new HashSet<>();
-		for(String fieldUuid : m.get("fields").split(",")) {
-			FieldTemplate f = new FieldTemplate();
-			f.fromMap(fieldUuid, properties.get(fieldUuid));
-			this.fields.add(f);
+		String fieldIndex = m.get("fields");
+		if(StringUtils.isNotBlank(fieldIndex)) {
+			for(String fieldUuid : fieldIndex.split(",")) {
+				FieldTemplate f = new FieldTemplate();
+				f.fromMap(fieldUuid, properties.get(fieldUuid));
+				this.fields.add(f);
+			}
 		}
 		categories = new HashSet<>();
-		for(String catUuid : m.get("categories").split(",")) {
-			FieldCategory c = new FieldCategory();
-			c.fromMap(catUuid, properties);
-			categories.add(c);
+		String categoryIndex = m.get("categories");
+		if(StringUtils.isNotBlank(categoryIndex)) {
+			for(String catUuid : categoryIndex.split(",")) {
+				FieldCategory c = new FieldCategory();
+				c.fromMap(catUuid, properties);
+				categories.add(c);
+			}
 		}
 	}
 }
