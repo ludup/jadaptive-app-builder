@@ -23,8 +23,6 @@ import com.jadaptive.entity.template.FieldValidator;
 import com.jadaptive.entity.template.ValidationException;
 import com.jadaptive.repository.RepositoryException;
 
-import javafx.beans.binding.IntegerExpression;
-
 public class EntityDeserializer extends StdDeserializer<Entity> {
 
 	private static final long serialVersionUID = -7322676764669077046L;
@@ -174,19 +172,21 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 	}
 
 	private void validateText(JsonNode node, FieldTemplate field) throws ValidationException {
-		for(FieldValidator v : field.getValidators()) {
-			switch(v.getType()) {
-			case LENGTH:
-				String value = node.asText();
-				int maxlength = Integer.parseInt(v.getValue());
-				if(value.length() > maxlength) {
-					throw new ValidationException(String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
+		if(!Objects.isNull(field.getValidators())) {
+			for(FieldValidator v : field.getValidators()) {
+				switch(v.getType()) {
+				case LENGTH:
+					String value = node.asText();
+					int maxlength = Integer.parseInt(v.getValue());
+					if(value.length() > maxlength) {
+						throw new ValidationException(String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
+					}
+					break;
+				case RANGE:
+					break;
+				case REGEX:
+					break;
 				}
-				break;
-			case RANGE:
-				break;
-			case REGEX:
-				break;
 			}
 		}
 	}

@@ -19,7 +19,7 @@ public class RedisDataSource implements EntityDataSource {
 	public RedisDataSource() {
 		
 		 this.redisClient = RedisClient
-				  .create("redis://127.0.0.1:32768/");
+				  .create("redis://127.0.0.1:32770/");
 				
 		this.connection = redisClient.connect();
 	}
@@ -91,21 +91,5 @@ public class RedisDataSource implements EntityDataSource {
 
 		return Collections.unmodifiableCollection(syncCommands.smembers(getIndexKey(tenant, resourceKey)));
 	}
-
-//	@Override
-//	public void save(String resourceKey, String uuid, Map<String, String> values) {
-//		
-//		RedisCommands<String, String> syncCommands = connection.sync();
-//		
-//		syncCommands.sadd(resourceKey, uuid);
-//		syncCommands.hmset(uuid, values);
-//		syncCommands.m
-//	}
-//
-//	@Override
-//	public Map<String, String> get(String resourceKey, String uuid) {
-//		
-//		return null;
-//	}
 
 }

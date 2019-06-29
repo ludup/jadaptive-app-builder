@@ -1,7 +1,6 @@
 package com.jadaptive.entity.template;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,9 +8,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.jadaptive.entity.FieldMetaType;
 import com.jadaptive.entity.FieldType;
-import com.jadaptive.entity.ValidationType;
 import com.jadaptive.repository.AbstractUUIDObject;
 
 @JsonSerialize(using=FieldTemplateSerializer.class)

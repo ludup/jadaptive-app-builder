@@ -24,12 +24,12 @@ public class EntityTemplateRepositoryImpl extends TenantAwareUUIDRepositoryImpl<
 	}
 
 	@Override
-	protected EntityTemplate createEntity() {
+	public EntityTemplate createEntity() {
 		return new EntityTemplate();
 	}
 
 	@Override
-	protected String getName() {
+	public String getName() {
 		return "EntityTemplate";
 	}
 

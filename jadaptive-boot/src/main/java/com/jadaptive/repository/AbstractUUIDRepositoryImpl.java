@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.PostConstruct;
+
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.datasource.DataSourceEntity;
 import com.jadaptive.datasource.EntityDataSource;
@@ -21,7 +23,22 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> e
 
 	protected abstract Class<E> getResourceClass();
 	
-	EntityDataSource datasource = new RedisDataSource(); 
+	static EntityDataSource datasource = new RedisDataSource(); 
+	static Map<Class<?>, AbstractUUIDRepository<?>> repositories = new HashMap<>();
+	
+	@PostConstruct
+	private void postConstruct() {
+		repositories.put(getResourceClass(), this);
+	}
+
+	
+	public static AbstractUUIDRepository<?> getRepositoryForType(Class<?> clz) {
+		AbstractUUIDRepository<?> repository = repositories.get(clz);
+		if(Objects.isNull(repository)) {
+			throw new IllegalArgumentException(String.format("%s is not a valid repository type", clz.getName()));
+		}
+		return repository;
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -33,7 +50,13 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> e
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void save(E e, TransactionAdapter<E>... operations) throws RepositoryException {
+	public void saveObject(AbstractUUIDEntity e) throws RepositoryException {
+		save((E)e);
+	}
+			
+	@Override
+	@SafeVarargs
+	public final void save(E e, TransactionAdapter<E>... operations) throws RepositoryException {
 		try {
 			
 			if(!(e instanceof DataSourceEntity)) {
@@ -88,9 +111,7 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> e
 		
 	}
 
-	protected abstract String getName();
-	
-	protected abstract E createEntity();
+
 
 	@Override
 	public Collection<E> list() throws RepositoryException {

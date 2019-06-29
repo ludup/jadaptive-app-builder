@@ -44,12 +44,12 @@ public class TemplateRepositoryImpl extends AbstractUUIDRepositoryImpl<Template>
 	}
 
 	@Override
-	protected Template createEntity() {
+	public Template createEntity() {
 		return new Template();
 	}
 
 	@Override
-	protected String getName() {
+	public String getName() {
 		return "Template";
 	}
 

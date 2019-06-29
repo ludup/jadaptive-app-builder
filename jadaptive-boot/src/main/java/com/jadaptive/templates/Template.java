@@ -1,21 +1,17 @@
 package com.jadaptive.templates;
 
-import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
-import com.jadaptive.datasource.DataSourceEntity;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.utils.Utils;
+import com.jadaptive.repository.ReflectionUUIDEntity;
 
-public class Template extends AbstractUUIDEntity implements DataSourceEntity {
+public class Template extends ReflectionUUIDEntity {
 
 	String version; 
 	Date timestamp;
-
+	
 	public Date getTimestamp() {
-		return timestamp;
+		return Objects.isNull(timestamp) ? new Date() : timestamp;
 	}
 
 	public void setTimestamp(Date timestamp) {
@@ -30,26 +26,4 @@ public class Template extends AbstractUUIDEntity implements DataSourceEntity {
 		this.version = version;
 	}
 
-	@Override
-	public void store(Map<String, Map<String,String>> properties) throws ParseException {
-		
-		Map<String,String> m = new HashMap<>();
-		
-		super.toMap(m);
-	
-		m.put("version", version);
-		m.put("timestamp", timestamp==null ? Utils.formatDateTime(new Date()) : Utils.formatDateTime(timestamp));
-		
-		properties.put(getUuid(), m);
-	}
-	
-	public void load(String uuid, Map<String,Map<String,String>> properties) throws ParseException {
-
-		Map<String,String> m = properties.get(uuid);
-		
-		super.fromMap(m);
-		
-		this.version = m.get("version");
-		this.timestamp = Utils.parseDateTime(m.get("timestamp"));
-	}
 }

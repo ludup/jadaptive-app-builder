@@ -19,12 +19,12 @@ public class EntityRepositoryImpl extends TenantAwareUUIDRepositoryImpl<Entity> 
 	}
 
 	@Override
-	protected String getName() {
+	public String getName() {
 		return "Entity";
 	}
 
 	@Override
-	protected Entity createEntity() {
+	public Entity createEntity() {
 		return new Entity();
 	}
 

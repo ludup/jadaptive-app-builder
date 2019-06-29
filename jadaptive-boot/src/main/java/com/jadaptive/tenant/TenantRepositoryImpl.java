@@ -16,12 +16,12 @@ public class TenantRepositoryImpl extends AbstractUUIDRepositoryImpl<Tenant> imp
 	}
 
 	@Override
-	protected String getName() {
+	public String getName() {
 		return "Tenant";
 	}
 
 	@Override
-	protected Tenant createEntity() {
+	public Tenant createEntity() {
 		return new Tenant();
 	}
 
