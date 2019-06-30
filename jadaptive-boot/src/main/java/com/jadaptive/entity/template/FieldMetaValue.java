@@ -2,7 +2,6 @@ package com.jadaptive.entity.template;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jadaptive.entity.FieldMetaType;
 import com.jadaptive.repository.AbstractUUIDEntity;
 
 public class FieldMetaValue extends AbstractUUIDEntity {

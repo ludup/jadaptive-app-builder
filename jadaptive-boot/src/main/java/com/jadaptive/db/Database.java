@@ -1,11 +1,11 @@
-package com.jadaptive.datasource;
+package com.jadaptive.db;
 
 import java.util.Collection;
 import java.util.Map;
 
 import com.jadaptive.entity.EntityNotFoundException;
 
-public interface EntityDataSource {
+public interface Database {
 
 	String getName();
 	

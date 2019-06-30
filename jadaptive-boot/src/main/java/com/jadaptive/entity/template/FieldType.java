@@ -1,4 +1,4 @@
-package com.jadaptive.entity;
+package com.jadaptive.entity.template;
 
 public enum FieldType {
 

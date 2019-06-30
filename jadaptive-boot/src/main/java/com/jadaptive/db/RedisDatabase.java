@@ -1,4 +1,4 @@
-package com.jadaptive.datasource;
+package com.jadaptive.db;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,15 +11,15 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 
-public class RedisDataSource implements EntityDataSource {
+public class RedisDatabase implements Database {
 
 	RedisClient redisClient;
 	StatefulRedisConnection<String, String> connection;
 	
-	public RedisDataSource() {
+	public RedisDatabase() {
 		
 		 this.redisClient = RedisClient
-				  .create("redis://127.0.0.1:32770/");
+				  .create("redis://127.0.0.1:32778/");
 				
 		this.connection = redisClient.connect();
 	}

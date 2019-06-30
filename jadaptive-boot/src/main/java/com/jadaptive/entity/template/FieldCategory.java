@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.jadaptive.repository.AbstractUUIDObject;
+import com.jadaptive.repository.AbstractUUIDEntity;
 
-public class FieldCategory extends AbstractUUIDObject {
+public class FieldCategory extends AbstractUUIDEntity {
 
 	String resourceKey;
 	Integer weight;

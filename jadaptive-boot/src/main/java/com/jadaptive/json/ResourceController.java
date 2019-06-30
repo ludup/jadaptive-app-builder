@@ -22,6 +22,11 @@ import com.jadaptive.repository.RepositoryException;
 @Controller
 public class ResourceController {
 	
+	@RequestMapping(value="", method = RequestMethod.GET)
+	public void doDefaultPath(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityNotFoundException, IOException {
+		sendRedirect("/app/", request, response);
+	}
+	
 	@RequestMapping(value="app/**", method = RequestMethod.GET)
 	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityNotFoundException, IOException {
 
@@ -48,7 +53,6 @@ public class ResourceController {
 	}
 
 	private void sendRedirect(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
-		
 		response.sendRedirect(uri);
 	}
 

@@ -3,9 +3,9 @@ package com.jadaptive.templates;
 import java.util.Date;
 import java.util.Objects;
 
-import com.jadaptive.repository.ReflectionUUIDEntity;
+import com.jadaptive.repository.AbstractUUIDEntity;
 
-public class Template extends ReflectionUUIDEntity {
+public class Template extends AbstractUUIDEntity {
 
 	String version; 
 	Date timestamp;

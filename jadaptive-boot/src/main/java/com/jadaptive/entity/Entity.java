@@ -6,13 +6,12 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.jadaptive.datasource.DataSourceEntity;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.repository.AbstractUUIDEntity;
 
 @JsonSerialize(using=EntitySerializer.class)
 @JsonDeserialize(using=EntityDeserializer.class)
-public class Entity extends AbstractUUIDEntity implements DataSourceEntity {
+public class Entity extends AbstractUUIDEntity {
 
 	String resourceKey;
 	Map<String,Map<String,String>> properties;
@@ -42,17 +41,15 @@ public class Entity extends AbstractUUIDEntity implements DataSourceEntity {
 
 	@Override
 	public void store(Map<String, Map<String, String>> properties) throws ParseException {
-
-		properties.putAll(this.properties);
-		super.toMap(this.properties.get(getUuid()));
 		
+		super.store(properties);
+		properties.putAll(this.properties);
 	}
 
 	@Override
 	public void load(String uuid, Map<String, Map<String, String>> properties) throws ParseException {
 		
-		fromMap(properties.get(uuid));
-		this.resourceKey = properties.get(uuid).get("resourceKey");
+		super.load(uuid, properties);
 		this.properties = properties;
 	}
 

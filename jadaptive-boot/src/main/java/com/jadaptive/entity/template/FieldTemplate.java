@@ -8,11 +8,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.jadaptive.entity.FieldType;
-import com.jadaptive.repository.AbstractUUIDObject;
+import com.jadaptive.repository.AbstractUUIDEntity;
 
 @JsonSerialize(using=FieldTemplateSerializer.class)
-public class FieldTemplate extends AbstractUUIDObject {
+public class FieldTemplate extends AbstractUUIDEntity {
 	
 	String resourceKey;
 	String defaultValue;

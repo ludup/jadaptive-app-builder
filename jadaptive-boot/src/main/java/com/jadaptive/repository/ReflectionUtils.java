@@ -20,6 +20,9 @@ public class ReflectionUtils {
 		if(Objects.isNull(results)) {
 			results = new HashSet<>();
 			for(Method m : clz.getMethods()) {
+				if(m.getAnnotation(JadaptiveIgnore.class) != null) {
+					continue;
+				}
 				if(m.getName().startsWith("set") && m.getName().length() > 3 && m.getParameterCount()==1) {
 					results.add(m);
 				}
@@ -37,6 +40,13 @@ public class ReflectionUtils {
 		if(Objects.isNull(results)) {
 			results = new HashSet<>();
 			for(Method m : clz.getMethods()) {
+				if(m.getName().equals("getClass")) {
+					continue;
+				}
+				
+				if(m.getAnnotation(JadaptiveIgnore.class) != null) {
+					continue;
+				}
 				if(m.getName().startsWith("get") && m.getName().length() > 3 && m.getParameterCount()==0) {
 					results.add(m);
 				}

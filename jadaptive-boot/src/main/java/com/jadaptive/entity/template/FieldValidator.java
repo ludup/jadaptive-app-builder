@@ -1,8 +1,8 @@
 package com.jadaptive.entity.template;
 
-import com.jadaptive.entity.ValidationType;
+import com.jadaptive.repository.AbstractUUIDEntity;
 
-public class FieldValidator {
+public class FieldValidator extends AbstractUUIDEntity {
 
 	ValidationType type;
 	String value;
