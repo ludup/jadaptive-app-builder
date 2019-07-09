@@ -1,6 +1,6 @@
 package com.jadaptive.repository;
 
-public class RepositoryException extends Exception {
+public class RepositoryException extends RuntimeException {
 
 	private static final long serialVersionUID = 6924504927585610332L;
 

@@ -29,8 +29,16 @@ public class TenantServiceImpl implements TenantService {
 	@Autowired
 	TenantRepository repository; 
 	
+	Tenant systemTenant;
+	
+	@SuppressWarnings("unchecked")
 	@EventListener
 	private void setup(ApplicationReadyEvent event) throws RepositoryException {
+		
+		
+		systemTenant = new Tenant(SYSTEM_TENANT_UUID, "System", "localhost");
+		systemTenant.setSystem(true);
+		repository.save(systemTenant);
 		
 		initialiseTenant(getSystemTenant());
 		
@@ -82,12 +90,7 @@ public class TenantServiceImpl implements TenantService {
 	}
 	
 	private Tenant getSystemTenant() throws RepositoryException {
-	
-		try {
-			return repository.get(SYSTEM_TENANT_UUID);
-		} catch (EntityNotFoundException e) {
-			return createTenant(SYSTEM_TENANT_UUID, "System", "localhost");
-		}
+		return systemTenant;
 	}
 	
 	@Override

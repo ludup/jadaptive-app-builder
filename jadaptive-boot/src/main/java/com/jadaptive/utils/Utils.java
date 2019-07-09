@@ -139,7 +139,7 @@ public class Utils {
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-		
+//		date.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return date;
 	}
 	
