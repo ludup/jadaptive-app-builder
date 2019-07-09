@@ -26,7 +26,7 @@ public class RedisDatabase implements Database {
 	public RedisDatabase() {
 		
 		 this.redisClient = RedisClient
-				  .create("redis://127.0.0.1:32782/");
+				  .create("redis://127.0.0.1:32783/");
 				
 		this.connection = redisClient.connect();
 	}

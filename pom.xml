@@ -45,7 +45,6 @@
 
 	<modules>
 		<module>jadaptive-boot</module>
-		<module>jadaptive-api-datasource</module>
 	</modules>
 
 	<dependencies>

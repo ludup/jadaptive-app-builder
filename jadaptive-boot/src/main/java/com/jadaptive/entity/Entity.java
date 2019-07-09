@@ -16,7 +16,7 @@ public class Entity extends AbstractUUIDEntity {
 	String resourceKey;
 	Map<String,Map<String,String>> properties;
 	
-	Entity() {	
+	public Entity() {	
 	}
 	
 	public String getResourceKey() {
