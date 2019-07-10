@@ -46,6 +46,14 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> e
 	
 	@SuppressWarnings("unchecked")
 	@Override
+	public void save(List<E> objects, String resourceKey, TransactionAdapter<E>... operations) throws RepositoryException {
+		for(E e : objects) {
+			save(e, resourceKey, operations);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
 	public void saveObject(AbstractUUIDEntity e) throws RepositoryException {
 		save((E)e);
 	}
@@ -64,16 +72,52 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> e
 		}
 		
 	}
+	
+	@Override
+	@SafeVarargs
+	public final void save(E e, String resourceKey, TransactionAdapter<E>... operations) throws RepositoryException {
+
+		Map<String,Map<String,String>> properties =  new HashMap<>();
+		
+		datasource.save(tenantService.getCurrentTenant(), e, resourceKey, properties);
+		
+		for(TransactionAdapter<E> op : operations) {
+			op.afterSave(e);
+		}
+		
+	}
 
 	
 	@Override
 	public E get(String uuid) throws RepositoryException, EntityNotFoundException {
 		return datasource.get(tenantService.getCurrentTenant(), uuid, getResourceClass());
 	}
+	
+	
+	
+	@Override
+	public E get(String uuid, String resourceKey) throws RepositoryException, EntityNotFoundException {
+		return datasource.get(tenantService.getCurrentTenant(), uuid, resourceKey, getResourceClass());
+	}
+
+	@Override
+	public Collection<E> list(String resourceKey) throws RepositoryException {
+		return datasource.list(tenantService.getCurrentTenant(), resourceKey, getResourceClass());
+	}
 
 	@Override
 	public Collection<E> list() throws RepositoryException {
 		return datasource.list(tenantService.getCurrentTenant(), getResourceClass());
+	}
+	
+	@Override
+	public void delete(String resourceKey, String uuid) {
+		datasource.delete(tenantService.getCurrentTenant(), resourceKey, uuid);
+	}
+	
+	@Override
+	public void delete(String uuid) {
+		datasource.delete(tenantService.getCurrentTenant(), getResourceClass(), uuid);
 	}
 
 }

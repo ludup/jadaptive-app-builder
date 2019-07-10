@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
@@ -60,6 +62,10 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 			}
 			
 			String uuid = uuidNode.asText();
+			
+			if(StringUtils.isBlank(uuid)) {
+				throw new IOException("Empty uuid in JSON deserialise");
+			}
 			
 			JsonNode rkNode = node.findValue("resourceKey");
 			

@@ -33,4 +33,9 @@ public class EntityTemplateRepositoryImpl extends TenantAwareUUIDRepositoryImpl<
 		return "EntityTemplate";
 	}
 
+	@Override
+	protected boolean isAutomaticResourceKey() {
+		return true;
+	}
+
 }

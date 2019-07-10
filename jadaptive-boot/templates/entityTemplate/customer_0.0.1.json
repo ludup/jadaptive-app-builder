@@ -1,0 +1,18 @@
+[{
+ "type": "COLLECTION",
+ "name": "Customer",
+ "uuid": "customer",
+ "system": false,
+ "fields": [{
+              "resourceKey": "name",
+              "defaultValue": "",
+              "description": "The name of this customer",
+              "fieldType": "TEXT",
+              "weight": 0,
+              "validators": [{
+              	"type": "LENGTH",
+              	"value": 255
+              }]
+       }],
+   "categories": []
+}]

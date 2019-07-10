@@ -1,0 +1,162 @@
+<html>
+<head>
+<title>Entity Tester</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="container">
+
+  
+  <div class="row">
+     <h1>Entity Tester</h1>
+  </div>
+  <form>
+     <div class="form-group">
+	     <div class="row mb-3">
+	        <div class="col-3">
+	        	 <label>Entity</label>
+	        </div>
+	        <div class="col-9">
+	        	<select id="template" name="template" class="form-control"></select>
+	        </div>
+	     </div>
+	      <div class="row mb-3 collection">
+	        <div class="col-3">
+	        	  <label>UUID</label>
+	        </div>
+	        <div class="col-9">
+	        	<select id="uuid" name="uuid" class="form-control"></select>
+	        </div>
+	     </div>
+	     <div class="row mb-3">
+	     	<div class="col-3">
+	     		<label>Object</label>
+	     	</div>
+	     	<div class="col-9">
+	       	 	<textarea id="json" style="width: 100%; height: 400px;" class="form-control"></textarea>
+	       	 </div>
+	     </div>
+	     <div class="row mb-3">
+	     	<div class="col-3">
+	     		<label>&nbsp;</label>
+	     	</div>
+	        <div class="col-9">
+	           <button id="postButton" type="button" class="btn btn-success">POST</button>
+	           <button id="deleteButton" type="button" class="btn btn-danger">DELETE</button>
+	        </div>
+	     </div>
+     </div>
+     
+     
+  </form>
+</div>
+
+
+<script>
+
+$(document).ready(function() {
+
+	$('#template').change(function() {
+		debugger;
+		var t = $("#template option:selected").data('template');
+		if(t) {
+			$('#uuid').empty();
+			$('#json').val('');
+			$.getJSON('/api/' + t.uuid + '/list', function(data) {
+				
+				if(data.length > 0) {
+					$.each(data, function(idx, obj) {
+						$('#uuid').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.uuid + '</option>');
+						$('#' + obj.uuid).data('object', obj);
+					});		
+
+					$('#uuid').change();
+				
+				} 
+			});
+			
+		}
+	});
+	
+	$('#uuid').change(function() {
+		debugger;
+		var uuid = $("#uuid option:selected").val();
+		var t = $("#template option:selected" ).data('template');
+		var url = '/api/' + t.uuid;
+		if(t.type !== 'SINGLETON') {
+			url += '/' + uuid;
+		}
+		
+		$('#json').val('');
+		
+		$.getJSON(url, function(data) {
+			$('#json').val(JSON.stringify(data, null, 4));
+		});
+	});
+	
+	$.getJSON('/api/template/list', function(data) {
+		$.each(data, function(idx, obj) {
+			$('#template').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.name + '</option>');
+			$('#' + obj.uuid).data('template', obj);
+			if(idx==0) {
+				$('#template').trigger('change');
+			}
+		});
+	});
+
+	
+	$('#postButton').click(function(e) {
+		
+		debugger;
+		var t = $("#template option:selected" ).data('template');
+		var url = '/api/' + t.uuid;
+		
+		$.ajax({
+            url: url,
+            type: 'post',
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function (data) {
+            	if(data.success) {
+            		alert('Object successfully posted');
+            	} else {
+            		alert(data.message);
+            	}
+            },
+            data: $('#json').val()
+        });
+	});
+	
+	$('#deleteButton').click(function(e) {
+		
+		debugger;
+		var t = $("#template option:selected" ).data('template');
+		var url = '/api/' + t.uuid + '/' + $('#uuid option:selected').val();
+		
+		$.ajax({
+            url: url,
+            type: 'delete',
+            dataType: 'json',
+            success: function (data) {
+            	if(data.success) {
+            		alert('Object successfully deleted');
+            		$('#template').trigger('change');
+            	} else {
+            		alert(data.message);
+            	}
+            }
+        });
+	});
+	
+});
+
+
+
+
+</script>
+</body>
+</html>

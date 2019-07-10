@@ -28,4 +28,9 @@ public class EntityRepositoryImpl extends TenantAwareUUIDRepositoryImpl<Entity> 
 		return new Entity();
 	}
 
+	@Override
+	protected boolean isAutomaticResourceKey() {
+		return false;
+	}
+
 }

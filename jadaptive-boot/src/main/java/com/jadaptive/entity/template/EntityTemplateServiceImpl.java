@@ -1,5 +1,6 @@
 package com.jadaptive.entity.template;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,11 @@ public class EntityTemplateServiceImpl implements EntityTemplateService {
 		}
 		
 		return e;
+	}
+
+	@Override
+	public Collection<EntityTemplate> list() {
+		return repository.list();
 	}
 
 }

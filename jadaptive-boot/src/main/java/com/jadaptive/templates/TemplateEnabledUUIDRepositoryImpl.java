@@ -35,6 +35,7 @@ public abstract class TemplateEnabledUUIDRepositoryImpl<E extends AbstractUUIDEn
 				getResourceClass().getSimpleName().substring(1));
 	}
 	
+	protected abstract boolean isAutomaticResourceKey();
 	
 	protected void registerSerializationModule(Module module) {
 		objectMapper.getObjectMapper().registerModule(module);
@@ -131,7 +132,7 @@ public abstract class TemplateEnabledUUIDRepositoryImpl<E extends AbstractUUIDEn
 					new FileInputStream(resource), 
 					objectMapper.getObjectMapper().getTypeFactory().constructCollectionType(List.class, getResourceClass()));
 			
-			save(templates,  new TransactionAdapter<E>() {
+			TransactionAdapter<E> t = new TransactionAdapter<E>() {
 
 				@Override
 				public void afterSave(E object) throws RepositoryException {
@@ -142,7 +143,13 @@ public abstract class TemplateEnabledUUIDRepositoryImpl<E extends AbstractUUIDEn
 					
 					log.info("Created {} {} '{}' version {}", getResourceClass().getSimpleName(), resourceKey, object.getUuid(), version.toString());
 				}
-			});
+			};
+			
+			if(isAutomaticResourceKey()) {
+				save(templates,  t);
+			} else {
+				save(templates, resourceKey, t);
+			}
 			
 		} catch (Throwable e) {
 			log.error(String.format("Failed to process template %s", uuid), e);

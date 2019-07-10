@@ -15,7 +15,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationServiceImpl;
-import com.jadaptive.entity.EntityNotFoundException;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.templates.TemplateEnabledUUIDRepository;
 
