@@ -6,4 +6,6 @@ public interface EntityRepository extends TemplateEnabledUUIDRepository<Entity> 
 
 	void delete(String resourceKey, String uuid);
 
+	void deleteAll(String resourceKey);
+
 }

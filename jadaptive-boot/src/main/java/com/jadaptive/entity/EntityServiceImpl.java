@@ -79,4 +79,16 @@ public class EntityServiceImpl implements EntityService {
 		}
 		entityRepository.delete(resourceKey, uuid);
 	}
+
+	@Override
+	public void deleteAll(String resourceKey) throws EntityNotFoundException {
+		
+		EntityTemplate template = templateService.get(resourceKey);
+		if(template.getType()==EntityType.SINGLETON) {	
+			throw new EntityNotFoundException("You cannot delete a Singleton Entity");
+		}
+		
+		entityRepository.deleteAll(resourceKey);
+		
+	}
 }

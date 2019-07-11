@@ -15,4 +15,6 @@ public interface EntityService {
 	void saveOrUpdate(String resourceKey, Entity entity) throws RepositoryException, EntityNotFoundException;
 
 	void delete(String resourceKey, String uuid) throws RepositoryException, EntityNotFoundException;
+
+	void deleteAll(String resourceKey) throws EntityNotFoundException;
 }

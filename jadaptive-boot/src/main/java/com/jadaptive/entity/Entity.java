@@ -61,7 +61,7 @@ public class Entity extends AbstractUUIDEntity {
 		
 		String value = objectProperties.get(field);
 		
-		if(Objects.isNull(objectProperties)) {
+		if(Objects.isNull(value)) {
 			return defaultValue;
 		}
 		

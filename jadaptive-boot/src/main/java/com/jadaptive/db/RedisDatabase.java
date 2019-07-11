@@ -27,7 +27,7 @@ public class RedisDatabase extends AbstractLoggingServiceImpl implements Databas
 	public RedisDatabase() {
 		
 		 this.redisClient = RedisClient
-				  .create("redis://127.0.0.1:32796/");
+				  .create("redis://127.0.0.1:32799/");
 				
 		this.connection = redisClient.connect();
 	}
@@ -160,17 +160,17 @@ public class RedisDatabase extends AbstractLoggingServiceImpl implements Databas
 	}
 	
 	@Override
-	public <T extends AbstractUUIDEntity> Collection<T> list(String className, Class<T> clz) {
-		return doList(TenantServiceImpl.SYSTEM_TENANT_UUID, className, clz);
+	public <T extends AbstractUUIDEntity> Collection<T> list(String resourceKey, Class<T> clz) {
+		return doList(TenantServiceImpl.SYSTEM_TENANT_UUID, resourceKey, clz);
 	}
 	
-	protected <T extends AbstractUUIDEntity> Collection<T> doList(String tenant, String className, Class<T> clz) {
+	protected <T extends AbstractUUIDEntity> Collection<T> doList(String tenant, String resourceKey, Class<T> clz) {
 		try {
 			RedisCommands<String, String> syncCommands = connection.sync();
 			
 			List<T> results = new ArrayList<>();
-			for(String uuid : syncCommands.smembers(getClassIndex(tenant, className))) {
-				results.add(doGet(tenant, uuid, className, clz));
+			for(String uuid : syncCommands.smembers(getClassIndex(tenant, resourceKey))) {
+				results.add(doGet(tenant, uuid, resourceKey, clz));
 			}
 			
 			return results;
@@ -201,4 +201,24 @@ public class RedisDatabase extends AbstractLoggingServiceImpl implements Databas
 		
 	}
 
+	@Override
+	public void deleteAll(Tenant tenant, String resourceKey) {
+		doDeleteAll(tenant.getUuid(), resourceKey);
+	}
+
+	protected void doDeleteAll(String tenant, String resourceKey) {
+		RedisCommands<String, String> syncCommands = connection.sync();
+		
+		String index = getClassIndex(tenant, resourceKey);
+		String[] members = syncCommands.smembers(index).toArray(new String[0]);
+		
+		if(members.length > 0) {
+			for(String uuid : members) {
+				String key = getObjectKey(tenant, resourceKey, uuid);
+				syncCommands.del(syncCommands.smembers(key).toArray(new String[0]));
+			}
+	
+			syncCommands.srem(index, members);
+		}
+	}
 }

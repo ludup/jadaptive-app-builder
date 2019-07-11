@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.entity.EntityNotFoundException;
+import com.jadaptive.entity.EntityService;
 import com.jadaptive.repository.RepositoryException;
 
 @Service
@@ -14,6 +15,10 @@ public class EntityTemplateServiceImpl implements EntityTemplateService {
 
 	@Autowired
 	EntityTemplateRepository repository; 
+	
+	
+	@Autowired
+	EntityService entityService;
 	
 	@Override
 	public EntityTemplate get(String resourceKey) throws RepositoryException, EntityNotFoundException {
@@ -30,6 +35,21 @@ public class EntityTemplateServiceImpl implements EntityTemplateService {
 	@Override
 	public Collection<EntityTemplate> list() {
 		return repository.list();
+	}
+
+	@Override
+	public void saveOrUpdate(EntityTemplate template) {
+		
+		repository.save(template);
+		
+	}
+
+	@Override
+	public void delete(String uuid) throws EntityNotFoundException {
+		
+		entityService.deleteAll(uuid);
+		repository.delete(uuid);
+		
 	}
 
 }

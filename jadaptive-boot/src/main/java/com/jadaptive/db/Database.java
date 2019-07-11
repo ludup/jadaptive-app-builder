@@ -40,4 +40,6 @@ public interface Database {
 	void delete(Tenant tenant, Class<?> resourceClass, String uuid);
 	
 	void delete(Tenant tenant, String resourceKey, String uuid);
+
+	void deleteAll(Tenant currentTenant, String resourceKey);
 }

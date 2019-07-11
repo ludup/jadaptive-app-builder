@@ -119,5 +119,12 @@ public abstract class AbstractUUIDRepositoryImpl<E extends AbstractUUIDEntity> e
 	public void delete(String uuid) {
 		datasource.delete(tenantService.getCurrentTenant(), getResourceClass(), uuid);
 	}
+	
+
+	@Override
+	public void deleteAll(String resourceKey) {
+		
+		datasource.deleteAll(tenantService.getCurrentTenant(), resourceKey);
+	}
 
 }

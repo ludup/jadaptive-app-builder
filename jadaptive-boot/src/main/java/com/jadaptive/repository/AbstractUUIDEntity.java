@@ -140,6 +140,9 @@ public abstract class AbstractUUIDEntity {
 		
 		Map<String,String> myProperties = properties.get(uuid);
 		
+		if(Objects.isNull(myProperties)) {
+			return;
+		}
 		try {
 			for(Method m : ReflectionUtils.getSetters(getClass())) {
 				String name = ReflectionUtils.calculateFieldName(m);

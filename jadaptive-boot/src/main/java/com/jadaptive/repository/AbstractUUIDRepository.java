@@ -33,4 +33,6 @@ public interface AbstractUUIDRepository<E extends AbstractUUIDEntity> {
 
 	void delete(String uuid);
 
+	void deleteAll(String resourceKey);
+
 }

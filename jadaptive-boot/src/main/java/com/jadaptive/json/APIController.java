@@ -44,6 +44,32 @@ public class APIController {
 		return templateService.get(resourceKey);
 	}
 	
+	@RequestMapping(value="api/template", method = RequestMethod.POST, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus saveTemplate(@RequestBody EntityTemplate template, HttpServletRequest request) {
+
+		try {
+			templateService.saveOrUpdate(template);
+			return new RequestStatus();
+		} catch (RepositoryException e) {
+			return new RequestStatus(false, e.getMessage());
+		}
+	}
+	
+	@RequestMapping(value="api/template/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus deleteTemplate(@PathVariable String uuid, HttpServletRequest request) {
+
+		try {
+			templateService.delete(uuid);
+			return new RequestStatus();
+		} catch (RepositoryException | EntityNotFoundException e) {
+			return new RequestStatus(false, e.getMessage());
+		}
+	}
+	
 	@RequestMapping(value="api/template/versions", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
