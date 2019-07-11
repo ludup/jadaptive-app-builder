@@ -51,10 +51,11 @@ public class EntityServiceImpl implements EntityService {
 
 	@Override
 	public Collection<Entity> list(String resourceKey) throws RepositoryException, EntityNotFoundException {
-		EntityTemplate template = templateService.get(resourceKey);
+		templateService.get(resourceKey);
 		return entityRepository.list(resourceKey);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void saveOrUpdate(String resourceKey, Entity entity) throws RepositoryException, EntityNotFoundException {
 		EntityTemplate template = templateService.get(resourceKey);

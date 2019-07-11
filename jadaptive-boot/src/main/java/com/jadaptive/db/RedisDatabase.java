@@ -27,7 +27,7 @@ public class RedisDatabase extends AbstractLoggingServiceImpl implements Databas
 	public RedisDatabase() {
 		
 		 this.redisClient = RedisClient
-				  .create("redis://127.0.0.1:32799/");
+				  .create("redis://127.0.0.1:32800/");
 				
 		this.connection = redisClient.connect();
 	}

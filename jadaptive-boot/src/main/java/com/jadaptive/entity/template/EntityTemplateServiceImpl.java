@@ -37,6 +37,7 @@ public class EntityTemplateServiceImpl implements EntityTemplateService {
 		return repository.list();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void saveOrUpdate(EntityTemplate template) {
 		

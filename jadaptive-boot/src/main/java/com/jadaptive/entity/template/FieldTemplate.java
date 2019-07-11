@@ -1,16 +1,13 @@
 package com.jadaptive.entity.template;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.jadaptive.repository.AbstractUUIDEntity;
 
-@JsonSerialize(using=FieldTemplateSerializer.class)
 public class FieldTemplate extends AbstractUUIDEntity {
 	
 	String resourceKey;
@@ -20,8 +17,7 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	Integer weight;
 	boolean hidden;
 	boolean searchable; 
-	
-	Collection<FieldValidator> validators;
+	Set<FieldValidator> validators;
 	
 	public FieldTemplate() {
 	}
@@ -83,11 +79,11 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	}
 
 	
-	public Collection<FieldValidator> getValidators() {
+	public Set<FieldValidator> getValidators() {
 		return validators;
 	}
 
-	public void setValidators(Collection<FieldValidator> validators) {
+	public void setValidators(Set<FieldValidator> validators) {
 		this.validators = validators;
 	}
 
@@ -107,29 +103,5 @@ public class FieldTemplate extends AbstractUUIDEntity {
 		}
 		return false;
 	}
-	
-	public void toMap(Map<String,String> properties) {
-		
-		properties.put("resourceKey", resourceKey);
-		properties.put("defaultValue", defaultValue);
-		properties.put("description", description);
-		properties.put("fieldType", fieldType.name());
-		properties.put("weight", String.valueOf(weight));
-		properties.put("hidden", String.valueOf(hidden));
-		properties.put("searchable", String.valueOf(searchable));
 
-	}
-	
-	public void fromMap(String uuid, Map<String, String> properties) {
-		
-		setUuid(uuid);
-		
-		resourceKey = properties.get("resourceKey");
-		defaultValue = properties.get("defaultValue");
-		description = properties.get("description");
-		fieldType = FieldType.valueOf(properties.get("fieldType"));
-		weight = Integer.parseInt(properties.get("weight"));
-		hidden = Boolean.valueOf(properties.get("hidden"));
-		searchable  = Boolean.valueOf(properties.get("searchable"));
-	}
 }

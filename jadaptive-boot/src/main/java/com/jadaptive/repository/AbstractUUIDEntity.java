@@ -216,6 +216,7 @@ public abstract class AbstractUUIDEntity {
 						for (Enum<?> enumConstant : enumConstants) {
 							if(enumConstant.name().equals(value)){
 								m.invoke(this, enumConstant);
+								break;
 							}
 						}
 					}

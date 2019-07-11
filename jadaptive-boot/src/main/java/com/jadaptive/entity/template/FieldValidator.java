@@ -8,7 +8,6 @@ public class FieldValidator extends AbstractUUIDEntity {
 	String value;
 	
 	public FieldValidator() {
-
 	}
 
 	public ValidationType getType() {
