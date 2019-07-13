@@ -1,13 +1,12 @@
 package com.jadaptive.entity;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -23,12 +22,13 @@ import com.jadaptive.entity.template.FieldCategory;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.entity.template.FieldValidator;
 import com.jadaptive.entity.template.ValidationException;
-import com.jadaptive.repository.RepositoryException;
 
 public class EntityDeserializer extends StdDeserializer<Entity> {
 
 	private static final long serialVersionUID = -7322676764669077046L;
 
+	static final Logger log = LoggerFactory.getLogger(EntityDeserializer.class);
+	
 	public EntityDeserializer() {
 		super((Class<?>)null);
 	}
@@ -56,17 +56,6 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 			JsonNode node = oc.readTree(parser);
    
 			JsonNode uuidNode = node.findValue("uuid");
-			
-			if(Objects.isNull(uuidNode)) {
-				throw new IOException("Missing uuid in JSON deserialise");
-			}
-			
-			String uuid = uuidNode.asText();
-			
-			if(StringUtils.isBlank(uuid)) {
-				throw new IOException("Empty uuid in JSON deserialise");
-			}
-			
 			JsonNode rkNode = node.findValue("resourceKey");
 			
 			if(Objects.isNull(rkNode)) {
@@ -77,49 +66,51 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 			
 			EntityTemplate template = templateService.get(rkNode.asText());
 			
-			JsonNode current = node;
+			Entity e = new Entity(template.getUuid(), new Document());
 			
-			Map<String,Map<String,String>> properties = new HashMap<>();
-			properties.put(uuid, new HashMap<>());
+			if(!Objects.isNull(uuidNode)) {
+				e.setUuid(uuidNode.asText());
+			}
 			
-			setProperty(current, uuid, "uuid", uuid, properties);
-			setProperty(current, uuid, "resourceKey", rkNode.asText(), properties);
-			setProperty(current, uuid, "system", "false", properties);
-			setProperty(current, uuid, "hidden", "false", properties);
+			e.setSystem(node.findValue("system").asBoolean(false));
+			e.setHidden(node.findValue("hidden").asBoolean(false));
 			
-			iterateFields(current, uuid, template.getFields(), properties);
+			iterateFields(node, template.getFields(), e);
 
-			iterateCategories(current, uuid, template.getCategories(), properties);
+			iterateCategories(node, template.getCategories(), e);
 
-			Entity e = new Entity();
-			e.load(uuid, properties);
 			return e;
-		} catch (RepositoryException | EntityNotFoundException | ParseException | ValidationException e) {
+		} catch (Throwable e) {
+			log.error("Failed to deserialize Entity", e);
 			throw new IOException(e);
 		}
 	}
 
-	private void iterateCategories(JsonNode current, String uuid, Set<FieldCategory> categories,
-			Map<String, Map<String, String>> properties) throws IOException, ValidationException {
-		for(FieldCategory c : categories) {
-			iterateCategory(current.findValue(c.getResourceKey()), uuid, c, properties);
+	private void iterateCategories(JsonNode current, Set<FieldCategory> categories,
+			Entity e) throws IOException, ValidationException {
+		if(!Objects.isNull(categories)) {
+			for(FieldCategory c : categories) {
+				iterateCategory(current.findValue(c.getResourceKey()), c, new Entity(e, c.getResourceKey(), new Document()));
+			}
 		}
 	}
 
-	private void iterateCategory(JsonNode current, String uuid, FieldCategory c,
-			Map<String, Map<String, String>> properties) throws IOException, ValidationException {
-		iterateFields(current, uuid, c.getTemplates(), properties);
+	private void iterateCategory(JsonNode current, FieldCategory c,
+			Entity cat) throws IOException, ValidationException {
+		iterateFields(current, c.getTemplates(), cat);
 	}
 
-	private void iterateFields(JsonNode current, String uuid, Set<FieldTemplate> fields, Map<String,Map<String,String>> properties) throws IOException, ValidationException {
+	private void iterateFields(JsonNode current, Set<FieldTemplate> fields, Entity e) throws IOException, ValidationException {
 		
-		for(FieldTemplate field : fields) {
-			validateNode(current.findPath(field.getResourceKey()), uuid, field, properties);
+		if(!Objects.isNull(fields)) {
+			for(FieldTemplate field : fields) {
+				validateNode(current.findPath(field.getResourceKey()), field, e);
+			}
 		}
 	}
 
-	private void validateNode(JsonNode node, String uuid, FieldTemplate field,
-			Map<String, Map<String, String>> properties) throws IOException, ValidationException {
+	private void validateNode(JsonNode node, FieldTemplate field,
+			Entity e) throws IOException, ValidationException {
 		
 		if(node==null) {
 			throw new IOException(String.format("%s is missing", field.getResourceKey()));
@@ -141,7 +132,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 			validateText(node, field);
 		}
 		
-		setProperty(node, uuid, field.getResourceKey(), node.asText(field.getDefaultValue()), properties);
+		setProperty(node, field, e);
 		
 	}
 
@@ -197,13 +188,10 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		}
 	}
 
-	private void setProperty(JsonNode current, String uuid, String resourceKey, String defaultValue, Map<String,Map<String,String>> properties) {
-		JsonNode value = current.findValue(resourceKey);
-		if(value==null) {
-			properties.get(uuid).put(resourceKey, defaultValue);
-		} else {
-			properties.get(uuid).put(resourceKey, value.asText(defaultValue));
-		}
+	private void setProperty(JsonNode value, FieldTemplate t, Entity e) {
+		if(!Objects.isNull(value)) {
+			e.setValue(t, value.asText());
+		} 
 	}
 
 

@@ -15,7 +15,6 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	String description;
 	FieldType fieldType; 
 	Integer weight;
-	boolean hidden;
 	boolean searchable; 
 	Set<FieldValidator> validators;
 	
@@ -60,14 +59,6 @@ public class FieldTemplate extends AbstractUUIDEntity {
 
 	public void setWeight(Integer weight) {
 		this.weight = weight;
-	}
-	
-	public Boolean getHidden() {
-		return hidden;
-	}
-
-	public void setHidden(Boolean hidden) {
-		this.hidden = hidden;
 	}
 
 	public Boolean getSearchable() {

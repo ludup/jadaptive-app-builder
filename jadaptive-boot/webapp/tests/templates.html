@@ -53,13 +53,17 @@
 var reloadTemplates = function() {
 	$("#template").empty();
 	$.getJSON('/api/template/list', function(data) {
-		$.each(data, function(idx, obj) {
-			$('#template').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.name + '</option>');
-			$('#' + obj.uuid).data('template', obj);
-			if(idx==0) {
-				$('#template').trigger('change');
-			}
-		});
+		if(data.success) {
+			$.each(data.result, function(idx, obj) {
+				$('#template').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.name + '</option>');
+				$('#' + obj.uuid).data('template', obj);
+				if(idx==0) {
+					$('#template').trigger('change');
+				}
+			});
+		} else {
+			alert(data.message);
+		}
 	});
 }
 $(document).ready(function() {
@@ -71,7 +75,11 @@ $(document).ready(function() {
 		if(t) {
 			$('#json').val('');
 			$.getJSON('/api/template/' + t.uuid, function(data) {
-				$('#json').val(JSON.stringify(data, null, 4));
+				if(data.success) {
+					$('#json').val(JSON.stringify(data.result, null, 4));
+				} else {
+					alert(data.message);
+				}
 			});
 			
 		}

@@ -13,44 +13,41 @@ import java.util.Objects;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.Module;
+import com.jadaptive.app.AbstractLoggingServiceImpl;
+import com.jadaptive.entity.EntityException;
 import com.jadaptive.json.ObjectMapperHolder;
 import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.repository.AbstractUUIDRepositoryImpl;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.repository.TransactionAdapter;
 import com.jadaptive.utils.Version;
 
-public abstract class TemplateEnabledUUIDRepositoryImpl<E extends AbstractUUIDEntity> extends AbstractUUIDRepositoryImpl<E> {
-
+@Service
+public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl implements TemplateVersionService  {
+	
 	@Autowired
-	protected TemplateRepository templateRepository; 
+	protected TemplateVersionRepository templateRepository; 
 	
 	@Autowired
 	protected ObjectMapperHolder objectMapper;
 	
-	protected String getResourceKey() {
-		return String.format("%s%s", getResourceClass().getSimpleName().substring(0,1).toLowerCase(),
-				getResourceClass().getSimpleName().substring(1));
+	@Override
+	public Collection<TemplateVersion> list() throws RepositoryException, EntityException {
+		return templateRepository.list();
 	}
 	
-	protected abstract boolean isAutomaticResourceKey();
-	
-	protected void registerSerializationModule(Module module) {
-		objectMapper.getObjectMapper().registerModule(module);
-	}
-	
-	public void processTemplates() {
+	@Override
+	public <E extends AbstractUUIDEntity> void processTemplates(TemplateEnabledUUIDRepository<E> repository) {
 		
 		if(log.isInfoEnabled()) {
-			log.info("Processing templates for {}", getResourceKey());
+			log.info("Processing templates for {}", repository.getResourceKey());
 		}
 		
 		try {
 			
 			Collection<File> orderedTemplates = findVersionedTemplates(
-					String.format("templates%s%s", File.separator, getResourceKey()));
+					String.format("templates%s%s", File.separator, repository.getResourceKey()));
 			
 			for(File template : orderedTemplates) {
 				
@@ -61,7 +58,7 @@ public abstract class TemplateEnabledUUIDRepositoryImpl<E extends AbstractUUIDEn
 				}
 				Version version = new Version(elements[1]);
 				String templateResourceKey = elements[0];
-				String uuid = getResourceKey() + "_" + templateResourceKey;
+				String uuid = repository.getResourceKey() + "_" + templateResourceKey;
 				Version currentVersion = templateRepository.getCurrentVersion(uuid);
 				
 				if(currentVersion==null || version.compareTo(currentVersion) > 0) {
@@ -72,13 +69,13 @@ public abstract class TemplateEnabledUUIDRepositoryImpl<E extends AbstractUUIDEn
 						continue;
 					}
 					
-					processTemplate(template, uuid, templateResourceKey, version);
+					processTemplate(template, uuid, repository, version);
 				}
 				
 			}
 			
 			if(log.isInfoEnabled()) {
-				log.info("Finished processing templates for {}", getResourceKey());
+				log.info("Finished processing templates for {}", repository.getResourceKey());
 			}
 			
 		} catch(IOException | RepositoryException e) {
@@ -119,44 +116,38 @@ public abstract class TemplateEnabledUUIDRepositoryImpl<E extends AbstractUUIDEn
 		return orderedTemplates;
 	}
 
-
 	@SuppressWarnings("unchecked")
-	private void processTemplate(File resource, String uuid, String resourceKey, Version version) {
+	private <E extends AbstractUUIDEntity> void processTemplate(File resource, String uuid, TemplateEnabledUUIDRepository<E> repository, Version version) {
 		try {
 			
 			if(log.isInfoEnabled()) {
 				log.info("Processing template {} resource {}", uuid, version.toString());
 			}
 			
-			List<E> templates = objectMapper.getObjectMapper().readValue(
+			List<E> objects = objectMapper.getObjectMapper().readValue(
 					new FileInputStream(resource), 
-					objectMapper.getObjectMapper().getTypeFactory().constructCollectionType(List.class, getResourceClass()));
+					objectMapper.getObjectMapper().getTypeFactory().constructCollectionType(List.class, repository.getResourceClass()));
 			
-			TransactionAdapter<E> t = new TransactionAdapter<E>() {
+			repository.saveTemplateObjects(objects, new TransactionAdapter<E>() {
 
 				@Override
-				public void afterSave(E object) throws RepositoryException {
-					Template  t = new Template();
+				public void afterSave(E object) throws RepositoryException, EntityException {
+					TemplateVersion  t = new TemplateVersion();
 					t.setUuid(uuid);
 					t.setVersion(version.toString());
 					templateRepository.save(t);
 					
-					log.info("Created {} {} '{}' version {}", getResourceClass().getSimpleName(), resourceKey, object.getUuid(), version.toString());
+					log.info("Created {} {} '{}' version {}",
+							repository.getResourceClass().getSimpleName(), 
+							repository.getResourceKey(), 
+							object.getUuid(), 
+							version.toString());
 				}
-			};
-			
-			if(isAutomaticResourceKey()) {
-				save(templates,  t);
-			} else {
-				save(templates, resourceKey, t);
-			}
-			
+			});
+
 		} catch (Throwable e) {
 			log.error(String.format("Failed to process template %s", uuid), e);
 		}
 		
 	}
-
-
-	public abstract Integer getWeight();
 }

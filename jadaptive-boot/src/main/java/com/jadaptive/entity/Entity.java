@@ -1,11 +1,15 @@
 package com.jadaptive.entity;
 
-import java.text.ParseException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+
+import org.bson.Document;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.jadaptive.entity.template.FieldCategory;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.repository.AbstractUUIDEntity;
 
@@ -13,12 +17,42 @@ import com.jadaptive.repository.AbstractUUIDEntity;
 @JsonDeserialize(using=EntityDeserializer.class)
 public class Entity extends AbstractUUIDEntity {
 
+	Entity parent;
+	Map<String,Entity> children = new HashMap<>();
 	String resourceKey;
-	Map<String,Map<String,String>> properties;
+	Document document;
 	
 	public Entity() {	
 	}
 	
+	public Entity(String resourceKey, Document document) {
+		this(null, resourceKey, document);
+		for(Entry<String,Object> entry : document.entrySet()) {
+			if(entry.getValue() instanceof Document) {
+				children.put(entry.getKey(), new Entity(this, resourceKey, (Document)entry.getValue()));
+			}
+		}
+	}
+	
+	public Entity(Entity parent, String resourceKey, Document document) {
+		this.parent = parent;
+		this.resourceKey = resourceKey;
+		this.document = document;
+		
+		if(!Objects.isNull(parent)) {
+			parent.addChild(this);
+		}
+	}
+	
+	private void addChild(Entity e) {
+		children.put(e.getResourceKey(), e);
+		document.put(e.getResourceKey(), e.getDocument());
+	}
+	
+	public Entity getChild(FieldCategory c) {
+		return children.get(c.getResourceKey());
+	}
+
 	public String getResourceKey() {
 		return resourceKey;
 	}
@@ -27,44 +61,45 @@ public class Entity extends AbstractUUIDEntity {
 		this.resourceKey = resourceKey;
 	}
 
-	public String getValue(String fieldName) {
-		String value =  checkExistsOrDefault(getUuid(), properties, fieldName, null);
-		if(Objects.isNull(value)) {
-			throw new IllegalArgumentException(String.format("%s is not a valid field for entity %s", fieldName, getResourceKey()));
-		}
-		return value;
+	public Document getDocument() {
+		return document;
 	}
-	
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	@Override
+	public void setUuid(String uuid) {
+		document.put("_id",  uuid);
+		super.setUuid(uuid);
+	}
+
+	@Override
+	public void setSystem(Boolean system) {
+		document.put("system",  String.valueOf(system));
+		super.setSystem(system);
+	}
+
+	@Override
+	public void setHidden(Boolean hidden) {
+		document.put("hidden",  String.valueOf(hidden));
+		super.setHidden(hidden);
+	}
+
 	public String getValue(FieldTemplate t) {
-		return checkExistsOrDefault(getUuid(), properties, t.getResourceKey(), t.getDefaultValue());
-	}
-
-	@Override
-	public void store(Map<String, Map<String, String>> properties) throws ParseException {
-		
-		super.store(properties);
-		properties.putAll(this.properties);
-	}
-
-	@Override
-	public void load(String uuid, Map<String, Map<String, String>> properties) throws ParseException {
-		
-		super.load(uuid, properties);
-		this.properties = properties;
-	}
-
-	private String checkExistsOrDefault(String uuid, Map<String, Map<String, String>> properties, String field, String defaultValue) {
-		Map<String,String> objectProperties = properties.get(uuid);
-		if(Objects.isNull(objectProperties)) {
-			throw new IllegalStateException(String.format("No properties for uuid",uuid));
+		switch(t.getFieldType()) {
+		case BOOLEAN:
+		case DECIMAL:
+		case NUMBER:
+		case TEXT:
+		case TEXT_AREA:
+		default:
+			return document.get(t.getResourceKey(), t.getDefaultValue());
 		}
-		
-		String value = objectProperties.get(field);
-		
-		if(Objects.isNull(value)) {
-			return defaultValue;
-		}
-		
-		return value;
+	}
+
+	public void setValue(FieldTemplate t, String value) {
+		document.put(t.getResourceKey(), value);
 	}
 }

@@ -3,7 +3,7 @@ package com.jadaptive.db;
 import java.util.Collection;
 import java.util.Map;
 
-import com.jadaptive.entity.EntityNotFoundException;
+import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.AbstractUUIDEntity;
 import com.jadaptive.tenant.Tenant;
 
@@ -12,13 +12,13 @@ public interface Database {
 	String getName();
 	
 	
-	<T extends AbstractUUIDEntity> T get(Tenant tenant, String uuid, Class<T> clz) throws EntityNotFoundException;
+	<T extends AbstractUUIDEntity> T get(Tenant tenant, String uuid, Class<T> clz) throws EntityException;
 
-	<T extends AbstractUUIDEntity> T get(String uuid, String resourceKey, Class<T> clz) throws EntityNotFoundException;
+	<T extends AbstractUUIDEntity> T get(String uuid, String resourceKey, Class<T> clz) throws EntityException;
 
-	<T extends AbstractUUIDEntity> T get(Tenant tenant, String uuid, String resourceKey, Class<T> clz) throws EntityNotFoundException;	
+	<T extends AbstractUUIDEntity> T get(Tenant tenant, String uuid, String resourceKey, Class<T> clz) throws EntityException;	
 
-	<T extends AbstractUUIDEntity> T get(String uuid, Class<T> clz) throws EntityNotFoundException;
+	<T extends AbstractUUIDEntity> T get(String uuid, Class<T> clz) throws EntityException;
 
 	<T extends AbstractUUIDEntity> Collection<T> list(Tenant tenant, Class<T> clz);
 

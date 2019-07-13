@@ -16,19 +16,19 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.jadaptive.entity.EntityNotFoundException;
+import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
 
 @Controller
 public class ResourceController {
 	
 	@RequestMapping(value="", method = RequestMethod.GET)
-	public void doDefaultPath(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityNotFoundException, IOException {
+	public void doDefaultPath(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityException, IOException {
 		sendRedirect("/app/", request, response);
 	}
 	
 	@RequestMapping(value="app/**", method = RequestMethod.GET)
-	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityNotFoundException, IOException {
+	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityException, IOException {
 
 		String uri = request.getRequestURI();
 		String resourceUri = uri.length() >= 4 ? uri.substring(4) : "";

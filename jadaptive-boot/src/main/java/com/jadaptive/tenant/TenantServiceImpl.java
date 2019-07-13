@@ -15,8 +15,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationServiceImpl;
+import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.templates.TemplateEnabledUUIDRepository;
+import com.jadaptive.templates.TemplateVersionService;
 
 @Service
 public class TenantServiceImpl implements TenantService {
@@ -28,17 +30,17 @@ public class TenantServiceImpl implements TenantService {
 	@Autowired
 	TenantRepository repository; 
 	
+	@Autowired
+	TemplateVersionService templateService;
+	
 	Tenant systemTenant;
 	
-	@SuppressWarnings("unchecked")
 	@EventListener
-	private void setup(ApplicationReadyEvent event) throws RepositoryException {
+	private void setup(ApplicationReadyEvent event) throws RepositoryException, EntityException {
 		
-		
-		systemTenant = new Tenant(SYSTEM_TENANT_UUID, "System", "localhost");
-		systemTenant.setSystem(true);
-		repository.save(systemTenant);
-		
+		if(Boolean.getBoolean("jadaptive.runFresh")) {
+			repository.newSchema();
+		}
 		initialiseTenant(getSystemTenant());
 		
 		for(Tenant tenant : getTenants()) {
@@ -51,8 +53,8 @@ public class TenantServiceImpl implements TenantService {
 	@Override
 	public Collection<Tenant> getTenants()  {
 		try {
-			return repository.getTenants();
-		} catch (RepositoryException e) {
+			return repository.listTenants();
+		} catch (RepositoryException | EntityException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
@@ -76,8 +78,8 @@ public class TenantServiceImpl implements TenantService {
 				}
 			});
 			
-			for(TemplateEnabledUUIDRepository repository : ordered) {
-				repository.processTemplates();
+			for(TemplateEnabledUUIDRepository<?> repository : ordered) {
+				templateService.processTemplates(repository);
 			}
 	
 		} finally {
@@ -88,26 +90,25 @@ public class TenantServiceImpl implements TenantService {
 		
 	}
 	
-	private Tenant getSystemTenant() throws RepositoryException {
-		return systemTenant;
+	public Tenant getSystemTenant() throws RepositoryException, EntityException {
+		return repository.getSystemTenant();
 	}
 	
 	@Override
-	public Tenant createTenant(String name, String hostname) throws RepositoryException {
+	public Tenant createTenant(String name, String hostname) throws RepositoryException, EntityException {
 		return initialiseTenant(createTenant(UUID.randomUUID().toString(), name, hostname));
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Tenant createTenant(String uuid, String name, String hostname) throws RepositoryException {
+	public Tenant createTenant(String uuid, String name, String hostname) throws RepositoryException, EntityException {
 		
 		Tenant tenant = new Tenant(uuid, name, hostname);
-		repository.save(tenant);
+		repository.saveTenant(tenant);
 		return tenant;
 		
 	}
 
 	@Override
-	public Tenant getCurrentTenant() throws RepositoryException {
+	public Tenant getCurrentTenant() throws RepositoryException, EntityException {
 		Tenant tenant = currentTenant.get();
 		if(Objects.isNull(tenant)) {
 			return getSystemTenant();

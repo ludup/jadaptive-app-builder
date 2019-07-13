@@ -68,15 +68,19 @@ $(document).ready(function() {
 			$('#json').val('');
 			$.getJSON('/api/' + t.uuid + '/list', function(data) {
 				
-				if(data.length > 0) {
-					$.each(data, function(idx, obj) {
-						$('#uuid').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.uuid + '</option>');
-						$('#' + obj.uuid).data('object', obj);
-					});		
-
-					$('#uuid').change();
-				
-				} 
+				if(data.success) {
+					if(data.result.length > 0) {
+						$.each(data.result, function(idx, obj) {
+							$('#uuid').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.uuid + '</option>');
+							$('#' + obj.uuid).data('object', obj);
+						});		
+	
+						$('#uuid').change();
+					
+					} 
+				} else {
+					alert(data.message);
+				}
 			});
 			
 		}
@@ -94,18 +98,27 @@ $(document).ready(function() {
 		$('#json').val('');
 		
 		$.getJSON(url, function(data) {
-			$('#json').val(JSON.stringify(data, null, 4));
+			if(data.success) {
+				$('#json').val(JSON.stringify(data.result, null, 4));
+			} else {
+				alert(data.message);
+			}
 		});
 	});
 	
 	$.getJSON('/api/template/list', function(data) {
-		$.each(data, function(idx, obj) {
-			$('#template').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.name + '</option>');
-			$('#' + obj.uuid).data('template', obj);
-			if(idx==0) {
-				$('#template').trigger('change');
-			}
-		});
+		
+		if(data.success) {
+			$.each(data.result, function(idx, obj) {
+				$('#template').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.name + '</option>');
+				$('#' + obj.uuid).data('template', obj);
+				if(idx==0) {
+					$('#template').trigger('change');
+				}
+			});
+		} else {
+			alert(data.message);
+		}
 	});
 
 	

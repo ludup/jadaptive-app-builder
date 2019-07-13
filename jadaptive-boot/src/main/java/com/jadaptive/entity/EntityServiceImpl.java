@@ -19,11 +19,11 @@ public class EntityServiceImpl implements EntityService {
 	EntityTemplateService templateService;
 	
 	@Override
-	public Entity getSingleton(String resourceKey) throws RepositoryException, EntityNotFoundException {
+	public Entity getSingleton(String resourceKey) throws RepositoryException, EntityException {
 
 		EntityTemplate template = templateService.get(resourceKey);
 		if(template.getType()!=EntityType.SINGLETON) {
-			throw new EntityNotFoundException(String.format("%s is not a singleton entity", resourceKey));
+			throw new EntityException(String.format("%s is not a singleton entity", resourceKey));
 		}
 		
 		Entity e = entityRepository.get(resourceKey, resourceKey);
@@ -34,11 +34,11 @@ public class EntityServiceImpl implements EntityService {
  	}
 	
 	@Override
-	public Entity get(String resourceKey, String uuid) throws RepositoryException, EntityNotFoundException {
+	public Entity get(String resourceKey, String uuid) throws RepositoryException, EntityException {
 
 		EntityTemplate template = templateService.get(resourceKey);
 		if(template.getType()!=EntityType.COLLECTION) {
-			throw new EntityNotFoundException(String.format("%s is not a collection entity", resourceKey));
+			throw new EntityException(String.format("%s is not a collection entity", resourceKey));
 		}
 		
 		Entity e = entityRepository.get(uuid, resourceKey);
@@ -50,43 +50,42 @@ public class EntityServiceImpl implements EntityService {
 
 
 	@Override
-	public Collection<Entity> list(String resourceKey) throws RepositoryException, EntityNotFoundException {
+	public Collection<Entity> list(String resourceKey) throws RepositoryException, EntityException {
 		templateService.get(resourceKey);
 		return entityRepository.list(resourceKey);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public void saveOrUpdate(String resourceKey, Entity entity) throws RepositoryException, EntityNotFoundException {
-		EntityTemplate template = templateService.get(resourceKey);
-		if(template.getType()==EntityType.SINGLETON && !entity.getUuid().equals(resourceKey)) {	
-			throw new EntityNotFoundException("You cannot save a Singleton Entity with a new UUID");
+	public void saveOrUpdate(Entity entity) throws RepositoryException, EntityException {
+		EntityTemplate template = templateService.get(entity.getResourceKey());
+		if(template.getType()==EntityType.SINGLETON && !entity.getUuid().equals(entity.getResourceKey())) {	
+			throw new EntityException("You cannot save a Singleton Entity with a new UUID");
 		}
-		entityRepository.save(entity, resourceKey);
+		entityRepository.save(entity);
 		
 	}
 
 	@Override
-	public void delete(String resourceKey, String uuid) throws RepositoryException, EntityNotFoundException {
+	public void delete(String resourceKey, String uuid) throws RepositoryException, EntityException {
 		
 		EntityTemplate template = templateService.get(resourceKey);
 		if(template.getType()==EntityType.SINGLETON) {	
-			throw new EntityNotFoundException("You cannot delete a Singleton Entity");
+			throw new EntityException("You cannot delete a Singleton Entity");
 		}
 		
 		Entity e = get(resourceKey, uuid);
 		if(e.getSystem()) {
-			throw new EntityNotFoundException("You cannot delete a system object");
+			throw new EntityException("You cannot delete a system object");
 		}
 		entityRepository.delete(resourceKey, uuid);
 	}
 
 	@Override
-	public void deleteAll(String resourceKey) throws EntityNotFoundException {
+	public void deleteAll(String resourceKey) throws EntityException {
 		
 		EntityTemplate template = templateService.get(resourceKey);
 		if(template.getType()==EntityType.SINGLETON) {	
-			throw new EntityNotFoundException("You cannot delete a Singleton Entity");
+			throw new EntityException("You cannot delete a Singleton Entity");
 		}
 		
 		entityRepository.deleteAll(resourceKey);

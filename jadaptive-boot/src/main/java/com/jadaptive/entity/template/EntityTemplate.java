@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.entity.EntityType;
+import com.jadaptive.repository.JadaptiveIgnore;
 import com.jadaptive.repository.NamedUUIDEntity;
 
 public class EntityTemplate extends NamedUUIDEntity {
@@ -27,6 +28,7 @@ public class EntityTemplate extends NamedUUIDEntity {
 	}
 	
 	@JsonIgnore
+	@JadaptiveIgnore
 	public Map<String,FieldCategory> getCategoriesMap() {
 		Map<String,FieldCategory> tmp = new HashMap<>();
 		for(FieldCategory c : categories) {

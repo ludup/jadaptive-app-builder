@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.entity.EntityNotFoundException;
+import com.jadaptive.entity.EntityException;
 import com.jadaptive.entity.EntityService;
 import com.jadaptive.repository.RepositoryException;
 
@@ -21,32 +21,31 @@ public class EntityTemplateServiceImpl implements EntityTemplateService {
 	EntityService entityService;
 	
 	@Override
-	public EntityTemplate get(String resourceKey) throws RepositoryException, EntityNotFoundException {
+	public EntityTemplate get(String resourceKey) throws RepositoryException, EntityException {
 		
 		EntityTemplate e = repository.get(resourceKey);
 		
 		if(Objects.isNull(e)) {
-			throw new EntityNotFoundException(String.format("Cannot find entity with resource key %s", resourceKey));
+			throw new EntityException(String.format("Cannot find entity with resource key %s", resourceKey));
 		}
 		
 		return e;
 	}
 
 	@Override
-	public Collection<EntityTemplate> list() {
+	public Collection<EntityTemplate> list() throws RepositoryException, EntityException {
 		return repository.list();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public void saveOrUpdate(EntityTemplate template) {
+	public void saveOrUpdate(EntityTemplate template) throws RepositoryException, EntityException {
 		
-		repository.save(template);
+		repository.saveOrUpdate(template);
 		
 	}
 
 	@Override
-	public void delete(String uuid) throws EntityNotFoundException {
+	public void delete(String uuid) throws EntityException {
 		
 		entityService.deleteAll(uuid);
 		repository.delete(uuid);

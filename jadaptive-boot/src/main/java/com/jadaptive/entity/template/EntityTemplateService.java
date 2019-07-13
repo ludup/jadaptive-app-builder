@@ -2,18 +2,18 @@ package com.jadaptive.entity.template;
 
 import java.util.Collection;
 
-import com.jadaptive.entity.EntityNotFoundException;
+import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
 
 public interface EntityTemplateService {
 
 	EntityTemplate get(String uuid)
-			throws RepositoryException, EntityNotFoundException;
+			throws RepositoryException, EntityException;
 
-	Collection<EntityTemplate> list();
+	Collection<EntityTemplate> list() throws RepositoryException, EntityException;
 
-	void saveOrUpdate(EntityTemplate template);
+	void saveOrUpdate(EntityTemplate template) throws RepositoryException, EntityException;
 
-	void delete(String uuid) throws EntityNotFoundException;
+	void delete(String uuid) throws EntityException;
 
 }

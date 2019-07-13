@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import com.jadaptive.repository.AbstractUUIDEntity;
 
-public class Template extends AbstractUUIDEntity {
+public class TemplateVersion extends AbstractUUIDEntity {
 
 	String version; 
 	Date timestamp;
