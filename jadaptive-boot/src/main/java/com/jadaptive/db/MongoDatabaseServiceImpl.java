@@ -46,7 +46,7 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 		
 		mongoClient = new MongoClient(
 				properties.getProperty("hostname", "localhost"),
-				Integer.parseInt(properties.getProperty("port", "32773")));
+				Integer.parseInt(properties.getProperty("port", "32768")));
 	}
 
 }

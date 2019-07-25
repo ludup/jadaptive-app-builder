@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -16,24 +19,32 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.entity.EntityException;
+import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.templates.TemplateEnabledUUIDRepository;
+import com.jadaptive.repository.TransactionAdapter;
+import com.jadaptive.templates.TemplateEnabledService;
 import com.jadaptive.templates.TemplateVersionService;
 
 @Service
-public class TenantServiceImpl implements TenantService {
+public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant> {
 
 	ThreadLocal<Tenant> currentTenant = new ThreadLocal<>();
 	
 	final public static String SYSTEM_TENANT_UUID = "cb3129ea-b8b1-48a4-85de-8443945d95e3";
 	
+	final public static String TENANT_RESOURCE_KEY = "tenant";
 	@Autowired
 	TenantRepository repository; 
 	
 	@Autowired
 	TemplateVersionService templateService;
 	
+	@Autowired
+	PermissionService permissionService; 
+	
 	Tenant systemTenant;
+	
+	Map<String,Tenant> tenantsByHostname = new HashMap<>();
 	
 	@EventListener
 	private void setup(ApplicationReadyEvent event) throws RepositoryException, EntityException {
@@ -41,6 +52,9 @@ public class TenantServiceImpl implements TenantService {
 		if(Boolean.getBoolean("jadaptive.runFresh")) {
 			repository.newSchema();
 		}
+		
+		permissionService.registerStandardPermissions(TENANT_RESOURCE_KEY);
+		
 		initialiseTenant(getSystemTenant());
 		
 		for(Tenant tenant : getTenants()) {
@@ -64,22 +78,27 @@ public class TenantServiceImpl implements TenantService {
 		
 		setCurrentTenant(tenant);
 		
+		tenantsByHostname.put(tenant.getHostname(), tenant);
+		
 		try {
-			Map<String,TemplateEnabledUUIDRepository> repositories
+			Map<String,TemplateEnabledService> templateServices
 				= ApplicationServiceImpl.getInstance().getContext().getBeansOfType(
-						TemplateEnabledUUIDRepository.class);
+						TemplateEnabledService.class);
 			
-			List<TemplateEnabledUUIDRepository> ordered = new ArrayList<TemplateEnabledUUIDRepository>(repositories.values());
+			List<TemplateEnabledService> ordered = new ArrayList<TemplateEnabledService>(templateServices.values());
 			
-			Collections.<TemplateEnabledUUIDRepository>sort(ordered, new  Comparator<TemplateEnabledUUIDRepository>() {
+			Collections.<TemplateEnabledService>sort(ordered, new  Comparator<TemplateEnabledService>() {
 				@Override
-				public int compare(TemplateEnabledUUIDRepository o1, TemplateEnabledUUIDRepository o2) {
+				public int compare(TemplateEnabledService o1, TemplateEnabledService o2) {
 					return o1.getWeight().compareTo(o2.getWeight());
 				}
 			});
 			
-			for(TemplateEnabledUUIDRepository<?> repository : ordered) {
-				templateService.processTemplates(repository);
+			
+			for(TemplateEnabledService<?> repository : ordered) {
+				if(tenant.getSystem() || !repository.isSystemOnly()) { 
+					templateService.processTemplates(repository);		
+				}
 			}
 	
 		} finally {
@@ -100,6 +119,10 @@ public class TenantServiceImpl implements TenantService {
 	}
 	
 	public Tenant createTenant(String uuid, String name, String hostname) throws RepositoryException, EntityException {
+		
+		if(tenantsByHostname.containsKey(hostname)) {
+			throw new EntityException(String.format("%s is already used by another tenant", hostname));
+		}
 		
 		Tenant tenant = new Tenant(uuid, name, hostname);
 		repository.saveTenant(tenant);
@@ -124,5 +147,61 @@ public class TenantServiceImpl implements TenantService {
 	@Override
 	public void clearCurrentTenant() {
 		currentTenant.remove();
+	}
+
+	@Override
+	public Integer getWeight() {
+		return Integer.MIN_VALUE;
+	}
+
+	@Override
+	public Tenant createEntity() {
+		return new Tenant();
+	}
+
+	@Override
+	public String getName() {
+		return "Tenant";
+	}
+
+	@Override
+	public String getResourceKey() {
+		return "tenant";
+	}
+
+	@Override
+	public Class<Tenant> getResourceClass() {
+		return Tenant.class;
+	}
+
+	@Override
+	public void saveTemplateObjects(List<Tenant> tenants, TransactionAdapter<Tenant>... ops)
+			throws RepositoryException, EntityException {
+
+		for(Tenant tenant : tenants) {
+			repository.saveTenant(tenant);
+		}
+	}
+
+	@Override
+	public void onTemplatesComplete(String... resourceKeys) {
+		
+	}
+	
+	@Override
+	public boolean isSystemOnly() {
+		return true;
+	}
+
+	@Override
+	public void setCurrentTenant(HttpServletRequest request) {
+		Tenant tenant = tenantsByHostname.get(request.getServerName());
+		if(Objects.isNull(tenant)) {
+			tenant = tenantsByHostname.get(request.getHeader("Host"));
+			if(Objects.isNull(tenant)) {
+				tenant = getSystemTenant();
+			}
+		}
+		setCurrentTenant(tenant);
 	}
 }

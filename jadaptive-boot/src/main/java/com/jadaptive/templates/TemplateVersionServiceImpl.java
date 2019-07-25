@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,17 +40,18 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 	
 	@Override
-	public <E extends AbstractUUIDEntity> void processTemplates(TemplateEnabledUUIDRepository<E> repository) {
+	public <E extends AbstractUUIDEntity> void processTemplates(TemplateEnabledService<E> templateEnabledService) {
 		
 		if(log.isInfoEnabled()) {
-			log.info("Processing templates for {}", repository.getResourceKey());
+			log.info("Processing templates for {}", templateEnabledService.getResourceKey());
 		}
 		
 		try {
 			
 			Collection<File> orderedTemplates = findVersionedTemplates(
-					String.format("templates%s%s", File.separator, repository.getResourceKey()));
+					String.format("templates%s%s", File.separator, templateEnabledService.getResourceKey()));
 			
+			Set<String> resourceKeys = new HashSet<>();
 			for(File template : orderedTemplates) {
 				
 				String filename = template.getName().substring(0, template.getName().length()-5);
@@ -58,7 +61,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				}
 				Version version = new Version(elements[1]);
 				String templateResourceKey = elements[0];
-				String uuid = repository.getResourceKey() + "_" + templateResourceKey;
+				resourceKeys.add(templateResourceKey);
+				
+				String uuid = templateEnabledService.getResourceKey() + "_" + templateResourceKey;
 				Version currentVersion = templateRepository.getCurrentVersion(uuid);
 				
 				if(currentVersion==null || version.compareTo(currentVersion) > 0) {
@@ -69,13 +74,15 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 						continue;
 					}
 					
-					processTemplate(template, uuid, repository, version);
+					processTemplate(template, uuid, templateEnabledService, version);
 				}
 				
 			}
 			
+			templateEnabledService.onTemplatesComplete(resourceKeys.toArray(new String[0]));
+			
 			if(log.isInfoEnabled()) {
-				log.info("Finished processing templates for {}", repository.getResourceKey());
+				log.info("Finished processing templates for {}", templateEnabledService.getResourceKey());
 			}
 			
 		} catch(IOException | RepositoryException e) {
@@ -117,11 +124,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 	@SuppressWarnings("unchecked")
-	private <E extends AbstractUUIDEntity> void processTemplate(File resource, String uuid, TemplateEnabledUUIDRepository<E> repository, Version version) {
+	private <E extends AbstractUUIDEntity> void processTemplate(File resource, String resourceKey, TemplateEnabledService<E> repository, Version version) {
 		try {
 			
 			if(log.isInfoEnabled()) {
-				log.info("Processing template {} resource {}", uuid, version.toString());
+				log.info("Processing template {} resource {}", resourceKey, version.toString());
 			}
 			
 			List<E> objects = objectMapper.getObjectMapper().readValue(
@@ -133,7 +140,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				@Override
 				public void afterSave(E object) throws RepositoryException, EntityException {
 					TemplateVersion  t = new TemplateVersion();
-					t.setUuid(uuid);
+					t.setUuid(resourceKey);
 					t.setVersion(version.toString());
 					templateRepository.save(t);
 					
@@ -146,7 +153,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			});
 
 		} catch (Throwable e) {
-			log.error(String.format("Failed to process template %s", uuid), e);
+			log.error(String.format("Failed to process template %s", resourceKey), e);
 		}
 		
 	}

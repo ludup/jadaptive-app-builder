@@ -69,7 +69,7 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 			log.info("Creating new application schema");
 		}
 		
-		saveTenant(new Tenant(SYSTEM_UUID, "System", "localhost"));
+		saveTenant(new Tenant(SYSTEM_UUID, "System", "localhost", true));
 	}
 	
 	

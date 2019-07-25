@@ -2,6 +2,8 @@ package com.jadaptive.tenant;
 
 import java.util.Collection;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
 
@@ -18,5 +20,7 @@ public interface TenantService {
 	Tenant createTenant(String name, String hostname) throws RepositoryException, EntityException;
 
 	Tenant getSystemTenant() throws RepositoryException, EntityException;
+
+	void setCurrentTenant(HttpServletRequest request);
 
 }

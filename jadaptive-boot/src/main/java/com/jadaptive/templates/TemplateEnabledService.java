@@ -7,7 +7,7 @@ import com.jadaptive.repository.AbstractUUIDEntity;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.repository.TransactionAdapter;
 
-public interface TemplateEnabledUUIDRepository<T extends AbstractUUIDEntity> {
+public interface TemplateEnabledService<T extends AbstractUUIDEntity> {
 
 	Integer getWeight();
 
@@ -20,5 +20,10 @@ public interface TemplateEnabledUUIDRepository<T extends AbstractUUIDEntity> {
 	Class<T> getResourceClass();
 
 	void saveTemplateObjects(List<T> objects, @SuppressWarnings("unchecked") TransactionAdapter<T>... ops) throws RepositoryException, EntityException;
+
+	void onTemplatesComplete(String... resourceKeys);
+
+	boolean isSystemOnly();
+	
 
 }

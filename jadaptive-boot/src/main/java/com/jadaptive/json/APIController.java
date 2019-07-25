@@ -44,6 +44,7 @@ public class APIController {
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<EntityTemplate> doEntityGet(@PathVariable String resourceKey, HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityException {
+		
 		try {
 		   return new EntityStatus<EntityTemplate>(templateService.get(resourceKey));
 		} catch(Throwable e) {
@@ -51,7 +52,7 @@ public class APIController {
 				log.error("GET api/template/{}", resourceKey, e);
 			}
 			return new EntityStatus<EntityTemplate>(false, e.getMessage());
-		}
+		} 
 	}
 	
 	@RequestMapping(value="api/template", method = RequestMethod.POST, produces = {"application/json"})

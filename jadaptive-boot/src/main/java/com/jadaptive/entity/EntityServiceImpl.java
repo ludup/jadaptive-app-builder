@@ -1,22 +1,30 @@
 package com.jadaptive.entity;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
+import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.repository.TransactionAdapter;
+import com.jadaptive.templates.SystemTemplates;
+import com.jadaptive.templates.TemplateEnabledService;
 
 @Service
-public class EntityServiceImpl implements EntityService {
+public class EntityServiceImpl implements EntityService, TemplateEnabledService<Entity> {
 
 	@Autowired
 	EntityRepository entityRepository;
 	
 	@Autowired
 	EntityTemplateService templateService;
+	
+	@Autowired
+	PermissionService permissionService; 
 	
 	@Override
 	public Entity getSingleton(String resourceKey) throws RepositoryException, EntityException {
@@ -90,5 +98,55 @@ public class EntityServiceImpl implements EntityService {
 		
 		entityRepository.deleteAll(resourceKey);
 		
+	}
+	
+	@Override
+	public Integer getWeight() {
+		return SystemTemplates.ENTITY.ordinal();
+	}
+
+	@Override
+	public Class<Entity> getResourceClass() {
+		return Entity.class;
+	}
+
+	@Override
+	public String getName() {
+		return "Entity";
+	}
+
+	@Override
+	public Entity createEntity() {
+		return new Entity();
+	}
+
+	@Override
+	public String getResourceKey() {
+		return "entity";
+	}
+
+	@Override
+	public void saveTemplateObjects(List<Entity> objects, @SuppressWarnings("unchecked") TransactionAdapter<Entity>... ops) throws RepositoryException, EntityException {
+		
+		for(Entity obj : objects) {
+			saveOrUpdate(obj);
+			for(TransactionAdapter<Entity> op : ops) {
+				op.afterSave(obj);
+			}
+		}
+	}
+		
+	@Override
+	public void onTemplatesComplete(String... resourceKeys) {
+		
+		for(String resourceKey : resourceKeys) {
+			permissionService.registerStandardPermissions(resourceKey);
+		}
+		
+	}
+
+	@Override
+	public boolean isSystemOnly() {
+		return false;
 	}
 }

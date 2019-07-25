@@ -11,9 +11,6 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.db.MongoDatabaseService;
 import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.repository.TransactionAdapter;
-import com.jadaptive.templates.SystemTemplates;
-import com.jadaptive.templates.TemplateEnabledUUIDRepository;
 import com.jadaptive.tenant.TenantService;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -21,49 +18,13 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 
 @Repository
-public class EntityRepositoryImpl implements EntityRepository, TemplateEnabledUUIDRepository<Entity> {
+public class EntityRepositoryImpl implements EntityRepository {
 
 	@Autowired
 	MongoDatabaseService mongo; 
 	
 	@Autowired
 	TenantService tenantService; 
-	
-	@Override
-	public Integer getWeight() {
-		return SystemTemplates.ENTITY.ordinal();
-	}
-
-	@Override
-	public Class<Entity> getResourceClass() {
-		return Entity.class;
-	}
-
-	@Override
-	public String getName() {
-		return "Entity";
-	}
-
-	@Override
-	public Entity createEntity() {
-		return new Entity();
-	}
-
-	@Override
-	public String getResourceKey() {
-		return "entity";
-	}
-
-	@Override
-	public void saveTemplateObjects(List<Entity> objects, @SuppressWarnings("unchecked") TransactionAdapter<Entity>... ops) throws RepositoryException, EntityException {
-		
-		for(Entity obj : objects) {
-			save(obj);
-			for(TransactionAdapter<Entity> op : ops) {
-				op.afterSave(obj);
-			}
-		}
-	}
 
 	@Override
 	public Collection<Entity> list(String resourceKey) throws RepositoryException, EntityException {

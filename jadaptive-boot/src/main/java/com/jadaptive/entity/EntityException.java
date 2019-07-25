@@ -1,6 +1,6 @@
 package com.jadaptive.entity;
 
-public class EntityException extends Exception {
+public class EntityException extends RuntimeException {
 
 	private static final long serialVersionUID = 1746679819167768580L;
 	

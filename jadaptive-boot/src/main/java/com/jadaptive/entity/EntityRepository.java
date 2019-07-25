@@ -3,9 +3,8 @@ package com.jadaptive.entity;
 import java.util.Collection;
 
 import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.templates.TemplateEnabledUUIDRepository;
 
-public interface EntityRepository extends TemplateEnabledUUIDRepository<Entity> {
+public interface EntityRepository {
 
 	Collection<Entity> list(String resourceKey) throws RepositoryException, EntityException;
 

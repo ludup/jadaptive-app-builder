@@ -11,7 +11,6 @@ public interface Database {
 
 	String getName();
 	
-	
 	<T extends AbstractUUIDEntity> T get(Tenant tenant, String uuid, Class<T> clz) throws EntityException;
 
 	<T extends AbstractUUIDEntity> T get(String uuid, String resourceKey, Class<T> clz) throws EntityException;

@@ -10,6 +10,6 @@ public interface TemplateVersionService {
 
 	Collection<TemplateVersion> list() throws RepositoryException, EntityException;
 
-	<E extends AbstractUUIDEntity>  void processTemplates(TemplateEnabledUUIDRepository<E> repository);
+	<E extends AbstractUUIDEntity>  void processTemplates(TemplateEnabledService<E> repository);
 
 }

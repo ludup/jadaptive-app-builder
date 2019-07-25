@@ -8,6 +8,12 @@ public class Tenant extends AbstractUUIDEntity {
 	String hostname;
 	
 	public Tenant() {
+		
+	}
+	
+	public Tenant(String uuid, String name, String hostname, boolean system) {
+		this(uuid, name, hostname);
+		setSystem(system);
 	}
 
 	public Tenant(String uuid, String name, String hostname) {
