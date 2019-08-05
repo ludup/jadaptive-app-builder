@@ -45,7 +45,7 @@ public class EntitySerializer extends StdSerializer<Entity> {
 			for (FieldCategory cat : template.getCategories()) {
 				gen.writeObjectFieldStart(cat.getResourceKey());
 
-				writeFields(gen, cat.getTemplates(), value.getChild(cat));
+				writeFields(gen, cat.getFields(), value.getChild(cat));
 
 				gen.writeEndObject();
 			}

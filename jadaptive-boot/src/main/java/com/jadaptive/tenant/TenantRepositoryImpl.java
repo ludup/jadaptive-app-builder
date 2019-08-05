@@ -71,6 +71,11 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 		
 		saveTenant(new Tenant(SYSTEM_UUID, "System", "localhost", true));
 	}
+
+	@Override
+	public boolean isEmpty() {
+		return countObjects(TENANT_DATABASE, Tenant.class) == 0;
+	}
 	
 	
 		

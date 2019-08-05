@@ -49,7 +49,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	@EventListener
 	private void setup(ApplicationReadyEvent event) throws RepositoryException, EntityException {
 		
-		if(Boolean.getBoolean("jadaptive.runFresh")) {
+		if(repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh")) {
 			repository.newSchema();
 		}
 		

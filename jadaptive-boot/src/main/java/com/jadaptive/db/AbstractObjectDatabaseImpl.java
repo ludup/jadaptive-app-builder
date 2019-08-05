@@ -111,4 +111,18 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			throw new RepositoryException(e.getMessage(), e);
 		}
 	}
+	
+	protected <T extends AbstractUUIDEntity> Long countObjects(String database, Class<T> clz) throws RepositoryException, EntityException {
+		
+		try {
+			
+			MongoDatabase db = mongo.getClient().getDatabase(database);
+			MongoCollection<Document> collection = db.getCollection(clz.getName());
+			return collection.countDocuments();
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
 }

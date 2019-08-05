@@ -21,6 +21,8 @@ public interface TenantRepository {
 
 	Tenant getSystemTenant() throws RepositoryException, EntityException;
 
+	boolean isEmpty();
+
 	
 
 

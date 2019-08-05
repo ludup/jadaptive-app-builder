@@ -97,7 +97,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 
 	private void iterateCategory(JsonNode current, FieldCategory c,
 			Entity cat) throws IOException, ValidationException {
-		iterateFields(current, c.getTemplates(), cat);
+		iterateFields(current, c.getFields(), cat);
 	}
 
 	private void iterateFields(JsonNode current, Set<FieldTemplate> fields, Entity e) throws IOException, ValidationException {

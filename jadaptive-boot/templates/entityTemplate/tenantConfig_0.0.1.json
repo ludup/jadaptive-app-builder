@@ -5,9 +5,11 @@
  "system": true,
  "categories": [{
       "resourceKey": "applicationIdentity",
+      "name": "Application",
       "weight": 0,
-       "templates": [{
+      "fields": [{
               "resourceKey": "applicationName",
+              "name": "Application Name",
               "defaultValue": "",
               "description": "The name of this application",
               "fieldType": "TEXT",

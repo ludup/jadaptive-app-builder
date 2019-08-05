@@ -7,13 +7,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.repository.NamedUUIDEntity;
 
-public class FieldCategory extends AbstractUUIDEntity {
+public class FieldCategory extends NamedUUIDEntity {
 
 	String resourceKey;
 	Integer weight;
-	Set<FieldTemplate> templates  = new HashSet<>(); 
+	Set<FieldTemplate> fields = new HashSet<>(); 
 
 	public String getResourceKey() {
 		return StringUtils.defaultString(resourceKey);
@@ -27,16 +27,20 @@ public class FieldCategory extends AbstractUUIDEntity {
 		return weight;
 	}
 
+	public String getAnchor() {
+		return "#" + getResourceKey();
+	}
+	
 	public void setWeight(Integer weight) {
 		this.weight = weight;
 	}
 
-	public Set<FieldTemplate> getTemplates() {
-		return templates;
+	public Set<FieldTemplate> getFields() {
+		return fields;
 	}
 
-	public void setTemplates(Set<FieldTemplate> templates) {
-		this.templates = templates;
+	public void setFields(Set<FieldTemplate> fields) {
+		this.fields = fields;
 	}
 	
 	@Override

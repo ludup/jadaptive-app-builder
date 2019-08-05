@@ -7,8 +7,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.repository.NamedUUIDEntity;
 
-public class FieldTemplate extends AbstractUUIDEntity {
+public class FieldTemplate extends NamedUUIDEntity {
 	
 	String resourceKey;
 	String defaultValue;

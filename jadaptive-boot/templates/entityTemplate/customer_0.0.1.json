@@ -5,6 +5,7 @@
  "system": false,
  "fields": [{
               "resourceKey": "name",
+              "name": "Customer Name",
               "defaultValue": "",
               "description": "The name of this customer",
               "fieldType": "TEXT",
