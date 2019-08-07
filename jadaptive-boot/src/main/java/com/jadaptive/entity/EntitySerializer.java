@@ -63,11 +63,12 @@ public class EntitySerializer extends StdSerializer<Entity> {
 		if(!Objects.isNull(templates)) {
 			for (FieldTemplate t : templates) {
 				switch (t.getFieldType()) {
-				case BOOLEAN:
+				case CHECKBOX:
 					gen.writeBooleanField(t.getResourceKey(), Boolean.parseBoolean(value.getValue(t)));
 					break;
 				case TEXT:
 				case TEXT_AREA:
+				case COUNTRY:
 					gen.writeStringField(t.getResourceKey(), value.getValue(t));
 					break;
 				case DECIMAL:

@@ -96,4 +96,8 @@ public class FieldTemplate extends NamedUUIDEntity {
 		return false;
 	}
 
+	public boolean getRequired() {
+		return false;
+	}
+
 }

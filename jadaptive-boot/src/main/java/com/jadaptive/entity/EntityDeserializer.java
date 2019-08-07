@@ -104,7 +104,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		
 		if(!Objects.isNull(fields)) {
 			for(FieldTemplate field : fields) {
-				validateNode(current.findPath(field.getResourceKey()), field, e);
+				validateNode(current, field, e);
 			}
 		}
 	}
@@ -112,12 +112,21 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 	private void validateNode(JsonNode node, FieldTemplate field,
 			Entity e) throws IOException, ValidationException {
 		
+		if(field.getValidators().isEmpty()) {
+			return;
+		}
+
 		if(node==null) {
 			throw new IOException(String.format("%s is missing", field.getResourceKey()));
 		}
 		
+		node = node.findPath(field.getResourceKey());
+		if(Objects.isNull(node) && field.getRequired()) {
+			throw new ValidationException(String.format("Missing node for %s", field.getResourceKey()));
+		}
+		
 		switch(field.getFieldType()) {
-		case BOOLEAN:
+		case CHECKBOX:
 			validateBooleean(node, field);
 			break;
 		case DECIMAL:
@@ -126,6 +135,9 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		case NUMBER:
 			validateNumber(node, field);
 			break;
+		case COUNTRY:
+			validateCountry(node, field);
+			break;
 		case TEXT:
 		case TEXT_AREA:
 		default:
@@ -133,6 +145,11 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		}
 		
 		setProperty(node, field, e);
+		
+	}
+
+	private void validateCountry(JsonNode node, FieldTemplate field) {
+		// TODO Auto-generated method stub
 		
 	}
 

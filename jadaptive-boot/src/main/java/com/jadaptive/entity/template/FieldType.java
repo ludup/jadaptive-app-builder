@@ -2,11 +2,12 @@ package com.jadaptive.entity.template;
 
 public enum FieldType {
 
-	BOOLEAN,
+	CHECKBOX,
 	NUMBER(ValidationType.RANGE),
 	DECIMAL(ValidationType.RANGE),
 	TEXT(ValidationType.LENGTH, ValidationType.REGEX),
-	TEXT_AREA(ValidationType.LENGTH, ValidationType.REGEX);
+	TEXT_AREA(ValidationType.LENGTH, ValidationType.REGEX),
+	COUNTRY;
 	
 	ValidationType[] options;
 	

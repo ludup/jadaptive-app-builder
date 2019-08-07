@@ -89,11 +89,12 @@ public class Entity extends AbstractUUIDEntity {
 
 	public String getValue(FieldTemplate t) {
 		switch(t.getFieldType()) {
-		case BOOLEAN:
+		case CHECKBOX:
 		case DECIMAL:
 		case NUMBER:
 		case TEXT:
 		case TEXT_AREA:
+		case COUNTRY:
 		default:
 			return document.get(t.getResourceKey(), t.getDefaultValue());
 		}

@@ -2,5 +2,12 @@
   "resourceKey" : "customer",
   "system" : true,
   "hidden" : false,
-  "name" : "JADAPTIVE Limited"
+  "name" : "JADAPTIVE Limited",
+  "address": {
+      "line1": "",
+      "line2": "",
+      "line3": "",
+      "city": "",
+      "state": ""
+  }
 }]
