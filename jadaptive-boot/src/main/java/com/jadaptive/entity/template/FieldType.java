@@ -8,8 +8,8 @@ public enum FieldType {
 	TEXT(ValidationType.LENGTH, ValidationType.REGEX),
 	TEXT_AREA(ValidationType.LENGTH, ValidationType.REGEX),
 	COUNTRY,
-	OBJECT_REFERENCE(ValidationType.OBJECT),
-	OBJECT_COLLECTION(ValidationType.OBJECT);
+	OBJECT_REFERENCE(ValidationType.OBJECT_REF),
+	OBJECT_EMBEDDED(ValidationType.OBJECT_TYPE);
 	
 	ValidationType[] options;
 	

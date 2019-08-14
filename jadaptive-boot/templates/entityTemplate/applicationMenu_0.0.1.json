@@ -36,7 +36,7 @@
               "defaultColumn": true,
               "weight": 0,
               "validators": [{
-              	"type": "OBJECT",
+              	"type": "OBJECT_TYPE",
               	"value": "applicationMenu"
               }]
        }]

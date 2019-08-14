@@ -175,7 +175,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	}
 
 	@Override
-	public void saveTemplateObjects(List<Tenant> tenants, TransactionAdapter<Tenant>... ops)
+	public void saveTemplateObjects(List<Tenant> tenants, @SuppressWarnings("unchecked") TransactionAdapter<Tenant>... ops)
 			throws RepositoryException, EntityException {
 
 		for(Tenant tenant : tenants) {

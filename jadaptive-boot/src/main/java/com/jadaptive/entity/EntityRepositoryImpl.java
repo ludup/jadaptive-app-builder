@@ -126,11 +126,11 @@ public class EntityRepositoryImpl implements EntityRepository {
 				switch(t.getFieldType()) {
 				case OBJECT_REFERENCE:
 					if(StringUtils.isNotBlank(entity.getValue(t))) {
-						validateEntityExists(entity.getValue(t), t.getValidationValue(ValidationType.OBJECT));
+						validateEntityExists(entity.getValue(t), t.getValidationValue(ValidationType.OBJECT_TYPE));
 					}
 					break;
-				case OBJECT_COLLECTION:
-					break;
+//				case OBJECT_COLLECTION:
+//					break;
 				default:
 					break;
 				}

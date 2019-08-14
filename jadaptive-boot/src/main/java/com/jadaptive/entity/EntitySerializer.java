@@ -15,6 +15,7 @@ import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
 import com.jadaptive.entity.template.FieldCategory;
 import com.jadaptive.entity.template.FieldTemplate;
+import com.jadaptive.entity.template.ValidationType;
 
 public class EntitySerializer extends StdSerializer<Entity> {
 
@@ -33,33 +34,63 @@ public class EntitySerializer extends StdSerializer<Entity> {
 			EntityTemplate template = ApplicationServiceImpl.getInstance().getBean(
 					EntityTemplateService.class).get(value.getResourceKey());
 
-			gen.writeStartObject();
-			
-			gen.writeStringField("uuid", value.getUuid());
-			gen.writeStringField("resourceKey", value.getResourceKey());
-			gen.writeBooleanField("system", value.getSystem());
-			gen.writeBooleanField("hidden", value.getHidden());
-
-			writeFields(gen, template.getFields(), value);
-			
-			if(!Objects.isNull(template.getCategories())) {
-				for (FieldCategory cat : template.getCategories()) {
-					gen.writeObjectFieldStart(cat.getResourceKey());
-	
-					writeFields(gen, cat.getFields(), value.getChild(cat));
-	
-					gen.writeEndObject();
-				}
-			}
-
-			gen.writeEndObject();
+			writeObject(value, template, gen);
 		} catch (Throwable e) {
 			log.error("Failed to serialize Entity", e);
 			throw new IOException(e);
 		}
 
 	}
+	
+	private void writeObject(Entity value, EntityTemplate template, JsonGenerator gen) throws IOException {
+		
+		gen.writeStartObject();
+		
+		gen.writeStringField("uuid", value.getUuid());
+		gen.writeStringField("resourceKey", value.getResourceKey());
+		gen.writeBooleanField("system", value.getSystem());
+		gen.writeBooleanField("hidden", value.getHidden());
 
+		writeFields(gen, template.getFields(), value);
+		
+		if(!Objects.isNull(template.getCategories())) {
+			for (FieldCategory cat : template.getCategories()) {
+				gen.writeObjectFieldStart(cat.getResourceKey());
+
+				writeFields(gen, cat.getFields(), value.getChild(cat));
+
+				gen.writeEndObject();
+			}
+		}
+
+		gen.writeEndObject();
+	}
+
+
+	private void writeEmbeddedObject(Entity value, EntityTemplate template, JsonGenerator gen) throws IOException {
+		
+		gen.writeObjectFieldStart(value.getResourceKey());
+		
+		gen.writeStringField("uuid", value.getUuid());
+		gen.writeStringField("resourceKey", value.getResourceKey());
+		gen.writeBooleanField("system", value.getSystem());
+		gen.writeBooleanField("hidden", value.getHidden());
+
+		writeFields(gen, template.getFields(), value);
+		
+		if(!Objects.isNull(template.getCategories())) {
+			for (FieldCategory cat : template.getCategories()) {
+				gen.writeObjectFieldStart(cat.getResourceKey());
+
+				writeFields(gen, cat.getFields(), value.getChild(cat));
+
+				gen.writeEndObject();
+			}
+		}
+
+		gen.writeEndObject();
+	}
+	
 	private void writeFields(JsonGenerator gen, Set<FieldTemplate> templates, Entity value) throws IOException {
 		
 		if(!Objects.isNull(templates)) {
@@ -79,8 +110,12 @@ public class EntitySerializer extends StdSerializer<Entity> {
 				case NUMBER:
 					gen.writeNumberField(t.getResourceKey(), Long.parseLong(value.getValue(t)));
 					break;
-				case OBJECT_COLLECTION:
-					// TODO
+				case OBJECT_EMBEDDED:
+					Entity child = value.getChild(t);
+					String type = t.getValidationValue(ValidationType.OBJECT_TYPE);
+					writeEmbeddedObject(child, 
+							ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class).get(type), 
+							gen);
 					break;
 				case OBJECT_REFERENCE:
 					gen.writeStringField(t.getResourceKey(), value.getValue(t));

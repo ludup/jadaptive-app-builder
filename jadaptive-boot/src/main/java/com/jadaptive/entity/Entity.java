@@ -49,7 +49,12 @@ public class Entity extends AbstractUUIDEntity {
 		document.put(e.getResourceKey(), e.getDocument());
 	}
 	
+
 	public Entity getChild(FieldCategory c) {
+		return children.get(c.getResourceKey());
+	}
+
+	public Entity getChild(FieldTemplate c) {
 		return children.get(c.getResourceKey());
 	}
 

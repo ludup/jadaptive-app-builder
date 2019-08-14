@@ -9,7 +9,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.tenant.Tenant;
 import com.jadaptive.tenant.TenantService;
 
 @RunWith(SpringRunner.class)
@@ -27,7 +26,7 @@ public class DatabaseTests {
 	public void testSystemTenant() {
 		
 		try {
-			Tenant system = tenantService.getSystemTenant();
+			tenantService.getSystemTenant();
 		} catch (RepositoryException | EntityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
