@@ -5,5 +5,5 @@ public enum ValidationType {
 	RANGE, 
 	LENGTH,
 	REGEX,
-	RESOURCE;
+	OBJECT;
 }
