@@ -3,6 +3,7 @@ package com.jadaptive.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -10,6 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.db.MongoDatabaseService;
+import com.jadaptive.entity.template.EntityTemplate;
+import com.jadaptive.entity.template.EntityTemplateService;
+import com.jadaptive.entity.template.FieldCategory;
+import com.jadaptive.entity.template.FieldTemplate;
+import com.jadaptive.entity.template.ValidationType;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.tenant.TenantService;
 import com.mongodb.client.MongoCollection;
@@ -26,6 +32,9 @@ public class EntityRepositoryImpl implements EntityRepository {
 	@Autowired
 	TenantService tenantService; 
 
+	@Autowired
+	EntityTemplateService templateService; 
+	
 	@Override
 	public Collection<Entity> list(String resourceKey) throws RepositoryException, EntityException {
 		
@@ -50,7 +59,11 @@ public class EntityRepositoryImpl implements EntityRepository {
 	public Entity get(String uuid, String resourceKey) throws RepositoryException, EntityException {
 	
 		MongoCollection<Document> collection = getCollection(resourceKey);
-		return buildEntity(resourceKey, collection.find(Filters.eq("_id", uuid)).first());
+		Document e = collection.find(Filters.eq("_id", uuid)).first();
+		if(Objects.isNull(e)) {
+			throw new EntityException(String.format("Uuid %s for entity %s was not found", uuid, resourceKey));
+		}
+		return buildEntity(resourceKey, e);
 	}
 
 	@Override
@@ -82,12 +95,54 @@ public class EntityRepositoryImpl implements EntityRepository {
 		
 		MongoCollection<Document> collection = getCollection(entity);
 		
+		EntityTemplate template = templateService.get(entity.getResourceKey());
+		
+		validateReferences(template, entity);
+		
 		if(StringUtils.isBlank(entity.getUuid())) {
 			collection.insertOne(entity.getDocument());
 		} else {
 			collection.replaceOne(Filters.eq("_id", entity.getUuid()), 
 					entity.getDocument(), 
 					new ReplaceOptions().upsert(true));
+		}
+	}
+
+	private void validateReferences(EntityTemplate template, Entity entity) {
+		
+		validateReferences(template.getFields(), entity);
+		
+		if(!Objects.isNull(template.getCategories())) {
+			for(FieldCategory cat : template.getCategories()) {
+				validateReferences(cat.getFields(), entity);
+			}
+		}
+
+	}
+
+	private void validateReferences(Collection<FieldTemplate> fields, Entity entity) {
+		if(!Objects.isNull(fields)) {
+			for(FieldTemplate t : fields) {
+				switch(t.getFieldType()) {
+				case OBJECT_REFERENCE:
+					if(StringUtils.isNotBlank(entity.getValue(t))) {
+						validateEntityExists(entity.getValue(t), t.getValidationValue(ValidationType.OBJECT));
+					}
+					break;
+				case OBJECT_COLLECTION:
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
+	private void validateEntityExists(String uuid, String resourceKey) {
+		
+		MongoCollection<Document> collection = getCollection(resourceKey);
+		Document e = collection.find(Filters.eq("_id", uuid)).first();
+		if(Objects.isNull(e)) {
+			throw new EntityException(String.format("Uuid %s for entity %s was not found", uuid, resourceKey));
 		}
 	}
 

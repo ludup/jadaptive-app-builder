@@ -123,5 +123,14 @@ public class FieldTemplate extends NamedUUIDEntity {
 		this.ignoreColumn = ignoreColumn;
 	}
 
+	public String getValidationValue(ValidationType type) {
+		for(FieldValidator v : validators) {
+			if(type==v.getType()) {
+				return v.getValue();
+			}
+		}
+		throw new IllegalStateException(String.format("There is no validator for type %s on field %s", type.name(), getResourceKey()));
+	}
+
 	
 }

@@ -1,5 +1,6 @@
 [{ 
   "resourceKey" : "applicationMenu",
+  "uuid": "e2361a2c-4f3e-4b9b-adc0-56d5d700863a",
   "title": "Dashboard",
   "resource": "dash",
   "system" : true,
@@ -17,6 +18,7 @@
   "parent": ""
 },{
   "resourceKey" : "applicationMenu",
+  "uuid": "0e288ca6-e77d-4c37-bc41-2643920c803f",
   "title": "Charts",
   "resource": "charts",
   "system" : true,
