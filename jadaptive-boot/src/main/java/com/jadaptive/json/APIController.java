@@ -189,4 +189,18 @@ public class APIController {
 			return new EntityStatus<Collection<Entity>>(false, e.getMessage());
 		}
 	}
+	
+	@RequestMapping(value="api/{resourceKey}/table", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public TableStatus<Collection<Entity>> tableEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+		try {
+			   return new TableStatus<Collection<Entity>>(templateService.get(resourceKey), entityService.list(resourceKey));
+		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/{}/table", resourceKey, e);
+			}
+			return new TableStatus<Collection<Entity>>(false, e.getMessage());
+		}
+	}
 }

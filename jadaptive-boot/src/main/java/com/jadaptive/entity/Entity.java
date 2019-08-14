@@ -29,7 +29,7 @@ public class Entity extends AbstractUUIDEntity {
 		this(null, resourceKey, document);
 		for(Entry<String,Object> entry : document.entrySet()) {
 			if(entry.getValue() instanceof Document) {
-				children.put(entry.getKey(), new Entity(this, resourceKey, (Document)entry.getValue()));
+				new Entity(this, entry.getKey(), (Document)entry.getValue());
 			}
 		}
 	}

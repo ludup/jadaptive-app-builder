@@ -42,12 +42,14 @@ public class EntitySerializer extends StdSerializer<Entity> {
 
 			writeFields(gen, template.getFields(), value);
 			
-			for (FieldCategory cat : template.getCategories()) {
-				gen.writeObjectFieldStart(cat.getResourceKey());
-
-				writeFields(gen, cat.getFields(), value.getChild(cat));
-
-				gen.writeEndObject();
+			if(!Objects.isNull(template.getCategories())) {
+				for (FieldCategory cat : template.getCategories()) {
+					gen.writeObjectFieldStart(cat.getResourceKey());
+	
+					writeFields(gen, cat.getFields(), value.getChild(cat));
+	
+					gen.writeEndObject();
+				}
 			}
 
 			gen.writeEndObject();
@@ -76,6 +78,12 @@ public class EntitySerializer extends StdSerializer<Entity> {
 					break;
 				case NUMBER:
 					gen.writeNumberField(t.getResourceKey(), Long.parseLong(value.getValue(t)));
+					break;
+				case OBJECT_COLLECTION:
+					// TODO
+					break;
+				case OBJECT_REFERENCE:
+					gen.writeStringField(t.getResourceKey(), value.getValue(t));
 					break;
 				}
 			}

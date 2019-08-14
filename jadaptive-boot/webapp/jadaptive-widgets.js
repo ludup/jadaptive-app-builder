@@ -20,8 +20,8 @@ Vue.component('textarea-field', {
 
 Vue.component('number-field', {
 	  props: ['field'],
-	  attached: function() {
-		  this.$el.inputSpinner();  
+	  mounted: function() {
+		  $(this.$el).inputSpinner();  
 	  },
 	  template: `
 	      <div class='form-group'>
@@ -327,17 +327,109 @@ Vue.component('component-panel', {
       </div>`
 });
 
+Vue.component('entity-table', {
+	  props: ['page'],
+	  components: {
+		     'bootstrap-table': BootstrapTable
+	  },
+	  mounted: function() {
+		  $('.jedit').on('click', function(e) {
+			  e.preventDefault();
+			  var uuid = $(this).data('uuid');
+			  this.$el.hide();
+		  });
+	  },
+	  computed: {
+		  orderedColumns: function() {
+			  var tmp = [];
+	    	  if(this._props.page.template.fields) {
+	    		  tmp = tmp.concat(this._props.page.template.fields);
+		    	  tmp.sort(function(a, b){return a.weight - b.weight});
+	    	  }
+
+	    	  var columns = [];
+	    	  $.each(tmp, function(idx, obj) {
+	    		 if(!obj.ignoreColumn) {
+		    		 columns.push({
+		    			 title: obj.name,
+		    			 field: obj.resourceKey,
+		    			 visible: obj.defaultColumn,
+		    			 formatter: function(val, row) {
+		    				 if(obj.fieldType === 'CHECKBOX') {
+		    					 return val ? "YES" : "NO";
+		    				 }
+		    				 return val;
+		    			 }
+		    		 });
+	    		 }
+	    	  });
+	    	  
+	    	  if(this._props.page.template.categories) {
+		    	  tmp = [].concat(this._props.page.template.categories);
+		    	  tmp.sort(function(a, b){return a.weight - b.weight});
+		    	  
+		    	  $.each(tmp, function(idx, cat) {
+		    		  
+		    		  if(cat.fields) {
+			    		  tmp = [].concat(cat.fields);
+				    	  tmp.sort(function(a, b){return a.weight - b.weight});
+				    	  
+				    	  $.each(tmp, function(idx, obj) {
+				    		  if(!obj.ignoreColumn) {
+				    	  
+					    		 columns.push({
+					    			 title: obj.name,
+					    			 field: cat.resourceKey + '.' + obj.resourceKey,
+					    			 visible: obj.defaultColumn,
+					    			 formatter: function(val, row) {
+					    				 if(obj.fieldType === 'CHECKBOX') {
+					    					 return val ? "YES" : "NO";
+					    				 }
+					    				 return val;
+					    			 }
+					    		 });
+				    		  }
+					    	});
+		    		  }
+		    	  });
+	    	  }
+	    	  
+	    	  columns.push({
+	    		  title: "Actions",
+	    		  formatter: function(val, row, idx) {
+	    			  return '<a data-uuid="' + row.uuid + '" href="#"><i class="far fa-edit"></i></a>';
+	    		  }
+	    	  });
+	    	  return columns;
+		  },
+		  options: function() {
+			  return {
+				  search: true,
+				  showColumns: true
+			  }
+		  }
+	  },
+	  template: `<bootstrap-table :columns="orderedColumns" :data="page.result" :options="options"></bootstrap-table>`
+});
+
+
 Vue.component('template-panel', {
 	  props: ['template'],
 	  computed: {
           orderedFields () {
-	    	  var tmp = [].concat(this._props.template.fields);
-	    	  tmp.sort(function(a, b){return a.weight - b.weight});
+	    	  var tmp = [];
+	    	  if(this._props.template.fields) {
+	    		  tmp = tmp.concat(this._props.template.fields);
+		    	  tmp.sort(function(a, b){return a.weight - b.weight});
+	    	  }
 	    	  return tmp;
           },
           orderedCategories () {
-        	  var tmp = [].concat(this._props.template.categories);
-	    	  tmp.sort(function(a, b){return a.weight - b.weight});
+        	  var tmp = [];
+	    	  if(this._props.template.categories) {
+	    		  tmp = tmp.concat(this._props.template.categories);
+		    	  tmp.sort(function(a, b){return a.weight - b.weight});
+	    	  }
 	    	  return tmp;
           }
       },
@@ -363,4 +455,76 @@ Vue.component('template-panel', {
               </div>
             </div>
 	    </form>`
+});
+
+
+Vue.component('side-menu', {
+	  props: ['items'],
+	  data: function() {
+		  return {
+			  resource: undefined
+		  }
+	  },
+	  computed: { 
+		  orderedMenus: function() {
+
+			  var map = new Map();
+			  var roots = [];
+			  $.each(this._props.items, function(idx, obj) {
+			      map.set(obj.uuid, obj);
+			      obj.items = [];
+			      obj.href = '#' + obj.resource;
+			  });
+			  
+			  $.each(this._props.items, function(idx, obj) {
+				  const v4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
+				  var parent = obj.parent.match(v4);
+			      if(parent) {
+			    	  var p = map.get(obj.parent);
+			    	  p.items.push(obj);
+			      } else {
+			    	  roots.push(obj);
+			      }
+			  });
+			  
+			  return roots;
+		  }
+      },
+      methods: {
+    	  isSelected: function(resource) {
+    		  return this.resource === resource;
+    	  },
+    	  select: function(resource) {
+    		  debugger;
+    		  this.resource = resource;
+    	  },
+      },
+	  template: `
+<aside id="sidebar" class="sidebar">
+<div id="sidebar-menu" class="sidebar-menu">
+   <template v-for="menu in orderedMenus">
+	   <a v-if="menu.items.length === 0" href="#" class="sidebar-link" v-on:click="select(menu.resource)" v-bind:class="{active: isSelected(menu.resource)}">
+	      <i class="sidebar-icon" :class="menu.icon"></i>
+	      <div class="sidebar-title"><span>{{ menu.title }}</span>
+	      </div>
+	   </a>
+	   <div v-else class="sidebar-link-group">
+	      <a :href="menu.href" class="sidebar-link" data-toggle="collapse" role="button" aria-expanded="false" :aria-controls="menu.resource">
+	          <i class="sidebar-icon" :class="menu.icon"></i>
+	          <div class="sidebar-title"><span>{{ menu.title }}</span>
+	          <i class="sidebar-collapse fas fa-sort-down"></i>
+	          </div>
+	      </a>
+	      <div :id="menu.resource" class="collapse sidebar-link-group">
+	          <template v-for="item in menu.items">
+		          <a href="#" class="sidebar-link" v-on:click="select(item.resource)" v-bind:class="{active: isSelected(item.resource)}">
+		          <i class="sidebar-icon" :class="item.icon"></i>
+		              <div class="sidebar-title"><span>{{ item.title }}</span></div>
+		          </a>
+	          </template>
+	      </div>
+	   </div>
+   </template>
+</div>
+</aside>`
 });

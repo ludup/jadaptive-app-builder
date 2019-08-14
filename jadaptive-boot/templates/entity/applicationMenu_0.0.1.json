@@ -1,0 +1,26 @@
+[{ 
+  "resourceKey" : "applicationMenu",
+  "title": "Dashboard",
+  "resource": "dash",
+  "system" : true,
+  "hidden" : false,
+  "icon": "fas fa-chart-pie",
+  "parent": ""
+},{
+  "uuid": "0705001a-15b6-42ab-a197-8afb7c2e43f1",
+  "resourceKey" : "applicationMenu",
+  "title": "Statistics",
+  "resource": "stats",
+  "system" : true,
+  "hidden" : false,
+  "icon": "far fa-chart-bar",
+  "parent": ""
+},{
+  "resourceKey" : "applicationMenu",
+  "title": "Charts",
+  "resource": "charts",
+  "system" : true,
+  "hidden" : false,
+  "icon": "",
+  "parent": "0705001a-15b6-42ab-a197-8afb7c2e43f1"
+}]

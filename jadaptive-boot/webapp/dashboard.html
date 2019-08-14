@@ -15,48 +15,48 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.5.0/css/bootstrap4-toggle.min.css">
 <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.3/dist/bootstrap-table.min.css">
+<link rel="stylesheet" href="app.css">
 
 <title>Index Page</title>
 </head>
 <body>
-<!-- <h1>Vue Workspace</h1> -->
-<div class="col-md-2"></div>
-<!-- <div id="appForm" class="col-md-8"> -->
-<!--    <entity-table v-bind:page="page"></entity-table> -->
-<!--   </div> -->
-<div id="appForm2" class="col-md-8">  
-   <template-panel v-bind:template="template"></template-panel>
+<div id="app" class="app">
+  <div class="layout">
+   <nav class="navbar"></nav>
+   <side-menu v-bind:items="items"></side-menu>
+   <div id="content" class="content">
+   </div>
+  </div>
 </div>
-<div class="col-md-2"></div>
 </body>
 <script type="text/javascript">
 
 
-$.getJSON('/api/template/customer', function(data) {
-	if(data.success) {
-		var app7 = new Vue({
-			  el: '#appForm2',
-			  data: {
-				  template: data.result
-			  }
-			});
-	} else {
-		alert(data.message);
-	}
-});
-
-// $.getJSON('/api/customer/table', function(data) {
+// $.getJSON('/api/template/customer', function(data) {
 // 	if(data.success) {
 // 		var app7 = new Vue({
-// 			  el: '#appForm',
+// 			  el: '#appForm2',
 // 			  data: {
-// 				  page: data
+// 				  template: data.result
 // 			  }
 // 			});
 // 	} else {
 // 		alert(data.message);
 // 	}
 // });
+
+$.getJSON('/api/applicationMenu/list', function(data) {
+	if(data.success) {
+		var app7 = new Vue({
+			  el: '#app',
+			  data: {
+				  items: data.result
+			  }
+			});
+	} else {
+		alert(data.message);
+	}
+});
 
 
 </script>

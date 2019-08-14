@@ -112,44 +112,72 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 	private void validateNode(JsonNode node, FieldTemplate field,
 			Entity e) throws IOException, ValidationException {
 		
-		if(field.getValidators().isEmpty()) {
-			return;
+		if(log.isInfoEnabled()) {
+			log.info("Validating node {}", field.getResourceKey());
 		}
-
+		
 		if(node==null) {
-			throw new IOException(String.format("%s is missing", field.getResourceKey()));
+			if(field.getRequired()) {
+				throw new IOException(String.format("%s is missing", field.getResourceKey()));
+			} 
+			setPropertyDefault(field, e);
+			return;
 		}
 		
 		node = node.findPath(field.getResourceKey());
-		if(Objects.isNull(node) && field.getRequired()) {
-			throw new ValidationException(String.format("Missing node for %s", field.getResourceKey()));
-		}
+		if(Objects.isNull(node)) {
+			if(field.getRequired()) {
+				throw new ValidationException(String.format("Missing node for %s", field.getResourceKey()));
+			} else {
+				setPropertyDefault(field, e);
+				return;
+			}
+		} 
 		
-		switch(field.getFieldType()) {
-		case CHECKBOX:
-			validateBooleean(node, field);
-			break;
-		case DECIMAL:
-			validateDecimal(node, field);
-			break;
-		case NUMBER:
-			validateNumber(node, field);
-			break;
-		case COUNTRY:
-			validateCountry(node, field);
-			break;
-		case TEXT:
-		case TEXT_AREA:
-		default:
-			validateText(node, field);
+		if(!Objects.isNull(field.getValidators()) && !field.getValidators().isEmpty()) {
+
+			switch(field.getFieldType()) {
+			case OBJECT_REFERENCE:
+				validateObject(node, field);
+				break;
+			case OBJECT_COLLECTION:
+				validateObjects(node, field);
+				break;
+			case CHECKBOX:
+				validateBooleean(node, field);
+				break;
+			case DECIMAL:
+				validateDecimal(node, field);
+				break;
+			case NUMBER:
+				validateNumber(node, field);
+				break;
+			case COUNTRY:
+				validateCountry(node, field);
+				break;
+			case TEXT:
+			case TEXT_AREA:
+			default:
+				validateText(node, field);
+			}
 		}
 		
 		setProperty(node, field, e);
 		
 	}
 
-	private void validateCountry(JsonNode node, FieldTemplate field) {
+	private void validateObjects(JsonNode node, FieldTemplate field) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	private void validateObject(JsonNode node, FieldTemplate field) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void validateCountry(JsonNode node, FieldTemplate field) {
+		
 		
 	}
 
@@ -196,9 +224,10 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 						throw new ValidationException(String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
 					}
 					break;
-				case RANGE:
-					break;
 				case REGEX:
+					// TODO
+					break;
+				default:
 					break;
 				}
 			}
@@ -209,6 +238,10 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		if(!Objects.isNull(value)) {
 			e.setValue(t, value.asText());
 		} 
+	}
+	
+	private void setPropertyDefault(FieldTemplate t, Entity e) {
+		e.setValue(t, t.getDefaultValue()); 
 	}
 
 

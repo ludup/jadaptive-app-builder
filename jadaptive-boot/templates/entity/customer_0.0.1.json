@@ -4,10 +4,12 @@
   "hidden" : false,
   "name" : "JADAPTIVE Limited",
   "address": {
-      "line1": "",
-      "line2": "",
+      "line1": "Unit 1, Vision Business Center",
+      "line2": "Firth Way",
       "line3": "",
-      "city": "",
-      "state": ""
+      "city": "Nottingham",
+      "state": "Nottinghamshire",
+      "postcode": "NG6 8GF",
+      "country": "GB"
   }
 }]

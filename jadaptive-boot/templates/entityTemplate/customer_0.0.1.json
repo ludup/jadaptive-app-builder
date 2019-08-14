@@ -10,6 +10,8 @@
               "description": "The name of this customer",
               "fieldType": "TEXT",
               "weight": 0,
+              "required": true,
+              "defaultColumn": true,
               "validators": [{
               	"type": "LENGTH",
               	"value": 255
@@ -26,6 +28,8 @@
               "description": "",
               "fieldType": "TEXT",
               "weight": 0,
+ 			  "required": true,
+              "defaultColumn": true,
               "validators": [{
               	"type": "LENGTH",
               	"value": 255
@@ -37,6 +41,7 @@
               "description": "",
               "fieldType": "TEXT",
               "weight": 100,
+              "ignoreColumn": true,
               "validators": [{
               	"type": "LENGTH",
               	"value": 255
@@ -48,12 +53,13 @@
               "description": "",
               "fieldType": "TEXT",
               "weight": 200,
+              "ignoreColumn": true,
               "validators": [{
               	"type": "LENGTH",
               	"value": 255
               }]
               }, {
-              "resourceKey": "addressCity",
+              "resourceKey": "city",
               "name": "City",
               "defaultValue": "",
               "description": "",
@@ -64,7 +70,7 @@
               	"value": 255
                }]
               }, {
-              "resourceKey": "addressState",
+              "resourceKey": "state",
               "name": "State",
               "defaultValue": "",
               "description": "",
@@ -75,12 +81,27 @@
               	"value": 255
               }]
            }, {
+              "resourceKey": "postcode",
+              "name": "Postcode",
+              "defaultValue": "",
+              "description": "",
+              "fieldType": "TEXT",
+              "weight": 500,
+ 			  "required": true,
+              "defaultColumn": true,
+              "validators": [{
+              	"type": "LENGTH",
+              	"value": 255
+              }]
+              }, {
               "resourceKey": "country",
               "name": "Country",
               "defaultValue": "",
               "description": "",
               "fieldType": "COUNTRY",
-              "weight": 500,
+              "weight": 600,
+ 			  "required": true,
+              "defaultColumn": true,
               "validators": []
            }]
        }, {

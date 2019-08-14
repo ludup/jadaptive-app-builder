@@ -17,6 +17,10 @@ public class FieldTemplate extends NamedUUIDEntity {
 	FieldType fieldType; 
 	Integer weight;
 	boolean searchable; 
+	boolean required;
+	boolean defaultColumn;
+	boolean ignoreColumn;
+	
 	Set<FieldValidator> validators;
 	
 	public FieldTemplate() {
@@ -70,7 +74,18 @@ public class FieldTemplate extends NamedUUIDEntity {
 		this.searchable = searchable;
 	}
 
+	public void setRequired(Boolean required) {
+		this.required = required;
+	}
 	
+	public boolean isDefaultColumn() {
+		return defaultColumn;
+	}
+
+	public void setDefaultColumn(Boolean defaultColumn) {
+		this.defaultColumn = defaultColumn;
+	}
+
 	public Set<FieldValidator> getValidators() {
 		return validators;
 	}
@@ -100,4 +115,13 @@ public class FieldTemplate extends NamedUUIDEntity {
 		return false;
 	}
 
+	public boolean isIgnoreColumn() {
+		return ignoreColumn;
+	}
+
+	public void setIgnoreColumn(Boolean ignoreColumn) {
+		this.ignoreColumn = ignoreColumn;
+	}
+
+	
 }

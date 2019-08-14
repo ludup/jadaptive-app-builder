@@ -7,7 +7,9 @@ public enum FieldType {
 	DECIMAL(ValidationType.RANGE),
 	TEXT(ValidationType.LENGTH, ValidationType.REGEX),
 	TEXT_AREA(ValidationType.LENGTH, ValidationType.REGEX),
-	COUNTRY;
+	COUNTRY,
+	OBJECT_REFERENCE(ValidationType.RESOURCE),
+	OBJECT_COLLECTION(ValidationType.RESOURCE);
 	
 	ValidationType[] options;
 	
