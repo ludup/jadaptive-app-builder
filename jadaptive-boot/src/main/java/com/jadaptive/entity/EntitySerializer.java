@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
-import com.jadaptive.entity.template.FieldCategory;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.entity.template.ValidationType;
 
@@ -52,16 +51,6 @@ public class EntitySerializer extends StdSerializer<Entity> {
 		gen.writeBooleanField("hidden", value.getHidden());
 
 		writeFields(gen, template.getFields(), value);
-		
-		if(!Objects.isNull(template.getCategories())) {
-			for (FieldCategory cat : template.getCategories()) {
-				gen.writeObjectFieldStart(cat.getResourceKey());
-
-				writeFields(gen, cat.getFields(), value.getChild(cat));
-
-				gen.writeEndObject();
-			}
-		}
 
 		gen.writeEndObject();
 	}
@@ -77,16 +66,6 @@ public class EntitySerializer extends StdSerializer<Entity> {
 		gen.writeBooleanField("hidden", value.getHidden());
 
 		writeFields(gen, template.getFields(), value);
-		
-		if(!Objects.isNull(template.getCategories())) {
-			for (FieldCategory cat : template.getCategories()) {
-				gen.writeObjectFieldStart(cat.getResourceKey());
-
-				writeFields(gen, cat.getFields(), value.getChild(cat));
-
-				gen.writeEndObject();
-			}
-		}
 
 		gen.writeEndObject();
 	}
@@ -96,7 +75,7 @@ public class EntitySerializer extends StdSerializer<Entity> {
 		if(!Objects.isNull(templates)) {
 			for (FieldTemplate t : templates) {
 				switch (t.getFieldType()) {
-				case CHECKBOX:
+				case BOOL:
 					gen.writeBooleanField(t.getResourceKey(), Boolean.parseBoolean(value.getValue(t)));
 					break;
 				case TEXT:

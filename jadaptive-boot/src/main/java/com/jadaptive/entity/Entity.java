@@ -94,7 +94,7 @@ public class Entity extends AbstractUUIDEntity {
 
 	public String getValue(FieldTemplate t) {
 		switch(t.getFieldType()) {
-		case CHECKBOX:
+		case BOOL:
 		case DECIMAL:
 		case NUMBER:
 		case TEXT:

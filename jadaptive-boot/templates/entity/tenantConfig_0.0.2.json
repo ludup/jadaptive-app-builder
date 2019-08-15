@@ -3,7 +3,5 @@
   "resourceKey" : "tenantConfig",
   "system" : true,
   "hidden" : false,
-  "applicationIdentity" : {
-    "applicationName" : "JADAPTIVE Entity Builder v2"
-  }
+  "applicationName" : "JADAPTIVE Entity Builder v2"
 }]

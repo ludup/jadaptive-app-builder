@@ -2,13 +2,13 @@ package com.jadaptive.entity.template;
 
 public enum FieldType {
 
-	CHECKBOX,
+	BOOL,
 	NUMBER(ValidationType.RANGE),
 	DECIMAL(ValidationType.RANGE),
 	TEXT(ValidationType.LENGTH, ValidationType.REGEX),
 	TEXT_AREA(ValidationType.LENGTH, ValidationType.REGEX),
 	COUNTRY,
-	OBJECT_REFERENCE(ValidationType.OBJECT_REF),
+	OBJECT_REFERENCE(ValidationType.OBJECT_TYPE),
 	OBJECT_EMBEDDED(ValidationType.OBJECT_TYPE);
 	
 	ValidationType[] options;

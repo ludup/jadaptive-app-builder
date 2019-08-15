@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
-import com.jadaptive.entity.template.FieldCategory;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.entity.template.FieldValidator;
 import com.jadaptive.entity.template.ValidationException;
@@ -69,7 +68,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 			
 			Entity e = new Entity(template.getUuid(), new Document());
 			
-			iterateType(node, template, e);
+			iterateType(node, template, e, true);
 
 			return e;
 		} catch (Throwable e) {
@@ -78,8 +77,9 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		}
 	}
 
-	private void iterateType(JsonNode node, EntityTemplate template, Entity e) throws IOException, ValidationException {
+	private void iterateType(JsonNode node, EntityTemplate template, Entity e, boolean requiresUUID) throws IOException, ValidationException {
 		
+
 		JsonNode uuidNode = node.findValue("uuid");
 		if(!Objects.isNull(uuidNode)) {
 			e.setUuid(uuidNode.asText());
@@ -89,8 +89,6 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		e.setHidden(getBooleanNodeValue(node, "hidden"));
 		
 		iterateFields(node, template.getFields(), e);
-
-		iterateCategories(node, template.getCategories(), e);
 		
 	}
 
@@ -103,19 +101,6 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		return node.asBoolean(false);
 	}
 
-	private void iterateCategories(JsonNode current, Set<FieldCategory> categories,
-			Entity e) throws IOException, ValidationException {
-		if(!Objects.isNull(categories)) {
-			for(FieldCategory c : categories) {
-				iterateCategory(current.findValue(c.getResourceKey()), c, new Entity(e, c.getResourceKey(), new Document()));
-			}
-		}
-	}
-
-	private void iterateCategory(JsonNode current, FieldCategory c,
-			Entity cat) throws IOException, ValidationException {
-		iterateFields(current, c.getFields(), cat);
-	}
 
 	private void iterateFields(JsonNode current, Set<FieldTemplate> fields, Entity e) throws IOException, ValidationException {
 		
@@ -163,10 +148,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 				 * Return otherwise setProperty at the end kills the document
 				 */
 				return;
-//			case OBJECT_COLLECTION:
-//				validateObjects(node, field);
-//				break;
-			case CHECKBOX:
+			case BOOL:
 				validateBooleean(node, field);
 				break;
 			case DECIMAL:
@@ -189,23 +171,21 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		
 	}
 
-//	private void validateObjects(JsonNode node, FieldTemplate field) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-
 	private void validateObjectReference(JsonNode node, FieldTemplate field) {
-		// TODO Auto-generated method stub
+		
+		/**
+		 * Object reference is enforced by the Entity service.
+		 */
 		
 	}
 	
 	private void validateObject(JsonNode node, FieldTemplate field, Entity e) throws IOException, ValidationException {
 		
-		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
+ 		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
 		EntityTemplateService templateService = ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class);
 		EntityTemplate template = templateService.get(type);
 
-		iterateType(node, template, new Entity(e, field.getResourceKey(), new Document()));
+		iterateType(node, template, new Entity(e, field.getResourceKey(), new Document()), false);
 	}
 
 	private void validateCountry(JsonNode node, FieldTemplate field) {

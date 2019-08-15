@@ -29,27 +29,5 @@
               	"type": "OBJECT_TYPE",
               	"value": "address"
             }]
-       }],
-   "categories": [{
-      "resourceKey": "options",
-      "name": "Options",
-      "weight": 1000,
-      "fields": [{
-              "resourceKey": "paymentTerms",
-              "name": "Payment Terms",
-              "defaultValue": 30,
-              "description": "The invoice payment terms",
-              "fieldType": "NUMBER",
-              "weight": 100,
-              "validators": []
-              }, {
-              "resourceKey": "confirmed",
-              "name": "Confirmed",
-              "defaultValue": false,
-              "description": "Has this customer been confirmed",
-              "fieldType": "CHECKBOX",
-              "weight": 0,
-              "validators": []
-              }]
-        }] 
+       }]
 }]

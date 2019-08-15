@@ -90,13 +90,42 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	@Override
 	public void saveTemplateObjects(List<EntityTemplate> objects, @SuppressWarnings("unchecked") TransactionAdapter<EntityTemplate>... ops) throws RepositoryException, EntityException {
 		for(EntityTemplate obj : objects) {
-			saveOrUpdate(obj);
+			saveOrUpdate(validateTemplate(obj));
 			for(TransactionAdapter<EntityTemplate> op : ops) {
 				op.afterSave(obj);
 			}
 		}
 	}
 	
+	private EntityTemplate validateTemplate(EntityTemplate obj) {
+		
+		if(!Objects.isNull(obj.getFields())) {
+			for(FieldTemplate t : obj.getFields()) {
+				switch(t.getFieldType()) {
+				case OBJECT_EMBEDDED:
+				case OBJECT_REFERENCE:
+					if(!validatorPresent(t, ValidationType.OBJECT_TYPE)) {
+						throw new EntityException(String.format("Missing OBJECT_TYPE validator on field %s", t.getResourceKey()));
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		
+		return obj;
+	}
+
+	private boolean validatorPresent(FieldTemplate field, ValidationType validator) {
+		for(FieldValidator v : field.getValidators()) {
+			if(v.getType() == validator) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public String getResourceKey() {
 		return "entityTemplate";

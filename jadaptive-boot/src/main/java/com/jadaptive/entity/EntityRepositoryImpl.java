@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 import com.jadaptive.db.MongoDatabaseService;
 import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
-import com.jadaptive.entity.template.FieldCategory;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.entity.template.ValidationType;
 import com.jadaptive.repository.RepositoryException;
@@ -111,12 +110,6 @@ public class EntityRepositoryImpl implements EntityRepository {
 	private void validateReferences(EntityTemplate template, Entity entity) {
 		
 		validateReferences(template.getFields(), entity);
-		
-		if(!Objects.isNull(template.getCategories())) {
-			for(FieldCategory cat : template.getCategories()) {
-				validateReferences(cat.getFields(), entity);
-			}
-		}
 
 	}
 
@@ -129,8 +122,11 @@ public class EntityRepositoryImpl implements EntityRepository {
 						validateEntityExists(entity.getValue(t), t.getValidationValue(ValidationType.OBJECT_TYPE));
 					}
 					break;
-//				case OBJECT_COLLECTION:
-//					break;
+				case OBJECT_EMBEDDED:
+					validateReferences(templateService.get(
+							t.getValidationValue(ValidationType.OBJECT_TYPE)), 
+							entity.getChild(t));
+					break;
 				default:
 					break;
 				}

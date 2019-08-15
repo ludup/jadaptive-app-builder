@@ -319,7 +319,7 @@ Vue.component('component-panel', {
 	            <template>
                   <text-field v-if="field.fieldType === 'TEXT'" v-bind:field="field"></text-field> 
                   <textarea-field v-if="field.fieldType === 'TEXT_AREA'" v-bind:field="field"></textarea-field> 
-                  <checkbox-field v-if="field.fieldType === 'CHECKBOX'" v-bind:field="field"></checkbox-field>
+                  <checkbox-field v-if="field.fieldType === 'BOOL'" v-bind:field="field"></checkbox-field>
                   <country-field v-if="field.fieldType === 'COUNTRY'" v-bind:field="field"></country-field>
                   <number-field v-if="field.fieldType === 'NUMBER' || field.fieldType === 'DECIMAL'" v-bind:field="field"></number-field>
                 </template>
@@ -355,7 +355,7 @@ Vue.component('entity-table', {
 		    			 field: obj.resourceKey,
 		    			 visible: obj.defaultColumn,
 		    			 formatter: function(val, row) {
-		    				 if(obj.fieldType === 'CHECKBOX') {
+		    				 if(obj.fieldType === 'BOOL') {
 		    					 return val ? "YES" : "NO";
 		    				 }
 		    				 return val;
@@ -382,7 +382,7 @@ Vue.component('entity-table', {
 					    			 field: cat.resourceKey + '.' + obj.resourceKey,
 					    			 visible: obj.defaultColumn,
 					    			 formatter: function(val, row) {
-					    				 if(obj.fieldType === 'CHECKBOX') {
+					    				 if(obj.fieldType === 'BOOL') {
 					    					 return val ? "YES" : "NO";
 					    				 }
 					    				 return val;

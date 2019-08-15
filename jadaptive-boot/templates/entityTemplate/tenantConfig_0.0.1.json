@@ -3,11 +3,7 @@
  "name": "Tenant Configuration",
  "uuid": "tenantConfig",
  "system": true,
- "categories": [{
-      "resourceKey": "applicationIdentity",
-      "name": "Application",
-      "weight": 0,
-      "fields": [{
+ "fields": [{
               "resourceKey": "applicationName",
               "name": "Application Name",
               "defaultValue": "",
@@ -19,5 +15,4 @@
               	"value": 64
               }]
        }] 
-  }]
 }]
