@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.jadaptive.app.ConfigHelper;
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.tenant.Tenant;
@@ -71,18 +72,19 @@ public class ResourceController {
 		Tenant tenant = tenantService.getCurrentTenant();
 		
 		if(!tenant.getSystem()) {
-			File webapp = new File("conf" + File.separator 
-					+ "tenants" + File.separator 
-					+ tenant.getHostname() + File.separator 
-					+ "webapp", resourceUri);
-			if(webapp.exists()) {
-				return webapp;
+			File res = new File(ConfigHelper.getTenantSubFolder(tenant, "webapp"), resourceUri);
+			if(res.exists()) {
+				return res;
+			}
+		} else {
+			File res = new File(ConfigHelper.getSystemPrivateSubFolder("webapp"), resourceUri);
+			if(res.exists()) {
+				return res;
 			}
 		}
 		
-		return new File("conf" + File.separator 
-				+ "system" + File.separator 
-				+ "webapp", resourceUri);
+		return new File(ConfigHelper.getSharedSubFolder("webapp"), resourceUri);
+
 	}
 
 	private void sendRedirect(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.AbstractLoggingServiceImpl;
+import com.jadaptive.app.ConfigHelper;
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.json.ObjectMapperHolder;
 import com.jadaptive.repository.AbstractUUIDEntity;
@@ -97,14 +98,23 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 		List<String> paths = new ArrayList<>();
 		
-		File systemPath = new File(System.getProperty("jadaptive.templatePath", "conf"), "system");
-		paths.add(new File(systemPath, templateEnabledService.getTemplateFolder()).getPath());
-		
-		if(!tenant.getSystem()) {
-			File tenantConf = new File(System.getProperty("jadaptive.templatePath", "conf"), 
-					"tenants" + File.separator + tenant.getHostname());
-			paths.add(String.format(tenantConf.getPath() + File.separator + 
-							templateEnabledService.getTemplateFolder()));
+		if(!templateEnabledService.isSystemOnly()) {
+			File sharedConf = new File(ConfigHelper.getSharedFolder(), templateEnabledService.getTemplateFolder());
+			paths.add(sharedConf.getPath());
+
+			if(!tenant.getSystem()) {
+
+				File tenantConf = new File(ConfigHelper.getTenantsFolder(), tenant.getHostname());
+				File templateConf = new File(tenantConf, templateEnabledService.getTemplateFolder());
+				paths.add(templateConf.getPath());
+				
+			} else {
+				File prvConf = new File(ConfigHelper.getSystemPrivateFolder(), templateEnabledService.getTemplateFolder());
+				paths.add(prvConf.getPath());
+			}
+			
+		} else {
+			paths.add(ConfigHelper.getSystemSubFolder(templateEnabledService.getTemplateFolder()).getPath());	
 		}
 		
 		return paths;
