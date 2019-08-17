@@ -149,4 +149,9 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
 	public boolean isSystemOnly() {
 		return false;
 	}
+
+	@Override
+	public String getTemplateFolder() {
+		return "objects";
+	}
 }

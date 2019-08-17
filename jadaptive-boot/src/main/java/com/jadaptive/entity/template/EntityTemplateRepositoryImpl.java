@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.db.AbstractObjectDatabaseImpl;
+import com.jadaptive.db.DocumentDatabase;
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.tenant.TenantService;
@@ -13,6 +14,10 @@ import com.jadaptive.tenant.TenantService;
 @Repository
 public class EntityTemplateRepositoryImpl extends AbstractObjectDatabaseImpl 
 		implements EntityTemplateRepository {
+
+	public EntityTemplateRepositoryImpl(DocumentDatabase db) {
+		super(db);
+	}
 
 	@Autowired
 	TenantService tenantService;

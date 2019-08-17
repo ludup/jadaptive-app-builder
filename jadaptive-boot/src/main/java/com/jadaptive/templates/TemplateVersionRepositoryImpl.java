@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.db.AbstractObjectDatabaseImpl;
+import com.jadaptive.db.DocumentDatabase;
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.tenant.TenantService;
@@ -17,6 +18,10 @@ public class TemplateVersionRepositoryImpl extends AbstractObjectDatabaseImpl im
 	@Autowired
 	TenantService tenantService; 
 
+	TemplateVersionRepositoryImpl(DocumentDatabase db) {
+		super(db);
+	}
+	
 	@Override
 	public boolean hasProcessed(String uuid, String version) {
 		try {

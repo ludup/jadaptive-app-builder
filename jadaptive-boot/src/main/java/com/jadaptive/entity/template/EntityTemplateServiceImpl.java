@@ -148,4 +148,9 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 		return false;
 	}
 
+	@Override
+	public String getTemplateFolder() {
+		return "templates";
+	}
+
 }

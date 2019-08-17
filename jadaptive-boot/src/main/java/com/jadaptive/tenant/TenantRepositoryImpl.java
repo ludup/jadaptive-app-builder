@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.db.AbstractObjectDatabaseImpl;
-import com.jadaptive.db.MongoDatabaseService;
+import com.jadaptive.db.DocumentDatabase;
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
 import com.mongodb.client.MongoDatabase;
@@ -16,13 +16,14 @@ import com.mongodb.client.MongoDatabase;
 @Repository
 public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements TenantRepository {
 
-	private static Logger log = LoggerFactory.getLogger(MongoDatabase.class);
+	private static Logger log = LoggerFactory.getLogger(TenantRepositoryImpl.class);
 	private static final String TENANT_DATABASE = "tenants";
 	
 	public static final String SYSTEM_UUID = "4f1b781c-581d-474f-9505-4fea9c5e3909";
-	
-	@Autowired
-	MongoDatabaseService mongo;
+		
+	public TenantRepositoryImpl(DocumentDatabase db) {
+		super(db);
+	}
 	
 	@Override
 	public void saveTenant(Tenant tenant) throws RepositoryException, EntityException {
@@ -53,10 +54,10 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 	public void dropSchema() throws RepositoryException, EntityException {
 		
 		for(Tenant tenant : listTenants()) {
-			mongo.getClient().dropDatabase(tenant.getUuid());
+			db.dropDatabase(tenant.getUuid());
 		}
 		
-		mongo.getClient().dropDatabase(TENANT_DATABASE);
+		db.dropDatabase(TENANT_DATABASE);
 		
 	}
 	
@@ -75,6 +76,11 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 	@Override
 	public boolean isEmpty() {
 		return countObjects(TENANT_DATABASE, Tenant.class) == 0;
+	}
+
+	@Override
+	public Long countTenants() {
+		return countObjects(TENANT_DATABASE, Tenant.class) ;
 	}
 	
 	

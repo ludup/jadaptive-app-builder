@@ -33,18 +33,20 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	final public static String SYSTEM_TENANT_UUID = "cb3129ea-b8b1-48a4-85de-8443945d95e3";
 	
 	final public static String TENANT_RESOURCE_KEY = "tenant";
+	
 	@Autowired
 	TenantRepository repository; 
 	
 	@Autowired
 	TemplateVersionService templateService;
 	
-	@Autowired
-	PermissionService permissionService; 
+//	@Autowired
+//	PermissionService permissionService; 
 	
 	Tenant systemTenant;
 	
 	Map<String,Tenant> tenantsByHostname = new HashMap<>();
+	
 	
 	@EventListener
 	private void setup(ApplicationReadyEvent event) throws RepositoryException, EntityException {
@@ -53,7 +55,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			repository.newSchema();
 		}
 		
-		permissionService.registerStandardPermissions(TENANT_RESOURCE_KEY);
+//		permissionService.registerStandardPermissions(TENANT_RESOURCE_KEY);
 		
 		initialiseTenant(getSystemTenant());
 		
@@ -97,7 +99,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			
 			for(TemplateEnabledService<?> repository : ordered) {
 				if(tenant.getSystem() || !repository.isSystemOnly()) { 
-					templateService.processTemplates(repository);		
+					templateService.processTemplates(tenant, repository);		
 				}
 			}
 	
@@ -203,5 +205,10 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			}
 		}
 		setCurrentTenant(tenant);
+	}
+
+	@Override
+	public String getTemplateFolder() {
+		return "tenants";
 	}
 }

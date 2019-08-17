@@ -23,6 +23,7 @@ import com.jadaptive.json.ObjectMapperHolder;
 import com.jadaptive.repository.AbstractUUIDEntity;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.repository.TransactionAdapter;
+import com.jadaptive.tenant.Tenant;
 import com.jadaptive.utils.Version;
 
 @Service
@@ -40,7 +41,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 	
 	@Override
-	public <E extends AbstractUUIDEntity> void processTemplates(TemplateEnabledService<E> templateEnabledService) {
+	public <E extends AbstractUUIDEntity> void processTemplates(Tenant tenant, TemplateEnabledService<E> templateEnabledService) {
 		
 		if(log.isInfoEnabled()) {
 			log.info("Processing templates for {}", templateEnabledService.getResourceKey());
@@ -49,7 +50,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		try {
 			
 			Collection<File> orderedTemplates = findVersionedTemplates(
-					String.format("templates%s%s", File.separator, templateEnabledService.getResourceKey()));
+					buildTemplatePaths(tenant, templateEnabledService));
 			
 			Set<String> resourceKeys = new HashSet<>();
 			for(File template : orderedTemplates) {
@@ -92,33 +93,55 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 
-	protected Collection<File> findVersionedTemplates(String path) throws IOException {
+	private List<String> buildTemplatePaths(Tenant tenant, TemplateEnabledService<?> templateEnabledService) {
 		
-		File dir = new File(".");
-		File templateFolder = new File(dir, path);
+		List<String> paths = new ArrayList<>();
 		
-		if(log.isInfoEnabled()) {
-			log.info(String.format("Searching for templates folder in %s [%b]", 
-					templateFolder.getCanonicalPath(), 
-					templateFolder.exists()));
+		File systemPath = new File(System.getProperty("jadaptive.templatePath", "conf"), "system");
+		paths.add(new File(systemPath, templateEnabledService.getTemplateFolder()).getPath());
+		
+		if(!tenant.getSystem()) {
+			File tenantConf = new File(System.getProperty("jadaptive.templatePath", "conf"), 
+					"tenants" + File.separator + tenant.getHostname());
+			paths.add(String.format(tenantConf.getPath() + File.separator + 
+							templateEnabledService.getTemplateFolder()));
 		}
 		
-		FileFilter fileFilter = new WildcardFileFilter("*.json");
+		return paths;
+	}
+
+	protected Collection<File> findVersionedTemplates(List<String> paths) throws IOException {
+		
 		List<File> orderedTemplates = new ArrayList<File>();
-		File[] files = templateFolder.listFiles(fileFilter);
-		if(!Objects.isNull(files)) {
-			for (File r : files) {
-				orderedTemplates.add(r);
+		
+		for(String path : paths) {
+			File dir = new File(".");
+			File templateFolder = new File(dir, path);
+			
+			if(log.isInfoEnabled()) {
+				log.info(String.format("Searching for templates folder in %s [%b]", 
+						templateFolder.getCanonicalPath(), 
+						templateFolder.exists()));
 			}
 			
-			Collections.<File>sort(orderedTemplates, new Comparator<File>() {
-	
-				@Override
-				public int compare(File o1, File o2) {
-					return o1.getName().compareTo(o2.getName());
+			FileFilter fileFilter = new WildcardFileFilter("*.json");
+			
+			File[] files = templateFolder.listFiles(fileFilter);
+			
+			if(!Objects.isNull(files)) {
+				for (File r : files) {
+					orderedTemplates.add(r);
 				}
-			});
+			}
 		}
+		
+		Collections.<File>sort(orderedTemplates, new Comparator<File>() {
+			
+			@Override
+			public int compare(File o1, File o2) {
+				return o1.getName().compareTo(o2.getName());
+			}
+		});
 		
 		return orderedTemplates;
 	}

@@ -23,6 +23,8 @@ public interface TenantRepository {
 
 	boolean isEmpty();
 
+	Long countTenants();
+
 	
 
 

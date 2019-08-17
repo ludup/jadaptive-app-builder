@@ -24,6 +24,8 @@ public interface TemplateEnabledService<T extends AbstractUUIDEntity> {
 	void onTemplatesComplete(String... resourceKeys);
 
 	boolean isSystemOnly();
+
+	String getTemplateFolder();
 	
 
 }

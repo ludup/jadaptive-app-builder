@@ -10,23 +10,19 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.db.MongoDatabaseService;
+import com.jadaptive.db.DocumentDatabase;
 import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.entity.template.ValidationType;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.tenant.TenantService;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.ReplaceOptions;
 
 @Repository
 public class EntityRepositoryImpl implements EntityRepository {
 
 	@Autowired
-	MongoDatabaseService mongo; 
+	DocumentDatabase db;
 	
 	@Autowired
 	TenantService tenantService; 
@@ -37,10 +33,9 @@ public class EntityRepositoryImpl implements EntityRepository {
 	@Override
 	public Collection<Entity> list(String resourceKey) throws RepositoryException, EntityException {
 		
-		MongoCollection<Document> collection = getCollection(resourceKey);
 		List<Entity> results = new ArrayList<>();
 		
-		for(Document document : collection.find()) {
+		for(Document document : db.list(resourceKey, tenantService.getCurrentTenant().getUuid())) {
 			results.add(buildEntity(resourceKey, document));
 		}
 		
@@ -54,63 +49,36 @@ public class EntityRepositoryImpl implements EntityRepository {
 		e.setSystem(Boolean.valueOf(document.getString("system")));
 		return e;
 	}
+	
 	@Override
 	public Entity get(String uuid, String resourceKey) throws RepositoryException, EntityException {
-	
-		MongoCollection<Document> collection = getCollection(resourceKey);
-		Document e = collection.find(Filters.eq("_id", uuid)).first();
-		if(Objects.isNull(e)) {
-			throw new EntityException(String.format("Uuid %s for entity %s was not found", uuid, resourceKey));
-		}
-		return buildEntity(resourceKey, e);
+		return buildEntity(resourceKey, db.get(uuid, resourceKey, tenantService.getCurrentTenant().getUuid()));
 	}
 
 	@Override
 	public void delete(String resourceKey, String uuid) throws RepositoryException, EntityException {
-		MongoCollection<Document> collection = getCollection(resourceKey);
-		collection.deleteOne(Filters.eq("_id", uuid));
+		db.delete(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
 	}
 
 	@Override
 	public void deleteAll(String resourceKey) throws RepositoryException, EntityException {
 		
-		MongoCollection<Document> collection = getCollection(resourceKey);
-		collection.drop();
+		db.dropCollection(resourceKey, tenantService.getCurrentTenant().getUuid());
 	
-	}
-
-	private MongoCollection<Document> getCollection(Entity e) throws RepositoryException, EntityException {
-		return getCollection(e.getResourceKey());
-	}
-	
-	private MongoCollection<Document> getCollection(String resourceKey) throws RepositoryException, EntityException {
-		
-		MongoDatabase mdb = mongo.getClient().getDatabase(tenantService.getCurrentTenant().getUuid());
-		return mdb.getCollection(resourceKey);
 	}
 	
 	@Override
 	public void save(Entity entity) throws RepositoryException, EntityException {
 		
-		MongoCollection<Document> collection = getCollection(entity);
-		
 		EntityTemplate template = templateService.get(entity.getResourceKey());
 		
 		validateReferences(template, entity);
 		
-		if(StringUtils.isBlank(entity.getUuid())) {
-			collection.insertOne(entity.getDocument());
-		} else {
-			collection.replaceOne(Filters.eq("_id", entity.getUuid()), 
-					entity.getDocument(), 
-					new ReplaceOptions().upsert(true));
-		}
+		db.insertOrUpdate(entity, entity.getDocument(), entity.getResourceKey(), tenantService.getCurrentTenant().getUuid());
 	}
 
 	private void validateReferences(EntityTemplate template, Entity entity) {
-		
 		validateReferences(template.getFields(), entity);
-
 	}
 
 	private void validateReferences(Collection<FieldTemplate> fields, Entity entity) {
@@ -133,13 +101,9 @@ public class EntityRepositoryImpl implements EntityRepository {
 			}
 		}
 	}
+	
 	private void validateEntityExists(String uuid, String resourceKey) {
-		
-		MongoCollection<Document> collection = getCollection(resourceKey);
-		Document e = collection.find(Filters.eq("_id", uuid)).first();
-		if(Objects.isNull(e)) {
-			throw new EntityException(String.format("Uuid %s for entity %s was not found", uuid, resourceKey));
-		}
+		db.getFirst(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
 	}
 
 
