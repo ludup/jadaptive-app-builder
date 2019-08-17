@@ -51,7 +51,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	protected <T extends AbstractUUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, EntityException {
 		try {
-			
+			if(obj.getSystem()) {
+				throw new EntityException(String.format("You cannot delete a system %s", obj.getClass().getName()));
+			}
 			db.delete(obj.getUuid(), obj.getClass().getName(), database);
 			
 		} catch(Throwable e) {

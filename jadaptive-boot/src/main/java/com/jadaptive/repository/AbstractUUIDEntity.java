@@ -1,8 +1,5 @@
 package com.jadaptive.repository;
 
-import java.util.Objects;
-import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +12,7 @@ public abstract class AbstractUUIDEntity {
 	Boolean hidden;
 	
 	public String getUuid() {
-		return Objects.isNull(uuid) ? uuid = UUID.randomUUID().toString() : uuid;
+		return uuid;
 	}
 
 	public void setUuid(String uuid) {

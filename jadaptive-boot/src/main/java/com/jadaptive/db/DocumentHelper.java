@@ -69,7 +69,6 @@ public class DocumentHelper {
 			
 			if(String.class.equals(value.getClass())) {
 				
-				
 			} else if(Integer.class.equals(value.getClass())) {
 				
 			} else if(Long.class.equals(value.getClass())) {
