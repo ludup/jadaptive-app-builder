@@ -1,6 +1,7 @@
 package com.jadaptive.tenant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,8 +22,13 @@ public class TenantRepositoryTests {
 	}
 	
 	@Test
-	public void verifyNewSchema() {
-		
+	public void verifyNewSchemaTenantCount() {
 		assertEquals(tenantRepository.countTenants(), new Long(1L));
+	}
+	
+	@Test
+	public void verifyNewSchemaSystemTenantExists() {
+		assertNotNull(tenantRepository.getSystemTenant());
+		assertEquals(tenantRepository.getSystemTenant().getUuid(), TenantRepository.SYSTEM_UUID);
 	}
 }

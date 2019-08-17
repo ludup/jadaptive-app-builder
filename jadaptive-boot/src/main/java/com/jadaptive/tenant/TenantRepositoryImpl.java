@@ -18,8 +18,6 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 
 	private static Logger log = LoggerFactory.getLogger(TenantRepositoryImpl.class);
 	private static final String TENANT_DATABASE = "tenants";
-	
-	public static final String SYSTEM_UUID = "4f1b781c-581d-474f-9505-4fea9c5e3909";
 		
 	public TenantRepositoryImpl(DocumentDatabase db) {
 		super(db);
