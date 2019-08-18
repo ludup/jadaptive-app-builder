@@ -6,9 +6,9 @@
      _/ |\__,_|\__,_|\__,_| .__/ \__|_| \_/ \___|
     |__/                  |_|                  
 
-# Rapid, Adaptive REST API Builder for Java
+# Rapid, Adaptive REST API Service
 
-The goal of this project is to create a web service for Java developers that enables rapid deployment of an entity-based REST API that implements standard CRUD and search operations without having to write code. All that should be required is a JSON template file that describes the entity required. The project will allow collections of resources to be persisted, managed and searched using a standard REST based API.
+The goal of this project is to create a web service for developers that enables rapid deployment of an entity-based REST API that implements standard CRUD and search operations without having to write code. All that should be required is a JSON template file that describes the entity required. The project will allow collections of resources to be persisted, managed and searched using a standard REST based API.
 
 It is envisioned that an event model and simple plugin architecture will be provided to enable custom code to be injected in any part of the entity lifecycle and an eco system created to allow the sharing of templates and plugins between developers.
 
