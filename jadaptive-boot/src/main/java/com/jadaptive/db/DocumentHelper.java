@@ -68,17 +68,17 @@ public class DocumentHelper {
 		for(Object value : values) {
 			
 			if(String.class.equals(value.getClass())) {
-				
+				list.add(value.toString());
 			} else if(Integer.class.equals(value.getClass())) {
-				
+				list.add(value.toString());
 			} else if(Long.class.equals(value.getClass())) {
-				
+				list.add(value.toString());
 			} else if(Boolean.class.equals(value.getClass())) {
-				
+				list.add(value.toString());
 			} else if(Float.class.equals(value.getClass())) {
-				
+				list.add(value.toString());
 			} else if(Double.class.equals(value.getClass())) {
-				
+				list.add(value.toString());
 			} else if(Date.class.equals(value.getClass())) {
 				
 			} else if(AbstractUUIDEntity.class.isAssignableFrom(value.getClass())) {
@@ -90,7 +90,7 @@ public class DocumentHelper {
 				list.add(embeddedDocument);
 
 			} else if(value.getClass().isEnum()) {
-				
+				list.add(value.toString());
 			} 
 		}
 		
