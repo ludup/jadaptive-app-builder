@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -66,21 +67,8 @@ public class DocumentHelper {
 		BasicDBList list = new BasicDBList();
 		
 		for(Object value : values) {
-			
-			if(String.class.equals(value.getClass())) {
-				list.add(value.toString());
-			} else if(Integer.class.equals(value.getClass())) {
-				list.add(value.toString());
-			} else if(Long.class.equals(value.getClass())) {
-				list.add(value.toString());
-			} else if(Boolean.class.equals(value.getClass())) {
-				list.add(value.toString());
-			} else if(Float.class.equals(value.getClass())) {
-				list.add(value.toString());
-			} else if(Double.class.equals(value.getClass())) {
-				list.add(value.toString());
-			} else if(Date.class.equals(value.getClass())) {
-				
+			if(Date.class.equals(value.getClass())) {
+				list.add(Utils.formatDateTime((Date)value));
 			} else if(AbstractUUIDEntity.class.isAssignableFrom(value.getClass())) {
 
 				AbstractUUIDEntity e = (AbstractUUIDEntity) value;
@@ -89,7 +77,7 @@ public class DocumentHelper {
 				convertObjectToDocument(e, embeddedDocument);
 				list.add(embeddedDocument);
 
-			} else if(value.getClass().isEnum()) {
+			} else {
 				list.add(value.toString());
 			} 
 		}
@@ -125,47 +113,6 @@ public class DocumentHelper {
 					m.invoke(obj, Double.parseDouble(document.getString(name)));
 				} else if(parameter.getType().equals(Date.class)) {
 					m.invoke(obj, Utils.parseDateTime(document.getString(name)));
-				} else if(Collection.class.isAssignableFrom(parameter.getType())) { 
-					ParameterizedType o = (ParameterizedType) parameter.getParameterizedType();
-					Class<?> type = (Class<?>) o.getActualTypeArguments()[0];
-					if(type.isEnum()) {
-						 
-					} else if(AbstractUUIDEntity.class.isAssignableFrom(type)) {
-						Set<AbstractUUIDEntity> elements = new HashSet<>();	
-						List<?> list = (List<?>) document.get(name);
-						if(Objects.isNull(list)) {
-							continue;
-						}
-						for(Object embedded : list) {
-							Document embeddedDocument = (Document) embedded;
-							elements.add(convertDocumentToObject((AbstractUUIDEntity)type.newInstance(), embeddedDocument));
-						}
-
-						m.invoke(obj, elements);
-						
-					} else if(type.equals(String.class)) {
-						
-					} else if(type.equals(Boolean.class)) {
-						
-					} else if(type.equals(Integer.class)) {
-						
-					} else if(type.equals(Long.class)) {
-						
-					} else if(type.equals(Float.class)) {
-						
-					} else if(type.equals(Double.class)) {
-						
-					} else if(type.equals(Date.class)) {
-					
-					} else {
-						throw new IllegalStateException(
-								String.format("Unexpected collection type %s in object setter %s",
-								type.getName(),
-								name));
-					}
-					
-					
-
 				} else if(AbstractUUIDEntity.class.isAssignableFrom(parameter.getType())) {
 					m.invoke(obj, convertDocumentToObject((AbstractUUIDEntity) parameter.getType().newInstance(), (Document) document.get(name)));
 				} else if(parameter.getType().isEnum()) { 
@@ -187,6 +134,47 @@ public class DocumentHelper {
 							}
 						}
 					}
+				} else if(Collection.class.isAssignableFrom(parameter.getType())) { 
+					ParameterizedType o = (ParameterizedType) parameter.getParameterizedType();
+					Class<?> type = (Class<?>) o.getActualTypeArguments()[0];
+					List<?> list = (List<?>) document.get(name);
+					if(Objects.isNull(list)) {
+						continue;
+					}
+					if(AbstractUUIDEntity.class.isAssignableFrom(type)) {
+						List<AbstractUUIDEntity> elements = new ArrayList<>();	
+						for(Object embedded : list) {
+							Document embeddedDocument = (Document) embedded;
+							elements.add(convertDocumentToObject((AbstractUUIDEntity)type.newInstance(), embeddedDocument));
+						}
+
+						m.invoke(obj, elements);
+						
+					} else {
+						
+						if(type.equals(String.class)) {
+							m.invoke(obj, list);
+						} else if(type.equals(Boolean.class)) {
+							m.invoke(obj, buildBooleanCollection(list));
+						} else if(type.equals(Integer.class)) {
+							m.invoke(obj, buildIntegerCollection(list));
+						} else if(type.equals(Long.class)) {
+							m.invoke(obj, buildLongCollection(list));
+						} else if(type.equals(Float.class)) {
+							m.invoke(obj, buildFloatCollection(list));
+						} else if(type.equals(Double.class)) {
+							m.invoke(obj, buildDoubleCollection(list));
+						} else if(type.equals(Date.class)) {
+							m.invoke(obj, buildDateCollection(list));
+						} else if(type.isEnum()) {  
+							m.invoke(obj, buildEnumCollection(list, type));
+						} else {
+							throw new IllegalStateException(
+									String.format("Unexpected collection type %s in object setter %s",
+									type.getName(),
+									name));
+						}
+					}  
 				} else {
 					throw new IllegalStateException(String.format("Unexpected type %s in object setter %s",
 							parameter.getType().getName(),
@@ -201,4 +189,74 @@ public class DocumentHelper {
 		}
 		
 	}
+
+	private static Object buildEnumCollection(List<?> items, Class<?> type) {
+
+		List<Enum<?>> v = new ArrayList<>();
+		for(Object item : items) {
+			Enum<?>[] enumConstants = (Enum<?>[]) type.getEnumConstants();
+			if(NumberUtils.isCreatable(item.toString())) {
+				Enum<?> enumConstant = enumConstants[Integer.parseInt(item.toString())];
+				v.add(enumConstant);
+				break;
+			} else {
+				for (Enum<?> enumConstant : enumConstants) {
+					if(enumConstant.name().equals(item)){
+						v.add(enumConstant);
+						break;
+					}
+				}
+			}			
+		}
+		return v;		
+	}
+
+	private static Collection<Date> buildDateCollection(List<?> items) throws ParseException {
+		List<Date> v = new ArrayList<>();
+		for(Object item : items) {
+			v.add(Utils.parseDateTime(item.toString()));
+		}
+		return v;
+	}
+
+	private static Collection<Double> buildDoubleCollection(List<?> items) {
+		List<Double> v = new ArrayList<>();
+		for(Object item : items) {
+			v.add(Double.parseDouble(item.toString()));
+		}
+		return v;
+	}
+
+	private static Collection<Float> buildFloatCollection(List<?> items) {
+		List<Float> v = new ArrayList<>();
+		for(Object item : items) {
+			v.add(Float.parseFloat(item.toString()));
+		}
+		return v;
+	}
+
+	private static Collection<Long> buildLongCollection(List<?> items) {
+		List<Long> v = new ArrayList<>();
+		for(Object item : items) {
+			v.add(Long.parseLong(item.toString()));
+		}
+		return v;
+	}
+
+	private static Collection<Integer> buildIntegerCollection(List<?> items) {
+		List<Integer> v = new ArrayList<>();
+		for(Object item : items) {
+			v.add(Integer.parseInt(item.toString()));
+		}
+		return v;
+	}
+
+	private static Collection<Boolean> buildBooleanCollection(List<?> items) {
+		List<Boolean> v = new ArrayList<>();
+		for(Object item : items) {
+			v.add(Boolean.parseBoolean(item.toString()));
+		}
+		return v;
+	}
+
 }

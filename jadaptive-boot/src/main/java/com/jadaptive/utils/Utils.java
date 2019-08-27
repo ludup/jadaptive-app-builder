@@ -98,7 +98,7 @@ public class Utils {
 	}
 	
 	public static String formatDateTime(Date date) {
-		return formatDate(date, "EEE, d MMM yyyy HH:mm:ss");
+		return formatDate(date, "EEE, d MMM yyyy HH:mm:ss.SSS Z");
 	}
 	
 	public static String formatShortDate(Date date) {
@@ -121,7 +121,7 @@ public class Utils {
 	}
 	
 	public static Date parseDateTime(String date) throws ParseException {
-		return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss").parse(date);
+		return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss.SSS Z").parse(date);
 	}
 	
 	public static Date parseShortDate(String date) throws ParseException {
