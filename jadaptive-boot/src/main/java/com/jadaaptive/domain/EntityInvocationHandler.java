@@ -8,7 +8,6 @@ public class EntityInvocationHandler implements InvocationHandler {
 
 	private final RawValueWrapper rawValueWrapper = new RawValueWrapper();
 	
-	
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		String methodName = method.getName();
@@ -19,7 +18,11 @@ public class EntityInvocationHandler implements InvocationHandler {
 			rawValueWrapper.getRaw().put(key, args[0]);
 		} else if ("save".equals(methodName)) {
 			System.out.println("Saved into database " + UUID.randomUUID().toString());
-		}
+		} else if ("hashCode".equals(methodName)) {
+			return rawValueWrapper.hashCode();
+		} else if ("toString".equals(methodName)) {
+			return rawValueWrapper.getRaw().toString();
+		} 
 		return null;
 	}
 
