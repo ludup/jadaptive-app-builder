@@ -8,6 +8,10 @@ public class EntityInvocationHandler implements InvocationHandler {
 
 	private final RawValueWrapper rawValueWrapper = new RawValueWrapper();
 	
+	/**
+	 * Note: hashCode, equals, toString need more refined logic, else proxy would fail in Map, Set and different areas
+	 * where these methods are required.
+	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		String methodName = method.getName();
