@@ -93,11 +93,13 @@ public class ReloadTest2 {
 				
 				System.out.println(name);
 				
+				// without passing `contextClassLoader` also works but explicit.
 				Object customer = EntityLocator.get(contextClassLoader, klass);
 				
 				Method setName = klass.getDeclaredMethod("setName", String.class);
 				setName.invoke(customer, "Bob Corp.");
 				
+				// without passing `contextClassLoader` also works but explicit.
 				ScriptEngineManager manager = new ScriptEngineManager(contextClassLoader); 
 				
 				manager.getEngineFactories().forEach( fac -> System.out.println(fac.getScriptEngine()));

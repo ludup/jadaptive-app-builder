@@ -9,5 +9,11 @@ public class EntityLocator {
 		return (T) Proxy.newProxyInstance(classLoader, 
 				classes, new EntityInvocationHandler());
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T get(Class<?>...classes) {
+		return (T) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), 
+				classes, new EntityInvocationHandler());
+	}
 
 }
