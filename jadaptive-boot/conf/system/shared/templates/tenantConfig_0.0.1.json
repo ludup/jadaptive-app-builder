@@ -9,7 +9,6 @@
               "defaultValue": "",
               "description": "The name of this application",
               "fieldType": "TEXT",
-              "weight": 0,
               "validators": [{
               	"type": "LENGTH",
               	"value": 64

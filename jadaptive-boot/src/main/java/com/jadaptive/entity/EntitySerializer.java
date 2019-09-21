@@ -1,8 +1,8 @@
 package com.jadaptive.entity;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +70,7 @@ public class EntitySerializer extends StdSerializer<Entity> {
 		gen.writeEndObject();
 	}
 	
-	private void writeFields(JsonGenerator gen, Set<FieldTemplate> templates, Entity value) throws IOException {
+	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, Entity value) throws IOException {
 		
 		if(!Objects.isNull(templates)) {
 			for (FieldTemplate t : templates) {

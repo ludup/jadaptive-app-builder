@@ -1,6 +1,7 @@
 package com.jadaptive.entity.template;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -14,13 +15,13 @@ public class FieldTemplate extends NamedUUIDEntity {
 	String defaultValue;
 	String description;
 	FieldType fieldType; 
-	Integer weight;
+//	Integer weight;
 	boolean searchable; 
 	boolean required;
-	boolean defaultColumn;
-	boolean ignoreColumn;
+//	boolean defaultColumn;
+//	boolean ignoreColumn;
 	
-	Set<FieldValidator> validators;
+	Collection<FieldValidator> validators = new ArrayList<>();
 	
 	public FieldTemplate() {
 	}
@@ -57,13 +58,13 @@ public class FieldTemplate extends NamedUUIDEntity {
 		this.fieldType = propertyType;
 	}
 
-	public Integer getWeight() {
-		return weight;
-	}
-
-	public void setWeight(Integer weight) {
-		this.weight = weight;
-	}
+//	public Integer getWeight() {
+//		return weight;
+//	}
+//
+//	public void setWeight(Integer weight) {
+//		this.weight = weight;
+//	}
 
 	public Boolean getSearchable() {
 		return searchable;
@@ -77,19 +78,19 @@ public class FieldTemplate extends NamedUUIDEntity {
 		this.required = required;
 	}
 	
-	public boolean isDefaultColumn() {
-		return defaultColumn;
-	}
+//	public boolean isDefaultColumn() {
+//		return defaultColumn;
+//	}
+//
+//	public void setDefaultColumn(Boolean defaultColumn) {
+//		this.defaultColumn = defaultColumn;
+//	}
 
-	public void setDefaultColumn(Boolean defaultColumn) {
-		this.defaultColumn = defaultColumn;
-	}
-
-	public Set<FieldValidator> getValidators() {
+	public Collection<FieldValidator> getValidators() {
 		return validators;
 	}
 
-	public void setValidators(Set<FieldValidator> validators) {
+	public void setValidators(Collection<FieldValidator> validators) {
 		this.validators = validators;
 	}
 
@@ -111,16 +112,16 @@ public class FieldTemplate extends NamedUUIDEntity {
 	}
 
 	public boolean getRequired() {
-		return false;
+		return required;
 	}
 
-	public boolean isIgnoreColumn() {
-		return ignoreColumn;
-	}
-
-	public void setIgnoreColumn(Boolean ignoreColumn) {
-		this.ignoreColumn = ignoreColumn;
-	}
+//	public boolean isIgnoreColumn() {
+//		return ignoreColumn;
+//	}
+//
+//	public void setIgnoreColumn(Boolean ignoreColumn) {
+//		this.ignoreColumn = ignoreColumn;
+//	}
 
 	public String getValidationValue(ValidationType type) {
 		for(FieldValidator v : validators) {

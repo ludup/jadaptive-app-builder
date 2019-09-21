@@ -8,33 +8,25 @@
               "name": "Title",
               "defaultValue": "",
               "description": "The title visible to users",
-              "fieldType": "TEXT",
-              "defaultColumn": true,
-              "weight": 0
+              "fieldType": "TEXT"
        }, {
               "resourceKey": "resource",
               "name": "Resource",
               "defaultValue": "",
               "description": "The resource key of the entity this menu links to",
-              "fieldType": "TEXT",
-              "defaultColumn": true,
-              "weight": 0
+              "fieldType": "TEXT"
        }, {
               "resourceKey": "icon",
               "name": "Icon",
               "defaultValue": "",
               "description": "The Font Awesome icon name",
-              "fieldType": "TEXT",
-              "defaultColumn": true,
-              "weight": 0
+              "fieldType": "TEXT"
        }, {
               "resourceKey": "parent",
               "name": "Parent",
               "defaultValue": "",
               "description": "This menu item's parent, if any'",
               "fieldType": "OBJECT_REFERENCE",
-              "defaultColumn": true,
-              "weight": 0,
               "validators": [{
               	"type": "OBJECT_TYPE",
               	"value": "applicationMenu"

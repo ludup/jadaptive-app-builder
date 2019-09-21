@@ -8,12 +8,9 @@ import java.util.Objects;
 import org.bson.Document;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.jadaptive.entity.template.FieldCategory;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.repository.AbstractUUIDEntity;
 
-@JsonSerialize(using=EntitySerializer.class)
 @JsonDeserialize(using=EntityDeserializer.class)
 public class Entity extends AbstractUUIDEntity {
 
@@ -47,11 +44,6 @@ public class Entity extends AbstractUUIDEntity {
 	private void addChild(Entity e) {
 		children.put(e.getResourceKey(), e);
 		document.put(e.getResourceKey(), e.getDocument());
-	}
-	
-
-	public Entity getChild(FieldCategory c) {
-		return children.get(c.getResourceKey());
 	}
 
 	public Entity getChild(FieldTemplate c) {
@@ -92,6 +84,10 @@ public class Entity extends AbstractUUIDEntity {
 		super.setHidden(hidden);
 	}
 
+	public String getValue(String fieldName) {
+		return document.get(fieldName, "");
+	}
+	
 	public String getValue(FieldTemplate t) {
 		switch(t.getFieldType()) {
 		case BOOL:

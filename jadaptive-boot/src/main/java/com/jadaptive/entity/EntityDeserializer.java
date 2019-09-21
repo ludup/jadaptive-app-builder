@@ -1,8 +1,9 @@
 package com.jadaptive.entity;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
@@ -29,20 +31,32 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 
 	static final Logger log = LoggerFactory.getLogger(EntityDeserializer.class);
 	
+	EntityTemplateService templateService; 
+	
+	public EntityDeserializer(EntityTemplateService templateService) {
+		super((Class<?>)null);
+		this.templateService = templateService;
+	}
+	
 	public EntityDeserializer() {
 		super((Class<?>)null);
+		templateService = ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class);
 	}
 	
 	public EntityDeserializer(Class<?> vc) {
 		super(vc);
+		templateService = ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class);
 	}
 
 	public EntityDeserializer(JavaType valueType) {
 		super(valueType);
+		templateService = ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class);
+		
 	}
 
 	public EntityDeserializer(StdDeserializer<?> src) {
 		super(src);
+		templateService = ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class);
 	}
 
 	@Override
@@ -51,18 +65,14 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 
 		try {
 			
-			
 			ObjectCodec oc = parser.getCodec();
 			JsonNode node = oc.readTree(parser);
    
-			
 			JsonNode rkNode = node.findValue("resourceKey");
 			
 			if(Objects.isNull(rkNode)) {
 				throw new IOException("Missing resourceKey in JSON deserialise");
 			}
-			
-			EntityTemplateService templateService = ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class);
 			
 			EntityTemplate template = templateService.get(rkNode.asText());
 			
@@ -102,7 +112,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 	}
 
 
-	private void iterateFields(JsonNode current, Set<FieldTemplate> fields, Entity e) throws IOException, ValidationException {
+	private void iterateFields(JsonNode current, Collection<FieldTemplate> fields, Entity e) throws IOException, ValidationException {
 		
 		if(!Objects.isNull(fields)) {
 			for(FieldTemplate field : fields) {
@@ -127,7 +137,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		}
 		
 		node = node.findPath(field.getResourceKey());
-		if(Objects.isNull(node)) {
+		if(Objects.isNull(node) || node instanceof MissingNode) {
 			if(field.getRequired()) {
 				throw new ValidationException(String.format("Missing node for %s", field.getResourceKey()));
 			} else {
@@ -136,7 +146,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 			}
 		} 
 		
-		if(!Objects.isNull(field.getValidators()) && !field.getValidators().isEmpty()) {
+//		if(!Objects.isNull(field.getValidators()) && !field.getValidators().isEmpty()) {
 
 			switch(field.getFieldType()) {
 			case OBJECT_REFERENCE:
@@ -149,7 +159,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 				 */
 				return;
 			case BOOL:
-				validateBooleean(node, field);
+				validateBoolean(node, field);
 				break;
 			case DECIMAL:
 				validateDecimal(node, field);
@@ -165,7 +175,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 			default:
 				validateText(node, field);
 			}
-		}
+//		}
 		
 		setProperty(node, field, e);
 		
@@ -182,7 +192,6 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 	private void validateObject(JsonNode node, FieldTemplate field, Entity e) throws IOException, ValidationException {
 		
  		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
-		EntityTemplateService templateService = ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class);
 		EntityTemplate template = templateService.get(type);
 
 		iterateType(node, template, new Entity(e, field.getResourceKey(), new Document()), false);
@@ -195,7 +204,31 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 
 	private void validateNumber(JsonNode node, FieldTemplate field) throws ValidationException {
 		try {
-			Long.parseLong(node.asText());
+			long value = Long.parseLong(node.asText());
+			
+			if(!Objects.isNull(field.getValidators())) {
+				for(FieldValidator v : field.getValidators()) {
+					switch(v.getType()) {
+					case RANGE:
+						String[] range = v.getValue().split(",");
+						if(range.length != 2) {
+							throw new ValidationException(String.format("Invalid range %s value in validator use \"<min>,<max>\" format", v.getValue()));
+						}
+						try {
+							long min = Long.parseLong(range[0]);
+							long max = Long.parseLong(range[1]);
+							if(value < min || value > max) {
+								throw new ValidationException(String.format("%s must be in the range %d to %d", field.getResourceKey(), min, max));
+							}
+						} catch (NumberFormatException e) {
+							throw new ValidationException(String.format("Invalid range %s value in validator use \"<min>,<max>\" format", v.getValue()));
+						}
+						break;
+					default:
+						break;
+					}
+				}
+			}
 		} catch (NumberFormatException e) {
 			throw new ValidationException(String.format("Value %s for field %s is not a number", node.asText(), field.getResourceKey()));
 		}
@@ -203,13 +236,37 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 
 	private void validateDecimal(JsonNode node, FieldTemplate field) throws ValidationException {
 		try {
-			Double.parseDouble(node.asText());
+			double value = Double.parseDouble(node.asText());
+			
+			if(!Objects.isNull(field.getValidators())) {
+				for(FieldValidator v : field.getValidators()) {
+					switch(v.getType()) {
+					case RANGE:
+						String[] range = v.getValue().split(",");
+						if(range.length != 2) {
+							throw new ValidationException(String.format("Invalid range %s value in validator use \"<min>,<max>\" format", v.getValue()));
+						}
+						try {
+							double min = Double.parseDouble(range[0]);
+							double max = Double.parseDouble(range[1]);
+							if(value < min || value > max) {
+								throw new ValidationException(String.format("%s must be in the range %d to %d", field.getResourceKey(), min, max));
+							}
+						} catch (NumberFormatException e) {
+							throw new ValidationException(String.format("Invalid range %s value in validator use \"<min>,<max>\" format", v.getValue()));
+						}
+						break;
+					default:
+						break;
+					}
+				}
+			}
 		} catch (NumberFormatException e) {
 			throw new ValidationException(String.format("Value %s for field %s is not a double", node.asText(), field.getResourceKey()));
 		}
 	}
 
-	private void validateBooleean(JsonNode node, FieldTemplate field) throws ValidationException {
+	private void validateBoolean(JsonNode node, FieldTemplate field) throws ValidationException {
 		if(node.isBoolean()) {
 			return;
 		}
@@ -226,18 +283,24 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 	}
 
 	private void validateText(JsonNode node, FieldTemplate field) throws ValidationException {
+		
+		String value = node.asText();
+		
 		if(!Objects.isNull(field.getValidators())) {
 			for(FieldValidator v : field.getValidators()) {
 				switch(v.getType()) {
 				case LENGTH:
-					String value = node.asText();
+					
 					int maxlength = Integer.parseInt(v.getValue());
 					if(value.length() > maxlength) {
 						throw new ValidationException(String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
 					}
 					break;
 				case REGEX:
-					// TODO
+					Pattern pattern = Pattern.compile(v.getValue());
+					if(!pattern.matcher(value).matches()) {
+						throw new ValidationException(String.format("%s does not conform to regex pattern %s", value, v.getValue()));
+					}
 					break;
 				default:
 					break;

@@ -1,6 +1,7 @@
 package com.jadaptive.entity.template;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import com.jadaptive.entity.EntityType;
 import com.jadaptive.repository.NamedUUIDEntity;
@@ -8,7 +9,7 @@ import com.jadaptive.repository.NamedUUIDEntity;
 public class EntityTemplate extends NamedUUIDEntity {
 
 	EntityType type;
-	Set<FieldTemplate> fields;
+	Collection<FieldTemplate> fields = new ArrayList<>();
 	
 	public EntityType getType() {
 		return type;
@@ -18,11 +19,11 @@ public class EntityTemplate extends NamedUUIDEntity {
 		this.type = type;
 	}
 
-	public Set<FieldTemplate> getFields() {
+	public Collection<FieldTemplate> getFields() {
 		return fields;
 	}
 
-	public void setFields(Set<FieldTemplate> fields) {
+	public void setFields(Collection<FieldTemplate> fields) {
 		this.fields = fields;
 	}
 }

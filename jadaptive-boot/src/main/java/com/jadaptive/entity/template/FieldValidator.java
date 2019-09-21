@@ -9,6 +9,11 @@ public class FieldValidator extends AbstractUUIDEntity {
 	
 	public FieldValidator() {
 	}
+	
+	public FieldValidator(ValidationType type, String value) {
+		this.type = type;
+		this.value = value;
+	}
 
 	public ValidationType getType() {
 		return type;
