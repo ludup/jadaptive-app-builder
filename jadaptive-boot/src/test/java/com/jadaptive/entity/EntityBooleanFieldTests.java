@@ -16,7 +16,6 @@ import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.entity.template.FieldType;
 import com.jadaptive.entity.template.FieldValidator;
 import com.jadaptive.entity.template.ValidationException;
-import com.jadaptive.entity.template.ValidationType;
 
 public class EntityBooleanFieldTests extends AbstractDeserializerTest {
 

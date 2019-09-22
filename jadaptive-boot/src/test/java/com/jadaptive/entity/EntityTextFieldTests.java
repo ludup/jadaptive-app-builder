@@ -11,7 +11,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.entity.template.FieldType;

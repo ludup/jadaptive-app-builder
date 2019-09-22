@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.entity.EntityException;
-import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.repository.TransactionAdapter;
 import com.jadaptive.templates.TemplateEnabledService;

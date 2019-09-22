@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -50,13 +52,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 		try {
 			
-			Collection<File> orderedTemplates = findVersionedTemplates(
+			Collection<Path> orderedTemplates = findVersionedTemplates(
 					buildTemplatePaths(tenant, templateEnabledService));
 			
 			Set<String> resourceKeys = new HashSet<>();
-			for(File template : orderedTemplates) {
+			for(Path template : orderedTemplates) {
 				
-				String filename = template.getName().substring(0, template.getName().length()-5);
+				String filename = template.getFileName().toString().substring(0, template.getFileName().toString().length()-5);
 				String[] elements = filename.split("_");
 				if(elements.length != 2) {
 					throw new IOException("Template json file should be named <id>_<version>.json");
@@ -71,7 +73,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				if(currentVersion==null || version.compareTo(currentVersion) > 0) {
 					if(templateRepository.hasProcessed(uuid, version.toString())) {
 						if(log.isInfoEnabled()) {
-							log.info("Already processed {}", template.getName());
+							log.info("Already processed {}", template.getFileName());
 						}
 						continue;
 					}
@@ -94,62 +96,58 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 
-	private List<String> buildTemplatePaths(Tenant tenant, TemplateEnabledService<?> templateEnabledService) {
+	private List<Path> buildTemplatePaths(Tenant tenant, TemplateEnabledService<?> templateEnabledService) {
 		
-		List<String> paths = new ArrayList<>();
+		List<Path> paths = new ArrayList<>();
 		
 		if(!templateEnabledService.isSystemOnly()) {
 			File sharedConf = new File(ConfigHelper.getSharedFolder(), templateEnabledService.getTemplateFolder());
-			paths.add(sharedConf.getPath());
+			paths.add(sharedConf.toPath());
 
 			if(!tenant.getSystem()) {
 
 				File tenantConf = new File(ConfigHelper.getTenantsFolder(), tenant.getHostname());
 				File templateConf = new File(tenantConf, templateEnabledService.getTemplateFolder());
-				paths.add(templateConf.getPath());
+				paths.add(templateConf.toPath());
 				
 			} else {
 				File prvConf = new File(ConfigHelper.getSystemPrivateFolder(), templateEnabledService.getTemplateFolder());
-				paths.add(prvConf.getPath());
+				paths.add(prvConf.toPath());
 			}
 			
 		} else {
-			paths.add(ConfigHelper.getSystemSubFolder(templateEnabledService.getTemplateFolder()).getPath());	
+			paths.add(ConfigHelper.getSystemSubFolder(templateEnabledService.getTemplateFolder()).toPath());	
 		}
 		
 		return paths;
 	}
 
-	protected Collection<File> findVersionedTemplates(List<String> paths) throws IOException {
+	protected Collection<Path> findVersionedTemplates(List<Path> paths) throws IOException {
 		
-		List<File> orderedTemplates = new ArrayList<File>();
+		List<Path> orderedTemplates = new ArrayList<>();
 		
-		for(String path : paths) {
-			File dir = new File(".");
-			File templateFolder = new File(dir, path);
+		for(Path path : paths) {
 			
 			if(log.isInfoEnabled()) {
-				log.info(String.format("Searching for templates folder in %s [%b]", 
-						templateFolder.getCanonicalPath(), 
-						templateFolder.exists()));
+				log.info(String.format("Searching for templates folder in %s", 
+						path.toString()));
 			}
 			
-			FileFilter fileFilter = new WildcardFileFilter("*.json");
-			
-			File[] files = templateFolder.listFiles(fileFilter);
-			
-			if(!Objects.isNull(files)) {
-				for (File r : files) {
-					orderedTemplates.add(r);
-				}
+			if(Files.exists(path)) {
+				Files.list(path)
+				.filter(f -> f.getFileName().toString().endsWith(".json"))
+				.forEach(jsonFile -> {
+					orderedTemplates.add(jsonFile);
+				});
 			}
+
 		}
 		
-		Collections.<File>sort(orderedTemplates, new Comparator<File>() {
+		Collections.<Path>sort(orderedTemplates, new Comparator<Path>() {
 			
 			@Override
-			public int compare(File o1, File o2) {
-				return o1.getName().compareTo(o2.getName());
+			public int compare(Path o1, Path o2) {
+				return o1.getFileName().compareTo(o2.getFileName());
 			}
 		});
 		
@@ -157,7 +155,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 	@SuppressWarnings("unchecked")
-	private <E extends AbstractUUIDEntity> void processTemplate(File resource, String resourceKey, TemplateEnabledService<E> repository, Version version) {
+	private <E extends AbstractUUIDEntity> void processTemplate(Path resource, String resourceKey, TemplateEnabledService<E> repository, Version version) {
 		try {
 			
 			if(log.isInfoEnabled()) {
@@ -165,7 +163,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			List<E> objects = objectMapper.getObjectMapper().readValue(
-					new FileInputStream(resource), 
+					Files.newInputStream(resource), 
 					objectMapper.getObjectMapper().getTypeFactory().constructCollectionType(List.class, repository.getResourceClass()));
 			
 			repository.saveTemplateObjects(objects, new TransactionAdapter<E>() {

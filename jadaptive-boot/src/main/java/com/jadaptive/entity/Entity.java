@@ -8,10 +8,12 @@ import java.util.Objects;
 import org.bson.Document;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.jadaptive.entity.template.FieldTemplate;
 import com.jadaptive.repository.AbstractUUIDEntity;
 
 @JsonDeserialize(using=EntityDeserializer.class)
+@JsonSerialize(using=EntitySerializer.class)
 public class Entity extends AbstractUUIDEntity {
 
 	Entity parent;

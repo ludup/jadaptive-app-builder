@@ -4,14 +4,12 @@ import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.db.AbstractObjectDatabaseImpl;
 import com.jadaptive.db.DocumentDatabase;
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
-import com.mongodb.client.MongoDatabase;
 
 @Repository
 public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements TenantRepository {
