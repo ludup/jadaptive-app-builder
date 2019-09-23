@@ -44,6 +44,8 @@
 	</properties>
 
 	<modules>
+		<module>jadaptive-api</module>
+		<module>jadaptive-sshd</module>
 		<module>jadaptive-boot</module>
 	</modules>
 

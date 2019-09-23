@@ -21,7 +21,6 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	@Autowired
 	EntityTemplateRepository repository; 
 	
-	
 	@Autowired
 	EntityService entityService;
 	
