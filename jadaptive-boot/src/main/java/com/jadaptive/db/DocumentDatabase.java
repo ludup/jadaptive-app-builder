@@ -22,4 +22,6 @@ public interface DocumentDatabase {
 
 	void dropDatabase(String uuid);
 
+	Iterable<Document> table(String table, String database, int start, int length);
+
 }

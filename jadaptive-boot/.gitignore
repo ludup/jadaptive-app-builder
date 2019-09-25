@@ -2,3 +2,11 @@
 /.classpath
 /.project
 /.settings/
+/ssh_host_ecdsa_256
+/ssh_host_ecdsa_256.pub
+/ssh_host_ecdsa_384
+/ssh_host_ecdsa_384.pub
+/ssh_host_ecdsa_521
+/ssh_host_ecdsa_521.pub
+/ssh_host_rsa
+/ssh_host_rsa.pub

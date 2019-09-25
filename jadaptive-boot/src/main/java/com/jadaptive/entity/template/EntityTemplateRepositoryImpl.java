@@ -42,4 +42,14 @@ public class EntityTemplateRepositoryImpl extends AbstractObjectDatabaseImpl
 		saveObject(template, tenantService.getCurrentTenant().getUuid());
 	}
 
+	@Override
+	public Collection<EntityTemplate> table(int start, int length) {
+		return tableObjects(tenantService.getCurrentTenant().getUuid(), EntityTemplate.class, start, length);
+	}
+
+	@Override
+	public long count() {
+		return countObjects(tenantService.getCurrentTenant().getUuid(), EntityTemplate.class);
+	}
+
 }

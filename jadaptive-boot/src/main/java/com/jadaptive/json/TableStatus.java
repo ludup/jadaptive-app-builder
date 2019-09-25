@@ -1,26 +1,19 @@
 package com.jadaptive.json;
 
-import com.jadaptive.entity.template.EntityTemplate;
+import java.util.Collection;
 
-public class TableStatus<T> extends EntityStatus<T> {
+public class TableStatus<T> extends EntityStatus<Collection<T>> {
 
-	EntityTemplate template;
+	long total;
 	
+	public TableStatus(Collection<T> result, long total) {
+		super(result);
+		this.total = total;
+	}
+
 	public TableStatus(boolean success, String message) {
 		super(success, message);
 	}
+
 	
-	public TableStatus(EntityTemplate template, T result) {
-		super(result);
-		this.template = template;
-	}
-
-	public EntityTemplate getTemplate() {
-		return template;
-	}
-
-	public void setTemplate(EntityTemplate template) {
-		this.template = template;
-	}
-
 }

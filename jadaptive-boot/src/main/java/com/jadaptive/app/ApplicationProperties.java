@@ -34,6 +34,15 @@ public class ApplicationProperties {
 		return properties.getProperty(name, defaultValue);
 	}
 	
+	public static boolean getValue(String name, boolean defaultValue) {
+		checkLoaded();
+		String val = properties.getProperty(name);
+		if(Objects.isNull(val)) {
+			return defaultValue;
+		}
+		return Boolean.parseBoolean(val);
+	}
+	
 	public static int getValue(String name, int defaultValue) {
 		checkLoaded();
 		String val = properties.getProperty(name);
@@ -49,6 +58,8 @@ public class ApplicationProperties {
 			throw new IllegalStateException("jadaptive.properties could not be loaded");
 		}
 	}
+
+
 	
 	
 }

@@ -11,9 +11,13 @@ public interface EntityTemplateService {
 			throws RepositoryException, EntityException;
 
 	Collection<EntityTemplate> list() throws RepositoryException, EntityException;
+	
+	Collection<EntityTemplate> table(int start, int length) throws RepositoryException, EntityException;
 
 	void saveOrUpdate(EntityTemplate template) throws RepositoryException, EntityException;
 
 	void delete(String uuid) throws EntityException;
+
+	long count();
 
 }

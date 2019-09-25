@@ -7,6 +7,10 @@ public class EntityException extends RuntimeException {
 	public EntityException(String msg) {
 		super(msg);
 	}
+	
+	public EntityException(Throwable e) {
+		super(e.getMessage(), e);
+	}
 
 	public EntityException(String msg, Exception e) {
 		super(msg, e);

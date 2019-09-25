@@ -1,5 +1,6 @@
 package com.jadaptive.entity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -32,6 +33,14 @@ public class MockEntityTemplateService implements EntityTemplateService {
 	@Override
 	public void delete(String uuid) throws EntityException {
 
+	}
+	@Override
+	public Collection<EntityTemplate> table(int start, int length) throws RepositoryException, EntityException {
+		return new ArrayList<>(templates.values()).subList(start, Math.min(start + length, templates.values().size()-1));
+	}
+	@Override
+	public long count() {
+		return templates.size();
 	}
 
 }

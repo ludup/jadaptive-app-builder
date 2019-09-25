@@ -15,4 +15,8 @@ public interface EntityTemplateRepository {
 
 	void saveOrUpdate(EntityTemplate template) throws RepositoryException, EntityException;
 
+	Collection<EntityTemplate> table(int start, int length);
+
+	long count();
+
 }

@@ -46,6 +46,17 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 		
 		return repository.list();
 	}
+	
+	@Override
+	public Collection<EntityTemplate> table(int start, int length) throws RepositoryException, EntityException {
+		
+		return repository.table(start, length);
+	}
+	
+	@Override
+	public long count() {
+		return repository.count();
+	}
 
 	@Override
 	public void saveOrUpdate(EntityTemplate template) throws RepositoryException, EntityException {

@@ -79,6 +79,24 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+
+	protected <T extends AbstractUUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, int start, int length) throws RepositoryException, EntityException {
+		
+		try {
+
+			List<T> results = new ArrayList<>();
+			for(Document document : db.table(clz.getName(), database, start, length)) {
+				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
+			}
+			
+			return results;
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
 	protected <T extends AbstractUUIDEntity> Long countObjects(String database, Class<T> clz) throws RepositoryException, EntityException {
 		
 		try {

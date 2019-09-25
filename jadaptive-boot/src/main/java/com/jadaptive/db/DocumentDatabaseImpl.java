@@ -71,6 +71,13 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		return collection.find();
 	}
+	
+	@Override
+	public Iterable<Document> table(String table, String database, int start, int length) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		return collection.find().skip(start).limit(length);
+	}
 
 	@Override
 	public Long count(String table, String database) {

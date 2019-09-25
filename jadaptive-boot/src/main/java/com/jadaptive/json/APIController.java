@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -116,6 +117,25 @@ public class APIController {
 		}
 	}
 	
+	@RequestMapping(value="api/template/table", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public TableStatus<EntityTemplate> getTemplateTable(HttpServletRequest request,
+			@RequestParam(required=false) String search,
+			@RequestParam String order,
+			@RequestParam int offset,
+			@RequestParam int limit) throws RepositoryException, UnknownEntityException, EntityException {
+		try {
+
+		   return new TableStatus<EntityTemplate>(templateService.table(offset, limit), templateService.count());
+		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/template/list", e);
+			}
+			return new TableStatus<EntityTemplate>(false, e.getMessage());
+		}
+	}
+	
 	@RequestMapping(value="api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
@@ -193,14 +213,14 @@ public class APIController {
 	@RequestMapping(value="api/{resourceKey}/table", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public TableStatus<Collection<Entity>> tableEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityTableStatus<Collection<Entity>> tableEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
-			   return new TableStatus<Collection<Entity>>(templateService.get(resourceKey), entityService.list(resourceKey));
+			   return new EntityTableStatus<Collection<Entity>>(templateService.get(resourceKey), entityService.list(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/table", resourceKey, e);
 			}
-			return new TableStatus<Collection<Entity>>(false, e.getMessage());
+			return new EntityTableStatus<Collection<Entity>>(false, e.getMessage());
 		}
 	}
 }
