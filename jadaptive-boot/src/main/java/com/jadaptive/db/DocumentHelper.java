@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -30,9 +31,11 @@ public class DocumentHelper {
 
 		try {
 			
-			if(StringUtils.isNotBlank(obj.getUuid())) {
-				document.put("_id", obj.getUuid());
+			if(StringUtils.isBlank(obj.getUuid())) {
+				obj.setUuid(UUID.randomUUID().toString());
 			}
+			
+			document.put("_id", obj.getUuid());
 			
 			for(Method m : ReflectionUtils.getGetters(obj.getClass())) {
 				String name = ReflectionUtils.calculateFieldName(m);

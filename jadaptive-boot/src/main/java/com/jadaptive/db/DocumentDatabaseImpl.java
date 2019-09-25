@@ -1,6 +1,7 @@
 package com.jadaptive.db;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -31,7 +32,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		
 		if(StringUtils.isBlank(obj.getUuid())) {
-			collection.insertOne(document);
+			obj.setUuid(UUID.randomUUID().toString());
+			document.put("_id", obj.getUuid());
+			collection.insertOne(document);			
 		} else {
 			collection.replaceOne(Filters.eq("_id", obj.getUuid()), 
 					document, new ReplaceOptions().upsert(true));

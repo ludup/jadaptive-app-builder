@@ -1,26 +1,29 @@
 package com.jadaptive.templates;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.app.ConfigHelper;
+import com.jadaptive.app.ZipPackage;
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.json.ObjectMapperHolder;
 import com.jadaptive.repository.AbstractUUIDEntity;
@@ -52,13 +55,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 		try {
 			
-			Collection<Path> orderedTemplates = findVersionedTemplates(
+			Collection<PathInfo> orderedTemplates = findVersionedTemplates(
 					buildTemplatePaths(tenant, templateEnabledService));
 			
 			Set<String> resourceKeys = new HashSet<>();
-			for(Path template : orderedTemplates) {
+			for(PathInfo template : orderedTemplates) {
 				
-				String filename = template.getFileName().toString().substring(0, template.getFileName().toString().length()-5);
+				String filename = template.path.getFileName().toString().substring(0, template.path.getFileName().toString().length()-5);
 				String[] elements = filename.split("_");
 				if(elements.length != 2) {
 					throw new IOException("Template json file should be named <id>_<version>.json");
@@ -73,7 +76,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				if(currentVersion==null || version.compareTo(currentVersion) > 0) {
 					if(templateRepository.hasProcessed(uuid, version.toString())) {
 						if(log.isInfoEnabled()) {
-							log.info("Already processed {}", template.getFileName());
+							log.info("Already processed {}", template.path.getFileName());
 						}
 						continue;
 					}
@@ -96,58 +99,119 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 
-	private List<Path> buildTemplatePaths(Tenant tenant, TemplateEnabledService<?> templateEnabledService) {
+	private List<PathInfo> buildTemplatePaths(Tenant tenant, TemplateEnabledService<?> templateEnabledService) throws IOException {
 		
-		List<Path> paths = new ArrayList<>();
+		List<PathInfo> paths = new ArrayList<>();
+		
+		if(log.isInfoEnabled()) {
+			log.info("Looking for {} templates in {}", templateEnabledService.getTemplateFolder(), tenant.getName());
+		}
 		
 		if(!templateEnabledService.isSystemOnly()) {
 			File sharedConf = new File(ConfigHelper.getSharedFolder(), templateEnabledService.getTemplateFolder());
-			paths.add(sharedConf.toPath());
-
+			
+			if(sharedConf.exists()) {
+				paths.add(new PathInfo(sharedConf.toPath()));
+			}
+			
+			for(ZipPackage pkg : ConfigHelper.getSharedPackages()) {
+				paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
+			}
+			
 			if(!tenant.getSystem()) {
 
 				File tenantConf = new File(ConfigHelper.getTenantsFolder(), tenant.getHostname());
 				File templateConf = new File(tenantConf, templateEnabledService.getTemplateFolder());
-				paths.add(templateConf.toPath());
-				
+				if(templateConf.exists()) {
+					paths.add(new PathInfo(templateConf.toPath()));
+				}
+				for(ZipPackage pkg : ConfigHelper.getTenantPackages(tenant)) {
+					paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
+				}
 			} else {
 				File prvConf = new File(ConfigHelper.getSystemPrivateFolder(), templateEnabledService.getTemplateFolder());
-				paths.add(prvConf.toPath());
+				if(prvConf.exists()) {
+					paths.add(new PathInfo(prvConf.toPath()));
+				}
+				for(ZipPackage pkg : ConfigHelper.getSystemPrivatePackages()) {
+					paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
+				}
 			}
 			
 		} else {
-			paths.add(ConfigHelper.getSystemSubFolder(templateEnabledService.getTemplateFolder()).toPath());	
+			File systemConf = ConfigHelper.getSystemSubFolder(templateEnabledService.getTemplateFolder());
+			if(systemConf.exists()) {
+				paths.add(new PathInfo(systemConf.toPath()));
+			}
+			for(ZipPackage pkg : ConfigHelper.getTenantPackages(tenant)) {
+				paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
+			}
 		}
 		
 		return paths;
 	}
 
-	protected Collection<Path> findVersionedTemplates(List<Path> paths) throws IOException {
+//	private void lookupTemplatesInZipFiles(Path path, String templateName, List<PathInfo> paths) {
+//		
+//		try {
+//			if(Files.exists(path)) {
+//				Files.list(path)
+//				.filter(f -> f.getFileName().toString().endsWith(".zip"))
+//				.forEach(zipFile -> {
+//					URI uri = URI.create(String.format("jar:file:%s", zipFile.toAbsolutePath().toString()));
+//	
+//					
+//					try {
+//						FileSystem zipfs;
+//						try {
+//							zipfs = FileSystems.getFileSystem(uri);
+//						} catch(FileSystemNotFoundException e) {
+//							zipfs = FileSystems.newFileSystem(uri, new HashMap<>());
+//						}
+//						Path inzip = zipfs.getPath(templateName);
+//						if(Files.exists(inzip)) {
+//							paths.add(new PathInfo(uri, zipfs, inzip.toAbsolutePath()));
+//						}
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+//	
+//	
+//				});
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 		
-		List<Path> orderedTemplates = new ArrayList<>();
+	protected Collection<PathInfo> findVersionedTemplates(List<PathInfo> paths) throws IOException {
 		
-		for(Path path : paths) {
+		List<PathInfo> orderedTemplates = new ArrayList<>();
+		
+		for(PathInfo path : paths) {
 			
 			if(log.isInfoEnabled()) {
 				log.info(String.format("Searching for templates folder in %s", 
-						path.toString()));
+						path.path.toString()));
 			}
-			
-			if(Files.exists(path)) {
-				Files.list(path)
+
+			if(Files.exists(path.getPath())) {
+				Files.list(path.getPath())
 				.filter(f -> f.getFileName().toString().endsWith(".json"))
 				.forEach(jsonFile -> {
-					orderedTemplates.add(jsonFile);
+					orderedTemplates.add(new PathInfo(jsonFile));
 				});
 			}
+			
 
 		}
 		
-		Collections.<Path>sort(orderedTemplates, new Comparator<Path>() {
+		Collections.<PathInfo>sort(orderedTemplates, new Comparator<PathInfo>() {
 			
 			@Override
-			public int compare(Path o1, Path o2) {
-				return o1.getFileName().compareTo(o2.getFileName());
+			public int compare(PathInfo o1, PathInfo o2) {
+				return o1.getFilename().toString().compareTo(o2.getFilename().toString());
 			}
 		});
 		
@@ -155,7 +219,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 	@SuppressWarnings("unchecked")
-	private <E extends AbstractUUIDEntity> void processTemplate(Path resource, String resourceKey, TemplateEnabledService<E> repository, Version version) {
+	private <E extends AbstractUUIDEntity> void processTemplate(PathInfo resource, String resourceKey, TemplateEnabledService<E> repository, Version version) {
 		try {
 			
 			if(log.isInfoEnabled()) {
@@ -163,7 +227,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			List<E> objects = objectMapper.getObjectMapper().readValue(
-					Files.newInputStream(resource), 
+					Files.newInputStream(resource.path), 
 					objectMapper.getObjectMapper().getTypeFactory().constructCollectionType(List.class, repository.getResourceClass()));
 			
 			repository.saveTemplateObjects(objects, new TransactionAdapter<E>() {
@@ -186,6 +250,38 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		} catch (Throwable e) {
 			log.error(String.format("Failed to process template %s", resourceKey), e);
 		}
+	}
+	
+	class PathInfo {
+		
+		ZipPackage pkg;
+		Path path;
+		
+		PathInfo(ZipPackage pkg, String path) {
+			this.pkg = pkg;
+			this.path = pkg.resolvePath(path);
+		}
+		
+		PathInfo(Path path) {
+			this.path = path;
+		}
+
+		public boolean isPackage() {
+			return Objects.nonNull(pkg);
+		}
+		
+		public ZipPackage getPkg() {
+			return pkg;
+		}
+
+		public Path getPath() {
+			return path;
+		}
+		
+		public String getFilename() {
+			return Objects.nonNull(pkg) ? pkg.getFilename() : path.getFileName().toString();
+		}
+		
 		
 	}
 }

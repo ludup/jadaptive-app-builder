@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +92,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		
 
 		JsonNode uuidNode = node.findValue("uuid");
-		if(!Objects.isNull(uuidNode)) {
+		if(!Objects.isNull(uuidNode) && StringUtils.isNotBlank(uuidNode.asText())) {
 			e.setUuid(uuidNode.asText());
 		}
 		
