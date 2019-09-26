@@ -48,9 +48,9 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	}
 	
 	@Override
-	public Collection<EntityTemplate> table(int start, int length) throws RepositoryException, EntityException {
+	public Collection<EntityTemplate> table(String search, String order, int start, int length) throws RepositoryException, EntityException {
 		
-		return repository.table(start, length);
+		return repository.table(search, order, start, length);
 	}
 	
 	@Override

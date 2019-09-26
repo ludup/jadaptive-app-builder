@@ -127,7 +127,7 @@ public class APIController {
 			@RequestParam int limit) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
 
-		   return new TableStatus<EntityTemplate>(templateService.table(offset, limit), templateService.count());
+		   return new TableStatus<EntityTemplate>(templateService.table(search, order, offset, limit), templateService.count());
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/template/list", e);

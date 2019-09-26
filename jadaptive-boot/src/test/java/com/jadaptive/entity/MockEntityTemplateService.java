@@ -35,7 +35,7 @@ public class MockEntityTemplateService implements EntityTemplateService {
 
 	}
 	@Override
-	public Collection<EntityTemplate> table(int start, int length) throws RepositoryException, EntityException {
+	public Collection<EntityTemplate> table(String search, String order, int start, int length) throws RepositoryException, EntityException {
 		return new ArrayList<>(templates.values()).subList(start, Math.min(start + length, templates.values().size()-1));
 	}
 	@Override
