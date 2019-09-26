@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
@@ -92,7 +93,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		
 
 		JsonNode uuidNode = node.findValue("uuid");
-		if(!Objects.isNull(uuidNode) && StringUtils.isNotBlank(uuidNode.asText())) {
+		if(!(uuidNode instanceof NullNode) && !Objects.isNull(uuidNode) && StringUtils.isNotBlank(uuidNode.asText())) {
 			e.setUuid(uuidNode.asText());
 		}
 		

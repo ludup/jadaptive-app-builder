@@ -106,5 +106,21 @@ public class EntityRepositoryImpl implements EntityRepository {
 		db.getFirst(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
 	}
 
+	@Override
+	public Collection<Entity> table(String resourceKey, int offset, int limit) {
+		List<Entity> results = new ArrayList<>();
+		
+		for(Document document : db.table(resourceKey, tenantService.getCurrentTenant().getUuid(), offset, limit)) {
+			results.add(buildEntity(resourceKey, document));
+		}
+		
+		return results;
+	}
+
+	@Override
+	public long count(String resourceKey) {
+		return db.count(resourceKey, tenantService.getCurrentTenant().getUuid());
+	}
+
 
 }

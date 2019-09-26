@@ -17,4 +17,8 @@ public interface EntityService {
 	void delete(String resourceKey, String uuid) throws RepositoryException, EntityException;
 
 	void deleteAll(String resourceKey) throws EntityException;
+
+	Collection<Entity> table(String resourceKey, int offset, int limit);
+
+	long count(String resourceKey);
 }

@@ -1,8 +1,10 @@
 package com.jadaptive.json;
 
+import java.util.Collection;
+
 import com.jadaptive.entity.template.EntityTemplate;
 
-public class EntityTableStatus<T> extends EntityStatus<T> {
+public class EntityTableStatus<T> extends TableStatus<T> {
 
 	EntityTemplate template;
 	
@@ -10,8 +12,8 @@ public class EntityTableStatus<T> extends EntityStatus<T> {
 		super(success, message);
 	}
 	
-	public EntityTableStatus(EntityTemplate template, T result) {
-		super(result);
+	public EntityTableStatus(EntityTemplate template, Collection<T> result, long total) {
+		super(result, total);
 		this.template = template;
 	}
 

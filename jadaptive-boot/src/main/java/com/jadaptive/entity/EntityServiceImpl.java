@@ -154,4 +154,16 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
 	public String getTemplateFolder() {
 		return "objects";
 	}
+
+	@Override
+	public Collection<Entity> table(String resourceKey, int offset, int limit) {
+		templateService.get(resourceKey);
+		return entityRepository.table(resourceKey, offset, limit);
+	}
+
+	@Override
+	public long count(String resourceKey) {
+		templateService.get(resourceKey);
+		return entityRepository.count(resourceKey);
+	}
 }

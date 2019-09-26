@@ -15,5 +15,13 @@ public class TableStatus<T> extends EntityStatus<Collection<T>> {
 		super(success, message);
 	}
 
+	public long getTotal() {
+		return total;
+	}
+
+	public void setTotal(long total) {
+		this.total = total;
+	}
+
 	
 }

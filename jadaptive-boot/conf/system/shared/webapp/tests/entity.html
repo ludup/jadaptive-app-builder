@@ -2,51 +2,35 @@
 <head>
 <title>Entity Tester</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.4/dist/bootstrap-table.min.css">
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-</head>
+<script src="https://unpkg.com/bootstrap-table@1.15.4/dist/bootstrap-table.min.js"></script>
+<script src="https://kit.fontawesome.com/78b33735a0.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/4.4.0/bootbox.min.js"></script></head>
 <body>
 
 <div class="container">
 
   
   <div class="row">
-     <h1>Entity Tester</h1>
+     <h1>Entities</h1>
   </div>
   <form>
      <div class="form-group">
-	     <div class="row mb-3">
-	        <div class="col-3">
-	        	 <label>Entity</label>
-	        </div>
-	        <div class="col-9">
+	      <div class="row mb-3">
+	        <div class="col-12">
 	        	<select id="template" name="template" class="form-control"></select>
 	        </div>
 	     </div>
-	      <div class="row mb-3 collection">
-	        <div class="col-3">
-	        	  <label>UUID</label>
+	      <div class="row mb-3">
+	      	<div id="tableholder" class="col-12">
 	        </div>
-	        <div class="col-9">
-	        	<select id="uuid" name="uuid" class="form-control"></select>
-	        </div>
-	     </div>
-	     <div class="row mb-3">
-	     	<div class="col-3">
-	     		<label>Object</label>
-	     	</div>
-	     	<div class="col-9">
-	       	 	<textarea id="json" style="width: 100%; height: 400px;" class="form-control"></textarea>
-	       	 </div>
-	     </div>
-	     <div class="row mb-3">
-	     	<div class="col-3">
-	     		<label>&nbsp;</label>
-	     	</div>
-	        <div class="col-9">
-	           <button id="postButton" type="button" class="btn btn-success">POST</button>
-	           <button id="deleteButton" type="button" class="btn btn-danger">DELETE</button>
+	      </div>
+	      <div class="row mb-3">
+	        <div class="col-12">
+	           <button id="addButton" type="button" class="btn btn-success">Add</button>
 	        </div>
 	     </div>
      </div>
@@ -54,56 +38,190 @@
      
   </form>
 </div>
-
+<div id="json" class="modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Entity</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+	     	<div class="col-12">
+	       	 	<textarea id="jsonContent" style="width: 100%; height: 400px;" class="form-control"></textarea>
+	       	 </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save" type="button" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 
 $(document).ready(function() {
 
 	$('#template').change(function() {
-		debugger;
+
 		var t = $("#template option:selected").data('template');
 		if(t) {
-			$('#uuid').empty();
-			$('#json').val('');
-			$.getJSON('/api/' + t.uuid + '/list', function(data) {
-				
-				if(data.success) {
-					if(data.result.length > 0) {
-						$.each(data.result, function(idx, obj) {
-							$('#uuid').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.uuid + '</option>');
-							$('#' + obj.uuid).data('object', obj);
-						});		
-	
-						$('#uuid').change();
-					
-					} 
-				} else {
-					alert(data.message);
+		
+			var columns = [];
+			columns.push({
+					title: 'UUID',
+					field: 'uuid'
+				});
+			
+			$.each(t.fields, function(idx, obj) {
+				if(!obj.hidden && (obj.fieldType==='TEXT' || obj.fieldType==="NUMBER" || obj.fieldType==="DECIMAL")) {
+					columns.push({
+						title: obj.name,
+						field: obj.resourceKey
+					});
 				}
 			});
 			
-		}
-	});
-	
-	$('#uuid').change(function() {
-		debugger;
-		var uuid = $("#uuid option:selected").val();
-		var t = $("#template option:selected" ).data('template');
-		var url = '/api/' + t.uuid;
-		if(t.type !== 'SINGLETON') {
-			url += '/' + uuid;
-		}
-		
-		$('#json').val('');
-		
-		$.getJSON(url, function(data) {
-			if(data.success) {
-				$('#json').val(JSON.stringify(data.result, null, 4));
+			columns.push({
+				title: 'Actions',
+				formatter: function(val, obj) {
+					var ret = '<a class="clickEdit" href="#" data-uuid="' + obj.uuid + '"><i class="far fa-edit"></i></a>&nbsp;';
+					if(!obj.system) {
+						ret += '<a class="clickDelete" href="#" data-uuid="' + obj.uuid + '"><i class="far fa-trash-alt"></i></a>';
+					}
+					return ret;
+				}
+			});
+			
+			$('#tableholder').empty();
+			$('#tableholder').append('<table id="table"></table>');
+			$('#table').bootstrapTable({
+				sidePagination: 'server',
+				totalField: 'total',
+				dataField: 'result',
+				url: '/api/' + t.uuid + '/table',
+				pagination: true,
+				columns: columns
+			});
+			
+			$('#table').off('post-header.bs.table');
+			$('#table').on('post-header.bs.table', function(e) {
+				$('.clickEdit').off('click');
+				$('.clickDelete').off('click');
+				
+				$('.clickEdit').on('click', function(e) {
+					e.preventDefault();
+					var uuid = $(this).data('uuid');
+					
+					$('#save').off('click');
+					$('#save').on('click', function(e) {
+						$.ajax({
+				            url: '/api/' + t.uuid,
+				            type: 'post',
+				            dataType: 'json',
+				            contentType: 'application/json',
+				            success: function (data) {
+				            	if(data.success) {
+				            		$('#table').bootstrapTable('refresh');
+				            		$('#json').modal('hide');
+				            	} else {
+				            		alert(data.message);
+				            	}
+				            },
+				            data: $('#jsonContent').val()
+				        });
+					});
+					
+					$('#jsonContent').val('');
+					var uri = '/api/' + t.uuid;
+					if(t.type !== 'SINGLETON') {
+						url += '/' + uuid;
+					} 
+					
+					$.getJSON(uri, function(data) {
+						if(data.success) {
+							$('#jsonContent').val(JSON.stringify(data.result, null, 4));
+							$('#json').modal('show');
+						} else {
+							alert(data.message);
+						}
+					});
+					
+					
+				});
+				
+				$('.clickDelete').on('click', function(e) {
+					e.preventDefault();
+					var uuid = $(this).data('uuid');
+					bootbox.confirm({
+					    message: "Are you sure you want to delete the entity with uuid " + uuid + "?",
+					    buttons: {
+					        confirm: {
+					            label: 'Yes',
+					            className: 'btn-success'
+					        },
+					        cancel: {
+					            label: 'No',
+					            className: 'btn-danger'
+					        }
+					    },
+					    callback: function (result) {
+					        if(result) {
+					        	var url = '/api/' + t.uuid + '/' + uuid;
+					    		
+					    		$.ajax({
+					                url: url,
+					                type: 'delete',
+					                dataType: 'json',
+					                success: function (data) {
+					                	$('#table').bootstrapTable('refresh');
+					                }
+					            });
+					        }
+					    }
+					});
+				});
+
+			});
+			
+			$('#addButton').off('click');
+			
+			if(t.type !== 'SINGLETON') {
+				$('#addButton').show();
+				
+				$('#addButton').on('click', function(e) {
+					
+					$('#save').off('click');
+					$('#save').on('click', function(e) {
+						$.ajax({
+				            url: '/api/' + t.uuid,
+				            type: 'post',
+				            dataType: 'json',
+				            contentType: 'application/json',
+				            success: function (data) {
+				            	if(data.success) {
+				            		$('#table').bootstrapTable('refresh');
+				            		$('#json').modal('hide');
+				            	} else {
+				            		alert(data.message);
+				            	}
+				            },
+				            data: $('#jsonContent').val()
+				        });
+					});
+					
+					$('#jsonContent').val('');
+					$('#json').modal('show');
+
+				});
 			} else {
-				alert(data.message);
+				$('#addButton').hide();
 			}
-		});
+			
+			
+		}
 	});
 	
 	$.getJSON('/api/template/list', function(data) {
@@ -122,48 +240,48 @@ $(document).ready(function() {
 	});
 
 	
-	$('#postButton').click(function(e) {
+// 	$('#postButton').click(function(e) {
 		
-		debugger;
-		var t = $("#template option:selected" ).data('template');
-		var url = '/api/' + t.uuid;
+// 		debugger;
+// 		var t = $("#template option:selected" ).data('template');
+// 		var url = '/api/' + t.uuid;
 		
-		$.ajax({
-            url: url,
-            type: 'post',
-            dataType: 'json',
-            contentType: 'application/json',
-            success: function (data) {
-            	if(data.success) {
-            		alert('Object successfully posted');
-            	} else {
-            		alert(data.message);
-            	}
-            },
-            data: $('#json').val()
-        });
-	});
+// 		$.ajax({
+//             url: url,
+//             type: 'post',
+//             dataType: 'json',
+//             contentType: 'application/json',
+//             success: function (data) {
+//             	if(data.success) {
+//             		alert('Object successfully posted');
+//             	} else {
+//             		alert(data.message);
+//             	}
+//             },
+//             data: $('#json').val()
+//         });
+// 	});
 	
-	$('#deleteButton').click(function(e) {
+// 	$('#deleteButton').click(function(e) {
 		
-		debugger;
-		var t = $("#template option:selected" ).data('template');
-		var url = '/api/' + t.uuid + '/' + $('#uuid option:selected').val();
+// 		debugger;
+// 		var t = $("#template option:selected" ).data('template');
+// 		var url = '/api/' + t.uuid + '/' + $('#uuid option:selected').val();
 		
-		$.ajax({
-            url: url,
-            type: 'delete',
-            dataType: 'json',
-            success: function (data) {
-            	if(data.success) {
-            		alert('Object successfully deleted');
-            		$('#template').trigger('change');
-            	} else {
-            		alert(data.message);
-            	}
-            }
-        });
-	});
+// 		$.ajax({
+//             url: url,
+//             type: 'delete',
+//             dataType: 'json',
+//             success: function (data) {
+//             	if(data.success) {
+//             		alert('Object successfully deleted');
+//             		$('#template').trigger('change');
+//             	} else {
+//             		alert(data.message);
+//             	}
+//             }
+//         });
+// 	});
 	
 });
 

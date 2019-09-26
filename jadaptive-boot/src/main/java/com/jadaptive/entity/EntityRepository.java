@@ -16,5 +16,9 @@ public interface EntityRepository {
 
 	void save(Entity entity) throws RepositoryException, EntityException;
 
+	Collection<Entity> table(String resourceKey, int offset, int limit);
+
+	long count(String resourceKey);
+
 
 }

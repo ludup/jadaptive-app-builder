@@ -213,14 +213,21 @@ public class APIController {
 	@RequestMapping(value="api/{resourceKey}/table", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityTableStatus<Collection<Entity>> tableEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityTableStatus<Entity> tableEntities(HttpServletRequest request, 
+			@PathVariable String resourceKey,
+			@RequestParam(required=false) String search,
+			@RequestParam String order,
+			@RequestParam int offset,
+			@RequestParam int limit) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
-			   return new EntityTableStatus<Collection<Entity>>(templateService.get(resourceKey), entityService.list(resourceKey));
+			   return new EntityTableStatus<Entity>(templateService.get(resourceKey), 
+					   entityService.table(resourceKey, offset, limit),
+					   entityService.count(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/table", resourceKey, e);
 			}
-			return new EntityTableStatus<Collection<Entity>>(false, e.getMessage());
+			return new EntityTableStatus<Entity>(false, e.getMessage());
 		}
 	}
 }
