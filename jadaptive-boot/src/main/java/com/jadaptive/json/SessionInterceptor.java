@@ -33,12 +33,19 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 			throws Exception {
 		
 		
+		String loginURL = ApplicationProperties.getValue("authentication.loginURL", null);
+		if(Objects.isNull(loginURL) || request.getRequestURI().startsWith(loginURL)) {
+			return super.preHandle(request, response, handler);
+		}
+		
 		Session session = sessionUtils.getActiveSession(request);
-		if(!ApplicationProperties.getValue("enableAuthentication", false) && Objects.nonNull(session)) {
-			tenantService.setCurrentTenant(session.getCurrentTenant());
-			return super.preHandle(request, response, handler);			
+		if(!ApplicationProperties.getValue("authentication.enabled", false)) {
+			tenantService.setCurrentTenant(request);
+		} else if(Objects.nonNull(session)) {
+			tenantService.setCurrentTenant(session.getCurrentTenant());		
 		} else {
-			response.sendError(403, "Authentication required");
+			response.sendRedirect(loginURL);
+			return false;
 		}
 
 		return super.preHandle(request, response, handler);

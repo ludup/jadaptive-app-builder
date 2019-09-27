@@ -11,11 +11,11 @@ import com.jadaptive.json.SessionInterceptor;
 public class WebMvcConfig implements WebMvcConfigurer {
  
 	@Autowired
-	SessionInterceptor tenantInterceptor;
+	SessionInterceptor sessionInterceptor;
 	
    @Override
    public void addInterceptors(InterceptorRegistry registry) {
-      registry.addInterceptor(tenantInterceptor);
+      registry.addInterceptor(sessionInterceptor);
    }
  
 }
