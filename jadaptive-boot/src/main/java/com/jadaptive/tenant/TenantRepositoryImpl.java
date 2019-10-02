@@ -43,7 +43,7 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 	
 	@Override
 	public Tenant getSystemTenant() throws RepositoryException, EntityException {
-		return getTenant(SYSTEM_UUID);
+		return getTenant(TenantService.SYSTEM_UUID);
 	}
 	
 	@Override
@@ -66,7 +66,8 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 			log.info("Creating new application schema");
 		}
 		
-		saveTenant(new Tenant(SYSTEM_UUID, "System", "localhost", true));
+		
+	
 	}
 
 	@Override

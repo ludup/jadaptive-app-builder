@@ -1,5 +1,6 @@
 package com.jadaptive.db;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -53,6 +54,19 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		return document;
 	}
+	
+	@Override
+	public Document find(String field, String value, String table, String database) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		
+		Document document = collection.find(Filters.eq(field, value)).first();
+		if(Objects.isNull(document)) {
+			throw new EntityException(String.format("%s not found with %s %s", table, field, value));
+		}
+		
+		return document;
+	}
 
 	@Override
 	public void delete(String uuid, String table, String database) {
@@ -71,6 +85,21 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		return collection.find();
 	}
+	
+	@Override
+	public Iterable<Document> list(String field, String value, String table, String database) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		return collection.find(Filters.eq(field, value));
+	}
+	
+	@Override
+	public Iterable<Document> matchCollectionField(String field, String value, String table, String database) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		return collection.find(Filters.in(field, value));
+	}
+		
 	
 	@Override
 	public Iterable<Document> table(String table, String database, int start, int length) {

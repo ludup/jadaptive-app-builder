@@ -91,4 +91,10 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		documents.remove(database);
 	}
 
+	@Override
+	public Document find(String field, String value, String table, String database) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

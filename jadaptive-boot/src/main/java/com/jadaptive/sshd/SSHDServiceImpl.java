@@ -3,23 +3,21 @@ package com.jadaptive.sshd;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
-import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationProperties;
 import com.jadaptive.app.ApplicationVersion;
+import com.jadaptive.sshd.commands.UserCommandFactory;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
-import com.sshtools.common.publickey.SshKeyUtils;
 import com.sshtools.common.ssh.SshException;
-import com.sshtools.server.InMemoryPasswordAuthenticator;
-import com.sshtools.server.InMemoryPublicKeyAuthenticator;
 import com.sshtools.server.SshServer;
 import com.sshtools.server.SshServerContext;
 import com.sshtools.server.vsession.VirtualChannelFactory;
@@ -31,6 +29,12 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 
 	static Logger log = LoggerFactory.getLogger(SSHDServiceImpl.class);
 
+	@Autowired
+	PasswordAuthenticatorImpl passwordAuthenticator; 
+	
+	@Autowired
+	UserCommandFactory userComands; 
+	
 	public SSHDServiceImpl() throws UnknownHostException {
 		super();
 	}
@@ -40,24 +44,10 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 
 		try {
 
-			String key = ApplicationProperties.getValue("sshd.publickey", null);
-			String username = ApplicationProperties.getValue("sshd.username", "admin");
-			String password = ApplicationProperties.getValue("sshd.password", "admin");
 			int port = ApplicationProperties.getValue("sshd.port", 2222);
 			boolean extenalAccess = ApplicationProperties.getValue("sshd.externalAccess", false);
 
-			if (Objects.nonNull(key)) {
-				try {
-					addAuthenticator(new InMemoryPublicKeyAuthenticator().addAuthorizedKey(username,
-							SshKeyUtils.getPublicKey(key)));
-				} catch (IOException e) {
-					log.error("Failed to install {} authentication key", username, e);
-				}
-			}
-
-			if (Objects.nonNull(password)) {
-				addAuthenticator(new InMemoryPasswordAuthenticator().addUser(username, password.toCharArray()));
-			}
+			addAuthenticator(passwordAuthenticator);
 
 			setFileFactory(new VirtualFileFactory(new VirtualMountTemplate("/", "tmp://", new VFSFileFactory()),
 					new VirtualMountTemplate("/conf", "conf", new VFSFileFactory())));
@@ -72,7 +62,10 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 	}
 
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
-		setChannelFactory(new VirtualChannelFactory(new FileSystemCommandFactory()));
+		sshContext.setChannelFactory(new VirtualChannelFactory(
+				new FileSystemCommandFactory(),
+				userComands
+		));
 
 		StringBuffer out = new StringBuffer();
 		out.append("   _           _             _   _           \n");

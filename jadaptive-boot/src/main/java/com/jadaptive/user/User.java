@@ -5,4 +5,6 @@ public interface User {
 	String getUuid();
 	
 	String getUsername();
+	
+	String getName();
 }

@@ -6,17 +6,20 @@ import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Properties;
 
-public class ZipPackage {
+public class ResourcePackage {
 
 	URI uri;
 	FileSystem fs;
 	String filename;
+	Properties properties;
 	
-	public ZipPackage(URI uri, FileSystem fs, String filename) {
+	public ResourcePackage(URI uri, FileSystem fs, String filename, Properties properties) {
 		this.uri = uri;
 		this.fs = fs;
 		this.filename = filename;
+		this.properties = properties;
 	}
 	
 	public URI getUri() {

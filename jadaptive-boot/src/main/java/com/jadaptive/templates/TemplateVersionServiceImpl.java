@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.app.ConfigHelper;
-import com.jadaptive.app.ZipPackage;
+import com.jadaptive.app.ResourcePackage;
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.json.ObjectMapperHolder;
 import com.jadaptive.repository.AbstractUUIDEntity;
@@ -109,7 +109,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				paths.add(new PathInfo(sharedConf.toPath()));
 			}
 			
-			for(ZipPackage pkg : ConfigHelper.getSharedPackages()) {
+			for(ResourcePackage pkg : ConfigHelper.getSharedPackages()) {
 				paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
 			}
 			
@@ -120,7 +120,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				if(templateConf.exists()) {
 					paths.add(new PathInfo(templateConf.toPath()));
 				}
-				for(ZipPackage pkg : ConfigHelper.getTenantPackages(tenant)) {
+				for(ResourcePackage pkg : ConfigHelper.getTenantPackages(tenant)) {
 					paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
 				}
 			} else {
@@ -128,7 +128,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				if(prvConf.exists()) {
 					paths.add(new PathInfo(prvConf.toPath()));
 				}
-				for(ZipPackage pkg : ConfigHelper.getSystemPrivatePackages()) {
+				for(ResourcePackage pkg : ConfigHelper.getSystemPrivatePackages()) {
 					paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
 				}
 			}
@@ -138,7 +138,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(systemConf.exists()) {
 				paths.add(new PathInfo(systemConf.toPath()));
 			}
-			for(ZipPackage pkg : ConfigHelper.getTenantPackages(tenant)) {
+			for(ResourcePackage pkg : ConfigHelper.getTenantPackages(tenant)) {
 				paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
 			}
 		}
@@ -249,10 +249,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	class PathInfo {
 		
-		ZipPackage pkg;
+		ResourcePackage pkg;
 		Path path;
 		
-		PathInfo(ZipPackage pkg, String path) {
+		PathInfo(ResourcePackage pkg, String path) {
 			this.pkg = pkg;
 			this.path = pkg.resolvePath(path);
 		}
@@ -265,7 +265,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			return Objects.nonNull(pkg);
 		}
 		
-		public ZipPackage getPkg() {
+		public ResourcePackage getPkg() {
 			return pkg;
 		}
 

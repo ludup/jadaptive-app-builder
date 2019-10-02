@@ -24,4 +24,10 @@ public interface DocumentDatabase {
 
 	Iterable<Document> table(String table, String database, int start, int length);
 
+	Document find(String field, String value, String table, String database);
+
+	Iterable<Document> list(String field, String value, String table, String database);
+
+	Iterable<Document> matchCollectionField(String field, String value, String table, String database);
+
 }

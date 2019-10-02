@@ -43,6 +43,17 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	protected <T extends AbstractUUIDEntity> T findObject(String field, String value, String database, Class<T> clz) throws RepositoryException, EntityException {
+		try {
+			
+			return DocumentHelper.convertDocumentToObject(clz.newInstance(), db.find(field, value, clz.getName(), database));
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
 	private void checkException(Throwable e) throws EntityException {
 		if(e instanceof EntityException) {
 			throw (EntityException)e;
@@ -68,6 +79,40 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.list(clz.getName(), database)) {
+				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
+			}
+			
+			return results;
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
+	protected <T extends AbstractUUIDEntity> Collection<T> listObjects(String field, String value, String database, Class<T> clz) throws RepositoryException, EntityException {
+		
+		try {
+
+			List<T> results = new ArrayList<>();
+			for(Document document : db.list(field, value, clz.getName(), database)) {
+				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
+			}
+			
+			return results;
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
+	protected <T extends AbstractUUIDEntity> Collection<T> matchCollectionObjects(String field, String value, String database, Class<T> clz) throws RepositoryException, EntityException {
+		
+		try {
+
+			List<T> results = new ArrayList<>();
+			for(Document document : db.matchCollectionField(field, value, clz.getName(), database)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
 			}
 			

@@ -9,6 +9,8 @@ import com.jadaptive.repository.RepositoryException;
 
 public interface TenantService {
 
+	public static final String SYSTEM_UUID = "4f1b781c-581d-474f-9505-4fea9c5e3909";
+	
 	Tenant getCurrentTenant() throws RepositoryException, EntityException;
 
 	void setCurrentTenant(Tenant tenant);

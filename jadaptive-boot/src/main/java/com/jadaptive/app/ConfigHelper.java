@@ -3,11 +3,14 @@ package com.jadaptive.app;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,15 +18,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 
 import com.jadaptive.tenant.Tenant;
 
 public class ConfigHelper {
 
 
-	static List<ZipPackage> sharedPackages;
-	static List<ZipPackage> systemPrivatePackages;
-	static Map<String,List<ZipPackage>> tenantPackages = new HashMap<>();
+	static List<ResourcePackage> sharedPackages;
+	static List<ResourcePackage> systemPrivatePackages;
+	static Map<String,List<ResourcePackage>> tenantPackages = new HashMap<>();
 	
 	public static File getConfFolder() {
 		return new File(System.getProperty("jadaptive.templatePath", "conf"));
@@ -65,7 +69,7 @@ public class ConfigHelper {
 		return new File(getTenantFolder(tenant), folder);
 	}
 	
-	public static Collection<ZipPackage> getSharedPackages() throws IOException {
+	public static Collection<ResourcePackage> getSharedPackages() throws IOException {
 		
 		if(sharedPackages==null) {
 			sharedPackages = new ArrayList<>();
@@ -89,7 +93,7 @@ public class ConfigHelper {
 		return Collections.unmodifiableCollection(sharedPackages);
 	}
 	
-	public static Collection<ZipPackage> getTenantPackages(Tenant tenant) throws IOException {
+	public static Collection<ResourcePackage> getTenantPackages(Tenant tenant) throws IOException {
 		
 		if(!tenantPackages.containsKey(tenant.getHostname())) {
 			tenantPackages.put(tenant.getHostname(), new ArrayList<>());
@@ -117,7 +121,7 @@ public class ConfigHelper {
 		return Collections.unmodifiableCollection(tenantPackages.get(tenant.getHostname()));
 	}
 	
-	public static Collection<ZipPackage> getSystemPrivatePackages() throws IOException {
+	public static Collection<ResourcePackage> getSystemPrivatePackages() throws IOException {
 		
 		if(systemPrivatePackages==null) {
 			systemPrivatePackages = new ArrayList<>();
@@ -141,8 +145,20 @@ public class ConfigHelper {
 		return Collections.unmodifiableCollection(systemPrivatePackages);
 	}
 	
+//	private static ResourcePackage getFolderPackage(File folder, String filename) throws IOException {
+//		
+//		
+//		File propertiesFile = new File(folder, "package.properties");
+//		Properties properties = new Properties();
+//		if(propertiesFile.exists()) {
+//			try(InputStream in = new FileInputStream(propertiesFile)) {
+//				properties.load(in);
+//			}
+//		}
+//		return new ResourcePackage(folder.toURI(), null, filename, properties);
+//	}
 	
-	private static ZipPackage getZipPackage(URI uri, String filename) throws IOException {
+	private static ResourcePackage getZipPackage(URI uri, String filename) throws IOException {
 		
 		FileSystem fs;
 		try {
@@ -151,7 +167,14 @@ public class ConfigHelper {
 			fs = FileSystems.newFileSystem(uri, new HashMap<>());
 		}
 		
-		return new ZipPackage(uri, fs, filename);
+		Path propertiesPath = fs.getPath("/package.properties");
+		Properties properties = new Properties();
+		if(Files.exists(propertiesPath)) {
+			try(InputStream in = Files.newInputStream(propertiesPath)) {
+				properties.load(in);
+			}
+		}
+		return new ResourcePackage(uri, fs, filename, properties);
 	}
 	
 }

@@ -102,15 +102,15 @@ public class DocumentHelper {
 
 				if(parameter.getType().equals(String.class)) {
 					m.invoke(obj, document.getString(name));
-				} else if(parameter.getType().equals(Boolean.class)) {
+				} else if(parameter.getType().equals(Boolean.class) || parameter.getType().equals(boolean.class)) {
 					m.invoke(obj, Boolean.parseBoolean(document.getString(name)));
-				} else if(parameter.getType().equals(Integer.class)) {
+				} else if(parameter.getType().equals(Integer.class) || parameter.getType().equals(int.class)) {
 					m.invoke(obj, Integer.parseInt(document.getString(name)));
-				} else if(parameter.getType().equals(Long.class)) {
+				} else if(parameter.getType().equals(Long.class) || parameter.getType().equals(long.class)) {
 					m.invoke(obj, Long.parseLong(document.getString(name)));
-				} else if(parameter.getType().equals(Float.class)) {
+				} else if(parameter.getType().equals(Float.class)  || parameter.getType().equals(float.class)) {
 					m.invoke(obj, Float.parseFloat(document.getString(name)));
-				} else if(parameter.getType().equals(Double.class)) {
+				} else if(parameter.getType().equals(Double.class) || parameter.getType().equals(double.class)) {
 					m.invoke(obj, Double.parseDouble(document.getString(name)));
 				} else if(parameter.getType().equals(Date.class)) {
 					m.invoke(obj, Utils.parseDateTime(document.getString(name)));

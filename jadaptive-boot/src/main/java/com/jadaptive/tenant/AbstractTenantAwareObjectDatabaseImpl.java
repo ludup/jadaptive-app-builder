@@ -19,11 +19,21 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 	}
 
 	@Autowired
-	TenantService tenantService;
+	protected TenantService tenantService;
 
 	@Override
 	public Collection<T> list() throws RepositoryException, EntityException {
 		return listObjects(tenantService.getCurrentTenant().getUuid(), getResourceClass());
+	}
+	
+	@Override
+	public Collection<T> list(String field, String value) {
+		return listObjects(field, value, tenantService.getCurrentTenant().getUuid(), getResourceClass());
+	}
+	
+	@Override
+	public Collection<T> matchCollectionObjects(String field, String value) {
+		return matchCollectionObjects(field, value, tenantService.getCurrentTenant().getUuid(), getResourceClass());
 	}
 
 	protected abstract Class<T> getResourceClass();

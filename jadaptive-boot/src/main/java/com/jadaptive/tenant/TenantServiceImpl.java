@@ -19,11 +19,17 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.entity.EntityException;
+import com.jadaptive.events.EventService;
 import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.repository.TransactionAdapter;
+import com.jadaptive.role.RoleService;
 import com.jadaptive.templates.TemplateEnabledService;
 import com.jadaptive.templates.TemplateVersionService;
+import com.jadaptive.tenant.events.TenantCreatedEvent;
+import com.jadaptive.user.User;
+import com.jadaptive.user.UserService;
+
 
 @Service
 public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant> {
@@ -43,6 +49,15 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	@Autowired
 	PermissionService permissionService; 
 	
+	@Autowired
+	EventService eventService; 
+	
+	@Autowired
+	UserService userService;
+	
+	@Autowired
+	RoleService roleService; 
+	
 	Tenant systemTenant;
 	
 	Map<String,Tenant> tenantsByHostname = new HashMap<>();
@@ -53,6 +68,16 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 		
 		if(repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh")) {
 			repository.newSchema();
+			createTenant(SYSTEM_UUID, "System", "localhost", true);
+			
+			setCurrentTenant(getSystemTenant());
+			
+			try {
+				User user = userService.createUser("admin", "admin".toCharArray(), "Administrator");
+				roleService.assignRole(roleService.getAdministrationRole(), user);
+			} finally {
+				clearCurrentTenant();
+			}
 		}
 		
 		permissionService.registerStandardPermissions(TENANT_RESOURCE_KEY);
@@ -121,14 +146,25 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	}
 	
 	public Tenant createTenant(String uuid, String name, String hostname) throws RepositoryException, EntityException {
+		return createTenant(uuid, name, hostname, false);
+	}
+	
+	public Tenant createTenant(String uuid, String name, String hostname, boolean system) throws RepositoryException, EntityException {
 		
 		if(tenantsByHostname.containsKey(hostname)) {
 			throw new EntityException(String.format("%s is already used by another tenant", hostname));
 		}
 		
 		Tenant tenant = new Tenant(uuid, name, hostname);
-		repository.saveTenant(tenant);
-		return tenant;
+		tenant.setSystem(system);
+		try {
+			repository.saveTenant(tenant);
+			eventService.publishEvent(new TenantCreatedEvent(this, tenant));
+			return tenant;
+		} catch (RepositoryException | EntityException e) {
+			eventService.publishEvent(new TenantCreatedEvent(this, tenant, e));
+			throw e;
+		}
 		
 	}
 

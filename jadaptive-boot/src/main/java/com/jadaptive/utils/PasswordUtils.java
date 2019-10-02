@@ -35,7 +35,7 @@ public class PasswordUtils {
 
 	public static byte[] generateSalt() throws NoSuchAlgorithmException {
 
-		SecureRandom random = SecureRandom.getInstance("SHA256PRNG");
+		SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
 
 		byte[] salt = new byte[32];
 		random.nextBytes(salt);

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.jadaptive.app.ConfigHelper;
-import com.jadaptive.app.ZipPackage;
+import com.jadaptive.app.ResourcePackage;
 import com.jadaptive.entity.EntityException;
 import com.jadaptive.repository.RepositoryException;
 import com.jadaptive.tenant.Tenant;
@@ -100,7 +100,7 @@ public class ResourceController {
 			
 			String uri = "webapp/" + resourceUri;
 			try {
-				for(ZipPackage pkg : ConfigHelper.getSystemPrivatePackages()) {
+				for(ResourcePackage pkg : ConfigHelper.getSystemPrivatePackages()) {
 					if(pkg.containsPath(uri)) {
 						return pkg.resolvePath(uri);
 					}
@@ -117,7 +117,7 @@ public class ResourceController {
 		
 		String uri = "webapp" + resourceUri;
 		try {
-			for(ZipPackage pkg : ConfigHelper.getSharedPackages()) {
+			for(ResourcePackage pkg : ConfigHelper.getSharedPackages()) {
 				if(pkg.containsPath(uri)) {
 					return pkg.resolvePath(uri);
 				}

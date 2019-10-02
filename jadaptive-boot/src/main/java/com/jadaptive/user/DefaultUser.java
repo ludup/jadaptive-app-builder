@@ -3,9 +3,10 @@ package com.jadaptive.user;
 import com.jadaptive.repository.NamedUUIDEntity;
 import com.jadaptive.utils.PasswordEncryptionType;
 
-public class DefaultUser extends NamedUUIDEntity {
+public class DefaultUser extends NamedUUIDEntity implements User {
 
 	String username;
+	String name;
 	String encodedPassword;
 	String salt;
 	PasswordEncryptionType encodingType;
@@ -16,6 +17,14 @@ public class DefaultUser extends NamedUUIDEntity {
 
 	public void setUsername(String username) {
 		this.username = username;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getEncodedPassword() {

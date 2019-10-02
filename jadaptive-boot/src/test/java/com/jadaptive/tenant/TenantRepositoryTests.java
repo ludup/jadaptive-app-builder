@@ -33,7 +33,7 @@ public class TenantRepositoryTests {
 	@Test
 	public void testNewSchemaSystemTenantExists() {
 		assertNotNull(tenantRepository.getSystemTenant());
-		assertEquals(tenantRepository.getSystemTenant().getUuid(), TenantRepository.SYSTEM_UUID);
+		assertEquals(tenantRepository.getSystemTenant().getUuid(), TenantService.SYSTEM_UUID);
 	}
 	
 	@Test
