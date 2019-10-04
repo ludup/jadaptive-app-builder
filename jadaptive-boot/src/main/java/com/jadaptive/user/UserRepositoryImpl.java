@@ -83,12 +83,12 @@ public class UserRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<De
 	}
 
 	@Override
-	protected Class<DefaultUser> getResourceClass() {
+	public Class<DefaultUser> getResourceClass() {
 		return DefaultUser.class;
 	}
 
 	@Override
 	public DefaultUser findUsername(String username) {
-		return findObject("username", username, tenantService.getCurrentTenant().getUuid(), DefaultUser.class);
+		return getObject("username", username, tenantService.getCurrentTenant().getUuid(), DefaultUser.class);
 	}
 }

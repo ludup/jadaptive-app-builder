@@ -1,5 +1,7 @@
 package com.jadaptive.sshd.commands;
 
+import java.io.IOException;
+
 import com.jadaptive.user.User;
 
 public abstract class UserCommand extends AbstractCommand {
@@ -8,7 +10,11 @@ public abstract class UserCommand extends AbstractCommand {
 		super(name, subsystem, signature, description);
 	}
 
-	protected User verifyUser(boolean requirePassword) {
+	protected User resolveUser(String name) {
+		return userService.findUsername(name);
+	}
+	
+	protected User verifyUser(boolean requirePassword) throws IOException {
 		
 		User user = userService.findUsername(console.getConnection().getUsername());
 		
@@ -22,7 +28,9 @@ public abstract class UserCommand extends AbstractCommand {
 			
 			char[] currentPassword = promptForPassword("Current Password: ");
 
-			userService.verifyPassword(user, currentPassword);
+			if(!userService.verifyPassword(user, currentPassword)) {
+				throw new IOException("Bad password");
+			}
 		}
 		
 		return user;

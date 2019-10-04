@@ -14,7 +14,7 @@ public class EntityTemplateRepositoryImpl extends AbstractTenantAwareObjectDatab
 	}
 
 	@Override
-	protected Class<EntityTemplate> getResourceClass() {
+	public Class<EntityTemplate> getResourceClass() {
 		return EntityTemplate.class;
 	}
 

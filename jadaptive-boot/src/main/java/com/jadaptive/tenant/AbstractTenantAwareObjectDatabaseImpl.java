@@ -20,7 +20,7 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 
 	@Autowired
 	protected TenantService tenantService;
-
+	
 	@Override
 	public Collection<T> list() throws RepositoryException, EntityException {
 		return listObjects(tenantService.getCurrentTenant().getUuid(), getResourceClass());
@@ -36,11 +36,13 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 		return matchCollectionObjects(field, value, tenantService.getCurrentTenant().getUuid(), getResourceClass());
 	}
 
-	protected abstract Class<T> getResourceClass();
-
 	@Override
 	public T get(String uuid) throws RepositoryException, EntityException {
 		return getObject(uuid, tenantService.getCurrentTenant().getUuid(), getResourceClass());
+	}
+	
+	public T get(String field, String value) throws RepositoryException, EntityException {
+		return getObject(field, value, tenantService.getCurrentTenant().getUuid(), getResourceClass());
 	}
 
 	@Override

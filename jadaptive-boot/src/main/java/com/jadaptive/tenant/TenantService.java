@@ -25,4 +25,8 @@ public interface TenantService {
 
 	void setCurrentTenant(HttpServletRequest request);
 
+	Tenant getTenantByName(String tenantName);
+
+	void setCurrentTenant(String name);
+
 }

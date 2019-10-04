@@ -11,6 +11,8 @@ public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity>
 	Collection<T> list() throws RepositoryException, EntityException;
 
 	T get(String uuid) throws RepositoryException, EntityException;
+	
+	T get(String field, String value) throws RepositoryException, EntityException;
 
 	void delete(String uuid) throws RepositoryException, EntityException;
 
@@ -25,5 +27,7 @@ public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity>
 	Collection<T> list(String field, String value);
 
 	Collection<T> matchCollectionObjects(String field, String value);
+	
+	public Class<T> getResourceClass();
 
 }

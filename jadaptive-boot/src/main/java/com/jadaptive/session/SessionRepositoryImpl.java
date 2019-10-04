@@ -13,7 +13,7 @@ public class SessionRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl
 	}
 
 	@Override
-	protected Class<Session> getResourceClass() {
+	public Class<Session> getResourceClass() {
 		return Session.class;
 	}
 

@@ -1,12 +1,9 @@
 package com.jadaptive.role;
 
-import java.util.Collection;
-
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.db.DocumentDatabase;
 import com.jadaptive.tenant.AbstractTenantAwareObjectDatabaseImpl;
-import com.jadaptive.user.User;
 
 @Repository
 public class RoleRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<Role> implements RoleRepository {
@@ -16,7 +13,7 @@ public class RoleRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<Ro
 	}
 
 	@Override
-	protected Class<Role> getResourceClass() {
+	public Class<Role> getResourceClass() {
 		return Role.class;
 	}
 

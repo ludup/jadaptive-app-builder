@@ -20,4 +20,6 @@ public interface RoleService extends AbstractTenantAwareObjectService<Role> {
 
 	Collection<Role> getRoles(User user);
 
+	Role getRoleByName(String name);
+
 }

@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.sshd.SSHDService;
 import com.jadaptive.tenant.Tenant;
 import com.jadaptive.tenant.TenantService;
-import com.jadaptive.user.User;
 import com.jadaptive.user.UserService;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.ssh.SshConnection;
@@ -44,18 +44,22 @@ public abstract class AbstractCommand extends ShellCommand {
 		} catch(UsageException e) { 
 			console.println(e.getMessage());
 		} catch(Throwable e) { 
-			console.println(String.format("Unexpected error: %s", e.getMessage()));
+			console.println(e.getMessage());
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
 		
+	}
+	
+	protected void printUsage() {
+		console.println(getUsage());
 	}
 
 	protected abstract void doRun(String[] args, VirtualConsole console) 
 				throws IOException, PermissionDeniedException, UsageException;
 
 	protected Tenant resolveTenant(SshConnection connection, Environment environment) {
-		return tenantService.getSystemTenant();
+		return (Tenant) connection.getProperty(SSHDService.TENANT);
 	}
 	
 	protected char[] promptForPassword(String prompt) {

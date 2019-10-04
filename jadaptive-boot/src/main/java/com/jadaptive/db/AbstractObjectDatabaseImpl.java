@@ -43,7 +43,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> T findObject(String field, String value, String database, Class<T> clz) throws RepositoryException, EntityException {
+	protected <T extends AbstractUUIDEntity> T getObject(String field, String value, String database, Class<T> clz) throws RepositoryException, EntityException {
 		try {
 			
 			return DocumentHelper.convertDocumentToObject(clz.newInstance(), db.find(field, value, clz.getName(), database));

@@ -20,7 +20,7 @@ public class SessionServiceImpl extends AbstractTenantAwareObjectServiceImpl<Ses
 	SessionRepository repository;
 
 	@Override
-	protected AbstractTenantAwareObjectDatabase<Session> getRepository() {
+	public AbstractTenantAwareObjectDatabase<Session> getRepository() {
 		return repository;
 	}
 

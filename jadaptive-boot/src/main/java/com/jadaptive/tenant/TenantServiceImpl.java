@@ -35,6 +35,7 @@ import com.jadaptive.user.UserService;
 public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant> {
 
 	ThreadLocal<Tenant> currentTenant = new ThreadLocal<>();
+	ThreadLocal<User> currentUser = new ThreadLocal<>();
 	
 	final public static String SYSTEM_TENANT_UUID = "cb3129ea-b8b1-48a4-85de-8443945d95e3";
 	
@@ -233,18 +234,25 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 
 	@Override
 	public void setCurrentTenant(HttpServletRequest request) {
-		Tenant tenant = tenantsByHostname.get(request.getServerName());
-		if(Objects.isNull(tenant)) {
-			tenant = tenantsByHostname.get(request.getHeader("Host"));
-			if(Objects.isNull(tenant)) {
-				tenant = getSystemTenant();
-			}
-		}
-		setCurrentTenant(tenant);
+		setCurrentTenant(getTenantByName(request.getServerName()));
+	}
+	
+	@Override
+	public void setCurrentTenant(String name) {
+		setCurrentTenant(getTenantByName(name));
 	}
 
 	@Override
 	public String getTemplateFolder() {
 		return "tenants";
+	}
+
+	@Override
+	public Tenant getTenantByName(String name) {
+		Tenant tenant = tenantsByHostname.get(name);
+		if(Objects.isNull(tenant)) {
+			return getSystemTenant();
+		}
+		return tenant;
 	}
 }

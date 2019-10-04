@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationProperties;
 import com.jadaptive.app.ApplicationVersion;
-import com.jadaptive.sshd.commands.UserCommandFactory;
+import com.jadaptive.sshd.commands.JadaptiveCommandFactory;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
@@ -33,7 +33,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 	PasswordAuthenticatorImpl passwordAuthenticator; 
 	
 	@Autowired
-	UserCommandFactory userComands; 
+	JadaptiveCommandFactory userComands; 
 	
 	public SSHDServiceImpl() throws UnknownHostException {
 		super();

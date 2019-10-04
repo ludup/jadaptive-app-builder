@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.AbstractLoggingServiceImpl;
+import com.jadaptive.role.RoleService;
 import com.jadaptive.tenant.Tenant;
 import com.jadaptive.tenant.TenantService;
 
@@ -25,6 +26,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Autowired
 	TenantService tenantService; 
+	
+	@Autowired
+	RoleService roleService; 
 	
 	Map<Tenant,Set<String>> tenantPermissions = new HashMap<>();
 	
@@ -80,7 +84,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 	@Override 
 	public void assertReadWrite(String resourceKey) throws PermissionDeniedException {
-		
+		assertAnyPermission(resourceKey, getReadWritePermission(resourceKey));
 	}
 	
 	@Override
@@ -90,6 +94,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Override
 	public void assertPermission(String resourceKey, String permission) throws PermissionDeniedException {
+		
 		
 	}
 

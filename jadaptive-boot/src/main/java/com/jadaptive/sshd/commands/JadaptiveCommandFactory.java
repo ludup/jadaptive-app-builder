@@ -14,7 +14,7 @@ import com.sshtools.server.vsession.CommandFactory;
 import com.sshtools.server.vsession.ShellCommand;
 
 @Component
-public class UserCommandFactory extends CommandFactory<ShellCommand> {
+public class JadaptiveCommandFactory extends CommandFactory<ShellCommand> {
 
 	@Autowired
 	ApplicationContext context;
@@ -23,6 +23,7 @@ public class UserCommandFactory extends CommandFactory<ShellCommand> {
 	private void postConstruct() {
 		installCommand("passwd", Passwd.class);
 		installCommand("roles", Roles.class);
+		installCommand("tenant", Tenant.class);
 	}
 	
 	protected void configureCommand(ShellCommand command, SshConnection con) throws IOException, PermissionDeniedException {

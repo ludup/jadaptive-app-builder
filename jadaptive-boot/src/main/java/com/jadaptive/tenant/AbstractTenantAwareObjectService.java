@@ -22,4 +22,8 @@ public interface AbstractTenantAwareObjectService<T extends AbstractUUIDEntity> 
 	void delete(T obj) throws EntityException;
 
 	long count();
+
+	T get(String field, String value) throws RepositoryException, EntityException;
+	
+	AbstractTenantAwareObjectDatabase<T> getRepository();
 }

@@ -1,6 +1,5 @@
 package com.jadaptive.db;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -123,7 +122,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document getFirst(String uuid, String table, String database) {
 		Document e = getCollection(table, database).find(Filters.eq("_id", uuid)).first();
 		if(Objects.isNull(e)) {
-			throw new EntityException(String.format("Uuid %s for entity %s was not found", uuid, table));
+			throw new EntityException(String.format("id %s for entity %s was not found", uuid, table));
 		}
 		return e;
 	}

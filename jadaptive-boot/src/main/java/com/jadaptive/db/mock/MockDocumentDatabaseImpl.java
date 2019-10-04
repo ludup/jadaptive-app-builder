@@ -97,4 +97,16 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return null;
 	}
 
+	@Override
+	public Iterable<Document> list(String field, String value, String table, String database) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterable<Document> matchCollectionField(String field, String value, String table, String database) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
