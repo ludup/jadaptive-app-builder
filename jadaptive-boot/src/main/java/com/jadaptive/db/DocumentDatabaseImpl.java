@@ -45,26 +45,16 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document get(String uuid, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		
-		Document document = collection.find(Filters.eq("_id", uuid)).first();
-		if(Objects.isNull(document)) {
-			throw new EntityException(String.format("%s not found with id %s", table, uuid));
-		}
-		
-		return document;
+		return collection.find(Filters.eq("_id", uuid)).first();
+
 	}
 	
 	@Override
 	public Document find(String field, String value, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		
-		Document document = collection.find(Filters.eq(field, value)).first();
-		if(Objects.isNull(document)) {
-			throw new EntityException(String.format("%s not found with %s %s", table, field, value));
-		}
-		
-		return document;
+		return collection.find(Filters.eq(field, value)).first();
+
 	}
 
 	@Override

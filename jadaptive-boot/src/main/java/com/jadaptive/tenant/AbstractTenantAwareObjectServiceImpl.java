@@ -85,12 +85,14 @@ public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUI
 
 	@Override
 	public void delete(T obj) throws EntityException {
+		
 		delete(obj.getUuid());
 	}
 	
 	@Override
 	public void delete(String uuid) throws EntityException {
 		
+		assertReadWrite();
 		beforeDelete(uuid);
 		getRepository().delete(uuid);
 		afterDelete(uuid);

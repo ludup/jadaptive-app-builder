@@ -2,14 +2,18 @@ package com.jadaptive.sshd.commands;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.entity.EntityNotFoundException;
 import com.jadaptive.role.Role;
 import com.jadaptive.role.RoleService;
 import com.jadaptive.user.User;
+import com.jadaptive.user.UserService;
 import com.sshtools.common.permissions.PermissionDeniedException;
+import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.VirtualConsole;
 
@@ -18,57 +22,62 @@ public class Roles extends UserCommand {
 	@Autowired
 	RoleService roleService; 
 	
+	@Autowired
+	UserService userService; 
+	
 	public Roles() {
-		super("roles", "Users", "roles [options] user role", "List the roles of a user");
+		super("roles", "User Management", "roles [options] [role] [user...]", "Manage roles");
 	}
 
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 		
-		
-		if(args.length==1) {	
+		if(CliHelper.hasLongOption(args, "help")) {
+			printUsage();
+		} else if(args.length==1) {	
 			printRoles(roleService.list());
 		} else if(args.length==2 && !args[1].startsWith("-")) {
-			printRoles(roleService.getRoles(verifyUser(false)));
+			printMembers(resolveRole(args[1]));
+		} else if(CliHelper.hasShortOption(args, 'c') || CliHelper.hasLongOption(args, "create")) {
+			
+			String roleName = args[2];
+			
+			try {
+				resolveRole(roleName);
+				console.println(String.format("There is already a Role named %s", roleName));
+			} catch(EntityNotFoundException e) {
+				Role role = roleService.createRole(roleName, resolveUsers());
+				console.println(String.format("Role %s created", role.getName()));
+			}
 		} else if(args.length >= 3) {
+			
+			Role role = resolveRole(args[2]);
+
 			switch(args[1]) {
 			case "-a":
 			case "--assign":
 			{
-				if(checkAssignmentArguments()) {
-					Role role = resolveRole(args[3]);
-					User user = resolveUser(args[2]);
-					if(checkValidArgumments(role, user)) {
-						roleService.assignRole(role, user);
-						console.println(String.format("%s was assigned to %s", user.getUsername(), role.getName()));
-					}
+				for(User user : resolveUsers()) {
+					roleService.assignRole(role, user);
+					console.println(String.format("%s was assigned to %s", user.getUsername(), role.getName()));
 				}
 				break;
 			}
 			case "-u":
 			case "--unassign":
 			{
-				if(checkAssignmentArguments()) {
-					Role role = resolveRole(args[3]);
-					User user = resolveUser(args[2]);
-					if(checkValidArgumments(role, user)) {
-						roleService.unassignRole(role, user);
-						console.println(String.format("%s was unassigned from %s", user.getUsername(), role.getName()));
-					}
+				for(User user : resolveUsers()) {
+					roleService.unassignRole(role, user);
+					console.println(String.format("%s was unassigned from %s", user.getUsername(), role.getName()));
 				}
-				break;
-			}
-			case "-c":
-			case "--create":
-			{
-				
 				break;
 			}
 			case "-d":
 			case "--delete":
 			{
-				
+				roleService.delete(role);
+				console.println(String.format("%s was deleted", role.getName()));
 				break;
 			}
 			default:
@@ -78,25 +87,16 @@ public class Roles extends UserCommand {
 			}
 		}
 	}
-
-	private boolean checkValidArgumments(Role role, User user) {
-		if(Objects.isNull(role)) {
-			console.println("Invalid role name!");
-		}
-		if(Objects.isNull(user)) {
-			console.println("Invalid user name!");
-		}
-		return Objects.nonNull(role) && Objects.nonNull(user);
-	}
-
-	private boolean checkAssignmentArguments() {
-		if(args.length < 4) {
-			console.println("Missing user or role argument!");
-			return false;
-		}
-		return true;
-	}
 	
+	private Collection<User> resolveUsers() {
+		Set<User> users = new HashSet<>();
+		int argIndex = 3;
+		while(args.length > argIndex) {
+			users.add(resolveUser(args[argIndex++]));
+		}
+		return users;
+	}
+
 	private Role resolveRole(String name) {
 		return roleService.getRoleByName(name);
 	}
@@ -106,5 +106,16 @@ public class Roles extends UserCommand {
 			console.println(role.getName());
 		}
 	}
+	
+	private void printMembers(Role role) {
+		if(role.isAllUsers()) {
+			console.println(String.format("All users are assigned to the %s Role", role.getName()));
+		} else {
+			for(String uuid : role.getUsers()) {
+				console.println(userService.getUser(uuid).getUsername());
+			}
+		}
+	}
+		
 
 }

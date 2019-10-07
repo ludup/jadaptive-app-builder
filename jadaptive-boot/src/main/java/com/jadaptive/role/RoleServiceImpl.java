@@ -1,5 +1,6 @@
 package com.jadaptive.role;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,6 +74,29 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	public Role getRoleByName(String name) {
 		return get("name", name);
 	}
+	
+	@Override
+	public Role createRole(String roleName, User... users) {
+		return createRole(roleName, Arrays.asList(users));
+	}
+	
+	@Override
+	public Role createRole(String roleName, Collection<User> users) {
+		
+		assertReadWrite();
+		
+		Role role = new Role();
+		role.setName(roleName);
+		
+		saveOrUpdate(role);
+		
+		for(User user : users) {
+			assignRole(role, user);
+		}
+		
+		return role;
+	}
+	
 	@Override
 	public void assignRole(Role role, User user) {
 		

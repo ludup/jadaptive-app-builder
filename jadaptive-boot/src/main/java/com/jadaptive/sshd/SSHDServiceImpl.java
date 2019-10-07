@@ -17,9 +17,14 @@ import com.jadaptive.sshd.commands.JadaptiveCommandFactory;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
+import com.sshtools.common.permissions.PermissionDeniedException;
+import com.sshtools.common.ssh.ChannelNG;
+import com.sshtools.common.ssh.SshConnection;
 import com.sshtools.common.ssh.SshException;
+import com.sshtools.common.ssh.UnsupportedChannelException;
 import com.sshtools.server.SshServer;
 import com.sshtools.server.SshServerContext;
+import com.sshtools.server.vsession.ShellCommandFactory;
 import com.sshtools.server.vsession.VirtualChannelFactory;
 import com.sshtools.server.vsession.VirtualSessionPolicy;
 import com.sshtools.server.vshell.commands.fs.FileSystemCommandFactory;
@@ -62,10 +67,16 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 	}
 
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
-		sshContext.setChannelFactory(new VirtualChannelFactory(
-				new FileSystemCommandFactory(),
-				userComands
-		));
+		sshContext.setChannelFactory(new VirtualChannelFactory() {
+
+			@Override
+			protected ChannelNG<SshServerContext> createSessionChannel(SshConnection con)
+					throws UnsupportedChannelException, PermissionDeniedException {
+				return new VirtualShell(con, new ShellCommandFactory(
+						new FileSystemCommandFactory(), userComands));
+			}
+			
+		});
 
 		StringBuffer out = new StringBuffer();
 		out.append("   _           _             _   _           \n");

@@ -17,7 +17,7 @@ public interface TenantService {
 
 	void clearCurrentTenant();
 
-	Collection<Tenant> getTenants();
+	Collection<Tenant> listTenants();
 
 	Tenant createTenant(String name, String hostname) throws RepositoryException, EntityException;
 
@@ -28,5 +28,9 @@ public interface TenantService {
 	Tenant getTenantByName(String tenantName);
 
 	void setCurrentTenant(String name);
+
+	void deleteTenant(Tenant tenant);
+
+	Tenant getTenantByNameOrDefault(String name);
 
 }

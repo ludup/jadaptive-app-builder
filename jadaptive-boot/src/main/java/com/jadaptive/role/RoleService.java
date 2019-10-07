@@ -22,4 +22,8 @@ public interface RoleService extends AbstractTenantAwareObjectService<Role> {
 
 	Role getRoleByName(String name);
 
+	Role createRole(String roleName, User... users);
+	
+	Role createRole(String roleName, Collection<User> users);
+
 }

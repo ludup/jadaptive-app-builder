@@ -3,10 +3,12 @@ package com.jadaptive.db;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import org.bson.Document;
 
 import com.jadaptive.entity.EntityException;
+import com.jadaptive.entity.EntityNotFoundException;
 import com.jadaptive.repository.AbstractUUIDEntity;
 import com.jadaptive.repository.RepositoryException;
 
@@ -35,7 +37,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends AbstractUUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, EntityException {
 		try {
 			
-			return DocumentHelper.convertDocumentToObject(clz.newInstance(), db.get(uuid, clz.getName(), database));
+			Document document = db.get(uuid, clz.getName(), database);
+			if(Objects.isNull(document)) {
+				throw new EntityNotFoundException(String.format("%s not found with id %s", clz.getSimpleName(), uuid));
+			}
+			return DocumentHelper.convertDocumentToObject(clz.newInstance(), document);
 			
 		} catch (Throwable e) {
 			checkException(e);
@@ -45,8 +51,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	protected <T extends AbstractUUIDEntity> T getObject(String field, String value, String database, Class<T> clz) throws RepositoryException, EntityException {
 		try {
-			
-			return DocumentHelper.convertDocumentToObject(clz.newInstance(), db.find(field, value, clz.getName(), database));
+			Document document = db.find(field, value, clz.getName(), database);
+			if(Objects.isNull(document)) {
+				throw new EntityNotFoundException(String.format("%s not found with %s %s", clz.getSimpleName(), field, value));
+			}
+			return DocumentHelper.convertDocumentToObject(clz.newInstance(), document);
 			
 		} catch (Throwable e) {
 			checkException(e);
@@ -63,7 +72,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends AbstractUUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, EntityException {
 		try {
 			if(obj.getSystem()) {
-				throw new EntityException(String.format("You cannot delete a system %s", obj.getClass().getName()));
+				throw new EntityException(String.format("You cannot delete a system %s", obj.getClass().getSimpleName()));
 			}
 			db.delete(obj.getUuid(), obj.getClass().getName(), database);
 			

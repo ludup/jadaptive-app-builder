@@ -6,8 +6,10 @@ public interface UserService {
 
 	boolean verifyPassword(User username, char[] password);
 
-	User findUsername(String string);
+	User findUsername(String username);
 
 	void setPassword(User user, char[] newPassword);
+
+	User getUser(String uuid);
 
 }

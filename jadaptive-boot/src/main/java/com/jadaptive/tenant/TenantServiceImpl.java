@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.entity.EntityException;
+import com.jadaptive.entity.EntityNotFoundException;
 import com.jadaptive.events.EventService;
 import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.repository.RepositoryException;
@@ -85,7 +86,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 		
 		initialiseTenant(getSystemTenant());
 		
-		for(Tenant tenant : getTenants()) {
+		for(Tenant tenant : listTenants()) {
 			if(!tenant.getSystem()) {
 				initialiseTenant(tenant);
 			}
@@ -93,7 +94,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	}
 	
 	@Override
-	public Collection<Tenant> getTenants()  {
+	public Collection<Tenant> listTenants()  {
 		try {
 			return repository.listTenants();
 		} catch (RepositoryException | EntityException e) {
@@ -200,7 +201,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 
 	@Override
 	public String getName() {
-		return "Tenant";
+		return "Tenants";
 	}
 
 	@Override
@@ -213,6 +214,13 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 		return Tenant.class;
 	}
 
+	@Override
+	public void deleteTenant(Tenant tenant) {
+		
+		permissionService.assertReadWrite(TENANT_RESOURCE_KEY);
+		repository.deleteTenant(tenant);
+	}
+	
 	@Override
 	public void saveTemplateObjects(List<Tenant> tenants, @SuppressWarnings("unchecked") TransactionAdapter<Tenant>... ops)
 			throws RepositoryException, EntityException {
@@ -234,12 +242,12 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 
 	@Override
 	public void setCurrentTenant(HttpServletRequest request) {
-		setCurrentTenant(getTenantByName(request.getServerName()));
+		setCurrentTenant(getTenantByNameOrDefault(request.getServerName()));
 	}
 	
 	@Override
 	public void setCurrentTenant(String name) {
-		setCurrentTenant(getTenantByName(name));
+		setCurrentTenant(getTenantByNameOrDefault(name));
 	}
 
 	@Override
@@ -249,6 +257,15 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 
 	@Override
 	public Tenant getTenantByName(String name) {
+		Tenant tenant = tenantsByHostname.get(name);
+		if(Objects.isNull(tenant)) {
+			throw new EntityNotFoundException(String.format("Tenant %s not found", name));
+		}
+		return tenant;
+	}
+	
+	@Override
+	public Tenant getTenantByNameOrDefault(String name) {
 		Tenant tenant = tenantsByHostname.get(name);
 		if(Objects.isNull(tenant)) {
 			return getSystemTenant();

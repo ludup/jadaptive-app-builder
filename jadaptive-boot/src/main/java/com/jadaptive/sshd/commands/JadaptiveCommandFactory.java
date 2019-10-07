@@ -23,7 +23,7 @@ public class JadaptiveCommandFactory extends CommandFactory<ShellCommand> {
 	private void postConstruct() {
 		installCommand("passwd", Passwd.class);
 		installCommand("roles", Roles.class);
-		installCommand("tenant", Tenant.class);
+		installCommand("tenants", Tenants.class);
 	}
 	
 	protected void configureCommand(ShellCommand command, SshConnection con) throws IOException, PermissionDeniedException {

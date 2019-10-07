@@ -14,6 +14,16 @@ public class UserServiceImpl implements UserService {
 	UserRepository userRepository; 
 	
 	@Override
+	public User getUser(String uuid) {
+		User user = userRepository.get(uuid);
+		
+		if(Objects.isNull(user)) {
+			throw new EntityNotFoundException(String.format("User with id %s not found", uuid));
+		}
+		return user;
+	}
+	
+	@Override
 	public User createUser(String username, char[] password, String name) {
 		
 		/**
