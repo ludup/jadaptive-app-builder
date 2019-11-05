@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.jadaptive.user.User;
 
-public abstract class UserCommand extends AbstractCommand {
+public abstract class UserCommand extends AbstractTenantAwareCommand {
 
 	public UserCommand(String name, String subsystem, String signature, String description) {
 		super(name, subsystem, signature, description);
@@ -36,4 +36,7 @@ public abstract class UserCommand extends AbstractCommand {
 		return user;
 	}
 
+	protected boolean isCurrentUser(User user) {
+		return user.getUsername().equals(console.getEnvironment().get("USER"));
+	}
 }

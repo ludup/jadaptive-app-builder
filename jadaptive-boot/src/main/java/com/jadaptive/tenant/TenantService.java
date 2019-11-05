@@ -25,12 +25,14 @@ public interface TenantService {
 
 	void setCurrentTenant(HttpServletRequest request);
 
-	Tenant getTenantByName(String tenantName);
-
 	void setCurrentTenant(String name);
 
 	void deleteTenant(Tenant tenant);
 
-	Tenant getTenantByNameOrDefault(String name);
+	Tenant getTenantByDomainOrDefault(String name);
+
+	Tenant getTenantByDomain(String name);
+
+	void assertManageTenant();
 
 }

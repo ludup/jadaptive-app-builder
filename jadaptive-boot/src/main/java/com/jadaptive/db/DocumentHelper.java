@@ -5,9 +5,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -93,6 +93,7 @@ public class DocumentHelper {
 		document.put(name, embedded);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(T obj, Document document) throws ParseException {
 		
 		try {
@@ -143,7 +144,7 @@ public class DocumentHelper {
 						continue;
 					}
 					if(AbstractUUIDEntity.class.isAssignableFrom(type)) {
-						List<AbstractUUIDEntity> elements = new ArrayList<>();	
+						Collection<AbstractUUIDEntity> elements = new HashSet<>();	
 						for(Object embedded : list) {
 							Document embeddedDocument = (Document) embedded;
 							elements.add(convertDocumentToObject((AbstractUUIDEntity)type.newInstance(), embeddedDocument));
@@ -154,7 +155,7 @@ public class DocumentHelper {
 					} else {
 						
 						if(type.equals(String.class)) {
-							m.invoke(obj, list);
+							m.invoke(obj, new HashSet<String>((Collection<? extends String>) list));
 						} else if(type.equals(Boolean.class)) {
 							m.invoke(obj, buildBooleanCollection(list));
 						} else if(type.equals(Integer.class)) {
@@ -193,7 +194,7 @@ public class DocumentHelper {
 
 	private static Object buildEnumCollection(List<?> items, Class<?> type) {
 
-		List<Enum<?>> v = new ArrayList<>();
+		Collection<Enum<?>> v = new HashSet<>();
 		for(Object item : items) {
 			Enum<?>[] enumConstants = (Enum<?>[]) type.getEnumConstants();
 			if(NumberUtils.isCreatable(item.toString())) {
@@ -213,7 +214,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Date> buildDateCollection(List<?> items) throws ParseException {
-		List<Date> v = new ArrayList<>();
+		Collection<Date> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Utils.parseDateTime(item.toString()));
 		}
@@ -221,7 +222,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Double> buildDoubleCollection(List<?> items) {
-		List<Double> v = new ArrayList<>();
+		Collection<Double> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Double.parseDouble(item.toString()));
 		}
@@ -229,7 +230,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Float> buildFloatCollection(List<?> items) {
-		List<Float> v = new ArrayList<>();
+		Collection<Float> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Float.parseFloat(item.toString()));
 		}
@@ -237,7 +238,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Long> buildLongCollection(List<?> items) {
-		List<Long> v = new ArrayList<>();
+		Collection<Long> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Long.parseLong(item.toString()));
 		}
@@ -245,7 +246,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Integer> buildIntegerCollection(List<?> items) {
-		List<Integer> v = new ArrayList<>();
+		Collection<Integer> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Integer.parseInt(item.toString()));
 		}
@@ -253,7 +254,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Boolean> buildBooleanCollection(List<?> items) {
-		List<Boolean> v = new ArrayList<>();
+		Collection<Boolean> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Boolean.parseBoolean(item.toString()));
 		}

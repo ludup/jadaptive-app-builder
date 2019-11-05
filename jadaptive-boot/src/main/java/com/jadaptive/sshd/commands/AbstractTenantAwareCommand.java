@@ -15,7 +15,7 @@ import com.sshtools.server.vsession.ShellCommand;
 import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.VirtualConsole;
 
-public abstract class AbstractCommand extends ShellCommand {
+public abstract class AbstractTenantAwareCommand extends ShellCommand {
 
 	@Autowired
 	TenantService tenantService; 
@@ -26,7 +26,7 @@ public abstract class AbstractCommand extends ShellCommand {
 	protected VirtualConsole console;
 	protected String[] args;
 	
-	public AbstractCommand(String name, String subsystem, String signature, String description) {
+	public AbstractTenantAwareCommand(String name, String subsystem, String signature, String description) {
 		super(name, subsystem, signature, description);
 	}
 

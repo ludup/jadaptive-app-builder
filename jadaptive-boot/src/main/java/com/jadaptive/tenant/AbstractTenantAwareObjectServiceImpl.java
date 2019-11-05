@@ -12,7 +12,8 @@ import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.repository.AbstractUUIDEntity;
 import com.jadaptive.repository.RepositoryException;
 
-public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUIDEntity> implements AbstractTenantAwareObjectService<T> {
+public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUIDEntity> 
+					implements AbstractTenantAwareObjectService<T>, TenantAware {
 
 	
 	@Autowired
@@ -20,8 +21,12 @@ public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUI
 	
 	@PostConstruct
 	private void postConstruct() {
+	
+	}
+	
+	@Override
+	public void initializeTenant(Tenant tenant) {
 		permissionService.registerStandardPermissions(getResourceKey());
-		
 	}
 	
 	protected String getResourceKey() {
@@ -33,9 +38,14 @@ public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUI
 		permissionService.assertReadWrite(getResourceKey());
 	}
 	
+	protected void assertRead() {
+		permissionService.assertRead(getResourceKey());
+	}
+	
 	@Override
 	public T get(String uuid) throws RepositoryException, EntityException {
 		
+		assertRead();
 		
 		T e = getRepository().get(uuid);
 		
@@ -49,6 +59,7 @@ public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUI
 	@Override
 	public T get(String field, String value) throws RepositoryException, EntityException {
 		
+		assertRead();
 		
 		T e = getRepository().get(field, value);
 		
@@ -61,24 +72,25 @@ public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUI
 
 	@Override
 	public Collection<T> list() throws RepositoryException, EntityException {
-		
+		assertRead();
 		return getRepository().list();
 	}
 	
 	@Override
 	public Collection<T> table(String search, String order, int start, int length) throws RepositoryException, EntityException {
-		
+		assertRead();
 		return getRepository().table(search, order, start, length);
 	}
 	
 	@Override
 	public long count() {
+		assertRead();
 		return getRepository().count();
 	}
 
 	@Override
 	public void saveOrUpdate(T obj) throws RepositoryException, EntityException {
-		
+		assertReadWrite();
 		getRepository().saveOrUpdate(obj);
 		
 	}

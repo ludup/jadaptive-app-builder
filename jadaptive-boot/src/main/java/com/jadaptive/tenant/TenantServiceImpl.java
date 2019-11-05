@@ -36,7 +36,6 @@ import com.jadaptive.user.UserService;
 public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant> {
 
 	ThreadLocal<Tenant> currentTenant = new ThreadLocal<>();
-	ThreadLocal<User> currentUser = new ThreadLocal<>();
 	
 	final public static String SYSTEM_TENANT_UUID = "cb3129ea-b8b1-48a4-85de-8443945d95e3";
 	
@@ -68,29 +67,42 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	@EventListener
 	private void setup(ApplicationReadyEvent event) throws RepositoryException, EntityException {
 		
-		if(repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh")) {
-			repository.newSchema();
-			createTenant(SYSTEM_UUID, "System", "localhost", true);
-			
-			setCurrentTenant(getSystemTenant());
-			
-			try {
-				User user = userService.createUser("admin", "admin".toCharArray(), "Administrator");
-				roleService.assignRole(roleService.getAdministrationRole(), user);
-			} finally {
-				clearCurrentTenant();
+		permissionService.setupSystemContext();
+		
+		try {
+			if(repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh")) {
+				repository.newSchema();
+				createTenant(SYSTEM_UUID, "System", "localhost", true);
+				
+				setCurrentTenant(getSystemTenant());
+				
+				
+				try {
+					User user = userService.createUser("admin", "admin".toCharArray(), "Administrator");
+					roleService.assignRole(roleService.getAdministrationRole(), user);
+				} finally {
+					
+					clearCurrentTenant();
+				}
 			}
-		}
-		
-		permissionService.registerStandardPermissions(TENANT_RESOURCE_KEY);
-		
-		initialiseTenant(getSystemTenant());
-		
-		for(Tenant tenant : listTenants()) {
-			if(!tenant.getSystem()) {
-				initialiseTenant(tenant);
+			
+			permissionService.registerStandardPermissions(TENANT_RESOURCE_KEY);
+			
+			initialiseTenant(getSystemTenant());
+			
+			for(Tenant tenant : listTenants()) {
+				if(!tenant.getSystem()) {
+					initialiseTenant(tenant);
+				}
 			}
+		} finally {
+			permissionService.clearUserContext();
 		}
+	}
+	
+	@Override
+	public void assertManageTenant() {
+		permissionService.assertReadWrite(TENANT_RESOURCE_KEY);
 	}
 	
 	@Override
@@ -128,6 +140,11 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 				if(tenant.getSystem() || !repository.isSystemOnly()) { 
 					templateService.processTemplates(tenant, repository);		
 				}
+			}
+			
+			for(TenantAware aware : ApplicationServiceImpl.getInstance().getContext().getBeansOfType(
+						TenantAware.class).values()) {
+				aware.initializeTenant(tenant);
 			}
 	
 		} finally {
@@ -242,12 +259,12 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 
 	@Override
 	public void setCurrentTenant(HttpServletRequest request) {
-		setCurrentTenant(getTenantByNameOrDefault(request.getServerName()));
+		setCurrentTenant(getTenantByDomainOrDefault(request.getServerName()));
 	}
 	
 	@Override
 	public void setCurrentTenant(String name) {
-		setCurrentTenant(getTenantByNameOrDefault(name));
+		setCurrentTenant(getTenantByDomainOrDefault(name));
 	}
 
 	@Override
@@ -256,7 +273,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	}
 
 	@Override
-	public Tenant getTenantByName(String name) {
+	public Tenant getTenantByDomain(String name) {
 		Tenant tenant = tenantsByHostname.get(name);
 		if(Objects.isNull(tenant)) {
 			throw new EntityNotFoundException(String.format("Tenant %s not found", name));
@@ -265,7 +282,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	}
 	
 	@Override
-	public Tenant getTenantByNameOrDefault(String name) {
+	public Tenant getTenantByDomainOrDefault(String name) {
 		Tenant tenant = tenantsByHostname.get(name);
 		if(Objects.isNull(tenant)) {
 			return getSystemTenant();

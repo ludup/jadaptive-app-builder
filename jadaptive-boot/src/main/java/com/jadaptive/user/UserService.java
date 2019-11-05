@@ -12,4 +12,8 @@ public interface UserService {
 
 	User getUser(String uuid);
 
+	void changePassword(User user, char[] oldPassword, char[] newPassword);
+
+	void changePassword(User user, char[] newPassword);
+
 }

@@ -6,12 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.entity.EntityNotFoundException;
+import com.jadaptive.permissions.PermissionService;
+import com.jadaptive.tenant.Tenant;
+import com.jadaptive.tenant.TenantAware;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, TenantAware {
 
+	public static final String CHANGE_PASSWORD_PERMISSION = "user.changePassword";
+	public static final String SET_PASSWORD_PERMISSION = "user.setPassword";
+	public static final String USER_RESOURCE_KEY = "user";
+	
 	@Autowired
 	UserRepository userRepository; 
+	
+	@Autowired
+	PermissionService permissionService; 
 	
 	@Override
 	public User getUser(String uuid) {
@@ -26,9 +36,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User createUser(String username, char[] password, String name) {
 		
-		/**
-		 * TODO enforce permission
-		 */
+		permissionService.assertReadWrite(USER_RESOURCE_KEY);
 		
 		DefaultUser user = new DefaultUser();
 		user.setUsername(username);
@@ -60,11 +68,33 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void setPassword(User user, char[] newPassword) {
 		
-		/**
-		 * TODO enforce permission
-		 */
+		permissionService.assertPermission(SET_PASSWORD_PERMISSION);
 		userRepository.setPassword(user, newPassword);
 		
+	}
+	
+	@Override
+	public void changePassword(User user, char[] oldPassword, char[] newPassword) {
+		
+		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
+		verifyPassword(user, oldPassword);
+		userRepository.setPassword(user, newPassword);
+		
+	}
+	
+	@Override
+	public void changePassword(User user, char[] newPassword) {
+		
+		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
+		userRepository.setPassword(user, newPassword);
+		
+	}
+
+	@Override
+	public void initializeTenant(Tenant tenant) {
+		
+		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
+		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 	}
 
 }

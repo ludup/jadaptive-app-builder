@@ -2,11 +2,14 @@ package com.jadaptive.permissions;
 
 import java.util.Collection;
 
+import com.jadaptive.tenant.Tenant;
+import com.jadaptive.user.User;
+
 public interface PermissionService {
 
-	void assertAnyPermission(String resourceKey, String... permissions) throws PermissionDeniedException;
+	void assertAnyPermission(String... permissions) throws PermissionDeniedException;
 
-	void assertPermission(String resourceKey, String permission) throws PermissionDeniedException;
+	void assertPermission(String permission) throws PermissionDeniedException;
 
 	void assertRead(String resourceKey) throws PermissionDeniedException;
 
@@ -14,8 +17,20 @@ public interface PermissionService {
 
 	void registerStandardPermissions(String resourceKey);
 
-	void registerCustomPermission(String resourceKey, String permission);
-
 	Collection<String> getAllPermissions();
+
+	Collection<String> getAllPermissions(Tenant tenant);
+
+	void setupUserContext(User user);
+
+	User getCurrentUser();
+
+	void setupSystemContext();
+
+	void clearUserContext();
+
+	void registerCustomPermission(String customPermission);
+
+	boolean isValidPermission(String permission);
 
 }

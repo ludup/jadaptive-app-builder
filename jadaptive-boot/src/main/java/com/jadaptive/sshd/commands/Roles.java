@@ -15,6 +15,7 @@ import com.jadaptive.user.UserService;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
+import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
 public class Roles extends UserCommand {
@@ -26,7 +27,17 @@ public class Roles extends UserCommand {
 	UserService userService; 
 	
 	public Roles() {
-		super("roles", "User Management", "roles [options] [role] [user...]", "Manage roles");
+		super("roles", "User Management", UsageHelper.build("roles [option] [role] [user...]",
+				"-l, --list                           List roles",
+				"-c, --create <name>                  Create a role",
+				"-d, --delete <name>                  Delete a role",
+				"-a, --assign <name> <usernames...>   Assign a role to users",
+				"-u, --unassign <name> <usernames...> Unassign users from a role",
+				"-m, --members <name>                 List the members of a role",
+				"-p, --permissions <name>             List the permissions of a role",
+				"-g, --grant <name> <permissions...>  Grant one or more permissions to a role",
+				"-r, --revoke <name> <permissions...> Revoke one or more permissions from a role")
+				, "Manage roles");
 	}
 
 	@Override
@@ -35,10 +46,10 @@ public class Roles extends UserCommand {
 		
 		if(CliHelper.hasLongOption(args, "help")) {
 			printUsage();
-		} else if(args.length==1) {	
+		} else if(args.length==1 || CliHelper.hasShortOption(args, 'l') || CliHelper.hasLongOption(args, "list")) {	
 			printRoles(roleService.list());
-		} else if(args.length==2 && !args[1].startsWith("-")) {
-			printMembers(resolveRole(args[1]));
+		} else if(args.length==3 &&  (CliHelper.hasShortOption(args, 'm') || CliHelper.hasLongOption(args, "members"))) {
+			printMembers(resolveRole(args[2]));
 		} else if(CliHelper.hasShortOption(args, 'c') || CliHelper.hasLongOption(args, "create")) {
 			
 			String roleName = args[2];
@@ -80,14 +91,57 @@ public class Roles extends UserCommand {
 				console.println(String.format("%s was deleted", role.getName()));
 				break;
 			}
+			case "-p":
+			case "--permissions":
+			{
+				if(role.isAllPermissions()) {
+					console.println(String.format("%s contains all available permissions", role.getName()));
+				} else {
+					if(role.getPermissions().isEmpty()) {
+						console.println(String.format("%s does not contain any permissions", role.getName()));
+
+					} else {
+						for(String permission : role.getPermissions()) {
+							console.println(permission);
+						}
+					}
+				}
+				break;
+			}
+			case "-g":
+			case "--grant":
+			{
+				roleService.grantPermission(role, resolvePermissions());
+				console.println(String.format("Permissions were granted to role %s", role.getName()));
+				break;
+			}
+			case "-r":
+			case "--revoke":
+			{
+				roleService.revokePermission(role, resolvePermissions());
+				console.println(String.format("Permissions were revoked from role %s", role.getName()));
+				break;
+			}
 			default:
 				console.println("Invalid arguments!");
 				printUsage();
 				break;
 			}
+		} else {
+			console.println("Invalid arguments!");
+			printUsage();
 		}
 	}
 	
+	private String[] resolvePermissions() {
+		Set<String> permissions = new HashSet<>();
+		int argIndex = 3;
+		while(args.length > argIndex) {
+			permissions.add(args[argIndex++]);
+		}
+		return permissions.toArray(new String[0]);
+	}
+
 	private Collection<User> resolveUsers() {
 		Set<User> users = new HashSet<>();
 		int argIndex = 3;

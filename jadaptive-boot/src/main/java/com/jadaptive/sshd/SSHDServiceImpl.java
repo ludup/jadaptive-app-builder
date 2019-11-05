@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationProperties;
@@ -39,6 +40,9 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 	
 	@Autowired
 	JadaptiveCommandFactory userComands; 
+	
+	@Autowired
+	ApplicationContext context;
 	
 	public SSHDServiceImpl() throws UnknownHostException {
 		super();
@@ -72,8 +76,13 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 			@Override
 			protected ChannelNG<SshServerContext> createSessionChannel(SshConnection con)
 					throws UnsupportedChannelException, PermissionDeniedException {
-				return new VirtualShell(con, new ShellCommandFactory(
+				
+				VirtualShell shell = new VirtualShell(con, new ShellCommandFactory(
 						new FileSystemCommandFactory(), userComands));
+				
+				context.getAutowireCapableBeanFactory().autowireBean(shell);
+				
+				return shell;
 			}
 			
 		});

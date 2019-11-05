@@ -14,9 +14,9 @@ public interface RoleService extends AbstractTenantAwareObjectService<Role> {
 
 	Role getEveryoneRole();
 
-	void assignRole(Role role, User user);
+	void assignRole(Role role, User... user);
 
-	void unassignRole(Role role, User user);
+	void unassignRole(Role role, User... user);
 
 	Collection<Role> getRoles(User user);
 
@@ -25,5 +25,9 @@ public interface RoleService extends AbstractTenantAwareObjectService<Role> {
 	Role createRole(String roleName, User... users);
 	
 	Role createRole(String roleName, Collection<User> users);
+
+	void grantPermission(Role role, String... permissions);
+
+	void revokePermission(Role role, String... permissions);
 
 }

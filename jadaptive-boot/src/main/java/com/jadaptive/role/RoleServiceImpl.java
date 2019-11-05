@@ -10,6 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.entity.EntityException;
+import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.tenant.AbstractTenantAwareObjectServiceImpl;
 import com.jadaptive.tenant.events.TenantCreatedEvent;
@@ -25,6 +26,9 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	
 	@Autowired
 	RoleRepository repository; 
+	
+	@Autowired
+	PermissionService permissionService; 
 	
 	@Override
 	public AbstractTenantAwareObjectDatabase<Role> getRepository() {
@@ -64,6 +68,7 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	
 	@Override
 	public Collection<Role> getRoles(User user) {
+		
 		Set<Role> roles = new HashSet<>();
 		roles.addAll(repository.matchCollectionObjects("users", user.getUuid()));
 		roles.addAll(repository.list("allUsers", "true"));
@@ -72,6 +77,7 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	
 	@Override
 	public Role getRoleByName(String name) {
+		assertRead();
 		return get("name", name);
 	}
 	
@@ -98,7 +104,7 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	}
 	
 	@Override
-	public void assignRole(Role role, User user) {
+	public void assignRole(Role role, User... users) {
 		
 		assertReadWrite();
 		
@@ -106,25 +112,76 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 			throw new EntityException("You cannot assign a user to the Everyone role");
 		}
 		
-		if(role.getUsers().contains(user.getUuid())) {
-			throw new EntityException(String.format(
-					"%s is already a member of the %s role", user.getUsername(), role.getName()));
+		Set<String> uuids = new HashSet<>();
+		for(User user : users) {
+			if(role.getUsers().contains(user.getUuid())) {
+				throw new EntityException(String.format(
+						"%s is already a member of the %s role", user.getUsername(), role.getName()));
+			}
+			uuids.add(user.getUuid());
 		}
 		
-		role.getUsers().add(user.getUuid());
+		role.getUsers().addAll(uuids);
+		
 		saveOrUpdate(role);
 	}
 	
 	@Override
-	public void unassignRole(Role role, User user) {
+	public void grantPermission(Role role, String... permissions) {
 		
 		assertReadWrite();
 		
+		Set<String> resolved = new HashSet<>();
+		for(String permission : permissions) {
+			if(!permissionService.isValidPermission(permission)) {
+				throw new EntityException(String.format("%s is not a valid permission", permission));
+			}
+			if(role.getPermissions().contains(permission)) {
+				throw new EntityException(String.format("%s is already granted on %s", permission, role.getName()));
+			}
+			resolved.add(permission);
+		}
+		
+		role.getPermissions().addAll(resolved);
+		saveOrUpdate(role);
+	}
+	
+	@Override
+	public void revokePermission(Role role, String... permissions) {
+		
+		assertReadWrite();
+		
+		Set<String> resolved = new HashSet<>();
+		for(String permission : permissions) {
+			if(!permissionService.isValidPermission(permission)) {
+				throw new EntityException(String.format("%s is not a valid permission", permission));
+			}
+			if(!role.getPermissions().contains(permission)) {
+				throw new EntityException(String.format("%s is not granted on %s", permission, role.getName()));
+			}
+			resolved.add(permission);
+		}
+		
+		role.getPermissions().removeAll(resolved);
+		saveOrUpdate(role);
+	}
+	
+	@Override
+	public void unassignRole(Role role, User... users) {
+		
+		assertReadWrite();
+		
+		Set<String> uuids = new HashSet<>();
+		for(User user : users) {
+			uuids.add(user.getUuid());
+		}
+		
 		if(ADMINISTRATOR_UUID.equals(role.getUuid())) {
-			if(role.getUsers().size() < 2) {
-				if(role.getUsers().contains(user.getUuid())) {
-					throw new EntityException("You cannot remove the last user from the Administration role");
-				}
+			
+			Set<String> roleUuids = new HashSet<>(role.getUsers());
+			roleUuids.removeAll(uuids);
+			if(roleUuids.isEmpty()) {
+				throw new EntityException("This operation would remove the last user from the Administration role");
 			}
 		}
 		
@@ -132,7 +189,8 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 			throw new EntityException("You cannot unassign a user from the Everyone role");
 		}
 		
-		role.getUsers().remove(user.getUuid());
+		role.getUsers().removeAll(uuids);
+		
 		saveOrUpdate(role);
 	}
 }

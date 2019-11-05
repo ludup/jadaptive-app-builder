@@ -38,8 +38,14 @@ public class Passwd extends UserCommand {
 			}
 			
 			try {
-				userService.setPassword(user, newPassword);
-				console.println("Password changed!");
+				if(isCurrentUser(user)) {
+					userService.changePassword(user, newPassword);
+					console.println("Your password was changed!");
+				} else {
+					userService.setPassword(user, newPassword);
+					console.println(String.format("Password for %s changed!", user.getUsername()));
+				}
+				
 				break;
 			} catch(EntityException e) { 
 				continue;
