@@ -97,4 +97,9 @@ public class UserServiceImpl implements UserService, TenantAware {
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 	}
 
+	@Override
+	public Iterable<? extends User> iterateUsers() {
+		return userRepository.list();
+	}
+
 }

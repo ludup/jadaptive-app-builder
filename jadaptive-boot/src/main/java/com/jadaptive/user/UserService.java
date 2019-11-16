@@ -16,4 +16,6 @@ public interface UserService {
 
 	void changePassword(User user, char[] newPassword);
 
+	Iterable<? extends User> iterateUsers();
+
 }

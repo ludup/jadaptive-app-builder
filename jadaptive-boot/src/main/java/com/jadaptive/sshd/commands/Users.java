@@ -1,14 +1,10 @@
 package com.jadaptive.sshd.commands;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.role.Role;
 import com.jadaptive.user.User;
 import com.jadaptive.user.UserService;
 import com.sshtools.common.permissions.PermissionDeniedException;
