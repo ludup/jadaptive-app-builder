@@ -3,11 +3,11 @@ package com.jadaptive.permissions;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -115,7 +115,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 		Set<String> allPermissions = tenantPermissions.get(tenant);
 		if(Objects.isNull(allPermissions)) {
-			allPermissions = new HashSet<>();
+			allPermissions = new TreeSet<>();
 			tenantPermissions.put(tenant, allPermissions);
 		}
 		
@@ -172,7 +172,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			return;
 		}
 		
-		Set<String> allPermissions = new HashSet<>();
+		Set<String> allPermissions = new TreeSet<>();
 		Collection<Role> roles = roleService.getRoles(user);
 		for(Role role : roles) {
 			if(role.isAllPermissions()) {
