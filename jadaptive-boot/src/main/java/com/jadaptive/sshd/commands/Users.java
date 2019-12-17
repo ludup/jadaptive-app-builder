@@ -23,8 +23,8 @@ public class Users extends UserCommand {
 	
 	public Users() {
 		super("users", "User Management", UsageHelper.build("users [option] [user]",
-				"-l, --list                           List all users"),
-				"List all permissions");
+				"-l, --list          List all users"),
+				"List all users");
 	}
 
 	@Override

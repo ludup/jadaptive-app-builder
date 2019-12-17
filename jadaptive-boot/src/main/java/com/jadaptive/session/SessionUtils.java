@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.app.ApplicationProperties;
+import com.jadaptive.entity.EntityNotFoundException;
+import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.tenant.Tenant;
 
 @Component
@@ -37,44 +39,57 @@ public class SessionUtils {
 	@Autowired
 	SessionService sessionService;; 
 	
+	@Autowired
+	PermissionService permissionService; 
+	
+	
 	public Session getActiveSession(HttpServletRequest request) {
 		
 		Session session = null;
 		
-		if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
-			session = sessionService.get(request.getParameter(SESSION_COOKIE));
-		} else if(request.getHeader(SESSION_COOKIE) != null) {
-			session = sessionService.get((String)request.getHeader(SESSION_COOKIE));
-		}
+		permissionService.setupSystemContext();
 		
-		if (session != null && sessionService.isLoggedOn(session, true)) {
-			return session;
-		}
-		
-		if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
-			session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
-			if(sessionService.isLoggedOn(session, true)) {
+		try {
+			if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
+				session = sessionService.get(request.getParameter(SESSION_COOKIE));
+			} else if(request.getHeader(SESSION_COOKIE) != null) {
+				session = sessionService.get((String)request.getHeader(SESSION_COOKIE));
+			}
+			
+			if (session != null && sessionService.isLoggedOn(session, true)) {
 				return session;
 			}
-		}
-		
-		if (request.getSession().getAttribute(AUTHENTICATED_SESSION) != null) {
-			session = (Session) request.getSession().getAttribute(
-					AUTHENTICATED_SESSION);
-			if(sessionService.isLoggedOn(session, true)) {
-				return session;
+			
+			if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
+				session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
+				if(sessionService.isLoggedOn(session, true)) {
+					return session;
+				}
 			}
-		}
-		
-		if(Objects.nonNull(request.getCookies())) {
-			for (Cookie c : request.getCookies()) {
-				if (c.getName().equals(SESSION_COOKIE)) {
-					session = sessionService.get(c.getValue());
-					if (session != null && sessionService.isLoggedOn(session, true)) {
-						return session;
+			
+			if (request.getSession().getAttribute(AUTHENTICATED_SESSION) != null) {
+				session = (Session) request.getSession().getAttribute(
+						AUTHENTICATED_SESSION);
+				if(sessionService.isLoggedOn(session, true)) {
+					return session;
+				}
+			}
+			
+			if(Objects.nonNull(request.getCookies())) {
+				for (Cookie c : request.getCookies()) {
+					if (c.getName().equals(SESSION_COOKIE)) {
+						session = sessionService.get(c.getValue());
+						if (session != null && sessionService.isLoggedOn(session, true)) {
+							return session;
+						}
 					}
 				}
 			}
+			
+		} catch(EntityNotFoundException e) { 
+
+		} finally {
+			permissionService.clearUserContext();
 		}
 
 		return null;
@@ -133,7 +148,7 @@ public class SessionUtils {
 		request.setAttribute(AUTHENTICATED_SESSION, session);
 		request.getSession().setAttribute(AUTHENTICATED_SESSION, session);
 
-		addAPISession(request, response, session);
+		addSessionCookies(request, response, session);
 
 		return session;
 
@@ -245,7 +260,7 @@ public class SessionUtils {
 		return false;
 	}
 
-	public void addAPISession(HttpServletRequest request,
+	public void addSessionCookies(HttpServletRequest request,
 			HttpServletResponse response, Session session) {
 
 		Cookie cookie = new Cookie(SESSION_COOKIE, session.getUuid());

@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 
 import com.jadaptive.entity.EntityException;
+import com.jadaptive.permissions.AccessDeniedException;
 import com.jadaptive.repository.RepositoryException;
 
 public interface TenantService {
@@ -33,6 +34,6 @@ public interface TenantService {
 
 	Tenant getTenantByDomain(String name);
 
-	void assertManageTenant();
+	void assertManageTenant() throws AccessDeniedException;
 
 }

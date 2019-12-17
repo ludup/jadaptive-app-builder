@@ -143,7 +143,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
-	public void assertRead(String resourceKey) throws PermissionDeniedException {
+	public void assertRead(String resourceKey) throws AccessDeniedException {
 		assertAnyPermission(getReadPermission(resourceKey), getReadWritePermission(resourceKey));
 	}
 	
@@ -156,12 +156,12 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 
 	@Override 
-	public void assertReadWrite(String resourceKey) throws PermissionDeniedException {
+	public void assertReadWrite(String resourceKey) throws AccessDeniedException {
 		assertAnyPermission(getReadWritePermission(resourceKey));
 	}
 	
 	@Override
-	public void assertAnyPermission(String... permissions) throws PermissionDeniedException {
+	public void assertAnyPermission(String... permissions) throws AccessDeniedException {
 		User user = getCurrentUser();
 		
 		if(log.isInfoEnabled()) {
@@ -191,11 +191,45 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 					user.getUsername(), 
 					Utils.csv(allPermissions));
 		}
-		throw new PermissionDeniedException();
+		throw new AccessDeniedException();
 	}
 	
 	@Override
-	public void assertPermission(String permission) throws PermissionDeniedException {
+	public void assertAllPermission(String... permissions) throws AccessDeniedException {
+		User user = getCurrentUser();
+		
+		if(log.isInfoEnabled()) {
+			log.info(String.format("Asserting all permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
+		}
+		
+		if(user.getUuid().equals(SYSTEM_USER_UUID)) {
+			return;
+		}
+		
+		Set<String> allPermissions = new TreeSet<>();
+		Collection<Role> roles = roleService.getRoles(user);
+		for(Role role : roles) {
+			if(role.isAllPermissions()) {
+				return;
+			}
+			allPermissions.addAll(role.getPermissions());
+		}
+		
+		for(String permission : permissions) {
+			if(!allPermissions.contains(permission)) {
+				if(log.isInfoEnabled()) {
+					log.info("User {} denied permission from permission set {}", 
+							user.getUsername(), 
+							Utils.csv(allPermissions));
+				}
+				throw new AccessDeniedException();
+			}
+		}
+		
+	}
+	
+	@Override
+	public void assertPermission(String permission) throws AccessDeniedException {
 		assertAnyPermission(permission);
 	}
 
@@ -205,6 +239,16 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		Tenant tenant = tenantService.getCurrentTenant();
 		Set<String> allPermissions = tenantPermissions.get(tenant);
 		return allPermissions.contains(permission);
+	}
+
+	@Override
+	public boolean hasUserContext() {
+
+		Stack<User>  users = currentUser.get();
+		if(Objects.nonNull(users)) {
+			return !users.isEmpty();
+		}
+		return false;
 	}
 
 }

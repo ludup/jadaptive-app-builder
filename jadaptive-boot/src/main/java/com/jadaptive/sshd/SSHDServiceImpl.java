@@ -14,7 +14,10 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.app.ApplicationProperties;
 import com.jadaptive.app.ApplicationVersion;
-import com.jadaptive.sshd.commands.JadaptiveCommandFactory;
+import com.jadaptive.permissions.AccessDeniedException;
+import com.jadaptive.sshd.commands.SuperUserCommandFactory;
+import com.jadaptive.sshd.commands.TenantUserCommandFactory;
+import com.jadaptive.tenant.TenantService;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
@@ -36,13 +39,19 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 	static Logger log = LoggerFactory.getLogger(SSHDServiceImpl.class);
 
 	@Autowired
-	PasswordAuthenticatorImpl passwordAuthenticator; 
+	private PasswordAuthenticatorImpl passwordAuthenticator; 
 	
 	@Autowired
-	JadaptiveCommandFactory userComands; 
+	private SuperUserCommandFactory superUserCommands; 
 	
 	@Autowired
-	ApplicationContext context;
+	private TenantUserCommandFactory tenantUserCommands; 
+	
+	@Autowired
+	private ApplicationContext context;
+	
+	@Autowired
+	private TenantService tenantService; 
 	
 	public SSHDServiceImpl() throws UnknownHostException {
 		super();
@@ -58,9 +67,6 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 
 			addAuthenticator(passwordAuthenticator);
 
-			setFileFactory(new VirtualFileFactory(new VirtualMountTemplate("/", "tmp://", new VFSFileFactory()),
-					new VirtualMountTemplate("/conf", "conf", new VFSFileFactory())));
-
 			addInterface(extenalAccess ? "::" : "::1", port);
 			addInterface(extenalAccess ? "0.0.0.0" : "127.0.0.1", port);
 
@@ -70,6 +76,22 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 		}
 	}
 
+	@Override
+	protected void configureFilesystem(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
+		
+		VirtualFileFactory vff = new VirtualFileFactory(
+				new VirtualMountTemplate("/", "tmp://", new VFSFileFactory()));
+
+		if(tenantService.getCurrentTenant().getSystem()) {
+			try {
+				tenantService.assertManageTenant();
+				vff.addMountTemplate(new VirtualMountTemplate("/conf", "conf", new VFSFileFactory()));
+			} catch(AccessDeniedException e) { }
+		} 
+		
+		sshContext.setFileFactory(vff);
+	}
+	
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
 		sshContext.setChannelFactory(new VirtualChannelFactory() {
 
@@ -77,8 +99,18 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 			protected ChannelNG<SshServerContext> createSessionChannel(SshConnection con)
 					throws UnsupportedChannelException, PermissionDeniedException {
 				
-				VirtualShell shell = new VirtualShell(con, new ShellCommandFactory(
-						new FileSystemCommandFactory(), userComands));
+				ShellCommandFactory scf = new ShellCommandFactory(
+						new FileSystemCommandFactory(),
+						tenantUserCommands);
+				
+				if(tenantService.getCurrentTenant().getSystem()) {
+					try {
+						tenantService.assertManageTenant();
+						scf.installFactory(superUserCommands);
+					} catch(AccessDeniedException e) { }
+				} 
+				
+				VirtualShell shell = new VirtualShell(con, scf);
 				
 				context.getAutowireCapableBeanFactory().autowireBean(shell);
 				

@@ -7,13 +7,13 @@ import com.jadaptive.user.User;
 
 public interface PermissionService {
 
-	void assertAnyPermission(String... permissions) throws PermissionDeniedException;
+	void assertAnyPermission(String... permissions) throws AccessDeniedException;
 
-	void assertPermission(String permission) throws PermissionDeniedException;
+	void assertPermission(String permission) throws AccessDeniedException;
 
-	void assertRead(String resourceKey) throws PermissionDeniedException;
+	void assertRead(String resourceKey) throws AccessDeniedException;
 
-	void assertReadWrite(String resourceKey) throws PermissionDeniedException;
+	void assertReadWrite(String resourceKey) throws AccessDeniedException;
 
 	void registerStandardPermissions(String resourceKey);
 
@@ -32,5 +32,9 @@ public interface PermissionService {
 	void registerCustomPermission(String customPermission);
 
 	boolean isValidPermission(String permission);
+
+	void assertAllPermission(String... permissions);
+
+	boolean hasUserContext();
 
 }

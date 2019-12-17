@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.tenant.AbstractTenantAwareObjectServiceImpl;
+import com.jadaptive.tenant.Tenant;
+import com.jadaptive.user.User;
 
 @Service
 public class SessionServiceImpl extends AbstractTenantAwareObjectServiceImpl<Session> implements SessionService {
@@ -22,6 +24,22 @@ public class SessionServiceImpl extends AbstractTenantAwareObjectServiceImpl<Ses
 	@Override
 	public AbstractTenantAwareObjectDatabase<Session> getRepository() {
 		return repository;
+	}
+	
+	@Override
+	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent) {
+		
+		Session session = new Session();
+		session.setRemoteAddress(remoteAddress);
+		session.setSessionTimeout(60 * 15);
+		session.setSignedIn(new Date());
+		session.setTenant(tenant);
+		session.setUserAgent(userAgent);
+		session.setUsername(user.getUsername());
+		
+		saveOrUpdate(session);
+		
+		return session;
 	}
 
 	@Override

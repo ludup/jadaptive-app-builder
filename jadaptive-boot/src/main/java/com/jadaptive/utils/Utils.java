@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -117,14 +118,23 @@ public class Utils {
 	 * @throws ParseException
 	 */
 	public static Date parseDate(String date, String format) throws ParseException {
+		if(Objects.isNull(date)) {
+			return null;
+		}
 		return new SimpleDateFormat(format).parse(date);
 	}
 	
 	public static Date parseDateTime(String date) throws ParseException {
+		if(Objects.isNull(date)) {
+			return null;
+		}
 		return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss.SSS Z").parse(date);
 	}
 	
 	public static Date parseShortDate(String date) throws ParseException {
+		if(Objects.isNull(date)) {
+			return null;
+		}
 		return new SimpleDateFormat("EEE, d MMM yyyy").parse(date);
 	}
 	

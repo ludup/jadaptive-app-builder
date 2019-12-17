@@ -24,6 +24,7 @@ import com.jadaptive.entity.EntityService;
 import com.jadaptive.entity.template.EntityTemplate;
 import com.jadaptive.entity.template.EntityTemplateService;
 import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.session.SessionService;
 import com.jadaptive.templates.TemplateVersion;
 import com.jadaptive.templates.TemplateVersionService;
 
@@ -40,6 +41,9 @@ public class APIController {
 	
 	@Autowired
 	EntityService entityService;
+	
+	@Autowired
+	SessionService sessionService; 
 	
 	@RequestMapping(value="api/template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
@@ -219,6 +223,8 @@ public class APIController {
 			@RequestParam String order,
 			@RequestParam int offset,
 			@RequestParam int limit) throws RepositoryException, UnknownEntityException, EntityException {
+		
+		
 		try {
 			   return new EntityTableStatus<Entity>(templateService.get(resourceKey), 
 					   entityService.table(resourceKey, offset, limit),
@@ -230,4 +236,5 @@ public class APIController {
 			return new EntityTableStatus<Entity>(false, e.getMessage());
 		}
 	}
+
 }
