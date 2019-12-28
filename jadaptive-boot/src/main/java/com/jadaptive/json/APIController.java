@@ -126,7 +126,7 @@ public class APIController {
 	@ResponseStatus(value=HttpStatus.OK)
 	public TableStatus<EntityTemplate> getTemplateTable(HttpServletRequest request,
 			@RequestParam(required=false) String search,
-			@RequestParam String order,
+			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam int offset,
 			@RequestParam int limit) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
@@ -220,9 +220,9 @@ public class APIController {
 	public EntityTableStatus<Entity> tableEntities(HttpServletRequest request, 
 			@PathVariable String resourceKey,
 			@RequestParam(required=false) String search,
-			@RequestParam String order,
-			@RequestParam int offset,
-			@RequestParam int limit) throws RepositoryException, UnknownEntityException, EntityException {
+			@RequestParam(required=false, defaultValue = "asc") String order,
+			@RequestParam(required=false, defaultValue = "0") int offset,
+			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, EntityException {
 		
 		
 		try {
