@@ -93,7 +93,11 @@ public class SecurityPropertyServiceImpl implements SecurityPropertyService {
 	
 	private List<Path> resolveSecurityFiles(String resourceUri, File rootFolder, Collection<ResourcePackage> packages) {
 		List<Path> securityProperties = new ArrayList<>();
-		List<String> parentFolders = FileUtils.getParentPaths(FileUtils.checkStartsWithSlash(resourceUri));
+		List<String> parentFolders = new ArrayList<>();
+		if(resourceUri.endsWith("/")) {
+			parentFolders.add(resourceUri);
+		}
+		parentFolders.addAll(FileUtils.getParentPaths(FileUtils.checkStartsWithSlash(resourceUri)));
 		for(String parentFolder : parentFolders) {
 			String securityFile = FileUtils.checkEndsWithSlash(parentFolder) + "security.properties";
 			File res = new File(rootFolder, securityFile);
