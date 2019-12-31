@@ -45,8 +45,8 @@
 
 	<modules>
 		<module>jadaptive-api</module>
-		<module>jadaptive-sshd</module>
 		<module>jadaptive-boot</module>
+		<module>plugins/example-plugin</module>
 	</modules>
 
 	<dependencies>
