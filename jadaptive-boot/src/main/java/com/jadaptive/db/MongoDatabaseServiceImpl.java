@@ -33,8 +33,8 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 	protected void connect() throws IOException {
 		
 		mongoClient = new MongoClient(
-				ApplicationProperties.getValue("hostname", "localhost"),
-				ApplicationProperties.getValue("port", 32768));
+				ApplicationProperties.getValue("mongodb.hostname", "localhost"),
+				ApplicationProperties.getValue("mongodb.port", 32768));
 	}
 
 }

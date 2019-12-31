@@ -10,3 +10,4 @@
 /ssh_host_ecdsa_521.pub
 /ssh_host_rsa
 /ssh_host_rsa.pub
+*.factorypath
