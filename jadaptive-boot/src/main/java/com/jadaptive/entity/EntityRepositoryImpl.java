@@ -107,10 +107,10 @@ public class EntityRepositoryImpl implements EntityRepository {
 	}
 
 	@Override
-	public Collection<Entity> table(String resourceKey, int offset, int limit) {
+	public Collection<Entity> table(String resourceKey, String field, String search, int offset, int limit) {
 		List<Entity> results = new ArrayList<>();
 		
-		for(Document document : db.table(resourceKey, tenantService.getCurrentTenant().getUuid(), offset, limit)) {
+		for(Document document : db.table(resourceKey, field, search, tenantService.getCurrentTenant().getUuid(), offset, limit)) {
 			results.add(buildEntity(resourceKey, document));
 		}
 		
@@ -120,6 +120,11 @@ public class EntityRepositoryImpl implements EntityRepository {
 	@Override
 	public long count(String resourceKey) {
 		return db.count(resourceKey, tenantService.getCurrentTenant().getUuid());
+	}
+	
+	@Override
+	public long count(String resourceKey, String searchField, String searchValue) {
+		return db.count(resourceKey, searchField, searchValue, tenantService.getCurrentTenant().getUuid());
 	}
 
 

@@ -134,12 +134,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 
-	protected <T extends AbstractUUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, int start, int length) throws RepositoryException, EntityException {
+	protected <T extends AbstractUUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, String searchField, String searchValue, int start, int length) throws RepositoryException, EntityException {
 		
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.table(clz.getName(), database, start, length)) {
+			for(Document document : db.table(clz.getName(), searchField, searchValue, database, start, length)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
 			}
 			

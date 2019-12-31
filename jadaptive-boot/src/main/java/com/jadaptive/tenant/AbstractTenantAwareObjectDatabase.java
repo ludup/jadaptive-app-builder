@@ -18,7 +18,7 @@ public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity>
 
 	void saveOrUpdate(T obj) throws RepositoryException, EntityException;
 
-	Collection<T> table(String search, String order, int start, int length);
+	Collection<T> table(String searchField, String searchValue, String order, int start, int length);
 
 	long count();
 

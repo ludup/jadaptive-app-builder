@@ -164,8 +164,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public void assertAnyPermission(String... permissions) throws AccessDeniedException {
 		User user = getCurrentUser();
 		
-		if(log.isInfoEnabled()) {
-			log.info(String.format("Asserting permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
+		if(log.isDebugEnabled()) {
+			log.debug(String.format("Asserting permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
 		}
 		
 		if(user.getUuid().equals(SYSTEM_USER_UUID)) {
@@ -198,8 +198,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public void assertAllPermission(String... permissions) throws AccessDeniedException {
 		User user = getCurrentUser();
 		
-		if(log.isInfoEnabled()) {
-			log.info(String.format("Asserting all permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
+		if(log.isDebugEnabled()) {
+			log.debug(String.format("Asserting all permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
 		}
 		
 		if(user.getUuid().equals(SYSTEM_USER_UUID)) {

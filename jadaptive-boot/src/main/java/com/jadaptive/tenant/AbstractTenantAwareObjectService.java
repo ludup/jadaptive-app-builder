@@ -13,7 +13,7 @@ public interface AbstractTenantAwareObjectService<T extends AbstractUUIDEntity> 
 
 	Collection<T> list() throws RepositoryException, EntityException;
 	
-	Collection<T> table(String search, String order, int start, int length) throws RepositoryException, EntityException;
+	Collection<T> table(String searchField, String searchValue, String order, int start, int length) throws RepositoryException, EntityException;
 
 	void saveOrUpdate(T template) throws RepositoryException, EntityException;
 

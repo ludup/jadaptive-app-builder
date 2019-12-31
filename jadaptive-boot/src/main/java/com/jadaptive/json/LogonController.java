@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.jadaptive.app.ApplicationProperties;
 import com.jadaptive.app.SecurityPropertyService;
 import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.session.Session;

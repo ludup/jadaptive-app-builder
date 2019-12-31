@@ -103,11 +103,25 @@ $(document).ready(function() {
 				dataField: 'result',
 				url: '/api/' + t.uuid + '/table',
 				pagination: true,
-				columns: columns
+				columns: columns,
+				search: true,
+				queryParams: function(params) {
+					params['searchField'] = $('#searchField').val();
+					return params;
+				}
 			});
 			
 			$('#table').off('post-header.bs.table');
 			$('#table').on('post-header.bs.table', function(e) {
+				
+				if($('#searchField').length == 0) {
+					$('.search').parent().append('<div class="float-right btn-group"><select id="searchField"></select></div>');
+					
+					$.each(t.fields, function(idx, obj) {
+						$('#searchField').append('<option value="' + obj.resourceKey + '">' + obj.name + '</option>');
+					});
+				}
+				
 				$('.clickEdit').off('click');
 				$('.clickDelete').off('click');
 				

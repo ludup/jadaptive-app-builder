@@ -91,16 +91,37 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 	
 	@Override
-	public Iterable<Document> table(String table, String database, int start, int length) {
+	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.find().skip(start).limit(length);
+		if(StringUtils.isBlank(searchField)) {
+			// Default the search field?
+		}
+		if(StringUtils.isBlank(searchValue)) {
+			return collection.find().skip(start).limit(length);
+		} else {
+			return collection.find(Filters.regex(searchField, searchValue)).skip(start).limit(length);
+		}
 	}
 
 	@Override
 	public Long count(String table, String database) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		return collection.countDocuments();
+	}
+	
+	@Override
+	public Long count(String table, String searchField, String searchValue, String database) {
+		MongoCollection<Document> collection = getCollection(table, database);
+		if(StringUtils.isBlank(searchField)) {
+			// Default the search field?
+		}
+		if(StringUtils.isBlank(searchValue)) {
+			return collection.countDocuments();
+		} else {
+			return collection.countDocuments(Filters.regex(searchField, searchValue));
+		}
+		
 	}
 
 	@Override

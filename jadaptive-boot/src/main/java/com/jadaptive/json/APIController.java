@@ -125,13 +125,14 @@ public class APIController {
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public TableStatus<EntityTemplate> getTemplateTable(HttpServletRequest request,
-			@RequestParam(required=false) String search,
+			@RequestParam(required=false) String searchField,
+			@RequestParam(required=false, name="search") String searchValue,
 			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam int offset,
 			@RequestParam int limit) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
 
-		   return new TableStatus<EntityTemplate>(templateService.table(search, order, offset, limit), templateService.count());
+		   return new TableStatus<EntityTemplate>(templateService.table(searchField, searchValue, order, offset, limit), templateService.count());
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/template/list", e);
@@ -219,7 +220,8 @@ public class APIController {
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityTableStatus<Entity> tableEntities(HttpServletRequest request, 
 			@PathVariable String resourceKey,
-			@RequestParam(required=false) String search,
+			@RequestParam(required=false) String searchField,
+			@RequestParam(required=false, name="search") String searchValue,
 			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam(required=false, defaultValue = "0") int offset,
 			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, EntityException {
@@ -227,8 +229,8 @@ public class APIController {
 		
 		try {
 			   return new EntityTableStatus<Entity>(templateService.get(resourceKey), 
-					   entityService.table(resourceKey, offset, limit),
-					   entityService.count(resourceKey));
+					   entityService.table(resourceKey, searchField, searchValue, offset, limit),
+					   entityService.count(resourceKey, searchField, searchValue));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/table", resourceKey, e);

@@ -77,9 +77,9 @@ public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUI
 	}
 	
 	@Override
-	public Collection<T> table(String search, String order, int start, int length) throws RepositoryException, EntityException {
+	public Collection<T> table(String searchField, String searchValue,  String order, int start, int length) throws RepositoryException, EntityException {
 		assertRead();
-		return getRepository().table(search, order, start, length);
+		return getRepository().table(searchField, searchValue, order, start, length);
 	}
 	
 	@Override

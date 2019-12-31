@@ -16,18 +16,22 @@ public interface DocumentDatabase {
 
 	Long count(String name, String database);
 
+	Long count(String table, String searchField, String searchValue, String database);
+	
 	void dropCollection(String resourceKey, String uuid);
 
 	Document getFirst(String uuid, String resourceKey, String uuid2);
 
 	void dropDatabase(String uuid);
 
-	Iterable<Document> table(String table, String database, int start, int length);
+	Iterable<Document> table(String table, String field, String value, String database, int start, int length);
 
 	Document find(String field, String value, String table, String database);
 
 	Iterable<Document> list(String field, String value, String table, String database);
 
 	Iterable<Document> matchCollectionField(String field, String value, String table, String database);
+
+	
 
 }

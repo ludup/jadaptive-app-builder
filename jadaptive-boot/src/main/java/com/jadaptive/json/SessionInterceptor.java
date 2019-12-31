@@ -17,7 +17,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import com.jadaptive.app.SecurityPropertyService;
 import com.jadaptive.permissions.PermissionService;
 import com.jadaptive.session.Session;
-import com.jadaptive.session.SessionService;
 import com.jadaptive.session.SessionUtils;
 import com.jadaptive.tenant.TenantService;
 import com.jadaptive.user.UserService;

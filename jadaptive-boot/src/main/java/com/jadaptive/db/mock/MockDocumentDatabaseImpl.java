@@ -64,7 +64,7 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public Iterable<Document> table(String table, String database, int start, int length) {
+	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length) {
 		Collection<Document> tmp = getCollection(table, database).values();
 		return new ArrayList<>(tmp).subList(start, Math.min(start + length, tmp.size()-1));
 	}
@@ -105,6 +105,12 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public Iterable<Document> matchCollectionField(String field, String value, String table, String database) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long count(String table, String searchField, String searchValue, String database) {
 		// TODO Auto-generated method stub
 		return null;
 	}
