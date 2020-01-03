@@ -1,8 +1,6 @@
 package com.jadaptive.app;
 
 import javax.annotation.PreDestroy;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 
 import org.pf4j.spring.SpringPluginManager;
 import org.springframework.context.annotation.Bean;

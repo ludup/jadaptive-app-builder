@@ -9,49 +9,40 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>example-plugin</artifactId>
-	<name>Demo Plugin #1</name>
+	<artifactId>jadaptive-ssh-management</artifactId>
+	<name>SSH Management</name>
 
 	<properties>
-		<plugin.id>example-plugin</plugin.id>
-		<plugin.class>com.jadaptive.plugins.example.ExamplePlugin</plugin.class>
+		<plugin.id>jadaptive-ssh-management</plugin.id>
+		<plugin.class>com.jadaptive.plugins.ssh.management.SSHDManagementPlugin</plugin.class>
 		<plugin.version>0.0.1</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.dependencies />
 	</properties>
 
 	<dependencies>
+
 		<dependency>
-			<groupId>com.jadaptive</groupId>
-			<artifactId>jadaptive-api</artifactId>
-			<version>${project.version}</version>
+			<groupId>com.sshtools</groupId>
+			<artifactId>maverick-synergy-server</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
+
 		<dependency>
-			<groupId>com.jadaptive</groupId>
-			<artifactId>jadaptive-boot</artifactId>
-			<version>${project.version}</version>
+			<groupId>com.sshtools</groupId>
+			<artifactId>maverick-virtual-session</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sshtools</groupId>
+			<artifactId>maverick-virtual-filesystem</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Plugin-Id>${plugin.id}</Plugin-Id>
-							<Plugin-Class>${plugin.class}</Plugin-Class>
-							<Plugin-Version>${plugin.version}</Plugin-Version>
-							<Plugin-Provider>${plugin.provider}</Plugin-Provider>
-							<Plugin-Dependencies>${plugin.dependencies}</Plugin-Dependencies>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>
