@@ -3,7 +3,7 @@ package com.jadaptive.db;
 import java.util.Arrays;
 import java.util.Collection;
 
-import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 public class TestEnumCollections extends AbstractUUIDEntity {
 

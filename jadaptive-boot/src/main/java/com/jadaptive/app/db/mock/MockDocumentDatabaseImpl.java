@@ -1,4 +1,4 @@
-package com.jadaptive.db.mock;
+package com.jadaptive.app.db.mock;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,9 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
-import com.jadaptive.db.DocumentDatabase;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 public class MockDocumentDatabaseImpl implements DocumentDatabase {
 

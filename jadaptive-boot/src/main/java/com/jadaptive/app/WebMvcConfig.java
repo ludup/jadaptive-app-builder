@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.jadaptive.json.SessionInterceptor;
+import com.jadaptive.app.json.SessionInterceptor;
 
 @Configuration
-@ServletComponentScan(basePackages = { "com.jadaptive" })
+@ServletComponentScan(basePackages = { "com.jadaptive.app" })
 public class WebMvcConfig implements WebMvcConfigurer {
  
 	@Autowired

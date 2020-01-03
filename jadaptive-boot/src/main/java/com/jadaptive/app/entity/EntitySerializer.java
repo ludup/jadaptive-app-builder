@@ -1,4 +1,4 @@
-package com.jadaptive.entity;
+package com.jadaptive.app.entity;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -10,24 +10,24 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
-import com.jadaptive.entity.template.EntityTemplate;
-import com.jadaptive.entity.template.EntityTemplateService;
-import com.jadaptive.entity.template.FieldTemplate;
-import com.jadaptive.entity.template.ValidationType;
 
-public class EntitySerializer extends StdSerializer<Entity> {
+public class EntitySerializer extends StdSerializer<MongoEntity> {
 
 	private static final long serialVersionUID = 5624312163275460262L;
 
 	static Logger log = LoggerFactory.getLogger(EntitySerializer.class);
 	
 	public EntitySerializer() {
-		super(Entity.class);
+		super(MongoEntity.class);
 	}
 
 	@Override
-	public void serialize(Entity value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+	public void serialize(MongoEntity value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 		try {
 			EntityTemplate template = ApplicationServiceImpl.getInstance().getBean(
@@ -41,7 +41,7 @@ public class EntitySerializer extends StdSerializer<Entity> {
 
 	}
 	
-	private void writeObject(Entity value, EntityTemplate template, JsonGenerator gen) throws IOException {
+	private void writeObject(MongoEntity value, EntityTemplate template, JsonGenerator gen) throws IOException {
 		
 		gen.writeStartObject();
 		
@@ -56,7 +56,7 @@ public class EntitySerializer extends StdSerializer<Entity> {
 	}
 
 
-	private void writeEmbeddedObject(Entity value, EntityTemplate template, JsonGenerator gen) throws IOException {
+	private void writeEmbeddedObject(MongoEntity value, EntityTemplate template, JsonGenerator gen) throws IOException {
 		
 		gen.writeObjectFieldStart(value.getResourceKey());
 		
@@ -70,7 +70,7 @@ public class EntitySerializer extends StdSerializer<Entity> {
 		gen.writeEndObject();
 	}
 	
-	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, Entity value) throws IOException {
+	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, MongoEntity value) throws IOException {
 		
 		if(!Objects.isNull(templates)) {
 			for (FieldTemplate t : templates) {
@@ -90,7 +90,7 @@ public class EntitySerializer extends StdSerializer<Entity> {
 					gen.writeNumberField(t.getResourceKey(), Long.parseLong(value.getValue(t)));
 					break;
 				case OBJECT_EMBEDDED:
-					Entity child = value.getChild(t);
+					MongoEntity child = value.getChild(t);
 					String type = t.getValidationValue(ValidationType.OBJECT_TYPE);
 					writeEmbeddedObject(child, 
 							ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class).get(type), 

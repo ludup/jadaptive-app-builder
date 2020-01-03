@@ -1,6 +1,6 @@
-package com.jadaptive.user;
+package com.jadaptive.api.user;
 
-import com.jadaptive.tenant.AbstractTenantAwareObjectDatabase;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 
 public interface UserRepository extends AbstractTenantAwareObjectDatabase<DefaultUser> {
 

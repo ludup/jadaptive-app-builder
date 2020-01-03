@@ -1,4 +1,4 @@
-package com.jadaptive.user;
+package com.jadaptive.api.user;
 
 public interface UserService {
 

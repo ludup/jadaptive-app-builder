@@ -1,14 +1,18 @@
-package com.jadaptive.user;
+package com.jadaptive.app.user;
 
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.tenant.Tenant;
-import com.jadaptive.tenant.TenantAware;
+import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.user.DefaultUser;
+import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserRepository;
+import com.jadaptive.api.user.UserService;
 
 @Service
 public class UserServiceImpl implements UserService, TenantAware {

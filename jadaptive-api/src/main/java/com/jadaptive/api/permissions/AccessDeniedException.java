@@ -1,4 +1,4 @@
-package com.jadaptive.permissions;
+package com.jadaptive.api.permissions;
 
 public class AccessDeniedException extends RuntimeException {
 

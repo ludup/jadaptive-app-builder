@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
-import com.jadaptive.tenant.Tenant;
+import com.jadaptive.api.tenant.Tenant;
 
 public class ConfigHelper {
 
@@ -73,21 +73,23 @@ public class ConfigHelper {
 		
 		if(sharedPackages==null) {
 			sharedPackages = new ArrayList<>();
-			for(File pkg : getSharedFolder().listFiles(new FilenameFilter() {
+			File[] pkgs = getSharedFolder().listFiles(new FilenameFilter() {
 	
 				@Override
 				public boolean accept(File dir, String name) {
 					return name.endsWith(".zip");
 				}
-			})) {
-				try {
-					URI uri = new URI(String.format("jar:%s", pkg.toURI().toString()));
-					sharedPackages.add(getZipPackage(uri, pkg.getName()));
-				} catch (URISyntaxException e) {
-					throw new IOException(e.getMessage(), e);
+			});
+			if(Objects.nonNull(pkgs)) {
+				for(File pkg : pkgs) {
+					try {
+						URI uri = new URI(String.format("jar:%s", pkg.toURI().toString()));
+						sharedPackages.add(getZipPackage(uri, pkg.getName()));
+					} catch (URISyntaxException e) {
+						throw new IOException(e.getMessage(), e);
+					}
 				}
 			}
-			
 			
 		}
 		return Collections.unmodifiableCollection(sharedPackages);
@@ -125,21 +127,23 @@ public class ConfigHelper {
 		
 		if(systemPrivatePackages==null) {
 			systemPrivatePackages = new ArrayList<>();
-			for(File pkg : getSystemPrivateFolder().listFiles(new FilenameFilter() {
+			File[] pkgs = getSystemPrivateFolder().listFiles(new FilenameFilter() {
 	
 				@Override
 				public boolean accept(File dir, String name) {
 					return name.endsWith(".zip");
 				}
-			})) {
-				try {
-					URI uri = new URI(String.format("jar:%s", pkg.toURI().toString()));
-					systemPrivatePackages.add(getZipPackage(uri, pkg.getName()));
-				} catch (URISyntaxException e) {
-					throw new IOException(e.getMessage(), e);
+			});
+			if(Objects.nonNull(pkgs)) {
+				for(File pkg : pkgs) {
+					try {
+						URI uri = new URI(String.format("jar:%s", pkg.toURI().toString()));
+						systemPrivatePackages.add(getZipPackage(uri, pkg.getName()));
+					} catch (URISyntaxException e) {
+						throw new IOException(e.getMessage(), e);
+					}
 				}
 			}
-			
 			
 		}
 		return Collections.unmodifiableCollection(systemPrivatePackages);

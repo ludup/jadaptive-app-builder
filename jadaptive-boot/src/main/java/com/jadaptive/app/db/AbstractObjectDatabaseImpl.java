@@ -1,4 +1,4 @@
-package com.jadaptive.db;
+package com.jadaptive.app.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,10 +7,11 @@ import java.util.Objects;
 
 import org.bson.Document;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.api.db.AbstractObjectDatabase;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.RepositoryException;
 
 public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 

@@ -1,4 +1,4 @@
-package com.jadaptive.entity;
+package com.jadaptive.app.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,16 +10,18 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.db.DocumentDatabase;
-import com.jadaptive.entity.template.EntityTemplate;
-import com.jadaptive.entity.template.EntityTemplateService;
-import com.jadaptive.entity.template.FieldTemplate;
-import com.jadaptive.entity.template.ValidationType;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.tenant.TenantService;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityRepository;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.repository.RepositoryException;
 
 @Repository
-public class EntityRepositoryImpl implements EntityRepository {
+public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 
 	@Autowired
 	DocumentDatabase db;
@@ -31,9 +33,9 @@ public class EntityRepositoryImpl implements EntityRepository {
 	EntityTemplateService templateService; 
 	
 	@Override
-	public Collection<Entity> list(String resourceKey) throws RepositoryException, EntityException {
+	public Collection<MongoEntity> list(String resourceKey) throws RepositoryException, EntityException {
 		
-		List<Entity> results = new ArrayList<>();
+		List<MongoEntity> results = new ArrayList<>();
 		
 		for(Document document : db.list(resourceKey, tenantService.getCurrentTenant().getUuid())) {
 			results.add(buildEntity(resourceKey, document));
@@ -42,8 +44,8 @@ public class EntityRepositoryImpl implements EntityRepository {
 		return results;
 	}
 
-	private Entity buildEntity(String resourceKey, Document document) {
-		Entity e = new Entity(resourceKey, document);
+	private MongoEntity buildEntity(String resourceKey, Document document) {
+		MongoEntity e = new MongoEntity(resourceKey, document);
 		e.setUuid(document.getString("_id"));
 		e.setHidden(Boolean.valueOf(document.getString("hidden")));
 		e.setSystem(Boolean.valueOf(document.getString("system")));
@@ -51,7 +53,7 @@ public class EntityRepositoryImpl implements EntityRepository {
 	}
 	
 	@Override
-	public Entity get(String uuid, String resourceKey) throws RepositoryException, EntityException {
+	public MongoEntity get(String uuid, String resourceKey) throws RepositoryException, EntityException {
 		return buildEntity(resourceKey, db.get(uuid, resourceKey, tenantService.getCurrentTenant().getUuid()));
 	}
 
@@ -68,7 +70,7 @@ public class EntityRepositoryImpl implements EntityRepository {
 	}
 	
 	@Override
-	public void save(Entity entity) throws RepositoryException, EntityException {
+	public void save(MongoEntity entity) throws RepositoryException, EntityException {
 		
 		EntityTemplate template = templateService.get(entity.getResourceKey());
 		
@@ -77,11 +79,11 @@ public class EntityRepositoryImpl implements EntityRepository {
 		db.insertOrUpdate(entity, entity.getDocument(), entity.getResourceKey(), tenantService.getCurrentTenant().getUuid());
 	}
 
-	private void validateReferences(EntityTemplate template, Entity entity) {
+	private void validateReferences(EntityTemplate template, MongoEntity entity) {
 		validateReferences(template.getFields(), entity);
 	}
 
-	private void validateReferences(Collection<FieldTemplate> fields, Entity entity) {
+	private void validateReferences(Collection<FieldTemplate> fields, MongoEntity entity) {
 		if(!Objects.isNull(fields)) {
 			for(FieldTemplate t : fields) {
 				switch(t.getFieldType()) {
@@ -107,8 +109,8 @@ public class EntityRepositoryImpl implements EntityRepository {
 	}
 
 	@Override
-	public Collection<Entity> table(String resourceKey, String field, String search, int offset, int limit) {
-		List<Entity> results = new ArrayList<>();
+	public Collection<MongoEntity> table(String resourceKey, String field, String search, int offset, int limit) {
+		List<MongoEntity> results = new ArrayList<>();
 		
 		for(Document document : db.table(resourceKey, field, search, tenantService.getCurrentTenant().getUuid(), offset, limit)) {
 			results.add(buildEntity(resourceKey, document));

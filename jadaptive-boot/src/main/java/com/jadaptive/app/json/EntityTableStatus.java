@@ -1,8 +1,8 @@
-package com.jadaptive.json;
+package com.jadaptive.app.json;
 
 import java.util.Collection;
 
-import com.jadaptive.entity.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplate;
 
 public class EntityTableStatus<T> extends TableStatus<T> {
 

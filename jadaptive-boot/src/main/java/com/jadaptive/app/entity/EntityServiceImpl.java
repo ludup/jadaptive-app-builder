@@ -1,4 +1,4 @@
-package com.jadaptive.entity;
+package com.jadaptive.app.entity;
 
 import java.util.Collection;
 import java.util.List;
@@ -6,19 +6,23 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.entity.template.EntityTemplate;
-import com.jadaptive.entity.template.EntityTemplateService;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.repository.TransactionAdapter;
-import com.jadaptive.templates.SystemTemplates;
-import com.jadaptive.templates.TemplateEnabledService;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityRepository;
+import com.jadaptive.api.entity.EntityService;
+import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.templates.SystemTemplates;
+import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.app.repository.TransactionAdapter;
 
 @Service
-public class EntityServiceImpl implements EntityService, TemplateEnabledService<Entity> {
+public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEnabledService<MongoEntity> {
 
 	@Autowired
-	EntityRepository entityRepository;
+	EntityRepository<MongoEntity> entityRepository;
 	
 	@Autowired
 	EntityTemplateService templateService;
@@ -27,14 +31,14 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
 	PermissionService permissionService; 
 	
 	@Override
-	public Entity getSingleton(String resourceKey) throws RepositoryException, EntityException {
+	public MongoEntity getSingleton(String resourceKey) throws RepositoryException, EntityException {
 
 		EntityTemplate template = templateService.get(resourceKey);
 		if(template.getType()!=EntityType.SINGLETON) {
 			throw new EntityException(String.format("%s is not a singleton entity", resourceKey));
 		}
 		
-		Entity e = entityRepository.get(resourceKey, resourceKey);
+		MongoEntity e = entityRepository.get(resourceKey, resourceKey);
 		if(!resourceKey.equals(e.getResourceKey())) {
 			throw new IllegalStateException();
 		}
@@ -42,14 +46,14 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
  	}
 	
 	@Override
-	public Entity get(String resourceKey, String uuid) throws RepositoryException, EntityException {
+	public MongoEntity get(String resourceKey, String uuid) throws RepositoryException, EntityException {
 
 		EntityTemplate template = templateService.get(resourceKey);
 		if(template.getType()!=EntityType.COLLECTION) {
 			throw new EntityException(String.format("%s is not a collection entity", resourceKey));
 		}
 		
-		Entity e = entityRepository.get(uuid, resourceKey);
+		MongoEntity e = entityRepository.get(uuid, resourceKey);
 		if(!resourceKey.equals(e.getResourceKey())) {
 			throw new IllegalStateException();
 		}
@@ -58,13 +62,13 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
 
 
 	@Override
-	public Collection<Entity> list(String resourceKey) throws RepositoryException, EntityException {
+	public Collection<MongoEntity> list(String resourceKey) throws RepositoryException, EntityException {
 		templateService.get(resourceKey);
 		return entityRepository.list(resourceKey);
 	}
 
 	@Override
-	public void saveOrUpdate(Entity entity) throws RepositoryException, EntityException {
+	public void saveOrUpdate(MongoEntity entity) throws RepositoryException, EntityException {
 		EntityTemplate template = templateService.get(entity.getResourceKey());
 		if(template.getType()==EntityType.SINGLETON && !entity.getUuid().equals(entity.getResourceKey())) {	
 			throw new EntityException("You cannot save a Singleton Entity with a new UUID");
@@ -81,7 +85,7 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
 			throw new EntityException("You cannot delete a Singleton Entity");
 		}
 		
-		Entity e = get(resourceKey, uuid);
+		MongoEntity e = get(resourceKey, uuid);
 		if(e.getSystem()) {
 			throw new EntityException("You cannot delete a system object");
 		}
@@ -106,8 +110,8 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
 	}
 
 	@Override
-	public Class<Entity> getResourceClass() {
-		return Entity.class;
+	public Class<MongoEntity> getResourceClass() {
+		return MongoEntity.class;
 	}
 
 	@Override
@@ -116,8 +120,8 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
 	}
 
 	@Override
-	public Entity createEntity() {
-		return new Entity();
+	public MongoEntity createEntity() {
+		return new MongoEntity();
 	}
 
 	@Override
@@ -126,11 +130,11 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
 	}
 
 	@Override
-	public void saveTemplateObjects(List<Entity> objects, @SuppressWarnings("unchecked") TransactionAdapter<Entity>... ops) throws RepositoryException, EntityException {
+	public void saveTemplateObjects(List<MongoEntity> objects, @SuppressWarnings("unchecked") TransactionAdapter<MongoEntity>... ops) throws RepositoryException, EntityException {
 		
-		for(Entity obj : objects) {
+		for(MongoEntity obj : objects) {
 			saveOrUpdate(obj);
-			for(TransactionAdapter<Entity> op : ops) {
+			for(TransactionAdapter<MongoEntity> op : ops) {
 				op.afterSave(obj);
 			}
 		}
@@ -156,7 +160,7 @@ public class EntityServiceImpl implements EntityService, TemplateEnabledService<
 	}
 
 	@Override
-	public Collection<Entity> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
+	public Collection<MongoEntity> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
 		templateService.get(resourceKey);
 		return entityRepository.table(resourceKey, searchField, searchValue, offset, limit);
 	}

@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.tenant.Tenant;
-import com.jadaptive.tenant.TenantService;
-import com.sshtools.common.util.FileUtils;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.utils.FileUtils;
 
 @Service
 public class SecurityPropertyServiceImpl implements SecurityPropertyService {

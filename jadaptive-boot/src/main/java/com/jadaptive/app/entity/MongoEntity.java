@@ -1,4 +1,4 @@
-package com.jadaptive.entity;
+package com.jadaptive.app.entity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,31 +9,32 @@ import org.bson.Document;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.jadaptive.entity.template.FieldTemplate;
-import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.api.entity.AbstractEntity;
+import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 @JsonDeserialize(using=EntityDeserializer.class)
 @JsonSerialize(using=EntitySerializer.class)
-public class Entity extends AbstractUUIDEntity {
+public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 
-	Entity parent;
-	Map<String,Entity> children = new HashMap<>();
+	MongoEntity parent;
+	Map<String,MongoEntity> children = new HashMap<>();
 	String resourceKey;
 	Document document;
 	
-	public Entity() {	
+	public MongoEntity() {	
 	}
 	
-	public Entity(String resourceKey, Document document) {
+	public MongoEntity(String resourceKey, Document document) {
 		this(null, resourceKey, document);
 		for(Entry<String,Object> entry : document.entrySet()) {
 			if(entry.getValue() instanceof Document) {
-				new Entity(this, entry.getKey(), (Document)entry.getValue());
+				new MongoEntity(this, entry.getKey(), (Document)entry.getValue());
 			}
 		}
 	}
 	
-	public Entity(Entity parent, String resourceKey, Document document) {
+	public MongoEntity(MongoEntity parent, String resourceKey, Document document) {
 		this.parent = parent;
 		this.resourceKey = resourceKey;
 		this.document = document;
@@ -43,19 +44,22 @@ public class Entity extends AbstractUUIDEntity {
 		}
 	}
 	
-	private void addChild(Entity e) {
+	private void addChild(MongoEntity e) {
 		children.put(e.getResourceKey(), e);
 		document.put(e.getResourceKey(), e.getDocument());
 	}
 
-	public Entity getChild(FieldTemplate c) {
+	@Override
+	public MongoEntity getChild(FieldTemplate c) {
 		return children.get(c.getResourceKey());
 	}
 
+	@Override
 	public String getResourceKey() {
 		return resourceKey;
 	}
 
+	@Override
 	public void setResourceKey(String resourceKey) {
 		this.resourceKey = resourceKey;
 	}
@@ -86,10 +90,12 @@ public class Entity extends AbstractUUIDEntity {
 		super.setHidden(hidden);
 	}
 
+	@Override
 	public String getValue(String fieldName) {
 		return document.get(fieldName, "");
 	}
 	
+	@Override
 	public String getValue(FieldTemplate t) {
 		switch(t.getFieldType()) {
 		case BOOL:
@@ -103,6 +109,7 @@ public class Entity extends AbstractUUIDEntity {
 		}
 	}
 
+	@Override
 	public void setValue(FieldTemplate t, String value) {
 		document.put(t.getResourceKey(), value);
 	}

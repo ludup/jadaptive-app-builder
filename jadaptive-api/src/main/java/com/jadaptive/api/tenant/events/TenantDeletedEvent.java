@@ -1,8 +1,8 @@
-package com.jadaptive.tenant.events;
+package com.jadaptive.api.tenant.events;
 
-import com.jadaptive.events.DefaultEventType;
-import com.jadaptive.events.AbstractUUIDEntityEvent;
-import com.jadaptive.tenant.Tenant;
+import com.jadaptive.api.events.AbstractUUIDEntityEvent;
+import com.jadaptive.api.events.DefaultEventType;
+import com.jadaptive.api.tenant.Tenant;
 
 public class TenantDeletedEvent extends AbstractUUIDEntityEvent<Tenant> {
 

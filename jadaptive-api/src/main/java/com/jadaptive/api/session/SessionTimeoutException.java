@@ -1,4 +1,4 @@
-package com.jadaptive.session;
+package com.jadaptive.api.session;
 
 public class SessionTimeoutException extends Exception {
 

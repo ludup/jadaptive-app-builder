@@ -1,4 +1,4 @@
-package com.jadaptive.passwords;
+package com.jadaptive.app.passwords;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,12 +11,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.entity.Entity;
-import com.jadaptive.entity.EntityService;
-import com.jadaptive.entity.template.EntityTemplate;
-import com.jadaptive.entity.template.EntityTemplateService;
-import com.jadaptive.entity.template.FieldTemplate;
-import com.jadaptive.json.upload.UploadHandler;
+import com.jadaptive.api.entity.EntityService;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.upload.UploadHandler;
+import com.jadaptive.app.entity.MongoEntity;
 
 @Component
 public class BannedPasswordUploadHandler implements UploadHandler {
@@ -25,7 +25,7 @@ public class BannedPasswordUploadHandler implements UploadHandler {
 	
 	
 	@Autowired
-	EntityService entityService; 
+	EntityService<MongoEntity> entityService; 
 	
 	@Autowired
 	EntityTemplateService templateService; 
@@ -40,7 +40,7 @@ public class BannedPasswordUploadHandler implements UploadHandler {
 		String password;
 		int i = 0;
 		while((password = reader.readLine()) != null) {
-			Entity e = new Entity("bannedPasswords", new Document());
+			MongoEntity e = new MongoEntity("bannedPasswords", new Document());
 			e.setValue(t, password);
 			entityService.saveOrUpdate(e);
 			++i;

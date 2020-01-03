@@ -1,15 +1,15 @@
-package com.jadaptive.db;
+package com.jadaptive.app.db;
 
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -140,7 +140,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void dropDatabase(String database) {
-		mongo.getClient().dropDatabase(database);
+		mongo.getClient().getDatabase(database).drop();
 		
 	}
 }

@@ -1,4 +1,4 @@
-package com.jadaptive.permissions;
+package com.jadaptive.app.permissions;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -12,12 +12,14 @@ import java.util.TreeSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.role.Role;
+import com.jadaptive.api.role.RoleService;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.User;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
-import com.jadaptive.role.Role;
-import com.jadaptive.role.RoleService;
-import com.jadaptive.tenant.Tenant;
-import com.jadaptive.tenant.TenantService;
-import com.jadaptive.user.User;
 import com.jadaptive.utils.Utils;
 
 @Service

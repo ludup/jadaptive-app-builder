@@ -1,4 +1,4 @@
-package com.jadaptive.json;
+package com.jadaptive.app.json;
 
 public class RequestStatus {
 

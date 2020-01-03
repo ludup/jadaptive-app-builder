@@ -1,4 +1,4 @@
-package com.jadaptive.json.upload;
+package com.jadaptive.app.json.upload;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.http.fileupload.FileItemIterator;
 import org.apache.tomcat.util.http.fileupload.FileItemStream;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
@@ -22,13 +21,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.json.ResponseHelper;
-import com.jadaptive.passwords.BannedPasswordUploadHandler;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.session.Session;
-import com.jadaptive.session.SessionTimeoutException;
-import com.jadaptive.session.SessionUtils;
-import com.jadaptive.user.UserService;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionTimeoutException;
+import com.jadaptive.api.upload.UploadHandler;
+import com.jadaptive.api.user.UserService;
+import com.jadaptive.app.json.ResponseHelper;
+import com.jadaptive.app.passwords.BannedPasswordUploadHandler;
+import com.jadaptive.app.session.SessionUtils;
 import com.jadaptive.utils.FileUtils;
 
 @WebServlet(name="uploadServlet", description="Servlet for handing file uploads", urlPatterns = { "/upload/*" })
@@ -151,7 +151,10 @@ public class UploadServlet extends HttpServlet {
 		
 		@Override
 		public void close() {
-			IOUtils.closeQuietly(in);
+			try {
+				in.close();
+			} catch (IOException e) {
+			}
 		}
 		
 		private void touchSession() {

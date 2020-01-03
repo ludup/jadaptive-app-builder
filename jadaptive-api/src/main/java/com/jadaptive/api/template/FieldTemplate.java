@@ -1,13 +1,13 @@
-package com.jadaptive.entity.template;
+package com.jadaptive.api.template;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.jadaptive.repository.NamedUUIDEntity;
+import com.jadaptive.app.repository.NamedUUIDEntity;
 
 public class FieldTemplate extends NamedUUIDEntity {
 	
@@ -98,7 +98,7 @@ public class FieldTemplate extends NamedUUIDEntity {
 		return  new HashCodeBuilder(7, 43)
 				.append(getUuid())
 				.append(resourceKey)
-				.append(fieldType.ordinal()).build();
+				.append(fieldType.ordinal()).toHashCode();
 	}
 
 	public boolean equals(Object obj) {
@@ -106,7 +106,7 @@ public class FieldTemplate extends NamedUUIDEntity {
 			FieldTemplate template = (FieldTemplate) obj;
 		return new EqualsBuilder().append(getUuid(), template.getUuid())
 				.append(resourceKey, template.getResourceKey())
-				.append(fieldType.ordinal(), template.getFieldType().ordinal()).build();
+				.append(fieldType.ordinal(), template.getFieldType().ordinal()).isEquals();
 		}
 		return false;
 	}

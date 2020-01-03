@@ -1,4 +1,4 @@
-package com.jadaptive.templates;
+package com.jadaptive.app.templates;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,15 +16,19 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.api.templates.TemplateVersion;
+import com.jadaptive.api.templates.TemplateVersionRepository;
+import com.jadaptive.api.templates.TemplateVersionService;
+import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.app.ConfigHelper;
 import com.jadaptive.app.ResourcePackage;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.json.ObjectMapperHolder;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.repository.TransactionAdapter;
-import com.jadaptive.tenant.Tenant;
+import com.jadaptive.app.json.ObjectMapperHolder;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.app.repository.TransactionAdapter;
 import com.jadaptive.utils.Version;
 
 @Service

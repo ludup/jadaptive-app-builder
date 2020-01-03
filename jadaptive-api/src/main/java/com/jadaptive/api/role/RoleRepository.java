@@ -1,6 +1,6 @@
-package com.jadaptive.role;
+package com.jadaptive.api.role;
 
-import com.jadaptive.tenant.AbstractTenantAwareObjectDatabase;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 
 public interface RoleRepository extends AbstractTenantAwareObjectDatabase<Role> {
 

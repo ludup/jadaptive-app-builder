@@ -1,7 +1,8 @@
-package com.jadaptive.json;
+package com.jadaptive.app.json;
 
 import java.util.Collection;
 
+import javax.annotation.PostConstruct;
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,15 +19,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.jadaptive.entity.Entity;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.entity.EntityService;
-import com.jadaptive.entity.template.EntityTemplate;
-import com.jadaptive.entity.template.EntityTemplateService;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.session.SessionService;
-import com.jadaptive.templates.TemplateVersion;
-import com.jadaptive.templates.TemplateVersionService;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityService;
+import com.jadaptive.api.session.SessionService;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.templates.TemplateVersion;
+import com.jadaptive.api.templates.TemplateVersionService;
+import com.jadaptive.app.entity.MongoEntity;
+import com.jadaptive.app.repository.RepositoryException;
 
 @Controller
 public class APIController {
@@ -40,10 +41,15 @@ public class APIController {
 	TemplateVersionService versionService; 
 	
 	@Autowired
-	EntityService entityService;
+	EntityService<MongoEntity> entityService;
 	
 	@Autowired
 	SessionService sessionService; 
+	
+	@PostConstruct
+	private void postConstruct() {
+		System.out.println(getClass().getName());
+	}
 	
 	@RequestMapping(value="api/template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
@@ -144,35 +150,35 @@ public class APIController {
 	@RequestMapping(value="api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<Entity> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<MongoEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
-		   return new EntityStatus<Entity>(entityService.get(resourceKey, uuid));
+		   return new EntityStatus<MongoEntity>(entityService.get(resourceKey, uuid));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/{}", resourceKey, uuid, e);
 			}
-			return new EntityStatus<Entity>(false, e.getMessage());
+			return new EntityStatus<MongoEntity>(false, e.getMessage());
 		}
 	}
 	
 	@RequestMapping(value="api/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<Entity> getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<MongoEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
-			   return new EntityStatus<Entity>(entityService.getSingleton(resourceKey));
+			   return new EntityStatus<MongoEntity>(entityService.getSingleton(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}", resourceKey, e);
 			}
-			return new EntityStatus<Entity>(false, e.getMessage());
+			return new EntityStatus<MongoEntity>(false, e.getMessage());
 		}
 	}
 	
 	@RequestMapping(value="api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus saveEntity(HttpServletRequest request, @PathVariable String resourceKey, @RequestBody Entity entity)  {
+	public RequestStatus saveEntity(HttpServletRequest request, @PathVariable String resourceKey, @RequestBody MongoEntity entity)  {
 
 		try {
 			entityService.saveOrUpdate(entity);
@@ -204,21 +210,21 @@ public class APIController {
 	@RequestMapping(value="api/{resourceKey}/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<Collection<Entity>> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<Collection<MongoEntity>> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
-			   return new EntityStatus<Collection<Entity>>(entityService.list(resourceKey));
+			   return new EntityStatus<Collection<MongoEntity>>(entityService.list(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/list", resourceKey, e);
 			}
-			return new EntityStatus<Collection<Entity>>(false, e.getMessage());
+			return new EntityStatus<Collection<MongoEntity>>(false, e.getMessage());
 		}
 	}
 	
 	@RequestMapping(value="api/{resourceKey}/table", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityTableStatus<Entity> tableEntities(HttpServletRequest request, 
+	public EntityTableStatus<MongoEntity> tableEntities(HttpServletRequest request, 
 			@PathVariable String resourceKey,
 			@RequestParam(required=false) String searchField,
 			@RequestParam(required=false, name="search") String searchValue,
@@ -228,14 +234,14 @@ public class APIController {
 		
 		
 		try {
-			   return new EntityTableStatus<Entity>(templateService.get(resourceKey), 
+			   return new EntityTableStatus<MongoEntity>(templateService.get(resourceKey), 
 					   entityService.table(resourceKey, searchField, searchValue, offset, limit),
 					   entityService.count(resourceKey, searchField, searchValue));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/table", resourceKey, e);
 			}
-			return new EntityTableStatus<Entity>(false, e.getMessage());
+			return new EntityTableStatus<MongoEntity>(false, e.getMessage());
 		}
 	}
 

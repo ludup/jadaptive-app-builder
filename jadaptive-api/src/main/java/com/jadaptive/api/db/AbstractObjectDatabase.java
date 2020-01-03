@@ -1,4 +1,4 @@
-package com.jadaptive.db;
+package com.jadaptive.api.db;
 
 public interface AbstractObjectDatabase {
 

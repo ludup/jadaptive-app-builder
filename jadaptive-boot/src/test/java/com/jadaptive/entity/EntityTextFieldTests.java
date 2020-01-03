@@ -11,12 +11,14 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jadaptive.entity.template.EntityTemplate;
-import com.jadaptive.entity.template.FieldTemplate;
-import com.jadaptive.entity.template.FieldType;
-import com.jadaptive.entity.template.FieldValidator;
-import com.jadaptive.entity.template.ValidationException;
-import com.jadaptive.entity.template.ValidationType;
+import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.app.entity.MongoEntity;
 
 public class EntityTextFieldTests extends AbstractDeserializerTest {
 
@@ -54,7 +56,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		Entity e = getTextField(true).readValue(json, Entity.class);
+		MongoEntity e = getTextField(true).readValue(json, MongoEntity.class);
 
 		Assert.assertEquals("JADAPTIVE", e.getValue("name"));
 
@@ -69,7 +71,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		Entity e = getTextField(true, new FieldValidator(ValidationType.LENGTH, "255")).readValue(json, Entity.class);
+		MongoEntity e = getTextField(true, new FieldValidator(ValidationType.LENGTH, "255")).readValue(json, MongoEntity.class);
 
 		Assert.assertEquals("JADAPTIVE", e.getValue("name"));
 
@@ -84,7 +86,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		getTextField(true, new FieldValidator(ValidationType.REGEX, "\\w+")).readValue(json, Entity.class);
+		getTextField(true, new FieldValidator(ValidationType.REGEX, "\\w+")).readValue(json, MongoEntity.class);
 
 	}
 	
@@ -97,7 +99,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		getTextField(true, new FieldValidator(ValidationType.LENGTH, "5")).readValue(json, Entity.class);
+		getTextField(true, new FieldValidator(ValidationType.LENGTH, "5")).readValue(json, MongoEntity.class);
 
 	}
 	
@@ -110,7 +112,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		getTextField(true, new FieldValidator(ValidationType.REGEX, "\\d+")).readValue(json, Entity.class);
+		getTextField(true, new FieldValidator(ValidationType.REGEX, "\\d+")).readValue(json, MongoEntity.class);
 
 	}
 	
@@ -123,7 +125,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 
 		System.out.println(json);
 		
-		getTextField(true).readValue(json, Entity.class);
+		getTextField(true).readValue(json, MongoEntity.class);
 
 
 	}
@@ -136,7 +138,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 
 		System.out.println(json);
 		
-		Entity e = getTextField(false).readValue(json, Entity.class);
+		MongoEntity e = getTextField(false).readValue(json, MongoEntity.class);
 
 		Assert.assertEquals("Default", e.getValue("name"));
 	}

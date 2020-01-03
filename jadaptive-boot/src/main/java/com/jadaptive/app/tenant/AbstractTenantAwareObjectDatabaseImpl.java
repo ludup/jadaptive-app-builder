@@ -1,14 +1,16 @@
-package com.jadaptive.tenant;
+package com.jadaptive.app.tenant;
 
 import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.db.AbstractObjectDatabaseImpl;
-import com.jadaptive.db.DocumentDatabase;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
+import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.RepositoryException;
 
 public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity> 
 		extends AbstractObjectDatabaseImpl implements AbstractTenantAwareObjectDatabase<T> {

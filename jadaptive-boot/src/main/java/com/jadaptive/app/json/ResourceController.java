@@ -1,4 +1,4 @@
-package com.jadaptive.json;
+package com.jadaptive.app.json;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import javax.annotation.PostConstruct;
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,12 +18,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.ConfigHelper;
 import com.jadaptive.app.ResourcePackage;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.tenant.Tenant;
-import com.jadaptive.tenant.TenantService;
+import com.jadaptive.app.repository.RepositoryException;
 import com.jadaptive.utils.FileUtils;
 
 @Controller
@@ -32,6 +33,11 @@ public class ResourceController {
 	
 	@Autowired
 	TenantService tenantService; 
+	
+	@PostConstruct
+	private void postConstruct() {
+		System.out.println(getClass().getName());
+	}
 	
 	@RequestMapping(value="", method = RequestMethod.GET)
 	public void doDefaultPath(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityException, IOException {

@@ -1,8 +1,8 @@
-package com.jadaptive.session;
+package com.jadaptive.api.session;
 
-import com.jadaptive.tenant.AbstractTenantAwareObjectService;
-import com.jadaptive.tenant.Tenant;
-import com.jadaptive.user.User;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectService;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.user.User;
 
 public interface SessionService extends AbstractTenantAwareObjectService<Session> {
 

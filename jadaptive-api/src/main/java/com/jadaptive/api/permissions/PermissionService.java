@@ -1,9 +1,9 @@
-package com.jadaptive.permissions;
+package com.jadaptive.api.permissions;
 
 import java.util.Collection;
 
-import com.jadaptive.tenant.Tenant;
-import com.jadaptive.user.User;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.user.User;
 
 public interface PermissionService {
 

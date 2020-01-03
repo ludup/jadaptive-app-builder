@@ -1,4 +1,4 @@
-package com.jadaptive.tenant;
+package com.jadaptive.api.tenant;
 
 public interface TenantAware {
 

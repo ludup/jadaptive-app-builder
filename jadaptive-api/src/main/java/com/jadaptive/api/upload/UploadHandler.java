@@ -1,4 +1,4 @@
-package com.jadaptive.json.upload;
+package com.jadaptive.api.upload;
 
 import java.io.IOException;
 import java.io.InputStream;

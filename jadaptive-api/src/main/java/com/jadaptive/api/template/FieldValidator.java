@@ -1,6 +1,6 @@
-package com.jadaptive.entity.template;
+package com.jadaptive.api.template;
 
-import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 public class FieldValidator extends AbstractUUIDEntity {
 

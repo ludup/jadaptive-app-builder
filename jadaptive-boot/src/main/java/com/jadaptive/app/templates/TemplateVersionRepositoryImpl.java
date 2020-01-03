@@ -1,15 +1,17 @@
-package com.jadaptive.templates;
+package com.jadaptive.app.templates;
 
 import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.db.AbstractObjectDatabaseImpl;
-import com.jadaptive.db.DocumentDatabase;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.tenant.TenantService;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.templates.TemplateVersion;
+import com.jadaptive.api.templates.TemplateVersionRepository;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
+import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.repository.RepositoryException;
 import com.jadaptive.utils.Version;
 
 @Repository

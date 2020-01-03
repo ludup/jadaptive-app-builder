@@ -1,4 +1,4 @@
-package com.jadaptive.json;
+package com.jadaptive.app.json;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

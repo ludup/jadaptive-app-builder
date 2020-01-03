@@ -1,11 +1,11 @@
-package com.jadaptive.templates;
+package com.jadaptive.api.templates;
 
 import java.util.List;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.repository.TransactionAdapter;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.app.repository.TransactionAdapter;
 
 public interface TemplateEnabledService<T extends AbstractUUIDEntity> {
 

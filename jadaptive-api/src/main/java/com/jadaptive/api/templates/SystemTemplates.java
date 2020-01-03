@@ -1,4 +1,4 @@
-package com.jadaptive.templates;
+package com.jadaptive.api.templates;
 
 public enum SystemTemplates {
 

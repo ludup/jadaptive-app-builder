@@ -11,12 +11,14 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jadaptive.entity.template.EntityTemplate;
-import com.jadaptive.entity.template.FieldTemplate;
-import com.jadaptive.entity.template.FieldType;
-import com.jadaptive.entity.template.FieldValidator;
-import com.jadaptive.entity.template.ValidationException;
-import com.jadaptive.entity.template.ValidationType;
+import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.app.entity.MongoEntity;
 
 public class EntityNumberFieldTests extends AbstractDeserializerTest {
 
@@ -52,7 +54,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		Entity e = getNumberField(true).readValue(json, Entity.class);
+		MongoEntity e = getNumberField(true).readValue(json, MongoEntity.class);
 
 		Assert.assertEquals("100", e.getValue("employees"));
 
@@ -66,7 +68,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		Entity e = getNumberField(false).readValue(json, Entity.class);
+		MongoEntity e = getNumberField(false).readValue(json, MongoEntity.class);
 
 		Assert.assertEquals("1", e.getValue("employees"));
 
@@ -81,7 +83,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		Entity e = getNumberField(true, new FieldValidator(ValidationType.RANGE, "0,9999999")).readValue(json, Entity.class);
+		MongoEntity e = getNumberField(true, new FieldValidator(ValidationType.RANGE, "0,9999999")).readValue(json, MongoEntity.class);
 
 		Assert.assertEquals("100", e.getValue("employees"));
 
@@ -97,7 +99,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		getNumberField(true, new FieldValidator(ValidationType.RANGE, "0,9999999")).readValue(json, Entity.class);
+		getNumberField(true, new FieldValidator(ValidationType.RANGE, "0,9999999")).readValue(json, MongoEntity.class);
 
 	}
 	
@@ -112,7 +114,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 
 		System.out.println(json);
 		
-		getNumberField(true).readValue(json, Entity.class);
+		getNumberField(true).readValue(json, MongoEntity.class);
 
 
 	}
@@ -125,7 +127,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 
 		System.out.println(json);
 		
-		Entity e = getNumberField(false).readValue(json, Entity.class);
+		MongoEntity e = getNumberField(false).readValue(json, MongoEntity.class);
 
 		Assert.assertEquals("1", e.getValue("employees"));
 	}

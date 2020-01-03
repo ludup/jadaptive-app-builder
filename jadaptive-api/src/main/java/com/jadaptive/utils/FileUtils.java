@@ -182,16 +182,12 @@ public class FileUtils {
 		return sourcePath.indexOf('/') > -1;
 	}
 
-	public static List<String> generatePaths(String fullpath) {
+	public static List<String> getParentPaths(String path) {
 		
-		List<String> paths = new ArrayList<String>();
-		String tmp = "/";
-		for(String p : fullpath.split("/")) {
-			if(p.equals("")) {
-				continue;
-			}
-			tmp += p + "/";
-			paths.add(tmp);
+		List<String> paths = new ArrayList<>();
+		while(hasParents(path)) {
+			paths.add(path);
+			path = getParentPath(path);
 		}
 		return paths;
 	}

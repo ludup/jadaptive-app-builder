@@ -1,6 +1,6 @@
-package com.jadaptive.user;
+package com.jadaptive.api.user;
 
-import com.jadaptive.repository.NamedUUIDEntity;
+import com.jadaptive.app.repository.NamedUUIDEntity;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 public class DefaultUser extends NamedUUIDEntity implements User {

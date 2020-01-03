@@ -1,10 +1,10 @@
-package com.jadaptive.role;
+package com.jadaptive.api.role;
 
 import java.util.Collection;
 
-import com.jadaptive.tenant.AbstractTenantAwareObjectService;
-import com.jadaptive.tenant.events.TenantCreatedEvent;
-import com.jadaptive.user.User;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectService;
+import com.jadaptive.api.tenant.events.TenantCreatedEvent;
+import com.jadaptive.api.user.User;
 
 public interface RoleService extends AbstractTenantAwareObjectService<Role> {
 

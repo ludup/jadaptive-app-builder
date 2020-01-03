@@ -1,4 +1,4 @@
-package com.jadaptive.app;
+package com.jadaptive.api.app;
 
 import java.io.File;
 import java.io.InputStream;

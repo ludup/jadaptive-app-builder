@@ -1,9 +1,11 @@
-package com.jadaptive.session;
+package com.jadaptive.app.session;
 
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.db.DocumentDatabase;
-import com.jadaptive.tenant.AbstractTenantAwareObjectDatabaseImpl;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionRepository;
+import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 
 @Repository
 public class SessionRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<Session> implements SessionRepository {

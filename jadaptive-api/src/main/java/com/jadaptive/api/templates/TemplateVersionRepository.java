@@ -1,10 +1,10 @@
-package com.jadaptive.templates;
+package com.jadaptive.api.templates;
 
 import java.util.Collection;
 
-import com.jadaptive.db.AbstractObjectDatabase;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.api.db.AbstractObjectDatabase;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.app.repository.RepositoryException;
 import com.jadaptive.utils.Version;
 
 public interface TemplateVersionRepository extends AbstractObjectDatabase {

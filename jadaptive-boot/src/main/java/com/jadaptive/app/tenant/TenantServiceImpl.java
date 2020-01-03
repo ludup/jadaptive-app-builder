@@ -1,4 +1,4 @@
-package com.jadaptive.tenant;
+package com.jadaptive.app.tenant;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,19 +17,23 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.role.RoleService;
+import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.api.templates.TemplateVersionService;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.tenant.TenantRepository;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.tenant.events.TenantCreatedEvent;
+import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.ApplicationServiceImpl;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.events.EventService;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.repository.TransactionAdapter;
-import com.jadaptive.role.RoleService;
-import com.jadaptive.templates.TemplateEnabledService;
-import com.jadaptive.templates.TemplateVersionService;
-import com.jadaptive.tenant.events.TenantCreatedEvent;
-import com.jadaptive.user.User;
-import com.jadaptive.user.UserService;
+import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.app.repository.TransactionAdapter;
 
 
 @Service

@@ -1,10 +1,10 @@
-package com.jadaptive.tenant;
+package com.jadaptive.api.tenant;
 
 import java.util.Collection;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.RepositoryException;
 
 public interface AbstractTenantAwareObjectService<T extends AbstractUUIDEntity> {
 

@@ -1,4 +1,4 @@
-package com.jadaptive.json;
+package com.jadaptive.app.json;
 
 public class EntityStatus<T> extends RequestStatus {
 

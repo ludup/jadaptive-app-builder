@@ -1,9 +1,9 @@
-package com.jadaptive.templates;
+package com.jadaptive.api.templates;
 
 import java.util.Date;
 import java.util.Objects;
 
-import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 public class TemplateVersion extends AbstractUUIDEntity {
 

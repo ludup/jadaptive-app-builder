@@ -1,10 +1,11 @@
-package com.jadaptive.db;
+package com.jadaptive.app.db;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -12,17 +13,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.repository.JadaptiveIgnore;
-import com.jadaptive.repository.ReflectionUtils;
-import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.JadaptiveIgnore;
+import com.jadaptive.app.repository.ReflectionUtils;
+import com.jadaptive.app.repository.RepositoryException;
 import com.jadaptive.utils.Utils;
-import com.mongodb.BasicDBList;
 
 public class DocumentHelper {
 
@@ -65,7 +65,7 @@ public class DocumentHelper {
 
 	public static void buildCollectionDocuments(String name, Collection<?> values, Class<?> returnType, Document document) throws ParseException, EntityException {
 		
-		BasicDBList list = new BasicDBList();
+		List<Object> list = new ArrayList<>();
 		
 		for(Object value : values) {
 			if(Date.class.equals(value.getClass())) {
@@ -124,7 +124,7 @@ public class DocumentHelper {
 						m.invoke(obj, (Object)null);
 						break;
 					}
-					if(NumberUtils.isCreatable(v)) {
+					if(NumberUtils.isNumber(v)) {
 						Enum<?> enumConstant = enumConstants[Integer.parseInt(v)];
 						m.invoke(obj, enumConstant);
 						break;
@@ -197,7 +197,7 @@ public class DocumentHelper {
 		Collection<Enum<?>> v = new HashSet<>();
 		for(Object item : items) {
 			Enum<?>[] enumConstants = (Enum<?>[]) type.getEnumConstants();
-			if(NumberUtils.isCreatable(item.toString())) {
+			if(NumberUtils.isNumber(item.toString())) {
 				Enum<?> enumConstant = enumConstants[Integer.parseInt(item.toString())];
 				v.add(enumConstant);
 				break;

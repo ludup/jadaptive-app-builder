@@ -1,11 +1,11 @@
-package com.jadaptive.db;
+package com.jadaptive.app.db;
 
 import java.util.Collection;
 import java.util.Map;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.tenant.Tenant;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 public interface Database {
 

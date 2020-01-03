@@ -1,4 +1,4 @@
-package com.jadaptive.tenant;
+package com.jadaptive.app.tenant;
 
 import java.util.Collection;
 
@@ -6,10 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.db.AbstractObjectDatabaseImpl;
-import com.jadaptive.db.DocumentDatabase;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantRepository;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
+import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.repository.RepositoryException;
 
 @Repository
 public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements TenantRepository {

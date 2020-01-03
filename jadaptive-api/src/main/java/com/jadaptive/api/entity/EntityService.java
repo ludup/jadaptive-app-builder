@@ -1,24 +1,24 @@
-package com.jadaptive.entity;
+package com.jadaptive.api.entity;
 
 import java.util.Collection;
 
-import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.app.repository.RepositoryException;
 
-public interface EntityService {
+public interface EntityService<E extends AbstractEntity> {
 
-	Entity get(String resourceKey, String uuid) throws RepositoryException, EntityException;
+	E get(String resourceKey, String uuid) throws RepositoryException, EntityException;
 
-	Entity getSingleton(String resourceKey) throws RepositoryException, EntityException;
+	E getSingleton(String resourceKey) throws RepositoryException, EntityException;
 
-	Collection<Entity> list(String resourceKey) throws RepositoryException, EntityException;
+	Collection<E> list(String resourceKey) throws RepositoryException, EntityException;
 
-	void saveOrUpdate(Entity entity) throws RepositoryException, EntityException;
+	void saveOrUpdate(E entity) throws RepositoryException, EntityException;
 
 	void delete(String resourceKey, String uuid) throws RepositoryException, EntityException;
 
 	void deleteAll(String resourceKey) throws EntityException;
 
-	Collection<Entity> table(String resourceKey, String searchField, String searchValue, int offset, int limit);
+	Collection<E> table(String resourceKey, String searchField, String searchValue, int offset, int limit);
 
 	long count(String resourceKey);
 

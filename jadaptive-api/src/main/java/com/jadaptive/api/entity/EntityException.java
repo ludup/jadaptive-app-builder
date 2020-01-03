@@ -1,4 +1,4 @@
-package com.jadaptive.entity;
+package com.jadaptive.api.entity;
 
 public class EntityException extends RuntimeException {
 

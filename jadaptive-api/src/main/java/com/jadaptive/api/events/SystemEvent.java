@@ -1,4 +1,4 @@
-package com.jadaptive.events;
+package com.jadaptive.api.events;
 
 import org.springframework.context.ApplicationEvent;
 

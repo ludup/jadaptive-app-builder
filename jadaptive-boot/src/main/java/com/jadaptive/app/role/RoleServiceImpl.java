@@ -1,4 +1,4 @@
-package com.jadaptive.role;
+package com.jadaptive.app.role;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.tenant.AbstractTenantAwareObjectDatabase;
-import com.jadaptive.tenant.AbstractTenantAwareObjectServiceImpl;
-import com.jadaptive.tenant.events.TenantCreatedEvent;
-import com.jadaptive.user.User;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.role.Role;
+import com.jadaptive.api.role.RoleRepository;
+import com.jadaptive.api.role.RoleService;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
+import com.jadaptive.api.tenant.events.TenantCreatedEvent;
+import com.jadaptive.api.user.User;
+import com.jadaptive.app.tenant.AbstractTenantAwareObjectServiceImpl;
 
 @Service
 public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> implements RoleService {

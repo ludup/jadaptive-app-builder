@@ -1,4 +1,4 @@
-package com.jadaptive.user;
+package com.jadaptive.app.user;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -8,10 +8,13 @@ import java.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.db.DocumentDatabase;
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.tenant.AbstractTenantAwareObjectDatabaseImpl;
-import com.jadaptive.tenant.TenantService;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.DefaultUser;
+import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserRepository;
+import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 import com.jadaptive.utils.PasswordEncryptionType;
 import com.jadaptive.utils.PasswordUtils;
 

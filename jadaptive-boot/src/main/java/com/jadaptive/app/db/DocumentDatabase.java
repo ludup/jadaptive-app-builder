@@ -1,8 +1,8 @@
-package com.jadaptive.db;
+package com.jadaptive.app.db;
 
 import org.bson.Document;
 
-import com.jadaptive.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 public interface DocumentDatabase {
 

@@ -1,4 +1,4 @@
-package com.jadaptive.app;
+package com.jadaptive.api.app;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +24,7 @@ public class ApplicationProperties {
 						"jadaptive.properties"))) {
 			properties.load(in);
 		} catch(IOException e) {
-			log.error("Could not load database properties", e);
+			log.warn("Could not load jadaptive.properties file [{}]", e.getMessage());
 		}
 		checkLoaded();
 	}

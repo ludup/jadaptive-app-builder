@@ -1,4 +1,4 @@
-package com.jadaptive.json;
+package com.jadaptive.app.json;
 
 import java.util.Objects;
 import java.util.Properties;
@@ -14,13 +14,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.SecurityPropertyService;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.session.Session;
-import com.jadaptive.session.SessionUtils;
-import com.jadaptive.tenant.TenantService;
-import com.jadaptive.user.UserService;
-import com.sshtools.common.util.FileUtils;
+import com.jadaptive.app.session.SessionUtils;
+import com.jadaptive.utils.FileUtils;
 
 @Component
 public class SessionInterceptor extends HandlerInterceptorAdapter {

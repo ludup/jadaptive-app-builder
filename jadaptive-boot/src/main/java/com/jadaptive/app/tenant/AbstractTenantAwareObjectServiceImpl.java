@@ -1,4 +1,4 @@
-package com.jadaptive.tenant;
+package com.jadaptive.app.tenant;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -7,10 +7,13 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectService;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.RepositoryException;
 
 public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUIDEntity> 
 					implements AbstractTenantAwareObjectService<T>, TenantAware {

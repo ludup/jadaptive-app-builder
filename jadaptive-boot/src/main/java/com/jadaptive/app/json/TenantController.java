@@ -1,7 +1,8 @@
-package com.jadaptive.json;
+package com.jadaptive.app.json;
 
 import java.util.Collection;
 
+import javax.annotation.PostConstruct;
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -15,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.tenant.Tenant;
-import com.jadaptive.tenant.TenantService;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.app.repository.RepositoryException;
 
 @Controller
 public class TenantController {
@@ -27,6 +28,11 @@ public class TenantController {
 	
 	@Autowired
 	TenantService tenantService; 
+	
+	@PostConstruct
+	private void postConstruct() {
+		System.out.println(getClass().getName());
+	}
 	
 	@RequestMapping(value="api/tenant/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody

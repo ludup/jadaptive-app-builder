@@ -1,12 +1,12 @@
-package com.jadaptive.tenant;
+package com.jadaptive.api.tenant;
 
 import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.permissions.AccessDeniedException;
-import com.jadaptive.repository.RepositoryException;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.app.repository.RepositoryException;
 
 public interface TenantService {
 

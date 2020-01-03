@@ -1,6 +1,6 @@
-package com.jadaptive.entity.template;
+package com.jadaptive.api.template;
 
-import com.jadaptive.tenant.AbstractTenantAwareObjectDatabase;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 
 public interface EntityTemplateRepository extends AbstractTenantAwareObjectDatabase<EntityTemplate> {
 

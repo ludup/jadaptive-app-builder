@@ -1,8 +1,9 @@
-package com.jadaptive.json;
+package com.jadaptive.app.json;
 
 import java.util.Objects;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,19 +18,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionService;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.SecurityPropertyService;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.session.Session;
-import com.jadaptive.session.SessionService;
-import com.jadaptive.session.SessionUtils;
-import com.jadaptive.tenant.TenantService;
-import com.jadaptive.user.User;
-import com.jadaptive.user.UserService;
+import com.jadaptive.app.session.SessionUtils;
 
 @Controller
 public class LogonController {
 
 	static Logger log = LoggerFactory.getLogger(LogonController.class);
+	
+	@PostConstruct
+	private void postConstruct() {
+		System.out.println(getClass().getName());
+	}
 	
 	@Autowired
 	private SessionService sessionService; 
@@ -76,6 +82,9 @@ public class LogonController {
 			if(Objects.isNull(homePage)) {
 				Properties properties = securityService.resolveSecurityProperties(request, request.getRequestURI());
 				homePage = properties.getProperty("authentication.homePage");
+			}
+			if(log.isInfoEnabled()) {
+				log.info("Logged user {} on with home {}", username, homePage);
 			}
 			return new RequestStatus(true, homePage);
 		} catch (Throwable e) {

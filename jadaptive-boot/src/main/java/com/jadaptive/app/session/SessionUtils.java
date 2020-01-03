@@ -1,4 +1,4 @@
-package com.jadaptive.session;
+package com.jadaptive.app.session;
 
 import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
@@ -17,10 +17,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.app.ApplicationProperties;
-import com.jadaptive.entity.EntityNotFoundException;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.tenant.Tenant;
+import com.jadaptive.api.app.ApplicationProperties;
+import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionService;
+import com.jadaptive.api.session.SessionTimeoutException;
+import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.tenant.Tenant;
 
 @Component
 public class SessionUtils {

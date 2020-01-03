@@ -1,11 +1,11 @@
-package com.jadaptive.templates;
+package com.jadaptive.api.templates;
 
 import java.util.Collection;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.repository.AbstractUUIDEntity;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.tenant.Tenant;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.app.repository.RepositoryException;
 
 public interface TemplateVersionService {
 

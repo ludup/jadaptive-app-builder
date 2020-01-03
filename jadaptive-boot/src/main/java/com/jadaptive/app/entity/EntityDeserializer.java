@@ -1,11 +1,11 @@
-package com.jadaptive.entity;
+package com.jadaptive.app.entity;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +19,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
-import com.jadaptive.entity.template.EntityTemplate;
-import com.jadaptive.entity.template.EntityTemplateService;
-import com.jadaptive.entity.template.FieldTemplate;
-import com.jadaptive.entity.template.FieldValidator;
-import com.jadaptive.entity.template.ValidationException;
-import com.jadaptive.entity.template.ValidationType;
 
-public class EntityDeserializer extends StdDeserializer<Entity> {
+public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 
 	private static final long serialVersionUID = -7322676764669077046L;
 
@@ -62,7 +62,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 	}
 
 	@Override
-	public Entity deserialize(JsonParser parser, DeserializationContext ctx)
+	public MongoEntity deserialize(JsonParser parser, DeserializationContext ctx)
 			throws IOException, JsonProcessingException {
 
 		try {
@@ -78,7 +78,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 			
 			EntityTemplate template = templateService.get(rkNode.asText());
 			
-			Entity e = new Entity(template.getUuid(), new Document());
+			MongoEntity e = new MongoEntity(template.getUuid(), new Document());
 			
 			iterateType(node, template, e, true);
 
@@ -89,7 +89,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		}
 	}
 
-	private void iterateType(JsonNode node, EntityTemplate template, Entity e, boolean requiresUUID) throws IOException, ValidationException {
+	private void iterateType(JsonNode node, EntityTemplate template, MongoEntity e, boolean requiresUUID) throws IOException, ValidationException {
 		
 
 		JsonNode uuidNode = node.findValue("uuid");
@@ -114,7 +114,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 	}
 
 
-	private void iterateFields(JsonNode current, Collection<FieldTemplate> fields, Entity e) throws IOException, ValidationException {
+	private void iterateFields(JsonNode current, Collection<FieldTemplate> fields, MongoEntity e) throws IOException, ValidationException {
 		
 		if(!Objects.isNull(fields)) {
 			for(FieldTemplate field : fields) {
@@ -124,7 +124,7 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 	}
 
 	private void validateNode(JsonNode node, FieldTemplate field,
-			Entity e) throws IOException, ValidationException {
+			MongoEntity e) throws IOException, ValidationException {
 		
 		if(log.isInfoEnabled()) {
 			log.info("Validating node {}", field.getResourceKey());
@@ -191,12 +191,12 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		
 	}
 	
-	private void validateObject(JsonNode node, FieldTemplate field, Entity e) throws IOException, ValidationException {
+	private void validateObject(JsonNode node, FieldTemplate field, MongoEntity e) throws IOException, ValidationException {
 		
  		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
 		EntityTemplate template = templateService.get(type);
 
-		iterateType(node, template, new Entity(e, field.getResourceKey(), new Document()), false);
+		iterateType(node, template, new MongoEntity(e, field.getResourceKey(), new Document()), false);
 	}
 
 	private void validateCountry(JsonNode node, FieldTemplate field) {
@@ -311,13 +311,13 @@ public class EntityDeserializer extends StdDeserializer<Entity> {
 		}
 	}
 
-	private void setProperty(JsonNode value, FieldTemplate t, Entity e) {
+	private void setProperty(JsonNode value, FieldTemplate t, MongoEntity e) {
 		if(!Objects.isNull(value)) {
 			e.setValue(t, value.asText());
 		} 
 	}
 	
-	private void setPropertyDefault(FieldTemplate t, Entity e) {
+	private void setPropertyDefault(FieldTemplate t, MongoEntity e) {
 		e.setValue(t, t.getDefaultValue()); 
 	}
 

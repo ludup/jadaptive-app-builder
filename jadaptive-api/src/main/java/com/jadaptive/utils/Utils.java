@@ -34,14 +34,8 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Utils {
 
@@ -205,11 +199,7 @@ public class Utils {
 	}
 	
 	public static String base64Encode(byte[] bytes) {
-		try {
-			return new String(Base64.encodeBase64(bytes), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException("System does not support UTF-8 encoding!");
-		}
+		return java.util.Base64.getEncoder().encodeToString(bytes);
 	}
 	
 	public static String base64Encode(String resourceKey) {
@@ -221,23 +211,8 @@ public class Utils {
 	}
 
 	public static byte[] base64Decode(String property) throws IOException {
-		return Base64.decodeBase64(property.getBytes("UTF-8"));
+		return java.util.Base64.getDecoder().decode(property.getBytes("UTF-8"));
 	}
-	
-	public static boolean isValidJSON(final String json) {
-		   try {
-		      final JsonParser parser = new ObjectMapper().getFactory()
-		            .createParser(json);
-		      while (parser.nextToken() != null) {
-		      }
-		      return true;
-		   } catch (JsonParseException jpe) {
-		      return false;
-		   } catch (IOException ioe) {
-			   return false;
-		   }
-
-		}
 
 	public static String format(Double d) {
 		return new DecimalFormat("0.00").format(d);
@@ -339,16 +314,6 @@ public class Utils {
 		return set;
 	}
 
-
-	public static <S extends Throwable,D extends Throwable> S chain(S source, D target) {
-		try {
-			FieldUtils.writeField(source, "cause", target, true);
-			return source;
-		} catch (IllegalAccessException e) {
-			throw new IllegalStateException("Problem in chaining exceptions", e);
-		}
-	}
-
 	public static String csv(String[] items) {
 		StringBuffer b = new StringBuffer();
 		for(String i : items) {
@@ -380,16 +345,6 @@ public class Utils {
 			b.append(i.toString());
 		}
 		return b.toString();
-	}
-
-	public static String prettyPrintJson(String output) {
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readValue(output, Object.class));
-		} catch (IOException e) {
-			throw new IllegalStateException(e.getMessage(), e);
-
-		}
 	}
 
 	public static String encodeURIPath(String url) {

@@ -1,4 +1,4 @@
-package com.jadaptive.repository;
+package com.jadaptive.app.repository;
 
 public class NamedUUIDEntity extends AbstractUUIDEntity {
 

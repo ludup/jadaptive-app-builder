@@ -1,2 +1,4 @@
 /.settings/
 *.project
+/target/
+/plf4j-plugin-generator/

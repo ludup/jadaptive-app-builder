@@ -1,6 +1,6 @@
-package com.jadaptive.repository;
+package com.jadaptive.app.repository;
 
-import com.jadaptive.entity.EntityException;
+import com.jadaptive.api.entity.EntityException;
 
 public interface TransactionAdapter<E> {
 

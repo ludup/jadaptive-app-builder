@@ -1,4 +1,4 @@
-package com.jadaptive.entity.template;
+package com.jadaptive.app.entity.template;
 
 import java.util.Collection;
 import java.util.List;
@@ -7,13 +7,20 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.entity.EntityException;
-import com.jadaptive.entity.EntityService;
-import com.jadaptive.permissions.PermissionService;
-import com.jadaptive.repository.RepositoryException;
-import com.jadaptive.repository.TransactionAdapter;
-import com.jadaptive.templates.SystemTemplates;
-import com.jadaptive.templates.TemplateEnabledService;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityService;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateRepository;
+import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.templates.SystemTemplates;
+import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.app.entity.MongoEntity;
+import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.app.repository.TransactionAdapter;
 
 @Service
 public class EntityTemplateServiceImpl implements EntityTemplateService, TemplateEnabledService<EntityTemplate> {
@@ -22,7 +29,7 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	EntityTemplateRepository repository; 
 	
 	@Autowired
-	EntityService entityService;
+	EntityService<MongoEntity> entityService;
 	
 	@Autowired
 	PermissionService permissionService; 

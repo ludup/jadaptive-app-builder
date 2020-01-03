@@ -9,9 +9,13 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jadaptive.db.DocumentDatabase;
-import com.jadaptive.db.mock.MockDocumentDatabaseImpl;
-import com.jadaptive.entity.EntityException;
+import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantRepository;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.db.mock.MockDocumentDatabaseImpl;
+import com.jadaptive.app.tenant.TenantRepositoryImpl;
 
 public class TenantRepositoryTests {
 

@@ -1,4 +1,4 @@
-package com.jadaptive.repository;
+package com.jadaptive.app.repository;
 
 import static java.lang.annotation.ElementType.METHOD;
 

@@ -1,4 +1,4 @@
-package com.jadaptive.session;
+package com.jadaptive.app.session;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -8,10 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.tenant.AbstractTenantAwareObjectDatabase;
-import com.jadaptive.tenant.AbstractTenantAwareObjectServiceImpl;
-import com.jadaptive.tenant.Tenant;
-import com.jadaptive.user.User;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionRepository;
+import com.jadaptive.api.session.SessionService;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.user.User;
+import com.jadaptive.app.tenant.AbstractTenantAwareObjectServiceImpl;
 
 @Service
 public class SessionServiceImpl extends AbstractTenantAwareObjectServiceImpl<Session> implements SessionService {
