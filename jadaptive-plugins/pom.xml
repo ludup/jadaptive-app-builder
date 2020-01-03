@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<parent>
+		<groupId>com.jadaptive</groupId>
+		<artifactId>jadaptive</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jadaptive-plugins</artifactId>
+
+	<packaging>pom</packaging>
+	<name>Plugins Parent</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- Override below properties in each plugin's pom.xml -->
+		<plugin.id />
+		<plugin.class />
+		<plugin.version />
+		<plugin.provider />
+		<plugin.dependencies />
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+				<version>2.8.2</version>
+			</plugin>
+		</plugins>
+	</build>
+
+	<modules>
+		<module>example-plugin</module>
+		<module>jadaptive-ssh-management</module>
+	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.jadaptive</groupId>
+			<artifactId>jadaptive-boot</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jadaptive</groupId>
+			<artifactId>jadaptive-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+</project>
