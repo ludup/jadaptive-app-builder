@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.jadaptive.api.servlet.GenericController;
+import com.jadaptive.api.servlet.PluginController;
 
 @Controller
 @Extension
-public class ExampleController extends GenericController {
+public class ExampleController extends PluginController {
 
 	@PostConstruct
 	private void postConstruct() {
