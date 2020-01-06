@@ -41,7 +41,7 @@
 	<modules>
 		<module>jadaptive-api</module>
 		<module>jadaptive-boot</module>
-		<module>jadaptive-plugins</module>
+		<module>plugins</module>
 	</modules>
 
 	<dependencies>
@@ -80,7 +80,7 @@
         <plugins>
         	<plugin>
 				<groupId>com.jadaptive</groupId>
-				<artifactId>plf4j-plugin-generator</artifactId>
+				<artifactId>pf4j-plugin-generator</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
 				<executions>
 					<execution>

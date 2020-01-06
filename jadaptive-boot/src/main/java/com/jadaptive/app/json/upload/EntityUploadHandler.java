@@ -9,6 +9,8 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.Extension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.supercsv.comment.CommentStartsWith;
 import org.supercsv.io.CsvListReader;
@@ -25,6 +27,8 @@ import com.jadaptive.utils.FileUtils;
 @Extension
 public class EntityUploadHandler implements UploadHandler {
 
+	static Logger log = LoggerFactory.getLogger(EntityUploadHandler.class);
+	
 	@Autowired
 	EntityTemplateService templateService; 
 	
@@ -71,6 +75,7 @@ public class EntityUploadHandler implements UploadHandler {
 			csvPreferences.skipComments(new CommentStartsWith("#"));
 		}
 		
+		long count = 0;
 		ICsvListReader listReader = null;
         try {
                 listReader = new CsvListReader(new InputStreamReader(in), csvPreferences.build());
@@ -84,13 +89,19 @@ public class EntityUploadHandler implements UploadHandler {
                         
                 	MongoEntity e = new MongoEntity(templateName);
                     for(int i=0; i < fields.length && i < results.size();i++)  {
-                    	if(StringUtils.isBlank(fields[i])) {
+                    	String name = fields[i];
+                    	if(StringUtils.isBlank(name)) {
                     		continue;
                     	}
-                    	e.setValue(template.getField(fields[i]), results.get(i));
+                    	if(name.equalsIgnoreCase("UUID")) {
+                    		e.setUuid(results.get(i));
+                    	} else {
+                    		e.setValue(template.getField(name), results.get(i));
+                    	}
                     }
                     
                     entityService.saveOrUpdate(e);
+                    count++;
                 }
                 
         }
@@ -98,6 +109,10 @@ public class EntityUploadHandler implements UploadHandler {
                 if( listReader != null ) {
                         listReader.close();
                 }
+        }
+        
+        if(log.isInfoEnabled()) {
+        	log.info("Uploaded {} entities", count);
         }
 	}
 
