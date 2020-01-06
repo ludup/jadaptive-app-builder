@@ -13,7 +13,7 @@ import org.springframework.core.env.Environment;
 
 import com.jadaptive.api.app.ApplicationVersion;
 
-@ComponentScan({"com.jadaptive.app"})
+@ComponentScan({"com.jadaptive.app.**"})
 @ServletComponentScan
 @SpringBootApplication
 public class Application {

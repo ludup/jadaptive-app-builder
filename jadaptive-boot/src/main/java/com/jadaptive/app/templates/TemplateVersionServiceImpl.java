@@ -17,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
@@ -26,9 +29,6 @@ import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.app.ConfigHelper;
 import com.jadaptive.app.ResourcePackage;
 import com.jadaptive.app.json.ObjectMapperHolder;
-import com.jadaptive.app.repository.AbstractUUIDEntity;
-import com.jadaptive.app.repository.RepositoryException;
-import com.jadaptive.app.repository.TransactionAdapter;
 import com.jadaptive.utils.Version;
 
 @Service

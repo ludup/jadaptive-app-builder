@@ -2,7 +2,7 @@ package com.jadaptive.db;
 
 import java.util.Date;
 
-import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 public class TestFieldTypesObject extends AbstractUUIDEntity {
 

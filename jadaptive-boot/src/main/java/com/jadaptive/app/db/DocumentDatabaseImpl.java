@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;

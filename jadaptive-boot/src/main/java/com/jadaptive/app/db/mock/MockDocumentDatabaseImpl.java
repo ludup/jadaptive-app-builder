@@ -12,8 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.app.db.DocumentDatabase;
-import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 public class MockDocumentDatabaseImpl implements DocumentDatabase {
 

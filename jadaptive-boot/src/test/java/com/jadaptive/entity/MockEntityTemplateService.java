@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
-import com.jadaptive.app.repository.RepositoryException;
 
 public class MockEntityTemplateService implements EntityTemplateService {
 

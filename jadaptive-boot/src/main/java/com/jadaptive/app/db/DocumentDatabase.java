@@ -2,7 +2,7 @@ package com.jadaptive.app.db;
 
 import org.bson.Document;
 
-import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 public interface DocumentDatabase {
 

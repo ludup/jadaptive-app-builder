@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.tenant.Tenant;
-import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 public interface Database {
 

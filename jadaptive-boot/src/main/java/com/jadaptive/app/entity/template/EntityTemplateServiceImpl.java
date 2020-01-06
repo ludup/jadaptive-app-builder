@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.EntityTemplateService;
@@ -19,8 +21,6 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.app.entity.MongoEntity;
-import com.jadaptive.app.repository.RepositoryException;
-import com.jadaptive.app.repository.TransactionAdapter;
 
 @Service
 public class EntityTemplateServiceImpl implements EntityTemplateService, TemplateEnabledService<EntityTemplate> {

@@ -65,7 +65,7 @@
 $(document).ready(function() {
 
 	$('#template').change(function() {
-
+		debugger;
 		var t = $("#template option:selected").data('template');
 		if(t) {
 		
@@ -94,7 +94,7 @@ $(document).ready(function() {
 					return ret;
 				}
 			});
-			
+			debugger;
 			$('#tableholder').empty();
 			$('#tableholder').append('<table id="table"></table>');
 			$('#table').bootstrapTable({
@@ -149,11 +149,11 @@ $(document).ready(function() {
 					});
 					
 					$('#jsonContent').val('');
-					var uri = '/api/' + t.uuid;
+					var uri = '/api/' + t.uuid + '/';
 					if(t.type !== 'SINGLETON') {
-						url += '/' + uuid;
+						url += uuid;
 					} 
-					
+					debugger;
 					$.getJSON(uri, function(data) {
 						if(data.success) {
 							$('#jsonContent').val(JSON.stringify(data.result, null, 4));
@@ -242,6 +242,7 @@ $(document).ready(function() {
 		
 		if(data.success) {
 			$.each(data.result, function(idx, obj) {
+				debugger;
 				$('#template').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.name + '</option>');
 				$('#' + obj.uuid).data('template', obj);
 				if(idx==0) {

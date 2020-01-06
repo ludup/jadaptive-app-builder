@@ -12,13 +12,13 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityRepository;
+import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.DocumentDatabase;
-import com.jadaptive.app.repository.RepositoryException;
 
 @Repository
 public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {

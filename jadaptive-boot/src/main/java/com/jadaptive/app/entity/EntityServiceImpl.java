@@ -11,12 +11,12 @@ import com.jadaptive.api.entity.EntityRepository;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.templates.TemplateEnabledService;
-import com.jadaptive.app.repository.RepositoryException;
-import com.jadaptive.app.repository.TransactionAdapter;
 
 @Service
 public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEnabledService<MongoEntity> {

@@ -10,8 +10,8 @@ import org.bson.Document;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.jadaptive.api.entity.AbstractEntity;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
-import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 @JsonDeserialize(using=EntityDeserializer.class)
 @JsonSerialize(using=EntitySerializer.class)
@@ -25,6 +25,9 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 	public MongoEntity() {	
 	}
 	
+	public MongoEntity(String resourceKey) {
+		this(resourceKey, new Document());
+	}
 	public MongoEntity(String resourceKey, Document document) {
 		this(null, resourceKey, document);
 		for(Entry<String,Object> entry : document.entrySet()) {

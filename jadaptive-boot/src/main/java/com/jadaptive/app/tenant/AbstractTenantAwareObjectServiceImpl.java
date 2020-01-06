@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
-import com.jadaptive.app.repository.AbstractUUIDEntity;
-import com.jadaptive.app.repository.RepositoryException;
 
 public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUIDEntity> 
 					implements AbstractTenantAwareObjectService<T>, TenantAware {

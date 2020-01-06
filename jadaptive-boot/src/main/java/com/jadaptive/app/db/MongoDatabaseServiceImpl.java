@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationProperties;
-import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.api.repository.RepositoryException;
 import com.mongodb.MongoClient;
 
 

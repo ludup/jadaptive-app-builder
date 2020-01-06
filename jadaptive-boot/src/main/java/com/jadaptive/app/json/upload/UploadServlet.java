@@ -3,23 +3,26 @@ package com.jadaptive.app.json.upload;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.http.fileupload.FileItemIterator;
 import org.apache.tomcat.util.http.fileupload.FileItemStream;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
@@ -27,7 +30,6 @@ import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.upload.UploadHandler;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.json.ResponseHelper;
-import com.jadaptive.app.passwords.BannedPasswordUploadHandler;
 import com.jadaptive.app.session.SessionUtils;
 import com.jadaptive.utils.FileUtils;
 
@@ -38,11 +40,6 @@ public class UploadServlet extends HttpServlet {
 	
 	@Autowired
 	SessionUtils sessionUtils;
-
-	Map<String,UploadHandler> handlers = new HashMap<>();
-	
-	@Autowired
-	BannedPasswordUploadHandler h;
 	
 	@Autowired
 	PermissionService permissionService; 
@@ -50,14 +47,10 @@ public class UploadServlet extends HttpServlet {
 	@Autowired
 	UserService userService; 
 	
-	@PostConstruct
-	private void postConstruct() {
-		handlers.put("bannedPasswords", h);
-	}
+	@Autowired
+	PluginManager pluginManager;
 	
-	public void registerHandler(String name, UploadHandler handler) {
-		handlers.put(name, handler);
-	}
+	Map<String,UploadHandler> uploadHandlers = new HashMap<>();
 	
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -85,32 +78,39 @@ public class UploadServlet extends HttpServlet {
 
 			// Parse the request
 			FileItemIterator iter = upload.getItemIterator(req);
-
+			Map<String,String> parameters = new HashMap<>();
 			while (iter.hasNext()) {
 			    FileItemStream item = iter.next();
 
-			    if(Objects.isNull(handler)) {
-			    	log.warn("Missing upload handler for {}", handlerName);
-			    	continue;
-			    }
-			    
-			    InputStream stream = new SessionStickyInputStream(
-			    		item.openStream(), 
-			    		session);
-	
-			    try {
-			    	handler.handleUpload(handlerName, uri, item.getName(), stream);    
-			    } finally {
-			    	stream.close();
+			    if (item.isFormField()) {
+			    	String name = item.getFieldName();
+			        String value = IOUtils.toString(item.openStream(), "UTF-8");
+			        parameters.put(name, value);
+			    } else {
+			     
+				    if(Objects.isNull(handler)) {
+				    	log.warn("Missing upload handler for {}", handlerName);
+				    	continue;
+				    }
+				    
+				    InputStream stream = new SessionStickyInputStream(
+				    		item.openStream(), 
+				    		session);
+		
+				    try {
+				    	handler.handleUpload(handlerName, uri, parameters, item.getName(), stream);    
+				    } finally {
+				    	stream.close();
+				    }
 			    }
 			    
 			}
 		
-			super.doPost(req, resp);
+			resp.setStatus(HttpStatus.OK.value());
 			
 		} catch (FileUploadException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Upload failure", e);
+			resp.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal error. Please see application log for more information.");
 		} finally {
 			if(Objects.nonNull(session)) {
 				permissionService.clearUserContext();
@@ -121,7 +121,20 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	private UploadHandler getUploadHandler(String handlerName) {
-		return handlers.get(handlerName);
+		
+		UploadHandler handler = uploadHandlers.get(handlerName);
+		
+		if(Objects.isNull(handler)) {
+			for(UploadHandler h : pluginManager.getExtensions(UploadHandler.class)) {
+				if(h.getURIName().equalsIgnoreCase(handlerName)) {
+					handler = h;
+					uploadHandlers.put(handlerName, h);
+					break;
+				}
+			}
+		}
+		
+		return handler;
 	}
 
 	private static final long serialVersionUID = -6914120139469535232L;

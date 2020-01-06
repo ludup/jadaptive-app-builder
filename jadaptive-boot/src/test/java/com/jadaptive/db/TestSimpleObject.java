@@ -1,6 +1,6 @@
 package com.jadaptive.db;
 
-import com.jadaptive.app.repository.NamedUUIDEntity;
+import com.jadaptive.api.repository.NamedUUIDEntity;
 
 public class TestSimpleObject extends NamedUUIDEntity {
 	

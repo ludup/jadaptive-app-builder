@@ -21,6 +21,8 @@ import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
@@ -32,8 +34,6 @@ import com.jadaptive.api.tenant.events.TenantCreatedEvent;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.ApplicationServiceImpl;
-import com.jadaptive.app.repository.RepositoryException;
-import com.jadaptive.app.repository.TransactionAdapter;
 
 
 @Service

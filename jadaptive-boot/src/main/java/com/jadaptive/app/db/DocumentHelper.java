@@ -18,10 +18,10 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.app.repository.AbstractUUIDEntity;
-import com.jadaptive.app.repository.JadaptiveIgnore;
-import com.jadaptive.app.repository.ReflectionUtils;
-import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.JadaptiveIgnore;
+import com.jadaptive.api.repository.ReflectionUtils;
+import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.utils.Utils;
 
 public class DocumentHelper {

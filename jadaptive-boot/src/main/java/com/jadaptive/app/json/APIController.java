@@ -21,13 +21,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
+import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.app.entity.MongoEntity;
-import com.jadaptive.app.repository.RepositoryException;
 
 @Controller
 public class APIController {
