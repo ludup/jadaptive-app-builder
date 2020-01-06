@@ -2,7 +2,7 @@ package com.jadaptive.api.entity;
 
 import java.util.Collection;
 
-import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.api.repository.RepositoryException;
 
 public interface EntityService<E extends AbstractEntity> {
 

@@ -3,8 +3,8 @@ package com.jadaptive.api.tenant;
 import java.util.Collection;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.app.repository.AbstractUUIDEntity;
-import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.RepositoryException;
 
 public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
 
@@ -28,6 +28,6 @@ public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity>
 
 	Collection<T> matchCollectionObjects(String field, String value);
 	
-	public Class<T> getResourceClass();
+	Class<T> getResourceClass();
 
 }

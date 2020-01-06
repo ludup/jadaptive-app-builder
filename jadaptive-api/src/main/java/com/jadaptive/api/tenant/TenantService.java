@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.permissions.AccessDeniedException;
-import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.api.repository.RepositoryException;
 
 public interface TenantService {
 

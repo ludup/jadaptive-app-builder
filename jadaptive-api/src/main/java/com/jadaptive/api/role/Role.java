@@ -3,7 +3,7 @@ package com.jadaptive.api.role;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.jadaptive.app.repository.NamedUUIDEntity;
+import com.jadaptive.api.repository.NamedUUIDEntity;
 
 public class Role extends NamedUUIDEntity {
 

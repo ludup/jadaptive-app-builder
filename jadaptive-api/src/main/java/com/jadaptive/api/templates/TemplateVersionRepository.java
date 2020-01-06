@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.jadaptive.api.db.AbstractObjectDatabase;
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.utils.Version;
 
 public interface TemplateVersionRepository extends AbstractObjectDatabase {

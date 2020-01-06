@@ -1,4 +1,4 @@
-package com.jadaptive.app.repository;
+package com.jadaptive.api.repository;
 
 import com.jadaptive.api.entity.EntityException;
 

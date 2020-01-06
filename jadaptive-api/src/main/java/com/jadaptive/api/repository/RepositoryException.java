@@ -1,4 +1,4 @@
-package com.jadaptive.app.repository;
+package com.jadaptive.api.repository;
 
 public class RepositoryException extends RuntimeException {
 

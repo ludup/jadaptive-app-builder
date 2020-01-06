@@ -1,4 +1,4 @@
-package com.jadaptive.app.repository;
+package com.jadaptive.api.repository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

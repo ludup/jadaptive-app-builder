@@ -1,6 +1,6 @@
 package com.jadaptive.api.events;
 
-import com.jadaptive.app.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 public class AbstractUUIDEntityEvent<T extends AbstractUUIDEntity> extends SystemEvent {
 

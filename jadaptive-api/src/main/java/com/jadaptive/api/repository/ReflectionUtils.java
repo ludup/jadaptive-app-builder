@@ -1,4 +1,4 @@
-package com.jadaptive.app.repository;
+package com.jadaptive.api.repository;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

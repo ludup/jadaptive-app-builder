@@ -2,8 +2,8 @@ package com.jadaptive.api.session;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.tenant.Tenant;
-import com.jadaptive.app.repository.AbstractUUIDEntity;
 
 public class Session extends AbstractUUIDEntity {
 

@@ -3,7 +3,7 @@ package com.jadaptive.api.template;
 import java.util.Collection;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.api.repository.RepositoryException;
 
 public interface EntityTemplateService {
 

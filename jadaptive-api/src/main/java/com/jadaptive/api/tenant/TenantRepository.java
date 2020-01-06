@@ -3,7 +3,7 @@ package com.jadaptive.api.tenant;
 import java.util.Collection;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.app.repository.RepositoryException;
+import com.jadaptive.api.repository.RepositoryException;
 
 public interface TenantRepository {
 

@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import com.jadaptive.app.repository.NamedUUIDEntity;
+import com.jadaptive.api.repository.NamedUUIDEntity;
 
 public class FieldTemplate extends NamedUUIDEntity {
 	
