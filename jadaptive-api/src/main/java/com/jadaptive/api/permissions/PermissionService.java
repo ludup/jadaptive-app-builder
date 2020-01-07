@@ -37,4 +37,8 @@ public interface PermissionService {
 
 	boolean hasUserContext();
 
+	String getReadWritePermission(String resourceKey);
+
+	String getReadPermission(String resourceKey);
+
 }
