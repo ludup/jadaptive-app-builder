@@ -2,8 +2,10 @@ package com.jadaptive.app.templates;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,7 +15,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.entity.EntityException;
@@ -39,6 +45,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	@Autowired
 	protected ObjectMapperHolder objectMapper;
+	
+	@Autowired
+	PluginManager pluginManager; 
 	
 	@Override
 	public Collection<TemplateVersion> list() throws RepositoryException, EntityException {
@@ -117,6 +126,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
 			}
 			
+			addClasspathResources("system/shared/" + templateEnabledService.getTemplateFolder(), paths);
+			
 			if(!tenant.getSystem()) {
 
 				File tenantConf = new File(ConfigHelper.getTenantsFolder(), tenant.getHostname());
@@ -135,6 +146,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				for(ResourcePackage pkg : ConfigHelper.getSystemPrivatePackages()) {
 					paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
 				}
+				
+				addClasspathResources("system/private/" + templateEnabledService.getTemplateFolder(), paths);
 			}
 			
 		} else {
@@ -149,41 +162,31 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 		return paths;
 	}
-
-//	private void lookupTemplatesInZipFiles(Path path, String templateName, List<PathInfo> paths) {
-//		
-//		try {
-//			if(Files.exists(path)) {
-//				Files.list(path)
-//				.filter(f -> f.getFileName().toString().endsWith(".zip"))
-//				.forEach(zipFile -> {
-//					URI uri = URI.create(String.format("jar:file:%s", zipFile.toAbsolutePath().toString()));
-//	
-//					
-//					try {
-//						FileSystem zipfs;
-//						try {
-//							zipfs = FileSystems.getFileSystem(uri);
-//						} catch(FileSystemNotFoundException e) {
-//							zipfs = FileSystems.newFileSystem(uri, new HashMap<>());
-//						}
-//						Path inzip = zipfs.getPath(templateName);
-//						if(Files.exists(inzip)) {
-//							paths.add(new PathInfo(uri, zipfs, inzip.toAbsolutePath()));
-//						}
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-//	
-//	
-//				});
-//			}
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 		
+	private void addClasspathResources(String path, List<PathInfo> paths) throws IOException {
+		
+		for(PluginWrapper w : pluginManager.getPlugins()) {
+			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(w.getPluginClassLoader());
+			Resource[] resources = resolver.getResources("classpath*:" + path);
+			for(Resource resource : resources) {
+				try {
+					paths.add(new PathInfo(Paths.get(resource.getURL().toURI())));
+				} catch (URISyntaxException e) {
+				}
+			}
+		}
+		
+		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(getClass().getClassLoader());
+		Resource[] resources = resolver.getResources("classpath*:" + path);
+		for(Resource resource : resources) {
+			try {
+				paths.add(new PathInfo(Paths.get(resource.getURL().toURI())));
+			} catch (URISyntaxException e) {
+			}
+		}
+	
+	}
+
 	protected Collection<PathInfo> findVersionedTemplates(List<PathInfo> paths) throws IOException {
 		
 		List<PathInfo> orderedTemplates = new ArrayList<>();
@@ -202,9 +205,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					orderedTemplates.add(new PathInfo(jsonFile));
 				});
 			}
-			
-
 		}
+	
 		
 		Collections.<PathInfo>sort(orderedTemplates, new Comparator<PathInfo>() {
 			
