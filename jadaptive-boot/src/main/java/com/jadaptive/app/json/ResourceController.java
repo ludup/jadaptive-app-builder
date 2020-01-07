@@ -3,14 +3,21 @@ package com.jadaptive.app.json;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hibernate.validator.internal.util.privilegedactions.GetClassLoader;
+import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +40,9 @@ public class ResourceController {
 	
 	@Autowired
 	TenantService tenantService; 
+	
+	@Autowired
+	PluginManager pluginManager; 
 	
 	@PostConstruct
 	private void postConstruct() {
@@ -62,7 +72,7 @@ public class ResourceController {
 			
 			Path resource = resolveResource(request, resourceUri);
 			
-			if(Files.exists(resource) && Files.exists(resource)  && !uri.endsWith("/")) {
+			if(Files.exists(resource) && Files.isDirectory(resource) && !uri.endsWith("/")) {
 				ResponseHelper.sendRedirect(uri + "/", request, response);
 				return;
 			}
@@ -94,18 +104,38 @@ public class ResourceController {
 		
 		Tenant tenant = tenantService.getCurrentTenant();
 		
+		String uri = "webapp" + resourceUri;
+		
 		if(!tenant.getSystem()) {
+			
+			/**
+			 * Process tenant files, then packages
+			 */
 			File res = new File(ConfigHelper.getTenantSubFolder(tenant, "webapp"), resourceUri);
 			if(res.exists()) {
 				return res.toPath();
 			}
+			
+			try {
+				for(ResourcePackage pkg : ConfigHelper.getTenantPackages(tenant)) {
+					if(pkg.containsPath(uri)) {
+						return pkg.resolvePath(uri);
+					}
+				}
+			} catch (IOException e) {
+				log.error("Failed to process package file for " + uri, e);
+			}
+			
 		} else {
+			
+			/**
+			 * Process system files, then packages
+			 */
 			File res = new File(ConfigHelper.getSystemPrivateSubFolder("webapp"), resourceUri);
 			if(res.exists()) {
 				return res.toPath();
-			}
+			}			
 			
-			String uri = "webapp/" + resourceUri;
 			try {
 				for(ResourcePackage pkg : ConfigHelper.getSystemPrivatePackages()) {
 					if(pkg.containsPath(uri)) {
@@ -122,7 +152,6 @@ public class ResourceController {
 			return res.toPath();
 		}
 		
-		String uri = "webapp" + resourceUri;
 		try {
 			for(ResourcePackage pkg : ConfigHelper.getSharedPackages()) {
 				if(pkg.containsPath(uri)) {
@@ -131,6 +160,26 @@ public class ResourceController {
 			}
 		} catch (IOException e) {
 			log.error("Failed to process package file for " + uri, e);
+		}
+		
+		for(PluginWrapper w : pluginManager.getPlugins()) {
+			URL url = w.getPluginClassLoader().getResource(FileUtils.checkStartsWithNoSlash(uri));
+			if(Objects.nonNull(url)) {
+				try {
+					return Paths.get(url.toURI());
+				} catch (URISyntaxException e) {
+					log.error("Failed to process classpath resource for " + uri, e);
+				}
+			}
+		}
+		
+		URL url = getClass().getClassLoader().getResource(resourceUri);
+		if(Objects.nonNull(url)) {
+			try {
+				return Paths.get(url.toURI());
+			} catch (URISyntaxException e) {
+				log.error("Failed to process classpath resource for " + uri, e);
+			}
 		}
 		
 		return res.toPath();
