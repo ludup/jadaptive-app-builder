@@ -43,7 +43,7 @@
 	       </div>
 	        <br>
 	        <div class="col-6">
-	        	<form id="uploadForm" enctype="multipart/form-data" method="post">
+	        	<form id="uploadForm" enctype="multipart/form-data" action="/app/upload" method="post">
 		    		<input type="hidden" id="orderedFields" name="orderedFields" value="">
 		    		<label>Quote Character</label>
 		    		<input type="text" maxlength="1" name="quoteChar" value="&quot"><br>
@@ -54,7 +54,7 @@
 		    		<label>Ignore Empty Lines</label>&nbsp;<input type="checkbox" name="ignoreEmptyLines" checked value="true"><br>
 		    		
 		    		<input id="image-file" type="file" name="file"/>	
-		    		<button style="float: right;" class="btn btn-success">Import</button>
+		    		<button id="importButton" style="float: right;" class="btn btn-success">Import</button>
 				</form>
 	        </div>
 
@@ -150,6 +150,8 @@ $(document).ready(function() {
 				
 				if($('#searchField').length == 0) {
 					$('.search').parent().append('<div class="float-right btn-group"><select id="searchField"></select></div>');
+					
+					$('#searchField').append('<option value="uuid">UUID</option>');
 					
 					$.each(t.fields, function(idx, obj) {
 						$('#searchField').append('<option value="' + obj.resourceKey + '">' + obj.name + '</option>');

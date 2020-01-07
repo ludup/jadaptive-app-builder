@@ -131,7 +131,7 @@ public class APIController {
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public TableStatus<EntityTemplate> getTemplateTable(HttpServletRequest request,
-			@RequestParam(required=false) String searchField,
+			@RequestParam(required=false, defaultValue="uuid") String searchField,
 			@RequestParam(required=false, name="search") String searchValue,
 			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam int offset,
@@ -226,7 +226,7 @@ public class APIController {
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityTableStatus<MongoEntity> tableEntities(HttpServletRequest request, 
 			@PathVariable String resourceKey,
-			@RequestParam(required=false) String searchField,
+			@RequestParam(required=false, defaultValue="uuid") String searchField,
 			@RequestParam(required=false, name="search") String searchValue,
 			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam(required=false, defaultValue = "0") int offset,

@@ -30,7 +30,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public <E extends AbstractUUIDEntity> void insertOrUpdate(E obj, Document document, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		
+
 		if(StringUtils.isBlank(obj.getUuid())) {
 			obj.setUuid(UUID.randomUUID().toString());
 			document.put("_id", obj.getUuid());

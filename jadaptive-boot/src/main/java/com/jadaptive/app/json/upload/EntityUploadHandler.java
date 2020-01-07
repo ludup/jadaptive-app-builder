@@ -119,7 +119,9 @@ public class EntityUploadHandler implements UploadHandler {
 	private String[] validateFields(String[] fields, EntityTemplate template) throws IOException {
 		for(String field : fields) {
 			if(StringUtils.isNotBlank(field) && Objects.isNull(template.getField(field))) {
-				throw new IOException(String.format("Invalid field reference '%s'", field));
+				if(!field.equalsIgnoreCase("UUID")) {
+					throw new IOException(String.format("Invalid field reference '%s'", field));
+				}
 			}
 		}
 		return fields;
