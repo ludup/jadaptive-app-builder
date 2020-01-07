@@ -36,7 +36,6 @@ public class EntityUploadHandler implements UploadHandler {
 	EntityService<MongoEntity> entityService; 
 	
 	public EntityUploadHandler() {
-		System.out.println();
 	}
 	
 	@Override
