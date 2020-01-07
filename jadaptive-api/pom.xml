@@ -27,6 +27,14 @@
 					<groupId>org.pf4j</groupId>
 					<artifactId>pf4j</artifactId>
 				</exclusion>
+				<exclusion>
+				  <groupId>org.springframework</groupId>
+				  <artifactId>spring-core</artifactId>
+				</exclusion>
+				<exclusion>
+				  <groupId>org.springframework</groupId>
+				  <artifactId>spring-context</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		
