@@ -149,11 +149,13 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		assertAnyPermission(getReadPermission(resourceKey), getReadWritePermission(resourceKey));
 	}
 	
-	private String getReadWritePermission(String resourceKey) {
+	@Override
+	public String getReadWritePermission(String resourceKey) {
 		return String.format("%s.%s", resourceKey, READ_WRITE);
 	}
 
-	private String getReadPermission(String resourceKey) {
+	@Override
+	public String getReadPermission(String resourceKey) {
 		return String.format("%s.%s", resourceKey, READ);
 	}
 
