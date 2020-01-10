@@ -73,7 +73,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 		try {
 
 			int port = ApplicationProperties.getValue("sshd.port", 2222);
-			boolean extenalAccess = ApplicationProperties.getValue("sshd.externalAccess", false);
+			boolean extenalAccess = ApplicationProperties.getValue("sshd.externalAccess", true);
 
 			addAuthenticator(passwordAuthenticator);
 
