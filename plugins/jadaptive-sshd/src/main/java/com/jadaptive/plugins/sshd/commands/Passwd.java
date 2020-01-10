@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.ssh.management.commands;
+package com.jadaptive.plugins.sshd.commands;
 
 import java.io.IOException;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.ssh.management;
+package com.jadaptive.plugins.sshd;
 
 import java.io.IOException;
 

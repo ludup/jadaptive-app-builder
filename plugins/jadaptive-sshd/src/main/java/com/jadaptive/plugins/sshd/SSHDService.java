@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.ssh.management;
+package com.jadaptive.plugins.sshd;
 
 public interface SSHDService {
 

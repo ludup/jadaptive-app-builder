@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.ssh.management;
+package com.jadaptive.plugins.sshd;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -6,6 +6,7 @@ import java.nio.channels.SocketChannel;
 
 import javax.annotation.PostConstruct;
 
+import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,9 @@ import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.plugins.ssh.management.commands.SuperUserCommandFactory;
-import com.jadaptive.plugins.ssh.management.commands.TenantUserCommandFactory;
+import com.jadaptive.plugins.sshd.commands.PluginCommandFactory;
+import com.jadaptive.plugins.sshd.commands.UserCommandFactory;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
@@ -45,16 +45,10 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 	private PasswordAuthenticatorImpl passwordAuthenticator; 
 	
 	@Autowired
-	private SuperUserCommandFactory superUserCommands; 
-	
-	@Autowired
-	private TenantUserCommandFactory tenantUserCommands; 
+	private UserCommandFactory userCommands; 
 	
 	@Autowired
 	private ApplicationContext context;
-	
-	@Autowired
-	private TenantService tenantService; 
 	
 	@Autowired
 	private PermissionService permissionService; 
@@ -62,6 +56,8 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 	@Autowired
 	private UserService userService; 
 	
+	@Autowired
+	private PluginManager pluginManager; 
 	
 	public SSHDServiceImpl() throws UnknownHostException {
 		super();
@@ -104,17 +100,18 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 				
 				ShellCommandFactory scf = new ShellCommandFactory(
 						new FileSystemCommandFactory(),
-						tenantUserCommands);
+						userCommands);
 				
 				permissionService.setupUserContext(userService.findUsername(con.getUsername()));
 				
 				try {
-					if(tenantService.getCurrentTenant().getSystem()) {
+					
+					for(PluginCommandFactory cf : pluginManager.getExtensions(PluginCommandFactory.class)) {
 						try {
-							tenantService.assertManageTenant();
-							scf.installFactory(superUserCommands);
+						cf.assertAccess();
+						scf.installFactory(cf);
 						} catch(AccessDeniedException e) { }
-					} 
+					}
 					
 					VirtualShell shell = new VirtualShell(con, scf);
 					
