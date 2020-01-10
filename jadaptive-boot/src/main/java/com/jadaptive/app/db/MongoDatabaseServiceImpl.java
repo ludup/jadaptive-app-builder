@@ -88,7 +88,7 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 		
 		mongoClient = new MongoClient(
 				ApplicationProperties.getValue("mongodb.hostname", "localhost"),
-				ApplicationProperties.getValue("mongodb.port", 32768));
+				ApplicationProperties.getValue("mongodb.port", 27017));
 	}
 
 }

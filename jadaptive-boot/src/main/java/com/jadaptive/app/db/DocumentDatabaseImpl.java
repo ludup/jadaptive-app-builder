@@ -96,11 +96,17 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		if(StringUtils.isBlank(searchField)) {
-			// Default the search field?
+			searchField = "_id";
+			/**
+			 * TODO look for a default field in the template
+			 */
 		}
 		if(StringUtils.isBlank(searchValue)) {
 			return collection.find().skip(start).limit(length);
 		} else {
+			if(searchField.equalsIgnoreCase("UUID")) {
+				searchField = "_id";
+			}
 			return collection.find(Filters.regex(searchField, searchValue)).skip(start).limit(length);
 		}
 	}
@@ -115,11 +121,17 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Long count(String table, String searchField, String searchValue, String database) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		if(StringUtils.isBlank(searchField)) {
-			// Default the search field?
+			searchField = "_id";
+			/**
+			 * TODO look for a default field in the template
+			 */
 		}
 		if(StringUtils.isBlank(searchValue)) {
 			return collection.countDocuments();
 		} else {
+			if(searchField.equalsIgnoreCase("UUID")) {
+				searchField = "_id";
+			}
 			return collection.countDocuments(Filters.regex(searchField, searchValue));
 		}
 		
