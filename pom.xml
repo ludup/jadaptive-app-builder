@@ -43,6 +43,8 @@
 		<module>jadaptive-api</module>
 		<module>jadaptive-boot</module>
 		<module>plugins</module>
+		<module>wrapper</module>
+        <module>install</module>
 	</modules>
 
 	<dependencies>
@@ -80,22 +82,6 @@
 		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<mainClass>com.jadaptive.app.Application</mainClass>
-					<workingDirectory>..</workingDirectory>	
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>com.jadaptive</groupId>
 				<artifactId>pf4j-plugin-generator</artifactId>
 				<version>0.0.1-SNAPSHOT</version>
@@ -109,7 +95,6 @@
 						<configuration>
 							<containerArtifact>jadaptive-boot</containerArtifact>
 							<apiArtifact>jadaptive-api</apiArtifact>
-							<pluginsArtifact>jadaptive-plugins</pluginsArtifact>
 						</configuration>
 					</execution>
 				</executions>
