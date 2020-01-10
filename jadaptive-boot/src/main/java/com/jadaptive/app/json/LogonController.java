@@ -21,9 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.SecurityPropertyService;
 import com.jadaptive.app.auth.AuthenticationService;
 import com.jadaptive.app.session.SessionUtils;
@@ -37,12 +35,6 @@ public class LogonController {
 	private void postConstruct() {
 		System.out.println(getClass().getName());
 	}
-	
-	@Autowired
-	private SessionService sessionService; 
-	
-	@Autowired
-	private UserService userService; 
 	
 	@Autowired
 	private TenantService tenantService; 

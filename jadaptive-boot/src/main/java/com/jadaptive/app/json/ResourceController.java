@@ -15,7 +15,6 @@ import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hibernate.validator.internal.util.privilegedactions.GetClassLoader;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
