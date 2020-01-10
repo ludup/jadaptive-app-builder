@@ -125,8 +125,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			for(ResourcePackage pkg : ConfigHelper.getSharedPackages()) {
 				paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
 			}
-			
-			addClasspathResources("system/shared/" + templateEnabledService.getTemplateFolder(), paths);
+						addClasspathResources("system/shared/" + templateEnabledService.getTemplateFolder(), paths);
 			
 			if(!tenant.getSystem()) {
 
@@ -184,7 +183,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			} catch (URISyntaxException e) {
 			}
 		}
-	
 	}
 
 	protected Collection<PathInfo> findVersionedTemplates(List<PathInfo> paths) throws IOException {

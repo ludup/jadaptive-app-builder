@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +23,9 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.SecurityPropertyService;
+import com.jadaptive.app.auth.AuthenticationService;
 import com.jadaptive.app.session.SessionUtils;
 
 @Controller
@@ -53,7 +54,10 @@ public class LogonController {
 	private PermissionService permissionService; 
 	
 	@Autowired
-	SecurityPropertyService securityService; 
+	private SecurityPropertyService securityService; 
+	
+	@Autowired
+	private AuthenticationService authenticationService; 
 	
 	@RequestMapping(value="api/logon", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
@@ -64,17 +68,10 @@ public class LogonController {
 		permissionService.setupSystemContext();
 		
 		try {
-			User user = userService.findUsername(username);
-			if(Objects.isNull(user)) {
-				return new RequestStatus(false, "Bad username or password");
-			}
-			
-			if(!userService.verifyPassword(user, password.toCharArray())) {
-				return new RequestStatus(false, "Bad username or password");
-			}
-			
-			Session session = sessionService.createSession(tenantService.getCurrentTenant(), 
-					user, request.getRemoteAddr(), request.getHeader("User-Agent"));
+			Session session = authenticationService.logonUser(username, password,
+					tenantService.getCurrentTenant(), 
+					request.getRemoteAddr(), 
+					request.getHeader(HttpHeaders.USER_AGENT));
 			
 			sessionUtils.addSessionCookies(request, response, session);
 			

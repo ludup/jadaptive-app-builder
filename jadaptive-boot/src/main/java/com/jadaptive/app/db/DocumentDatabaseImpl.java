@@ -25,6 +25,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoDatabase db = mongo.getClient().getDatabase(database);
 		return db.getCollection(table);
 	}
+
 	
 	@Override
 	public <E extends AbstractUUIDEntity> void insertOrUpdate(E obj, Document document, String table, String database) {

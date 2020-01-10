@@ -17,6 +17,25 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		
+		<!-- This dependency is to have an embedded mongodb -->
+	    <dependency>
+	        <groupId>de.flapdoodle.embed</groupId>
+	        <artifactId>de.flapdoodle.embed.mongo</artifactId>
+	    </dependency>
+	
+	    <!-- while this provides a spring factory bean for the embedded mongodb -->
+	    <dependency>
+	        <groupId>cz.jirutka.spring</groupId>
+	        <artifactId>embedmongo-spring</artifactId>
+	        <version>RELEASE</version>
+	    </dependency>
+	
+	    <!-- finally this one is the spring-boot starter for mongodb -->
+	    <dependency>
+	        <groupId>org.springframework.boot</groupId>
+	        <artifactId>spring-boot-starter-data-mongodb</artifactId>
+	     </dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -1,5 +1,7 @@
 package com.jadaptive.app.json;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -10,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -19,6 +22,7 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.SecurityPropertyService;
+import com.jadaptive.app.auth.AuthenticationService;
 import com.jadaptive.app.session.SessionUtils;
 import com.jadaptive.utils.FileUtils;
 
@@ -44,20 +48,28 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 	@Autowired
 	private UserService userService; 
 	
+	@Autowired
+	private AuthenticationService authenticationService; 
+	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 		
 		Session session = sessionUtils.getActiveSession(request);
-			
+		Properties properties = securityService.resolveSecurityProperties(request, request.getRequestURI());
+	
+		tenantService.setCurrentTenant(request);
+		
+		if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))
+				&& Objects.nonNull(request.getHeader(HttpHeaders.AUTHORIZATION))) {
+			session = performBasicAuthentication(request);
+		}
+		
 		if(Objects.nonNull(session)) {
 			tenantService.setCurrentTenant(session.getCurrentTenant());	
 			permissionService.setupUserContext(userService.findUsername(session.getUsername()));
-		} else {
-			tenantService.setCurrentTenant(request);
-		}
+		} 
 		
-		Properties properties = securityService.resolveSecurityProperties(request, request.getRequestURI());
 		String loginURL = properties.getProperty("authentication.loginURL");
 		String requestURL = request.getRequestURI();
 		
@@ -89,6 +101,30 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 		}
 
 		return super.preHandle(request, response, handler);
+	}
+
+	private Session performBasicAuthentication(HttpServletRequest request) throws UnsupportedEncodingException {
+		
+		String[] authorization = request.getHeader(HttpHeaders.AUTHORIZATION).split(" ");
+		if(authorization.length > 1) {
+			if(authorization[0].equalsIgnoreCase("BASIC")) {
+				String encoded = new String(Base64.getDecoder().decode(authorization[1]), "UTF-8");
+				int idx = encoded.indexOf(':');
+				if(idx==-1) {
+					return null;
+				}
+				String username = encoded.substring(0, idx);
+				String password = encoded.substring(idx+1);
+				
+				return authenticationService.logonUser(
+						username, 
+						password, 
+						tenantService.getCurrentTenant(), 
+						request.getRemoteAddr(), 
+						request.getHeader(HttpHeaders.USER_AGENT));
+			}
+		}
+		return null;
 	}
 
 	@Override
