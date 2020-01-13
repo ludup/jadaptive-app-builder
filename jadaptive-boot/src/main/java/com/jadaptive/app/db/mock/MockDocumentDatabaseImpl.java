@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.app.db.DocumentDatabase;
@@ -103,14 +104,32 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return null;
 	}
 
+//	@Override
+//	public Iterable<Document> searchCollectionField(String field, String value, String table, String database) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
 	@Override
-	public Iterable<Document> matchCollectionField(String field, String value, String table, String database) {
+	public Long count(String table, String searchField, String searchValue, String database) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Long count(String table, String searchField, String searchValue, String database) {
+	public Iterable<Document> search(String table, String database, SearchField... fields) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterable<Document> searchTable(String table, String database, int start, int length, SearchField... fields) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long searchCount(String table, String database, SearchField... fields) {
 		// TODO Auto-generated method stub
 		return null;
 	}

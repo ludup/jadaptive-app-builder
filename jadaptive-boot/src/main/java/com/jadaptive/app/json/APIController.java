@@ -165,6 +165,11 @@ public class APIController {
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<MongoEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+		
+		if(resourceKey.equals("logon")) {
+			return new EntityStatus<MongoEntity>(false, "Logon API requires POST request");
+		}
+		
 		try {
 			   return new EntityStatus<MongoEntity>(entityService.getSingleton(resourceKey));
 		} catch(Throwable e) {
@@ -221,7 +226,7 @@ public class APIController {
 		}
 	}
 	
-	@RequestMapping(value="api/{resourceKey}/table", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="api/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityTableStatus<MongoEntity> tableEntities(HttpServletRequest request, 

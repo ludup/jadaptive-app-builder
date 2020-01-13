@@ -62,7 +62,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 		
 		if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))
 				&& Objects.nonNull(request.getHeader(HttpHeaders.AUTHORIZATION))) {
-			session = performBasicAuthentication(request);
+			session = performBasicAuthentication(request, response);
 		}
 		
 		if(Objects.nonNull(session)) {
@@ -103,7 +103,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 		return super.preHandle(request, response, handler);
 	}
 
-	private Session performBasicAuthentication(HttpServletRequest request) throws UnsupportedEncodingException {
+	private Session performBasicAuthentication(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		
 		String[] authorization = request.getHeader(HttpHeaders.AUTHORIZATION).split(" ");
 		if(authorization.length > 1) {
@@ -116,12 +116,16 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 				String username = encoded.substring(0, idx);
 				String password = encoded.substring(idx+1);
 				
-				return authenticationService.logonUser(
+				Session session = authenticationService.logonUser(
 						username, 
 						password, 
 						tenantService.getCurrentTenant(), 
 						request.getRemoteAddr(), 
 						request.getHeader(HttpHeaders.USER_AGENT));
+				
+				sessionUtils.addSessionCookies(request, response, session);
+				
+				return session;
 			}
 		}
 		return null;

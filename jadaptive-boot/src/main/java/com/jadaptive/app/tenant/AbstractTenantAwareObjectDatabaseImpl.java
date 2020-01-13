@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
@@ -34,8 +35,18 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 	}
 	
 	@Override
-	public Collection<T> matchCollectionObjects(String field, String value) {
-		return matchCollectionObjects(field, value, tenantService.getCurrentTenant().getUuid(), getResourceClass());
+	public Collection<T> searchObjects(SearchField... fields) {
+		return searchObjects(tenantService.getCurrentTenant().getUuid(), getResourceClass(), fields);
+	}
+	
+	@Override
+	public Collection<T> searchTable(int start, int length, SearchField... fields) {
+		return searchTable(tenantService.getCurrentTenant().getUuid(), getResourceClass(), start, length, fields);
+	}
+	
+	@Override
+	public Long searchCount(SearchField... fields) {
+		return searchCount(tenantService.getCurrentTenant().getUuid(), getResourceClass(), fields);
 	}
 
 	@Override

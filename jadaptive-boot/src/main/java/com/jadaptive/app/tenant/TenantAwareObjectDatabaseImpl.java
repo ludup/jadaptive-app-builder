@@ -5,6 +5,8 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
@@ -32,11 +34,6 @@ public class TenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity>
 	@Override
 	public Collection<T> list(String field, String value, Class<T> resourceClass) {
 		return listObjects(field, value, tenantService.getCurrentTenant().getUuid(), resourceClass);
-	}
-	
-	@Override
-	public Collection<T> matchCollectionObjects(String field, String value, Class<T> resourceClass) {
-		return matchCollectionObjects(field, value, tenantService.getCurrentTenant().getUuid(), resourceClass);
 	}
 
 	@Override
@@ -73,5 +70,19 @@ public class TenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity>
 	public long count(Class<T> resourceClass) {
 		return countObjects(tenantService.getCurrentTenant().getUuid(), resourceClass);
 	}
+	
+	@Override
+	public Collection<T> searchTable(Class<T> resourceClass, int start, int length, SearchField... fields) {
+		return searchTable(tenantService.getCurrentTenant().getUuid(), resourceClass, start, length, fields);
+	}
+	
+	@Override
+	public Collection<T> searchObjects(Class<T> resourceClass, SearchField... fields) {
+		return searchObjects(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
+	}
 
+	@Override
+	public Long searchCount(Class<T> resourceClass, SearchField... fields) {
+		return searchCount(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
+	}
 }

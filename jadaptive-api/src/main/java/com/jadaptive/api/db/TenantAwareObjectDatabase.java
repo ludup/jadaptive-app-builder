@@ -1,4 +1,4 @@
-package com.jadaptive.app.tenant;
+package com.jadaptive.api.db;
 
 import java.util.Collection;
 
@@ -12,8 +12,6 @@ public interface TenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
 
 	Collection<T> list(String field, String value, Class<T> resourceClass);
 
-	Collection<T> matchCollectionObjects(String field, String value, Class<T> resourceClass);
-
 	T get(String uuid, Class<T> resourceClass) throws RepositoryException, EntityException;
 
 	void delete(T obj) throws RepositoryException, EntityException;
@@ -25,8 +23,12 @@ public interface TenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
 	Collection<T> table(String searchField, String searchValue, String order, int start, int length,
 			Class<T> resourceClass);
 
-
-
 	long count(Class<T> resourceClass);
+
+	Collection<T> searchTable(Class<T> resourceClass, int start, int length, SearchField... fields);
+
+	Collection<T> searchObjects(Class<T> resourceClass, SearchField... fields);
+
+	Long searchCount(Class<T> resourceClass, SearchField... fields);
 
 }

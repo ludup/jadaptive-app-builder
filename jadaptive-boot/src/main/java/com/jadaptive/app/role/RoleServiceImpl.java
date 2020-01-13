@@ -41,6 +41,7 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	@EventListener
 	@Override
 	public void onTenantCreated(TenantCreatedEvent evt) {
+		
 		Role role = new Role();
 		role.setUuid(ADMINISTRATOR_UUID);
 		role.setName(ADMINISTRATION);
@@ -56,6 +57,7 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 		role.setAllUsers(true);
 		
 		saveOrUpdate(role);
+
 		
 	}
 	
@@ -73,8 +75,8 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	public Collection<Role> getRoles(User user) {
 		
 		Set<Role> roles = new HashSet<>();
-		roles.addAll(repository.matchCollectionObjects("users", user.getUuid()));
-		roles.addAll(repository.list("allUsers", "true"));
+		roles.addAll(repository.getRolesByUser(user));
+		roles.addAll(repository.getAllUserRoles());
 		return roles;
 	}
 	
@@ -99,17 +101,18 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 		
 		saveOrUpdate(role);
 		
-		for(User user : users) {
-			assignRole(role, user);
-		}
+		doAssign(role, users.toArray(new User[0]));
 		
 		return role;
 	}
 	
 	@Override
 	public void assignRole(Role role, User... users) {
-		
 		assertReadWrite();
+		doAssign(role, users);
+	}
+	
+	private void doAssign(Role role, User... users) {
 		
 		if(EVERYONE_UUID.equals(role.getUuid())) {
 			throw new EntityException("You cannot assign a user to the Everyone role");

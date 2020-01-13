@@ -13,4 +13,6 @@ public interface TemplateVersionService {
 
 	<E extends AbstractUUIDEntity>  void processTemplates(Tenant tenant, TemplateEnabledService<E> repository);
 
+	void registerAnnotatedTemplates();
+
 }

@@ -1,9 +1,13 @@
 package com.jadaptive.app.role;
 
+import java.util.Collection;
+
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleRepository;
+import com.jadaptive.api.user.User;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 
@@ -17,6 +21,16 @@ public class RoleRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<Ro
 	@Override
 	public Class<Role> getResourceClass() {
 		return Role.class;
+	}
+
+	@Override
+	public Collection<Role> getRolesByUser(User user) {
+		return searchObjects(SearchField.in("users", user.getUuid()));
+	}
+
+	@Override
+	public Collection<Role> getAllUserRoles() {
+		return searchObjects(SearchField.eq("allUsers", "true"));
 	}
 
 }

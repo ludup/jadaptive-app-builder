@@ -16,19 +16,16 @@ public class ApplicationVersion {
 	static String version;
 	
 	public static String getVersion() {
-		return getVersion("jadaptive-boot");
+		return getVersion("jadaptive-api");
 	}
 	
 	public static String getSerial() {
 		Preferences pref = Preferences.userNodeForPackage(ApplicationVersion.class);
 		
-		String hypersocketId = System.getProperty("jadaptive.id", "jadaptive-unknown");
-		if(pref.get("jadaptive.serial", null)!=null) {
-			pref.put(hypersocketId, pref.get("jadaptive.serial", UUID.randomUUID().toString()));
-			pref.remove("jadaptive.serial");
-		} 
-		String serial = pref.get(hypersocketId, UUID.randomUUID().toString());
-		pref.put(hypersocketId, serial);
+		String jadaptiveId = System.getProperty("jadaptive.id", "jadaptive-unknown");
+		String serialId = String.format("jadaptive.serial.%s", jadaptiveId);
+		String serial = pref.get(serialId, UUID.randomUUID().toString());
+		pref.put(jadaptiveId, serial);
 		return serial;
 	}
 	

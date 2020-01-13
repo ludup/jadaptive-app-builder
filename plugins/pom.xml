@@ -67,15 +67,10 @@
 		<module>example-plugin</module>
 		<module>banned-passwords</module>
 		<module>jadaptive-ssh-management</module>
+		<module>jadaptive-virtual-sftp</module>
 	</modules>
 
 	<dependencies>
-		<dependency>
-			<groupId>com.jadaptive</groupId>
-			<artifactId>jadaptive-boot</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
 		<dependency>
 			<groupId>com.jadaptive</groupId>
 			<artifactId>jadaptive-api</artifactId>

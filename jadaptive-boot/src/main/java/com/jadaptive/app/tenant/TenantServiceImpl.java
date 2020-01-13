@@ -92,6 +92,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			
 			permissionService.registerStandardPermissions(TENANT_RESOURCE_KEY);
 			
+			templateService.registerAnnotatedTemplates();
 			initialiseTenant(getSystemTenant());
 			
 			for(Tenant tenant : listTenants()) {

@@ -2,6 +2,7 @@ package com.jadaptive.app.db;
 
 import org.bson.Document;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 public interface DocumentDatabase {
@@ -30,7 +31,13 @@ public interface DocumentDatabase {
 
 	Iterable<Document> list(String field, String value, String table, String database);
 
-	Iterable<Document> matchCollectionField(String field, String value, String table, String database);
+	Iterable<Document> search(String table, String database, SearchField... fields);
+
+	Iterable<Document> searchTable(String table, String database, int start, int length, SearchField... fields);
+
+	Long searchCount(String table, String database, SearchField... fields);
+
+//	Iterable<Document> searchCollectionField(String field, String value, String table, String database);
 
 	
 

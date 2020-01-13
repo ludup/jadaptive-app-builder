@@ -2,6 +2,7 @@ package com.jadaptive.app.templates;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +18,10 @@ import java.util.Set;
 
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
+import org.reflections.Reflections;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -26,6 +31,11 @@ import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.template.Entity;
+import com.jadaptive.api.template.EntityField;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateRepository;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
@@ -41,17 +51,20 @@ import com.jadaptive.utils.Version;
 public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl implements TemplateVersionService  {
 	
 	@Autowired
-	protected TemplateVersionRepository templateRepository; 
+	protected TemplateVersionRepository versionRepository; 
 	
 	@Autowired
 	protected ObjectMapperHolder objectMapper;
 	
 	@Autowired
-	PluginManager pluginManager; 
+	private PluginManager pluginManager; 
+	
+	@Autowired
+	private EntityTemplateRepository templateRepository;
 	
 	@Override
 	public Collection<TemplateVersion> list() throws RepositoryException, EntityException {
-		return templateRepository.list();
+		return versionRepository.list();
 	}
 	
 	@Override
@@ -79,10 +92,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				resourceKeys.add(templateResourceKey);
 				
 				String uuid = templateEnabledService.getResourceKey() + "_" + templateResourceKey;
-				Version currentVersion = templateRepository.getCurrentVersion(uuid);
+				Version currentVersion = versionRepository.getCurrentVersion(uuid);
 				
 				if(currentVersion==null || version.compareTo(currentVersion) > 0) {
-					if(templateRepository.hasProcessed(uuid, version.toString())) {
+					if(versionRepository.hasProcessed(uuid, version.toString())) {
 						if(log.isInfoEnabled()) {
 							log.info("Already processed {}", template.path.getFileName());
 						}
@@ -236,7 +249,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					TemplateVersion  t = new TemplateVersion();
 					t.setUuid(resourceKey);
 					t.setVersion(version.toString());
-					templateRepository.save(t);
+					versionRepository.save(t);
 					
 					log.info("Created {} {} '{}' version {}",
 							repository.getResourceClass().getSimpleName(), 
@@ -280,7 +293,87 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		public String getFilename() {
 			return Objects.nonNull(pkg) ? pkg.getFilename() : path.getFileName().toString();
 		}
+	}
+
+	@Override
+	public void registerAnnotatedTemplates() {
+			
+		for(PluginWrapper w : pluginManager.getPlugins()) {
+
+			if(log.isInfoEnabled()) {
+				log.info("Scanning plugin {} for entity templates in {}", 
+						w.getPluginId(),
+						w.getPlugin().getClass().getPackage().getName());
+			}
+			
+			try {
+				ConfigurationBuilder builder = new ConfigurationBuilder();
+				
+				builder.addClassLoaders(w.getPluginClassLoader());
+				builder.addUrls(ClasspathHelper.forPackage(
+						w.getPlugin().getClass().getPackage().getName(),
+						w.getPluginClassLoader()));
+				builder.addScanners(new TypeAnnotationsScanner());
+
+				Reflections reflections = new Reflections(builder);
+				
+				for(Class<?> clz : reflections.getTypesAnnotatedWith(Entity.class)) {
+					if(log.isInfoEnabled()) {
+						log.info("Found annotated template {}", clz.getName());
+					}
+					registerAnnotatedTemplate(clz);
+				}
+			} catch (Exception e) {
+				log.error("Failed to process annotated templates for plugin {}", w.getPluginId(), e);
+			}
+		}
 		
 		
+	}
+
+	private void registerAnnotatedTemplate(Class<?> clz) {
+		
+		try {
+			Entity e = clz.getAnnotation(Entity.class);
+			
+			EntityTemplate template;
+			try {
+				template = templateRepository.get(clz.getSimpleName());
+			} catch (EntityException ee) {
+				template = new EntityTemplate();
+				template.setUuid(clz.getSimpleName());
+			}
+			
+			template.setAlias(e.alias());
+			template.setHidden(e.hidden());
+			template.setSystem(e.system());
+			template.setName(e.name());
+			template.setType(e.type());
+			 
+			template.getFields().clear();
+			
+			for(Field f : clz.getDeclaredFields()) {
+				
+				EntityField[] annotations = f.getAnnotationsByType(EntityField.class);
+				if(Objects.nonNull(annotations) && annotations.length > 0) {
+					
+					EntityField field = annotations[0];
+					FieldTemplate t = new FieldTemplate();
+					t.setDefaultValue(field.defaultValue());
+					t.setDescription(field.description());
+					t.setFieldType(field.type());
+					t.setHidden(field.hidden());
+					t.setName(f.getName());
+					t.setRequired(field.required());
+					t.setSystem(false);
+					
+					template.getFields().add(t);
+				}
+			}
+			
+			templateRepository.saveOrUpdate(template);
+		} catch(RepositoryException | EntityException e) {
+			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
+		}
 	}
 }

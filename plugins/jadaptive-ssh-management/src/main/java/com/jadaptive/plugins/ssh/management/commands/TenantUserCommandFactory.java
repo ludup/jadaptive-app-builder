@@ -1,23 +1,35 @@
 package com.jadaptive.plugins.ssh.management.commands;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.stereotype.Component;
+import org.pf4j.Extension;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
-import com.jadaptive.plugins.sshd.commands.PluginCommandFactory;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.sshd.PluginCommandFactory;
+import com.jadaptive.api.sshd.commands.AbstractAutowiredCommandFactory;
+import com.sshtools.server.vsession.CommandFactory;
+import com.sshtools.server.vsession.ShellCommand;
 
-public class TenantUserCommandFactory extends PluginCommandFactory {
+@Extension
+public class TenantUserCommandFactory extends AbstractAutowiredCommandFactory implements PluginCommandFactory {
 
-	@PostConstruct
-	private void postConstruct() {
-		installCommand("roles", Roles.class);
-		installCommand("permissions", Permissions.class);
-		installCommand("users", Users.class);
-	}
-
+	@Autowired
+	PermissionService permissionService; 
+	
 	@Override
-	public void assertAccess() throws AccessDeniedException {
-		
+	public CommandFactory<ShellCommand> buildFactory() throws AccessDeniedException {
+		tryCommand("roles", Roles.class, "roles.read", "roles.readWrite");
+		tryCommand("permissions", Permissions.class, "role.read", "roles.readWrite");
+		tryCommand("users", Users.class, "user.read", "user.readWrite");
+
+		return this;
 	}
+
+	private void tryCommand(String name, Class<? extends ShellCommand> clz, String... permissions) {
+		try {
+			permissionService.assertAnyPermission(permissions);
+			installCommand(name, clz);
+		} catch(AccessDeniedException e) { }
+	}
+	
 }

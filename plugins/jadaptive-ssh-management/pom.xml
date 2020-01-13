@@ -17,13 +17,13 @@
 		<plugin.class>com.jadaptive.plugins.ssh.management.SSHDManagementPlugin</plugin.class>
 		<plugin.version>0.0.1</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
-		<plugin.dependencies>jadaptive-sshd</plugin.dependencies>
+		<plugin.dependencies></plugin.dependencies>
 	</properties>
 
-	<dependencies>
+	<dependencies>		
 		<dependency>
 			<groupId>com.jadaptive</groupId>
-			<artifactId>jadaptive-sshd</artifactId>
+			<artifactId>jadaptive-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

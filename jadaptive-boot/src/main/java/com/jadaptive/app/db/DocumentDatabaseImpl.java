@@ -1,13 +1,17 @@
 package com.jadaptive.app.db;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.mongodb.client.MongoCollection;
@@ -82,31 +86,54 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		return collection.find(Filters.eq(field, value));
 	}
+//	
+//	@Override
+//	public Iterable<Document> searchCollectionField(String field, String value, String table, String database) {
+//		
+//		MongoCollection<Document> collection = getCollection(table, database);
+//		return collection.find(Filters.in(field, value));
+//	}
 	
 	@Override
-	public Iterable<Document> matchCollectionField(String field, String value, String table, String database) {
+	public Iterable<Document> search(String table, String database, SearchField...fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.find(Filters.in(field, value));
+		if(fields.length == 0) {
+			return collection.find();
+		} else {
+			return collection.find(buildFilter(fields));
+		}
+	}
+	
+	@Override
+	public Iterable<Document> searchTable(String table, String database, int start, int length, SearchField...fields) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		if(fields.length == 0) {
+			return collection.find().skip(start).limit(length);
+		} else {
+			return collection.find(buildFilter(fields)).skip(start).limit(length);
+		}
 	}
 		
+	@Override
+	public Long searchCount(String table, String database, SearchField... fields) {
+		MongoCollection<Document> collection = getCollection(table, database);
+		if(fields.length == 0) {
+			return collection.countDocuments();
+		} else {
+			return collection.countDocuments(buildFilter(fields));
+		}
+	}
 	
 	@Override
 	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		if(StringUtils.isBlank(searchField)) {
-			searchField = "_id";
-			/**
-			 * TODO look for a default field in the template
-			 */
-		}
+		searchField = configureSearch(searchField);
 		if(StringUtils.isBlank(searchValue)) {
 			return collection.find().skip(start).limit(length);
 		} else {
-			if(searchField.equalsIgnoreCase("UUID")) {
-				searchField = "_id";
-			}
 			return collection.find(Filters.regex(searchField, searchValue)).skip(start).limit(length);
 		}
 	}
@@ -120,21 +147,20 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Override
 	public Long count(String table, String searchField, String searchValue, String database) {
 		MongoCollection<Document> collection = getCollection(table, database);
-		if(StringUtils.isBlank(searchField)) {
-			searchField = "_id";
-			/**
-			 * TODO look for a default field in the template
-			 */
-		}
+		searchField = configureSearch(searchField);
 		if(StringUtils.isBlank(searchValue)) {
 			return collection.countDocuments();
 		} else {
-			if(searchField.equalsIgnoreCase("UUID")) {
-				searchField = "_id";
-			}
 			return collection.countDocuments(Filters.regex(searchField, searchValue));
 		}
 		
+	}
+	
+	protected String configureSearch(String searchField) {
+		if(StringUtils.isBlank(searchField) || searchField.equalsIgnoreCase("UUID")) {
+			searchField = "_id";
+		}
+		return searchField;
 	}
 
 	@Override
@@ -155,5 +181,25 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void dropDatabase(String database) {
 		mongo.getClient().getDatabase(database).drop();
 		
+	}
+	
+	public Bson buildFilter(SearchField...fields) {
+		
+		List<Bson> tmp = new ArrayList<>();
+		for(SearchField field : fields) {
+			switch(field.getSearchType()) {
+			case EQUALS:
+				tmp.add(Filters.eq(field.getSearchField(), field.getSearchValue()[0]));
+				break;
+			case IN:
+				tmp.add(Filters.in(field.getSearchField(), field.getSearchValue()));
+				break;
+			case LIKE:
+				tmp.add(Filters.regex(field.getSearchField(), field.getSearchValue()[0]));
+				break;
+			}
+		}
+		
+		return Filters.and(tmp);
 	}
 }

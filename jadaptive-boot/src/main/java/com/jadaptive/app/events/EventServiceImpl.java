@@ -16,6 +16,10 @@ public class EventServiceImpl implements EventService {
 	
 	@Override
 	public void publishEvent(SystemEvent evt) {
+		
+		/**
+		 * TODO determine tenant and setup a context to process events in
+		 */
 		eventPublisher.publishEvent(evt);
 	}
 }

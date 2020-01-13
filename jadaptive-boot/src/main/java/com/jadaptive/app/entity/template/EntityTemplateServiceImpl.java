@@ -4,6 +4,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
+import javax.annotation.PostConstruct;
+
+import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
+import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +18,7 @@ import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.template.Entity;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.EntityTemplateService;
@@ -33,6 +40,9 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	
 	@Autowired
 	PermissionService permissionService; 
+	
+	@Autowired
+	PluginManager pluginManager; 
 	
 	@Override
 	public EntityTemplate get(String resourceKey) throws RepositoryException, EntityException {
@@ -103,7 +113,7 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	public String getName() {
 		return "EntityTemplate";
 	}
-
+	
 	@Override
 	public void saveTemplateObjects(List<EntityTemplate> objects, @SuppressWarnings("unchecked") TransactionAdapter<EntityTemplate>... ops) throws RepositoryException, EntityException {
 		for(EntityTemplate obj : objects) {

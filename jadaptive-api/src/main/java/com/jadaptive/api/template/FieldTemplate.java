@@ -15,11 +15,7 @@ public class FieldTemplate extends NamedUUIDEntity {
 	String defaultValue;
 	String description;
 	FieldType fieldType; 
-//	Integer weight;
-	boolean searchable; 
 	boolean required;
-//	boolean defaultColumn;
-//	boolean ignoreColumn;
 	
 	Collection<FieldValidator> validators = new ArrayList<>();
 	
@@ -58,33 +54,9 @@ public class FieldTemplate extends NamedUUIDEntity {
 		this.fieldType = propertyType;
 	}
 
-//	public Integer getWeight() {
-//		return weight;
-//	}
-//
-//	public void setWeight(Integer weight) {
-//		this.weight = weight;
-//	}
-
-	public Boolean getSearchable() {
-		return searchable;
-	}
-
-	public void setSearchable(Boolean searchable) {
-		this.searchable = searchable;
-	}
-
 	public void setRequired(Boolean required) {
 		this.required = required;
 	}
-	
-//	public boolean isDefaultColumn() {
-//		return defaultColumn;
-//	}
-//
-//	public void setDefaultColumn(Boolean defaultColumn) {
-//		this.defaultColumn = defaultColumn;
-//	}
 
 	public Collection<FieldValidator> getValidators() {
 		return validators;

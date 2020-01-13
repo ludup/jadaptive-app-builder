@@ -8,6 +8,7 @@ import java.util.Objects;
 import org.bson.Document;
 
 import com.jadaptive.api.db.AbstractObjectDatabase;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
@@ -117,17 +118,42 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> Collection<T> matchCollectionObjects(String field, String value, String database, Class<T> clz) throws RepositoryException, EntityException {
-		
+	protected <T extends AbstractUUIDEntity> Collection<T> searchObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.matchCollectionField(field, value, clz.getSimpleName(), database)) {
+			for(Document document : db.search(clz.getSimpleName(), database, fields)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
 			}
 			
 			return results;
 			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
+	protected <T extends AbstractUUIDEntity> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SearchField... fields) throws RepositoryException, EntityException {
+		try {
+
+			List<T> results = new ArrayList<>();
+			for(Document document : db.searchTable(clz.getSimpleName(), database, start, length, fields)) {
+				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
+			}
+			
+			return results;
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
+	protected <T extends AbstractUUIDEntity> Long searchCount(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
+		
+		try {
+			return db.searchCount(clz.getSimpleName(), database, fields);			
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(e.getMessage(), e);

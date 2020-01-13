@@ -12,6 +12,7 @@ import com.jadaptive.api.repository.NamedUUIDEntity;
 public class EntityTemplate extends NamedUUIDEntity {
 
 	EntityType type;
+	String alias;
 	Collection<FieldTemplate> fields = new ArrayList<>();
 	Map<String,FieldTemplate> fieldsByName;
 	
@@ -35,6 +36,14 @@ public class EntityTemplate extends NamedUUIDEntity {
 		return toMap().get(name);
 	}
 	
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+
 	Map<String,FieldTemplate> toMap() {
 		
 		if(Objects.isNull(fieldsByName)) {
