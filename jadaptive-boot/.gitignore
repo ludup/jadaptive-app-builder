@@ -13,3 +13,4 @@
 *.factorypath
 /db/
 /logs/
+*.log

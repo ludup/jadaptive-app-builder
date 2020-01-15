@@ -30,6 +30,4 @@ public class VirtualFolder extends AssignableUUIDEntity {
 	public void setDestinationUri(String destinationUri) {
 		this.destinationUri = destinationUri;
 	}
-	
-	
 }

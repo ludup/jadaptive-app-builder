@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.sshd.SSHDService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.ssh.SshConnection;
@@ -19,13 +20,14 @@ import com.sshtools.server.vsession.VirtualConsole;
 public abstract class AbstractTenantAwareCommand extends ShellCommand {
 
 	@Autowired
-	TenantService tenantService; 
+	private TenantService tenantService; 
 	
 	@Autowired
-	UserService userService; 
+	protected UserService userService; 
 	
 	protected VirtualConsole console;
 	protected String[] args;
+	protected User user;
 	
 	public AbstractTenantAwareCommand(String name, String subsystem, String signature, String description) {
 		super(name, subsystem, signature, description);
@@ -35,10 +37,11 @@ public abstract class AbstractTenantAwareCommand extends ShellCommand {
 	public void run(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 		
+		tenantService.setCurrentTenant(resolveTenant(console.getConnection(), console.getEnvironment()));
+		
 		this.console = console;
 		this.args = args;
-		
-		tenantService.setCurrentTenant(resolveTenant(console.getConnection(), console.getEnvironment()));
+		this.user = userService.findUsername(console.getConnection().getUsername());
 		
 		try {
 			doRun(args, console);

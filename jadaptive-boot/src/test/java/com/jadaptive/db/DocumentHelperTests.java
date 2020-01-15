@@ -49,20 +49,24 @@ public class DocumentHelperTests {
 		
 		Document one = new Document();
 		one.put("name", "one");
+		one.put("_clz", TestSimpleObject.class.getName());
 		Document two = new Document();
 		two.put("name", "two");
+		two.put("_clz", TestSimpleObject.class.getName());
 		Document three = new Document();
 		three.put("name", "three");
+		three.put("_clz", TestSimpleObject.class.getName());
 		BasicDBList list = new BasicDBList();
 		list.add(one);
 		list.add(two);
 		list.add(three);
 		
 		doc.put("values", list);
+		doc.put("_clz", TestObjectCollections.class.getName());
 		
 		System.out.println(doc.toString());
 		
-		TestObjectCollections obj = DocumentHelper.convertDocumentToObject(new TestObjectCollections(), doc);
+		TestObjectCollections obj = DocumentHelper.convertDocumentToObject(TestObjectCollections.class, doc);
 
         Assert.assertNotNull(obj.getValues());
         Assert.assertEquals(3, obj.getValues().size());
@@ -98,8 +102,8 @@ public class DocumentHelperTests {
 		Document doc = new Document();
 		List<String> strings = Arrays.asList("ONE", "TWO", "THREE");
 		doc.put("values", strings);
-		
-		TestEnumCollections obj = DocumentHelper.convertDocumentToObject(new TestEnumCollections(), doc);
+		doc.put("_clz", TestEnumCollections.class.getName());
+		TestEnumCollections obj = DocumentHelper.convertDocumentToObject(TestEnumCollections.class, doc);
 
         Assert.assertNotNull(obj.getValues());
         Assert.assertTrue(obj.getValues().contains(TestEnum.ONE));
@@ -132,8 +136,8 @@ public class DocumentHelperTests {
 		Document doc = new Document();
 		List<String> strings = Arrays.asList("one", "two", "three");
 		doc.put("strings", strings);
-		
-		TestStringCollections obj = DocumentHelper.convertDocumentToObject(new TestStringCollections(), doc);
+		doc.put("_clz", TestStringCollections.class.getName());
+		TestStringCollections obj = DocumentHelper.convertDocumentToObject(TestStringCollections.class, doc);
 
         Assert.assertNotNull(obj.getStrings());
         Assert.assertTrue(obj.getStrings().contains("one"));
@@ -162,7 +166,8 @@ public class DocumentHelperTests {
 		
 		
 		Document doc = new Document();
-		TestStringCollections obj = DocumentHelper.convertDocumentToObject(new TestStringCollections(), doc);
+		doc.put("_clz", TestStringCollections.class.getName());
+		TestStringCollections obj = DocumentHelper.convertDocumentToObject(TestStringCollections.class, doc);
 
         Assert.assertNull(obj.getStrings());
 	}
@@ -210,6 +215,7 @@ public class DocumentHelperTests {
 		Date date = new Date();
 		
 		Document doc = new Document();
+		doc.put("_clz", TestFieldTypesObject.class.getName());
         doc.put("string", "a");
         doc.put("longNumber", "10");
         doc.put("intNumber", "100");
@@ -220,6 +226,7 @@ public class DocumentHelperTests {
         doc.put("bool", "true");
         
         Document embeddedDoc = new Document();
+        embeddedDoc.put("_clz", EmbeddedObject.class.getName());
         embeddedDoc.put("embeddedString", "test");
         embeddedDoc.put("embeddedLong", String.valueOf(Long.MAX_VALUE));
         embeddedDoc.put("embeddedInt", String.valueOf(Integer.MIN_VALUE));
@@ -231,7 +238,7 @@ public class DocumentHelperTests {
 
         doc.put("embedded", embeddedDoc);
         
-        TestFieldTypesObject obj = DocumentHelper.convertDocumentToObject(new TestFieldTypesObject(), doc);
+        TestFieldTypesObject obj = DocumentHelper.convertDocumentToObject(TestFieldTypesObject.class, doc);
         
         Assert.assertEquals("a", obj.getString());
         Assert.assertEquals(new Long(10L), obj.getLongNumber());

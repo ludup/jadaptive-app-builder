@@ -16,6 +16,10 @@ public class EntityTemplate extends NamedUUIDEntity {
 	Collection<FieldTemplate> fields = new ArrayList<>();
 	Map<String,FieldTemplate> fieldsByName;
 	
+	public EntityTemplate() {
+		
+	}
+	
 	public EntityType getType() {
 		return type;
 	}

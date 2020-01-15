@@ -31,7 +31,7 @@ public class TenantRepositoryTests {
 	
 	@Test
 	public void testNewSchemaTenantCount() {
-		assertEquals(tenantRepository.countTenants(), new Long(1L));
+		assertEquals(new Long(1L), tenantRepository.countTenants());
 	}
 	
 	@Test

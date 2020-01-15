@@ -38,7 +38,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity>
 		saveOrUpdate(e);
 	}
 	
-	
+	@Override
 	public Collection<T> getAssignedObjects(Class<T> resourceClass, User user) {
 		
 		Collection<Role> userRoles = roleRepository.getRolesByUser(user);

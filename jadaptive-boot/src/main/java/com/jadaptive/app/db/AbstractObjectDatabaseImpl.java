@@ -43,7 +43,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 			if(Objects.isNull(document)) {
 				throw new EntityNotFoundException(String.format("%s not found with id %s", clz.getSimpleName(), uuid));
 			}
-			return DocumentHelper.convertDocumentToObject(clz.newInstance(), document);
+			return DocumentHelper.convertDocumentToObject(clz, document);
 			
 		} catch (Throwable e) {
 			checkException(e);
@@ -57,7 +57,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 			if(Objects.isNull(document)) {
 				throw new EntityNotFoundException(String.format("%s not found with %s %s", clz.getSimpleName(), field, value));
 			}
-			return DocumentHelper.convertDocumentToObject(clz.newInstance(), document);
+			return DocumentHelper.convertDocumentToObject(clz, document);
 			
 		} catch (Throwable e) {
 			checkException(e);
@@ -90,7 +90,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.list(clz.getSimpleName(), database)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
+				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
 			return results;
@@ -107,7 +107,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.list(field, value, clz.getSimpleName(), database)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
+				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
 			return results;
@@ -123,7 +123,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.search(clz.getSimpleName(), database, fields)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
+				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
 			return results;
@@ -139,7 +139,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.searchTable(clz.getSimpleName(), database, start, length, fields)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
+				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
 			return results;
@@ -167,7 +167,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.table(clz.getSimpleName(), searchField, searchValue, database, start, length)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz.newInstance(), document));
+				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
 			return results;

@@ -36,6 +36,7 @@ public class DocumentHelper {
 			}
 			
 			document.put("_id", obj.getUuid());
+			document.put("_clz", obj.getClass().getName());
 			
 			for(Method m : ReflectionUtils.getGetters(obj.getClass())) {
 				String name = ReflectionUtils.calculateFieldName(m);
@@ -66,7 +67,7 @@ public class DocumentHelper {
 	public static void buildCollectionDocuments(String name, Collection<?> values, Class<?> returnType, Document document) throws ParseException, EntityException {
 		
 		List<Object> list = new ArrayList<>();
-		
+
 		for(Object value : values) {
 			if(Date.class.equals(value.getClass())) {
 				list.add(Utils.formatDateTime((Date)value));
@@ -94,9 +95,20 @@ public class DocumentHelper {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(T obj, Document document) throws ParseException {
+	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<T> baseClass, Document document) throws ParseException {
 		
 		try {
+			
+			String clz = document.getString("_clz");
+			if(Objects.isNull(clz)) {
+				clz = document.getString("clz"); // Compaitilbity with older version.
+			}
+			if(Objects.isNull(clz)) {
+				throw new ParseException("Missing clz parameter from document", 0);
+			}
+			
+			T obj = (T) baseClass.getClassLoader().loadClass(clz).newInstance();
+			
 			for(Method m : ReflectionUtils.getSetters(obj.getClass())) {
 				String name = ReflectionUtils.calculateFieldName(m);
 				Parameter parameter = m.getParameters()[0];
@@ -116,7 +128,7 @@ public class DocumentHelper {
 				} else if(parameter.getType().equals(Date.class)) {
 					m.invoke(obj, Utils.parseDateTime(document.getString(name)));
 				} else if(AbstractUUIDEntity.class.isAssignableFrom(parameter.getType())) {
-					m.invoke(obj, convertDocumentToObject((AbstractUUIDEntity) parameter.getType().newInstance(), (Document) document.get(name)));
+					m.invoke(obj, convertDocumentToObject(AbstractUUIDEntity.class, (Document) document.get(name)));
 				} else if(parameter.getType().isEnum()) { 
 					String v = document.getString(name);
 					Enum<?>[] enumConstants = (Enum<?>[]) parameter.getType().getEnumConstants();
@@ -144,10 +156,10 @@ public class DocumentHelper {
 						continue;
 					}
 					if(AbstractUUIDEntity.class.isAssignableFrom(type)) {
-						Collection<AbstractUUIDEntity> elements = new HashSet<>();	
+						Collection<AbstractUUIDEntity> elements = new ArrayList<>();	
 						for(Object embedded : list) {
 							Document embeddedDocument = (Document) embedded;
-							elements.add(convertDocumentToObject((AbstractUUIDEntity)type.newInstance(), embeddedDocument));
+							elements.add(convertDocumentToObject(AbstractUUIDEntity.class, embeddedDocument));
 						}
 
 						m.invoke(obj, elements);
@@ -186,8 +198,8 @@ public class DocumentHelper {
 			}
 			
 			return obj;
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException e) {
-			throw new RepositoryException(String.format("Unexpected error loading UUID entity %s", obj.getClass().getName()), e);			
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException | ClassNotFoundException e) {
+			throw new RepositoryException(String.format("Unexpected error loading UUID entity %s", baseClass.getName()), e);			
 		}
 		
 	}
