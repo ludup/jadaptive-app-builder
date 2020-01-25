@@ -43,8 +43,6 @@
 		<module>jadaptive-api</module>
 		<module>jadaptive-boot</module>
 		<module>plugins</module>
-		<module>wrapper</module>
-        <module>install</module>
 	</modules>
 
 	<dependencies>
@@ -80,26 +78,6 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
-		<plugins>
-			<plugin>
-				<groupId>com.jadaptive</groupId>
-				<artifactId>pf4j-plugin-generator</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<id>generate-plugin</id>
-						<phase>install</phase>
-						<goals>
-							<goal>generate-plugin</goal>
-						</goals>
-						<configuration>
-							<containerArtifact>jadaptive-boot</containerArtifact>
-							<apiArtifact>jadaptive-api</apiArtifact>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
 	</build>
 
 </project>

@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.jadaptive</groupId>
-		<artifactId>jadaptive-plugins</artifactId>
+		<artifactId>plugins</artifactId>
 		<relativePath>..</relativePath>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
@@ -15,7 +15,7 @@
 	<properties>
 		<plugin.id>jadaptive-ssh-management</plugin.id>
 		<plugin.class>com.jadaptive.plugins.ssh.management.SSHDManagementPlugin</plugin.class>
-		<plugin.version>0.0.1</plugin.version>
+		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.dependencies></plugin.dependencies>
 	</properties>
@@ -25,11 +25,42 @@
 			<groupId>com.jadaptive</groupId>
 			<artifactId>jadaptive-api</artifactId>
 			<version>${project.version}</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Plugin-Id>${plugin.id}</Plugin-Id>
+							<Plugin-Class>${plugin.class}</Plugin-Class>
+							<Plugin-Version>${plugin.version}</Plugin-Version>
+							<Plugin-Provider>${plugin.provider}</Plugin-Provider>
+							<Plugin-Dependencies>${plugin.dependencies}</Plugin-Dependencies>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.jadaptive</groupId>
+				<artifactId>pf4j-plugin-generator</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
+				<executions>
+					<execution>
+						<id>generate-plugin</id>
+						<phase>install</phase>
+						<goals>
+							<goal>generate-plugin</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<configuration>

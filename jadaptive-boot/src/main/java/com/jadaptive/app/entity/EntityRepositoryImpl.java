@@ -14,7 +14,7 @@ import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityRepository;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.tenant.TenantService;
@@ -30,7 +30,7 @@ public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 	TenantService tenantService; 
 
 	@Autowired
-	EntityTemplateService templateService; 
+	EntityTemplateRepository templateRepository; 
 	
 	@Override
 	public Collection<MongoEntity> list(String resourceKey) throws RepositoryException, EntityException {
@@ -72,7 +72,7 @@ public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 	@Override
 	public void save(MongoEntity entity) throws RepositoryException, EntityException {
 		
-		EntityTemplate template = templateService.get(entity.getResourceKey());
+		EntityTemplate template = templateRepository.get(entity.getResourceKey());
 		
 		validateReferences(template, entity);
 		
@@ -93,7 +93,7 @@ public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 					}
 					break;
 				case OBJECT_EMBEDDED:
-					validateReferences(templateService.get(
+					validateReferences(templateRepository.get(
 							t.getValidationValue(ValidationType.OBJECT_TYPE)), 
 							entity.getChild(t));
 					break;

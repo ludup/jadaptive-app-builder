@@ -2,7 +2,7 @@
   "resourceKey" : "applicationMenu",
   "uuid": "e2361a2c-4f3e-4b9b-adc0-56d5d700863a",
   "title": "Dashboard",
-  "resource": "dash",
+  "resource": "admin/dashboard.html",
   "system" : true,
   "hidden" : false,
   "icon": "fas fa-chart-pie",

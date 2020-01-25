@@ -10,7 +10,7 @@
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>jadaptive-plugins</artifactId>
+	<artifactId>plugins</artifactId>
 
 	<packaging>pom</packaging>
 	<name>Plugins Parent</name>
@@ -67,7 +67,8 @@
 		<module>example-plugin</module>
 		<module>banned-passwords</module>
 		<module>jadaptive-ssh-management</module>
-		<module>jadaptive-virtual-sftp</module>
+		<module>jadaptive-web-bootstrap-vue</module>
+		<module>jadaptive-web-management</module>
 	</modules>
 
 	<dependencies>
