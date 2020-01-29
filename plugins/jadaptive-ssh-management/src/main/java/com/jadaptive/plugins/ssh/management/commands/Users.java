@@ -2,6 +2,7 @@ package com.jadaptive.plugins.ssh.management.commands;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.PermissionService;
@@ -23,8 +24,9 @@ public class Users extends UserCommand {
 	UserService userService; 
 	
 	public Users() {
-		super("users", "User Management", UsageHelper.build("users [option] [user]",
-				"-l, --list          List all users"),
+		super("users", "User Management", UsageHelper.build("users [option]",
+				"-l, --list          List all users",
+				"-c, --create        Create a user"),
 				"List all users");
 	}
 
@@ -36,12 +38,36 @@ public class Users extends UserCommand {
 			printUsage();
 		} else if(args.length==1 || CliHelper.hasShortOption(args, 'l') || CliHelper.hasLongOption(args, "list")) {	
 			printUsers();
+		} else if(args.length==1 || CliHelper.hasShortOption(args, 'c') || CliHelper.hasLongOption(args, "create")) {	
+			createUser();
 		} else {
 			console.println("Invalid arguments!");
 			printUsage();
 		}
 	}
 
+	private void createUser() {
+		
+		String username = console.readLine("Username: ");
+		String fullname = console.readLine("Full Name: ");
+		
+		String password;
+		String confirmPassword;
+		boolean identical;
+		do {
+			password = console.getLineReader().readLine("Password: ", '*');
+			confirmPassword = console.getLineReader().readLine("Confirm Password: ", '*');
+			identical = StringUtils.equals(password, confirmPassword);
+			if(!identical) {
+				console.println("Passwords do not match");
+			}
+		} while(!identical);
+		
+		userService.createUser(username, password.toCharArray(), fullname);
+		
+		console.println(String.format("Created user %s", username));
+	}
+	
 	private void printUsers() {
 		for(User user : userService.iterateUsers()) {
 			console.println(user.getUsername());
