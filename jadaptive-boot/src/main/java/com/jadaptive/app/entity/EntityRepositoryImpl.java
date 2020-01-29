@@ -10,6 +10,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityRepository;
 import com.jadaptive.api.repository.RepositoryException;
@@ -33,11 +34,11 @@ public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 	EntityTemplateRepository templateRepository; 
 	
 	@Override
-	public Collection<MongoEntity> list(String resourceKey) throws RepositoryException, EntityException {
+	public Collection<MongoEntity> list(String resourceKey, SearchField... fields) throws RepositoryException, EntityException {
 		
 		List<MongoEntity> results = new ArrayList<>();
 		
-		for(Document document : db.list(resourceKey, tenantService.getCurrentTenant().getUuid())) {
+		for(Document document : db.list(resourceKey, tenantService.getCurrentTenant().getUuid(), fields)) {
 			results.add(buildEntity(resourceKey, document));
 		}
 		
@@ -72,7 +73,7 @@ public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 	@Override
 	public void save(MongoEntity entity) throws RepositoryException, EntityException {
 		
-		EntityTemplate template = templateRepository.get(entity.getResourceKey());
+		EntityTemplate template = templateRepository.get(SearchField.eq("resourceKey", entity.getResourceKey()));
 		
 		validateReferences(template, entity);
 		

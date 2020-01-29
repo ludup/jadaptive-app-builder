@@ -8,6 +8,7 @@ import java.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.DefaultUser;
@@ -92,6 +93,6 @@ public class UserRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<De
 
 	@Override
 	public DefaultUser findUsername(String username) {
-		return getObject("username", username, tenantService.getCurrentTenant().getUuid(), DefaultUser.class);
+		return getObject(tenantService.getCurrentTenant().getUuid(), DefaultUser.class, SearchField.eq("username", username));
 	}
 }

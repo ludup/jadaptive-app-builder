@@ -6,18 +6,28 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.jadaptive.app.json.SessionInterceptor;
+import com.jadaptive.app.auth.DefaultTenantInterceptor;
+import com.jadaptive.app.auth.QuotaInterceptor;
+import com.jadaptive.app.auth.SessionInterceptor;
 
 @Configuration
 @ServletComponentScan(basePackages = { "com.jadaptive.app" })
 public class WebMvcConfig implements WebMvcConfigurer {
- 
+
 	@Autowired
-	SessionInterceptor sessionInterceptor;
+	private DefaultTenantInterceptor tenantInterceptor;
 	
-   @Override
-   public void addInterceptors(InterceptorRegistry registry) {
-      registry.addInterceptor(sessionInterceptor);
-   }
- 
+	@Autowired
+	private SessionInterceptor sessionInterceptor;
+
+	@Autowired
+	private QuotaInterceptor quotaInterceptor;
+
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(tenantInterceptor);
+		registry.addInterceptor(sessionInterceptor);
+		registry.addInterceptor(quotaInterceptor);
+	}
+
 }

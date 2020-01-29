@@ -7,9 +7,11 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface EntityField {
+public @interface JField {
 		
 		String defaultValue() default "";
+		
+		String name();
 		
 		String description();
 		
@@ -18,5 +20,7 @@ public @interface EntityField {
 		boolean required() default false;
 
 		boolean hidden() default false;
+
+
 
 }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.role.Role;
@@ -83,7 +84,7 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	@Override
 	public Role getRoleByName(String name) {
 		assertRead();
-		return get("name", name);
+		return get(SearchField.eq("name", name));
 	}
 	
 	@Override

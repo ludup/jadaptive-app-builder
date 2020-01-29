@@ -1,7 +1,9 @@
 [{
- "type": "SINGLETON",
- "name": "Tenant Configuration",
  "uuid": "tenantConfig",
+ "type": "SINGLETON",
+ "scope": "GLOBAL",
+ "name": "Tenant Configuration",
+ "resourceKey": "tenantConfig",
  "system": true,
  "fields": [{
               "resourceKey": "applicationName",

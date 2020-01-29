@@ -54,6 +54,16 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	}
 	
+
+
+	@Override
+	public Document get(String table, String database, SearchField... fields) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		return collection.find(buildFilter(fields)).first();
+
+	}
+	
 	@Override
 	public Document find(String field, String value, String table, String database) {
 		
@@ -74,25 +84,15 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public Iterable<Document> list(String table, String database) {
+	public Iterable<Document> list(String table, String database, SearchField... fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.find();
+		if(fields.length == 0) {
+			return collection.find();
+		} else {
+			return collection.find(buildFilter(fields));
+		}
 	}
-	
-	@Override
-	public Iterable<Document> list(String field, String value, String table, String database) {
-		
-		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.find(Filters.eq(field, value));
-	}
-//	
-//	@Override
-//	public Iterable<Document> searchCollectionField(String field, String value, String table, String database) {
-//		
-//		MongoCollection<Document> collection = getCollection(table, database);
-//		return collection.find(Filters.in(field, value));
-//	}
 	
 	@Override
 	public Iterable<Document> search(String table, String database, SearchField...fields) {
@@ -202,4 +202,5 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		return Filters.and(tmp);
 	}
+
 }

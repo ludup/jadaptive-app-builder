@@ -51,11 +51,11 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> T getObject(String field, String value, String database, Class<T> clz) throws RepositoryException, EntityException {
+	protected <T extends AbstractUUIDEntity> T getObject(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
 		try {
-			Document document = db.find(field, value, clz.getSimpleName(), database);
+			Document document = db.get(clz.getSimpleName(), database, fields);
 			if(Objects.isNull(document)) {
-				throw new EntityNotFoundException(String.format("%s not found with %s %s", clz.getSimpleName(), field, value));
+				throw new EntityNotFoundException(String.format("%s not found", clz.getSimpleName()));
 			}
 			return DocumentHelper.convertDocumentToObject(clz, document);
 			
@@ -101,12 +101,12 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> Collection<T> listObjects(String field, String value, String database, Class<T> clz) throws RepositoryException, EntityException {
+	protected <T extends AbstractUUIDEntity> Collection<T> listObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
 		
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.list(field, value, clz.getSimpleName(), database)) {
+			for(Document document : db.list(clz.getSimpleName(), database, fields)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			

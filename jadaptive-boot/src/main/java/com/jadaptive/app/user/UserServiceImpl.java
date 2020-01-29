@@ -2,6 +2,7 @@ package com.jadaptive.app.user;
 
 import java.util.Objects;
 
+import org.omg.PortableInterceptor.USER_EXCEPTION;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -97,6 +98,7 @@ public class UserServiceImpl implements UserService, TenantAware {
 	@Override
 	public void initializeTenant(Tenant tenant) {
 		
+		permissionService.registerStandardPermissions(USER_RESOURCE_KEY);
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 	}

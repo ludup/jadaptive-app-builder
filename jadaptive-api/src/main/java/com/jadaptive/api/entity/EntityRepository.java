@@ -2,11 +2,12 @@ package com.jadaptive.api.entity;
 
 import java.util.Collection;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.RepositoryException;
 
 public interface EntityRepository<E extends AbstractEntity> {
 
-	Collection<E> list(String resourceKey) throws RepositoryException, EntityException;
+	Collection<E> list(String resourceKey, SearchField... fields) throws RepositoryException, EntityException;
 
 	E get(String uuid, String resourceKey) throws RepositoryException, EntityException;
 

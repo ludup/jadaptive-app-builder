@@ -10,10 +10,10 @@ public interface DocumentDatabase {
 	<E extends AbstractUUIDEntity> void insertOrUpdate(E obj, Document document, String table, String database);
 
 	Document get(String uuid, String table, String database);
+	
+	Document get(String table, String database, SearchField... fields);
 
 	void delete(String uuid, String table, String database);
-
-	Iterable<Document> list(String table, String database);
 
 	Long count(String name, String database);
 
@@ -29,7 +29,7 @@ public interface DocumentDatabase {
 
 	Document find(String field, String value, String table, String database);
 
-	Iterable<Document> list(String field, String value, String table, String database);
+	Iterable<Document> list(String table, String database, SearchField... fields);
 
 	Iterable<Document> search(String table, String database, SearchField... fields);
 

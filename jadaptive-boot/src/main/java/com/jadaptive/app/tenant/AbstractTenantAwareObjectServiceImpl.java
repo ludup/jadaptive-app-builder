@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
@@ -60,14 +61,14 @@ public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUI
 	}
 	
 	@Override
-	public T get(String field, String value) throws RepositoryException, EntityException {
+	public T get(SearchField... fields) throws RepositoryException, EntityException {
 		
 		assertRead();
 		
-		T e = getRepository().get(field, value);
+		T e = getRepository().get(fields);
 		
 		if(Objects.isNull(e)) {
-			throw new EntityException(String.format("Cannot find %s with %s %s", getResourceKey(), field, value));
+			throw new EntityException(String.format("Cannot find %s", getResourceKey()));
 		}
 		
 		return e;

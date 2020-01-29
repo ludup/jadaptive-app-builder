@@ -1,6 +1,7 @@
 package com.jadaptive.api.permissions;
 
 import java.util.Collection;
+import java.util.Set;
 
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
@@ -40,5 +41,9 @@ public interface PermissionService {
 	String getReadWritePermission(String resourceKey);
 
 	String getReadPermission(String resourceKey);
+
+	Set<String> resolvePermissions(User user);
+
+	Set<String> resolveCurrentPermissions();
 
 }

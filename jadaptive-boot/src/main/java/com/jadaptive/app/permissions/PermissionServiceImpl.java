@@ -1,8 +1,10 @@
 package com.jadaptive.app.permissions;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -35,6 +37,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	RoleService roleService; 
 	
 	Map<Tenant,Set<String>> tenantPermissions = new HashMap<>();
+	Map<Tenant,Map<String,Set<String>>> tenantPermissionsAlias = new HashMap<>();
 	
 	ThreadLocal<Stack<User>> currentUser = new ThreadLocal<>();
 	
@@ -62,7 +65,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public void registerStandardPermissions(String resourceKey) {
 		
 		registerPermission(getReadPermission(resourceKey));
-		registerPermission(getReadWritePermission(resourceKey));
+		registerPermission(getReadWritePermission(resourceKey), getReadPermission(resourceKey));
 	}
 	
 	@Override
@@ -107,7 +110,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		}
 	}
 	
-	private synchronized void registerPermission(String permission) {
+	private synchronized void registerPermission(String permission, String... aliases) {
 		
 		Tenant tenant = tenantService.getCurrentTenant();	
 		
@@ -121,11 +124,24 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			tenantPermissions.put(tenant, allPermissions);
 		}
 		
+		Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);
+		if(Objects.isNull(aliasPermissions)) {
+			aliasPermissions = new HashMap<>();
+			tenantPermissionsAlias.put(tenant, aliasPermissions);
+		}
+		
 		if(allPermissions.contains(permission)) {
 			throw new IllegalArgumentException(String.format("%s is already a registered permission"));
 		}
 		
 		allPermissions.add(permission);
+		
+		if(aliases.length > 0) {
+			if(!aliasPermissions.containsKey(permission)) {
+				aliasPermissions.put(permission, new HashSet<>());
+			}
+			aliasPermissions.get(permission).addAll(Arrays.asList(aliases));
+		}
 	}
 	
 	@Override
@@ -146,7 +162,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Override
 	public void assertRead(String resourceKey) throws AccessDeniedException {
-		assertAnyPermission(getReadPermission(resourceKey), getReadWritePermission(resourceKey));
+		assertAnyPermission(getReadPermission(resourceKey));
 	}
 	
 	@Override
@@ -165,7 +181,39 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
+	public Set<String> resolveCurrentPermissions() {
+		return resolvePermissions(getCurrentUser());
+	}
+	
+	@Override
+	public Set<String> resolvePermissions(User user) {
+		
+		Tenant tenant = tenantService.getCurrentTenant();
+		Set<String> allPermissions = new TreeSet<>();
+		Collection<Role> roles = roleService.getRoles(user);
+		for(Role role : roles) {
+			if(role.isAllPermissions()) {
+				allPermissions.addAll(getAllPermissions());
+			}
+			allPermissions.addAll(role.getPermissions());
+		}
+		
+		Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);
+		Set<String> resolvedPermissions = new HashSet<>(allPermissions);
+		for(String permission : allPermissions) {
+			Set<String> aliases = aliasPermissions.get(permission);
+			if(Objects.nonNull(aliases)) {
+				resolvedPermissions.addAll(aliases);
+			}
+		}
+		
+		return resolvedPermissions;
+	}
+	
+	@Override
 	public void assertAnyPermission(String... permissions) throws AccessDeniedException {
+		
+		
 		User user = getCurrentUser();
 		
 		if(log.isDebugEnabled()) {
@@ -175,31 +223,27 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		if(user.getUuid().equals(SYSTEM_USER_UUID)) {
 			return;
 		}
+
+		Set<String> resolvedPermissions = resolvePermissions(user);
+		Set<String> testPermissions = new HashSet<>(Arrays.asList(permissions));
+
+		testPermissions.retainAll(resolvedPermissions);
 		
-		Set<String> allPermissions = new TreeSet<>();
-		Collection<Role> roles = roleService.getRoles(user);
-		for(Role role : roles) {
-			if(role.isAllPermissions()) {
-				return;
-			}
-			allPermissions.addAll(role.getPermissions());
-			for(String permission : permissions) {
-				if(allPermissions.contains(permission)) {
-					return;
-				}
-			}
+		if(!testPermissions.isEmpty()) {
+			return;
 		}
 		
 		if(log.isInfoEnabled()) {
 			log.info("User {} denied permission from permission set {}", 
 					user.getUsername(), 
-					Utils.csv(allPermissions));
+					Utils.csv(resolvedPermissions));
 		}
 		throw new AccessDeniedException();
 	}
 	
 	@Override
 	public void assertAllPermission(String... permissions) throws AccessDeniedException {
+		
 		User user = getCurrentUser();
 		
 		if(log.isDebugEnabled()) {
@@ -209,22 +253,15 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		if(user.getUuid().equals(SYSTEM_USER_UUID)) {
 			return;
 		}
-		
-		Set<String> allPermissions = new TreeSet<>();
-		Collection<Role> roles = roleService.getRoles(user);
-		for(Role role : roles) {
-			if(role.isAllPermissions()) {
-				return;
-			}
-			allPermissions.addAll(role.getPermissions());
-		}
+
+		Set<String> resolvedPermissions = resolvePermissions(user);
 		
 		for(String permission : permissions) {
-			if(!allPermissions.contains(permission)) {
+			if(!resolvedPermissions.contains(permission)) {
 				if(log.isInfoEnabled()) {
 					log.info("User {} denied permission from permission set {}", 
 							user.getUsername(), 
-							Utils.csv(allPermissions));
+							Utils.csv(resolvedPermissions));
 				}
 				throw new AccessDeniedException();
 			}

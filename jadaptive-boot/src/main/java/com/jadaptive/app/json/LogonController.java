@@ -19,11 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.app.SecurityPropertyService;
 import com.jadaptive.app.auth.AuthenticationService;
+import com.jadaptive.app.auth.SessionInterceptor;
 import com.jadaptive.app.session.SessionUtils;
 
 @Controller
@@ -69,7 +70,7 @@ public class LogonController {
 			
 			String homePage = (String) request.getSession().getAttribute(SessionInterceptor.PRE_LOGON_ORIGINAL_URL);
 			if(Objects.isNull(homePage)) {
-				Properties properties = securityService.resolveSecurityProperties(request, request.getRequestURI());
+				Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 				homePage = properties.getProperty("authentication.homePage");
 			}
 			if(log.isInfoEnabled()) {

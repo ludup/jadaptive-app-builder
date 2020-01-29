@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.AssignableObjectDatabase;
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleRepository;
@@ -15,16 +16,14 @@ import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.utils.EntityUtils;
 
 @Repository
-public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> 
-		extends TenantAwareObjectDatabaseImpl<T> implements AssignableObjectDatabase<T> {
+public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implements AssignableObjectDatabase<T> {
 	
 	@Autowired
-	RoleRepository roleRepository; 
+	private RoleRepository roleRepository; 
 	
-	protected AssignableObjectDatabaseImpl(DocumentDatabase db) {
-		super(db);
-	}
-
+	@Autowired
+	private TenantAwareObjectDatabase<T> objectDatabase;
+	
 	protected void assign(T e, Collection<Role> roles, Collection<User> users) {
 		
 		for(Role role : roles) {
@@ -35,14 +34,14 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity>
 			e.getUsers().add(user.getUuid());
 		}
 		
-		saveOrUpdate(e);
+		objectDatabase.saveOrUpdate(e);
 	}
 	
 	@Override
 	public Collection<T> getAssignedObjects(Class<T> resourceClass, User user) {
 		
 		Collection<Role> userRoles = roleRepository.getRolesByUser(user);
-		return searchObjects(resourceClass, 
+		return objectDatabase.searchObjects(resourceClass, 
 				SearchField.in("users", user.getUuid()),
 				SearchField.in("roles", EntityUtils.getUUIDs(userRoles)));
 	}

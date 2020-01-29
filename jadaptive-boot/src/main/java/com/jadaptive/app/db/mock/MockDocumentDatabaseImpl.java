@@ -60,7 +60,7 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public Iterable<Document> list(String table, String database) {	
+	public Iterable<Document> list(String table, String database, SearchField...fields) {	
 		return getCollection(table, database).values();
 	}
 	
@@ -98,12 +98,6 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return null;
 	}
 
-	@Override
-	public Iterable<Document> list(String field, String value, String table, String database) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 //	@Override
 //	public Iterable<Document> searchCollectionField(String field, String value, String table, String database) {
 //		// TODO Auto-generated method stub
@@ -130,6 +124,12 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public Long searchCount(String table, String database, SearchField... fields) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Document get(String table, String database, SearchField... fields) {
 		// TODO Auto-generated method stub
 		return null;
 	}

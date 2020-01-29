@@ -27,13 +27,8 @@ public class TenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity>
 	protected TenantService tenantService;
 	
 	@Override
-	public Collection<T> list(Class<T> resourceClass) throws RepositoryException, EntityException {
-		return listObjects(tenantService.getCurrentTenant().getUuid(), resourceClass);
-	}
-	
-	@Override
-	public Collection<T> list(String field, String value, Class<T> resourceClass) {
-		return listObjects(field, value, tenantService.getCurrentTenant().getUuid(), resourceClass);
+	public Collection<T> list(Class<T> resourceClass, SearchField... fields) {
+		return listObjects(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
 	}
 
 	@Override
@@ -41,8 +36,8 @@ public class TenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity>
 		return getObject(uuid, tenantService.getCurrentTenant().getUuid(), resourceClass);
 	}
 	
-	public T get(String field, String value, Class<T> resourceClass) throws RepositoryException, EntityException {
-		return getObject(field, value, tenantService.getCurrentTenant().getUuid(), resourceClass);
+	public T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, EntityException {
+		return getObject(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
 	}
 
 	@SuppressWarnings("unchecked")

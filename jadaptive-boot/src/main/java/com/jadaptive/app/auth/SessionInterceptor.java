@@ -1,4 +1,4 @@
-package com.jadaptive.app.json;
+package com.jadaptive.app.auth;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -17,12 +17,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.app.SecurityPropertyService;
-import com.jadaptive.app.auth.AuthenticationService;
 import com.jadaptive.app.session.SessionUtils;
 import com.jadaptive.utils.FileUtils;
 
@@ -46,7 +45,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 	private SecurityPropertyService securityService; 
 	
 	@Autowired
-	private UserService userService; 
+	private UserService userService;  
 	
 	@Autowired
 	private AuthenticationService authenticationService; 
@@ -56,20 +55,20 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 			throws Exception {
 		
 		Session session = sessionUtils.getActiveSession(request);
-		Properties properties = securityService.resolveSecurityProperties(request, request.getRequestURI());
-	
-		tenantService.setCurrentTenant(request);
+		Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 		
 		if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))
 				&& Objects.nonNull(request.getHeader(HttpHeaders.AUTHORIZATION))) {
 			session = performBasicAuthentication(request, response);
 		}
 		
-		if(Objects.nonNull(session)) {
+		if(Objects.isNull(session) && Boolean.parseBoolean(properties.getProperty("authentication.allowAnonymous", "false"))) {
+			permissionService.setupSystemContext();
+		} else if(Objects.nonNull(session)) {
 			tenantService.setCurrentTenant(session.getCurrentTenant());	
 			permissionService.setupUserContext(userService.findUsername(session.getUsername()));
 		} 
-		
+
 		String loginURL = properties.getProperty("authentication.loginURL");
 		String requestURL = request.getRequestURI();
 		

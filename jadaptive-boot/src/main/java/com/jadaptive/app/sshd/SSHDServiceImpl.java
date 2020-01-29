@@ -53,6 +53,9 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 	private PasswordAuthenticatorImpl passwordAuthenticator; 
 	
 	@Autowired
+	private AuthorizedKeyProvider authorizedKeysAuthenticator;
+	
+	@Autowired
 	private UserCommandFactory userCommands; 
 	
 	@Autowired
@@ -80,9 +83,9 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 			boolean extenalAccess = ApplicationProperties.getValue("sshd.externalAccess", true);
 
 			addAuthenticator(passwordAuthenticator);
-
+			addAuthenticator(authorizedKeysAuthenticator);
+			
 			addInterface(extenalAccess ? "::" : "::1", port);
-			//addInterface(extenalAccess ? "0.0.0.0" : "127.0.0.1", port);
 
 			start(true);
 		} catch (IOException e) {

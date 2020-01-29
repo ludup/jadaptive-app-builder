@@ -1,5 +1,7 @@
 package com.jadaptive.db;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
@@ -9,6 +11,7 @@ import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBList;
@@ -17,7 +20,7 @@ public class DocumentHelperTests {
 	
 	
 	@Test
-	public void testObjectCollectionSerialization() {
+	public void testObjectCollectionSerializationAndDeserialization() throws ParseException {
 		
 		TestObjectCollections obj = new TestObjectCollections(new TestSimpleObject("one"),
 				new TestSimpleObject("two"), new TestSimpleObject("three"));
@@ -25,23 +28,33 @@ public class DocumentHelperTests {
 		Document doc = new Document();
         DocumentHelper.convertObjectToDocument(obj, doc);
         
-        System.out.println(doc);
+        TestObjectCollections des = DocumentHelper.convertDocumentToObject(TestObjectCollections.class, doc);
         
-        List<?> values = (List<?>) doc.get("values");
+        List<TestSimpleObject> values = des.getValues();
         
         Assert.assertNotNull(values);
         Assert.assertEquals(3, values.size());
-        Document one = (Document) values.get(0);
-        Assert.assertEquals("one", one.get("name"));
+        TestSimpleObject one = values.get(0);
+        Assert.assertEquals("one", one.getName());
         
-        Document two = (Document) values.get(1);
-        Assert.assertEquals("two", two.get("name"));
+        TestSimpleObject two = values.get(1);
+        Assert.assertEquals("two", two.getName());
         
-        Document three = (Document) values.get(2);
-        Assert.assertEquals("three", three.get("name"));
+        TestSimpleObject three = values.get(2);
+        Assert.assertEquals("three", three.getName());
+        
+        assertKnownFields(obj, des);
 
 	}
 	
+	private void assertKnownFields(AbstractUUIDEntity obj, AbstractUUIDEntity des) {
+		
+		assertEquals(obj.getHidden(), des.getHidden());
+		assertEquals(obj.getSystem(), des.getSystem());
+		assertEquals(obj.getUuid(), des.getUuid());
+		
+	}
+
 	@Test
 	public void testObjectCollectionDeserialization() throws ParseException {
 		

@@ -8,6 +8,7 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
@@ -30,8 +31,8 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 	}
 	
 	@Override
-	public Collection<T> list(String field, String value) {
-		return listObjects(field, value, tenantService.getCurrentTenant().getUuid(), getResourceClass());
+	public Collection<T> list(SearchField... fields) {
+		return listObjects(tenantService.getCurrentTenant().getUuid(), getResourceClass(), fields);
 	}
 	
 	@Override
@@ -54,8 +55,8 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 		return getObject(uuid, tenantService.getCurrentTenant().getUuid(), getResourceClass());
 	}
 	
-	public T get(String field, String value) throws RepositoryException, EntityException {
-		return getObject(field, value, tenantService.getCurrentTenant().getUuid(), getResourceClass());
+	public T get(SearchField... fields) throws RepositoryException, EntityException {
+		return getObject(tenantService.getCurrentTenant().getUuid(), getResourceClass(), fields);
 	}
 
 	@Override

@@ -6,13 +6,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import com.jadaptive.api.entity.EntityScope;
 import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
 public class EntityTemplate extends NamedUUIDEntity {
 
 	EntityType type;
-	String alias;
+	EntityScope scope;
+	String resourceKey;
+	String defaultFilter;
 	Collection<FieldTemplate> fields = new ArrayList<>();
 	Map<String,FieldTemplate> fieldsByName;
 	
@@ -20,6 +23,15 @@ public class EntityTemplate extends NamedUUIDEntity {
 		
 	}
 	
+	public EntityScope getScope() {
+		return scope;
+	}
+
+	public void setScope(EntityScope scope) {
+		this.scope = scope;
+	}
+
+
 	public EntityType getType() {
 		return type;
 	}
@@ -39,13 +51,21 @@ public class EntityTemplate extends NamedUUIDEntity {
 	public FieldTemplate getField(String name) {
 		return toMap().get(name);
 	}
-	
-	public String getAlias() {
-		return alias;
+
+	public String getResourceKey() {
+		return resourceKey;
 	}
 
-	public void setAlias(String alias) {
-		this.alias = alias;
+	public void setResourceKey(String resourceKey) {
+		this.resourceKey = resourceKey;
+	}
+
+	public String getDefaultFilter() {
+		return defaultFilter;
+	}
+
+	public void setDefaultFilter(String defaultFilter) {
+		this.defaultFilter = defaultFilter;
 	}
 
 	Map<String,FieldTemplate> toMap() {

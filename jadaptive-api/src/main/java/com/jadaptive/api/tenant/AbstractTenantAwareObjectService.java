@@ -2,6 +2,7 @@ package com.jadaptive.api.tenant;
 
 import java.util.Collection;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
@@ -22,8 +23,10 @@ public interface AbstractTenantAwareObjectService<T extends AbstractUUIDEntity> 
 	void delete(T obj) throws EntityException;
 
 	long count();
-
-	T get(String field, String value) throws RepositoryException, EntityException;
+	
+	T get(SearchField... fields) throws RepositoryException, EntityException;
 	
 	AbstractTenantAwareObjectDatabase<T> getRepository();
+
+	
 }

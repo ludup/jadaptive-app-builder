@@ -5,8 +5,7 @@ import java.util.Collection;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.user.User;
 
-public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> 
-			extends TenantAwareObjectDatabase<T> {
+public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> {
 
 	Collection<T> getAssignedObjects(Class<T> resourceClass, User user);
 

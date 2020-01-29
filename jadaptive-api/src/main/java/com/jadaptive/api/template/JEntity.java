@@ -5,17 +5,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.jadaptive.api.entity.EntityScope;
 import com.jadaptive.api.entity.EntityType;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Entity {
+public @interface JEntity {
 		
 		String name();
 		
-		String alias();
+		String resourceKey();
 		
 		EntityType type();
+		
+		EntityScope scope() default EntityScope.GLOBAL;
 
 		boolean hidden() default false;
 		

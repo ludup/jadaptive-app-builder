@@ -17,6 +17,7 @@ import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.app.db.SearchHelper;
 
 @Service
 public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEnabledService<MongoEntity> {
@@ -29,6 +30,9 @@ public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEn
 	
 	@Autowired
 	PermissionService permissionService; 
+	
+	@Autowired
+	SearchHelper searchHelper;
 	
 	@Override
 	public MongoEntity getSingleton(String resourceKey) throws RepositoryException, EntityException {
@@ -63,8 +67,8 @@ public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEn
 
 	@Override
 	public Collection<MongoEntity> list(String resourceKey) throws RepositoryException, EntityException {
-		templateService.get(resourceKey);
-		return entityRepository.list(resourceKey);
+		EntityTemplate template = templateService.get(resourceKey);
+		return entityRepository.list(resourceKey, searchHelper.parseFilterField(template.getDefaultFilter()));
 	}
 
 	@Override

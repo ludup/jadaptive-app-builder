@@ -31,11 +31,11 @@ import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
-import com.jadaptive.api.template.Entity;
-import com.jadaptive.api.template.EntityField;
+import com.jadaptive.api.template.JEntity;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.JField;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
@@ -317,7 +317,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 
 				Reflections reflections = new Reflections(builder);
 				
-				for(Class<?> clz : reflections.getTypesAnnotatedWith(Entity.class)) {
+				for(Class<?> clz : reflections.getTypesAnnotatedWith(JEntity.class)) {
 					if(log.isInfoEnabled()) {
 						log.info("Found annotated template {}", clz.getName());
 					}
@@ -334,7 +334,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	private void registerAnnotatedTemplate(Class<?> clz) {
 		
 		try {
-			Entity e = clz.getAnnotation(Entity.class);
+			JEntity e = clz.getAnnotation(JEntity.class);
 			
 			EntityTemplate template;
 			try {
@@ -344,7 +344,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template.setUuid(clz.getSimpleName());
 			}
 			
-			template.setAlias(e.alias());
+			template.setResourceKey(e.resourceKey());
 			template.setHidden(e.hidden());
 			template.setSystem(e.system());
 			template.setName(e.name());
@@ -354,16 +354,17 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			for(Field f : clz.getDeclaredFields()) {
 				
-				EntityField[] annotations = f.getAnnotationsByType(EntityField.class);
+				JField[] annotations = f.getAnnotationsByType(JField.class);
 				if(Objects.nonNull(annotations) && annotations.length > 0) {
 					
-					EntityField field = annotations[0];
+					JField field = annotations[0];
 					FieldTemplate t = new FieldTemplate();
+					t.setResourceKey(t.getName());
 					t.setDefaultValue(field.defaultValue());
 					t.setDescription(field.description());
 					t.setFieldType(field.type());
 					t.setHidden(field.hidden());
-					t.setName(f.getName());
+					t.setName(field.name());
 					t.setRequired(field.required());
 					t.setSystem(false);
 					

@@ -78,7 +78,7 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 			
 			EntityTemplate template = templateService.get(rkNode.asText());
 			
-			MongoEntity e = new MongoEntity(template.getUuid(), new Document());
+			MongoEntity e = new MongoEntity(template.getResourceKey(), new Document());
 			
 			iterateType(node, template, e, true);
 

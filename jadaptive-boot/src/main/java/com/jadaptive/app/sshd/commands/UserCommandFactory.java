@@ -12,5 +12,7 @@ public class UserCommandFactory extends AbstractAutowiredCommandFactory {
 	@PostConstruct
 	private void postConstruct() {
 		installCommand("passwd", Passwd.class);
+		installCommand("ssh-keygen", SshKeyGen.class);
+		installCommand("authorized-keys", AuthorizedKeys.class);
 	}
 }

@@ -7,18 +7,15 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 
 import org.pf4j.PluginManager;
-import org.pf4j.PluginWrapper;
-import org.reflections.Reflections;
-import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
-import com.jadaptive.api.template.Entity;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.EntityTemplateService;
@@ -32,6 +29,8 @@ import com.jadaptive.app.entity.MongoEntity;
 @Service
 public class EntityTemplateServiceImpl implements EntityTemplateService, TemplateEnabledService<EntityTemplate> {
 
+	public static final String RESOURCE_KEY = "entityTemplate";
+	
 	@Autowired
 	EntityTemplateRepository repository; 
 	
@@ -44,12 +43,17 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	@Autowired
 	PluginManager pluginManager; 
 	
+	@PostConstruct
+	private void postConstruct() {
+		permissionService.registerStandardPermissions(RESOURCE_KEY);
+	}
+	
 	@Override
 	public EntityTemplate get(String resourceKey) throws RepositoryException, EntityException {
 		
-		permissionService.assertRead(resourceKey);
+		permissionService.assertRead(RESOURCE_KEY);
 		
-		EntityTemplate e = repository.get(resourceKey);
+		EntityTemplate e = repository.get(SearchField.eq("resourceKey", resourceKey));
 		
 		if(Objects.isNull(e)) {
 			throw new EntityException(String.format("Cannot find entity with resource key %s", resourceKey));
@@ -61,11 +65,15 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	@Override
 	public Collection<EntityTemplate> list() throws RepositoryException, EntityException {
 		
+		permissionService.assertRead(RESOURCE_KEY);
+		
 		return repository.list();
 	}
 	
 	@Override
 	public Collection<EntityTemplate> table(String searchField, String searchValue, String order, int start, int length) throws RepositoryException, EntityException {
+		
+		permissionService.assertRead(RESOURCE_KEY);
 		
 		return repository.table(searchField, searchValue, order, start, length);
 	}
@@ -78,7 +86,7 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	@Override
 	public void saveOrUpdate(EntityTemplate template) throws RepositoryException, EntityException {
 		
-		permissionService.assertReadWrite(template.getUuid());
+		permissionService.assertReadWrite(RESOURCE_KEY);
 		
 		repository.saveOrUpdate(template);
 		
@@ -87,7 +95,7 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	@Override
 	public void delete(String uuid) throws EntityException {
 		
-		permissionService.assertReadWrite(uuid);
+		permissionService.assertReadWrite(RESOURCE_KEY);
 		
 		entityService.deleteAll(uuid);
 		repository.delete(uuid);
@@ -155,19 +163,19 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 
 	@Override
 	public String getResourceKey() {
-		return "entityTemplate";
+		return RESOURCE_KEY;
 	}
 
-	private String getPermissionKey(String resourceKey) {
-		return String.format("%sTemplate", resourceKey);
-	}
+//	private String getPermissionKey(String resourceKey) {
+//		return String.format("%sTemplate", resourceKey);
+//	}
 	
 	@Override
 	public void onTemplatesComplete(String... resourceKeys) {
 		
-		for(String resourceKey : resourceKeys) {
-			permissionService.registerStandardPermissions(getPermissionKey(resourceKey));
-		}
+//		for(String resourceKey : resourceKeys) {
+//			permissionService.registerStandardPermissions(getPermissionKey(resourceKey));
+//		}
 	}
 	
 	@Override

@@ -8,11 +8,11 @@ import com.jadaptive.api.repository.RepositoryException;
 
 public interface TenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
 
-	Collection<T> list(Class<T> resourceClass) throws RepositoryException, EntityException;
-
-	Collection<T> list(String field, String value, Class<T> resourceClass);
+	Collection<T> list(Class<T> resourceClass, SearchField...fields);
 
 	T get(String uuid, Class<T> resourceClass) throws RepositoryException, EntityException;
+	
+	T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, EntityException;
 
 	void delete(T obj) throws RepositoryException, EntityException;
 
