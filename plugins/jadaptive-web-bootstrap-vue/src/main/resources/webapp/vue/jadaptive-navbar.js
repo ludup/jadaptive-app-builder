@@ -15,7 +15,9 @@ Vue.component('jadaptive-navbar', {
 			      obj.menus = [];
 			      obj.href = '#' + obj.resource;
 			  });
-			  
+			  var routes = this.$routes;
+			  var router = this.$router;
+			  debugger;
 			  $.each(this.items, function(idx, obj) {
 				  const v4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
 				  var parent = obj.parent.match(v4);
@@ -25,6 +27,11 @@ Vue.component('jadaptive-navbar', {
 			      } else {
 			    	  roots.push(obj);
 			      }
+			      
+			      router.options.routes.push({
+			    	  path: obj.path,
+			    	  component: { template: '<div>dynamic</div>' }
+			      });
 			  });
 			  
 			  return roots;
@@ -55,14 +62,14 @@ Vue.component('jadaptive-navbar', {
 		       	       href="#" 
 		       	       v-on:click="select(menu.resource)" 
 		       	       v-bind:class="{active: isSelected(menu.resource)}">
-		       	       <router-link to="/bar">{{ menu.title }}</router-link>
+		       	       <router-link v-bind:to="menu.resource">{{ menu.title }}</router-link>
 		  		   </b-nav-item>
-		  		   <b-nav-item-dropdown v-else text="Lang" right>
+		  		   <b-nav-item-dropdown v-else v-bind:text="menu.title" right>
 		  		       <template v-for="item in menu.menus">
 		  		           <b-dropdown-item href="#"
-		  		           		v-on:click="select(menu.resource)" 
+		  		           		v-on:click="select(item.resource)" 
 		       	       			v-bind:class="{active: isSelected(menu.resource)}">
-		  		              <router-link to="/foo">{{ menu.title }}</router-link>
+		  		              <router-link v-bind:to="item.resource">{{ item.title }}</router-link>
 		  		           </b-dropdown-item>
 		  		       </template>
 		  		   </b-nav-item-dropdown>

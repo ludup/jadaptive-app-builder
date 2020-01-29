@@ -47,13 +47,9 @@
     <!-- Start running your app -->
     <script>
     const Home = { template: '<div>home</div>' }; 
-    const Foo = { template: '<div>foo</div>' };
-	 const Bar = { template: '<div>bar</div>' };
 
 	 const routes = [
-	   { path: '/', component: Home },
-	   { path: '/foo', component: Foo },
-	   { path: '/bar', component: Bar }
+	   { path: '/', component: Home }
 	 ];
 	 
 	 const router = new VueRouter({

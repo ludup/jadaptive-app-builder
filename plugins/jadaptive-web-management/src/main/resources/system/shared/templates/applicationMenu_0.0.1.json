@@ -1,7 +1,8 @@
 [{
  "type": "COLLECTION",
+ "scope": "GLOBAL",
  "name": "Application Menu",
- "uuid": "applicationMenu",
+ "resourceKey": "applicationMenu",
  "system": true,
  "fields": [{
               "resourceKey": "title",
@@ -16,10 +17,28 @@
               "description": "The resource key of the entity this menu links to",
               "fieldType": "TEXT"
        }, {
+              "resourceKey": "path",
+              "name": "Path",
+              "defaultValue": "",
+              "description": "The URL path of this resource",
+              "fieldType": "TEXT"
+       },{
+              "resourceKey": "permission",
+              "name": "Permission",
+              "defaultValue": "",
+              "description": "The permission(s) required to access this menu",
+              "fieldType": "TEXT"
+       }, {
               "resourceKey": "icon",
               "name": "Icon",
               "defaultValue": "",
               "description": "The Font Awesome icon name",
+              "fieldType": "TEXT"
+       },{
+              "resourceKey": "keywords",
+              "name": "Keywords",
+              "defaultValue": "",
+              "description": "Keywords that users might use to search for this page",
               "fieldType": "TEXT"
        }, {
               "resourceKey": "parent",
@@ -31,5 +50,6 @@
               	"type": "OBJECT_TYPE",
               	"value": "applicationMenu"
               }]
-       }]
+       }],
+  "defaultFilter": "permission in(${permissions})"
 }]
