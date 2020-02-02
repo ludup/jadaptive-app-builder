@@ -29,8 +29,13 @@ public abstract class AbstractTenantAwareObjectServiceImpl<T extends AbstractUUI
 	}
 	
 	@Override
-	public void initializeTenant(Tenant tenant) {
+	public void initializeSystem() {
 		permissionService.registerStandardPermissions(getResourceKey());
+	}
+	
+	@Override
+	public void initializeTenant(Tenant tenant) {
+
 	}
 	
 	protected String getResourceKey() {

@@ -31,11 +31,11 @@ import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
-import com.jadaptive.api.template.JEntity;
+import com.jadaptive.api.template.Entity;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
-import com.jadaptive.api.template.JField;
+import com.jadaptive.api.template.Member;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
@@ -300,6 +300,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
+			if(w.getPlugin()==null) {
+				continue;
+			}
 			if(log.isInfoEnabled()) {
 				log.info("Scanning plugin {} for entity templates in {}", 
 						w.getPluginId(),
@@ -317,7 +320,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 
 				Reflections reflections = new Reflections(builder);
 				
-				for(Class<?> clz : reflections.getTypesAnnotatedWith(JEntity.class)) {
+				for(Class<?> clz : reflections.getTypesAnnotatedWith(Entity.class)) {
 					if(log.isInfoEnabled()) {
 						log.info("Found annotated template {}", clz.getName());
 					}
@@ -334,7 +337,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	private void registerAnnotatedTemplate(Class<?> clz) {
 		
 		try {
-			JEntity e = clz.getAnnotation(JEntity.class);
+			Entity e = clz.getAnnotation(Entity.class);
 			
 			EntityTemplate template;
 			try {
@@ -354,10 +357,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			for(Field f : clz.getDeclaredFields()) {
 				
-				JField[] annotations = f.getAnnotationsByType(JField.class);
+				Member[] annotations = f.getAnnotationsByType(Member.class);
 				if(Objects.nonNull(annotations) && annotations.length > 0) {
 					
-					JField field = annotations[0];
+					Member field = annotations[0];
 					FieldTemplate t = new FieldTemplate();
 					t.setResourceKey(t.getName());
 					t.setDefaultValue(field.defaultValue());

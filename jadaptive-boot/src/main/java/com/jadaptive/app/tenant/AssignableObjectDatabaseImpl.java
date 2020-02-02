@@ -12,7 +12,6 @@ import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleRepository;
 import com.jadaptive.api.user.User;
-import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.utils.EntityUtils;
 
 @Repository

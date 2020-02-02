@@ -10,7 +10,7 @@ import com.jadaptive.api.entity.EntityType;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface JEntity {
+public @interface Entity {
 		
 		String name();
 		

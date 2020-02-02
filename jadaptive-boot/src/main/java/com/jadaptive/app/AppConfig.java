@@ -8,6 +8,7 @@ import org.pf4j.CompoundPluginRepository;
 import org.pf4j.DefaultPluginRepository;
 import org.pf4j.DevelopmentPluginRepository;
 import org.pf4j.ExtensionFactory;
+import org.pf4j.ExtensionFinder;
 import org.pf4j.JarPluginRepository;
 import org.pf4j.PluginRepository;
 import org.pf4j.spring.SpringPluginManager;
@@ -28,6 +29,11 @@ public class AppConfig {
     public SpringPluginManager pluginManager() {
         pluginManager = new SpringPluginManager() {
         	@Override
+			protected ExtensionFinder createExtensionFinder() {
+				return new ScanningExtensionFinder(this);
+			}
+
+			@Override
             protected ExtensionFactory createExtensionFactory() {
                 return new CustomSpringExtensionFactory(this);
             }

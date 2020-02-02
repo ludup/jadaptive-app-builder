@@ -1,10 +1,12 @@
 package com.jadaptive.app.permissions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -19,25 +21,29 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.utils.Utils;
 
 @Service
-public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements PermissionService {
+public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements PermissionService, TenantAware {
 
 	public static final String READ = "read";
 	public static final String READ_WRITE = "readWrite";
 	
 	@Autowired
-	TenantService tenantService; 
+	private TenantService tenantService; 
 	
 	@Autowired
-	RoleService roleService; 
+	private RoleService roleService; 
 	
 	Map<Tenant,Set<String>> tenantPermissions = new HashMap<>();
 	Map<Tenant,Map<String,Set<String>>> tenantPermissionsAlias = new HashMap<>();
+	
+	Set<String> systemPermissions = new TreeSet<>();
+	Map<String,Set<String>> systemPermissionsAlias = new HashMap<>();
 	
 	ThreadLocal<Stack<User>> currentUser = new ThreadLocal<>();
 	
@@ -60,7 +66,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			return "System";
 		}
 	};
-	
+
 	@Override
 	public void registerStandardPermissions(String resourceKey) {
 		
@@ -114,20 +120,33 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		Tenant tenant = tenantService.getCurrentTenant();	
 		
-		if(log.isInfoEnabled()) {
-			log.info("Registering permission {} for tenant {}", permission, tenant.getHostname());
+		if(tenant.getSystem()) {
+			
+			doRegisterPermission(systemPermissions, systemPermissionsAlias, permission, aliases);
+		} else {
+			
+			Set<String> allPermissions = tenantPermissions.get(tenant);
+			if(Objects.isNull(allPermissions)) {
+				allPermissions = new TreeSet<>();
+				tenantPermissions.put(tenant, allPermissions);
+			}
+			
+			Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);	
+			
+			if(Objects.isNull(aliasPermissions)) {
+				aliasPermissions = new HashMap<>();
+				tenantPermissionsAlias.put(tenant, aliasPermissions);
+			}
+			
+			doRegisterPermission(allPermissions, aliasPermissions, permission, aliases);
 		}
-
-		Set<String> allPermissions = tenantPermissions.get(tenant);
-		if(Objects.isNull(allPermissions)) {
-			allPermissions = new TreeSet<>();
-			tenantPermissions.put(tenant, allPermissions);
-		}
+	}
+	
+	private synchronized void doRegisterPermission(Set<String> allPermissions, Map<String,Set<String>> aliasPermissions, String permission, String... aliases) {
 		
-		Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);
-		if(Objects.isNull(aliasPermissions)) {
-			aliasPermissions = new HashMap<>();
-			tenantPermissionsAlias.put(tenant, aliasPermissions);
+		
+		if(log.isInfoEnabled()) {
+			log.info("Registering permission {} for tenant {}", permission, tenantService.getCurrentTenant().getHostname());
 		}
 		
 		if(allPermissions.contains(permission)) {
@@ -146,7 +165,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Override
 	public void registerCustomPermission(String customPermission) {
-		
 		registerPermission(customPermission);
 	}
 	
@@ -157,7 +175,12 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Override
 	public Collection<String> getAllPermissions(Tenant tenant) {
-		return Collections.unmodifiableCollection(tenantPermissions.get(tenant));
+		List<String> tmp = new ArrayList<>();
+		tmp.addAll(systemPermissions);
+		if(tenantPermissions.containsKey(tenant)) {
+			tmp.addAll(tenantPermissions.get(tenant));
+		}
+		return Collections.unmodifiableCollection(tmp);
 	}
 	
 	@Override
@@ -197,17 +220,24 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			}
 			allPermissions.addAll(role.getPermissions());
 		}
-		
-		Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);
+
 		Set<String> resolvedPermissions = new HashSet<>(allPermissions);
+		processAliases(systemPermissionsAlias, allPermissions, resolvedPermissions);
+		if(!tenant.getSystem()) {
+			processAliases(tenantPermissionsAlias.get(tenant), allPermissions, resolvedPermissions);
+		}		
+		return resolvedPermissions;
+	}
+	
+	private void processAliases(Map<String,Set<String>> aliasPermissions, Set<String> allPermissions, Set<String> resolvedPermissions) {
+
+		
 		for(String permission : allPermissions) {
 			Set<String> aliases = aliasPermissions.get(permission);
 			if(Objects.nonNull(aliases)) {
 				resolvedPermissions.addAll(aliases);
 			}
 		}
-		
-		return resolvedPermissions;
 	}
 	
 	@Override
@@ -292,4 +322,46 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		return false;
 	}
 
+	@Override
+	public void initializeTenant(Tenant tenant) {
+	
+	}
+	
+	@Override
+	public void initializeSystem() {
+			
+//		for(PluginWrapper w : pluginManager.getPlugins()) {
+//
+//			if(log.isInfoEnabled()) {
+//				log.info("Scanning plugin {} for custom permissions in {}", 
+//						w.getPluginId(),
+//						w.getPlugin().getClass().getPackage().getName());
+//			}
+//			
+//			try {
+//				ConfigurationBuilder builder = new ConfigurationBuilder();
+//				
+//				builder.addClassLoaders(w.getPluginClassLoader());
+//				builder.addUrls(ClasspathHelper.forPackage(
+//						w.getPlugin().getClass().getPackage().getName(),
+//						w.getPluginClassLoader()));
+//				builder.addScanners(new TypeAnnotationsScanner());
+//
+//				Reflections reflections = new Reflections(builder);
+//				
+//				for(Class<?> clz : reflections.getTypesAnnotatedWith(Permissions.class)) {
+//					if(log.isInfoEnabled()) {
+//						log.info("Found annotated permissions {}", clz.getName());
+//					}
+//					Permissions perms = clz.getAnnotation(Permissions.class);
+//					for(String key : perms.keys()) {
+//						registerCustomPermission(key);
+//					}
+//				}
+//			} catch (Exception e) {
+//				log.error("Failed to process annotated templates for plugin {}", w.getPluginId(), e);
+//			}
+//		}
+		
+	}
 }

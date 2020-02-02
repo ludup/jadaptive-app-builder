@@ -1,6 +1,5 @@
 package com.jadaptive.plugins.ssh.management.commands;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 

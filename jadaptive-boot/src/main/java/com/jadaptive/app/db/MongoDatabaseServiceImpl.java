@@ -26,7 +26,7 @@ import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Storage;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
-import de.flapdoodle.embed.process.extract.UserTempNaming;
+import de.flapdoodle.embed.process.extract.UUIDTempNaming;
 
 
 @Service
@@ -50,7 +50,7 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 		                    .defaults(Command.MongoD)
 		                    .download(new DownloadConfigBuilder()
 		                            .defaultsForCommand(Command.MongoD).build())
-		                    .executableNaming(new UserTempNaming()))
+		                    .executableNaming(new UUIDTempNaming()))
 		            .build();
 	
 		    IMongodConfig mongodConfig = new MongodConfigBuilder()
@@ -62,6 +62,14 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 	
 		    MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);
 		    process = runtime.prepare(mongodConfig).start();
+		    
+		    Runtime.getRuntime().addShutdownHook(new Thread() {
+		    	public void run() {
+		    		if(Objects.nonNull(process)) {
+		   			 process.stop();
+		   		 }
+		    	}
+		    });
 		}
 	 }
 

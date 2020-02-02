@@ -2,8 +2,6 @@ package com.jadaptive.app.entity.template;
 
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.app.db.DocumentDatabase;

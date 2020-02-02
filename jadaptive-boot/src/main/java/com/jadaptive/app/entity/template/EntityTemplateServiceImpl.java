@@ -43,11 +43,6 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	@Autowired
 	PluginManager pluginManager; 
 	
-	@PostConstruct
-	private void postConstruct() {
-		permissionService.registerStandardPermissions(RESOURCE_KEY);
-	}
-	
 	@Override
 	public EntityTemplate get(String resourceKey) throws RepositoryException, EntityException {
 		
@@ -166,16 +161,9 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 		return RESOURCE_KEY;
 	}
 
-//	private String getPermissionKey(String resourceKey) {
-//		return String.format("%sTemplate", resourceKey);
-//	}
-	
 	@Override
 	public void onTemplatesComplete(String... resourceKeys) {
-		
-//		for(String resourceKey : resourceKeys) {
-//			permissionService.registerStandardPermissions(getPermissionKey(resourceKey));
-//		}
+		permissionService.registerStandardPermissions(RESOURCE_KEY);
 	}
 	
 	@Override

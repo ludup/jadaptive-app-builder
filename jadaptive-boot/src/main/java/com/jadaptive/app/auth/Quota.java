@@ -6,26 +6,26 @@ import com.jadaptive.api.entity.EntityScope;
 import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.JEntity;
-import com.jadaptive.api.template.JField;
+import com.jadaptive.api.template.Entity;
+import com.jadaptive.api.template.Member;
 
-@JEntity(name = "Quota", resourceKey = "quota", 
+@Entity(name = "Quota", resourceKey = "quota", 
 	hidden = true, system = true, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 public class Quota extends AbstractUUIDEntity {
 
-	@JField(name = "Group", description = "A group to identify the quote type", type = FieldType.TEXT)
+	@Member(name = "Group", description = "A group to identify the quote type", type = FieldType.TEXT)
 	String group;
 	
-	@JField(name = "Key", description = "An individual quote within the group", type = FieldType.TEXT)
+	@Member(name = "Key", description = "An individual quote within the group", type = FieldType.TEXT)
 	String key;
 	
-	@JField(name = "Quota", description = "The maximum available value of this quota", type = FieldType.NUMBER)
+	@Member(name = "Quota", description = "The maximum available value of this quota", type = FieldType.NUMBER)
 	long quota;
 	
-	@JField(name = "Period", description = "The period of time in seconds that the quote applies", type = FieldType.NUMBER)
+	@Member(name = "Period", description = "The period of time in seconds that the quote applies", type = FieldType.NUMBER)
 	long period;
 	
-	@JField(name = "Value", description = "The current value of this quota", type = FieldType.NUMBER)
+	@Member(name = "Value", description = "The current value of this quota", type = FieldType.NUMBER)
 	long value;
 
 	Date quotaStarted;

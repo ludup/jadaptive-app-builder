@@ -149,7 +149,11 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			
 			for(TenantAware aware : ApplicationServiceImpl.getInstance().getContext().getBeansOfType(
 						TenantAware.class).values()) {
-				aware.initializeTenant(tenant);
+				if(tenant.getSystem()) {
+					aware.initializeSystem();
+				} else {
+					aware.initializeTenant(tenant);
+				}
 			}
 	
 		} finally {
