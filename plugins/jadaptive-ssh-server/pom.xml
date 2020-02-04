@@ -9,12 +9,12 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>jadaptive-ssh-management</artifactId>
-	<name>SSH Management</name>
+	<artifactId>jadaptive-ssh-server</artifactId>
+	<name>SSH Server</name>
 
 	<properties>
-		<plugin.id>jadaptive-ssh-management</plugin.id>
-		<plugin.class>com.jadaptive.plugins.ssh.management.SSHDManagementPlugin</plugin.class>
+		<plugin.id>jadaptive-ssh-server</plugin.id>
+		<plugin.class>com.jadaptive.plugins.ssh.management.SSHDServerPlugin</plugin.class>
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.dependencies></plugin.dependencies>
@@ -24,12 +24,6 @@
 		<dependency>
 			<groupId>com.jadaptive</groupId>
 			<artifactId>jadaptive-api</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.jadaptive</groupId>
-			<artifactId>jadaptive-ssh-server</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>

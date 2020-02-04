@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.PersonalObjectDatabase;
+import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.sshd.AuthorizedKey;
 import com.jadaptive.api.sshd.AuthorizedKeyService;
 import com.jadaptive.api.user.User;
-import com.jadaptive.app.permissions.Permissions;
 
 @Service
 @Permissions(keys = { AuthorizedKeyServiceImpl.AUTHORIZED_KEY_ASSIGN })

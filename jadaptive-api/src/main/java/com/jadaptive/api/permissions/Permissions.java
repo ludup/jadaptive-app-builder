@@ -1,4 +1,4 @@
-package com.jadaptive.app.permissions;
+package com.jadaptive.api.permissions;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
