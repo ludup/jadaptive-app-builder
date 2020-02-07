@@ -44,9 +44,6 @@ public class AppConfig {
     @Bean
     public SpringPluginManager pluginManager() {
         pluginManager = new SpringPluginManager() {
-
-        	@Autowired
-        	private ApplicationService applicationService; 
         	
 			@Override
 			protected ExtensionFinder createExtensionFinder() {
@@ -73,39 +70,6 @@ public class AppConfig {
                pluginRepository.add(new DefaultPluginRepository(getPluginsRoot()), this::isNotDevelopment);
                
                return pluginRepository;
-            }
-        	
-        	/**
-             * This method load, start plugins and inject extensions in Spring
-             */
-            @PostConstruct
-            public void init() {
-                loadPlugins();
-                startPlugins();
-
-                for(PluginWrapper w : pluginManager.getStartedPlugins()) {
-                	log.info("Building application context for {}", w.getPluginId());
-                	if(w.getPlugin() instanceof SpringPlugin) {
-                		((SpringPlugin)w.getPlugin()).getApplicationContext();
-                	}
-                }
-                
-                AbstractAutowireCapableBeanFactory beanFactory = (AbstractAutowireCapableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
-                ExtensionsInjector extensionsInjector = new ExtensionsInjector(this, beanFactory);
-                extensionsInjector.injectExtensions();
-                
-                List<StartupAware> startups = new ArrayList<>(applicationService.getBeans(StartupAware.class));
-                Collections.<StartupAware>sort(startups, new Comparator<StartupAware>() {
-
-					@Override
-					public int compare(StartupAware o1, StartupAware o2) {
-						return o1.getStartupPosition().compareTo(o2.getStartupPosition());
-					}
-				});
-                
-                for(StartupAware startup : startups) {
-                	startup.onApplicationStartup();
-                }
             }
         };
         return pluginManager;

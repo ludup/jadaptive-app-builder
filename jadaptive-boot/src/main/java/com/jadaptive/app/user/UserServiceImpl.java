@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.DefaultUser;

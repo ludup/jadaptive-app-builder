@@ -54,7 +54,7 @@ public class ScanningExtensionFinder extends AbstractExtensionFinder {
 					bucket.add(clz.getName());
 				}
 			} catch (Exception e) {
-				log.error("Failed to look up Extensions");
+				log.error("Failed to look up Extensions. {}", e.getMessage());
 			}
 
 

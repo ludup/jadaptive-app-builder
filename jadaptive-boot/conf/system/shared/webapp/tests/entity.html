@@ -301,7 +301,7 @@ $(document).ready(function() {
 				});
 				debugger;
 				$('#orderedFields').val(orderedFields);
-				$('#uploadForm').attr('action', "/upload/entity/" + t.uuid);
+				$('#uploadForm').attr('action', "/upload/entity/" + t.resourceKey);
 				$('#uploadForm').submit();
 			});
 			

@@ -86,12 +86,20 @@ public class ApplicationServiceImpl implements ApplicationService {
 						.getApplicationContext().getBeansOfType(clz);
 				
 				if(log.isDebugEnabled()) {
-					log.debug("Found {} beans of type {}", tmp.size(), clz.getName());
+					log.debug("Found {} plugin beans of type {}", tmp.size(), clz.getName());
 				}
 				
 				results.addAll(tmp.values());
 			}
 		}
+		
+		Map<String,E> tmp = context.getBeansOfType(clz);
+		
+		if(log.isDebugEnabled()) {
+			log.debug("Found {} system beans of type {}", tmp.size(), clz.getName());
+		}
+		
+		results.addAll(tmp.values());
 		
 		return results;
 	}

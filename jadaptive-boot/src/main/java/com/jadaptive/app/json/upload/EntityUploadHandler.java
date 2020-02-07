@@ -12,6 +12,7 @@ import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.supercsv.comment.CommentStartsWith;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.io.ICsvListReader;
@@ -25,6 +26,7 @@ import com.jadaptive.app.entity.MongoEntity;
 import com.jadaptive.utils.FileUtils;
 
 @Extension
+@Component
 public class EntityUploadHandler implements UploadHandler {
 
 	static Logger log = LoggerFactory.getLogger(EntityUploadHandler.class);

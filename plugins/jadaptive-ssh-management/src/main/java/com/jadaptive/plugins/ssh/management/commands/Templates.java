@@ -67,7 +67,7 @@ public class Templates extends AbstractTenantAwareCommand {
 				: CliHelper.hasShortOption(args, 'e') ? EntityType.OBJECT : EntityType.COLLECTION);
 		
 		templateService.saveOrUpdate(template);
-		console.println(String.format("Created user %s", template.getName()));
+		console.println(String.format("Created template %s", template.getName()));
 	}
 	
 

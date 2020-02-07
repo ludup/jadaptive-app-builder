@@ -121,7 +121,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		Tenant tenant = tenantService.getCurrentTenant();	
 		
 		if(tenant.getSystem()) {
-			
 			doRegisterPermission(systemPermissions, systemPermissionsAlias, permission, aliases);
 		} else {
 			

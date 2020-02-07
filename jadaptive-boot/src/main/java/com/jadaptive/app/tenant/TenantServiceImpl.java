@@ -13,8 +13,11 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
@@ -36,7 +39,7 @@ import com.jadaptive.app.ApplicationServiceImpl;
 
 
 @Service
-public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant>, StartupAware {
+public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant> {
 
 	ThreadLocal<Tenant> currentTenant = new ThreadLocal<>();
 	
@@ -45,29 +48,32 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	final public static String TENANT_RESOURCE_KEY = "tenant";
 	
 	@Autowired
-	TenantRepository repository; 
+	private TenantRepository repository; 
 	
 	@Autowired
-	TemplateVersionService templateService;
+	private TemplateVersionService templateService;
 	
 	@Autowired
-	PermissionService permissionService; 
+	private PermissionService permissionService; 
 	
 	@Autowired
-	EventService eventService; 
+	private EventService eventService; 
 	
 	@Autowired
-	UserService userService;
+	private UserService userService;
 	
 	@Autowired
-	RoleService roleService; 
+	private RoleService roleService; 
+	
+	@Autowired
+	private ApplicationService applicationService; 
 	
 	Tenant systemTenant;
 	
 	Map<String,Tenant> tenantsByHostname = new HashMap<>();
 	
-	@Override
-	public void onApplicationStartup() {
+	@EventListener
+	public void onApplicationStartup(ApplicationReadyEvent evt) {
 		
 		permissionService.setupSystemContext();
 		
@@ -99,18 +105,22 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 				}
 			}
 			
-			for(StartupAware aware : ApplicationServiceImpl.getInstance().getBeans(StartupAware.class)) {
-				aware.onApplicationStartup();
+            List<StartupAware> startups = new ArrayList<>(applicationService.getBeans(StartupAware.class));
+            Collections.<StartupAware>sort(startups, new Comparator<StartupAware>() {
+
+				@Override
+				public int compare(StartupAware o1, StartupAware o2) {
+					return o2.getStartupPosition().compareTo(o1.getStartupPosition());
+				}
+			});
+            
+			for(StartupAware startup : startups) {
+				startup.onApplicationStartup();
 			}
 			
 		} finally {
 			permissionService.clearUserContext();
 		}
-	}
-	
-	@Override
-	public Integer getStartupPosition() {
-		return Integer.MIN_VALUE;
 	}
 	
 	@Override
@@ -155,7 +165,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 				}
 			}
 			
-			for(TenantAware aware : ApplicationServiceImpl.getInstance().getBeans(TenantAware.class)) {
+			for(TenantAware aware : applicationService.getBeans(TenantAware.class)) {
 				if(tenant.getSystem()) {
 					aware.initializeSystem();
 				} else {
