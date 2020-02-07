@@ -1,9 +1,9 @@
 package com.jadaptive.plugins.ssh.management.commands;
 
+import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -12,7 +12,7 @@ import com.jadaptive.plugins.sshd.commands.AbstractAutowiredCommandFactory;
 import com.sshtools.server.vsession.CommandFactory;
 import com.sshtools.server.vsession.ShellCommand;
 
-@Component
+@Extension
 public class TenantUserCommandFactory extends AbstractAutowiredCommandFactory implements PluginCommandFactory {
 
 	static Logger log = LoggerFactory.getLogger(TenantUserCommandFactory.class);
