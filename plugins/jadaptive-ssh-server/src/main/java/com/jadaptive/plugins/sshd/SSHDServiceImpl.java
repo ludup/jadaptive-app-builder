@@ -1,4 +1,4 @@
-package com.jadaptive.app.sshd;
+package com.jadaptive.plugins.sshd;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.PostConstruct;
-
-import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +15,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationProperties;
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
+import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.sshd.PluginCommandFactory;
-import com.jadaptive.api.sshd.PluginFileSystemMount;
-import com.jadaptive.api.sshd.SSHDService;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.app.sshd.commands.UserCommandFactory;
+import com.jadaptive.plugins.sshd.commands.UserCommandFactory;
 import com.sshtools.common.files.AbstractFileFactory;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
@@ -45,10 +41,13 @@ import com.sshtools.server.vsession.VirtualSessionPolicy;
 import com.sshtools.server.vshell.commands.fs.FileSystemCommandFactory;
 
 @Service
-public class SSHDServiceImpl extends SshServer implements SSHDService {
+public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAware {
 
 	static Logger log = LoggerFactory.getLogger(SSHDServiceImpl.class);
 
+	@Autowired
+	private ApplicationService appContext; 
+	
 	@Autowired
 	private PasswordAuthenticatorImpl passwordAuthenticator; 
 	
@@ -67,15 +66,12 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 	@Autowired
 	private UserService userService; 
 	
-	@Autowired
-	private PluginManager pluginManager; 
-	
 	public SSHDServiceImpl() throws UnknownHostException {
 		super();
 	}
 
-	@PostConstruct
-	private void postConstruct() {
+	@Override
+	public void onApplicationStartup() {
 
 		try {
 
@@ -91,6 +87,11 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 		} catch (IOException e) {
 			log.error("SSHD service failed to start", e);
 		}
+	}
+	
+	@Override
+	public Integer getStartupPosition() {
+		return 0;
 	}
 
 	@Override
@@ -112,7 +113,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 					try {
 						List<VirtualMountTemplate> mounts = new ArrayList<>();
 						VirtualMountTemplate home = null;
-						for(PluginFileSystemMount mount : pluginManager.getExtensions(PluginFileSystemMount.class)) {
+						for(PluginFileSystemMount mount : appContext.getBeans(PluginFileSystemMount.class)) {
 							mounts.addAll(mount.getAdditionalMounts());
 							if(mount.hasHome()) {
 								if(Objects.nonNull(home)) {
@@ -165,7 +166,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService {
 				
 				try {
 					
-					for(PluginCommandFactory cf : pluginManager.getExtensions(PluginCommandFactory.class)) {
+					for(PluginCommandFactory cf : appContext.getBeans(PluginCommandFactory.class)) {
 						try {
 							scf.installFactory(cf.buildFactory());
 						} catch(AccessDeniedException e) { }

@@ -1,4 +1,4 @@
-package com.jadaptive.app.sshd;
+package com.jadaptive.plugins.sshd;
 
 import java.util.Collection;
 
@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.PersonalObjectDatabase;
 import com.jadaptive.api.permissions.Permissions;
-import com.jadaptive.api.sshd.AuthorizedKey;
-import com.jadaptive.api.sshd.AuthorizedKeyService;
 import com.jadaptive.api.user.User;
 
 @Service

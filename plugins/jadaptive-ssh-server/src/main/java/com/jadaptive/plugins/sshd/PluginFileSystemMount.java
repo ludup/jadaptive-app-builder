@@ -1,12 +1,10 @@
-package com.jadaptive.api.sshd;
+package com.jadaptive.plugins.sshd;
 
 import java.util.Collection;
 
-import org.pf4j.ExtensionPoint;
-
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
 
-public interface PluginFileSystemMount extends ExtensionPoint {
+public interface PluginFileSystemMount {
 
 	Collection<? extends VirtualMountTemplate> getAdditionalMounts();
 

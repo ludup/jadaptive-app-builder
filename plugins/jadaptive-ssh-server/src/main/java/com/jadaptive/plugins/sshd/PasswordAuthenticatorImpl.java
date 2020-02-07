@@ -1,4 +1,4 @@
-package com.jadaptive.app.sshd;
+package com.jadaptive.plugins.sshd;
 
 import java.io.IOException;
 
@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.sshd.SSHDService;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;

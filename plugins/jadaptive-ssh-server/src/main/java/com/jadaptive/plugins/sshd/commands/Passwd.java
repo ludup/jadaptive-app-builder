@@ -1,4 +1,4 @@
-package com.jadaptive.app.sshd.commands;
+package com.jadaptive.plugins.sshd.commands;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -6,7 +6,6 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.sshd.commands.UserCommand;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.sshtools.common.permissions.PermissionDeniedException;

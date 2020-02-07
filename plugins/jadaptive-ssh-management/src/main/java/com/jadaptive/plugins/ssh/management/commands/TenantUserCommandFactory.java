@@ -1,16 +1,16 @@
 package com.jadaptive.plugins.ssh.management.commands;
 
-import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.sshd.PluginCommandFactory;
-import com.jadaptive.api.sshd.commands.AbstractAutowiredCommandFactory;
+import com.jadaptive.plugins.sshd.PluginCommandFactory;
+import com.jadaptive.plugins.sshd.commands.AbstractAutowiredCommandFactory;
 import com.sshtools.server.vsession.CommandFactory;
 import com.sshtools.server.vsession.ShellCommand;
 
-@Extension
+@Component
 public class TenantUserCommandFactory extends AbstractAutowiredCommandFactory implements PluginCommandFactory {
 
 	@Autowired

@@ -13,21 +13,12 @@ public class AbstractSpringPlugin extends SpringPlugin {
 
 	static Logger log = LoggerFactory.getLogger(AbstractSpringPlugin.class);
 	
-	AnnotationConfigApplicationContext pluginContext; 
-	
 	public AbstractSpringPlugin(PluginWrapper wrapper) {
 		super(wrapper);
 	}
 
 	@Override
 	public void start() {
-
-		try {
-			this.pluginContext = createPluginContext();
-		} catch (ServletException e) {
-			throw new IllegalStateException(e.getMessage(),  e);
-		}
-		
 		doStart();
 		super.start();
 	}
@@ -38,11 +29,10 @@ public class AbstractSpringPlugin extends SpringPlugin {
 
 	@Override
     protected ApplicationContext createApplicationContext() {
-    	return pluginContext;
-    }
-
-	private AnnotationConfigApplicationContext createPluginContext() throws ServletException {
-		
+	
+		if(log.isInfoEnabled()) {
+			log.info("Creating application context for {}", getWrapper().getPluginId());
+		}
 		
 		ApplicationContext parentContext = ((SpringPluginManager)getWrapper().getPluginManager()).getApplicationContext();
 		

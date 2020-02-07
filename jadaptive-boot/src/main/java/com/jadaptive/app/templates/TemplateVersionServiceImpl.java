@@ -312,7 +312,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			try {
 				ConfigurationBuilder builder = new ConfigurationBuilder();
 				
-				builder.addClassLoaders(w.getPluginClassLoader());
+				builder.addClassLoaders(w.getPluginClassLoader(), getClass().getClassLoader());
 				builder.addUrls(ClasspathHelper.forPackage(
 						w.getPlugin().getClass().getPackage().getName(),
 						w.getPluginClassLoader()));

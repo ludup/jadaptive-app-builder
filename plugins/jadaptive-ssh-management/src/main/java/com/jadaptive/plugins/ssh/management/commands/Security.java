@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.sshd.commands.AbstractTenantAwareCommand;
+import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.util.FileUtils;
 import com.sshtools.server.vsession.CliHelper;

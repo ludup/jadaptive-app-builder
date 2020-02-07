@@ -1,13 +1,13 @@
-package com.jadaptive.app;
+package com.jadaptive.api.app;
 
-import org.springframework.context.ApplicationContext;
+import java.util.Collection;
 
 public interface ApplicationService {
-
-	ApplicationContext getContext();
 
 	<E> E getBean(Class<E> clz);
 
 	void registerTestingBean(Class<?> clz, Object obj);
+
+	<E> Collection<E> getBeans(Class<E> clz);
 
 }

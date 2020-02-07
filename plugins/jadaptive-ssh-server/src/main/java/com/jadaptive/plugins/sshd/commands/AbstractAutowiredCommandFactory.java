@@ -1,4 +1,4 @@
-package com.jadaptive.api.sshd.commands;
+package com.jadaptive.plugins.sshd.commands;
 
 import java.io.IOException;
 

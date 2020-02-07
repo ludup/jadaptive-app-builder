@@ -14,7 +14,7 @@
 
 	<properties>
 		<plugin.id>jadaptive-ssh-server</plugin.id>
-		<plugin.class>com.jadaptive.plugins.ssh.management.SSHDServerPlugin</plugin.class>
+		<plugin.class>com.jadaptive.plugins.sshd.SSHDServerPlugin</plugin.class>
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.dependencies></plugin.dependencies>

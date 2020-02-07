@@ -13,10 +13,9 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.events.EventService;
@@ -37,7 +36,7 @@ import com.jadaptive.app.ApplicationServiceImpl;
 
 
 @Service
-public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant> {
+public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant>, StartupAware {
 
 	ThreadLocal<Tenant> currentTenant = new ThreadLocal<>();
 	
@@ -67,9 +66,8 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	
 	Map<String,Tenant> tenantsByHostname = new HashMap<>();
 	
-	
-	@EventListener
-	private void setup(ApplicationReadyEvent event) throws RepositoryException, EntityException {
+	@Override
+	public void onApplicationStartup() {
 		
 		permissionService.setupSystemContext();
 		
@@ -100,9 +98,19 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 					initialiseTenant(tenant);
 				}
 			}
+			
+			for(StartupAware aware : ApplicationServiceImpl.getInstance().getBeans(StartupAware.class)) {
+				aware.onApplicationStartup();
+			}
+			
 		} finally {
 			permissionService.clearUserContext();
 		}
+	}
+	
+	@Override
+	public Integer getStartupPosition() {
+		return Integer.MIN_VALUE;
 	}
 	
 	@Override
@@ -127,11 +135,11 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 		tenantsByHostname.put(tenant.getHostname(), tenant);
 		
 		try {
-			Map<String,TemplateEnabledService> templateServices
-				= ApplicationServiceImpl.getInstance().getContext().getBeansOfType(
+			Collection<TemplateEnabledService> templateServices
+				= ApplicationServiceImpl.getInstance().getBeans(
 						TemplateEnabledService.class);
 			
-			List<TemplateEnabledService> ordered = new ArrayList<TemplateEnabledService>(templateServices.values());
+			List<TemplateEnabledService> ordered = new ArrayList<TemplateEnabledService>(templateServices);
 			
 			Collections.<TemplateEnabledService>sort(ordered, new  Comparator<TemplateEnabledService>() {
 				@Override
@@ -147,8 +155,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 				}
 			}
 			
-			for(TenantAware aware : ApplicationServiceImpl.getInstance().getContext().getBeansOfType(
-						TenantAware.class).values()) {
+			for(TenantAware aware : ApplicationServiceImpl.getInstance().getBeans(TenantAware.class)) {
 				if(tenant.getSystem()) {
 					aware.initializeSystem();
 				} else {
