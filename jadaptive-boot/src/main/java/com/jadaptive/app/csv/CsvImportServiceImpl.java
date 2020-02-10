@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.supercsv.comment.CommentStartsWith;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.io.ICsvListReader;
@@ -21,6 +22,7 @@ import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.app.entity.MongoEntity;
 
+@Service
 public class CsvImportServiceImpl implements CsvImportService {
 
 	static Logger log = LoggerFactory.getLogger(CsvImportServiceImpl.class);
