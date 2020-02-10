@@ -8,9 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.PersonalObjectDatabase;
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.AuthorizedKey;
+import com.jadaptive.plugins.sshd.AuthorizedKeyServiceImpl;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.publickey.SshKeyPairGenerator;
 import com.sshtools.common.publickey.SshKeyUtils;
@@ -31,12 +36,16 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 	@Autowired
 	PersonalObjectDatabase<AuthorizedKey> authorizedKeyService; 
 	
+	@Autowired
+	PermissionService permissionService; 
+	
 	public SshKeyGen() {
 		super("ssh-keygen", 
 				"User",
-				UsageHelper.build("ssh-keygen <user> -t [rsa|ecdsa|ed25519] -b [bits]",
+				UsageHelper.build("ssh-keygen -t [rsa|ecdsa|ed25519] -b [bits] -a [user]",
 						"-t                  The type of key to generate",
-						"-b                  The number of bits required for the key (ignored for ed25519)"),
+						"-b                  The number of bits required for the key (ignored for ed25519)",
+						"-a                  Assign the key to another user (requires administrative or authorizedKey.assign permission"),
 						"Generate SSH keys");
 	}
 
@@ -66,6 +75,22 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 				bits = "0";
 			}
 		}
+		
+		boolean assign = CliHelper.hasShortOption(args, 'a');
+		User forUser = user;
+		if(assign) {
+			try {
+				forUser = userService.findUsername(CliHelper.getShortValue(args, 'a'));
+			} catch(EntityNotFoundException e) {
+				throw new IOException(e.getMessage(), e);
+			}
+			try {
+				permissionService.assertAnyPermission(AuthorizedKeyServiceImpl.AUTHORIZED_KEY_ASSIGN);
+			} catch(AccessDeniedException e) {
+				throw new IOException("You do not have the permission to assign a key to " + forUser.getUsername());
+			}
+		}
+		
 		if(!StringUtils.isNumeric(bits)) {
 			throw new UsageException("bits argument must be a valid number");
 		}
@@ -89,7 +114,7 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 				key.setPublicKey(publicKey);
 				key.setName(comment);
 				
-				authorizedKeyService.saveOrUpdate(key, user);
+				authorizedKeyService.saveOrUpdate(key, forUser);
 				
 				SshPrivateKeyFile file = SshPrivateKeyFileFactory.create(pair, new String(newPassword));
 				console.println();

@@ -113,13 +113,13 @@ public class SessionUtils {
 
 	public Session touchSession(HttpServletRequest request,
 			HttpServletResponse response) throws UnauthorizedException,
-			SessionTimeoutException, AccessDeniedException {
+			SessionTimeoutException {
 		return touchSession(request, response, true);
 	}
 	
 	public Session touchSession(HttpServletRequest request,
 			HttpServletResponse response, boolean performCsrfCheck) throws UnauthorizedException,
-			SessionTimeoutException, AccessDeniedException {
+			SessionTimeoutException {
 
 		Session session = null;
 		
@@ -202,7 +202,7 @@ public class SessionUtils {
 		throw new UnauthorizedException();
 	}
 	
-	private void verifySameSiteRequest(HttpServletRequest request, Session session) throws AccessDeniedException, UnauthorizedException {
+	private void verifySameSiteRequest(HttpServletRequest request, Session session) throws UnauthorizedException {
 		
 
 		if(isValidCORSRequest(request)) {

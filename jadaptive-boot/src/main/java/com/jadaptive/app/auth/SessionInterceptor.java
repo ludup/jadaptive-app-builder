@@ -22,6 +22,7 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.app.Request;
 import com.jadaptive.app.session.SessionUtils;
 import com.jadaptive.utils.FileUtils;
 
@@ -53,6 +54,8 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
+		
+		Request.setup(request, response);
 		
 		Session session = sessionUtils.getActiveSession(request);
 		Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
@@ -137,6 +140,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 		if(permissionService.hasUserContext()) {
 			permissionService.clearUserContext();
 		}
+		Request.tearDown();
 		super.postHandle(request, response, handler, modelAndView);
 	}
 

@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionTimeoutException;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.upload.UploadHandler;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.json.ResponseHelper;
@@ -107,7 +108,7 @@ public class UploadServlet extends HttpServlet {
 		
 			resp.setStatus(HttpStatus.OK.value());
 			
-		} catch (FileUploadException e) {
+		} catch (FileUploadException | SessionTimeoutException | UnauthorizedException e) {
 			log.error("Upload failure", e);
 			resp.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal error. Please see application log for more information.");
 		} finally {
