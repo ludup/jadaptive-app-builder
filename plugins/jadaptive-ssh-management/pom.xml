@@ -39,19 +39,39 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.4</version>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.1.0</version>
 				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<outputDirectory>../../target/dist/plugins</outputDirectory>
+					<finalName>${project.artifactId}-${project.version}-plugin</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
+					<attach>false</attach>
 					<archive>
+						<manifest>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+						</manifest>
 						<manifestEntries>
 							<Plugin-Id>${plugin.id}</Plugin-Id>
-							<Plugin-Class>${plugin.class}</Plugin-Class>
 							<Plugin-Version>${plugin.version}</Plugin-Version>
 							<Plugin-Provider>${plugin.provider}</Plugin-Provider>
+							<Plugin-Class>${plugin.class}</Plugin-Class>
 							<Plugin-Dependencies>${plugin.dependencies}</Plugin-Dependencies>
 						</manifestEntries>
 					</archive>
 				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>com.jadaptive</groupId>

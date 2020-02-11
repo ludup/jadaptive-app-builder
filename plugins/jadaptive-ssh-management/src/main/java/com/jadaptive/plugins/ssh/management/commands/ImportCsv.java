@@ -6,7 +6,6 @@ import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.csv.CsvImportService;
-import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.plugins.sshd.commands.UserCommand;
@@ -20,9 +19,6 @@ import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
 public class ImportCsv extends UserCommand {
-
-	@Autowired
-	private PermissionService permissionService; 
 	
 	@Autowired
 	private CsvImportService importService; 

@@ -1,6 +1,4 @@
 package com.jadaptive.api.spring;
-import javax.servlet.ServletException;
-
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPlugin;
 import org.pf4j.spring.SpringPluginManager;

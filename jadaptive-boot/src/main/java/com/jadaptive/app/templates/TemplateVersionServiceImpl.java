@@ -3,7 +3,10 @@ package com.jadaptive.app.templates;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,17 +14,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
-import org.reflections.Reflections;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -46,6 +47,10 @@ import com.jadaptive.app.ConfigHelper;
 import com.jadaptive.app.ResourcePackage;
 import com.jadaptive.app.json.ObjectMapperHolder;
 import com.jadaptive.utils.Version;
+
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 
 @Service
 public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl implements TemplateVersionService  {
@@ -138,7 +143,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			for(ResourcePackage pkg : ConfigHelper.getSharedPackages()) {
 				paths.add(new PathInfo(pkg, templateEnabledService.getTemplateFolder()));
 			}
-						addClasspathResources("system/shared/" + templateEnabledService.getTemplateFolder(), paths);
+			
+			addClasspathResources("system/shared/" + templateEnabledService.getTemplateFolder(), paths);
 			
 			if(!tenant.getSystem()) {
 
@@ -177,12 +183,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 	private void addClasspathResources(String path, List<PathInfo> paths) throws IOException {
 		
+		Map<String, String> env = new HashMap<>(); 
+        env.put("create", "true");
+        
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 			PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(w.getPluginClassLoader());
 			Resource[] resources = resolver.getResources("classpath*:" + path);
 			for(Resource resource : resources) {
 				try {
-					paths.add(new PathInfo(Paths.get(resource.getURL().toURI())));
+					URI uri = resource.getURL().toURI();
+					try {
+						FileSystems.getFileSystem(uri);
+					} catch(FileSystemNotFoundException e) { 
+						FileSystems.newFileSystem(uri, env);
+					}
+					paths.add(new PathInfo(Paths.get(uri)));
 				} catch (URISyntaxException e) {
 				}
 			}
@@ -192,7 +207,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		Resource[] resources = resolver.getResources("classpath*:" + path);
 		for(Resource resource : resources) {
 			try {
-				paths.add(new PathInfo(Paths.get(resource.getURL().toURI())));
+				URI uri = resource.getURL().toURI();
+				FileSystems.newFileSystem(uri, env);
+				paths.add(new PathInfo(Paths.get(uri)));
 			} catch (URISyntaxException e) {
 			}
 		}
@@ -309,29 +326,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 						w.getPlugin().getClass().getPackage().getName());
 			}
 			
-			try {
-				ConfigurationBuilder builder = new ConfigurationBuilder();
-				
-				builder.addClassLoaders(w.getPluginClassLoader(), getClass().getClassLoader());
-				builder.addUrls(ClasspathHelper.forPackage(
-						w.getPlugin().getClass().getPackage().getName(),
-						w.getPluginClassLoader()));
-				builder.addScanners(new TypeAnnotationsScanner());
 
-				Reflections reflections = new Reflections(builder);
-				
-				for(Class<?> clz : reflections.getTypesAnnotatedWith(Entity.class)) {
-					if(log.isInfoEnabled()) {
-						log.info("Found annotated template {}", clz.getName());
+            try (ScanResult scanResult =
+                    new ClassGraph()                 
+                        .enableAllInfo()  
+                        .addClassLoader(w.getPluginClassLoader())
+                        .whitelistPackages(w.getPlugin().getClass().getPackage().getName())   
+                        .scan()) {                  
+                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Entity.class.getName())) {
+                    if(log.isInfoEnabled()) {
+						log.info("Found extension {}", classInfo.getName());
 					}
-					registerAnnotatedTemplate(clz);
-				}
-			} catch (Exception e) {
-				log.error("Failed to process annotated templates for plugin {}", w.getPluginId(), e);
-			}
+                    registerAnnotatedTemplate(classInfo.loadClass());
+                }
+            }
 		}
-		
-		
 	}
 
 	private void registerAnnotatedTemplate(Class<?> clz) {

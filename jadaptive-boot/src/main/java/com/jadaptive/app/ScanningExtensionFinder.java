@@ -10,12 +10,12 @@ import org.pf4j.AbstractExtensionFinder;
 import org.pf4j.Extension;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
-import org.reflections.Reflections;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 
 public class ScanningExtensionFinder extends AbstractExtensionFinder {
 
@@ -36,27 +36,19 @@ public class ScanningExtensionFinder extends AbstractExtensionFinder {
             log.debug("Reading extensions storage from plugin '{}'", pluginId);
             Set<String> bucket = new HashSet<>();
 
-            try {
-				ConfigurationBuilder builder = new ConfigurationBuilder();
-				
-				builder.addClassLoaders(plugin.getPluginClassLoader());
-				builder.addUrls(ClasspathHelper.forPackage(
-						plugin.getPlugin().getClass().getPackage().getName(),
-						plugin.getPluginClassLoader()));
-				builder.addScanners(new TypeAnnotationsScanner());
-
-				Reflections reflections = new Reflections(builder);
-				
-				for(Class<?> clz : reflections.getTypesAnnotatedWith(Extension.class)) {
-					if(log.isInfoEnabled()) {
-						log.info("Found extension {}", clz.getName());
+            try (ScanResult scanResult =
+                    new ClassGraph()                  
+                        .enableAllInfo()  
+                        .addClassLoader(plugin.getPluginClassLoader())
+                        .whitelistPackages(plugin.getPlugin().getClass().getPackage().getName())   
+                        .scan()) {              
+                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Extension.class.getName())) {
+                    if(log.isInfoEnabled()) {
+						log.info("Found extension {}", classInfo.getName());
 					}
-					bucket.add(clz.getName());
-				}
-			} catch (Exception e) {
-				log.error("Failed to look up Extensions. {}", e.getMessage());
-			}
-
+					bucket.add(classInfo.getName());
+                }
+            }
 
 			debugExtensions(bucket);
 
@@ -72,25 +64,21 @@ public class ScanningExtensionFinder extends AbstractExtensionFinder {
         Map<String, Set<String>> result = new LinkedHashMap<>();
 
         Set<String> bucket = new HashSet<>();
-
-    	try {
-			ConfigurationBuilder builder = new ConfigurationBuilder();
-			
-			builder.addClassLoaders(getClass().getClassLoader());
-			builder.addUrls(ClasspathHelper.forPackage(Application.class.getPackage().getName()));
-			builder.addScanners(new TypeAnnotationsScanner());
-
-			Reflections reflections = new Reflections(builder);
-			
-			for(Class<?> clz : reflections.getTypesAnnotatedWith(Extension.class)) {
-				if(log.isInfoEnabled()) {
-					log.info("Found extension {}", clz.getName());
+        
+        try (ScanResult scanResult =
+                new ClassGraph()                   
+                    .enableAllInfo()     
+                    .addClassLoader(getClass().getClassLoader())
+                    .whitelistPackages(Application.class.getPackage().getName())   
+                    .scan()) {                  
+            for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Extension.class.getName())) {
+                
+                if(log.isInfoEnabled()) {
+					log.info("Found extension {}", classInfo.getName());
 				}
-				bucket.add(clz.getName());
-			}
-		} catch (Exception e) {
-			log.error("Failed to look up Extensions", e);
-		}
+				bucket.add(classInfo.getName());
+            }
+        }
 
         debugExtensions(bucket);
 
