@@ -2,9 +2,11 @@ package com.jadaptive.plugins.sshd;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.sshtools.common.auth.AbstractPublicKeyAuthenticationProvider;
@@ -21,16 +23,28 @@ public class AuthorizedKeyProvider extends AbstractPublicKeyAuthenticationProvid
 	@Autowired
 	private UserService userService; 
 	
+	@Autowired
+	private TenantService tenantService; 
+	
 	@Override
 	public boolean isAuthorizedKey(SshPublicKey key, SshConnection con) throws IOException {
-		User user = userService.findUsername(con.getUsername());
-		for(AuthorizedKey authorizedKey : authorizedKeyService.getAuthorizedKeys(user)) {
-			SshPublicKey publicKey = SshKeyUtils.getPublicKey(authorizedKey.getPublicKey());
-			if(publicKey.equals(key)) {
-				return true;
+		
+		tenantService.setCurrentTenant(StringUtils.substringAfter(con.getUsername(), "@"));
+		
+		try {
+			User user = userService.findUsername(con.getUsername());
+			for(AuthorizedKey authorizedKey : authorizedKeyService.getAuthorizedKeys(user)) {
+				SshPublicKey publicKey = SshKeyUtils.getPublicKey(authorizedKey.getPublicKey());
+				if(publicKey.equals(key)) {
+					con.setProperty(SSHDService.TENANT, tenantService.getCurrentTenant());
+					con.setProperty(SSHDService.USER, user);
+					return true;
+				}
 			}
+			return false;
+		} finally {
+			tenantService.clearCurrentTenant();
 		}
-		return false;
 	}
 
 }

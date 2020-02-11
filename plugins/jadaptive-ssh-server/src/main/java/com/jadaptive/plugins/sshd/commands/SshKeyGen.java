@@ -43,9 +43,9 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 		super("ssh-keygen", 
 				"User",
 				UsageHelper.build("ssh-keygen -t [rsa|ecdsa|ed25519] -b [bits] -a [user]",
-						"-t                  The type of key to generate",
-						"-b                  The number of bits required for the key (ignored for ed25519)",
-						"-a                  Assign the key to another user (requires administrative or authorizedKey.assign permission"),
+						"-t, --type              The type of key to generate",
+						"-b, --bits              The number of bits required for the key (ignored for ed25519)",
+						"-a, --assign            Assign the key to another user (requires administrative or authorizedKey.assign permission"),
 						"Generate SSH keys");
 	}
 
@@ -55,14 +55,14 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 	
 		String type;
 		try {
-			type = CliHelper.getShortValue(args, 't');
+			type = CliHelper.getValue(args, 't', "type");
 		} catch (UsageException e) {
 			type = "ed25519";
 		}
 		type = type.toLowerCase();
 		String bits;
 		try {
-			bits = CliHelper.getShortValue(args, 'b');
+			bits = CliHelper.getValue(args, 'b', "bits");
 		} catch (UsageException e) {
 			switch(type) {
 			case "ecdsa":
@@ -76,11 +76,11 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 			}
 		}
 		
-		boolean assign = CliHelper.hasShortOption(args, 'a');
+		boolean assign = CliHelper.hasOption(args, 'a', "assign");
 		User forUser = user;
 		if(assign) {
 			try {
-				forUser = userService.findUsername(CliHelper.getShortValue(args, 'a'));
+				forUser = userService.findUsername(CliHelper.getValue(args, 'a', "assign"));
 			} catch(EntityNotFoundException e) {
 				throw new IOException(e.getMessage(), e);
 			}
@@ -95,6 +95,8 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 			throw new UsageException("bits argument must be a valid number");
 		}
 		
+		String comment = console.readLine("Name: ");
+		
 		for(int i=0;i<3;i++) {
 			char[] newPassword = promptForPassword("Passphrase: ");
 			char[] confirmedPassword = promptForPassword("Confirm Passphrase: ");
@@ -105,7 +107,7 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 			}
 			
 			try {
-				String comment = console.readLine("Name: ");
+				
 				SshKeyPair pair = SshKeyPairGenerator.generateKeyPair(type, Integer.parseInt(bits));
 				
 				String publicKey = SshKeyUtils.getOpenSSHFormattedKey(pair.getPublicKey(), comment);

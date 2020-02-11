@@ -14,4 +14,6 @@ public interface CsvImportService {
 	long importCsv(EntityTemplate template, InputStream in, 
 			boolean containsHeader, String... orderedFields) throws IOException;
 
+	void prepareCallback(ImportCallback callback);
+
 }

@@ -18,6 +18,7 @@ import org.supercsv.io.ICsvListReader;
 import org.supercsv.prefs.CsvPreference;
 
 import com.jadaptive.api.csv.CsvImportService;
+import com.jadaptive.api.csv.ImportCallback;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.app.entity.MongoEntity;
@@ -29,6 +30,13 @@ public class CsvImportServiceImpl implements CsvImportService {
 	
 	@Autowired
 	private EntityService<MongoEntity> entityService;
+	
+	private ThreadLocal<ImportCallback> callbacks = new ThreadLocal<>();
+	
+	@Override
+	public void prepareCallback(ImportCallback callback) {
+		callbacks.set(callback);
+	}
 	
 	@Override
 	public long importCsv(EntityTemplate template, InputStream in, boolean containsHeader, String... orderedFields)
@@ -70,6 +78,8 @@ public class CsvImportServiceImpl implements CsvImportService {
                 
                 List<String> results;
                 List<String> values = new ArrayList<>();
+                ImportCallback cb = callbacks.get();
+                
                 while((results = listReader.read()) != null ) {
                         
                 	MongoEntity e = new MongoEntity(template.getResourceKey());
@@ -89,15 +99,22 @@ public class CsvImportServiceImpl implements CsvImportService {
                     	
                     	values.add(value);
                     }
-                    
-                    
+
                     entityService.saveOrUpdate(e);
                     count++;
+                    
+                    if(Objects.nonNull(cb)) {
+                    	cb.imported(count, values.toArray(new String[0]));
+                    }
                
                 }
                 
                 if(log.isInfoEnabled()) {
                 	log.info("Imported {} entities", count);
+                }
+                
+                if(Objects.nonNull(cb)) {
+                	callbacks.remove();
                 }
                 
                 return count;

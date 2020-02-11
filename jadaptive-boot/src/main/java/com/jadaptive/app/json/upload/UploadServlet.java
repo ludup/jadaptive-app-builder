@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionStickyInputStream;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.upload.UploadHandler;
@@ -95,7 +96,17 @@ public class UploadServlet extends HttpServlet {
 				    
 				    InputStream stream = new SessionStickyInputStream(
 				    		item.openStream(), 
-				    		session);
+				    		session) {
+				    	protected void touchSession() {
+							if((System.currentTimeMillis() - lastTouch) >  30000) {
+								try {
+									sessionUtils.touchSession(session);
+								} catch (SessionTimeoutException e) {
+								}
+								lastTouch = System.currentTimeMillis();
+							}
+						}
+				    };
 		
 				    try {
 				    	handler.handleUpload(handlerName, uri, parameters, item.getName(), stream);    
@@ -138,47 +149,4 @@ public class UploadServlet extends HttpServlet {
 	}
 
 	private static final long serialVersionUID = -6914120139469535232L;
-
-	class SessionStickyInputStream extends InputStream {
-		
-		InputStream in;
-		Session session;
-		long lastTouch = System.currentTimeMillis();
-		
-		SessionStickyInputStream(InputStream in, Session session) {
-			this.in = in;
-			this.session = session;
-		}
-		
-		@Override
-		public int read() throws IOException {
-			touchSession();
-			return in.read();
-		}
-		
-		@Override
-		public int read(byte[] buf, int off, int len) throws IOException {
-			touchSession();
-			return in.read(buf, off, len);
-		}
-		
-		@Override
-		public void close() {
-			try {
-				in.close();
-			} catch (IOException e) {
-			}
-		}
-		
-		private void touchSession() {
-			if((System.currentTimeMillis() - lastTouch) >  30000) {
-				try {
-					sessionUtils.touchSession(session);
-				} catch (SessionTimeoutException e) {
-				}
-				lastTouch = System.currentTimeMillis();
-			}
-		}
-		
-	}
 }

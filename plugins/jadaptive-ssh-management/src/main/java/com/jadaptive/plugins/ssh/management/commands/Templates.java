@@ -25,7 +25,7 @@ public class Templates extends AbstractTenantAwareCommand {
 	EntityTemplateService templateService; 
 	
 	public Templates() {
-		super("templates", "Template Management", UsageHelper.build("templates [option]",
+		super("templates", "Object Management", UsageHelper.build("templates [option]",
 				"-l, --list          List all templates",
 				"-c, --create        Create a new template",
 				"-p                  Personal scope",
