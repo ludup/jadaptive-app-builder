@@ -192,10 +192,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			for(Resource resource : resources) {
 				try {
 					URI uri = resource.getURL().toURI();
-					try {
-						FileSystems.getFileSystem(uri);
-					} catch(FileSystemNotFoundException e) { 
-						FileSystems.newFileSystem(uri, env);
+					if(!uri.getScheme().equals("file")) {
+						try {
+							FileSystems.getFileSystem(uri);
+						} catch(FileSystemNotFoundException e) { 
+							FileSystems.newFileSystem(uri, env);
+						}
 					}
 					paths.add(new PathInfo(Paths.get(uri)));
 				} catch (URISyntaxException e) {
@@ -208,7 +210,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		for(Resource resource : resources) {
 			try {
 				URI uri = resource.getURL().toURI();
-				FileSystems.newFileSystem(uri, env);
+				if(!uri.getScheme().equals("file")) {
+					try {
+						FileSystems.getFileSystem(uri);
+					} catch(FileSystemNotFoundException e) { 
+						FileSystems.newFileSystem(uri, env);
+					}
+				}
 				paths.add(new PathInfo(Paths.get(uri)));
 			} catch (URISyntaxException e) {
 			}
