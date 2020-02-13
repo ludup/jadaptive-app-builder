@@ -134,12 +134,12 @@ public class DocumentHelper {
 					Enum<?>[] enumConstants = (Enum<?>[]) parameter.getType().getEnumConstants();
 					if(StringUtils.isBlank(v)) {
 						m.invoke(obj, (Object)null);
-						break;
+						continue;
 					}
 					if(NumberUtils.isNumber(v)) {
 						Enum<?> enumConstant = enumConstants[Integer.parseInt(v)];
 						m.invoke(obj, enumConstant);
-						break;
+						continue;
 					} else {//name
 						for (Enum<?> enumConstant : enumConstants) {
 							if(enumConstant.name().equals(v)){
@@ -164,7 +164,7 @@ public class DocumentHelper {
 
 						m.invoke(obj, elements);
 						
-					} else {
+e					} else {
 						
 						if(type.equals(String.class)) {
 							m.invoke(obj, new HashSet<String>((Collection<? extends String>) list));
