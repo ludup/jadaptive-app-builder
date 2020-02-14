@@ -1,5 +1,6 @@
 package com.jadaptive.plugins.sshd;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import org.pf4j.ExtensionPoint;
@@ -13,6 +14,6 @@ public interface PluginFileSystemMount extends ExtensionPoint {
 
 	boolean hasHome();
 
-	VirtualMountTemplate getHomeMount();
+	VirtualMountTemplate getHomeMount() throws IOException;
 
 }

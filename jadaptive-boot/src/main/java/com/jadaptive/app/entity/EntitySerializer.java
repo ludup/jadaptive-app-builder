@@ -99,6 +99,9 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 				case OBJECT_REFERENCE:
 					gen.writeStringField(t.getResourceKey(), value.getValue(t));
 					break;
+				case ENUM:
+					gen.writeStringField(t.getResourceKey(), value.getValue(t));
+					break;
 				}
 			}
 		}

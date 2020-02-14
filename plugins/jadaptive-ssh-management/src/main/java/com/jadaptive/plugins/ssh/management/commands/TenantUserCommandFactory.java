@@ -31,14 +31,5 @@ public class TenantUserCommandFactory extends AbstractAutowiredCommandFactory im
 
 		return this;
 	}
-
-	private void tryCommand(String name, Class<? extends ShellCommand> clz, String... permissions) {
-		try {
-			permissionService.assertAnyPermission(permissions);
-			installCommand(name, clz);
-		} catch(AccessDeniedException e) {
-			log.info("{} will not be available to {}", name, permissionService.getCurrentUser().getUsername());
-		}
-	}
 	
 }

@@ -28,6 +28,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 	public MongoEntity(String resourceKey) {
 		this(resourceKey, new Document());
 	}
+	
 	public MongoEntity(String resourceKey, Document document) {
 		this(null, resourceKey, document);
 		for(Entry<String,Object> entry : document.entrySet()) {

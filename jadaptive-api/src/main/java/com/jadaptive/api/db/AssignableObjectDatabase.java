@@ -9,4 +9,9 @@ public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> {
 
 	Collection<T> getAssignedObjects(Class<T> resourceClass, User user);
 
+	T getObjectByUUID(Class<T> resourceClass, String uuid);
+
+	void saveOrUpdate(T obj);
+
+	void deleteObject(T virtualFolder);
 }

@@ -315,10 +315,14 @@ public class Utils {
 	}
 
 	public static String csv(String[] items) {
+		return csv(",", items);
+	}
+	
+	public static String csv(String delim, String[] items) {
 		StringBuffer b = new StringBuffer();
 		for(String i : items) {
 			if(b.length() > 0) {
-				b.append(",");
+				b.append(delim);
 			}
 			b.append(i);
 		}

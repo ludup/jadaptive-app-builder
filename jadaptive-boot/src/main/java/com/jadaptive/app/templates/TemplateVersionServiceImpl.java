@@ -29,6 +29,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -66,6 +67,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	@Autowired
 	private EntityTemplateRepository templateRepository;
+	
+	@Autowired
+	private PermissionService permissionService; 
 	
 	@Override
 	public Collection<TemplateVersion> list() throws RepositoryException, EntityException {
@@ -393,6 +397,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			templateRepository.saveOrUpdate(template);
+			permissionService.registerStandardPermissions(template.getResourceKey());
 		} catch(RepositoryException | EntityException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
 		}

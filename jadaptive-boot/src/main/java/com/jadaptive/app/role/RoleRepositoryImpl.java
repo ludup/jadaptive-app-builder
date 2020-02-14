@@ -1,6 +1,8 @@
 package com.jadaptive.app.role;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
@@ -25,7 +27,9 @@ public class RoleRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<Ro
 
 	@Override
 	public Collection<Role> getRolesByUser(User user) {
-		return searchObjects(SearchField.in("users", user.getUuid()));
+		List<Role> results = new ArrayList<>(getAllUserRoles());
+		results.addAll(searchObjects(SearchField.in("users", user.getUuid())));
+		return results;
 	}
 
 	@Override

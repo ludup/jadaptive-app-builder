@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.SearchField.Type;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.mongodb.client.MongoCollection;
@@ -180,27 +181,48 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Override
 	public void dropDatabase(String database) {
 		mongo.getClient().getDatabase(database).drop();
-		
 	}
 	
 	public Bson buildFilter(SearchField...fields) {
+		return buildFilter(Type.AND, fields);
+	}
+	
+	public Bson buildFilter(SearchField.Type queryType, SearchField...fields) {
 		
 		List<Bson> tmp = new ArrayList<>();
 		for(SearchField field : fields) {
 			switch(field.getSearchType()) {
 			case EQUALS:
-				tmp.add(Filters.eq(field.getSearchField(), field.getSearchValue()[0]));
+				tmp.add(Filters.eq(field.getColumn(), field.getValue()[0]));
 				break;
 			case IN:
-				tmp.add(Filters.in(field.getSearchField(), field.getSearchValue()));
+				tmp.add(Filters.in(field.getColumn(), field.getValue()));
 				break;
 			case LIKE:
-				tmp.add(Filters.regex(field.getSearchField(), field.getSearchValue()[0]));
+				tmp.add(Filters.regex(field.getColumn(), field.getValue()[0]));
+				break;
+			case OR:
+				tmp.add(buildFilter(SearchField.Type.OR, field.getFields()));
+				break;
+			case AND:
+				tmp.add(buildFilter(SearchField.Type.AND, field.getFields()));
 				break;
 			}
 		}
+
+		if(tmp.size() > 1) {
+			switch(queryType) {
+			case AND:
+				return Filters.and(tmp);
+			case OR:
+				return Filters.or(tmp);
+			default:
+				throw new IllegalArgumentException("Invalid use of SearchField.Type");
+			}
+		}
 		
-		return Filters.and(tmp);
+		return tmp.get(0);
 	}
+
 
 }

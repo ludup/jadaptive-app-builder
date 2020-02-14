@@ -6,12 +6,24 @@ import org.springframework.util.StringUtils;
 
 public class SearchField {
 
-	public enum Type { EQUALS, LIKE, IN }
+	public enum Type { EQUALS, LIKE, IN, OR, AND }
 	
 	String searchField;
 	String[] searchValue;
 	Type type;
+	SearchField[] fields;
 	
+	private SearchField(Type type, SearchField... fields) {
+		switch(type) {
+		case OR:
+		case AND:
+			break;
+		default:
+			throw new IllegalArgumentException("You cannot use child fields with type other than OR or AND");
+		}
+		this.fields = fields;
+		this.type = type;
+	}
 	
 	private SearchField(Type type, String searchField, String... searchValue) {
 		super();
@@ -24,11 +36,15 @@ public class SearchField {
 		this.type = type;
 	}
 
-	public String getSearchField() {
+	public SearchField[] getFields() {
+		return fields;
+	}
+	
+	public String getColumn() {
 		return searchField;
 	}
 	
-	public String[] getSearchValue() {
+	public String[] getValue() {
 		return searchValue;
 	}
 	
@@ -50,5 +66,13 @@ public class SearchField {
 	
 	public static SearchField like(String searchField, String searchValue) {
 		return new SearchField(Type.LIKE, searchField, searchValue);
+	}
+	
+	public static SearchField or(SearchField...fields) {
+		return new SearchField(Type.OR, fields);
+	}
+	
+	public static SearchField and(SearchField...fields) {
+		return new SearchField(Type.AND, fields);
 	}
 }

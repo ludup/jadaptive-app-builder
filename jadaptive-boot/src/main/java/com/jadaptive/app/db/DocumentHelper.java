@@ -164,7 +164,7 @@ public class DocumentHelper {
 
 						m.invoke(obj, elements);
 						
-e					} else {
+					} else {
 						
 						if(type.equals(String.class)) {
 							m.invoke(obj, new HashSet<String>((Collection<? extends String>) list));

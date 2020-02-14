@@ -134,7 +134,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 								home, mounts.toArray(new VirtualMountTemplate[0])));
 						
 						return super.getFileFactory(con);
-					} catch (FileNotFoundException e) {
+					} catch (IOException e) {
 						throw new IllegalStateException(e.getMessage(), e);
 					} finally {
 						permissionService.clearUserContext();
@@ -152,6 +152,8 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	}
 	
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
+		
+		sshContext.setIdleConnectionTimeoutSeconds(60*15);
 		sshContext.setChannelFactory(new VirtualChannelFactory() {
 
 			@Override
@@ -186,15 +188,18 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		});
 
 		StringBuffer out = new StringBuffer();
+		out.append("==============================================\n");
 		out.append("   _           _             _   _           \n");
 		out.append("  (_) __ _  __| | __ _ _ __ | |_(_)_   _____ \n");
 		out.append("  | |/ _` |/ _` |/ _` | '_ \\| __| \\ \\ / / _ \\\n");
 		out.append("  | | (_| | (_| | (_| | |_) | |_| |\\ V /  __/\n");
 		out.append(" _/ |\\__,_|\\__,_|\\__,_| .__/ \\__|_| \\_/ \\___|\n");
 		out.append("|__/                  |_|                    \n");
-		out.append("==== ");
-		out.append(String.format("Version %s", ApplicationVersion.getVersion()));
-		out.append("\n\n");
+		out.append("\n");
+		out.append(System.getProperty("jadaptive.productName", "Adaptive Application Builder"));
+		out.append("\n");
+		out.append(ApplicationVersion.getVersion());
+		out.append("\n==============================================\n");
 		
 		sshContext.getPolicy(VirtualSessionPolicy.class).setWelcomeText(out.toString());
 		ClassLoader classLoader = getClass().getClassLoader();

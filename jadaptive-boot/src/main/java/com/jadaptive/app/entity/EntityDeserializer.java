@@ -172,6 +172,9 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 			case COUNTRY:
 				validateCountry(node, field);
 				break;
+			case ENUM:
+				validateEnum(node, field);
+				break;
 			case TEXT:
 			case TEXT_AREA:
 			default:
@@ -180,6 +183,11 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 //		}
 		
 		setProperty(node, field, e);
+		
+	}
+
+	private void validateEnum(JsonNode node, FieldTemplate field) {
+		
 		
 	}
 
