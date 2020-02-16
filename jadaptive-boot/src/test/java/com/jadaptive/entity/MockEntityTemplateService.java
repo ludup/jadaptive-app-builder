@@ -1,13 +1,16 @@
 package com.jadaptive.entity;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.app.db.DocumentHelper;
 
 public class MockEntityTemplateService implements EntityTemplateService {
 
@@ -42,6 +45,11 @@ public class MockEntityTemplateService implements EntityTemplateService {
 	@Override
 	public long count() {
 		return templates.size();
+	}
+
+	@Override
+	public <T extends AbstractUUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
+		return DocumentHelper.convertDocumentToObject(baseClass, values);
 	}
 
 }

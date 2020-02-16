@@ -1,4 +1,4 @@
-package com.jadaptive.api.db;
+package com.jadaptive.app.db;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,6 +23,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.utils.Utils;
 
 public class DocumentHelper {
@@ -116,8 +117,14 @@ public class DocumentHelper {
 				clz = baseClass.getName();
 			}
 			
-			T obj = (T) classLoader.loadClass(clz).newInstance();
+			T obj;
 			
+			try {
+				obj = (T) classLoader.loadClass(clz).newInstance();
+			} catch(ClassNotFoundException e) {
+				obj = (T) ClassLoaderServiceImpl.getInstance().resolveClass(clz).newInstance();
+			}
+
 			for(Method m : ReflectionUtils.getSetters(obj.getClass())) {
 				String name = ReflectionUtils.calculateFieldName(m);
 				Parameter parameter = m.getParameters()[0];

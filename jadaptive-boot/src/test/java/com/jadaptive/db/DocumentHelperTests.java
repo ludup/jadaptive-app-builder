@@ -12,8 +12,8 @@ import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.jadaptive.api.db.DocumentHelper;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBList;
 

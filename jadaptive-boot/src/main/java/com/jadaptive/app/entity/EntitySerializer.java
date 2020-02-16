@@ -80,7 +80,7 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 					break;
 				case TEXT:
 				case TEXT_AREA:
-				case COUNTRY:
+//				case COUNTRY:
 					gen.writeStringField(t.getResourceKey(), value.getValue(t));
 					break;
 				case DECIMAL:

@@ -19,6 +19,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.db.ClassLoaderService;
 
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
@@ -26,10 +27,13 @@ public class ApplicationServiceImpl implements ApplicationService {
 	static Logger log = LoggerFactory.getLogger(ApplicationServiceImpl.class);
 
 	@Autowired
-	ApplicationContext context;
+	private ApplicationContext context;
 	
 	@Autowired
-	SpringPluginManager pluginManager; 
+	private SpringPluginManager pluginManager; 
+	
+	@Autowired
+	ClassLoaderService classLoaderService; 
 	
 	static ApplicationServiceImpl instance = new ApplicationServiceImpl();
 	
@@ -108,4 +112,10 @@ public class ApplicationServiceImpl implements ApplicationService {
 	public void registerTestingBean(Class<?> clz, Object obj) {
 		testingBeans.put(clz, obj);
 	}
+
+	@Override
+	public Class<?> resolveClass(String type) throws ClassNotFoundException {
+		return classLoaderService.resolveClass(type);
+	}
+
 }

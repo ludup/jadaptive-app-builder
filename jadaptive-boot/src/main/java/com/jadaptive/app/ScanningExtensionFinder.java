@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.pf4j.AbstractExtensionFinder;
@@ -35,19 +36,21 @@ public class ScanningExtensionFinder extends AbstractExtensionFinder {
             String pluginId = plugin.getDescriptor().getPluginId();
             log.debug("Reading extensions storage from plugin '{}'", pluginId);
             Set<String> bucket = new HashSet<>();
-
-            try (ScanResult scanResult =
-                    new ClassGraph()                  
-                        .enableAllInfo()  
-                        .addClassLoader(plugin.getPluginClassLoader())
-                        .whitelistPackages(plugin.getPlugin().getClass().getPackage().getName())   
-                        .scan()) {              
-                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Extension.class.getName())) {
-                    if(log.isInfoEnabled()) {
-						log.info("Found extension {}", classInfo.getName());
-					}
-					bucket.add(classInfo.getName());
-                }
+            if(Objects.nonNull(plugin.getPlugin())) {
+            
+	            try (ScanResult scanResult =
+	                    new ClassGraph()                  
+	                        .enableAllInfo()  
+	                        .addClassLoader(plugin.getPluginClassLoader())
+	                        .whitelistPackages(plugin.getPlugin().getClass().getPackage().getName())   
+	                        .scan()) {              
+	                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Extension.class.getName())) {
+	                    if(log.isInfoEnabled()) {
+							log.info("Found extension {}", classInfo.getName());
+						}
+						bucket.add(classInfo.getName());
+	                }
+	            }
             }
 
 			debugExtensions(bucket);

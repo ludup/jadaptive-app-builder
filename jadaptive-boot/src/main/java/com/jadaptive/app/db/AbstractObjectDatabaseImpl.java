@@ -8,7 +8,6 @@ import java.util.Objects;
 import org.bson.Document;
 
 import com.jadaptive.api.db.AbstractObjectDatabase;
-import com.jadaptive.api.db.DocumentHelper;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;

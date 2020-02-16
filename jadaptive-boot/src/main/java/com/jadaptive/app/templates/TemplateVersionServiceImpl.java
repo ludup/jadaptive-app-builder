@@ -37,7 +37,9 @@ import com.jadaptive.api.template.Entity;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.Member;
+import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
@@ -396,6 +398,16 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					t.setName(field.name());
 					t.setRequired(field.required());
 					t.setSystem(false);
+					
+					switch(field.type()) {
+					case ENUM:
+					case OBJECT_EMBEDDED:
+					case OBJECT_REFERENCE:
+						t.getValidators().add(new FieldValidator(ValidationType.OBJECT_TYPE, f.getType().getName()));
+						break;
+					default:
+						break;
+					}
 					
 					template.getFields().add(t);
 				}

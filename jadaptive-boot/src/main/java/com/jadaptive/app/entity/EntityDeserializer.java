@@ -169,9 +169,9 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 			case NUMBER:
 				validateNumber(node, field);
 				break;
-			case COUNTRY:
-				validateCountry(node, field);
-				break;
+//			case COUNTRY:
+//				validateCountry(node, field);
+//				break;
 			case ENUM:
 				validateEnum(node, field);
 				break;
@@ -207,10 +207,10 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 		iterateType(node, template, new MongoEntity(e, field.getResourceKey(), new Document()), false);
 	}
 
-	private void validateCountry(JsonNode node, FieldTemplate field) {
-		
-		
-	}
+//	private void validateCountry(JsonNode node, FieldTemplate field) {
+//		
+//		
+//	}
 
 	private void validateNumber(JsonNode node, FieldTemplate field) throws ValidationException {
 		try {

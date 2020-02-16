@@ -1,7 +1,9 @@
 package com.jadaptive.app.entity.template;
 
+import java.text.ParseException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.pf4j.PluginManager;
@@ -12,6 +14,7 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.template.EntityTemplate;
@@ -22,6 +25,7 @@ import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.entity.MongoEntity;
 
 @Service
@@ -183,6 +187,11 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	@Override
 	public String getTemplateFolder() {
 		return "templates";
+	}
+	
+	@Override
+	public <T extends AbstractUUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
+		return DocumentHelper.convertDocumentToObject(baseClass, values);
 	}
 
 }

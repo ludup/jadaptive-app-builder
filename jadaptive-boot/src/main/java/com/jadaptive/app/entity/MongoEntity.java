@@ -103,12 +103,9 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 	@Override
 	public String getValue(FieldTemplate t) {
 		switch(t.getFieldType()) {
-		case BOOL:
-		case DECIMAL:
-		case NUMBER:
-		case TEXT:
-		case TEXT_AREA:
-		case COUNTRY:
+		case OBJECT_EMBEDDED:
+		case OBJECT_REFERENCE:
+			throw new IllegalArgumentException("Use getChild to object embedded object");
 		default:
 			return StringUtils.defaultString((String) document.get(t.getResourceKey()), t.getDefaultValue());
 		}

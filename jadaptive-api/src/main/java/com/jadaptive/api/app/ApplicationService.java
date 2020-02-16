@@ -10,4 +10,6 @@ public interface ApplicationService {
 
 	<E> Collection<E> getBeans(Class<E> clz);
 
+	Class<?> resolveClass(String type) throws ClassNotFoundException;
+
 }
