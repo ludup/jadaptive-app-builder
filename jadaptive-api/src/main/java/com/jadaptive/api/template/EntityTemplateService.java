@@ -20,4 +20,6 @@ public interface EntityTemplateService {
 
 	long count();
 
+//	<T extends AbstractUUIDEntity> T buildObject(Class<T> clz, EntityTemplate template, Map<String, Object> values);
+
 }

@@ -15,7 +15,7 @@ public interface EntityRepository<E extends AbstractEntity> {
 
 	void deleteAll(String resourceKey) throws RepositoryException, EntityException;
 
-	void save(E entity) throws RepositoryException, EntityException;
+	String save(E entity) throws RepositoryException, EntityException;
 
 	Collection<E> table(String resourceKey, String searchField, String searchValue, int offset, int limit);
 

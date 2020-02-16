@@ -71,13 +71,15 @@ public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 	}
 	
 	@Override
-	public void save(MongoEntity entity) throws RepositoryException, EntityException {
+	public String save(MongoEntity entity) throws RepositoryException, EntityException {
 		
 		EntityTemplate template = templateRepository.get(SearchField.eq("resourceKey", entity.getResourceKey()));
 		
 		validateReferences(template, entity);
 		
-		db.insertOrUpdate(entity, entity.getDocument(), entity.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+		Document doc = new Document(entity.getDocument());
+		db.insertOrUpdate(entity, doc, entity.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+		return doc.getString("_id");
 	}
 
 	private void validateReferences(EntityTemplate template, MongoEntity entity) {

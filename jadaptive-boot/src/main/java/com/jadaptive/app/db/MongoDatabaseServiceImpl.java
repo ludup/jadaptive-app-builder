@@ -20,6 +20,7 @@ import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.DownloadConfigBuilder;
 import de.flapdoodle.embed.mongo.config.ExtractedArtifactStoreBuilder;
 import de.flapdoodle.embed.mongo.config.IMongodConfig;
+import de.flapdoodle.embed.mongo.config.MongoCmdOptionsBuilder;
 import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
 import de.flapdoodle.embed.mongo.config.Net;
 import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
@@ -50,14 +51,14 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 		                    .defaults(Command.MongoD)
 		                    .download(new DownloadConfigBuilder()
 		                            .defaultsForCommand(Command.MongoD).build())
-		                    .executableNaming(new UUIDTempNaming()))
-		            .build();
+		                    .executableNaming(new UUIDTempNaming())).build();
 	
 		    IMongodConfig mongodConfig = new MongodConfigBuilder()
 		            .version(Version.Main.PRODUCTION)
 		            .net(new Net(ApplicationProperties.getValue("mongodb.hostname", "localhost"), 
 		            		ApplicationProperties.getValue("mongodb.port", 27017), false))
 		            .replication(storage)
+		            .cmdOptions(new MongoCmdOptionsBuilder().defaultSyncDelay().build())
 		            .build();
 	
 		    MongodStarter runtime = MongodStarter.getInstance(runtimeConfig);

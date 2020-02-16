@@ -12,7 +12,7 @@ public interface EntityService<E extends AbstractEntity> {
 
 	Collection<E> list(String resourceKey) throws RepositoryException, EntityException;
 
-	void saveOrUpdate(E entity) throws RepositoryException, EntityException;
+	String saveOrUpdate(E entity) throws RepositoryException, EntityException;
 
 	void delete(String resourceKey, String uuid) throws RepositoryException, EntityException;
 

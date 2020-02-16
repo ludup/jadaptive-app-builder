@@ -95,6 +95,17 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 		
 	}
 	
+//	@Override
+//	public <T extends AbstractUUIDEntity> T buildObject(Class<T> clz, EntityTemplate template, Map<String,Object> values) {
+//		String uuid = entityService.saveOrUpdate(new MongoEntity(template.getResourceKey(), values));
+//		try {
+//			return DocumentHelper.convertDocumentToObject(clz, 
+//					entityService.get(template.getResourceKey(), uuid).getDocument());
+//		} catch (ParseException e) {
+//			throw new RepositoryException(e);
+//		}
+//	}
+	
 	@Override
 	public Integer getWeight() {
 		return SystemTemplates.ENTITY_TEMPLATE.ordinal();

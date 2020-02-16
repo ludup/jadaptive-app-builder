@@ -6,13 +6,14 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.jadaptive.api.db.DocumentHelper;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBList;
 
@@ -207,7 +208,8 @@ public class DocumentHelperTests {
         Assert.assertEquals("false", doc.get("system"));
         Assert.assertEquals("false", doc.get("hidden"));
         
-        Document embeddedDocument = (Document) doc.get("embedded");
+        @SuppressWarnings("unchecked")
+		Map<String,Object> embeddedDocument = (Map<String,Object>) doc.get("embedded");
         Assert.assertNotNull(embeddedDocument);
         Assert.assertEquals("test", embeddedDocument.get("embeddedString"));
         Assert.assertEquals(String.valueOf(Long.MAX_VALUE), embeddedDocument.get("embeddedLong"));

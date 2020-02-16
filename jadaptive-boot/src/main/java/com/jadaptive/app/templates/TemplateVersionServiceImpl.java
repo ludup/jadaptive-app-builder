@@ -358,6 +358,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	private void registerAnnotatedTemplate(Class<?> clz) {
 		
 		try {
+			
+			if(log.isInfoEnabled()) {
+				log.info("Registering template from annotations on class {}", clz.getSimpleName());
+			}
+			
 			Entity e = clz.getAnnotation(Entity.class);
 			
 			EntityTemplate template;
@@ -383,7 +388,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					
 					Member field = annotations[0];
 					FieldTemplate t = new FieldTemplate();
-					t.setResourceKey(t.getName());
+					t.setResourceKey(f.getName());
 					t.setDefaultValue(field.defaultValue());
 					t.setDescription(field.description());
 					t.setFieldType(field.type());

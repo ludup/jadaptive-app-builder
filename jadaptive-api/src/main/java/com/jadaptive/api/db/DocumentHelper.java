@@ -1,4 +1,4 @@
-package com.jadaptive.app.db;
+package com.jadaptive.api.db;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -8,14 +8,15 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
-import org.bson.Document;
 
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
@@ -27,7 +28,7 @@ import com.jadaptive.utils.Utils;
 public class DocumentHelper {
 
 	
-	public static void convertObjectToDocument(AbstractUUIDEntity obj, Document document) throws RepositoryException, EntityException {
+	public static void convertObjectToDocument(AbstractUUIDEntity obj, Map<String,Object> document) throws RepositoryException, EntityException {
 
 		try {
 			
@@ -48,6 +49,8 @@ public class DocumentHelper {
 					if(m.getReturnType().equals(Date.class)) {
 						value = Utils.formatDateTime((Date)value);
 						document.put(name,  String.valueOf(value));
+					} else if(m.getReturnType().isEnum()) {
+						document.put(name, ((Enum<?>)value).name());
 					} else if(AbstractUUIDEntity.class.isAssignableFrom(m.getReturnType())) {
 						buildDocument(name, (AbstractUUIDEntity)value, m.getReturnType(), document);
 					} else if(Collection.class.isAssignableFrom(m.getReturnType())) {
@@ -64,18 +67,20 @@ public class DocumentHelper {
 		
 	}
 
-	public static void buildCollectionDocuments(String name, Collection<?> values, Class<?> returnType, Document document) throws ParseException, EntityException {
+	public static void buildCollectionDocuments(String name, Collection<?> values, Class<?> returnType, Map<String,Object> document) throws ParseException, EntityException {
 		
 		List<Object> list = new ArrayList<>();
 
 		for(Object value : values) {
 			if(Date.class.equals(value.getClass())) {
 				list.add(Utils.formatDateTime((Date)value));
+			} else if(value.getClass().isEnum()) {
+				list.add(((Enum<?>)value).name());
 			} else if(AbstractUUIDEntity.class.isAssignableFrom(value.getClass())) {
 
 				AbstractUUIDEntity e = (AbstractUUIDEntity) value;
 				
-				Document embeddedDocument = new Document();
+				Map<String,Object> embeddedDocument = new HashMap<String,Object>();
 				convertObjectToDocument(e, embeddedDocument);
 				list.add(embeddedDocument);
 
@@ -87,50 +92,58 @@ public class DocumentHelper {
 		document.put(name, list);
 	}
 
-	public static void buildDocument(String name, AbstractUUIDEntity object, Class<?> type, Document document) throws RepositoryException, ParseException, EntityException {
+	public static void buildDocument(String name, AbstractUUIDEntity object, Class<?> type, Map<String,Object> document) throws RepositoryException, ParseException, EntityException {
 		
-		Document embedded = new Document();
+		Map<String,Object> embedded = new HashMap<String,Object>();
 		convertObjectToDocument(object, embedded);
 		document.put(name, embedded);
 	}
 
+	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<?> baseClass, Map<String,Object> document) throws ParseException {
+		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
+	}
+
 	@SuppressWarnings("unchecked")
-	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<T> baseClass, Document document) throws ParseException {
+	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<?> baseClass, Map<String,Object> document, ClassLoader classLoader) throws ParseException {
 		
 		try {
 			
-			String clz = document.getString("_clz");
+			String clz = (String) document.get("_clz");
 			if(Objects.isNull(clz)) {
-				clz = document.getString("clz"); // Compaitilbity with older version.
+				clz = (String) document.get("clz"); // Compaitilbity with older version.
 			}
 			if(Objects.isNull(clz)) {
-				throw new ParseException("Missing clz parameter from document", 0);
+				clz = baseClass.getName();
 			}
 			
-			T obj = (T) baseClass.getClassLoader().loadClass(clz).newInstance();
+			T obj = (T) classLoader.loadClass(clz).newInstance();
 			
 			for(Method m : ReflectionUtils.getSetters(obj.getClass())) {
 				String name = ReflectionUtils.calculateFieldName(m);
 				Parameter parameter = m.getParameters()[0];
 
 				if(parameter.getType().equals(String.class)) {
-					m.invoke(obj, document.getString(name));
+					m.invoke(obj, document.get(name));
 				} else if(parameter.getType().equals(Boolean.class) || parameter.getType().equals(boolean.class)) {
-					m.invoke(obj, Boolean.parseBoolean(document.getString(name)));
+					m.invoke(obj, Boolean.parseBoolean((String)document.get(name)));
 				} else if(parameter.getType().equals(Integer.class) || parameter.getType().equals(int.class)) {
-					m.invoke(obj, Integer.parseInt(document.getString(name)));
+					m.invoke(obj, Integer.parseInt((String)document.get(name)));
 				} else if(parameter.getType().equals(Long.class) || parameter.getType().equals(long.class)) {
-					m.invoke(obj, Long.parseLong(document.getString(name)));
+					m.invoke(obj, Long.parseLong((String)document.get(name)));
 				} else if(parameter.getType().equals(Float.class)  || parameter.getType().equals(float.class)) {
-					m.invoke(obj, Float.parseFloat(document.getString(name)));
+					m.invoke(obj, Float.parseFloat((String)document.get(name)));
 				} else if(parameter.getType().equals(Double.class) || parameter.getType().equals(double.class)) {
-					m.invoke(obj, Double.parseDouble(document.getString(name)));
+					m.invoke(obj, Double.parseDouble((String)document.get(name)));
 				} else if(parameter.getType().equals(Date.class)) {
-					m.invoke(obj, Utils.parseDateTime(document.getString(name)));
+					m.invoke(obj, Utils.parseDateTime((String)document.get(name)));
 				} else if(AbstractUUIDEntity.class.isAssignableFrom(parameter.getType())) {
-					m.invoke(obj, convertDocumentToObject(AbstractUUIDEntity.class, (Document) document.get(name)));
+					Map<String,Object> doc = (Map<String,Object>) document.get(name);
+					if(Objects.isNull(doc)) {
+						continue;
+					}
+					m.invoke(obj, convertDocumentToObject(AbstractUUIDEntity.class, doc, classLoader));
 				} else if(parameter.getType().isEnum()) { 
-					String v = document.getString(name);
+					String v = (String) document.get(name);
 					Enum<?>[] enumConstants = (Enum<?>[]) parameter.getType().getEnumConstants();
 					if(StringUtils.isBlank(v)) {
 						m.invoke(obj, (Object)null);
@@ -142,7 +155,7 @@ public class DocumentHelper {
 						continue;
 					} else {//name
 						for (Enum<?> enumConstant : enumConstants) {
-							if(enumConstant.name().equals(v)){
+							if(enumConstant.name().equalsIgnoreCase(v)){
 								m.invoke(obj, enumConstant);
 								break;
 							}
@@ -158,8 +171,8 @@ public class DocumentHelper {
 					if(AbstractUUIDEntity.class.isAssignableFrom(type)) {
 						Collection<AbstractUUIDEntity> elements = new ArrayList<>();	
 						for(Object embedded : list) {
-							Document embeddedDocument = (Document) embedded;
-							elements.add(convertDocumentToObject(AbstractUUIDEntity.class, embeddedDocument));
+							Map<String,Object> embeddedDocument = (Map<String,Object>) embedded;
+							elements.add(convertDocumentToObject(AbstractUUIDEntity.class, embeddedDocument, classLoader));
 						}
 
 						m.invoke(obj, elements);

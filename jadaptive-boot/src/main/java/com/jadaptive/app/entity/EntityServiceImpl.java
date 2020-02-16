@@ -72,12 +72,12 @@ public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEn
 	}
 
 	@Override
-	public void saveOrUpdate(MongoEntity entity) throws RepositoryException, EntityException {
+	public String saveOrUpdate(MongoEntity entity) throws RepositoryException, EntityException {
 		EntityTemplate template = templateService.get(entity.getResourceKey());
 		if(template.getType()==EntityType.SINGLETON && !entity.getUuid().equals(entity.getResourceKey())) {	
 			throw new EntityException("You cannot save a Singleton Entity with a new UUID");
 		}
-		entityRepository.save(entity);
+		return entityRepository.save(entity);
 		
 	}
 

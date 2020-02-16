@@ -2,9 +2,9 @@ package com.jadaptive.app.entity;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -29,19 +29,20 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 		this(resourceKey, new Document());
 	}
 	
-	public MongoEntity(String resourceKey, Document document) {
+	@SuppressWarnings("unchecked")
+	public MongoEntity(String resourceKey, Map<String,Object> document) {
 		this(null, resourceKey, document);
-		for(Entry<String,Object> entry : document.entrySet()) {
+		for(Map.Entry<String,Object> entry : document.entrySet()) {
 			if(entry.getValue() instanceof Document) {
-				new MongoEntity(this, entry.getKey(), (Document)entry.getValue());
+				new MongoEntity(this, entry.getKey(), (Map<String,Object>)entry.getValue());
 			}
 		}
 	}
 	
-	public MongoEntity(MongoEntity parent, String resourceKey, Document document) {
+	public MongoEntity(MongoEntity parent, String resourceKey, Map<String,Object> document) {
 		this.parent = parent;
 		this.resourceKey = resourceKey;
-		this.document = document;
+		this.document = new Document(document);
 		
 		if(!Objects.isNull(parent)) {
 			parent.addChild(this);
@@ -68,7 +69,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 		this.resourceKey = resourceKey;
 	}
 
-	public Document getDocument() {
+	public Map<String,Object> getDocument() {
 		return document;
 	}
 
@@ -96,7 +97,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 
 	@Override
 	public String getValue(String fieldName) {
-		return document.get(fieldName, "");
+		return StringUtils.defaultString((String) document.get(fieldName), "");
 	}
 	
 	@Override
@@ -109,7 +110,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 		case TEXT_AREA:
 		case COUNTRY:
 		default:
-			return document.get(t.getResourceKey(), t.getDefaultValue());
+			return StringUtils.defaultString((String) document.get(t.getResourceKey()), t.getDefaultValue());
 		}
 	}
 
