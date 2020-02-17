@@ -33,12 +33,12 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
-import com.jadaptive.api.template.Entity;
+import com.jadaptive.api.template.Template;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldValidator;
-import com.jadaptive.api.template.Member;
+import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
@@ -347,7 +347,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                         .addClassLoader(w.getPluginClassLoader())
                         .whitelistPackages(w.getPlugin().getClass().getPackage().getName())   
                         .scan()) {                  
-                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Entity.class.getName())) {
+                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Template.class.getName())) {
                     if(log.isInfoEnabled()) {
 						log.info("Found extension {}", classInfo.getName());
 					}
@@ -365,7 +365,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				log.info("Registering template from annotations on class {}", clz.getSimpleName());
 			}
 			
-			Entity e = clz.getAnnotation(Entity.class);
+			Template e = clz.getAnnotation(Template.class);
 			
 			EntityTemplate template;
 			try {
@@ -385,10 +385,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			for(Field f : clz.getDeclaredFields()) {
 				
-				Member[] annotations = f.getAnnotationsByType(Member.class);
+				Column[] annotations = f.getAnnotationsByType(Column.class);
 				if(Objects.nonNull(annotations) && annotations.length > 0) {
 					
-					Member field = annotations[0];
+					Column field = annotations[0];
 					FieldTemplate t = new FieldTemplate();
 					t.setResourceKey(f.getName());
 					t.setDefaultValue(field.defaultValue());

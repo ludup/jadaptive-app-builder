@@ -5,22 +5,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.jadaptive.api.entity.EntityScope;
+import com.jadaptive.api.entity.EntityType;
+
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface Member {
-		
-		String defaultValue() default "";
+@Target(ElementType.TYPE)
+public @interface Template {
 		
 		String name();
 		
-		String description();
+		String resourceKey();
 		
-		FieldType type();
+		EntityType type();
 		
-		boolean required() default false;
+		EntityScope scope() default EntityScope.GLOBAL;
 
 		boolean hidden() default false;
-
-
-
+		
+		boolean system() default false;
+		
 }
