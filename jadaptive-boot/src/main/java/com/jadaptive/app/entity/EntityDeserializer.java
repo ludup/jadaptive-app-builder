@@ -148,47 +148,48 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 			}
 		} 
 		
-//		if(!Objects.isNull(field.getValidators()) && !field.getValidators().isEmpty()) {
-
-			switch(field.getFieldType()) {
-			case OBJECT_REFERENCE:
-				validateObjectReference(node, field);
-				break;
-			case OBJECT_EMBEDDED:
-				validateObject(node, field, e);
-				/**
-				 * Return otherwise setProperty at the end kills the document
-				 */
-				return;
-			case BOOL:
-				validateBoolean(node, field);
-				break;
-			case DECIMAL:
-				validateDecimal(node, field);
-				break;
-			case NUMBER:
-				validateNumber(node, field);
-				break;
-//			case COUNTRY:
-//				validateCountry(node, field);
-//				break;
-			case ENUM:
-				validateEnum(node, field);
-				break;
-			case TEXT:
-			case TEXT_AREA:
-			default:
-				validateText(node, field);
-			}
-//		}
+		switch(field.getFieldType()) {
+		case OBJECT_REFERENCE:
+			validateObjectReference(node, field);
+			break;
+		case OBJECT_EMBEDDED:
+			validateObject(node, field, e);
+			/**
+			 * Return otherwise setProperty at the end kills the document
+			 */
+			return;
+		case BOOL:
+			validateBoolean(node, field);
+			break;
+		case DECIMAL:
+			validateDecimal(node, field);
+			break;
+		case NUMBER:
+			validateNumber(node, field);
+			break;
+		case DATE:
+			validateDate(node, field);
+			break;
+		case ENUM:
+			validateEnum(node, field);
+			break;
+		case TEXT:
+		case TEXT_AREA:
+		case PASSWORD:
+			validateText(node, field);
+			break;
+		}
 		
 		setProperty(node, field, e);
 		
 	}
 
+	private void validateDate(JsonNode node, FieldTemplate field) {
+		
+	}
+
 	private void validateEnum(JsonNode node, FieldTemplate field) {
-		
-		
+	
 	}
 
 	private void validateObjectReference(JsonNode node, FieldTemplate field) {
@@ -206,11 +207,6 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 
 		iterateType(node, template, new MongoEntity(e, field.getResourceKey(), new Document()), false);
 	}
-
-//	private void validateCountry(JsonNode node, FieldTemplate field) {
-//		
-//		
-//	}
 
 	private void validateNumber(JsonNode node, FieldTemplate field) throws ValidationException {
 		try {

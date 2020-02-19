@@ -1,11 +1,14 @@
 package com.jadaptive.app.db;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -13,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -20,14 +24,16 @@ import org.apache.commons.lang.math.NumberUtils;
 
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.template.Column;
 import com.jadaptive.app.ClassLoaderServiceImpl;
+import com.jadaptive.app.encrypt.EncryptionServiceImpl;
 import com.jadaptive.utils.Utils;
 
 public class DocumentHelper {
 
+	static Set<String> builtInNames = new HashSet<>(Arrays.asList("uuid", "system", "hidden"));
 	
 	public static void convertObjectToDocument(AbstractUUIDEntity obj, Map<String,Object> document) throws RepositoryException, EntityException {
 
@@ -40,24 +46,31 @@ public class DocumentHelper {
 			document.put("_id", obj.getUuid());
 			document.put("_clz", obj.getClass().getName());
 			
+			Map<String,Field> fields = ReflectionUtils.getFields(obj.getClass());
+			
 			for(Method m : ReflectionUtils.getGetters(obj.getClass())) {
 				String name = ReflectionUtils.calculateFieldName(m);
-				if(m.isAnnotationPresent(JadaptiveIgnore.class)) {
+				Field field = fields.get(name);
+				if(Objects.isNull(field)) {
 					continue;
 				}
+				Column columnDefinition = field.getAnnotation(Column.class);
+//				if(!builtInNames.contains(name) && Objects.isNull(columnDefinition)) {
+//					continue;
+//				}
 				Object value = m.invoke(obj);
 				if(!Objects.isNull(value)) { 
 					if(m.getReturnType().equals(Date.class)) {
 						value = Utils.formatDateTime((Date)value);
-						document.put(name,  String.valueOf(value));
+						document.put(name,  checkForAndPerformEncryption(columnDefinition, String.valueOf(value)));
 					} else if(m.getReturnType().isEnum()) {
 						document.put(name, ((Enum<?>)value).name());
 					} else if(AbstractUUIDEntity.class.isAssignableFrom(m.getReturnType())) {
 						buildDocument(name, (AbstractUUIDEntity)value, m.getReturnType(), document);
 					} else if(Collection.class.isAssignableFrom(m.getReturnType())) {
-						buildCollectionDocuments(name, (Collection<?>)value, m.getReturnType(), document);
+						buildCollectionDocuments(name, columnDefinition, (Collection<?>)value, m.getReturnType(), document);
 					} else {
-						document.put(name,  String.valueOf(value));
+						document.put(name,  checkForAndPerformEncryption(columnDefinition, String.valueOf(value)));
 					}
 				}
 			}
@@ -68,13 +81,31 @@ public class DocumentHelper {
 		
 	}
 
-	public static void buildCollectionDocuments(String name, Collection<?> values, Class<?> returnType, Map<String,Object> document) throws ParseException, EntityException {
+	private static String checkForAndPerformEncryption(Column columnDefinition, String value) {
+		if(Objects.nonNull(columnDefinition) && (columnDefinition.manualEncryption() || columnDefinition.automaticEncryption())) {
+			if(Objects.nonNull(value) && !EncryptionServiceImpl.getInstance().isEncrypted(value)) {
+				return EncryptionServiceImpl.getInstance().encrypt(value);
+			}
+		}
+		return value;
+	}
+	
+	private static String checkForAndPerformDecryption(Column columnDefinition, String value) {
+		if(Objects.nonNull(columnDefinition) && columnDefinition.automaticEncryption()) {
+			if(Objects.nonNull(value) && EncryptionServiceImpl.getInstance().isEncrypted(value)) {
+				return EncryptionServiceImpl.getInstance().decrypt(value);
+			}
+		}
+		return value;
+	}
+
+	public static void buildCollectionDocuments(String name, Column columnDefinition, Collection<?> values, Class<?> returnType, Map<String,Object> document) throws ParseException, EntityException {
 		
 		List<Object> list = new ArrayList<>();
 
 		for(Object value : values) {
 			if(Date.class.equals(value.getClass())) {
-				list.add(Utils.formatDateTime((Date)value));
+				list.add(checkForAndPerformEncryption(columnDefinition,Utils.formatDateTime((Date)value)));
 			} else if(value.getClass().isEnum()) {
 				list.add(((Enum<?>)value).name());
 			} else if(AbstractUUIDEntity.class.isAssignableFrom(value.getClass())) {
@@ -86,7 +117,7 @@ public class DocumentHelper {
 				list.add(embeddedDocument);
 
 			} else {
-				list.add(value.toString());
+				list.add(checkForAndPerformEncryption(columnDefinition,value.toString()));
 			} 
 		}
 		
@@ -125,24 +156,35 @@ public class DocumentHelper {
 				obj = (T) ClassLoaderServiceImpl.getInstance().resolveClass(clz).newInstance();
 			}
 
+			Map<String,Field> fields = ReflectionUtils.getFields(obj.getClass());
+			
 			for(Method m : ReflectionUtils.getSetters(obj.getClass())) {
 				String name = ReflectionUtils.calculateFieldName(m);
+				Field field = fields.get(name);
+				if(Objects.isNull(field)) {
+					continue;
+				}
+				Column columnDefinition = field.getAnnotation(Column.class);
+//				if(!builtInNames.contains(name) && Objects.isNull(columnDefinition)) {
+//					continue;
+//				}
+				
 				Parameter parameter = m.getParameters()[0];
 
 				if(parameter.getType().equals(String.class)) {
-					m.invoke(obj, document.get(name));
+					m.invoke(obj, checkForAndPerformDecryption(columnDefinition, (String) document.get(name)));
 				} else if(parameter.getType().equals(Boolean.class) || parameter.getType().equals(boolean.class)) {
-					m.invoke(obj, Boolean.parseBoolean((String)document.get(name)));
+					m.invoke(obj, Boolean.parseBoolean(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
 				} else if(parameter.getType().equals(Integer.class) || parameter.getType().equals(int.class)) {
-					m.invoke(obj, Integer.parseInt((String)document.get(name)));
+					m.invoke(obj, Integer.parseInt(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
 				} else if(parameter.getType().equals(Long.class) || parameter.getType().equals(long.class)) {
-					m.invoke(obj, Long.parseLong((String)document.get(name)));
+					m.invoke(obj, Long.parseLong(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
 				} else if(parameter.getType().equals(Float.class)  || parameter.getType().equals(float.class)) {
-					m.invoke(obj, Float.parseFloat((String)document.get(name)));
+					m.invoke(obj, Float.parseFloat(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
 				} else if(parameter.getType().equals(Double.class) || parameter.getType().equals(double.class)) {
-					m.invoke(obj, Double.parseDouble((String)document.get(name)));
+					m.invoke(obj, Double.parseDouble(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
 				} else if(parameter.getType().equals(Date.class)) {
-					m.invoke(obj, Utils.parseDateTime((String)document.get(name)));
+					m.invoke(obj, Utils.parseDateTime(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
 				} else if(AbstractUUIDEntity.class.isAssignableFrom(parameter.getType())) {
 					Map<String,Object> doc = (Map<String,Object>) document.get(name);
 					if(Objects.isNull(doc)) {
@@ -187,19 +229,19 @@ public class DocumentHelper {
 					} else {
 						
 						if(type.equals(String.class)) {
-							m.invoke(obj, new HashSet<String>((Collection<? extends String>) list));
+							m.invoke(obj, buildStringCollection(columnDefinition, list));
 						} else if(type.equals(Boolean.class)) {
-							m.invoke(obj, buildBooleanCollection(list));
+							m.invoke(obj, buildBooleanCollection(columnDefinition, list));
 						} else if(type.equals(Integer.class)) {
-							m.invoke(obj, buildIntegerCollection(list));
+							m.invoke(obj, buildIntegerCollection(columnDefinition, list));
 						} else if(type.equals(Long.class)) {
-							m.invoke(obj, buildLongCollection(list));
+							m.invoke(obj, buildLongCollection(columnDefinition, list));
 						} else if(type.equals(Float.class)) {
-							m.invoke(obj, buildFloatCollection(list));
+							m.invoke(obj, buildFloatCollection(columnDefinition, list));
 						} else if(type.equals(Double.class)) {
-							m.invoke(obj, buildDoubleCollection(list));
+							m.invoke(obj, buildDoubleCollection(columnDefinition, list));
 						} else if(type.equals(Date.class)) {
-							m.invoke(obj, buildDateCollection(list));
+							m.invoke(obj, buildDateCollection(columnDefinition, list));
 						} else if(type.isEnum()) {  
 							m.invoke(obj, buildEnumCollection(list, type));
 						} else {
@@ -224,6 +266,14 @@ public class DocumentHelper {
 		
 	}
 
+	private static Object buildStringCollection(Column columnDefinition, List<?> list) {
+		Collection<String> v = new HashSet<>();
+		for(Object item : list) {
+			v.add(checkForAndPerformDecryption(columnDefinition, item.toString()));
+		}
+		return v;
+	}
+
 	private static Object buildEnumCollection(List<?> items, Class<?> type) {
 
 		Collection<Enum<?>> v = new HashSet<>();
@@ -245,50 +295,50 @@ public class DocumentHelper {
 		return v;		
 	}
 
-	private static Collection<Date> buildDateCollection(List<?> items) throws ParseException {
+	private static Collection<Date> buildDateCollection(Column columnDefinition, List<?> items) throws ParseException {
 		Collection<Date> v = new HashSet<>();
 		for(Object item : items) {
-			v.add(Utils.parseDateTime(item.toString()));
+			v.add(Utils.parseDateTime(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
 		return v;
 	}
 
-	private static Collection<Double> buildDoubleCollection(List<?> items) {
+	private static Collection<Double> buildDoubleCollection(Column columnDefinition, List<?> items) {
 		Collection<Double> v = new HashSet<>();
 		for(Object item : items) {
-			v.add(Double.parseDouble(item.toString()));
+			v.add(Double.parseDouble(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
 		return v;
 	}
 
-	private static Collection<Float> buildFloatCollection(List<?> items) {
+	private static Collection<Float> buildFloatCollection(Column columnDefinition, List<?> items) {
 		Collection<Float> v = new HashSet<>();
 		for(Object item : items) {
-			v.add(Float.parseFloat(item.toString()));
+			v.add(Float.parseFloat(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
 		return v;
 	}
 
-	private static Collection<Long> buildLongCollection(List<?> items) {
+	private static Collection<Long> buildLongCollection(Column columnDefinition, List<?> items) {
 		Collection<Long> v = new HashSet<>();
 		for(Object item : items) {
-			v.add(Long.parseLong(item.toString()));
+			v.add(Long.parseLong(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
 		return v;
 	}
 
-	private static Collection<Integer> buildIntegerCollection(List<?> items) {
+	private static Collection<Integer> buildIntegerCollection(Column columnDefinition, List<?> items) {
 		Collection<Integer> v = new HashSet<>();
 		for(Object item : items) {
-			v.add(Integer.parseInt(item.toString()));
+			v.add(Integer.parseInt(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
 		return v;
 	}
 
-	private static Collection<Boolean> buildBooleanCollection(List<?> items) {
+	private static Collection<Boolean> buildBooleanCollection(Column columnDefinition, List<?> items) {
 		Collection<Boolean> v = new HashSet<>();
 		for(Object item : items) {
-			v.add(Boolean.parseBoolean(item.toString()));
+			v.add(Boolean.parseBoolean(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
 		return v;
 	}

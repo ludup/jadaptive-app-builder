@@ -2,18 +2,40 @@ package com.jadaptive.db;
 
 import java.util.Date;
 
+import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.Template;
 
+@Template(name = "Test Field Types Object", resourceKey = "testFieldTypesObject", type = EntityType.COLLECTION)
 public class TestFieldTypesObject extends AbstractUUIDEntity {
 
+	@Column(name = "String", description = "A string", type = FieldType.TEXT)
 	String string;
+	
+	@Column(name = "Long", description = "A long", type = FieldType.NUMBER)
 	Long longNumber;
+	
+	@Column(name = "Integer", description = "An int", type = FieldType.NUMBER)
 	Integer intNumber;
+	
+	@Column(name = "Float", description = "A float", type = FieldType.DECIMAL)
 	Float floatNumber;
+	
+	@Column(name = "Double", description = "A double", type = FieldType.DECIMAL)
 	Double doubleNumber;
+	
+	@Column(name = "Date", description = "A date", type = FieldType.DATE)
 	Date date;
+	
+	@Column(name = "Enum", description = "An enum", type = FieldType.ENUM)
 	TestEnum enumField;
+	
+	@Column(name = "Bool", description = "A boolean", type = FieldType.BOOL)
 	Boolean bool;
+	
+	@Column(name = "Object", description = "An object", type = FieldType.OBJECT_EMBEDDED)
 	EmbeddedObject embedded;
 	
 	public TestFieldTypesObject() {

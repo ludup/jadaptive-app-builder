@@ -1,5 +1,7 @@
 package com.jadaptive.api.repository;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,8 +14,58 @@ public class ReflectionUtils {
 
 	static Map<Class<?>, Set<Method>> setterCache = new HashMap<>();
 	static Map<Class<?>, Set<Method>> getterCache = new HashMap<>();
+	static Map<Class<?>, Map<String,Field>> fieldCache = new HashMap<>();
 	
 	
+	public static <T extends Annotation> Set<T> getFieldAnnotations(Class<?> clz, Class<T> annotation) {
+		
+		Set<T> annotations = new HashSet<>();
+		iterateAnnotatedFields(annotations, clz, annotation);
+		return annotations;
+	}
+	
+	
+	private static <T extends Annotation> void iterateAnnotatedFields(Set<T> results, Class<?> clz, Class<T> annotation) {
+		
+		for(Field field : clz.getDeclaredFields()) {
+			T column = field.getAnnotation(annotation);
+			if(Objects.nonNull(column)) {
+				results.add(column);
+			}
+		}
+		
+		Class<?> superClass = clz.getSuperclass();
+		if(Objects.nonNull(superClass)) {
+			iterateAnnotatedFields(results, superClass, annotation);
+		}
+	}
+
+	public static Map<String, Field> getFields(Class<?> clz) {
+		
+		Map<String, Field> results = fieldCache.get(clz);
+		if(Objects.isNull(results)) {
+			results = new HashMap<>();
+			iterateFields(clz, results);
+			fieldCache.put(clz, results);
+		}
+		
+		return results;
+	}
+	
+	private static void iterateFields(Class<?> clz, Map<String, Field> results) {
+		
+		for(Field field : clz.getDeclaredFields()) {
+			results.put(field.getName(), field);
+		}
+		
+		Class<?> superClass = clz.getSuperclass();
+		if(Objects.nonNull(superClass)) {
+			iterateFields(superClass, results);
+		}
+		
+	}
+
+
 	public static Set<Method> getSetters(Class<?> clz) {
 		
 		Set<Method> results = setterCache.get(clz);
@@ -27,7 +79,6 @@ public class ReflectionUtils {
 					results.add(m);
 				}
 			}
-		
 			setterCache.put(clz, results);
 		}
 		
@@ -73,5 +124,6 @@ public class ReflectionUtils {
 		
 		throw new IllegalStateException(String.format("Cannot determine field name from method name %s", m.getName()));
 	}
+
 	
 }

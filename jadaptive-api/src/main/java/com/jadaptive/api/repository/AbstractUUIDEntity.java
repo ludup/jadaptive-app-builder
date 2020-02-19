@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public abstract class AbstractUUIDEntity {
 
 	static Logger log = LoggerFactory.getLogger(AbstractUUIDEntity.class);
-			
+	
 	String uuid;
 	Boolean system;
 	Boolean hidden;

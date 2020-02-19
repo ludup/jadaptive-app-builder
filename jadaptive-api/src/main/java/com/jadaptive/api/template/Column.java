@@ -21,4 +21,8 @@ public @interface Column {
 
 		boolean hidden() default false;
 
+		boolean manualEncryption() default false;
+		
+		boolean automaticEncryption() default false;
+
 }

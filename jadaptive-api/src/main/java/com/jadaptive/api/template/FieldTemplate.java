@@ -16,6 +16,7 @@ public class FieldTemplate extends NamedUUIDEntity {
 	String description;
 	FieldType fieldType; 
 	boolean required;
+	boolean encrypted;
 	
 	Collection<FieldValidator> validators = new ArrayList<>();
 	
@@ -87,13 +88,13 @@ public class FieldTemplate extends NamedUUIDEntity {
 		return required;
 	}
 
-//	public boolean isIgnoreColumn() {
-//		return ignoreColumn;
-//	}
-//
-//	public void setIgnoreColumn(Boolean ignoreColumn) {
-//		this.ignoreColumn = ignoreColumn;
-//	}
+	public boolean getEncrypted() {
+		return encrypted;
+	}
+
+	public void setEncrypted(boolean encrypted) {
+		this.encrypted = encrypted;
+	}
 
 	public String getValidationValue(ValidationType type) {
 		for(FieldValidator v : validators) {
