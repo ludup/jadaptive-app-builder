@@ -9,26 +9,32 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>example-plugin</artifactId>
-	<name>Demo Plugin #1</name>
+	<artifactId>jadaptive-web-management-webbits</artifactId>
+	<name>Web Management</name>
 
 	<properties>
-		<plugin.id>example-plugin</plugin.id>
-		<plugin.class>com.jadaptive.plugins.example.ExamplePlugin</plugin.class>
+		<plugin.id>jadaptive-web-management-webbits</plugin.id>
+		<plugin.class></plugin.class>
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
-		<plugin.dependencies />
+		<plugin.dependencies>jadaptive-web-management</plugin.dependencies>
 	</properties>
 
-	<dependencies>
+	<dependencies>		
 		<dependency>
 			<groupId>com.jadaptive</groupId>
 			<artifactId>jadaptive-api</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.jadaptive</groupId>
+			<artifactId>jadaptive-web-management</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -79,6 +85,12 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -41,11 +41,11 @@
 	</build>
 
 	<modules>
-		<module>example-plugin</module>
 		<module>jadaptive-ssh-server</module>
 		<module>jadaptive-ssh-management</module>
-		<module>jadaptive-web-bootstrap-vue</module>
 		<module>jadaptive-web-management</module>
+		<module>jadaptive-web-management-webbits</module>
+		
 	</modules>
 
 	<dependencies>

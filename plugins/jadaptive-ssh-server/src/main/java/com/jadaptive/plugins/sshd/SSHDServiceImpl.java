@@ -81,7 +81,6 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 
 			if(ApplicationProperties.getValue("sshd.permitPassword", true)) {
 				addAuthenticator(passwordAuthenticator);
-				addAuthenticator(new KeyboardInteractiveAuthenticator(PasswordKeyboardInteractiveProvider.class));
 			}
 			
 			addAuthenticator(authorizedKeysAuthenticator);
@@ -205,6 +204,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		out.append("\n");
 		out.append(ApplicationVersion.getVersion());
 		out.append("\n==============================================\n");
+		out.append("\nType 'help' for a list of commands.\n");
 		
 		sshContext.getPolicy(VirtualSessionPolicy.class).setWelcomeText(out.toString());
 		ClassLoader classLoader = getClass().getClassLoader();
