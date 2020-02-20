@@ -63,7 +63,7 @@ public class Users extends UserCommand {
 			}
 		} while(!identical);
 		
-		userService.createUser(username, password.toCharArray(), fullname);
+		userService.createUser(username, password.toCharArray(), fullname, false);
 		
 		console.println(String.format("Created user %s", username));
 	}

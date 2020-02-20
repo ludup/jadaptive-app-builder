@@ -38,13 +38,14 @@ public class UserServiceImpl implements UserService, TenantAware {
 	}
 	
 	@Override
-	public User createUser(String username, char[] password, String name) {
+	public User createUser(String username, char[] password, String name, boolean passwordChangeRequired) {
 		
 		permissionService.assertReadWrite(USER_RESOURCE_KEY);
 		
 		DefaultUser user = new DefaultUser();
 		user.setUsername(username);
 		user.setName(name);
+		user.setPasswordChangeRequired(passwordChangeRequired);
 		
 		userRepository.createUser(user, password);
 		return user;

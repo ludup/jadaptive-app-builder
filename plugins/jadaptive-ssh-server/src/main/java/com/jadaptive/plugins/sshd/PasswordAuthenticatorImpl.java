@@ -33,6 +33,9 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 			
 			User user = userService.findUsername(username);
 			boolean success = userService.verifyPassword(user, password.toCharArray());
+			if(user.isPasswordChangeRequired()) {
+				throw new PasswordChangeException();
+			}
 			if(success) {
 				con.setProperty(SSHDService.TENANT, tenantService.getCurrentTenant());
 				con.setProperty(SSHDService.USER, user);
@@ -48,7 +51,19 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 	@Override
 	public boolean changePassword(SshConnection con, String username, String oldpassword, String newpassword)
 			throws PasswordChangeException, IOException {
-		return false;
+		
+		tenantService.setCurrentTenant(StringUtils.substringAfter(username, "@"));
+		
+		try {
+			userService.changePassword(userService.findUsername(username),
+					oldpassword.toCharArray(), newpassword.toCharArray());
+			return true;
+		} catch(EntityException e) {
+			return false;
+		} finally {
+			tenantService.clearCurrentTenant();
+		}
+		
 	}
 
 }

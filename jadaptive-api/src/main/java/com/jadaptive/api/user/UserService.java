@@ -2,7 +2,7 @@ package com.jadaptive.api.user;
 
 public interface UserService {
 
-	User createUser(String username, char[] password, String name);
+	User createUser(String username, char[] password, String name, boolean passwordChangeRequired);
 
 	boolean verifyPassword(User username, char[] password);
 

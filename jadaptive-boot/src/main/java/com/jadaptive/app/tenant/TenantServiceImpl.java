@@ -86,7 +86,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 				
 				
 				try {
-					User user = userService.createUser("admin", "admin".toCharArray(), "Administrator");
+					User user = userService.createUser("admin", "admin".toCharArray(), "Administrator", true);
 					roleService.assignRole(roleService.getAdministrationRole(), user);
 				} finally {
 					

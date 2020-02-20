@@ -10,6 +10,7 @@ public class DefaultUser extends NamedUUIDEntity implements User {
 	String encodedPassword;
 	String salt;
 	PasswordEncryptionType encodingType;
+	boolean passwordChangeRequired;
 	
 	public String getUsername() {
 		return username;
@@ -50,6 +51,12 @@ public class DefaultUser extends NamedUUIDEntity implements User {
 	public void setEncodingType(PasswordEncryptionType encodingType) {
 		this.encodingType = encodingType;
 	}
-	
-	
+
+	public boolean isPasswordChangeRequired() {
+		return passwordChangeRequired;
+	}
+
+	public void setPasswordChangeRequired(boolean passwordChangeRequired) {
+		this.passwordChangeRequired = passwordChangeRequired;
+	}
 }

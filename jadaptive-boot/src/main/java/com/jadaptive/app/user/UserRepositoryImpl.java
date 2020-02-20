@@ -54,6 +54,7 @@ public class UserRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<De
 			user.setEncodingType(PasswordEncryptionType.PBKDF2_SHA512_100000);
 			user.setSalt(Base64.getEncoder().encodeToString(salt));
 			user.setEncodedPassword(Base64.getEncoder().encodeToString(encodedPassword));
+			user.setPasswordChangeRequired(false);
 			
 			saveOrUpdate(user);
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {

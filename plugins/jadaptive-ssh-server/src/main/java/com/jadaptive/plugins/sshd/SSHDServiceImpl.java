@@ -21,6 +21,8 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.commands.UserCommandFactory;
+import com.sshtools.common.auth.KeyboardInteractiveAuthenticator;
+import com.sshtools.common.auth.PasswordKeyboardInteractiveProvider;
 import com.sshtools.common.files.AbstractFileFactory;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
@@ -77,7 +79,11 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			int port = ApplicationProperties.getValue("sshd.port", 2222);
 			boolean extenalAccess = ApplicationProperties.getValue("sshd.externalAccess", true);
 
-			addAuthenticator(passwordAuthenticator);
+			if(ApplicationProperties.getValue("sshd.permitPassword", true)) {
+				addAuthenticator(passwordAuthenticator);
+				addAuthenticator(new KeyboardInteractiveAuthenticator(PasswordKeyboardInteractiveProvider.class));
+			}
+			
 			addAuthenticator(authorizedKeysAuthenticator);
 			
 			addInterface(extenalAccess ? "::" : "::1", port);

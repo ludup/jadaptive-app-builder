@@ -9,4 +9,6 @@ public interface User {
 	
 	String getName();
 	
+	boolean isPasswordChangeRequired();
+	
 }
