@@ -44,7 +44,7 @@
 		<module>jadaptive-ssh-server</module>
 		<module>jadaptive-ssh-management</module>
 		<module>jadaptive-web-management</module>
-		<module>jadaptive-web-management-webbits</module>
+<!-- 		<module>jadaptive-web-management-webbits</module> -->
 		
 	</modules>
 
