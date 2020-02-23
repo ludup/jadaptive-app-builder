@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
@@ -18,10 +20,13 @@ import com.sshtools.common.ssh.SshConnection;
 public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 
 	@Autowired
-	UserService userService; 
+	private UserService userService; 
 	
 	@Autowired
-	TenantService tenantService; 
+	private TenantService tenantService; 
+	
+	@Autowired
+	private PermissionService permissionService; 
 	
 	@Override
 	public boolean verifyPassword(SshConnection con, String username, String password)
@@ -32,15 +37,28 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 		try {
 			
 			User user = userService.findUsername(username);
-			boolean success = userService.verifyPassword(user, password.toCharArray());
-			if(user.isPasswordChangeRequired()) {
-				throw new PasswordChangeException();
+			permissionService.setupUserContext(user);
+			
+			try {
+				boolean success = userService.verifyPassword(user, password.toCharArray());
+				
+				if(user.getPasswordChangeRequired()) {
+					try {
+						permissionService.assertAnyPermission( 
+								UserService.CHANGE_PASSWORD_PERMISSION,
+								UserService.SET_PASSWORD_PERMISSION);
+						throw new PasswordChangeException();
+					} catch(AccessDeniedException e) {
+					}
+				}
+				if(success) {
+					con.setProperty(SSHDService.TENANT, tenantService.getCurrentTenant());
+					con.setProperty(SSHDService.USER, user);
+				}
+				return success;
+			} finally {
+				permissionService.clearUserContext();
 			}
-			if(success) {
-				con.setProperty(SSHDService.TENANT, tenantService.getCurrentTenant());
-				con.setProperty(SSHDService.USER, user);
-			}
-			return success;
 		} catch(EntityException e) {
 			return false;
 		} finally {
@@ -53,13 +71,27 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 			throws PasswordChangeException, IOException {
 		
 		tenantService.setCurrentTenant(StringUtils.substringAfter(username, "@"));
-		
+
 		try {
-			userService.changePassword(userService.findUsername(username),
+			
+			User user = userService.findUsername(username);
+			permissionService.setupUserContext(user);
+
+			try {
+				userService.changePassword(user,
 					oldpassword.toCharArray(), newpassword.toCharArray());
+			
+				con.setProperty(SSHDService.TENANT, tenantService.getCurrentTenant());
+				con.setProperty(SSHDService.USER, user);
+			} finally {
+				permissionService.clearUserContext();
+			}
+
 			return true;
 		} catch(EntityException e) {
 			return false;
+		} catch(AccessDeniedException e) {
+			throw new IllegalStateException(e.getMessage(), e);
 		} finally {
 			tenantService.clearCurrentTenant();
 		}

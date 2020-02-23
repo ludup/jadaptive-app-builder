@@ -28,6 +28,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.ConfigHelper;
+import com.jadaptive.api.app.ResourcePackage;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
@@ -46,8 +48,6 @@ import com.jadaptive.api.templates.TemplateVersionRepository;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
-import com.jadaptive.app.ConfigHelper;
-import com.jadaptive.app.ResourcePackage;
 import com.jadaptive.app.json.ObjectMapperHolder;
 import com.jadaptive.utils.Version;
 

@@ -30,16 +30,16 @@ public class UserRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<De
 	}
 
 	@Override
-	public void createUser(DefaultUser user, char[] password) {
+	public void createUser(DefaultUser user, char[] password, boolean passwordChangeRequired) {
 		
-		setPassword(user, password);
+		setPassword(user, password, passwordChangeRequired);
 		saveObject(user, tenantService.getCurrentTenant().getUuid());
 
 	}
 	
 	
 	@Override
-	public void setPassword(User u, char[] password) {
+	public void setPassword(User u, char[] password, boolean passwordChangeRequired) {
 		
 		try {
 			
@@ -54,7 +54,7 @@ public class UserRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<De
 			user.setEncodingType(PasswordEncryptionType.PBKDF2_SHA512_100000);
 			user.setSalt(Base64.getEncoder().encodeToString(salt));
 			user.setEncodedPassword(Base64.getEncoder().encodeToString(encodedPassword));
-			user.setPasswordChangeRequired(false);
+			user.setPasswordChangeRequired(passwordChangeRequired);
 			
 			saveOrUpdate(user);
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {

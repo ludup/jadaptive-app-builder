@@ -21,8 +21,6 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.commands.UserCommandFactory;
-import com.sshtools.common.auth.KeyboardInteractiveAuthenticator;
-import com.sshtools.common.auth.PasswordKeyboardInteractiveProvider;
 import com.sshtools.common.files.AbstractFileFactory;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
@@ -30,6 +28,7 @@ import com.sshtools.common.files.vfs.VirtualMountTemplate;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.policy.ClassLoaderPolicy;
 import com.sshtools.common.policy.FileSystemPolicy;
+import com.sshtools.common.scp.ScpCommand;
 import com.sshtools.common.ssh.ChannelNG;
 import com.sshtools.common.ssh.SshConnection;
 import com.sshtools.common.ssh.SshException;
@@ -158,6 +157,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
 		
 		sshContext.setIdleConnectionTimeoutSeconds(60*15);
+		sshContext.addCommand("scp", ScpCommand.class);
 		sshContext.setChannelFactory(new VirtualChannelFactory() {
 
 			@Override

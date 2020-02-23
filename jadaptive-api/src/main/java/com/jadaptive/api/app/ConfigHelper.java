@@ -1,4 +1,4 @@
-package com.jadaptive.app;
+package com.jadaptive.api.app;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -62,6 +62,9 @@ public class ConfigHelper {
 	}
 	
 	public static File getTenantFolder(Tenant tenant) {
+		if(tenant.getSystem()) {
+			return getSystemPrivateFolder();
+		}
 		return new File(getTenantsFolder(), tenant.getHostname());
 	}
 	
@@ -148,19 +151,6 @@ public class ConfigHelper {
 		}
 		return Collections.unmodifiableCollection(systemPrivatePackages);
 	}
-	
-//	private static ResourcePackage getFolderPackage(File folder, String filename) throws IOException {
-//		
-//		
-//		File propertiesFile = new File(folder, "package.properties");
-//		Properties properties = new Properties();
-//		if(propertiesFile.exists()) {
-//			try(InputStream in = new FileInputStream(propertiesFile)) {
-//				properties.load(in);
-//			}
-//		}
-//		return new ResourcePackage(folder.toURI(), null, filename, properties);
-//	}
 	
 	private static ResourcePackage getZipPackage(URI uri, String filename) throws IOException {
 		

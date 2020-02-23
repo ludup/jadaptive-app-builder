@@ -1,6 +1,9 @@
 package com.jadaptive.app.entity;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -104,15 +107,30 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 	public String getValue(FieldTemplate t) {
 		switch(t.getFieldType()) {
 		case OBJECT_EMBEDDED:
-		case OBJECT_REFERENCE:
 			throw new IllegalArgumentException("Use getChild to object embedded object");
 		default:
 			return StringUtils.defaultString((String) document.get(t.getResourceKey()), t.getDefaultValue());
 		}
 	}
+	
+	public Collection<String> getCollection(String fieldName) {
+		return document.getList(fieldName, String.class);
+	}
 
 	@Override
 	public void setValue(FieldTemplate t, String value) {
 		document.put(t.getResourceKey(), value);
+	}
+
+	public void setValue(FieldTemplate t, List<Object> values) {
+		document.put(t.getResourceKey(), values);
+	}
+
+	public Collection<MongoEntity> getObjectCollection(String fieldName) {
+		List<MongoEntity> tmp = new ArrayList<>();
+		for(Map<String,Object> child : document.getList(fieldName, Map.class)) {
+			tmp.add(new MongoEntity(fieldName, child));
+		}
+		return tmp;
 	}
 }

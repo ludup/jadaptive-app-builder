@@ -52,7 +52,7 @@ public class DefaultUser extends NamedUUIDEntity implements User {
 		this.encodingType = encodingType;
 	}
 
-	public boolean isPasswordChangeRequired() {
+	public boolean getPasswordChangeRequired() {
 		return passwordChangeRequired;
 	}
 

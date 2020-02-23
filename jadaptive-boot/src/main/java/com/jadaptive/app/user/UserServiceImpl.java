@@ -17,9 +17,6 @@ import com.jadaptive.api.user.UserService;
 @Service
 public class UserServiceImpl implements UserService, TenantAware {
 
-	public static final String CHANGE_PASSWORD_PERMISSION = "user.changePassword";
-	public static final String SET_PASSWORD_PERMISSION = "user.setPassword";
-	public static final String USER_RESOURCE_KEY = "user";
 	
 	@Autowired
 	UserRepository userRepository; 
@@ -45,9 +42,8 @@ public class UserServiceImpl implements UserService, TenantAware {
 		DefaultUser user = new DefaultUser();
 		user.setUsername(username);
 		user.setName(name);
-		user.setPasswordChangeRequired(passwordChangeRequired);
 		
-		userRepository.createUser(user, password);
+		userRepository.createUser(user, password, passwordChangeRequired);
 		return user;
 	}
 
@@ -71,10 +67,10 @@ public class UserServiceImpl implements UserService, TenantAware {
 	}
 
 	@Override
-	public void setPassword(User user, char[] newPassword) {
+	public void setPassword(User user, char[] newPassword, boolean passwordChangeRequired) {
 		
 		permissionService.assertPermission(SET_PASSWORD_PERMISSION);
-		userRepository.setPassword(user, newPassword);
+		userRepository.setPassword(user, newPassword, passwordChangeRequired);
 		
 	}
 	
@@ -83,15 +79,15 @@ public class UserServiceImpl implements UserService, TenantAware {
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
 		verifyPassword(user, oldPassword);
-		userRepository.setPassword(user, newPassword);
+		userRepository.setPassword(user, newPassword, false);
 		
 	}
 	
 	@Override
-	public void changePassword(User user, char[] newPassword) {
+	public void changePassword(User user, char[] newPassword, boolean passwordChangeRequired) {
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
-		userRepository.setPassword(user, newPassword);
+		userRepository.setPassword(user, newPassword, passwordChangeRequired);
 		
 	}
 

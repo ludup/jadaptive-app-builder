@@ -1,7 +1,9 @@
 package com.jadaptive.app.entity;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -19,9 +21,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
@@ -129,15 +133,7 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 		if(log.isInfoEnabled()) {
 			log.info("Validating node {}", field.getResourceKey());
 		}
-		
-		if(node==null) {
-			if(field.getRequired()) {
-				throw new IOException(String.format("%s is missing", field.getResourceKey()));
-			} 
-			setPropertyDefault(field, e);
-			return;
-		}
-		
+
 		node = node.findPath(field.getResourceKey());
 		if(Objects.isNull(node) || node instanceof MissingNode) {
 			if(field.getRequired()) {
@@ -148,16 +144,84 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 			}
 		} 
 		
+		if(field.getCollection() && !node.isArray()) {
+			throw new ValidationException(String.format("%s is a collection and the json node is not an array", field.getResourceKey()));
+		} else if(!field.getCollection() && node.isArray()) {
+			throw new ValidationException(String.format("%s is not a collection but the json node is an array", field.getResourceKey()));
+		} 
+
+		if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
+			processEmbeddedObjects(field, node, e);
+		} else if(field.getFieldType()==FieldType.OBJECT_REFERENCE) {
+			processReferenceObjects(field, node, e);
+		} else {
+			processSimpleTypes(field, node, e);
+		}
+
+	}
+
+	private void processEmbeddedObjects(FieldTemplate field, JsonNode node, MongoEntity e) throws ValidationException, IOException {
+		
+		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
+		
+		try {
+ 			EntityTemplate template = templateService.get(type);
+ 			
+ 			if(node.isArray()) {
+ 				List<Document> documents = new ArrayList<>();
+ 				for(JsonNode element : node) {
+ 					MongoEntity child = new MongoEntity(e, field.getResourceKey(), new Document());
+ 					iterateType(element, template, child, false);
+ 					documents.add(new Document(child.getDocument()));
+ 				}
+ 				setCollectionProperty(field, node, e);
+ 			} else {
+ 				iterateType(node, template, new MongoEntity(e, field.getResourceKey(), new Document()), false);
+ 			}
+ 			
+ 			
+		
+ 		} catch(EntityException ex) {
+ 			throw new ValidationException(String.format("%s object type template not found", type));
+ 		}
+		
+		
+		
+ 		
+ 		
+ 		
+	}
+
+	private void processReferenceObjects(FieldTemplate field, JsonNode node, MongoEntity e) {
+		// EntityService currently validates references
+		setProperty(node, field, e);
+	}
+
+	private void processSimpleTypes(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
+		if(node.isArray()) {
+			for(JsonNode element : node) {
+				validate(field, element, e);
+			}
+			setCollectionProperty(field, node, e);
+		} else {
+			validate(field, node, e);
+			setProperty(node, field, e);
+		}
+	}
+
+	private void setCollectionProperty(FieldTemplate field, JsonNode node, MongoEntity e) {
+		
+		List<Object> values = new ArrayList<>();
+		for(JsonNode element : node) {
+			values.add(element.asText());
+		}
+		e.setValue(field, values);
+		
+	}
+
+	private void validate(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
+		
 		switch(field.getFieldType()) {
-		case OBJECT_REFERENCE:
-			validateObjectReference(node, field);
-			break;
-		case OBJECT_EMBEDDED:
-			validateObject(node, field, e);
-			/**
-			 * Return otherwise setProperty at the end kills the document
-			 */
-			return;
 		case BOOL:
 			validateBoolean(node, field);
 			break;
@@ -178,9 +242,11 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 		case PASSWORD:
 			validateText(node, field);
 			break;
+		default:
+			throw new ValidationException(
+					String.format("Missing field type %s in validate method", 
+						field.getFieldType().name()));
 		}
-		
-		setProperty(node, field, e);
 		
 	}
 
@@ -190,22 +256,6 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 
 	private void validateEnum(JsonNode node, FieldTemplate field) {
 	
-	}
-
-	private void validateObjectReference(JsonNode node, FieldTemplate field) {
-		
-		/**
-		 * Object reference is enforced by the Entity service.
-		 */
-		
-	}
-	
-	private void validateObject(JsonNode node, FieldTemplate field, MongoEntity e) throws IOException, ValidationException {
-		
- 		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
-		EntityTemplate template = templateService.get(type);
-
-		iterateType(node, template, new MongoEntity(e, field.getResourceKey(), new Document()), false);
 	}
 
 	private void validateNumber(JsonNode node, FieldTemplate field) throws ValidationException {

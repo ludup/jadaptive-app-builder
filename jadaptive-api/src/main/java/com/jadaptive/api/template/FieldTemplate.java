@@ -15,6 +15,7 @@ public class FieldTemplate extends NamedUUIDEntity {
 	String defaultValue;
 	String description;
 	FieldType fieldType; 
+	boolean collection;
 	boolean required;
 	boolean encrypted;
 	
@@ -94,6 +95,14 @@ public class FieldTemplate extends NamedUUIDEntity {
 
 	public void setEncrypted(boolean encrypted) {
 		this.encrypted = encrypted;
+	}
+
+	public boolean getCollection() {
+		return collection;
+	}
+
+	public void setCollection(boolean collection) {
+		this.collection = collection;
 	}
 
 	public String getValidationValue(ValidationType type) {

@@ -23,8 +23,9 @@
               "description": "The URL path of this resource",
               "fieldType": "TEXT"
        },{
-              "resourceKey": "permission",
-              "name": "Permission",
+              "resourceKey": "permissions",
+              "name": "Permissions",
+              "collection": true,
               "defaultValue": "",
               "description": "The permission(s) required to access this menu",
               "fieldType": "TEXT"

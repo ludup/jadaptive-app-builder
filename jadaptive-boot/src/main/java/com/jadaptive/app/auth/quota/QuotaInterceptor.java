@@ -1,4 +1,4 @@
-package com.jadaptive.app.auth;
+package com.jadaptive.app.auth.quota;
 
 import java.util.Properties;
 

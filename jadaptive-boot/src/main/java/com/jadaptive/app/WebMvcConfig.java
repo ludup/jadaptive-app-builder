@@ -7,8 +7,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.jadaptive.app.auth.DefaultTenantInterceptor;
-import com.jadaptive.app.auth.QuotaInterceptor;
 import com.jadaptive.app.auth.SessionInterceptor;
+import com.jadaptive.app.auth.quota.QuotaInterceptor;
 
 @Configuration
 @ServletComponentScan(basePackages = { "com.jadaptive.app" })

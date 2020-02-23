@@ -1,6 +1,15 @@
 package com.jadaptive.app;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import javax.annotation.PreDestroy;
 
@@ -12,6 +21,10 @@ import org.pf4j.ExtensionFinder;
 import org.pf4j.JarPluginRepository;
 import org.pf4j.PluginRepository;
 import org.pf4j.spring.SpringPluginManager;
+import org.pf4j.update.FileDownloader;
+import org.pf4j.update.PluginInfo;
+import org.pf4j.update.UpdateManager;
+import org.pf4j.update.PluginInfo.PluginRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +63,9 @@ public class AppConfig {
                
                pluginRepository.add(new DevelopmentPluginRepository(getPluginsRoot()), this::isDevelopment);
                
-               String[] additionalDevelopmentPaths = System.getProperty("jadaptive.developmentPluginDirs", "../../jadaptive-plugins").split(",");
+               String[] additionalDevelopmentPaths = System.getProperty(
+            		   "jadaptive.developmentPluginDirs", 
+            		   "../../jadaptive-vsftp,../../jadaptive-updates").split(",");
                for(String path : additionalDevelopmentPaths) {
             	   pluginRepository.add(new DevelopmentPluginRepository(Paths.get(path)), this::isDevelopment);
                }
@@ -59,12 +74,137 @@ public class AppConfig {
                
                return pluginRepository;
             }
+
+			@Override
+			public void loadPlugins() {
+				super.loadPlugins();
+				
+		        checkForUpdates();
+			}
+        	
+        	
         };
+        
+        
         return pluginManager;
     }
     
-    @PreDestroy
+    private void checkForUpdates() {
+		
+    	File repositories = new File("conf/repositories.json");
+    	
+    	if(repositories.exists()) {
+	    	UpdateManager updateManager = new UpdateManager(pluginManager,
+	    			repositories.toPath()) {
+	
+				@Override
+				protected FileDownloader getFileDownloader(String pluginId) {
+					return new SerialReportingFileDownloader();
+				}
+						
+				public boolean hasPluginUpdate(String id) {
+			        boolean  hasUpdate = super.hasPluginUpdate(id);
+			        // TODO a way to handle snapshot deployments
+			        return hasUpdate;
+			    }
+	    		
+	    	};
+	    	
+	    	// >> keep system up-to-date <<
+	        boolean systemUpToDate = true;
+	
+	        // check for updates
+	        if (updateManager.hasUpdates()) {
+	            List<PluginInfo> updates = updateManager.getUpdates();
+	            log.debug("Found {} updates", updates.size());
+	            for (PluginInfo plugin : updates) {
+	                log.debug("Found update for plugin '{}'", plugin.id);
+	                PluginInfo.PluginRelease lastRelease = updateManager.getLastPluginRelease(plugin.id);
+	                String lastVersion = lastRelease.version;
+	                String installedVersion = pluginManager.getPlugin(plugin.id).getDescriptor().getVersion();
+	                log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
+	                boolean updated = updateManager.updatePlugin(plugin.id, lastVersion);
+	                if (updated) {
+	                    log.debug("Updated plugin '{}'", plugin.id);
+	                } else {
+	                    log.error("Cannot update plugin '{}'", plugin.id);
+	                    systemUpToDate = false;
+	                }
+	            }
+	        } else {
+	            log.debug("No updates found");
+	        }
+	
+	        // check for available (new) plugins
+	        if (updateManager.hasAvailablePlugins()) {
+	            List<PluginInfo> availablePlugins = updateManager.getAvailablePlugins();
+	            log.debug("Found {} available plugins", availablePlugins.size());
+	            for (PluginInfo plugin : availablePlugins) {
+	                log.debug("Found available plugin '{}'", plugin.id);
+	                PluginInfo.PluginRelease lastRelease = updateManager.getLastPluginRelease(plugin.id);
+	                String lastVersion = lastRelease.version;
+	                log.debug("Install plugin '{}' with version {}", plugin.id, lastVersion);
+	                boolean installed = updateManager.installPlugin(plugin.id, lastVersion);
+	                if (installed) {
+	                    log.debug("Installed plugin '{}'", plugin.id);
+	                } else {
+	                    log.error("Cannot install plugin '{}'", plugin.id);
+	                    systemUpToDate = false;
+	                }
+	            }
+	        } else {
+	            log.debug("No available plugins found");
+	        }
+	
+	        if (systemUpToDate) {
+	            log.debug("System up-to-date");
+	        }
+    	}
+		
+	}
+
+	@PreDestroy
     public void cleanup() {
         pluginManager.stopPlugins();
     }
+	
+	
+	class SerialReportingFileDownloader implements FileDownloader {
+
+		@Override
+		public Path downloadFile(URL url) throws IOException {
+			
+			URLConnection con;
+			if(url.getProtocol().startsWith("http")) {
+				HttpURLConnection hc = (HttpURLConnection) url.openConnection();
+	
+		        hc.setDoOutput(true);
+		        hc.setDoInput(true);
+		        hc.setUseCaches(false);
+	
+		        hc.setRequestProperty("Product-Serial", ApplicationVersion.getSerial());
+		        hc.setRequestProperty("Product-Id", ApplicationVersion.getProductId());
+		        hc.setRequestProperty("Product-Version", ApplicationVersion.getVersion());
+			       
+		        con = hc;
+			} else {
+				con = url.openConnection();
+			}
+			
+	        Path destination = Files.createTempDirectory("pf4j-update-downloader");
+	        destination.toFile().deleteOnExit();
+
+	        String path = url.getPath();
+            String fileName = path.substring(path.lastIndexOf('/') + 1);
+            Path toFile = destination.resolve(fileName);
+            
+	        Files.copy(con.getInputStream(), toFile, 
+	        		StandardCopyOption.COPY_ATTRIBUTES, 
+	        		StandardCopyOption.REPLACE_EXISTING);
+
+	        return destination;
+		    
+		}
+		
+	}
 }

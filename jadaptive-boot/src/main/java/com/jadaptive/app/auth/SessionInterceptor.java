@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.pf4j.update.PluginInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
@@ -51,6 +54,9 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 	@Autowired
 	private AuthenticationService authenticationService; 
 	
+	@Autowired
+	private ApplicationService applicationService; 
+	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
@@ -76,7 +82,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 		String requestURL = request.getRequestURI();
 		
 		if(Objects.nonNull(loginURL) && FileUtils.checkEndsWithNoSlash(requestURL).equals(FileUtils.checkEndsWithNoSlash(loginURL))) {
-			return super.preHandle(request, response, handler);
+			return iteratePluginInterceptors(request, response, handler);
 		}
 	
 		String requireAllPermission = StringUtils.defaultIfBlank(properties.getProperty("permission.requireAll"), null);
@@ -91,7 +97,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 		}
 		
 		if((Objects.isNull(requireAnyPermission) && Objects.isNull(requireAllPermission)) || Objects.isNull(session)) {
-			return super.preHandle(request, response, handler);
+			return iteratePluginInterceptors(request, response, handler);
 		}
 
 		if(Objects.nonNull(requireAllPermission)) {
@@ -101,8 +107,22 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 		if(Objects.nonNull(requireAnyPermission)) {
 			permissionService.assertAnyPermission(requireAnyPermission.split(","));
 		}
-
+		
+		if(!iteratePluginInterceptors(request, response, handler)) {
+			return false;
+		}
+		
 		return super.preHandle(request, response, handler);
+	}
+
+	private boolean iteratePluginInterceptors(HttpServletRequest request, HttpServletResponse response,
+			Object handler) throws Exception {
+		for(PluginInterceptor in : applicationService.getBeans(PluginInterceptor.class)) {
+			if(!in.preHandle(request, response, handler)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private Session performBasicAuthentication(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
@@ -136,11 +156,18 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 			ModelAndView modelAndView) throws Exception {
+		
+		for(PluginInterceptor in : applicationService.getBeans(PluginInterceptor.class)) {
+			in.postHandle(request, response, handler);
+		}
+		
 		tenantService.clearCurrentTenant();
 		if(permissionService.hasUserContext()) {
 			permissionService.clearUserContext();
 		}
+		
 		Request.tearDown();
+		
 		super.postHandle(request, response, handler, modelAndView);
 	}
 

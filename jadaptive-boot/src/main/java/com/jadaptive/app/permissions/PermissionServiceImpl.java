@@ -66,7 +66,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			return "System";
 		}
 		
-		public boolean isPasswordChangeRequired() {
+		public boolean getPasswordChangeRequired() {
 			return false;
 		}
 	};

@@ -24,12 +24,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.jadaptive.api.app.ConfigHelper;
+import com.jadaptive.api.app.ResourcePackage;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.app.ConfigHelper;
-import com.jadaptive.app.ResourcePackage;
 import com.jadaptive.utils.FileUtils;
 
 @Controller

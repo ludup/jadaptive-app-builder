@@ -9,7 +9,9 @@ import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.sshtools.common.permissions.PermissionDeniedException;
+import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
+import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
 public class Passwd extends UserCommand {
@@ -18,9 +20,13 @@ public class Passwd extends UserCommand {
 	UserService userService; 
 	
 	public Passwd() {
-		super("passwd", "User", "passwd <user>", "Change the current user or another users password.");
+		super("passwd", 
+				"User",
+				UsageHelper.build("passwd [options] <user>",
+						"-f, --forceChange		       Force the user to change password at next logon"),
+						"Change the current user or another users password.");
 	}
-
+;
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
@@ -39,10 +45,11 @@ public class Passwd extends UserCommand {
 			
 			try {
 				if(isCurrentUser(user)) {
-					userService.changePassword(user, newPassword);
+					userService.changePassword(user, newPassword, false);
 					console.println("Your password was changed!");
 				} else {
-					userService.setPassword(user, newPassword);
+					boolean passwordChangeRequired = CliHelper.hasOption(args, 'f', "forceChange");
+					userService.setPassword(user, newPassword, passwordChangeRequired);
 					console.println(String.format("Password for %s changed!", user.getUsername()));
 				}
 				

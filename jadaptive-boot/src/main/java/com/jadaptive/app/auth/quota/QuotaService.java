@@ -1,4 +1,4 @@
-package com.jadaptive.app.auth;
+package com.jadaptive.app.auth.quota;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 

@@ -26,6 +26,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.ConfigHelper;
+import com.jadaptive.api.app.ResourcePackage;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.tenant.Tenant;

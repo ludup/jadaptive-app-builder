@@ -99,9 +99,14 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.64</version>
+			<version>1.60</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.pf4j</groupId>
+			<artifactId>pf4j-update</artifactId>
+			<version>2.3.0</version>
+		</dependency>
 	</dependencies>
 
 

@@ -1,9 +1,11 @@
 package com.jadaptive.plugins.sshd.commands;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.PersonalObjectDatabase;
@@ -16,12 +18,15 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.AuthorizedKey;
 import com.jadaptive.plugins.sshd.AuthorizedKeyServiceImpl;
+import com.sshtools.common.files.AbstractFile;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.publickey.SshKeyPairGenerator;
-import com.sshtools.common.publickey.SshKeyUtils;
 import com.sshtools.common.publickey.SshPrivateKeyFile;
 import com.sshtools.common.publickey.SshPrivateKeyFileFactory;
+import com.sshtools.common.publickey.SshPublicKeyFile;
+import com.sshtools.common.publickey.SshPublicKeyFileFactory;
 import com.sshtools.common.ssh.SshException;
+import com.sshtools.common.ssh.SshKeyFingerprint;
 import com.sshtools.common.ssh.components.SshKeyPair;
 import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
@@ -42,10 +47,11 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 	public SshKeyGen() {
 		super("ssh-keygen", 
 				"User",
-				UsageHelper.build("ssh-keygen -t [rsa|ecdsa|ed25519] -b [bits] -a [user]",
+				UsageHelper.build("ssh-keygen -t [rsa|ecdsa|ed25519] -f [path] -b [bits] -a [user]",
 						"-t, --type              The type of key to generate",
 						"-b, --bits              The number of bits required for the key (ignored for ed25519)",
-						"-a, --assign            Assign the key to another user (requires administrative or authorizedKey.assign permission"),
+						"-f, --file              The file path to save the key to",
+						"-a, --assign            Assign the key to a user (requires authorizedKey.assign permission"),
 						"Generate SSH keys");
 	}
 
@@ -110,15 +116,25 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 				
 				SshKeyPair pair = SshKeyPairGenerator.generateKeyPair(type, Integer.parseInt(bits));
 				
-				String publicKey = SshKeyUtils.getOpenSSHFormattedKey(pair.getPublicKey(), comment);
+				SshPublicKeyFile pubFile = SshPublicKeyFileFactory.create(
+						pair.getPublicKey(), comment, 
+							SshPublicKeyFileFactory.OPENSSH_FORMAT);
+				SshPrivateKeyFile file = SshPrivateKeyFileFactory.create(
+						pair, new String(newPassword));
 				
 				AuthorizedKey key = new AuthorizedKey();
-				key.setPublicKey(publicKey);
+				key.setPublicKey(new String(pubFile.getFormattedKey(), "UTF-8"));
 				key.setName(comment);
 				
 				authorizedKeyService.saveOrUpdate(key, forUser);
 				
-				SshPrivateKeyFile file = SshPrivateKeyFileFactory.create(pair, new String(newPassword));
+				if(CliHelper.hasOption(args, 'f', "file")) {
+					String path = CliHelper.getValue(args, 'f', "file");
+					AbstractFile f = console.getCurrentDirectory().resolveFile(path);
+					IOUtils.copy(new ByteArrayInputStream(file.getFormattedKey()), f.getOutputStream());
+					
+				}
+				
 				console.println();
 				console.println("*** IMPORTANT ***");
 				console.println("Your private has been created and has been printed below.");
@@ -126,6 +142,10 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 				console.println("Therefore please copy this to a safe location or it will be lost.");
 				console.println();
 				console.println(new String(file.getFormattedKey(), "UTF-8"));
+				console.println();
+				console.println(pair.getPublicKey().getFingerprint());
+				console.println();
+				console.println(SshKeyFingerprint.getBubbleBabble(pair.getPublicKey()));
 				console.println();
 				break;
 			} catch (NumberFormatException | RepositoryException | EntityException | SshException e) {
