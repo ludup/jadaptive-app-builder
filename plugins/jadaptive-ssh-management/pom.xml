@@ -39,7 +39,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.jadaptive</groupId>
+				<groupId>com.sshtools</groupId>
 				<artifactId>pf4j-plugin-generator</artifactId>
 				<version>0.0.1</version>
 				<executions>
