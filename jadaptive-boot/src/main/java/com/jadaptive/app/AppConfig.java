@@ -24,7 +24,6 @@ import org.pf4j.spring.SpringPluginManager;
 import org.pf4j.update.FileDownloader;
 import org.pf4j.update.PluginInfo;
 import org.pf4j.update.UpdateManager;
-import org.pf4j.update.PluginInfo.PluginRelease;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
