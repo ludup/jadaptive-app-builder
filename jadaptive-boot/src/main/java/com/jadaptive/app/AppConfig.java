@@ -216,7 +216,6 @@ public class AppConfig {
             Path toFile = destination.resolve(fileName);
             
 	        Files.copy(con.getInputStream(), toFile, 
-	        		StandardCopyOption.COPY_ATTRIBUTES, 
 	        		StandardCopyOption.REPLACE_EXISTING);
 
 	        return destination;
