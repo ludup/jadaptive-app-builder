@@ -23,6 +23,7 @@ import org.pf4j.PluginRepository;
 import org.pf4j.spring.SpringPluginManager;
 import org.pf4j.update.FileDownloader;
 import org.pf4j.update.PluginInfo;
+import org.pf4j.update.PluginInfo.PluginRelease;
 import org.pf4j.update.UpdateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.jadaptive.utils.Version;
 
 @Configuration
 public class AppConfig {
@@ -102,9 +105,24 @@ public class AppConfig {
 				}
 						
 				public boolean hasPluginUpdate(String id) {
-			        boolean  hasUpdate = super.hasPluginUpdate(id);
-			        // TODO a way to handle snapshot deployments
-			        return hasUpdate;
+					 PluginInfo pluginInfo = getPluginsMap().get(id);
+				        if (pluginInfo == null) {
+				            return false;
+				        }
+				        
+				        Version installedVersion = new Version(
+				        	pluginManager.getPlugin(id)
+				        		.getDescriptor().getVersion());
+				        
+				        PluginRelease last = getLastPluginRelease(id);
+				        if(last!=null) {
+				        	Version lastVersion = new Version(last.version);
+				        	return lastVersion.compareTo(installedVersion) > 0
+				        			|| (installedVersion.isSnapshot() 
+				        					&& lastVersion.isSnapshot());
+				        } 
+				        
+				        return false;
 			    }
 	    		
 	    	};

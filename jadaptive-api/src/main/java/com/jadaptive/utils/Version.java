@@ -38,8 +38,7 @@ public class Version implements Comparable<Version> {
                     String substring = string.substring(5);
                     element = -49999 + ( substring.equals("") ? 0 : Integer.parseInt(substring) );
                 } else if (string.toLowerCase().startsWith("snapshot")) {
-                    String substring = string.substring(8);
-                    element = -59999 + ( substring.equals("") ? 0 : Integer.parseInt(substring) );
+                    element = -59999;
                 } else if (string.toLowerCase().startsWith("local")) {
                     element = Integer.MAX_VALUE;
                 } else if (string.toLowerCase().startsWith("r")) {
@@ -70,6 +69,10 @@ public class Version implements Comparable<Version> {
 
     public String toString() {
         return versionString;
+    }
+    
+    public boolean isSnapshot() {
+    	return elements.length > 3 && elements[3] <= -59999;
     }
 
     public int compareTo(Version version) {

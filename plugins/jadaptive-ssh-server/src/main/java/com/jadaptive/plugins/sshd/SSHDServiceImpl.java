@@ -38,7 +38,7 @@ import com.sshtools.server.SshServerContext;
 import com.sshtools.server.vsession.ShellCommandFactory;
 import com.sshtools.server.vsession.VirtualChannelFactory;
 import com.sshtools.server.vsession.VirtualSessionPolicy;
-import com.sshtools.server.vshell.commands.fs.FileSystemCommandFactory;
+import com.sshtools.server.vsession.commands.fs.FileSystemCommandFactory;
 
 @Service
 public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAware {
