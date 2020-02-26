@@ -3,6 +3,7 @@ package com.jadaptive.app;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -20,6 +21,7 @@ import org.pf4j.ExtensionFactory;
 import org.pf4j.ExtensionFinder;
 import org.pf4j.JarPluginRepository;
 import org.pf4j.PluginRepository;
+import org.pf4j.PluginRuntimeException;
 import org.pf4j.spring.SpringPluginManager;
 import org.pf4j.update.FileDownloader;
 import org.pf4j.update.PluginInfo;
@@ -191,11 +193,17 @@ public class AppConfig {
 		@Override
 		public Path downloadFile(URL url) throws IOException {
 			
-			URLConnection con;
+			if(log.isInfoEnabled()) {
+				log.info("Downloading {}", url.toExternalForm());
+			}
+			
+			Path destination = Files.createTempDirectory("pf4j-update-downloader");
+	        destination.toFile().deleteOnExit();
+	        
 			if(url.getProtocol().startsWith("http")) {
 				HttpURLConnection hc = (HttpURLConnection) url.openConnection();
 	
-		        hc.setDoOutput(true);
+		        hc.setDoOutput(false);
 		        hc.setDoInput(true);
 		        hc.setUseCaches(false);
 	
@@ -203,22 +211,26 @@ public class AppConfig {
 		        hc.setRequestProperty("Product-Id", ApplicationVersion.getProductId());
 		        hc.setRequestProperty("Product-Version", ApplicationVersion.getVersion());
 			       
-		        con = hc;
+		        hc.connect();
+		        
+		        String path = url.getPath();
+		        String fileName = path.substring(path.lastIndexOf('/') + 1);
+		        Path toFile = destination.resolve(fileName);
+		        
+		        Files.copy(hc.getInputStream(), toFile, StandardCopyOption.REPLACE_EXISTING);
+		        return toFile;
 			} else {
-				con = url.openConnection();
+				try {
+					Path fromFile = Paths.get(url.toURI());
+		            String path = url.getPath();
+		            String fileName = path.substring(path.lastIndexOf('/') + 1);
+		            Path toFile = destination.resolve(fileName);
+		            Files.copy(fromFile, toFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+		            return toFile;
+				} catch (URISyntaxException e) {
+		            throw new PluginRuntimeException("Something wrong with given URL", e);
+		        }
 			}
-			
-	        Path destination = Files.createTempDirectory("pf4j-update-downloader");
-	        destination.toFile().deleteOnExit();
-
-	        String path = url.getPath();
-            String fileName = path.substring(path.lastIndexOf('/') + 1);
-            Path toFile = destination.resolve(fileName);
-            
-	        Files.copy(con.getInputStream(), toFile, 
-	        		StandardCopyOption.REPLACE_EXISTING);
-
-	        return destination;
 		    
 		}
 		

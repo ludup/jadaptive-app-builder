@@ -18,7 +18,7 @@
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.projectUrl>https://github.com/ludup/jadpative-builder</plugin.projectUrl>
-		<plugin.dependencies>jadaptive-web-bootstrap-vue</plugin.dependencies>
+		<plugin.dependencies></plugin.dependencies>
 	</properties>
 
 	<dependencies>		
