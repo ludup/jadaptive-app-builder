@@ -216,6 +216,11 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 	            if(plugin.id.equals("jadaptive-boot")) {
 	            	Version installedVersion = new Version(ApplicationVersion.getVersion());
 	            	PluginInfo.PluginRelease release = getLastPluginRelease(plugin.id);
+	            	
+	            	log.debug("Checking core application version {} against {}", 
+	            			ApplicationVersion.getVersion(),
+	            			release.version);
+	            	
 	            	Version latestVersion = new Version(release.version);
 	            	if(!checkPluginVersion(installedVersion, latestVersion, release, plugin.id,
 	            		new File("app/jadaptive-boot-" + installedVersion.toString() + ".jar").toPath())) {
