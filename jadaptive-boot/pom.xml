@@ -12,6 +12,15 @@
 		<relativePath>..</relativePath>
 	</parent>
 
+	<properties>
+		<plugin.id>jadaptive-boot</plugin.id>
+		<plugin.class></plugin.class>
+		<plugin.version>${project.version}</plugin.version>
+		<plugin.provider>JADAPTIVE Limited</plugin.provider>
+		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder</plugin.projectUrl>
+		<plugin.dependencies></plugin.dependencies>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -101,12 +110,6 @@
 			<artifactId>bcprov-jdk15on</artifactId>
 			<version>1.60</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.pf4j</groupId>
-			<artifactId>pf4j-update</artifactId>
-			<version>2.3.0</version>
-		</dependency>
 	</dependencies>
 
 
@@ -122,6 +125,24 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>com.sshtools</groupId>
+				<artifactId>pf4j-plugin-generator</artifactId>
+				<version>0.0.2</version>
+				<configuration>
+					<artifactIsPlugin>true</artifactIsPlugin>
+					<copyDependencies>false</copyDependencies>
+				</configuration>
+				<executions>
+					<execution>
+						<id>generate-plugin</id>
+						<phase>install</phase>
+						<goals>
+							<goal>generate-plugin</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -153,7 +174,7 @@
 									<type>${project.packaging}</type>
 								</artifactItem>
 							</artifactItems>
-							<outputDirectory>../target/dist/app</outputDirectory>
+							<outputDirectory>../target/app</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>
