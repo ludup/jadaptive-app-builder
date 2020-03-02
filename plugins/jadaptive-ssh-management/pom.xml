@@ -17,7 +17,7 @@
 		<plugin.class>com.jadaptive.plugins.ssh.management.SSHDManagementPlugin</plugin.class>
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
-		<plugin.projectUrl>https://github.com/ludup/jadpative-builder</plugin.projectUrl>
+		<plugin.projectUrl>https://github.com/ludup/jadpative-app/builder/plugins</plugin.projectUrl>
 		<plugin.dependencies>jadaptive-ssh-server</plugin.dependencies>
 	</properties>
 
@@ -41,7 +41,7 @@
 			<plugin>
 				<groupId>com.sshtools</groupId>
 				<artifactId>pf4j-plugin-generator</artifactId>
-				<version>0.0.1</version>
+				<version>0.0.2</version>
 				<executions>
 					<execution>
 						<id>generate-plugin</id>

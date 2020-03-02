@@ -20,6 +20,9 @@ public class SuperUserCommandFactory extends AbstractAutowiredCommandFactory imp
 	public CommandFactory<ShellCommand> buildFactory() throws AccessDeniedException {
 		tenantService.assertManageTenant();
 		installCommand("tenants", Tenants.class);
+		installCommand("updates", Updates.class);
+		installCommand("shutdown", Shutdown.class);
+		installCommand("restart", Restart.class);
 		return this;
 	}
 
