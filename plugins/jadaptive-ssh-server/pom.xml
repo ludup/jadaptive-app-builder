@@ -17,7 +17,7 @@
 		<plugin.class>com.jadaptive.plugins.sshd.SSHDServerPlugin</plugin.class>
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
-		<plugin.projectUrl>https://github.com/ludup/jadpative-builder</plugin.projectUrl>
+		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder/plugins</plugin.projectUrl>
 		<plugin.dependencies></plugin.dependencies>
 	</properties>
 
@@ -33,6 +33,9 @@
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-synergy</artifactId>
 			<version>3.0.0-SNAPSHOT</version>
+			<exclusions>
+
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.sshtools</groupId>
@@ -53,13 +56,25 @@
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-vfs2-sandbox</artifactId>
+			<artifactId>commons-vfs2</artifactId>
 			<version>2.6.0</version>
 			<exclusions>
 				<exclusion>
-					<groupId>org.apache.commons</groupId>
-					<artifactId>commons-vfs2</artifactId>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-hdfs-client</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+			
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-vfs2-sandbox</artifactId>
+			<version>2.6.0</version>
+			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
 					<artifactId>commons-logging</artifactId>
@@ -84,7 +99,7 @@
 			<plugin>
 				<groupId>com.sshtools</groupId>
 				<artifactId>pf4j-plugin-generator</artifactId>
-				<version>0.0.1</version>
+				<version>0.0.2</version>
 				<executions>
 					<execution>
 						<id>generate-plugin</id>

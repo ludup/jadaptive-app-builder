@@ -42,7 +42,7 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 			try {
 				boolean success = userService.verifyPassword(user, password.toCharArray());
 				
-				if(user.getPasswordChangeRequired()) {
+				if(success && user.getPasswordChangeRequired()) {
 					try {
 						permissionService.assertAnyPermission( 
 								UserService.CHANGE_PASSWORD_PERMISSION,
