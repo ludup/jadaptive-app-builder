@@ -61,28 +61,39 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
         PluginRelease latestRelease = getLastPluginRelease(id);
         if(latestRelease!=null) {
         	Version latestVersion = new Version(latestRelease.version);
-        	if(latestVersion.compareTo(installedVersion) > 0) {
-        		log.info("Found updated version {} for {} version {}", 
-        				latestRelease.version, id, installedVersion.toString());
-        		return true;
-        	}
-        	if(installedVersion.isSnapshot() && latestVersion.equals(installedVersion)) {
-        		try {
-					if(latestRelease.date.toInstant().isAfter(
-							Files.getLastModifiedTime(wrapper.getPluginPath()).toInstant())) {
-								log.info("Found updated SNAPSHOT version for {} version {}", 
-					    				id, installedVersion.toString());
-						return true;
-					}
-				} catch (IOException e) {
-					log.error("Could not resolve last modified time of plugin path", e);
-				}
-        	}
+        	return checkPluginVersion(installedVersion, latestVersion,
+        				latestRelease, wrapper.getPluginId(), wrapper.getPluginPath());
         		
         } 
         
         return false;
     }
+	
+	private boolean checkPluginVersion(Version installedVersion, 
+			Version latestVersion,
+			PluginInfo.PluginRelease latestRelease,
+			String pluginId,
+			Path pluginPath) {
+		if(latestVersion.compareTo(installedVersion) > 0) {
+    		log.info("Found updated version {} for {} version {}", 
+    				latestRelease.version, pluginId, installedVersion.toString());
+    		return true;
+    	}
+		
+		if(installedVersion.isSnapshot() && latestVersion.equals(installedVersion)) {
+    		try {
+				if(latestRelease.date.toInstant().isAfter(
+						Files.getLastModifiedTime(pluginPath).toInstant())) {
+							log.info("Found updated SNAPSHOT version for {} version {}", 
+				    				pluginId, installedVersion.toString());
+					return true;
+				}
+			} catch (IOException e) {
+				log.error("Could not resolve last modified time of plugin path", e);
+			}
+    	}
+		return false;
+	}
 	
 	public boolean processPlugin(PluginInfo plugin, PluginInfo.PluginRelease lastRelease) {
 		log.debug("Found available plugin '{}'", plugin.id);
@@ -114,6 +125,8 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 	}
 
 	public boolean processApplicationPlugin(PluginInfo plugin, PluginInfo.PluginRelease lastRelease) {
+		
+		log.debug("Install application core '{}' with version {}", plugin.id, lastRelease.version);
 		
 		try {
 			File destination = new File("app");
@@ -200,7 +213,17 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
             List<PluginInfo> availablePlugins = getAvailablePlugins();
             log.debug("Found {} available plugins", availablePlugins.size());
             for (PluginInfo plugin : availablePlugins) {
-               toInstall.add(plugin);
+	            if(plugin.id.equals("jadaptive-boot")) {
+	            	Version installedVersion = new Version(ApplicationVersion.getVersion());
+	            	PluginInfo.PluginRelease release = getLastPluginRelease(plugin.id);
+	            	Version latestVersion = new Version(release.version);
+	            	if(!checkPluginVersion(installedVersion, latestVersion, release, plugin.id,
+	            		new File("app/jadaptive-boot-" + installedVersion.toString() + ".jar").toPath())) {
+	            		continue;
+	            	}
+	            } 
+	            toInstall.add(plugin);
+	            
             }
         } else {
             log.debug("No available plugins found");
@@ -246,7 +269,9 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
         	
         	PluginInfo.PluginRelease lastRelease = getLastPluginRelease(plugin.id);
         	
-        	if("https://github.com/ludup/jadaptive-app-builder".equals(plugin.projectUrl)) {
+        	log.debug("Installing plugin '{} from {}'", plugin.id, plugin.projectUrl);
+        	
+        	if("jadaptive-boot".equals(plugin.id)) {
         		if(!processApplicationPlugin(plugin, lastRelease)) {
         			throw new IOException("Failed to install " + plugin.id);
         		}
@@ -261,39 +286,5 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
         }
         
         return true;
-	}
-
-	private boolean updatePluginFile(String id, PluginInfo.PluginRelease lastRelease) {
-		
-	       if (pluginManager.getPlugin(id) == null) {
-	            throw new PluginRuntimeException("Plugin {} cannot be updated since it is not installed", id);
-	        }
-
-	        PluginInfo pluginInfo = getPluginsMap().get(id);
-	        if (pluginInfo == null) {
-	            throw new PluginRuntimeException("Plugin {} does not exist in any repository", id);
-	        }
-
-	        if (!hasPluginUpdate(id)) {
-	            log.warn("Plugin {} does not have an update available which is compatible with system version", id);
-	            return false;
-	        }
-
-	        // Download to temp folder
-	        Path downloaded = downloadPlugin(id, lastRelease.version);
-
-	        if (!pluginManager.deletePlugin(id)) {
-	            return false;
-	        }
-
-	        Path pluginsRoot = pluginManager.getPluginsRoot();
-	        Path file = pluginsRoot.resolve(downloaded.getFileName());
-	        try {
-	            Files.move(downloaded, file, REPLACE_EXISTING);
-	            Files.setLastModifiedTime(file, FileTime.fromMillis(lastRelease.date.getTime()));
-	            return true;
-	        } catch (IOException e) {
-	            throw new PluginRuntimeException("Failed to write plugin file {} to plugin folder", file);
-	        }
 	}
 }
