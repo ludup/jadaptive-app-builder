@@ -274,12 +274,12 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
             String installedVersion = wrapper.getDescriptor().getVersion();
             log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
 
-            if(!installPluginFile(plugin.id, lastRelease.version, lastRelease.date)) {
-            	throw new IOException("Could not install plugin " + plugin.id);
-            }
-            
             if(!pluginManager.deletePlugin(plugin.id)) {
             	throw new IOException("Unable to delete plugin " + plugin.id);
+            }
+            
+            if(!installPluginFile(plugin.id, lastRelease.version, lastRelease.date)) {
+            	throw new IOException("Could not update plugin " + plugin.id);
             }
         }
 	
@@ -289,11 +289,8 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
         	
         	log.debug("Installing plugin '{} from {}'", plugin.id, plugin.projectUrl);
         	
-        	boolean installed = installPlugin(plugin.id, lastRelease.version);
-            if (installed) {
-                log.debug("Installed plugin '{}'", plugin.id);
-            } else {
-                log.error("Cannot install plugin '{}'", plugin.id);
+        	if(!installPluginFile(plugin.id, lastRelease.version, lastRelease.date)) {
+            	throw new IOException("Could not install plugin " + plugin.id);
             }
         }
 
