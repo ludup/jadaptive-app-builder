@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.pf4j.PluginManager;
 import org.pf4j.update.PluginInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ExitCodeGenerator;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 
 import com.jadaptive.api.app.ApplicationUpdateManager;
 import com.jadaptive.plugins.sshd.commands.UserCommand;
@@ -19,6 +23,12 @@ public class Updates extends UserCommand {
 	
 	@Autowired
 	private ApplicationUpdateManager updateService; 
+	
+	@Autowired
+	private ApplicationContext applicationContext;
+	
+	@Autowired
+	private PluginManager pluginManager;
 	
 	public Updates() {
 		super("updates", "System Management", UsageHelper.build("updates [option]",
@@ -55,8 +65,15 @@ public class Updates extends UserCommand {
 			String answer = console.readLine(String.format("Install %d updates? (y/n): ", count));
 			if("yes".contains(answer.toLowerCase())) {
 				try {
-					updateService.installUpdates(updates, newInstalls);
-					console.println("Application restart required");
+					updateService.installUpdates();
+
+					console.println("The application is being restarted");
+					
+					console.getSessionChannel().close();
+					console.getConnection().disconnect();
+					
+					updateService.restart();
+					
 				} catch (IOException e) {
 					console.println("Installation failed!");
 					console.println(e.getMessage());
@@ -88,6 +105,7 @@ public class Updates extends UserCommand {
 			printPlugins(updates);
 		}
 		if(!newInstalls.isEmpty()) {
+			console.println("New plugins");
 			printPlugins(newInstalls);
 		}
 		
@@ -96,7 +114,7 @@ public class Updates extends UserCommand {
 
 	private void printPlugins(List<PluginInfo> infos) {
 		for(PluginInfo info : infos) {
-			console.println(info.id);
+			console.println("  " + info.id);
 		}
 	}
 
