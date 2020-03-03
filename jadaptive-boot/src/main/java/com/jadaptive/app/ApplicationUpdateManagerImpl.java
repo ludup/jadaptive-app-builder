@@ -140,7 +140,28 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
     
     public PluginInfo getApplicationCoreUpdate() {
     	Map<String, PluginInfo> pluginsMap = super.getPluginsMap();
-    	return pluginsMap.get("jadaptive-boot");
+    	PluginInfo plugin = pluginsMap.get("jadaptive-boot");
+    	
+    	if(Objects.isNull(plugin)) {
+    		return null;
+    	}
+    	if(plugin.releases.size() < 1) {
+    		return null;
+    	}
+    	Version installedVersion = new Version(ApplicationVersion.getVersion());
+    	PluginInfo.PluginRelease release = plugin.releases.get(0);
+    	
+    	log.debug("Checking core application version {} against {}", 
+    			ApplicationVersion.getVersion(),
+    			release.version);
+    	
+    	Version latestVersion = new Version(release.version);
+    	if(!checkPluginVersion(installedVersion, latestVersion, release, plugin.id,
+    		new File("app/jadaptive-boot-" + installedVersion.toString() + ".jar").toPath())) {
+    		return null;
+    	}
+
+    	return plugin;
     }
 
 	public boolean processApplicationPlugin(PluginInfo plugin) {
@@ -241,22 +262,7 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
             List<PluginInfo> availablePlugins = getAvailablePlugins();
             log.debug("Found {} available plugins", availablePlugins.size());
             for (PluginInfo plugin : availablePlugins) {
-	            if(plugin.id.equals("jadaptive-boot")) {
-	            	Version installedVersion = new Version(ApplicationVersion.getVersion());
-	            	PluginInfo.PluginRelease release = getLastPluginRelease(plugin.id);
-	            	
-	            	log.debug("Checking core application version {} against {}", 
-	            			ApplicationVersion.getVersion(),
-	            			release.version);
-	            	
-	            	Version latestVersion = new Version(release.version);
-	            	if(!checkPluginVersion(installedVersion, latestVersion, release, plugin.id,
-	            		new File("app/jadaptive-boot-" + installedVersion.toString() + ".jar").toPath())) {
-	            		continue;
-	            	}
-	            } 
 	            toInstall.add(plugin);
-	            
             }
         } else {
             log.debug("No available plugins found");
