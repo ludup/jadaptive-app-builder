@@ -269,13 +269,17 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
         for (PluginInfo plugin : getUpdates()) {
             log.debug("Found update for plugin '{}'", plugin.id);
             PluginInfo.PluginRelease lastRelease = getLastPluginRelease(plugin.id);
-            String lastVersion = lastRelease.version;
+            Version updateVersion = new Version(lastRelease.version);
+            
             PluginWrapper wrapper = pluginManager.getPlugin(plugin.id);
-            String installedVersion = wrapper.getDescriptor().getVersion();
-            log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
+            Version installedVersion = new Version(wrapper.getDescriptor().getVersion());
+            log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, updateVersion);
 
-            if(!pluginManager.deletePlugin(plugin.id)) {
-            	throw new IOException("Unable to delete plugin " + plugin.id);
+            // Only delete plug-in if its a different version
+            if(installedVersion.compareTo(updateVersion) != 0) {
+            	if(!pluginManager.deletePlugin(plugin.id)) {
+            		throw new IOException("Unable to delete plugin " + plugin.id);
+            	}
             }
             
             if(!installPluginFile(plugin.id, lastRelease.version, lastRelease.date)) {
