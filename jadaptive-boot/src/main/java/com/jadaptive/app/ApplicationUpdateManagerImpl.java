@@ -303,15 +303,27 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 
 	@Override
 	public void restart() {
+		
+		log.info("Shutting down plugins");
 		pluginManager.stopPlugins();
+		
+		log.info("Shutting down application context");
 		int exitCode = SpringApplication.exit(applicationContext, (ExitCodeGenerator) () -> 99);
+		
+		log.info("Context shutdown with exit code " + exitCode);
 	    System.exit(exitCode);
 	}
 	
 	@Override
 	public void shutdown() {
+		
+		log.info("Shutting down plugins");
 		pluginManager.stopPlugins();
+		
+		log.info("Shutting down application context");
 		int exitCode = SpringApplication.exit(applicationContext, (ExitCodeGenerator) () -> 0);
+		
+		log.info("Context shutdown with exit code " + exitCode);
 	    System.exit(exitCode);
 	}
 }
