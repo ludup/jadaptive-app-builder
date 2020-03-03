@@ -314,22 +314,14 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 	@Override
 	public void restart() {
 		pluginManager.stopPlugins();
-		SpringApplication.exit(applicationContext, new ExitCodeGenerator() {
-			@Override
-			public int getExitCode() {
-				return 99;
-			}
-		});
+		int exitCode = SpringApplication.exit(applicationContext, (ExitCodeGenerator) () -> 99);
+	    System.exit(exitCode);
 	}
 	
 	@Override
 	public void shutdown() {
 		pluginManager.stopPlugins();
-		SpringApplication.exit(applicationContext, new ExitCodeGenerator() {
-			@Override
-			public int getExitCode() {
-				return 0;
-			}
-		});
+		int exitCode = SpringApplication.exit(applicationContext, (ExitCodeGenerator) () -> 0);
+	    System.exit(exitCode);
 	}
 }
