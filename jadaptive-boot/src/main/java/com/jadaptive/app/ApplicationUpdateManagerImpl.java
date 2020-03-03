@@ -1,7 +1,5 @@
 package com.jadaptive.app;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -12,20 +10,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
 import org.pf4j.update.FileDownloader;
+import org.pf4j.update.FileVerifier;
 import org.pf4j.update.PluginInfo;
 import org.pf4j.update.PluginInfo.PluginRelease;
 import org.pf4j.update.UpdateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ExitCodeGenerator;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationUpdateManager;
@@ -38,6 +41,9 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 		
 	private PluginManager pluginManager;
 
+	@Autowired
+	ApplicationContext applicationContext;
+	
 	public ApplicationUpdateManagerImpl(PluginManager pluginManager) {
 		super(pluginManager, new File("conf/repositories.json").toPath());
 		this.pluginManager = pluginManager;
@@ -95,36 +101,51 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 		return false;
 	}
 	
-	public boolean processPlugin(PluginInfo plugin, PluginInfo.PluginRelease lastRelease) {
-		log.debug("Found available plugin '{}'", plugin.id);
+//	public boolean processPlugin(PluginInfo plugin, PluginInfo.PluginRelease lastRelease) {
+//		log.debug("Found available plugin '{}'", plugin.id);
+//
+//        String lastVersion = lastRelease.version;
+//        log.debug("Install plugin '{}' with version {}", plugin.id, lastVersion);
+//        boolean installed = installPluginFile(plugin.id, lastVersion, lastRelease.date);
+//        if (installed) {
+//            log.debug("Installed plugin '{}'", plugin.id);
+//            return true;
+//        } else {
+//            log.error("Cannot install plugin '{}'", plugin.id);
+//            return false;
+//        }
+//	}
 
-        String lastVersion = lastRelease.version;
-        log.debug("Install plugin '{}' with version {}", plugin.id, lastVersion);
-        boolean installed = installPluginFile(plugin.id, lastVersion, lastRelease.date);
-        if (installed) {
-            log.debug("Installed plugin '{}'", plugin.id);
-            return true;
-        } else {
-            log.error("Cannot install plugin '{}'", plugin.id);
-            return false;
+//	private boolean installPluginFile(String id, String version, Date date) {
+//        Path downloaded = downloadPlugin(id, version);
+//
+//        Path pluginsRoot = pluginManager.getPluginsRoot();
+//        Path file = pluginsRoot.resolve(downloaded.getFileName());
+//        try {
+//            Files.move(downloaded, file, REPLACE_EXISTING);
+//            Files.setLastModifiedTime(file, FileTime.fromMillis(date.getTime()));
+//            return true;
+//        } catch (IOException e) {
+//            throw new PluginRuntimeException(e, "Failed to write file '{}' to plugins folder", file);
+//        }
+//	}
+	
+    public Map<String, PluginInfo> getPluginsMap() {
+        Map<String, PluginInfo> pluginsMap = super.getPluginsMap();
+        if(pluginsMap.containsKey("jadaptive-boot")) {
+        	pluginsMap.remove("jadaptive-boot");
         }
-	}
+        return pluginsMap;
+    }
+    
+    public PluginInfo getApplicationCoreUpdate() {
+    	Map<String, PluginInfo> pluginsMap = super.getPluginsMap();
+    	return pluginsMap.get("jadaptive-boot");
+    }
 
-	private boolean installPluginFile(String id, String version, Date date) {
-        Path downloaded = downloadPlugin(id, version);
-
-        Path pluginsRoot = pluginManager.getPluginsRoot();
-        Path file = pluginsRoot.resolve(downloaded.getFileName());
-        try {
-            Files.move(downloaded, file, REPLACE_EXISTING);
-            Files.setLastModifiedTime(file, FileTime.fromMillis(date.getTime()));
-            return true;
-        } catch (IOException e) {
-            throw new PluginRuntimeException(e, "Failed to write file '{}' to plugins folder", file);
-        }
-	}
-
-	public boolean processApplicationPlugin(PluginInfo plugin, PluginInfo.PluginRelease lastRelease) {
+	public boolean processApplicationPlugin(PluginInfo plugin) {
+		
+		PluginInfo.PluginRelease lastRelease = plugin.releases.get(0);
 		
 		log.debug("Install application core '{}' with version {}", plugin.id, lastRelease.version);
 		
@@ -133,7 +154,9 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 			FileUtils.deleteDirectory(destination);
 			destination.mkdirs();
 			
-			Path tmp = downloadPlugin(plugin.id, lastRelease.version);
+			Path tmp = getFileDownloader(plugin.id).downloadFile(new URL(lastRelease.url));
+            getFileVerifier(plugin.id).verify(new FileVerifier.Context(plugin.id, lastRelease), tmp);
+
 			String fileName = lastRelease.url.substring(lastRelease.url.lastIndexOf('/') + 1);
 			File appjar = new File(destination, fileName);
 			Files.copy(tmp, appjar.toPath());
@@ -209,6 +232,11 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
             log.debug("No updates found");
         }
 
+        PluginInfo core = getApplicationCoreUpdate();
+        if(core!=null) {
+        	toUpdate.add(core);
+        }
+        
         if (hasAvailablePlugins()) {
             List<PluginInfo> availablePlugins = getAvailablePlugins();
             log.debug("Found {} available plugins", availablePlugins.size());
@@ -238,22 +266,14 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 	
 	@Override
 	public boolean installUpdates() throws IOException {
-		List<PluginInfo> toUpdate = new ArrayList<>();
-		List<PluginInfo> toInstall = new ArrayList<>();
-		
-		check4Updates(toUpdate, toInstall);
-		
-		if(!toUpdate.isEmpty() || !toInstall.isEmpty()) {
-			return installUpdates(toUpdate, toInstall);
-		}
-		
-		return false;
-	}
-	
-	@Override
-	public boolean installUpdates(List<PluginInfo> toUpdate, List<PluginInfo> toInstall) throws IOException {
-	    
-        for (PluginInfo plugin : toUpdate) {
+
+    	PluginInfo core = getApplicationCoreUpdate();
+    	if(Objects.nonNull(core)) {
+    		log.info("Updating core {}", core.id);
+    		processApplicationPlugin(core);
+    	}
+    	
+        for (PluginInfo plugin : getUpdates()) {
             log.debug("Found update for plugin '{}'", plugin.id);
             PluginInfo.PluginRelease lastRelease = getLastPluginRelease(plugin.id);
             String lastVersion = lastRelease.version;
@@ -265,7 +285,7 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
             	throw new IOException("Unable to delete plugin " + plugin.id);
             }
             
-            boolean updated = processPlugin(plugin, lastRelease);
+            boolean updated = updatePlugin(plugin.id, lastRelease.version);
             if (updated) {
                 log.debug("Updated plugin '{}'", plugin.id);
             } else {
@@ -274,26 +294,42 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
         	
         }
 	
-        for (PluginInfo plugin : toInstall) {
+        for (PluginInfo plugin : getAvailablePlugins()) {
         	
         	PluginInfo.PluginRelease lastRelease = getLastPluginRelease(plugin.id);
         	
         	log.debug("Installing plugin '{} from {}'", plugin.id, plugin.projectUrl);
         	
-        	if("jadaptive-boot".equals(plugin.id)) {
-        		if(!processApplicationPlugin(plugin, lastRelease)) {
-        			throw new IOException("Failed to install " + plugin.id);
-        		}
-        	} else {
-        		boolean installed = processPlugin(plugin, lastRelease);
-	            if (installed) {
-	                log.debug("Installed plugin '{}'", plugin.id);
-	            } else {
-	                log.error("Cannot install plugin '{}'", plugin.id);
-	            }
-        	}
+        	boolean installed = installPlugin(plugin.id, lastRelease.version);
+            if (installed) {
+                log.debug("Installed plugin '{}'", plugin.id);
+            } else {
+                log.error("Cannot install plugin '{}'", plugin.id);
+            }
         }
-        
+
         return true;
+	}
+
+	@Override
+	public void restart() {
+		pluginManager.stopPlugins();
+		SpringApplication.exit(applicationContext, new ExitCodeGenerator() {
+			@Override
+			public int getExitCode() {
+				return 99;
+			}
+		});
+	}
+	
+	@Override
+	public void shutdown() {
+		pluginManager.stopPlugins();
+		SpringApplication.exit(applicationContext, new ExitCodeGenerator() {
+			@Override
+			public int getExitCode() {
+				return 0;
+			}
+		});
 	}
 }
