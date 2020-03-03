@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,6 +31,7 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import com.jadaptive.api.app.ApplicationUpdateManager;
 import com.jadaptive.utils.Version;
@@ -100,35 +102,20 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
     	}
 		return false;
 	}
-	
-//	public boolean processPlugin(PluginInfo plugin, PluginInfo.PluginRelease lastRelease) {
-//		log.debug("Found available plugin '{}'", plugin.id);
-//
-//        String lastVersion = lastRelease.version;
-//        log.debug("Install plugin '{}' with version {}", plugin.id, lastVersion);
-//        boolean installed = installPluginFile(plugin.id, lastVersion, lastRelease.date);
-//        if (installed) {
-//            log.debug("Installed plugin '{}'", plugin.id);
-//            return true;
-//        } else {
-//            log.error("Cannot install plugin '{}'", plugin.id);
-//            return false;
-//        }
-//	}
 
-//	private boolean installPluginFile(String id, String version, Date date) {
-//        Path downloaded = downloadPlugin(id, version);
-//
-//        Path pluginsRoot = pluginManager.getPluginsRoot();
-//        Path file = pluginsRoot.resolve(downloaded.getFileName());
-//        try {
-//            Files.move(downloaded, file, REPLACE_EXISTING);
-//            Files.setLastModifiedTime(file, FileTime.fromMillis(date.getTime()));
-//            return true;
-//        } catch (IOException e) {
-//            throw new PluginRuntimeException(e, "Failed to write file '{}' to plugins folder", file);
-//        }
-//	}
+	private boolean installPluginFile(String id, String version, Date date) {
+        Path downloaded = downloadPlugin(id, version);
+
+        Path pluginsRoot = pluginManager.getPluginsRoot();
+        Path file = pluginsRoot.resolve(downloaded.getFileName());
+        try {
+            Files.move(downloaded, file, StandardCopyOption.REPLACE_EXISTING);
+            Files.setLastModifiedTime(file, FileTime.fromMillis(date.getTime()));
+            return true;
+        } catch (IOException e) {
+            throw new PluginRuntimeException(e, "Failed to write file '{}' to plugins folder", file);
+        }
+	}
 	
     public Map<String, PluginInfo> getPluginsMap() {
         Map<String, PluginInfo> pluginsMap = super.getPluginsMap();
@@ -287,17 +274,13 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
             String installedVersion = wrapper.getDescriptor().getVersion();
             log.debug("Update plugin '{}' from version {} to version {}", plugin.id, installedVersion, lastVersion);
 
+            if(!installPluginFile(plugin.id, lastRelease.version, lastRelease.date)) {
+            	throw new IOException("Could not install plugin " + plugin.id);
+            }
+            
             if(!pluginManager.deletePlugin(plugin.id)) {
             	throw new IOException("Unable to delete plugin " + plugin.id);
             }
-            
-            boolean updated = updatePlugin(plugin.id, lastRelease.version);
-            if (updated) {
-                log.debug("Updated plugin '{}'", plugin.id);
-            } else {
-                log.error("Cannot update plugin '{}'", plugin.id);
-            }
-        	
         }
 	
         for (PluginInfo plugin : getAvailablePlugins()) {
