@@ -27,11 +27,9 @@ import org.pf4j.update.UpdateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ExitCodeGenerator;
-import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
 
 import com.jadaptive.api.app.ApplicationUpdateManager;
 import com.jadaptive.utils.Version;
@@ -303,27 +301,11 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 
 	@Override
 	public void restart() {
-		
-		log.info("Shutting down plugins");
-		pluginManager.stopPlugins();
-		
-		log.info("Shutting down application context");
-		int exitCode = SpringApplication.exit(applicationContext, (ExitCodeGenerator) () -> 99);
-		
-		log.info("Context shutdown with exit code " + exitCode);
-	    System.exit(exitCode);
+		Application.restart();
 	}
 	
 	@Override
 	public void shutdown() {
-		
-		log.info("Shutting down plugins");
-		pluginManager.stopPlugins();
-		
-		log.info("Shutting down application context");
-		int exitCode = SpringApplication.exit(applicationContext, (ExitCodeGenerator) () -> 0);
-		
-		log.info("Context shutdown with exit code " + exitCode);
-	    System.exit(exitCode);
+		Application.shutdown();
 	}
 }
