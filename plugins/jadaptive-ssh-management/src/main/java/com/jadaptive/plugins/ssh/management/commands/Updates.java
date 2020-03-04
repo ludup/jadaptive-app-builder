@@ -4,12 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.pf4j.PluginManager;
 import org.pf4j.update.PluginInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ExitCodeGenerator;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ApplicationContext;
 
 import com.jadaptive.api.app.ApplicationUpdateManager;
 import com.jadaptive.plugins.sshd.commands.UserCommand;
@@ -23,12 +19,6 @@ public class Updates extends UserCommand {
 	
 	@Autowired
 	private ApplicationUpdateManager updateService; 
-	
-	@Autowired
-	private ApplicationContext applicationContext;
-	
-	@Autowired
-	private PluginManager pluginManager;
 	
 	public Updates() {
 		super("updates", "System Management", UsageHelper.build("updates [option]",
