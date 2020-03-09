@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +19,7 @@ import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.bson.Document;
 
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
@@ -34,7 +34,7 @@ public class DocumentHelper {
 
 	static Set<String> builtInNames = new HashSet<>(Arrays.asList("uuid", "system", "hidden"));
 	
-	public static void convertObjectToDocument(AbstractUUIDEntity obj, Map<String,Object> document) throws RepositoryException, EntityException {
+	public static void convertObjectToDocument(AbstractUUIDEntity obj, Document document) throws RepositoryException, EntityException {
 
 		try {
 			
@@ -60,8 +60,27 @@ public class DocumentHelper {
 				Object value = m.invoke(obj);
 				if(!Objects.isNull(value)) { 
 					if(m.getReturnType().equals(Date.class)) {
-						value = Utils.formatDateTime((Date)value);
-						document.put(name,  checkForAndPerformEncryption(columnDefinition, String.valueOf(value)));
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(Integer.class)) {
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(int.class)) {
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(Long.class)) {
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(long.class)) {
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(Float.class)) {
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(float.class)) {
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(Double.class)) {
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(double.class)) {
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(Boolean.class)) {
+						document.put(name,  value);
+					} else if(m.getReturnType().equals(boolean.class)) {
+						document.put(name,  value);
 					} else if(m.getReturnType().isEnum()) {
 						document.put(name, ((Enum<?>)value).name());
 					} else if(AbstractUUIDEntity.class.isAssignableFrom(m.getReturnType())) {
@@ -104,14 +123,34 @@ public class DocumentHelper {
 
 		for(Object value : values) {
 			if(Date.class.equals(value.getClass())) {
-				list.add(checkForAndPerformEncryption(columnDefinition,Utils.formatDateTime((Date)value)));
+				list.add(value);
+			} else if(Integer.class.equals(value.getClass())) {
+				list.add(value);
+			} else if(int.class.equals(value.getClass())) {
+				list.add(value);
+			} else if(Long.class.equals(value.getClass())) {
+				list.add(value);
+			} else if(long.class.equals(value.getClass())) {
+				list.add(value);
+			} else if(Double.class.equals(value.getClass())) {
+				list.add(value);
+			} else if(double.class.equals(value.getClass())) {
+				list.add(value);
+			} else if(Float.class.equals(value.getClass())) {
+				list.add(value);
+			} else if(float.class.equals(value.getClass())) {
+				list.add(value);
+			} else if(Boolean.class.equals(value.getClass())) {
+				list.add(value);
+			} else if(boolean.class.equals(value.getClass())) {
+				list.add(value);
 			} else if(value.getClass().isEnum()) {
 				list.add(((Enum<?>)value).name());
 			} else if(AbstractUUIDEntity.class.isAssignableFrom(value.getClass())) {
 
 				AbstractUUIDEntity e = (AbstractUUIDEntity) value;
 				
-				Map<String,Object> embeddedDocument = new HashMap<String,Object>();
+				Document embeddedDocument = new Document();
 				convertObjectToDocument(e, embeddedDocument);
 				list.add(embeddedDocument);
 
@@ -123,19 +162,19 @@ public class DocumentHelper {
 		document.put(name, list);
 	}
 
-	public static void buildDocument(String name, AbstractUUIDEntity object, Class<?> type, Map<String,Object> document) throws RepositoryException, ParseException, EntityException {
+	public static void buildDocument(String name, AbstractUUIDEntity object, Class<?> type, Document document) throws RepositoryException, ParseException, EntityException {
 		
-		Map<String,Object> embedded = new HashMap<String,Object>();
+		Document embedded = new Document();
 		convertObjectToDocument(object, embedded);
 		document.put(name, embedded);
 	}
 
-	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<?> baseClass, Map<String,Object> document) throws ParseException {
+	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<?> baseClass, Document document) throws ParseException {
 		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<?> baseClass, Map<String,Object> document, ClassLoader classLoader) throws ParseException {
+	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) throws ParseException {
 		
 		try {
 			
@@ -169,29 +208,45 @@ public class DocumentHelper {
 //				}
 				
 				Parameter parameter = m.getParameters()[0];
-
+				Object value = document.get(name);
+				if(Objects.isNull(value) && Objects.nonNull(columnDefinition)) {
+					value = fromString(parameter.getType(), columnDefinition.defaultValue());
+				}
+				if(Objects.isNull(value) && parameter.getType().isPrimitive()) {
+					continue;
+				}
 				if(parameter.getType().equals(String.class)) {
-					m.invoke(obj, checkForAndPerformDecryption(columnDefinition, (String) document.get(name)));
-				} else if(parameter.getType().equals(Boolean.class) || parameter.getType().equals(boolean.class)) {
-					m.invoke(obj, Boolean.parseBoolean(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
-				} else if(parameter.getType().equals(Integer.class) || parameter.getType().equals(int.class)) {
-					m.invoke(obj, Integer.parseInt(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
-				} else if(parameter.getType().equals(Long.class) || parameter.getType().equals(long.class)) {
-					m.invoke(obj, Long.parseLong(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
-				} else if(parameter.getType().equals(Float.class)  || parameter.getType().equals(float.class)) {
-					m.invoke(obj, Float.parseFloat(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
-				} else if(parameter.getType().equals(Double.class) || parameter.getType().equals(double.class)) {
-					m.invoke(obj, Double.parseDouble(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
+					m.invoke(obj, checkForAndPerformDecryption(columnDefinition, (String) value));
+				} else if(parameter.getType().equals(Boolean.class)) {
+					m.invoke(obj, value);
+				} else if(parameter.getType().equals(boolean.class)) {
+					m.invoke(obj, value);
+				} else if(parameter.getType().equals(Integer.class)) {
+					m.invoke(obj, value);
+				} else if(parameter.getType().equals(int.class)) {
+					m.invoke(obj, value);
+				} else if(parameter.getType().equals(Long.class)) {
+					m.invoke(obj, value);
+				} else if(parameter.getType().equals(long.class)) {
+					m.invoke(obj, value);
+				} else if(parameter.getType().equals(Float.class)) {
+					m.invoke(obj, value);
+				} else if(parameter.getType().equals(float.class)) {
+					m.invoke(obj, value);
+				} else if(parameter.getType().equals(Double.class)) {
+					m.invoke(obj, value);
+				} else if(parameter.getType().equals(double.class)) {
+					m.invoke(obj, value);
 				} else if(parameter.getType().equals(Date.class)) {
-					m.invoke(obj, Utils.parseDateTime(checkForAndPerformDecryption(columnDefinition, (String) document.get(name))));
+					m.invoke(obj, document.getDate(name));
 				} else if(AbstractUUIDEntity.class.isAssignableFrom(parameter.getType())) {
-					Map<String,Object> doc = (Map<String,Object>) document.get(name);
+					Document doc = (Document) document.get(name);
 					if(Objects.isNull(doc)) {
 						continue;
 					}
 					m.invoke(obj, convertDocumentToObject(AbstractUUIDEntity.class, doc, classLoader));
 				} else if(parameter.getType().isEnum()) { 
-					String v = (String) document.get(name);
+					String v = (String) value;
 					Enum<?>[] enumConstants = (Enum<?>[]) parameter.getType().getEnumConstants();
 					if(StringUtils.isBlank(v)) {
 						m.invoke(obj, (Object)null);
@@ -219,7 +274,7 @@ public class DocumentHelper {
 					if(AbstractUUIDEntity.class.isAssignableFrom(type)) {
 						Collection<AbstractUUIDEntity> elements = new ArrayList<>();	
 						for(Object embedded : list) {
-							Map<String,Object> embeddedDocument = (Map<String,Object>) embedded;
+							Document embeddedDocument = (Document) embedded;
 							elements.add(convertDocumentToObject(AbstractUUIDEntity.class, embeddedDocument, classLoader));
 						}
 
@@ -263,6 +318,34 @@ public class DocumentHelper {
 			throw new RepositoryException(String.format("Unexpected error loading UUID entity %s", baseClass.getName()), e);			
 		}
 		
+	}
+
+	private static Object fromString(Class<?> type, String value) {
+		if(type.equals(boolean.class)) {
+			return Boolean.parseBoolean(value);
+		} else if(type.equals(Boolean.class)) {
+			return new Boolean(Boolean.parseBoolean(value));
+		} else if(type.equals(int.class)) {
+			return Integer.parseInt(value);
+		} else if(type.equals(Integer.class)) {
+			return new Integer(Integer.parseInt(value));
+		} else if(type.equals(long.class)) {
+			return Long.parseLong(value);
+		} else if(type.equals(Long.class)) {
+			return new Long(Long.parseLong(value));
+		} else if(type.equals(float.class)) {
+			return Float.parseFloat(value);
+		} else if(type.equals(Float.class)) {
+			return new Float(Float.parseFloat(value));
+		} else if(type.equals(double.class)) {
+			return Double.parseDouble(value);
+		} else if(type.equals(Double.class)) {
+			return new Double(Double.parseDouble(value));
+		} else if(type.equals(Date.class)) {
+			return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		} else {
+			return value;
+		}
 	}
 
 	private static Object buildStringCollection(Column columnDefinition, List<?> list) {

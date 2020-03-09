@@ -109,17 +109,17 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 		}
 	}
 
-	private void writeField(JsonGenerator gen, FieldTemplate t, String value) throws IOException {
+	private void writeField(JsonGenerator gen, FieldTemplate t, Object value) throws IOException {
 		
 		switch (t.getFieldType()) {
 		case BOOL:
-			gen.writeBooleanField(t.getResourceKey(), Boolean.parseBoolean(value));
+			gen.writeBooleanField(t.getResourceKey(), (Boolean) value);
 			break;
 		case DECIMAL:
-			gen.writeNumberField(t.getResourceKey(), Double.parseDouble(value));
+			gen.writeNumberField(t.getResourceKey(), (Double) value);
 			break;
 		case NUMBER:
-			gen.writeNumberField(t.getResourceKey(), Long.parseLong(value));
+			gen.writeNumberField(t.getResourceKey(), (Long) value);
 			break;
 		case TEXT:
 		case TEXT_AREA:
@@ -127,7 +127,7 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 		case DATE:
 		case OBJECT_REFERENCE:
 		case ENUM:
-			gen.writeStringField(t.getResourceKey(), value);
+			gen.writeStringField(t.getResourceKey(), value.toString());
 			break;
 		default:
 			throw new IllegalStateException(

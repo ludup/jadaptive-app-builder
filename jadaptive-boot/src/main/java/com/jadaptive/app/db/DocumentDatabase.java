@@ -37,8 +37,11 @@ public interface DocumentDatabase {
 
 	Long searchCount(String table, String database, SearchField... fields);
 
-//	Iterable<Document> searchCollectionField(String field, String value, String table, String database);
+	void createTextIndex(String fieldName, String table, String database);
 
+	void createUniqueIndex(String fieldName, String table, String database);
+
+	void createIndex(String fieldName, String table, String database);
 	
 
 }

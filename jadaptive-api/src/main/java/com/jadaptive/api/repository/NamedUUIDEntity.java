@@ -5,7 +5,7 @@ import com.jadaptive.api.template.FieldType;
 
 public class NamedUUIDEntity extends AbstractUUIDEntity {
 
-	@Column(name = "Name", description = "The name of this object", type = FieldType.TEXT)
+	@Column(name = "Name", description = "The name of this object", searchable = true, type = FieldType.TEXT)
 	String name;
 
 	public String getName() {

@@ -30,6 +30,7 @@ import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
+import com.jadaptive.utils.Utils;
 
 public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 
@@ -136,7 +137,7 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 
 		node = node.findPath(field.getResourceKey());
 		if(Objects.isNull(node) || node instanceof MissingNode) {
-			if(field.getRequired()) {
+			if(field.isRequired()) {
 				throw new ValidationException(String.format("Missing node for %s", field.getResourceKey()));
 			} else {
 				setPropertyDefault(field, e);
@@ -174,74 +175,62 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
  					iterateType(element, template, child, false);
  					documents.add(new Document(child.getDocument()));
  				}
- 				setCollectionProperty(field, node, e);
+ 				e.setValue(field, documents);
  			} else {
  				iterateType(node, template, new MongoEntity(e, field.getResourceKey(), new Document()), false);
  			}
  			
- 			
-		
  		} catch(EntityException ex) {
  			throw new ValidationException(String.format("%s object type template not found", type));
- 		}
-		
-		
-		
- 		
- 		
- 		
+ 		}	
 	}
 
 	private void processReferenceObjects(FieldTemplate field, JsonNode node, MongoEntity e) {
 		// EntityService currently validates references
-		setProperty(node, field, e);
+		setProperty(node.asText(), field, e);
 	}
 
 	private void processSimpleTypes(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
 		if(node.isArray()) {
-			for(JsonNode element : node) {
-				validate(field, element, e);
-			}
 			setCollectionProperty(field, node, e);
 		} else {
-			validate(field, node, e);
-			setProperty(node, field, e);
+			setProperty(validate(field, node, e), field, e);
 		}
 	}
 
-	private void setCollectionProperty(FieldTemplate field, JsonNode node, MongoEntity e) {
+	private void setCollectionProperty(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
 		
 		List<Object> values = new ArrayList<>();
 		for(JsonNode element : node) {
-			values.add(element.asText());
+			values.add(validate(field, element, e));
 		}
 		e.setValue(field, values);
 		
 	}
 
-	private void validate(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
+	private Object validate(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
 		
 		switch(field.getFieldType()) {
 		case BOOL:
 			validateBoolean(node, field);
-			break;
+			return node.asBoolean();
 		case DECIMAL:
 			validateDecimal(node, field);
-			break;
+			return node.asDouble();
 		case NUMBER:
 			validateNumber(node, field);
-			break;
+			return node.asLong();
 		case DATE:
 			validateDate(node, field);
-			break;
+			return Utils.parseDate(node.asText(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		case ENUM:
 			validateEnum(node, field);
-			break;
+			return node.asText();
 		case TEXT:
 		case TEXT_AREA:
 		case PASSWORD:
 			validateText(node, field);
-			break;
+			return node.asText();
 		default:
 			throw new ValidationException(
 					String.format("Missing field type %s in validate method", 
@@ -365,9 +354,9 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 		}
 	}
 
-	private void setProperty(JsonNode value, FieldTemplate t, MongoEntity e) {
+	private void setProperty(Object value, FieldTemplate t, MongoEntity e) {
 		if(!Objects.isNull(value)) {
-			e.setValue(t, value.asText());
+			e.setValue(t, value);
 		} 
 	}
 	

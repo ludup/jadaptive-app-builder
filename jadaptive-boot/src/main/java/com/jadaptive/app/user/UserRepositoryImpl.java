@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.DefaultUser;
 import com.jadaptive.api.user.User;
@@ -24,6 +25,9 @@ public class UserRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<De
 
 	@Autowired
 	TenantService tenantService;
+	
+	@Autowired
+	EntityTemplateRepository templateRepository;
 	
 	protected UserRepositoryImpl(DocumentDatabase db) {
 		super(db);

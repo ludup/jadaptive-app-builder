@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.app.db.DocumentHelper;
-import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBList;
 
 public class DocumentHelperTests {
@@ -198,29 +197,29 @@ public class DocumentHelperTests {
         System.out.println(doc);
         
         Assert.assertEquals("a", doc.get("string"));
-        Assert.assertEquals("10", doc.get("longNumber"));
-        Assert.assertEquals("100", doc.get("intNumber"));
-        Assert.assertEquals("1.0", doc.get("floatNumber"));
-        Assert.assertEquals("2.0", doc.get("doubleNumber"));
-        Assert.assertEquals(Utils.formatDateTime(date), doc.get("date"));
+        Assert.assertEquals(10L, doc.get("longNumber"));
+        Assert.assertEquals(100, doc.get("intNumber"));
+        Assert.assertEquals(1.0F, doc.get("floatNumber"));
+        Assert.assertEquals(2.0D, doc.get("doubleNumber"));
+        Assert.assertEquals(date, doc.get("date"));
         Assert.assertEquals("THREE", doc.get("enumField"));
-        Assert.assertEquals("true", doc.get("bool"));
-        Assert.assertEquals("false", doc.get("system"));
-        Assert.assertEquals("false", doc.get("hidden"));
+        Assert.assertEquals(true, doc.get("bool"));
+        Assert.assertEquals(false, doc.get("system"));
+        Assert.assertEquals(false, doc.get("hidden"));
         
         @SuppressWarnings("unchecked")
 		Map<String,Object> embeddedDocument = (Map<String,Object>) doc.get("embedded");
         Assert.assertNotNull(embeddedDocument);
         Assert.assertEquals("test", embeddedDocument.get("embeddedString"));
-        Assert.assertEquals(String.valueOf(Long.MAX_VALUE), embeddedDocument.get("embeddedLong"));
-        Assert.assertEquals(String.valueOf(Integer.MIN_VALUE), embeddedDocument.get("embeddedInt"));
-        Assert.assertEquals(String.valueOf(Float.MAX_VALUE), embeddedDocument.get("embeddedFloat"));
-        Assert.assertEquals(String.valueOf(Double.MIN_VALUE), embeddedDocument.get("embeddedDouble"));
-        Assert.assertEquals(Utils.formatDateTime(date), embeddedDocument.get("embeddedDate"));
+        Assert.assertEquals(Long.MAX_VALUE, embeddedDocument.get("embeddedLong"));
+        Assert.assertEquals(Integer.MIN_VALUE, embeddedDocument.get("embeddedInt"));
+        Assert.assertEquals(Float.MAX_VALUE, embeddedDocument.get("embeddedFloat"));
+        Assert.assertEquals(Double.MIN_VALUE, embeddedDocument.get("embeddedDouble"));
+        Assert.assertEquals(date, embeddedDocument.get("embeddedDate"));
         Assert.assertEquals("FIVE", embeddedDocument.get("embeddedEnum"));
-        Assert.assertEquals("false", embeddedDocument.get("embeddedBool"));
-        Assert.assertEquals("false", embeddedDocument.get("system"));
-        Assert.assertEquals("false", embeddedDocument.get("hidden"));
+        Assert.assertEquals(false, embeddedDocument.get("embeddedBool"));
+        Assert.assertEquals(false, embeddedDocument.get("system"));
+        Assert.assertEquals(false, embeddedDocument.get("hidden"));
         
 	}
 	
@@ -232,24 +231,24 @@ public class DocumentHelperTests {
 		Document doc = new Document();
 		doc.put("_clz", TestFieldTypesObject.class.getName());
         doc.put("string", "a");
-        doc.put("longNumber", "10");
-        doc.put("intNumber", "100");
-        doc.put("floatNumber", "1.0");
-        doc.put("doubleNumber", "2.0");
-        doc.put("date", Utils.formatDateTime(date));
+        doc.put("longNumber", 10L);
+        doc.put("intNumber", 100);
+        doc.put("floatNumber", 1.0F);
+        doc.put("doubleNumber", 2.0D);
+        doc.put("date", date);
         doc.put("enumField", "THREE");
-        doc.put("bool", "true");
+        doc.put("bool", true);
         
         Document embeddedDoc = new Document();
         embeddedDoc.put("_clz", EmbeddedObject.class.getName());
         embeddedDoc.put("embeddedString", "test");
-        embeddedDoc.put("embeddedLong", String.valueOf(Long.MAX_VALUE));
-        embeddedDoc.put("embeddedInt", String.valueOf(Integer.MIN_VALUE));
-        embeddedDoc.put("embeddedFloat", String.valueOf(Float.MAX_VALUE));
-        embeddedDoc.put("embeddedDouble", String.valueOf(Double.MIN_VALUE));
-        embeddedDoc.put("embeddedDate", Utils.formatDateTime(date));
+        embeddedDoc.put("embeddedLong", Long.MAX_VALUE);
+        embeddedDoc.put("embeddedInt", Integer.MIN_VALUE);
+        embeddedDoc.put("embeddedFloat", Float.MAX_VALUE);
+        embeddedDoc.put("embeddedDouble", Double.MIN_VALUE);
+        embeddedDoc.put("embeddedDate", date);
         embeddedDoc.put("embeddedEnum", "FIVE");
-        embeddedDoc.put("embeddedBool", "false");
+        embeddedDoc.put("embeddedBool", false);
 
         doc.put("embedded", embeddedDoc);
         

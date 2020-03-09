@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -99,17 +98,21 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 	}
 
 	@Override
-	public String getValue(String fieldName) {
-		return StringUtils.defaultString((String) document.get(fieldName), "");
+	public Object getValue(String fieldName) {
+		return document.get(fieldName);
 	}
 	
 	@Override
-	public String getValue(FieldTemplate t) {
+	public Object getValue(FieldTemplate t) {
 		switch(t.getFieldType()) {
 		case OBJECT_EMBEDDED:
 			throw new IllegalArgumentException("Use getChild to object embedded object");
 		default:
-			return StringUtils.defaultString((String) document.get(t.getResourceKey()), t.getDefaultValue());
+			Object value = document.get(t.getResourceKey());
+			if(value==null) {
+				value = t.getDefaultValue();
+			}
+			return value;
 		}
 	}
 	
@@ -118,7 +121,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 	}
 
 	@Override
-	public void setValue(FieldTemplate t, String value) {
+	public void setValue(FieldTemplate t, Object value) {
 		document.put(t.getResourceKey(), value);
 	}
 

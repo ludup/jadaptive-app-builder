@@ -13,11 +13,14 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
@@ -26,6 +29,10 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.utils.Utils;
+
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 
 @Service
 public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements PermissionService, TenantAware {
@@ -38,6 +45,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Autowired
 	private RoleService roleService; 
+	
+	@Autowired
+	private PluginManager pluginManager;
 	
 	Map<Tenant,Set<String>> tenantPermissions = new HashMap<>();
 	Map<Tenant,Map<String,Set<String>>> tenantPermissionsAlias = new HashMap<>();
@@ -333,38 +343,36 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Override
 	public void initializeSystem() {
 			
-//		for(PluginWrapper w : pluginManager.getPlugins()) {
-//
-//			if(log.isInfoEnabled()) {
-//				log.info("Scanning plugin {} for custom permissions in {}", 
-//						w.getPluginId(),
-//						w.getPlugin().getClass().getPackage().getName());
-//			}
-//			
-//			try {
-//				ConfigurationBuilder builder = new ConfigurationBuilder();
-//				
-//				builder.addClassLoaders(w.getPluginClassLoader());
-//				builder.addUrls(ClasspathHelper.forPackage(
-//						w.getPlugin().getClass().getPackage().getName(),
-//						w.getPluginClassLoader()));
-//				builder.addScanners(new TypeAnnotationsScanner());
-//
-//				Reflections reflections = new Reflections(builder);
-//				
-//				for(Class<?> clz : reflections.getTypesAnnotatedWith(Permissions.class)) {
-//					if(log.isInfoEnabled()) {
-//						log.info("Found annotated permissions {}", clz.getName());
-//					}
-//					Permissions perms = clz.getAnnotation(Permissions.class);
-//					for(String key : perms.keys()) {
-//						registerCustomPermission(key);
-//					}
-//				}
-//			} catch (Exception e) {
-//				log.error("Failed to process annotated templates for plugin {}", w.getPluginId(), e);
-//			}
-//		}
+		for(PluginWrapper w : pluginManager.getPlugins()) {
+
+			if(log.isInfoEnabled()) {
+				log.info("Scanning plugin {} for custom permissions in {}", 
+						w.getPluginId(),
+						w.getPlugin().getClass().getPackage().getName());
+			}
+			
+			try {
+				try (ScanResult scanResult =
+	                    new ClassGraph()                 
+	                        .enableAllInfo()  
+	                        .addClassLoader(w.getPluginClassLoader())
+	                        .whitelistPackages(w.getPlugin().getClass().getPackage().getName())   
+	                        .scan()) {                  
+	                for (ClassInfo clz : scanResult.getClassesWithAnnotation(Permissions.class.getName())) {
+						if(log.isInfoEnabled()) {
+							log.info("Found annotated permissions {}", clz.getName());
+						}
+						Permissions perms = clz.loadClass().getAnnotation(Permissions.class);
+						for(String key : perms.keys()) {
+							registerCustomPermission(key);
+						}
+	                }
+	            }
+
+			} catch (Exception e) {
+				log.error("Failed to process annotated templates for plugin {}", w.getPluginId(), e);
+			}
+		}
 		
 	}
 }

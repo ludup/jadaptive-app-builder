@@ -56,7 +56,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 		System.out.println(json);
 		MongoEntity e = getNumberField(true).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals("100", e.getValue("employees"));
+		Assert.assertEquals(100L, e.getValue("employees"));
 
 	}
 	
@@ -85,7 +85,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 		System.out.println(json);
 		MongoEntity e = getNumberField(true, new FieldValidator(ValidationType.RANGE, "0,9999999")).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals("100", e.getValue("employees"));
+		Assert.assertEquals(100L, e.getValue("employees"));
 
 	}
 	

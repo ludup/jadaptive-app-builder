@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.bson.Document;
 import org.pf4j.PluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -123,12 +124,13 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	public void saveTemplateObjects(List<EntityTemplate> objects, @SuppressWarnings("unchecked") TransactionAdapter<EntityTemplate>... ops) throws RepositoryException, EntityException {
 		for(EntityTemplate obj : objects) {
 			saveOrUpdate(validateTemplate(obj));
+			repository.createIndexes(obj);
 			for(TransactionAdapter<EntityTemplate> op : ops) {
 				op.afterSave(obj);
 			}
 		}
 	}
-	
+
 	private EntityTemplate validateTemplate(EntityTemplate obj) {
 		
 		if(!Objects.isNull(obj.getFields())) {
@@ -180,7 +182,7 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	
 	@Override
 	public <T extends AbstractUUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
-		return DocumentHelper.convertDocumentToObject(baseClass, values);
+		return DocumentHelper.convertDocumentToObject(baseClass, new Document(values));
 	}
 
 }

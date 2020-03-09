@@ -33,6 +33,7 @@ public class AuthorizedKeyProvider extends AbstractPublicKeyAuthenticationProvid
 		
 		try {
 			User user = userService.findUsername(con.getUsername());
+			
 			for(AuthorizedKey authorizedKey : authorizedKeyService.getAuthorizedKeys(user)) {
 				SshPublicKey publicKey = SshKeyUtils.getPublicKey(authorizedKey.getPublicKey());
 				if(publicKey.equals(key)) {

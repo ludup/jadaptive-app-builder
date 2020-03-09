@@ -10,10 +10,10 @@ public interface AbstractEntity {
 
 	void setResourceKey(String resourceKey);
 
-	String getValue(String fieldName);
+	Object getValue(String fieldName);
 
-	String getValue(FieldTemplate t);
+	Object getValue(FieldTemplate t);
 
-	void setValue(FieldTemplate t, String value);
+	void setValue(FieldTemplate t, Object value);
 
 }

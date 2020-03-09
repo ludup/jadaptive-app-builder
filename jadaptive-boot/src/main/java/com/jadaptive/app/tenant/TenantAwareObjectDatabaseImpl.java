@@ -18,11 +18,11 @@ import com.jadaptive.app.db.DocumentDatabase;
 public class TenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity> 
 		extends AbstractObjectDatabaseImpl implements TenantAwareObjectDatabase<T> {
 
-	
 	protected TenantAwareObjectDatabaseImpl(DocumentDatabase db) {
 		super(db);
 	}
 
+	
 	@Autowired
 	protected TenantService tenantService;
 	

@@ -8,7 +8,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.db.PersonalObjectDatabase;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -17,6 +16,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.AuthorizedKey;
+import com.jadaptive.plugins.sshd.AuthorizedKeyService;
 import com.jadaptive.plugins.sshd.AuthorizedKeyServiceImpl;
 import com.sshtools.common.files.AbstractFile;
 import com.sshtools.common.permissions.PermissionDeniedException;
@@ -36,13 +36,13 @@ import com.sshtools.server.vsession.VirtualConsole;
 public class SshKeyGen extends AbstractTenantAwareCommand {
 
 	@Autowired
-	UserService userService; 
+	private UserService userService; 
 	
 	@Autowired
-	PersonalObjectDatabase<AuthorizedKey> authorizedKeyService; 
+	private AuthorizedKeyService authorizedKeyService; 
 	
 	@Autowired
-	PermissionService permissionService; 
+	private PermissionService permissionService; 
 	
 	public SshKeyGen() {
 		super("ssh-keygen", 
@@ -83,7 +83,7 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 		}
 		
 		boolean assign = CliHelper.hasOption(args, 'a', "assign");
-		User forUser = user;
+		User forUser = currentUser;
 		if(assign) {
 			try {
 				forUser = userService.findUsername(CliHelper.getValue(args, 'a', "assign"));
@@ -126,7 +126,7 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 				key.setPublicKey(new String(pubFile.getFormattedKey(), "UTF-8"));
 				key.setName(comment);
 				
-				authorizedKeyService.saveOrUpdate(key, forUser);
+				authorizedKeyService.saveOrUpdate(key, AuthorizedKeyServiceImpl.SSH_TAG, forUser);
 				
 				if(CliHelper.hasOption(args, 'f', "file")) {
 					String path = CliHelper.getValue(args, 'f', "file");

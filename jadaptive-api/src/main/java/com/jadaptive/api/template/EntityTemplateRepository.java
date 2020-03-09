@@ -4,4 +4,6 @@ import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 
 public interface EntityTemplateRepository extends AbstractTenantAwareObjectDatabase<EntityTemplate> {
 
+	void createIndexes(EntityTemplate template);
+
 }

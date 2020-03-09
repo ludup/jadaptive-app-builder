@@ -1,5 +1,7 @@
 package com.jadaptive.api.repository;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,8 @@ public abstract class AbstractUUIDEntity {
 	String uuid;
 	Boolean system;
 	Boolean hidden;
+	Date created;
+	Date lastModified;
 	
 	public String getUuid() {
 		return uuid;
@@ -36,6 +40,22 @@ public abstract class AbstractUUIDEntity {
 
 	public void setHidden(Boolean hidden) {
 		this.hidden = hidden;
+	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public Date getLastModified() {
+		return lastModified;
+	}
+
+	public void setLastModified(Date lastModified) {
+		this.lastModified = lastModified;
 	}
 
 	@Override

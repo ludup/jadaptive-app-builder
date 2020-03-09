@@ -398,6 +398,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					t.setName(field.name());
 					t.setRequired(field.required());
 					t.setSystem(false);
+					t.setSearchable(field.searchable());
+					t.setTextIndex(field.textIndex());
+					t.setUnique(field.unique());
 					
 					switch(field.type()) {
 					case ENUM:
@@ -414,6 +417,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			templateRepository.saveOrUpdate(template);
+			templateRepository.createIndexes(template);
 			permissionService.registerStandardPermissions(template.getResourceKey());
 		} catch(RepositoryException | EntityException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);

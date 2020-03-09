@@ -24,5 +24,11 @@ public @interface Column {
 		boolean manualEncryption() default false;
 		
 		boolean automaticEncryption() default false;
+		
+		boolean searchable() default false;
+		
+		boolean unique() default false;
+		
+		boolean textIndex() default false;
 
 }

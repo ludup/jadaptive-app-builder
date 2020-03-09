@@ -111,25 +111,37 @@ public class Utils {
 	 * @return
 	 * @throws ParseException
 	 */
-	public static Date parseDate(String date, String format) throws ParseException {
+	public static Date parseDate(String date, String format) {
 		if(Objects.isNull(date)) {
 			return null;
 		}
-		return new SimpleDateFormat(format).parse(date);
+		try {
+			return new SimpleDateFormat(format).parse(date);
+		} catch (ParseException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 	
-	public static Date parseDateTime(String date) throws ParseException {
+	public static Date parseDateTime(String date) {
 		if(Objects.isNull(date)) {
 			return null;
 		}
-		return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss.SSS Z").parse(date);
+		try {
+			return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss.SSS Z").parse(date);
+		} catch (ParseException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 	
-	public static Date parseShortDate(String date) throws ParseException {
+	public static Date parseShortDate(String date) {
 		if(Objects.isNull(date)) {
 			return null;
 		}
-		return new SimpleDateFormat("EEE, d MMM yyyy").parse(date);
+		try {
+			return new SimpleDateFormat("EEE, d MMM yyyy").parse(date);
+		} catch (ParseException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 	
 	public static Date today() {

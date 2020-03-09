@@ -26,6 +26,14 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	}
 	
 	@Override
+	public Collection<T> getPersonalObjects(Class<T> resourceClass, User user, SearchField... search) {
+		
+		
+		return objectDatabase.searchObjects(resourceClass, 
+				SearchField.eq("ownerUUID", user.getUuid()), SearchField.and(search));
+	}
+	
+	@Override
 	public void saveOrUpdate(T obj, User user) {
 		obj.setOwnerUUID(user.getUuid());
 		objectDatabase.saveOrUpdate(obj);

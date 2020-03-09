@@ -1,6 +1,7 @@
 package com.jadaptive.app.db;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -18,6 +19,8 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 
 @Repository
@@ -31,12 +34,35 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		return db.getCollection(table);
 	}
 
+	@Override
+	public void createTextIndex(String fieldName, String table, String database) {
+		MongoCollection<Document> collection = getCollection(table, database);
+		collection.createIndex(Indexes.text(fieldName), new IndexOptions().name(fieldName + "_tidx"));
+	}
+	
+	@Override
+	public void createIndex(String fieldName, String table, String database) {
+		MongoCollection<Document> collection = getCollection(table, database);
+		collection.createIndex(Indexes.ascending(fieldName), new IndexOptions().name(fieldName + "_idx"));
+	}
+	
+	@Override
+	public void createUniqueIndex(String fieldName, String table, String database) {
+		MongoCollection<Document> collection = getCollection(table, database);
+		IndexOptions indexOptions = new IndexOptions().unique(true);
+		collection.createIndex(Indexes.ascending(fieldName), indexOptions);
+	}
 	
 	@Override
 	public <E extends AbstractUUIDEntity> void insertOrUpdate(E obj, Document document, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-
+		Date now = new Date();
+		document.put("lastModified", now);
+		if(!document.containsValue("created")) {
+			document.put("created", now);
+		}
+		
 		if(StringUtils.isBlank(obj.getUuid())) {
 			obj.setUuid(UUID.randomUUID().toString());
 			document.put("_id", obj.getUuid());
@@ -52,17 +78,13 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		return collection.find(Filters.eq("_id", uuid)).first();
-
 	}
-	
-
 
 	@Override
 	public Document get(String table, String database, SearchField... fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		return collection.find(buildFilter(fields)).first();
-
 	}
 	
 	@Override
@@ -70,18 +92,14 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		return collection.find(Filters.eq(field, value)).first();
-
 	}
 
 	@Override
 	public void delete(String uuid, String table, String database) {
 		
 		get(uuid, table, database);
-		
 		MongoCollection<Document> collection = getCollection(table, database);
-		
 		collection.deleteOne(Filters.eq("_id", uuid));
-		
 	}
 	
 	@Override

@@ -13,13 +13,22 @@ import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.template.Template;
 
-public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
+public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 
 	protected final DocumentDatabase db;
 	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
+	}
+	
+	protected String getCollectionName(Class<?> clz) {
+		Template template = (Template) clz.getAnnotation(Template.class);
+		if(Objects.nonNull(template)) {
+			return template.resourceKey();
+		}
+		return clz.getSimpleName();
 	}
 	
 	protected <T extends AbstractUUIDEntity> void saveObject(T obj, String database) throws RepositoryException, EntityException {
@@ -28,8 +37,8 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 			Document document = new Document();
 			DocumentHelper.convertObjectToDocument(obj, document);
 			
-			db.insertOrUpdate(obj, document, obj.getClass().getSimpleName(), database);
-			
+			db.insertOrUpdate(obj, document, getCollectionName(obj.getClass()), database);
+			onObjectUpdated(obj);
 		} catch(Throwable e) {
 			checkException(e);
 			throw new RepositoryException(e.getMessage(), e);
@@ -39,9 +48,9 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 	protected <T extends AbstractUUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, EntityException {
 		try {
 			
-			Document document = db.get(uuid, clz.getSimpleName(), database);
+			Document document = db.get(uuid, getCollectionName(clz), database);
 			if(Objects.isNull(document)) {
-				throw new EntityNotFoundException(String.format("%s not found with id %s", clz.getSimpleName(), uuid));
+				throw new EntityNotFoundException(String.format("%s not found with id %s", getCollectionName(clz), uuid));
 			}
 			return DocumentHelper.convertDocumentToObject(clz, document);
 			
@@ -53,9 +62,9 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 	
 	protected <T extends AbstractUUIDEntity> T getObject(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
 		try {
-			Document document = db.get(clz.getSimpleName(), database, fields);
+			Document document = db.get(getCollectionName(clz), database, fields);
 			if(Objects.isNull(document)) {
-				throw new EntityNotFoundException(String.format("%s not found", clz.getSimpleName()));
+				throw new EntityNotFoundException(String.format("%s not found", getCollectionName(clz)));
 			}
 			return DocumentHelper.convertDocumentToObject(clz, document);
 			
@@ -77,19 +86,25 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 				throw new EntityException(String.format("You cannot delete a system %s", obj.getClass().getSimpleName()));
 			}
 			db.delete(obj.getUuid(), obj.getClass().getSimpleName(), database);
-			
+			onObjectDeleted(obj);
 		} catch(Throwable e) {
 			checkException(e);
 			throw new RepositoryException(e.getMessage(), e);
 		}
 	}
 	
+	protected <T extends AbstractUUIDEntity> void onObjectDeleted(T obj) { }
+
+	protected <T extends AbstractUUIDEntity> void onObjectCreated(T obj) { }
+	
+	protected <T extends AbstractUUIDEntity> void onObjectUpdated(T obj) { }
+	
 	protected <T extends AbstractUUIDEntity> Collection<T> listObjects(String database, Class<T> clz) throws RepositoryException, EntityException {
 		
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.list(clz.getSimpleName(), database)) {
+			for(Document document : db.list(getCollectionName(clz), database)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -106,7 +121,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.list(clz.getSimpleName(), database, fields)) {
+			for(Document document : db.list(getCollectionName(clz), database, fields)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -122,7 +137,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.search(clz.getSimpleName(), database, fields)) {
+			for(Document document : db.search(getCollectionName(clz), database, fields)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -138,7 +153,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.searchTable(clz.getSimpleName(), database, start, length, fields)) {
+			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, fields)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -153,7 +168,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 	protected <T extends AbstractUUIDEntity> Long searchCount(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
 		
 		try {
-			return db.searchCount(clz.getSimpleName(), database, fields);			
+			return db.searchCount(getCollectionName(clz), database, fields);			
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(e.getMessage(), e);
@@ -166,7 +181,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.table(clz.getSimpleName(), searchField, searchValue, database, start, length)) {
+			for(Document document : db.table(getCollectionName(clz), searchField, searchValue, database, start, length)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -181,7 +196,7 @@ public class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 	protected <T extends AbstractUUIDEntity> Long countObjects(String database, Class<T> clz) throws RepositoryException, EntityException {
 		
 		try {
-			return db.count(clz.getSimpleName(), database);			
+			return db.count(getCollectionName(clz), database);			
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(e.getMessage(), e);

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+import org.bson.Document;
+
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
@@ -49,7 +51,7 @@ public class MockEntityTemplateService implements EntityTemplateService {
 
 	@Override
 	public <T extends AbstractUUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
-		return DocumentHelper.convertDocumentToObject(baseClass, values);
+		return DocumentHelper.convertDocumentToObject(baseClass, new Document(values));
 	}
 
 }

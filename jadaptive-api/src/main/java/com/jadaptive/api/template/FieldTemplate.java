@@ -18,6 +18,9 @@ public class FieldTemplate extends NamedUUIDEntity {
 	boolean collection;
 	boolean required;
 	boolean encrypted;
+	boolean searchable;
+	boolean unique;
+	boolean textIndex;
 	
 	Collection<FieldValidator> validators = new ArrayList<>();
 	
@@ -85,7 +88,7 @@ public class FieldTemplate extends NamedUUIDEntity {
 		return false;
 	}
 
-	public boolean getRequired() {
+	public boolean isRequired() {
 		return required;
 	}
 
@@ -103,6 +106,30 @@ public class FieldTemplate extends NamedUUIDEntity {
 
 	public void setCollection(boolean collection) {
 		this.collection = collection;
+	}
+
+	public boolean isSearchable() {
+		return searchable;
+	}
+
+	public void setSearchable(boolean searchable) {
+		this.searchable = searchable;
+	}
+
+	public boolean isUnique() {
+		return unique;
+	}
+
+	public void setUnique(boolean unique) {
+		this.unique = unique;
+	}
+
+	public boolean isTextIndex() {
+		return textIndex;
+	}
+
+	public void setTextIndex(boolean textIndex) {
+		this.textIndex = textIndex;
 	}
 
 	public String getValidationValue(ValidationType type) {

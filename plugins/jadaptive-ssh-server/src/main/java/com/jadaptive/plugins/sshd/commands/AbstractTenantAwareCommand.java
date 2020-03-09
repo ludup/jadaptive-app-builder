@@ -27,7 +27,7 @@ public abstract class AbstractTenantAwareCommand extends ShellCommand {
 	
 	protected VirtualConsole console;
 	protected String[] args;
-	protected User user;
+	protected User currentUser;
 	
 	public AbstractTenantAwareCommand(String name, String subsystem, String signature, String description) {
 		super(name, subsystem, signature, description);
@@ -41,7 +41,7 @@ public abstract class AbstractTenantAwareCommand extends ShellCommand {
 		
 		this.console = console;
 		this.args = args;
-		this.user = userService.findUsername(console.getConnection().getUsername());
+		this.currentUser = userService.findUsername(console.getConnection().getUsername());
 		
 		try {
 			doRun(args, console);

@@ -91,8 +91,8 @@ public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 			for(FieldTemplate t : fields) {
 				switch(t.getFieldType()) {
 				case OBJECT_REFERENCE:
-					if(StringUtils.isNotBlank(entity.getValue(t))) {
-						validateEntityExists(entity.getValue(t), t.getValidationValue(ValidationType.OBJECT_TYPE));
+					if(StringUtils.isNotBlank((String)entity.getValue(t))) {
+						validateEntityExists((String)entity.getValue(t), t.getValidationValue(ValidationType.OBJECT_TYPE));
 					}
 					break;
 				case OBJECT_EMBEDDED:

@@ -11,4 +11,7 @@ public interface PersonalObjectDatabase<T extends PersonalUUIDEntity> {
 
 	void saveOrUpdate(T obj, User user);
 
+	Collection<T> getPersonalObjects(Class<T> resourceClass, User user, SearchField... search);
+
+
 }

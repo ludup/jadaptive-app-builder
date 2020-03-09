@@ -42,9 +42,9 @@ public class ImportKey extends AbstractTenantAwareCommand {
 	PermissionService permissionService; 
 	
 	public ImportKey() {
-		super("importkey", 
+		super("import-key", 
 				"User",
-				UsageHelper.build("importkey -a [user] -f [filename] -c [comment]",
+				UsageHelper.build("import-key -a [user] -f [filename] -c [comment]",
 						"-f, --file        The file to import",
 						"-c, --comment     The comment to assign to this key",
 						"-a, --assign      Assign the key to another user (requires administrative or authorizedKey.assign permission"),
@@ -56,7 +56,7 @@ public class ImportKey extends AbstractTenantAwareCommand {
 			throws IOException, PermissionDeniedException, UsageException {
 
 		boolean assign = CliHelper.hasOption(args, 'a', "assign");
-		User forUser = user;
+		User forUser = currentUser;
 		if(assign) {
 			try {
 				forUser = userService.findUsername(CliHelper.getValue(args, 'a', "assign"));
@@ -93,7 +93,7 @@ public class ImportKey extends AbstractTenantAwareCommand {
 			pub = fromPrivateKey(filename, factory, console.getConnection());
 		}
 		
-		String comment = String.format("Imported by %s", user.getUsername());
+		String comment = String.format("Imported by %s", currentUser.getUsername());
 		if(CliHelper.hasOption(args, 'c', "comment")) {
 			comment = CliHelper.getValue(args, 'c', "comment");
 		}
