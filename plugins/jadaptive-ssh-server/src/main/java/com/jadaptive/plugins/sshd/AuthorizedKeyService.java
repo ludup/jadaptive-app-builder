@@ -6,6 +6,8 @@ import com.jadaptive.api.user.User;
 
 public interface AuthorizedKeyService {
 
+	public static final String AUTHORIZED_KEY_ASSIGN = "authorizedKey.assign";
+	
 	public static final String SSH_TAG = "SSH";
 	public static final String SYSTEM_TAG = "System";
 	

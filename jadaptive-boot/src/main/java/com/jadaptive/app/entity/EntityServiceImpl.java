@@ -143,15 +143,6 @@ public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEn
 			}
 		}
 	}
-		
-	@Override
-	public void onTemplatesComplete(String... resourceKeys) {
-		
-		for(String resourceKey : resourceKeys) {
-			permissionService.registerStandardPermissions(resourceKey);
-		}
-		
-	}
 
 	@Override
 	public boolean isSystemOnly() {

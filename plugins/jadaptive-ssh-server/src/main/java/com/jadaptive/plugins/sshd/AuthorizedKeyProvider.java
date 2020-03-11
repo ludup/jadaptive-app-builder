@@ -32,7 +32,7 @@ public class AuthorizedKeyProvider extends AbstractPublicKeyAuthenticationProvid
 		tenantService.setCurrentTenant(StringUtils.substringAfter(con.getUsername(), "@"));
 		
 		try {
-			User user = userService.findUsername(con.getUsername());
+			User user = userService.getUser(con.getUsername());
 			
 			for(AuthorizedKey authorizedKey : authorizedKeyService.getAuthorizedKeys(user)) {
 				SshPublicKey publicKey = SshKeyUtils.getPublicKey(authorizedKey.getPublicKey());

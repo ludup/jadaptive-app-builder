@@ -117,9 +117,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				}
 				
 			}
-			
-			templateEnabledService.onTemplatesComplete(resourceKeys.toArray(new String[0]));
-			
+
 			if(log.isInfoEnabled()) {
 				log.info("Finished processing templates for {}", templateEnabledService.getResourceKey());
 			}
@@ -349,12 +347,26 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                         .scan()) {                  
                 for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Template.class.getName())) {
                     if(log.isInfoEnabled()) {
-						log.info("Found extension {}", classInfo.getName());
+						log.info("Found template {}", classInfo.getName());
 					}
                     registerAnnotatedTemplate(classInfo.loadClass());
                 }
             }
 		}
+		
+		try (ScanResult scanResult =
+                new ClassGraph()                 
+                    .enableAllInfo()  
+                    .addClassLoader(getClass().getClassLoader())
+                    .whitelistPackages("com.jadaptive")   
+                    .scan()) {                  
+            for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Template.class.getName())) {
+                if(log.isInfoEnabled()) {
+					log.info("Found template {}", classInfo.getName());
+				}
+                registerAnnotatedTemplate(classInfo.loadClass());
+            }
+        }
 	}
 
 	private void registerAnnotatedTemplate(Class<?> clz) {
@@ -418,7 +430,15 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			templateRepository.saveOrUpdate(template);
 			templateRepository.createIndexes(template);
-			permissionService.registerStandardPermissions(template.getResourceKey());
+			switch(template.getType()) {
+			case COLLECTION:
+			case SINGLETON:
+				permissionService.registerStandardPermissions(template.getResourceKey());
+				break;
+			default:
+				// Embedded objects do not have direct permissions
+			}
+			
 		} catch(RepositoryException | EntityException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
 		}

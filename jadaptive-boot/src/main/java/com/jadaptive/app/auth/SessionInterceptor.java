@@ -74,7 +74,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 			permissionService.setupSystemContext();
 		} else if(Objects.nonNull(session)) {
 			tenantService.setCurrentTenant(session.getCurrentTenant());	
-			permissionService.setupUserContext(userService.findUsername(session.getUsername()));
+			permissionService.setupUserContext(userService.getUser(session.getUsername()));
 		} 
 
 		String loginURL = properties.getProperty("authentication.loginURL");

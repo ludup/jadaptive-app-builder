@@ -11,4 +11,5 @@ public interface User {
 	
 	boolean getPasswordChangeRequired();
 	
+	String getEmail();
 }

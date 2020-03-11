@@ -12,10 +12,8 @@ import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.user.User;
 
 @Service
-@Permissions(keys = { AuthorizedKeyServiceImpl.AUTHORIZED_KEY_ASSIGN })
+@Permissions(keys = { AuthorizedKeyService.AUTHORIZED_KEY_ASSIGN })
 public class AuthorizedKeyServiceImpl extends AuthenticatedService implements AuthorizedKeyService {
-
-	public static final String AUTHORIZED_KEY_ASSIGN = "authorizedKey.assign";
 	
 	@Autowired
 	private PersonalObjectDatabase<AuthorizedKey> objectDatabase; 

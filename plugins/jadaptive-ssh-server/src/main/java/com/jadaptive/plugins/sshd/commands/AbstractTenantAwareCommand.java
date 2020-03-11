@@ -41,7 +41,7 @@ public abstract class AbstractTenantAwareCommand extends ShellCommand {
 		
 		this.console = console;
 		this.args = args;
-		this.currentUser = userService.findUsername(console.getConnection().getUsername());
+		this.currentUser = userService.getUser(console.getConnection().getUsername());
 		
 		try {
 			doRun(args, console);

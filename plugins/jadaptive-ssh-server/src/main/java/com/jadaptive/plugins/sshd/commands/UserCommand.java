@@ -11,18 +11,18 @@ public abstract class UserCommand extends AbstractTenantAwareCommand {
 	}
 
 	protected User resolveUser(String name) {
-		return userService.findUsername(name);
+		return userService.getUser(name);
 	}
 	
 	protected User verifyUser(boolean requirePassword) throws IOException {
 		
-		User user = userService.findUsername(console.getConnection().getUsername());
+		User user = userService.getUser(console.getConnection().getUsername());
 		
 		if(args.length > 1) {
 			
 			assertAdministrationPermission();
 			
-			user = userService.findUsername(args[1]);
+			user = userService.getUser(args[1]);
 		} else if(requirePassword){
 			
 			

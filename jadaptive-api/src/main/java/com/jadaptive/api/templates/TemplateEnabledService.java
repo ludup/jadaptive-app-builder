@@ -21,8 +21,6 @@ public interface TemplateEnabledService<T extends AbstractUUIDEntity> {
 
 	void saveTemplateObjects(List<T> objects, @SuppressWarnings("unchecked") TransactionAdapter<T>... ops) throws RepositoryException, EntityException;
 
-	void onTemplatesComplete(String... resourceKeys);
-
 	boolean isSystemOnly();
 
 	String getTemplateFolder();

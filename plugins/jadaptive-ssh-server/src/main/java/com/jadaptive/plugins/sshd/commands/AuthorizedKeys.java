@@ -36,7 +36,7 @@ public class AuthorizedKeys extends AbstractTenantAwareCommand {
 				if(args[i].startsWith("-")) {
 					continue;
 				}
-				user = userService.findUsername(args[1]);
+				user = userService.getUser(args[1]);
 				break;
 			}
 		}

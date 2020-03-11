@@ -32,7 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		permissionService.setupSystemContext();
 		
 		try {
-			User user = userService.findUsername(username);
+			User user = userService.getUser(username);
 			if(Objects.isNull(user)) {
 				throw new AccessDeniedException("Bad username or password");
 			}

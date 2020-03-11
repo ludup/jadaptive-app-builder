@@ -125,6 +125,14 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 		for(EntityTemplate obj : objects) {
 			saveOrUpdate(validateTemplate(obj));
 			repository.createIndexes(obj);
+			switch(obj.getType()) {
+			case COLLECTION:
+			case SINGLETON:
+				permissionService.registerStandardPermissions(obj.getResourceKey());
+				break;
+			default:
+				// Embedded objects do not have direct permissions
+			}
 			for(TransactionAdapter<EntityTemplate> op : ops) {
 				op.afterSave(obj);
 			}
@@ -165,11 +173,6 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 		return RESOURCE_KEY;
 	}
 
-	@Override
-	public void onTemplatesComplete(String... resourceKeys) {
-		permissionService.registerStandardPermissions(RESOURCE_KEY);
-	}
-	
 	@Override
 	public boolean isSystemOnly() {
 		return false;

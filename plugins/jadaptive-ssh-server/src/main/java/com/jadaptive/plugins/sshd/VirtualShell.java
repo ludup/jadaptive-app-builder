@@ -26,7 +26,7 @@ public class VirtualShell extends VirtualShellNG {
 			@Override
 			public void commandStarted(Command cmd, String[] args, VirtualConsole console) {
 				String user = (String) console.getEnvironment().get("USER");
-				permissionService.setupUserContext(userService.findUsername(user));
+				permissionService.setupUserContext(userService.getUser(user));
 			}
 
 			@Override

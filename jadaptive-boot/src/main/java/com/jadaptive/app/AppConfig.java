@@ -47,7 +47,7 @@ public class AppConfig {
                
                String[] additionalDevelopmentPaths = System.getProperty(
             		   "jadaptive.developmentPluginDirs", 
-            		   "../../jadaptive-vsftp,../../jadaptive-updates").split(",");
+            		   "../../jadaptive-vsftp,../../jadaptive-updates,../../jadaptive-key-server").split(",");
                for(String path : additionalDevelopmentPaths) {
             	   pluginRepository.add(new DevelopmentPluginRepository(Paths.get(path)), this::isDevelopment);
                }

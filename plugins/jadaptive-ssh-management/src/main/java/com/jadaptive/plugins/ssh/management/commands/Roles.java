@@ -167,7 +167,7 @@ public class Roles extends UserCommand {
 			console.println(String.format("All users are assigned to the %s Role", role.getName()));
 		} else {
 			for(String uuid : role.getUsers()) {
-				console.println(userService.getUser(uuid).getUsername());
+				console.println(userService.getUserByUUID(uuid).getUsername());
 			}
 		}
 	}

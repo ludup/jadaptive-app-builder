@@ -5,45 +5,35 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
-import com.jadaptive.api.user.DefaultUser;
+import com.jadaptive.api.user.BuiltinUserDatabase;
 import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserRepository;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.utils.CompoundIterable;
 
 @Service
 public class UserServiceImpl implements UserService, TenantAware {
 
+	@Autowired
+	private ApplicationService applicationService;
 	
 	@Autowired
-	UserRepository userRepository; 
+	private BuiltinUserDatabase userRepository; 
 	
 	@Autowired
-	PermissionService permissionService; 
+	private PermissionService permissionService; 
 	
 	@Override
-	public User getUser(String uuid) {
-		User user = userRepository.get(uuid);
+	public User getUserByUUID(String uuid) {
+		User user = userRepository.getUserByUUID(uuid);
 		
 		if(Objects.isNull(user)) {
 			throw new EntityNotFoundException(String.format("User with id %s not found", uuid));
 		}
-		return user;
-	}
-	
-	@Override
-	public User createUser(String username, char[] password, String name, boolean passwordChangeRequired) {
-		
-		permissionService.assertReadWrite(USER_RESOURCE_KEY);
-		
-		DefaultUser user = new DefaultUser();
-		user.setUsername(username);
-		user.setName(name);
-		
-		userRepository.createUser(user, password, passwordChangeRequired);
 		return user;
 	}
 
@@ -58,8 +48,8 @@ public class UserServiceImpl implements UserService, TenantAware {
 
 
 	@Override
-	public User findUsername(String username) {
-		User user = userRepository.findUsername(username);
+	public User getUser(String username) {
+		User user = userRepository.getUser(username);
 		if(Objects.isNull(user)) {
 			throw new EntityNotFoundException(String.format("%s not found", username));
 		}
@@ -106,8 +96,11 @@ public class UserServiceImpl implements UserService, TenantAware {
 	}
 
 	@Override
-	public Iterable<? extends User> iterateUsers() {
-		return userRepository.list();
+	public Iterable<User> iterateUsers() {
+		
+		CompoundIterable<User> iterator = new CompoundIterable<>();
+		iterator.add(userRepository.iterateUsers());
+		return iterator;
 	}
 
 }

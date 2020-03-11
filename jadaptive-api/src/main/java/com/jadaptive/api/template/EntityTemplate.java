@@ -10,6 +10,7 @@ import com.jadaptive.api.entity.EntityScope;
 import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
+@Template(name = "Template", resourceKey = "entityTemplate", scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 public class EntityTemplate extends NamedUUIDEntity {
 
 	EntityType type;

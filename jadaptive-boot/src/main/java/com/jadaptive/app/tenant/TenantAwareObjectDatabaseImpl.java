@@ -1,6 +1,10 @@
 package com.jadaptive.app.tenant;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -21,7 +25,6 @@ public class TenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity>
 	protected TenantAwareObjectDatabaseImpl(DocumentDatabase db) {
 		super(db);
 	}
-
 	
 	@Autowired
 	protected TenantService tenantService;
@@ -79,5 +82,42 @@ public class TenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity>
 	@Override
 	public Long searchCount(Class<T> resourceClass, SearchField... fields) {
 		return searchCount(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
+	}
+	
+	public Iterable<T> iterator(Class<T> resourceClass) {
+		return new Iterable<T>() {
+
+			@Override
+			public Iterator<T> iterator() {
+				return new Iterator<T>() {
+					
+					List<T> page = null;
+					int start = 0;
+					
+					@Override
+					public boolean hasNext() {
+						return (Objects.nonNull(page) && !page.isEmpty()) || loadObjects();
+					}
+
+					@Override
+					public T next() {
+						if(Objects.isNull(page) || page.isEmpty()) {
+							if(!loadObjects()) {
+								throw new IllegalStateException();
+							}
+						}
+						return page.remove(0);
+					}
+					
+					private boolean loadObjects() {
+						
+						page = new ArrayList<>(searchTable(resourceClass, start, 10));
+						start += 10;
+						return !page.isEmpty();
+					}
+				};
+			}
+			
+		};
 	}
 }

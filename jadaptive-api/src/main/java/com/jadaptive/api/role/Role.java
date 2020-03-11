@@ -3,14 +3,40 @@ package com.jadaptive.api.role;
 import java.util.Collection;
 import java.util.HashSet;
 
+import com.jadaptive.api.entity.EntityScope;
+import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.Template;
 
+@Template(name = "Role", resourceKey = "role", scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 public class Role extends NamedUUIDEntity {
 
-	
+	@Column(name = "All Permissions", 
+			description = "Flag to indicate that this role contains all available permissions",
+			defaultValue = "false", 
+			type = FieldType.BOOL)
 	boolean allPermissions;
+	
+	@Column(name = "All Users", 
+			description = "Flag to indicate that this role contains all available users",
+			defaultValue = "false", 
+			type = FieldType.BOOL)
 	boolean allUsers;
+	
+	@Column(name = "Permissions", 
+			description = "The permissions assigned to this Role",
+			defaultValue = "false", 
+			type = FieldType.TEXT,
+			searchable = true)
 	Collection<String> permissions = new HashSet<>();
+	
+	@Column(name = "Users", 
+			description = "The users assigned to this Role",
+			defaultValue = "false", 
+			type = FieldType.TEXT,
+			searchable = true)
 	Collection<String> users = new HashSet<>();
 	
 	public Collection<String> getPermissions() {

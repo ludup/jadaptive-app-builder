@@ -111,7 +111,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 						return ff;
 					}
 					
-					permissionService.setupUserContext(userService.findUsername(con.getUsername()));
+					permissionService.setupUserContext(userService.getUser(con.getUsername()));
 					
 					try {
 						List<VirtualMountTemplate> mounts = new ArrayList<>();
@@ -130,7 +130,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 						}
 						
 						if(Objects.isNull(home)) {
-							home = new VirtualMountTemplate("/", "tmp://", new VFSFileFactory());
+							home = new VirtualMountTemplate("/", "tmp://", new VFSFileFactory(), true);
 						}
 
 						super.setFileFactory(new VirtualFileFactory(
@@ -168,7 +168,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 						new FileSystemCommandFactory(),
 						userCommands);
 				
-				permissionService.setupUserContext(userService.findUsername(con.getUsername()));
+				permissionService.setupUserContext(userService.getUser(con.getUsername()));
 				
 				try {
 					

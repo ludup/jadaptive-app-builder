@@ -33,8 +33,8 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.tenant.events.TenantCreatedEvent;
+import com.jadaptive.api.user.BuiltinUserDatabase;
 import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.ApplicationServiceImpl;
 
 
@@ -60,7 +60,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	private EventService eventService; 
 	
 	@Autowired
-	private UserService userService;
+	private BuiltinUserDatabase userService;
 	
 	@Autowired
 	private RoleService roleService; 
@@ -86,7 +86,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 				
 				
 				try {
-					User user = userService.createUser("admin", "admin".toCharArray(), "Administrator", true);
+					User user = userService.createUser("admin", "Administrator", "", "admin".toCharArray(), true);
 					roleService.assignRole(roleService.getAdministrationRole(), user);
 				} finally {
 					
@@ -273,11 +273,6 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 		}
 	}
 
-	@Override
-	public void onTemplatesComplete(String... resourceKeys) {
-		
-	}
-	
 	@Override
 	public boolean isSystemOnly() {
 		return true;

@@ -13,5 +13,10 @@ public interface PersonalObjectDatabase<T extends PersonalUUIDEntity> {
 
 	Collection<T> getPersonalObjects(Class<T> resourceClass, User user, SearchField... search);
 
+	T getPersonalObject(Class<T> resourceClass, User user, SearchField... search);
 
+	Collection<T> searchPersonalObjects(Class<T> resourceClass,
+			String searchColumn, String searchPattern, int start, int length);
+
+	Long searchPersonalObjectsCount(Class<T> resourceClass, String searchColumn, String searchPattern);
 }

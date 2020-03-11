@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.user.BuiltinUserDatabase;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.commands.UserCommand;
@@ -16,12 +16,12 @@ import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
 public class Users extends UserCommand {
-
-	@Autowired
-	PermissionService permissionService; 
 	
 	@Autowired
-	UserService userService; 
+	private BuiltinUserDatabase userService; 
+	
+	@Autowired
+	private UserService uService;
 	
 	public Users() {
 		super("users", "User Management", UsageHelper.build("users [option]",
@@ -50,6 +50,7 @@ public class Users extends UserCommand {
 		
 		String username = console.readLine("Username: ");
 		String fullname = console.readLine("Full Name: ");
+		String email = console.readLine("Email Address: ");
 		
 		String password;
 		String confirmPassword;
@@ -63,13 +64,13 @@ public class Users extends UserCommand {
 			}
 		} while(!identical);
 		
-		userService.createUser(username, password.toCharArray(), fullname, false);
+		userService.createUser(username, fullname, email, password.toCharArray(), false);
 		
 		console.println(String.format("Created user %s", username));
 	}
 	
 	private void printUsers() {
-		for(User user : userService.iterateUsers()) {
+		for(User user : uService.iterateUsers()) {
 			console.println(user.getUsername());
 		}
 	}

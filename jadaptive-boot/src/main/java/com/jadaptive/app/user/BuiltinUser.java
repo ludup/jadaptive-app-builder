@@ -1,16 +1,43 @@
-package com.jadaptive.api.user;
+package com.jadaptive.app.user;
 
+import com.jadaptive.api.entity.EntityScope;
+import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.Template;
+import com.jadaptive.api.user.User;
 import com.jadaptive.utils.PasswordEncryptionType;
 
-public class DefaultUser extends NamedUUIDEntity implements User {
+@Template(name = "Builtin User", resourceKey = "builtinUsers", scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+public class BuiltinUser extends NamedUUIDEntity implements User {
 
+	@Column(name = "Username", 
+			description = "The logon name of the user",
+			required = true,
+			searchable = true,
+			type = FieldType.TEXT, 
+			unique = true)
 	String username;
+	
+	@Column(name = "Full Name", 
+			description = "The full name of the user",
+			required = true,
+			searchable = true,
+			type = FieldType.TEXT)
 	String name;
+	
 	String encodedPassword;
 	String salt;
 	PasswordEncryptionType encodingType;
 	boolean passwordChangeRequired;
+	
+	@Column(name = "Email", 
+			description = "The user's email address",
+			required = false,
+			searchable = true,
+			type = FieldType.TEXT)
+	String email;
 	
 	public String getUsername() {
 		return username;
@@ -58,5 +85,13 @@ public class DefaultUser extends NamedUUIDEntity implements User {
 
 	public void setPasswordChangeRequired(boolean passwordChangeRequired) {
 		this.passwordChangeRequired = passwordChangeRequired;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 }

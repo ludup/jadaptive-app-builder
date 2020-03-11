@@ -79,6 +79,11 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		public boolean getPasswordChangeRequired() {
 			return false;
 		}
+
+		@Override
+		public String getEmail() {
+			return "";
+		}
 	};
 
 	@Override
@@ -163,7 +168,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		}
 		
 		if(allPermissions.contains(permission)) {
-			throw new IllegalArgumentException(String.format("%s is already a registered permission"));
+			throw new IllegalArgumentException(String.format("%s is already a registered permission", permission));
 		}
 		
 		allPermissions.add(permission);

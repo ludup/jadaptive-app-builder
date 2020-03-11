@@ -70,7 +70,7 @@ public class UploadServlet extends HttpServlet {
 		}
 		
 		if(Objects.nonNull(session)) {
-			permissionService.setupUserContext(userService.findUsername(session.getUsername()));
+			permissionService.setupUserContext(userService.getUser(session.getUsername()));
 		}
 		
 		try {

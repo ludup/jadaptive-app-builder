@@ -27,9 +27,13 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	
 	@Override
 	public Collection<T> getPersonalObjects(Class<T> resourceClass, User user, SearchField... search) {
-		
-		
 		return objectDatabase.searchObjects(resourceClass, 
+				SearchField.eq("ownerUUID", user.getUuid()), SearchField.and(search));
+	}
+	
+	@Override
+	public T getPersonalObject(Class<T> resourceClass, User user, SearchField... search) {
+		return objectDatabase.get(resourceClass, 
 				SearchField.eq("ownerUUID", user.getUuid()), SearchField.and(search));
 	}
 	
@@ -37,5 +41,17 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	public void saveOrUpdate(T obj, User user) {
 		obj.setOwnerUUID(user.getUuid());
 		objectDatabase.saveOrUpdate(obj);
+	}
+
+	@Override
+	public Collection<T> searchPersonalObjects(Class<T> resourceClass, String searchColumn, String searchPattern, int start,
+			int length) {
+		return objectDatabase.searchObjects(resourceClass, SearchField.like(searchColumn, searchPattern));
+	}
+
+	@Override
+	public Long searchPersonalObjectsCount(Class<T> resourceClass, String searchColumn, String searchPattern) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

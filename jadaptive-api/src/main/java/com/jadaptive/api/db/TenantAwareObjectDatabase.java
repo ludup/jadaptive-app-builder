@@ -31,4 +31,6 @@ public interface TenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
 
 	Long searchCount(Class<T> resourceClass, SearchField... fields);
 
+	Iterable<T> iterator(Class<T> resourceClass);
+
 }

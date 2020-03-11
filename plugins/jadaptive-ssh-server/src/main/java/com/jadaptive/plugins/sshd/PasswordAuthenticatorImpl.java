@@ -36,7 +36,7 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 		
 		try {
 			
-			User user = userService.findUsername(username);
+			User user = userService.getUser(username);
 			permissionService.setupUserContext(user);
 			
 			try {
@@ -74,7 +74,7 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 
 		try {
 			
-			User user = userService.findUsername(username);
+			User user = userService.getUser(username);
 			permissionService.setupUserContext(user);
 
 			try {

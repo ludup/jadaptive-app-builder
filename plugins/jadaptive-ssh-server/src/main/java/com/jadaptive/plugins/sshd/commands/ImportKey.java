@@ -59,7 +59,7 @@ public class ImportKey extends AbstractTenantAwareCommand {
 		User forUser = currentUser;
 		if(assign) {
 			try {
-				forUser = userService.findUsername(CliHelper.getValue(args, 'a', "assign"));
+				forUser = userService.getUser(CliHelper.getValue(args, 'a', "assign"));
 			} catch(EntityNotFoundException e) {
 				throw new IOException(e.getMessage(), e);
 			}
