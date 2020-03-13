@@ -36,9 +36,7 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 	@Override
 	public void saveOrUpdate(AuthorizedKey key, String tag, User user) {
 		
-		if(!getCurrentUser().getUuid().equals(user.getUuid())) {
-			assertPermission(AUTHORIZED_KEY_ASSIGN);
-		}
+		assertAssign(user);
 		
 		key.getTags().add(tag);
 		
@@ -48,8 +46,24 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 		
 	}
 
+	private void assertAssign(User user) {
+		if(!getCurrentUser().getUuid().equals(user.getUuid())) {
+			assertPermission(AUTHORIZED_KEY_ASSIGN);
+		}
+	}
+
 	private void checkDuplicateName(String name, User user) {
 
+	}
+
+	@Override
+	public AuthorizedKey getAuthorizedKey(User user, String name) {
+		return objectDatabase.getPersonalObject(AuthorizedKey.class, user, SearchField.eq("name", name));
+	}
+
+	@Override
+	public void deleteKey(AuthorizedKey key) {
+		objectDatabase.deletePersonalObject(key);
 	}
 
 }

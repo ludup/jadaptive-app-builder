@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -14,6 +15,7 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.sshtools.common.auth.PasswordAuthenticationProvider;
 import com.sshtools.common.auth.PasswordChangeException;
+import com.sshtools.common.logger.Log;
 import com.sshtools.common.ssh.SshConnection;
 
 @Component
@@ -41,6 +43,15 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 			
 			try {
 				boolean success = userService.verifyPassword(user, password.toCharArray());
+				
+				boolean adminPermitted = ApplicationProperties.getValue("sshd.permitAdminPassword", true);
+				
+				if(permissionService.isAdministrator(user) && !adminPermitted) {
+					if(Log.isWarnEnabled()) {
+						Log.warn("Administrator denied login using password due to sshd.permitAdminPassword setting");
+					}
+					return false;
+				}
 				
 				if(success && user.getPasswordChangeRequired()) {
 					try {

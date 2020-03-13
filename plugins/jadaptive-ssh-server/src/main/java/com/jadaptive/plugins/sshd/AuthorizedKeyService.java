@@ -18,4 +18,8 @@ public interface AuthorizedKeyService {
 	void saveOrUpdate(AuthorizedKey key, String tag, User user);
 
 	Collection<AuthorizedKey> getSystemKeys(User user);
+
+	AuthorizedKey getAuthorizedKey(User user, String name);
+
+	void deleteKey(AuthorizedKey key);
 }

@@ -34,6 +34,11 @@
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.codesmith</groupId>
+			<artifactId>webbits-spring</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>

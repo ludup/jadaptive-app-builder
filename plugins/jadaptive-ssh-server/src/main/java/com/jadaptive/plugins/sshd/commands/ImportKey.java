@@ -44,10 +44,10 @@ public class ImportKey extends AbstractTenantAwareCommand {
 	public ImportKey() {
 		super("import-key", 
 				"User",
-				UsageHelper.build("import-key -a [user] -f [filename] -c [comment]",
+				UsageHelper.build("import-key -a [user] -f [filename] -n [name]",
 						"-f, --file        The file to import",
-						"-c, --comment     The comment to assign to this key",
-						"-a, --assign      Assign the key to another user (requires administrative or authorizedKey.assign permission"),
+						"-n, --name        The name to assign to this key",
+						"-a, --assign      Assign the key to another user (requires administrative or authorizedKey.assign permission)"),
 						"Import SSH keys");
 	}
 
@@ -85,6 +85,13 @@ public class ImportKey extends AbstractTenantAwareCommand {
 			throw new IOException(String.format("%s does not exist", filename));
 		}
 		
+		String comment;
+		if(CliHelper.hasOption(args, 'n', "name")) {
+			comment = CliHelper.getValue(args, 'n', "name");
+		} else {
+			comment = console.readLine("Name: ");
+		}
+		
 		SshPublicKey pub;
 		
 		try {
@@ -92,17 +99,13 @@ public class ImportKey extends AbstractTenantAwareCommand {
 		} catch(IOException ex) {
 			pub = fromPrivateKey(filename, factory, console.getConnection());
 		}
-		
-		String comment = String.format("Imported by %s", currentUser.getUsername());
-		if(CliHelper.hasOption(args, 'c', "comment")) {
-			comment = CliHelper.getValue(args, 'c', "comment");
-		}
-		
+
 		String publicKey = SshKeyUtils.getOpenSSHFormattedKey(pub, comment);
 		
 		AuthorizedKey key = new AuthorizedKey();
 		key.setPublicKey(publicKey);
 		key.setName(comment);
+		key.getTags().add(AuthorizedKeyServiceImpl.SSH_TAG);
 		
 		authorizedKeyService.saveOrUpdate(key, forUser);
 

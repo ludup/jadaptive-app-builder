@@ -51,7 +51,11 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 
 	@Override
 	public Long searchPersonalObjectsCount(Class<T> resourceClass, String searchColumn, String searchPattern) {
-		// TODO Auto-generated method stub
-		return null;
+		return objectDatabase.searchCount(resourceClass, SearchField.like(searchColumn, searchPattern));
+	}
+
+	@Override
+	public void deletePersonalObject(T obj) {
+		objectDatabase.delete(obj);
 	}
 }

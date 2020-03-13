@@ -46,4 +46,6 @@ public interface PermissionService {
 
 	Set<String> resolveCurrentPermissions();
 
+	boolean isAdministrator(User user);
+
 }

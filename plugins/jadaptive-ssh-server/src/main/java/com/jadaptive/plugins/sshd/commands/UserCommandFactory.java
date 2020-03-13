@@ -11,6 +11,7 @@ public class UserCommandFactory extends AbstractAutowiredCommandFactory {
 	private void postConstruct() {
 		installCommand("passwd", Passwd.class);
 		installCommand("import-key", ImportKey.class);
+		installCommand("delete-key", DeleteKey.class);
 		installCommand("ssh-keygen", SshKeyGen.class);
 		installCommand("authorized-keys", AuthorizedKeys.class);
 	}

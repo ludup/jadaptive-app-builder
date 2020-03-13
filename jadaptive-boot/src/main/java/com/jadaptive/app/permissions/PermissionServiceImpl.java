@@ -135,6 +135,17 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		}
 	}
 	
+	@Override
+	public boolean isAdministrator(User user) {
+		Collection<Role> roles = roleService.getRoles(user);
+		for(Role role : roles) {
+			if(role.isAllPermissions()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private synchronized void registerPermission(String permission, String... aliases) {
 		
 		Tenant tenant = tenantService.getCurrentTenant();	
