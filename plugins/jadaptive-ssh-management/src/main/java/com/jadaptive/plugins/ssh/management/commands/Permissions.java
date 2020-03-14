@@ -6,14 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.plugins.sshd.commands.UserCommand;
+import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
-import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
-import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
-public class Permissions extends UserCommand {
+public class Permissions extends AbstractTenantAwareCommand {
 
 	@Autowired
 	PermissionService permissionService; 
@@ -22,8 +20,7 @@ public class Permissions extends UserCommand {
 	UserService userService; 
 	
 	public Permissions() {
-		super("permissions", "User Management", UsageHelper.build("permissions [option] [user]",
-				"-l, --list                           List all permissions"),
+		super("permissions", "User Management", "permissions",
 				"List all permissions");
 	}
 
@@ -31,14 +28,7 @@ public class Permissions extends UserCommand {
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 		
-		if(CliHelper.hasLongOption(args, "help")) {
-			printUsage();
-		} else if(args.length==1 || CliHelper.hasShortOption(args, 'l') || CliHelper.hasLongOption(args, "list")) {	
-			printPermissions();
-		} else {
-			console.println("Invalid arguments!");
-			printUsage();
-		}
+		printPermissions();
 	}
 
 	private void printPermissions() {

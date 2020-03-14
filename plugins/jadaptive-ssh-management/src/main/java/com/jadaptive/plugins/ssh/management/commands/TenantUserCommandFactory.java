@@ -25,6 +25,9 @@ public class TenantUserCommandFactory extends AbstractAutowiredCommandFactory im
 		tryCommand("roles", Roles.class, "role.read", "role.readWrite");
 		tryCommand("permissions", Permissions.class, "role.read", "roles.readWrite");
 		tryCommand("users", Users.class, "user.read", "user.readWrite");
+		tryCommand("create-user", CreateUser.class, "user.read", "user.readWrite");
+		tryCommand("update-user", UpdateUser.class, "user.read", "user.readWrite");
+		tryCommand("delete-user", DeleteUser.class, "user.read", "user.readWrite");
 		tryCommand("templates", Templates.class, "entityTemplate.read", "entityTemplate.readWrite");
 		tryCommand("security", Security.class, "tenant.read", "tenant.readWrite");
 		tryCommand("import-csv", ImportCsv.class, "tenant.read", "tenant.readWrite");

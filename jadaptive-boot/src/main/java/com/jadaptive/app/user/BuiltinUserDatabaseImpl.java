@@ -137,4 +137,16 @@ public class BuiltinUserDatabaseImpl extends AuthenticatedService implements Bui
 			}
 		}
 	}
+
+	@Override
+	public void saveOrUpdate(User user) {
+		assertWrite(UserService.USER_RESOURCE_KEY);
+		objectDatabase.saveOrUpdate((BuiltinUser) user); 
+	}
+
+	@Override
+	public void deleteUser(User user) {
+		assertWrite(UserService.USER_RESOURCE_KEY);
+		objectDatabase.delete((BuiltinUser) user); 
+	}
 }

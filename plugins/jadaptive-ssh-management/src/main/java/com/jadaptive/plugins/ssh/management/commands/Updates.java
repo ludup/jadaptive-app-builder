@@ -8,14 +8,14 @@ import org.pf4j.update.PluginInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationUpdateManager;
-import com.jadaptive.plugins.sshd.commands.UserCommand;
+import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
-public class Updates extends UserCommand {
+public class Updates extends AbstractTenantAwareCommand {
 	
 	@Autowired
 	private ApplicationUpdateManager updateService; 

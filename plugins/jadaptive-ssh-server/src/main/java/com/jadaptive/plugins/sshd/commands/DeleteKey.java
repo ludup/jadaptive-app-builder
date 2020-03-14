@@ -31,17 +31,20 @@ public class DeleteKey extends AbstractTenantAwareCommand {
 	
 	public DeleteKey() {
 		super("delete-key", 
-				"User",
-				UsageHelper.build("delete-key -a [user] [name]",
-						"-a, --assign      Delete a key assigned to another user (requires administrative or authorizedKey.assign permission",
-						"-n, --name        The name of the key you want to delete"),
-						"Delete SSH keys");
+				"Key Management",
+				UsageHelper.build("delete-key [options] <name>",
+						"-a, --assign <user>     Delete a key assigned to another user (requires administrative or authorizedKey.assign permission"),
+						"Delete an authorized key");
 	}
 
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 
+		if(args.length < 2) {
+			throw new UsageException("Missing key name");
+		}
+		
 		boolean assign = CliHelper.hasOption(args, 'a', "assign");
 		User forUser = currentUser;
 		if(assign) {
@@ -56,12 +59,7 @@ public class DeleteKey extends AbstractTenantAwareCommand {
 				throw new IOException("You do not have the permission to delete a key for " + forUser.getUsername());
 			}
 		}
-		
-		if(!CliHelper.hasOption(args, 'n', "name")) {
-			throw new IOException("-n or --name option required to delete key");
-		}
-		
-		String name = CliHelper.getValue(args, 'n', "name");
+		String name = args[args.length-1];
 		
 		AuthorizedKey key = authorizedKeyService.getAuthorizedKey(forUser, name);
 		authorizedKeyService.deleteKey(key);

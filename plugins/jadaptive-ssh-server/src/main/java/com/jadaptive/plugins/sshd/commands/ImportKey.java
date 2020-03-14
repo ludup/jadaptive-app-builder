@@ -43,18 +43,21 @@ public class ImportKey extends AbstractTenantAwareCommand {
 	
 	public ImportKey() {
 		super("import-key", 
-				"User",
-				UsageHelper.build("import-key -a [user] -f [filename] -n [name]",
-						"-f, --file        The file to import",
-						"-n, --name        The name to assign to this key",
-						"-a, --assign      Assign the key to another user (requires administrative or authorizedKey.assign permission)"),
-						"Import SSH keys");
+				"Key Management",
+				UsageHelper.build("import-key [options] <filename>",
+						"-n, --name   <name>      The name to assign to this key",
+						"-a, --assign <user>      Assign the key to another user (requires administrative or authorizedKey.assign permission)"),
+						"Import an authorized key");
 	}
 
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 
+		if(args.length < 2) {
+			throw new UsageException("Missing key filename");
+		}
+		
 		boolean assign = CliHelper.hasOption(args, 'a', "assign");
 		User forUser = currentUser;
 		if(assign) {
@@ -74,8 +77,7 @@ public class ImportKey extends AbstractTenantAwareCommand {
 			throw new IOException("-f or --file option required to import key");
 		}
 		
-		String filename = CliHelper.getValue(args, 'f', "file");
-		
+		String filename = args[args.length-1];
 		
 		AbstractFileFactory<?> factory = console.getConnection().getContext().getPolicy(
 								FileSystemPolicy.class).getFileFactory(console.getConnection());

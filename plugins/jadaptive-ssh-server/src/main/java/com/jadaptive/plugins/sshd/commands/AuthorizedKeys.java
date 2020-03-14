@@ -21,7 +21,7 @@ public class AuthorizedKeys extends AbstractTenantAwareCommand {
 	
 	public AuthorizedKeys() {
 		super("authorized-keys <user>", 
-				"User",
+				"Key Management",
 				UsageHelper.build("authorized-keys"),
 						"List your own, or another users authorized keys");
 	}

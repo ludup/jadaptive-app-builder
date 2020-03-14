@@ -12,14 +12,14 @@ import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.plugins.sshd.commands.UserCommand;
+import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
-public class Roles extends UserCommand {
+public class Roles extends AbstractTenantAwareCommand {
 
 	@Autowired
 	RoleService roleService; 
@@ -147,7 +147,7 @@ public class Roles extends UserCommand {
 		Set<User> users = new HashSet<>();
 		int argIndex = 3;
 		while(args.length > argIndex) {
-			users.add(resolveUser(args[argIndex++]));
+			users.add(userService.getUser(args[argIndex++]));
 		}
 		return users;
 	}

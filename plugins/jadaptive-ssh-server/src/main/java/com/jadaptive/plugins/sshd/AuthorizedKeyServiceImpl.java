@@ -10,6 +10,7 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 
 @Service
 @Permissions(keys = { AuthorizedKeyService.AUTHORIZED_KEY_ASSIGN })
@@ -17,6 +18,9 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 	
 	@Autowired
 	private PersonalObjectDatabase<AuthorizedKey> objectDatabase; 
+	
+	@Autowired
+	private UserService userService; 
 	
 	@Override
 	public Collection<AuthorizedKey> getAuthorizedKeys(User user) {
@@ -63,6 +67,8 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 
 	@Override
 	public void deleteKey(AuthorizedKey key) {
+		
+		assertAssign(userService.getUserByUUID(key.getOwnerUUID()));
 		objectDatabase.deletePersonalObject(key);
 	}
 

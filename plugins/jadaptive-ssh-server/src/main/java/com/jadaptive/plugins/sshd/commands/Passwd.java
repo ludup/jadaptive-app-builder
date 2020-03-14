@@ -21,18 +21,18 @@ public class Passwd extends UserCommand {
 	
 	public Passwd() {
 		super("passwd", 
-				"User",
+				"User Management",
 				UsageHelper.build("passwd [options] <user>",
 						"-f, --forceChange		       Force the user to change password at next logon"),
 						"Change the current user or another users password.");
 	}
-;
+
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 
 		
-		User user = verifyUser(true);
+		User user = getCommandLineUser(true);
 	
 		for(int i=0;i<3;i++) {
 			char[] newPassword = promptForPassword("New Password: ");

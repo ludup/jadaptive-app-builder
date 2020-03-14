@@ -14,6 +14,7 @@ public class CompoundIterable<T> implements Iterable<T> {
 	public CompoundIterable() {	
 	}
 	
+	@SafeVarargs
 	public CompoundIterable(Iterable<T>... it) {
 		iterators.addAll(Arrays.asList(it));
 	}

@@ -5,13 +5,13 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationUpdateManager;
-import com.jadaptive.plugins.sshd.commands.UserCommand;
+import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
-public class Restart extends UserCommand {
+public class Restart extends AbstractTenantAwareCommand {
 	
 	@Autowired
 	private ApplicationUpdateManager updateService; 

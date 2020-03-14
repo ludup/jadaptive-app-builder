@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.csv.CsvImportService;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
-import com.jadaptive.plugins.sshd.commands.UserCommand;
+import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.files.AbstractFile;
 import com.sshtools.common.files.AbstractFileFactory;
 import com.sshtools.common.permissions.PermissionDeniedException;
@@ -18,7 +18,7 @@ import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
-public class ImportCsv extends UserCommand {
+public class ImportCsv extends AbstractTenantAwareCommand {
 	
 	@Autowired
 	private CsvImportService importService; 

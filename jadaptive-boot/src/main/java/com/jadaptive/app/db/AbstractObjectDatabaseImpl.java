@@ -14,6 +14,7 @@ import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.Template;
+import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 
@@ -50,7 +51,8 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			Document document = db.get(uuid, getCollectionName(clz), database);
 			if(Objects.isNull(document)) {
-				throw new EntityNotFoundException(String.format("%s not found with id %s", getCollectionName(clz), uuid));
+				throw new EntityNotFoundException(String.format("Object from %s not found with id %s", 
+						getCollectionName(clz), uuid));
 			}
 			return DocumentHelper.convertDocumentToObject(clz, document);
 			
@@ -64,7 +66,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		try {
 			Document document = db.get(getCollectionName(clz), database, fields);
 			if(Objects.isNull(document)) {
-				throw new EntityNotFoundException(String.format("%s not found", getCollectionName(clz)));
+				throw new EntityNotFoundException(String.format("Object from %s not found for fields %s", 
+						getCollectionName(clz),
+						getSearchFieldsText(fields, "AND")));
 			}
 			return DocumentHelper.convertDocumentToObject(clz, document);
 			
@@ -74,6 +78,44 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	private Object getSearchFieldsText(SearchField[] fields, String condition) {
+		
+		StringBuffer buf = new StringBuffer();
+		for(int i=0;i<fields.length;i++) {
+			SearchField field = fields[i];
+			switch(field.getSearchType()) {
+			case AND:
+				buf.append("(");
+				buf.append(getSearchFieldsText(field.getFields(), " AND "));
+				buf.append(")");
+				break;
+			case OR:
+				buf.append("(");
+				buf.append(getSearchFieldsText(field.getFields(), " OR "));
+				buf.append(")");
+				break;
+			case EQUALS:
+			case LIKE:
+				buf.append(field.getColumn());
+				buf.append("=");
+				buf.append(field.getValue()[0]);
+				break;
+			case IN:
+				buf.append(field.getColumn());
+				buf.append(" IN(");
+				buf.append(Utils.csv(field.getValue()));
+				buf.append(")");
+				break;
+			}
+			
+			if(i < fields.length-1) {
+				buf.append(condition);
+			}
+		}
+		
+		return buf.toString();
+	}
+
 	private void checkException(Throwable e) throws EntityException {
 		if(e instanceof EntityException) {
 			throw (EntityException)e;
@@ -83,9 +125,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends AbstractUUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, EntityException {
 		try {
 			if(obj.getSystem()) {
-				throw new EntityException(String.format("You cannot delete a system %s", obj.getClass().getSimpleName()));
+				throw new EntityException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
 			}
-			db.delete(obj.getUuid(), obj.getClass().getSimpleName(), database);
+			db.delete(obj.getUuid(), getCollectionName(obj.getClass()), database);
 			onObjectDeleted(obj);
 		} catch(Throwable e) {
 			checkException(e);

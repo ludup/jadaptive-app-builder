@@ -5,7 +5,6 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.tenant.Tenant;
@@ -18,9 +17,6 @@ import com.jadaptive.utils.CompoundIterable;
 @Service
 public class UserServiceImpl implements UserService, TenantAware {
 
-	@Autowired
-	private ApplicationService applicationService;
-	
 	@Autowired
 	private BuiltinUserDatabase userRepository; 
 	

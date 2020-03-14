@@ -84,6 +84,14 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		public String getEmail() {
 			return "";
 		}
+
+		@Override
+		public void setEmail(String value) {
+		}
+
+		@Override
+		public void setName(String value) {
+		}
 	};
 
 	@Override

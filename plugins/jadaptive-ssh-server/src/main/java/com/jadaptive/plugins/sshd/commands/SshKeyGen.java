@@ -46,13 +46,13 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 	
 	public SshKeyGen() {
 		super("ssh-keygen", 
-				"User",
-				UsageHelper.build("ssh-keygen -t [rsa|ecdsa|ed25519] -f [path] -b [bits] -a [user]",
-						"-t, --type              The type of key to generate",
-						"-b, --bits              The number of bits required for the key (ignored for ed25519)",
-						"-f, --file              The file path to save the key to",
-						"-a, --assign            Assign the key to a user (requires authorizedKey.assign permission"),
-						"Generate SSH keys");
+				"Key Management",
+				UsageHelper.build("ssh-keygen [options]",
+						"-t, --type   <rsa|ecdsa|ed25519> The type of key to generate",
+						"-b, --bits   <bits>              The number of bits required for the key (ignored for ed25519)",
+						"-f, --file   <path>              The file path to save the key to",
+						"-a, --assign <user>              Assign the key to a user (requires authorizedKey.assign permission"),
+						"Generate an authorized key");
 	}
 
 	@Override
@@ -132,21 +132,24 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 					String path = CliHelper.getValue(args, 'f', "file");
 					AbstractFile f = console.getCurrentDirectory().resolveFile(path);
 					IOUtils.copy(new ByteArrayInputStream(file.getFormattedKey()), f.getOutputStream());
-					
+					console.println();
+					console.println(String.format("Private key saved to %s", path));
+				} else {
+					console.println();
+					console.println("*** IMPORTANT ***");
+					console.println("Your private has been created and has been printed below.");
+					console.println("There is no other record of the private key on this server.");
+					console.println("Therefore please copy this to a safe location or it will be lost.");
+					console.println();
+					console.println(new String(file.getFormattedKey(), "UTF-8"));
 				}
 				
-				console.println();
-				console.println("*** IMPORTANT ***");
-				console.println("Your private has been created and has been printed below.");
-				console.println("There is no other record of the private key on this server.");
-				console.println("Therefore please copy this to a safe location or it will be lost.");
-				console.println();
-				console.println(new String(file.getFormattedKey(), "UTF-8"));
 				console.println();
 				console.println(pair.getPublicKey().getFingerprint());
 				console.println();
 				console.println(SshKeyFingerprint.getBubbleBabble(pair.getPublicKey()));
 				console.println();
+				
 				break;
 			} catch (NumberFormatException | RepositoryException | EntityException | SshException e) {
 				throw new IOException(e.getMessage(), e);

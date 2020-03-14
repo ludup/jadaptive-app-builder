@@ -12,4 +12,8 @@ public interface User {
 	boolean getPasswordChangeRequired();
 	
 	String getEmail();
+
+	void setEmail(String value);
+
+	void setName(String value);
 }
