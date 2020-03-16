@@ -65,7 +65,7 @@ public class ConfigHelper {
 		if(tenant.getSystem()) {
 			return getSystemPrivateFolder();
 		}
-		return new File(getTenantsFolder(), tenant.getHostname());
+		return new File(getTenantsFolder(), tenant.getDomain());
 	}
 	
 	public static File getTenantSubFolder(Tenant tenant, String folder) {
@@ -100,8 +100,8 @@ public class ConfigHelper {
 	
 	public static Collection<ResourcePackage> getTenantPackages(Tenant tenant) throws IOException {
 		
-		if(!tenantPackages.containsKey(tenant.getHostname())) {
-			tenantPackages.put(tenant.getHostname(), new ArrayList<>());
+		if(!tenantPackages.containsKey(tenant.getDomain())) {
+			tenantPackages.put(tenant.getDomain(), new ArrayList<>());
 			File[] pkgs = getTenantFolder(tenant).listFiles(new FilenameFilter() {
 	
 				@Override
@@ -114,7 +114,7 @@ public class ConfigHelper {
 				for(File pkg : pkgs) {
 					try {
 						URI uri = new URI(String.format("jar:%s", pkg.toURI().toString()));
-						tenantPackages.get(tenant.getHostname()).add(getZipPackage(uri, pkg.getName()));
+						tenantPackages.get(tenant.getDomain()).add(getZipPackage(uri, pkg.getName()));
 					} catch (URISyntaxException e) {
 						throw new IOException(e.getMessage(), e);
 					}
@@ -123,7 +123,7 @@ public class ConfigHelper {
 			
 			
 		}
-		return Collections.unmodifiableCollection(tenantPackages.get(tenant.getHostname()));
+		return Collections.unmodifiableCollection(tenantPackages.get(tenant.getDomain()));
 	}
 	
 	public static Collection<ResourcePackage> getSystemPrivatePackages() throws IOException {

@@ -152,7 +152,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			if(!tenant.getSystem()) {
 
-				File tenantConf = new File(ConfigHelper.getTenantsFolder(), tenant.getHostname());
+				File tenantConf = new File(ConfigHelper.getTenantsFolder(), tenant.getDomain());
 				File templateConf = new File(tenantConf, templateEnabledService.getTemplateFolder());
 				if(templateConf.exists()) {
 					paths.add(new PathInfo(templateConf.toPath()));

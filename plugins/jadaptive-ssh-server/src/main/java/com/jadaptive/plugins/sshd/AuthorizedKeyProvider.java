@@ -29,7 +29,7 @@ public class AuthorizedKeyProvider extends AbstractPublicKeyAuthenticationProvid
 	@Override
 	public boolean isAuthorizedKey(SshPublicKey key, SshConnection con) throws IOException {
 		
-		tenantService.setCurrentTenant(StringUtils.substringAfter(con.getUsername(), "@"));
+		tenantService.setCurrentTenant(tenantService.resolveTenantName(con.getUsername()));
 		
 		try {
 			User user = userService.getUser(con.getUsername());

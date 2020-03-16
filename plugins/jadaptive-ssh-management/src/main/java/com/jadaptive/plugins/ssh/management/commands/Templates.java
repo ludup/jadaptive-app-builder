@@ -35,6 +35,10 @@ public class Templates extends AbstractTenantAwareCommand {
 				"Manage object templates");
 	}
 
+	public boolean isHidden() {
+		return true;
+	}
+	
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
@@ -79,10 +80,10 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 	public Long countTenants() {
 		return countObjects(TENANT_DATABASE, Tenant.class) ;
 	}
-	
-	
-		
-	
 
-	
+	@Override
+	public Tenant getTenantByName(String name) {
+		return getObject(TENANT_DATABASE, Tenant.class, SearchField.eq("name", name));
+	}
+
 }

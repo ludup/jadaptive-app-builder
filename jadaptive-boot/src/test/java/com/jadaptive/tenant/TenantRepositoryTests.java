@@ -45,7 +45,7 @@ public class TenantRepositoryTests {
 		
 		Tenant tenant = new Tenant();
 		tenant.setName("No UUID");
-		tenant.setHostname("test.jadaptive.com");
+		tenant.setDomain("test.jadaptive.com");
 		
 		assertNull(tenant.getUuid());
 		
@@ -59,7 +59,7 @@ public class TenantRepositoryTests {
 		
 		Tenant tenant = new Tenant();
 		tenant.setName("No UUID");
-		tenant.setHostname("test.jadaptive.com");
+		tenant.setDomain("test.jadaptive.com");
 		
 		String uuid = UUID.randomUUID().toString();
 		

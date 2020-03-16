@@ -20,8 +20,6 @@ public interface TenantService {
 
 	Collection<Tenant> listTenants();
 
-	Tenant createTenant(String name, String hostname) throws RepositoryException, EntityException;
-
 	Tenant getSystemTenant() throws RepositoryException, EntityException;
 
 	void setCurrentTenant(HttpServletRequest request);
@@ -35,5 +33,18 @@ public interface TenantService {
 	Tenant getTenantByDomain(String name);
 
 	void assertManageTenant() throws AccessDeniedException;
+
+	Tenant resolveTenantName(String username);
+
+	Tenant createTenant(String name, String domain, String... additionalDomains)
+			throws RepositoryException, EntityException;
+
+	Tenant createTenant(String uuid, String name, String primaryDomain, String... additionalDomains)
+			throws RepositoryException, EntityException;
+
+	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, String... additionalDomains)
+			throws RepositoryException, EntityException;
+
+	Tenant getTenantByName(String name);
 
 }

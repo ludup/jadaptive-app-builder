@@ -19,11 +19,9 @@ public class Tenants extends AbstractTenantAwareCommand {
 	TenantService tenantService; 
 	
 	public Tenants() {
-		super("tenants", "System", UsageHelper.build("tenant [options] [domain]",
+		super("tenants", "System Management", UsageHelper.build("tenant [options] [domain]",
 				"-l , --list [-f, --friendly]   List tenant domains",
-				"-m, --manage <domain>          Switch to the named domain",
-				"-c, --create <domain> <name>   Create a new Tenant",
-				"-d, --delete <domain>          Delete an existing Tenant"), "Manage tenant domains");
+				"-m, --manage <domain>          Switch to the named domain"), "List tenant domains");
 	}
 
 	@Override
@@ -42,31 +40,13 @@ public class Tenants extends AbstractTenantAwareCommand {
 			
 			Tenant tenant = resolveTenant(args[2]);
 			
-			switch(args[1]) {
-			case "-m":
-			case "--manage":
+			if(CliHelper.hasOption(args, 'm', "manage")) {
 				tenantService.assertManageTenant();
 				console.getEnvironment().put("TENANT_NAME", tenant.getName());
 				console.getEnvironment().put("TENANT_UUID", tenant.getUuid());
 				console.println(String.format("You are now managing %s", tenant.getName()));
-				break;
-			case "-d":
-			case "--delete":
-				String answer = console.readLine(String.format("Are you sure you want to delete the tenant %s [y/n]: ", tenant.getName()));
-				switch(answer.trim()) {
-				case "y":
-				case "yes":
-					tenantService.deleteTenant(tenant);
-					console.println(String.format("%s was deleted", tenant.getName()));
-					break;
-				default:
-					console.println(String.format("%s was not deleted", tenant.getName()));
-				}
-				
-				break;
-			default:
-				break;
 			}
+
 		} else {
 			console.println("Invalid arguments!");
 			printUsage();
@@ -81,9 +61,9 @@ public class Tenants extends AbstractTenantAwareCommand {
 		
 		for(Tenant tenant : tenantService.listTenants()) {
 			if(friendly) {
-				console.println(String.format("%s (%s)", tenant.getName(), tenant.getHostname()));
+				console.println(String.format("%s (%s)", tenant.getName(), tenant.getDomain()));
 			} else {
-				console.println(tenant.getHostname());
+				console.println(tenant.getDomain());
 			}
 		}
 		

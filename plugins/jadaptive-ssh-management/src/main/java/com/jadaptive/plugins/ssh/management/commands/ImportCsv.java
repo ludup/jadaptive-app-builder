@@ -40,6 +40,10 @@ public class ImportCsv extends AbstractTenantAwareCommand {
 				"Import a CSV file");
 	}
 
+	public boolean isHidden() {
+		return true;
+	}
+	
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {

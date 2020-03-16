@@ -14,7 +14,7 @@ import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
-public class AuthorizedKeys extends AbstractTenantAwareCommand {
+public class AuthorizedKeys extends UserCommand {
 	
 	@Autowired
 	private AuthorizedKeyService authorizedKeyService;
@@ -30,16 +30,7 @@ public class AuthorizedKeys extends AbstractTenantAwareCommand {
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 	
-		User user = currentUser;
-		if(args.length > 1) {
-			for(int i=1;i<args.length;i++) {
-				if(args[i].startsWith("-")) {
-					continue;
-				}
-				user = userService.getUser(args[1]);
-				break;
-			}
-		}
+		User user = getCommandLineUser(false);
 		
 		Collection<AuthorizedKey> keys;
 		if(CliHelper.hasOption(args, 's', "system")) {
@@ -52,4 +43,8 @@ public class AuthorizedKeys extends AbstractTenantAwareCommand {
 		}
 	}
 
+	@Override
+	protected void assertPermission() {
+		// Any user can list another users keys
+	}
 }

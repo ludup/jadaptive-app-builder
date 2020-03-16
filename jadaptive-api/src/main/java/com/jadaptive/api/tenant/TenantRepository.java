@@ -25,6 +25,8 @@ public interface TenantRepository {
 
 	Long countTenants();
 
+	Tenant getTenantByName(String name);
+
 	
 
 

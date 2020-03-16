@@ -48,4 +48,6 @@ public interface PermissionService {
 
 	boolean isAdministrator(User user);
 
+	void assertAdministrator();
+
 }

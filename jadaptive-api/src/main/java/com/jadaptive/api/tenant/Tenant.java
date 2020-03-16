@@ -1,11 +1,15 @@
 package com.jadaptive.api.tenant;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 public class Tenant extends AbstractUUIDEntity {
 
 	String name;
 	String hostname;
+	Set<String> alternativeDomains = new HashSet<>();
 	
 	public Tenant() {
 		
@@ -30,11 +34,29 @@ public class Tenant extends AbstractUUIDEntity {
 		this.name = name;
 	}
 
-	public String getHostname() {
+	public String getDomain() {
 		return hostname;
 	}
 
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
+	public void setDomain(String domain) {
+		this.hostname = domain;
 	}
+	
+	public String getHostname() {
+		return hostname;
+	}
+	
+	public void setHostname(String domain) {
+		this.hostname = domain;
+	}
+
+	public Set<String> getAlternativeDomains() {
+		return alternativeDomains;
+	}
+
+	public void setAlternativeDomains(Set<String> alternativeDomains) {
+		this.alternativeDomains = alternativeDomains;
+	}
+	
+	
 }

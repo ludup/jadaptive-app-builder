@@ -183,7 +183,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		
 		if(log.isInfoEnabled()) {
-			log.info("Registering permission {} for tenant {}", permission, tenantService.getCurrentTenant().getHostname());
+			log.info("Registering permission {} for tenant {}", permission, tenantService.getCurrentTenant().getDomain());
 		}
 		
 		if(allPermissions.contains(permission)) {
@@ -398,5 +398,13 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			}
 		}
 		
+	}
+
+	@Override
+	public void assertAdministrator() {
+		if(!isAdministrator(getCurrentUser())) {
+			throw new AccessDeniedException(String.format("%s is not an Administrator", 
+					getCurrentUser().getName()));
+		}
 	}
 }
