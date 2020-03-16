@@ -23,7 +23,7 @@ public class TemplateVersion extends AbstractUUIDEntity {
 	@Column(name = "Timestamp", 
 			description = "The timestamp this template was installed", 
 			required = true,
-			type = FieldType.DATE)
+			type = FieldType.TIMESTAMP)
 	Date timestamp;
 	
 	public Date getTimestamp() {

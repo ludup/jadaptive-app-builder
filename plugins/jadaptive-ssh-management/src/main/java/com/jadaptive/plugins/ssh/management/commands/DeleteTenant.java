@@ -9,7 +9,6 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
-import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;

@@ -14,10 +14,10 @@ public class TestFieldTypesObject extends AbstractUUIDEntity {
 	@Column(name = "String", description = "A string", type = FieldType.TEXT)
 	String string;
 	
-	@Column(name = "Long", description = "A long", type = FieldType.NUMBER)
+	@Column(name = "Long", description = "A long", type = FieldType.LONG)
 	Long longNumber;
 	
-	@Column(name = "Integer", description = "An int", type = FieldType.NUMBER)
+	@Column(name = "Integer", description = "An int", type = FieldType.INTEGER)
 	Integer intNumber;
 	
 	@Column(name = "Float", description = "A float", type = FieldType.DECIMAL)
@@ -26,7 +26,7 @@ public class TestFieldTypesObject extends AbstractUUIDEntity {
 	@Column(name = "Double", description = "A double", type = FieldType.DECIMAL)
 	Double doubleNumber;
 	
-	@Column(name = "Date", description = "A date", type = FieldType.DATE)
+	@Column(name = "Date", description = "A date", type = FieldType.TIMESTAMP)
 	Date date;
 	
 	@Column(name = "Enum", description = "An enum", type = FieldType.ENUM)

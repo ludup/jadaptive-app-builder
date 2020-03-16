@@ -35,21 +35,16 @@ public class APIController {
 	static Logger log = LoggerFactory.getLogger(APIController.class);
 	
 	@Autowired
-	EntityTemplateService templateService; 
+	private EntityTemplateService templateService; 
 	
 	@Autowired
-	TemplateVersionService versionService; 
+	private TemplateVersionService versionService; 
 	
 	@Autowired
-	EntityService<MongoEntity> entityService;
+	private EntityService<MongoEntity> entityService;
 	
 	@Autowired
-	SessionService sessionService; 
-	
-	@PostConstruct
-	private void postConstruct() {
-		System.out.println(getClass().getName());
-	}
+	private SessionService sessionService; 
 	
 	@RequestMapping(value="api/template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody

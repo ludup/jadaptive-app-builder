@@ -217,10 +217,13 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 		case DECIMAL:
 			validateDecimal(node, field);
 			return node.asDouble();
-		case NUMBER:
+		case LONG:
 			validateNumber(node, field);
 			return node.asLong();
-		case DATE:
+		case INTEGER:
+			validateNumber(node, field);
+			return node.asInt();
+		case TIMESTAMP:
 			validateDate(node, field);
 			return Utils.parseDate(node.asText(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		case ENUM:

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.bson.Document;
-import org.pf4j.PluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,16 +34,13 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	public static final String RESOURCE_KEY = "entityTemplate";
 	
 	@Autowired
-	EntityTemplateRepository repository; 
+	private EntityTemplateRepository repository; 
 	
 	@Autowired
-	EntityService<MongoEntity> entityService;
+	private EntityService<MongoEntity> entityService;
 	
 	@Autowired
-	PermissionService permissionService; 
-	
-	@Autowired
-	PluginManager pluginManager; 
+	private PermissionService permissionService; 
 	
 	@Override
 	public EntityTemplate get(String resourceKey) throws RepositoryException, EntityException {

@@ -2,6 +2,7 @@ package com.jadaptive.app;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -19,11 +20,13 @@ import org.apache.commons.io.FileUtils;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginRuntimeException;
 import org.pf4j.PluginWrapper;
+import org.pf4j.update.DefaultUpdateRepository;
 import org.pf4j.update.FileDownloader;
 import org.pf4j.update.FileVerifier;
 import org.pf4j.update.PluginInfo;
 import org.pf4j.update.PluginInfo.PluginRelease;
 import org.pf4j.update.UpdateManager;
+import org.pf4j.update.UpdateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +55,22 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 	protected FileDownloader getFileDownloader(String pluginId) {
 		return new SerialReportingFileDownloader();
 	}
-			
+	
+    public void addRepository(String id, URL url) {
+        for (UpdateRepository ur : repositories) {
+            if (ur.getId().equals(id)) {
+                throw new RuntimeException("Repository with id " + id + " already exists");
+            }
+        }
+        repositories.add(new DefaultUpdateRepository(id, url) {
+			@Override
+			protected InputStream openURL(URL url) throws IOException {
+				return ApplicationUpdateManagerImpl.this.openURL(url);
+			}
+        	
+        });
+    }
+    
 	public boolean hasPluginUpdate(String id) {
 		PluginInfo pluginInfo = getPluginsMap().get(id);
         if (pluginInfo == null) {
@@ -174,6 +192,32 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 		
 	}
 	
+	private InputStream openURL(URL url) throws IOException {
+		if(url.getProtocol().startsWith("http")) {
+			HttpURLConnection hc = (HttpURLConnection) url.openConnection();
+
+	        hc.setDoOutput(false);
+	        hc.setDoInput(true);
+	        hc.setUseCaches(false);
+
+	        hc.setRequestProperty("Product-Serial", ApplicationVersion.getSerial());
+	        hc.setRequestProperty("Product-Id", ApplicationVersion.getProductId());
+	        hc.setRequestProperty("Product-Version", ApplicationVersion.getVersion());
+		       
+	        hc.connect();
+	        
+	        return hc.getInputStream();
+
+		} else {
+			try {
+				Path fromFile = Paths.get(url.toURI());
+				return Files.newInputStream(fromFile);
+			} catch (URISyntaxException e) {
+	            throw new PluginRuntimeException("Something wrong with given URL", e);
+	        }
+		}   
+	}
+	
 	class SerialReportingFileDownloader implements FileDownloader {
 
 		@Override
@@ -185,38 +229,14 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 			
 			Path destination = Files.createTempDirectory("pf4j-update-downloader");
 	        destination.toFile().deleteOnExit();
-	        
-			if(url.getProtocol().startsWith("http")) {
-				HttpURLConnection hc = (HttpURLConnection) url.openConnection();
-	
-		        hc.setDoOutput(false);
-		        hc.setDoInput(true);
-		        hc.setUseCaches(false);
-	
-		        hc.setRequestProperty("Product-Serial", ApplicationVersion.getSerial());
-		        hc.setRequestProperty("Product-Id", ApplicationVersion.getProductId());
-		        hc.setRequestProperty("Product-Version", ApplicationVersion.getVersion());
-			       
-		        hc.connect();
-		        
-		        String path = url.getPath();
-		        String fileName = path.substring(path.lastIndexOf('/') + 1);
-		        Path toFile = destination.resolve(fileName);
-		        
-		        Files.copy(hc.getInputStream(), toFile, StandardCopyOption.REPLACE_EXISTING);
+	        String path = url.getPath();
+	        String fileName = path.substring(path.lastIndexOf('/') + 1);
+	        Path toFile = destination.resolve(fileName);
+
+	        try(InputStream in = openURL(url)) {
+		        Files.copy(in, toFile, StandardCopyOption.REPLACE_EXISTING);
 		        return toFile;
-			} else {
-				try {
-					Path fromFile = Paths.get(url.toURI());
-		            String path = url.getPath();
-		            String fileName = path.substring(path.lastIndexOf('/') + 1);
-		            Path toFile = destination.resolve(fileName);
-		            Files.copy(fromFile, toFile, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
-		            return toFile;
-				} catch (URISyntaxException e) {
-		            throw new PluginRuntimeException("Something wrong with given URL", e);
-		        }
-			}   
+	        }
 		}
 	}
 

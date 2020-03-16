@@ -32,11 +32,6 @@ public class LogonController {
 
 	static Logger log = LoggerFactory.getLogger(LogonController.class);
 	
-	@PostConstruct
-	private void postConstruct() {
-		System.out.println(getClass().getName());
-	}
-	
 	@Autowired
 	private TenantService tenantService; 
 	

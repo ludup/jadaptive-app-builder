@@ -14,10 +14,10 @@ public class EmbeddedObject extends AbstractUUIDEntity {
 	@Column(name = "Embedded String", description = "An embedded string", type = FieldType.TEXT)
 	String embeddedString;
 	
-	@Column(name = "Embedded Long", description = "An embedded long", type = FieldType.NUMBER)
+	@Column(name = "Embedded Long", description = "An embedded long", type = FieldType.LONG)
 	Long embeddedLong;
 	
-	@Column(name = "Embedded Int", description = "An embedded int", type = FieldType.NUMBER)
+	@Column(name = "Embedded Int", description = "An embedded int", type = FieldType.INTEGER)
 	Integer embeddedInt;
 	
 	@Column(name = "Embedded Float", description = "An embedded float", type = FieldType.DECIMAL)
@@ -26,7 +26,7 @@ public class EmbeddedObject extends AbstractUUIDEntity {
 	@Column(name = "Embedded Double", description = "An embedded double", type = FieldType.DECIMAL)
 	Double embeddedDouble;
 	
-	@Column(name = "Embedded Date", description = "An embedded date", type = FieldType.DATE)
+	@Column(name = "Embedded Date", description = "An embedded date", type = FieldType.TIMESTAMP)
 	Date embeddedDate;
 	
 	@Column(name = "Embedded Enum", description = "An embedded enum", type = FieldType.ENUM)

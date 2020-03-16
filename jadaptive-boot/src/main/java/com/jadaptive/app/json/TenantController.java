@@ -28,12 +28,7 @@ public class TenantController {
 	
 	@Autowired
 	TenantService tenantService; 
-	
-	@PostConstruct
-	private void postConstruct() {
-		System.out.println(getClass().getName());
-	}
-	
+		
 	@RequestMapping(value="api/tenant/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)

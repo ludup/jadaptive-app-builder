@@ -2,6 +2,7 @@ package com.jadaptive.app.entity;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
+import com.jadaptive.utils.Utils;
 
 public class EntitySerializer extends StdSerializer<MongoEntity> {
 
@@ -96,7 +98,7 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 				default:
 					if(t.getCollection()) {
 						gen.writeArrayFieldStart(t.getResourceKey());
-						for(String v : value.getCollection(t.getResourceKey())) {
+						for(Object v : value.getCollection(t.getResourceKey())) {
 							writeCollectionField(gen, t, v);
 						}
 						gen.writeEndArray();
@@ -118,13 +120,18 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 		case DECIMAL:
 			gen.writeNumberField(t.getResourceKey(), (Double) value);
 			break;
-		case NUMBER:
+		case LONG:
 			gen.writeNumberField(t.getResourceKey(), (Long) value);
+			break;
+		case INTEGER:
+			gen.writeNumberField(t.getResourceKey(), (Integer) value);
+			break;
+		case TIMESTAMP:
+			gen.writeStringField(t.getResourceKey(), Utils.formatDate((Date)value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
 			break;
 		case TEXT:
 		case TEXT_AREA:
 		case PASSWORD:
-		case DATE:
 		case OBJECT_REFERENCE:
 		case ENUM:
 			gen.writeStringField(t.getResourceKey(), value.toString());
@@ -137,25 +144,30 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 		
 	}
 	
-	private void writeCollectionField(JsonGenerator gen, FieldTemplate t, String value) throws IOException {
+	private void writeCollectionField(JsonGenerator gen, FieldTemplate t, Object value) throws IOException {
 		
 		switch (t.getFieldType()) {
 		case BOOL:
-			gen.writeBoolean(Boolean.parseBoolean(value));
+			gen.writeBoolean((Boolean) value);
 			break;
 		case DECIMAL:
-			gen.writeNumber(Double.parseDouble(value));
+			gen.writeNumber((Double)value);
 			break;
-		case NUMBER:
-			gen.writeNumber(Long.parseLong(value));
+		case LONG:
+			gen.writeNumber((Long)value);
+			break;
+		case INTEGER:
+			gen.writeNumber((Integer)value);
+			break;
+		case TIMESTAMP:
+			gen.writeString(Utils.formatDate((Date)value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
 			break;
 		case TEXT:
 		case TEXT_AREA:
 		case PASSWORD:
-		case DATE:
 		case OBJECT_REFERENCE:
 		case ENUM:
-			gen.writeString(value);
+			gen.writeString(value.toString());
 			break;
 		default:
 			throw new IllegalStateException(

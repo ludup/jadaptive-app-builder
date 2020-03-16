@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.plugins.sshd.PluginCommandFactory;
 import com.jadaptive.plugins.sshd.commands.AbstractAutowiredCommandFactory;
 import com.sshtools.server.vsession.CommandFactory;

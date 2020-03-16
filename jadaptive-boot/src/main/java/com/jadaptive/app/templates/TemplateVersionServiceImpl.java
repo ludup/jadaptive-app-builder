@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,12 +36,13 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.Template;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
@@ -405,7 +407,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					t.setResourceKey(f.getName());
 					t.setDefaultValue(field.defaultValue());
 					t.setDescription(field.description());
-					t.setFieldType(field.type());
+					t.setFieldType(selectFieldType(f.getType(), field.type()));
 					t.setHidden(field.hidden());
 					t.setName(field.name());
 					t.setRequired(field.required());
@@ -442,5 +444,29 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		} catch(RepositoryException | EntityException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
 		}
+	}
+	
+	private FieldType selectFieldType(Class<?> type, FieldType declaredType) {
+		if(Objects.nonNull(declaredType)) {
+			return declaredType;
+		}
+		
+		if(Long.class.equals(type) || long.class.equals(type)) {
+			return FieldType.LONG;
+		} else if(Integer.class.equals(type) || int.class.equals(type)) {
+			return FieldType.INTEGER;
+		} else if(Double.class.equals(type) || double.class.equals(type)) {
+			return FieldType.DECIMAL;
+		} else if(Boolean.class.equals(type) || boolean.class.equals(type)) {
+			return FieldType.BOOL;
+		} else if(Date.class.equals(type)) {
+			return FieldType.TIMESTAMP;
+		} else if(String.class.equals(type)) {
+			return FieldType.TEXT;
+		} else if(Enum.class.isAssignableFrom(type)) {
+			return FieldType.ENUM;
+		}
+		
+		throw new IllegalStateException(String.format("Could not detemine field type of class %s", type.getSimpleName()));
 	}
 }

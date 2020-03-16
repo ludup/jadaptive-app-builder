@@ -38,15 +38,10 @@ public class ResourceController {
 	static Logger log = LoggerFactory.getLogger(ResourceController.class);
 	
 	@Autowired
-	TenantService tenantService; 
+	private TenantService tenantService; 
 	
 	@Autowired
-	PluginManager pluginManager; 
-	
-	@PostConstruct
-	private void postConstruct() {
-		System.out.println(getClass().getName());
-	}
+	private PluginManager pluginManager; 
 	
 	@RequestMapping(value="", method = RequestMethod.GET)
 	public void doDefaultPath(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityException, IOException {

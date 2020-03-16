@@ -19,13 +19,13 @@ public class Quota extends AbstractUUIDEntity {
 	@Column(name = "Key", description = "An individual quote within the group", type = FieldType.TEXT)
 	String key;
 	
-	@Column(name = "Quota", description = "The maximum available value of this quota", type = FieldType.NUMBER)
+	@Column(name = "Quota", description = "The maximum available value of this quota", type = FieldType.LONG)
 	long quota;
 	
-	@Column(name = "Period", description = "The period of time in seconds that the quote applies", type = FieldType.NUMBER)
+	@Column(name = "Period", description = "The period of time in seconds that the quote applies", type = FieldType.LONG)
 	long period;
 	
-	@Column(name = "Value", description = "The current value of this quota", type = FieldType.NUMBER)
+	@Column(name = "Value", description = "The current value of this quota", type = FieldType.LONG)
 	long value;
 
 	Date quotaStarted;
