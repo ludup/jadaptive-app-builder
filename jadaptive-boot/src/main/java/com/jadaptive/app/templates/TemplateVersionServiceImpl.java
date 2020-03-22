@@ -42,7 +42,9 @@ import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
@@ -50,6 +52,7 @@ import com.jadaptive.api.templates.TemplateVersionRepository;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
+import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.json.ObjectMapperHolder;
 import com.jadaptive.utils.Version;
 
@@ -397,9 +400,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			 
 			template.getFields().clear();
 			
+			Index[] nonUnique = clz.getAnnotationsByType(Index.class);
+			UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);
+			
 			for(Field f : clz.getDeclaredFields()) {
 				
 				Column[] annotations = f.getAnnotationsByType(Column.class);
+				
 				if(Objects.nonNull(annotations) && annotations.length > 0) {
 					
 					Column field = annotations[0];
@@ -420,7 +427,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					case ENUM:
 					case OBJECT_EMBEDDED:
 					case OBJECT_REFERENCE:
-						t.getValidators().add(new FieldValidator(ValidationType.OBJECT_TYPE, f.getType().getName()));
+						t.getValidators().add(new FieldValidator(
+								ValidationType.OBJECT_TYPE, 
+								f.getType().getName()));
+						t.getValidators().add(new FieldValidator(
+								ValidationType.RESOURCE_KEY, 
+								DocumentHelper.getTemplateResourceKey(f.getType())));
 						break;
 					default:
 						break;
@@ -431,7 +443,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			templateRepository.saveOrUpdate(template);
-			templateRepository.createIndexes(template);
+			templateRepository.createIndexes(template, nonUnique, unique);
 			switch(template.getType()) {
 			case COLLECTION:
 			case SINGLETON:

@@ -2,6 +2,7 @@ package com.jadaptive.app.role;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -199,5 +200,16 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 		role.getUsers().removeAll(uuids);
 		
 		saveOrUpdate(role);
+	}
+
+	@Override
+	public boolean hasRole(User user, Collection<Role> roles) {
+		Collection<Role> userRoles = getRoles(user);
+		return !Collections.disjoint(userRoles, roles);
+	}
+
+	@Override
+	public boolean hasRole(User user, Role... roles) {
+		return hasRole(user, Arrays.asList(roles));
 	}
 }

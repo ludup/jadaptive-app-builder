@@ -9,7 +9,7 @@ public class SearchField {
 	public enum Type { EQUALS, LIKE, IN, OR, AND }
 	
 	String searchField;
-	String[] searchValue;
+	Object[] searchValue;
 	Type type;
 	SearchField[] fields;
 	
@@ -25,7 +25,7 @@ public class SearchField {
 		this.type = type;
 	}
 	
-	private SearchField(Type type, String searchField, String... searchValue) {
+	private SearchField(Type type, String searchField, Object... searchValue) {
 		super();
 		if(StringUtils.isEmpty(searchField) || searchField.equalsIgnoreCase("UUID")) {
 			searchField = "_id";
@@ -44,7 +44,7 @@ public class SearchField {
 		return searchField;
 	}
 	
-	public String[] getValue() {
+	public Object[] getValue() {
 		return searchValue;
 	}
 	
@@ -52,24 +52,32 @@ public class SearchField {
 		return type;
 	}
 	
-	public static SearchField eq(String searchField, String searchValue) {
+	public static SearchField eq(String searchField, Object searchValue) {
 		return new SearchField(Type.EQUALS, searchField, searchValue);
 	}
 	
-	public static SearchField in(String searchField, String... searchValue) {
+	public static SearchField in(String searchField, Object... searchValue) {
 		return new SearchField(Type.IN, searchField, searchValue);
 	}
 	
 	public static SearchField in(String searchField, Collection<String> searchValue) {
-		return new SearchField(Type.IN, searchField, searchValue.toArray(new String[0]));
+		return new SearchField(Type.IN, searchField, searchValue.toArray(new Object[0]));
 	}
 	
-	public static SearchField like(String searchField, String searchValue) {
+	public static SearchField like(String searchField, Object searchValue) {
 		return new SearchField(Type.LIKE, searchField, searchValue);
+	}
+	
+	public static SearchField or(SearchField x, SearchField y) {
+		return new SearchField(Type.OR, x, y);
 	}
 	
 	public static SearchField or(SearchField...fields) {
 		return new SearchField(Type.OR, fields);
+	}
+	
+	public static SearchField and(SearchField x, SearchField y) {
+		return new SearchField(Type.AND, x, y);
 	}
 	
 	public static SearchField and(SearchField...fields) {

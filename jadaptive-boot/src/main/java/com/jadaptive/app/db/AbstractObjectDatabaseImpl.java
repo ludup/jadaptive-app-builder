@@ -13,7 +13,6 @@ import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.template.Template;
 import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
@@ -25,11 +24,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 	protected String getCollectionName(Class<?> clz) {
-		Template template = (Template) clz.getAnnotation(Template.class);
-		if(Objects.nonNull(template)) {
-			return template.resourceKey();
-		}
-		return clz.getSimpleName();
+		return DocumentHelper.getTemplateResourceKey(clz);
 	}
 	
 	protected <T extends AbstractUUIDEntity> void saveObject(T obj, String database) throws RepositoryException, EntityException {

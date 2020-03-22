@@ -2,7 +2,6 @@ package com.jadaptive.app.json;
 
 import java.util.Collection;
 
-import javax.annotation.PostConstruct;
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.templates.TemplateVersion;
@@ -41,10 +39,7 @@ public class APIController {
 	private TemplateVersionService versionService; 
 	
 	@Autowired
-	private EntityService<MongoEntity> entityService;
-	
-	@Autowired
-	private SessionService sessionService; 
+	private EntityService<MongoEntity> entityService; 
 	
 	@RequestMapping(value="api/template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody

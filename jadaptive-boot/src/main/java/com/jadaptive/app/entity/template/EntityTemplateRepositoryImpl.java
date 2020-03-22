@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.Index;
+import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 
@@ -30,17 +32,29 @@ public class EntityTemplateRepositoryImpl extends AbstractTenantAwareObjectDatab
 		db.createTextIndex(fieldName, template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
 	}
 	
-	private void createIndex(EntityTemplate template, String fieldName) {
-		db.createIndex(fieldName, template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+	private void createIndex(EntityTemplate template, String... fieldNames) {
+		db.createIndex(template.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fieldNames);
 	}
 	
-	private void createUniqueIndex(EntityTemplate template, String fieldName) {
-		db.createUniqueIndex(fieldName, template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+	private void createUniqueIndex(EntityTemplate template, String... fieldNames) {
+		db.createUniqueIndex(template.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fieldNames);
 	}
 
 	@Override
-	public void createIndexes(EntityTemplate template) {
+	public void createIndexes(EntityTemplate template, Index[] nonUnique, UniqueIndex[] unique) {
 			
+		if(Objects.nonNull(nonUnique)) {
+			for(Index idx : nonUnique) {
+				createIndex(template, idx.columns());
+			}
+		}
+		
+		if(Objects.nonNull(unique)) {
+			for(UniqueIndex idx : unique) {
+				createUniqueIndex(template, idx.columns());
+			}
+		}
+		
 		FieldTemplate textIndexField = null;
 		for(FieldTemplate field : template.getFields()) {
 			if(!field.getResourceKey().equalsIgnoreCase("uuid")) {

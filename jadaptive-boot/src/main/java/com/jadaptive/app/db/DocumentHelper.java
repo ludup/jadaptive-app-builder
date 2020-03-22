@@ -26,6 +26,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.Template;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
 import com.jadaptive.utils.Utils;
@@ -33,6 +34,14 @@ import com.jadaptive.utils.Utils;
 public class DocumentHelper {
 
 	static Set<String> builtInNames = new HashSet<>(Arrays.asList("uuid", "system", "hidden"));
+	
+	public static String getTemplateResourceKey(Class<?> clz) {
+		Template template = (Template) clz.getAnnotation(Template.class);
+		if(Objects.nonNull(template)) {
+			return template.resourceKey();
+		}
+		return clz.getSimpleName();
+	}
 	
 	public static void convertObjectToDocument(AbstractUUIDEntity obj, Document document) throws RepositoryException, EntityException {
 
@@ -180,7 +189,7 @@ public class DocumentHelper {
 			
 			String clz = (String) document.get("_clz");
 			if(Objects.isNull(clz)) {
-				clz = (String) document.get("clz"); // Compaitilbity with older version.
+				clz = (String) document.get("clz"); // Compatibility with older version.
 			}
 			if(Objects.isNull(clz)) {
 				clz = baseClass.getName();
@@ -240,11 +249,15 @@ public class DocumentHelper {
 				} else if(parameter.getType().equals(Date.class)) {
 					m.invoke(obj, document.getDate(name));
 				} else if(AbstractUUIDEntity.class.isAssignableFrom(parameter.getType())) {
-					Document doc = (Document) document.get(name);
+					Object doc = document.get(name);
 					if(Objects.isNull(doc)) {
 						continue;
 					}
-					m.invoke(obj, convertDocumentToObject(AbstractUUIDEntity.class, doc, classLoader));
+					if(!(doc instanceof Document) && doc instanceof Map) {
+						doc = new Document((Map<String,Object>)doc);
+					}
+					
+					m.invoke(obj, convertDocumentToObject(AbstractUUIDEntity.class, (Document) doc, classLoader));
 				} else if(parameter.getType().isEnum()) { 
 					String v = (String) value;
 					Enum<?>[] enumConstants = (Enum<?>[]) parameter.getType().getEnumConstants();

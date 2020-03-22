@@ -5,7 +5,8 @@ public enum ValidationType {
 	RANGE(false), 
 	LENGTH(false),
 	REGEX(false),
-	OBJECT_TYPE(true);
+	OBJECT_TYPE(true),
+	RESOURCE_KEY(true);
 	
 	final boolean required;
 	

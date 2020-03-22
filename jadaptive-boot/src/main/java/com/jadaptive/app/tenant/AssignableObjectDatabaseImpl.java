@@ -61,6 +61,22 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	public void deleteObject(T obj) {
 		objectDatabase.delete(obj);
 	}
+
+	@Override
+	public T getObject(Class<T> resourceClass, User user, SearchField... fields) {
+		
+		Collection<Role> userRoles = roleRepository.getRolesByUser(user);
+		
+		if(fields.length > 0) {
+			return objectDatabase.get(resourceClass, SearchField.and(SearchField.and(fields), 
+					SearchField.or(SearchField.in("users", user.getUuid()),
+									SearchField.in("roles", EntityUtils.getUUIDs(userRoles)))));
+		} else {
+			return objectDatabase.get(resourceClass, SearchField.or(
+				SearchField.in("users", user.getUuid()),
+				SearchField.in("roles", EntityUtils.getUUIDs(userRoles))));
+		}
+	}
 	
 	
 	

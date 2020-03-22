@@ -2,13 +2,22 @@ package com.jadaptive.api.permissions;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 
 public class AuthenticatedService {
 
 	@Autowired
 	private PermissionService permissionService; 
-						
+	
+	@Autowired
+	private TenantService tenantService; 
+	
+	protected Tenant getCurrentTenant() {
+		return tenantService.getCurrentTenant();
+	}
+	
 	protected void setupUserContext(User user) {
 		permissionService.setupUserContext(user);
 	}

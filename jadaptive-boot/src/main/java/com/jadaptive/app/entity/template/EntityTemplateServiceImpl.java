@@ -120,7 +120,6 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	public void saveTemplateObjects(List<EntityTemplate> objects, @SuppressWarnings("unchecked") TransactionAdapter<EntityTemplate>... ops) throws RepositoryException, EntityException {
 		for(EntityTemplate obj : objects) {
 			saveOrUpdate(validateTemplate(obj));
-			repository.createIndexes(obj);
 			switch(obj.getType()) {
 			case COLLECTION:
 			case SINGLETON:

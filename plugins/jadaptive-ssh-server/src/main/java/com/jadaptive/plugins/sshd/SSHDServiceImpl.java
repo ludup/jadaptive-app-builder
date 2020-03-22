@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.ApplicationUpdateManager;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -62,6 +63,9 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	
 	@Autowired
 	private PermissionService permissionService; 
+	
+	@Autowired
+	private ApplicationUpdateManager updateManager; 
 	
 	@Autowired
 	private UserService userService; 
@@ -125,12 +129,14 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 									}
 									continue;
 								}
-								home = mount.getHomeMount();
+								if(mount.hasHome()) {
+									home = mount.getHomeMount();
+								}
 							}
 						}
 						
 						if(Objects.isNull(home)) {
-							home = new VirtualMountTemplate("/", "tmp://", new VFSFileFactory(), true);
+							home = new VirtualMountTemplate("/", "home/${username}", new VFSFileFactory(), true);
 						}
 
 						super.setFileFactory(new VirtualFileFactory(
@@ -179,6 +185,9 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 					}
 					
 					VirtualShell shell = new VirtualShell(con, scf);
+					shell.addProtectedEnvironmentVar("USER");
+					shell.addProtectedEnvironmentVar("TENANT_NAME");
+					shell.addProtectedEnvironmentVar("TENANT_UUID");
 					
 					context.getAutowireCapableBeanFactory().autowireBean(shell);
 					
@@ -205,6 +214,11 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		out.append(ApplicationVersion.getVersion());
 		out.append("\n==============================================\n");
 		out.append("\nType 'help' for a list of commands.\n");
+		
+		if(updateManager.hasPendingUpdates()) {
+			out.append("\n");
+			out.append("There are application updates. To install type 'updates -i'\n");
+		}
 		
 		sshContext.getPolicy(VirtualSessionPolicy.class).setWelcomeText(out.toString());
 		ClassLoader classLoader = getClass().getClassLoader();

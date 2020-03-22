@@ -79,10 +79,7 @@ public class ImportKey extends AbstractTenantAwareCommand {
 		
 		String filename = args[args.length-1];
 		
-		AbstractFileFactory<?> factory = console.getConnection().getContext().getPolicy(
-								FileSystemPolicy.class).getFileFactory(console.getConnection());
-		
-		AbstractFile f = factory.getFile(filename, console.getConnection());
+		AbstractFile f = console.getCurrentDirectory().resolveFile(filename);
 		if(!f.exists()) {
 			throw new IOException(String.format("%s does not exist", filename));
 		}
@@ -99,7 +96,7 @@ public class ImportKey extends AbstractTenantAwareCommand {
 		try {
 			pub = SshKeyUtils.getPublicKey(f.getInputStream());
 		} catch(IOException ex) {
-			pub = fromPrivateKey(filename, factory, console.getConnection());
+			pub = fromPrivateKey(filename, console.getConnection());
 		}
 
 		String publicKey = SshKeyUtils.getOpenSSHFormattedKey(pub, comment);
@@ -113,9 +110,9 @@ public class ImportKey extends AbstractTenantAwareCommand {
 
 	}
 	
-	private SshPublicKey fromPrivateKey(String filename, AbstractFileFactory<?> factory, SshConnection con) throws FileNotFoundException, IOException, PermissionDeniedException {
+	private SshPublicKey fromPrivateKey(String filename, SshConnection con) throws FileNotFoundException, IOException, PermissionDeniedException {
 		
-		AbstractFile f = factory.getFile(filename, con);
+		AbstractFile f = console.getCurrentDirectory().resolveFile(filename);
 		if(!f.exists()) {
 			throw new IOException(String.format("%s does not exist", filename));
 		}

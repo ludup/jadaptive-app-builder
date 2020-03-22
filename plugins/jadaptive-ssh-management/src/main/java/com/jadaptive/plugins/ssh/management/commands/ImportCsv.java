@@ -10,9 +10,7 @@ import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.files.AbstractFile;
-import com.sshtools.common.files.AbstractFileFactory;
 import com.sshtools.common.permissions.PermissionDeniedException;
-import com.sshtools.common.policy.FileSystemPolicy;
 import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.UsageHelper;
@@ -67,9 +65,8 @@ public class ImportCsv extends AbstractTenantAwareCommand {
 		
 		String[] orderedFields = args[args.length-1].split(",");
 		
-		AbstractFileFactory<?> factory = console.getConnection().getContext().getPolicy(
-				FileSystemPolicy.class).getFileFactory(console.getConnection());
-		AbstractFile f = factory.getFile(filename, console.getConnection());
+		AbstractFile f = console.getCurrentDirectory().resolveFile(filename);
+
 		if(!f.exists()) {
 			throw new IOException(String.format("%s does not exist!", filename));
 		}

@@ -20,9 +20,9 @@ public class AuthorizedKeys extends UserCommand {
 	private AuthorizedKeyService authorizedKeyService;
 	
 	public AuthorizedKeys() {
-		super("authorized-keys <user>", 
+		super("authorized-keys", 
 				"Key Management",
-				UsageHelper.build("authorized-keys"),
+				UsageHelper.build("authorized-keys <user>"),
 						"List your own, or another users authorized keys");
 	}
 

@@ -15,5 +15,9 @@ public interface ApplicationUpdateManager {
 
 	void shutdown();
 
+	void check4Updates();
+
+	boolean hasPendingUpdates();
+
 
 }

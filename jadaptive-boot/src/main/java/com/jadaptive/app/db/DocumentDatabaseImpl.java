@@ -36,21 +36,24 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void createTextIndex(String fieldName, String table, String database) {
+		String indexName = "text_" + fieldName;
 		MongoCollection<Document> collection = getCollection(table, database);
-		collection.createIndex(Indexes.text(fieldName), new IndexOptions().name(fieldName + "_tidx"));
+		collection.createIndex(Indexes.text(fieldName), new IndexOptions().name(indexName));
 	}
 	
 	@Override
-	public void createIndex(String fieldName, String table, String database) {
+	public void createIndex(String table, String database, String... fieldNames) {
+		String indexName = "index_" + StringUtils.join(fieldNames, "_");
 		MongoCollection<Document> collection = getCollection(table, database);
-		collection.createIndex(Indexes.ascending(fieldName), new IndexOptions().name(fieldName + "_idx"));
+		collection.createIndex(Indexes.ascending(fieldNames), new IndexOptions().name(indexName));
 	}
 	
 	@Override
-	public void createUniqueIndex(String fieldName, String table, String database) {
+	public void createUniqueIndex(String table, String database, String...fieldNames) {
+		String indexName = "unique_" + StringUtils.join(fieldNames, "_");
 		MongoCollection<Document> collection = getCollection(table, database);
-		IndexOptions indexOptions = new IndexOptions().unique(true);
-		collection.createIndex(Indexes.ascending(fieldName), indexOptions);
+		IndexOptions indexOptions = new IndexOptions().unique(true).name(indexName);
+		collection.createIndex(Indexes.ascending(fieldNames), indexOptions);
 	}
 	
 	@Override
@@ -217,7 +220,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				tmp.add(Filters.in(field.getColumn(), field.getValue()));
 				break;
 			case LIKE:
-				tmp.add(Filters.regex(field.getColumn(), field.getValue()[0]));
+				tmp.add(Filters.regex(field.getColumn(), field.getValue()[0].toString()));
 				break;
 			case OR:
 				tmp.add(buildFilter(SearchField.Type.OR, field.getFields()));

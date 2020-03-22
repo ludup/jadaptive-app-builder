@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationUpdateManager;
@@ -43,6 +45,8 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 		
 	private PluginManager pluginManager;
 
+	private boolean hasUpdates = false;
+	
 	@Autowired
 	ApplicationContext applicationContext;
 	
@@ -239,7 +243,13 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
 	        }
 		}
 	}
-
+	
+	@Override
+	@Scheduled(initialDelay = 60000, fixedDelay = 60000*60*24)
+	public void check4Updates() {
+		check4Updates(new ArrayList<>(), new ArrayList<>());
+	}
+	
 	@Override
 	public void check4Updates(List<PluginInfo> toUpdate, List<PluginInfo> toInstall) {
 		
@@ -253,6 +263,7 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
                 log.debug("Found update for plugin '{}'", plugin.id);
                 toUpdate.add(plugin);
             }
+            hasUpdates = true;
         } else {
             log.debug("No updates found");
         }
@@ -260,6 +271,7 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
         PluginInfo core = getApplicationCoreUpdate();
         if(core!=null) {
         	toUpdate.add(core);
+        	hasUpdates = true;
         }
         
         if (hasAvailablePlugins()) {
@@ -268,6 +280,7 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
             for (PluginInfo plugin : availablePlugins) {
 	            toInstall.add(plugin);
             }
+            hasUpdates = true;
         } else {
             log.debug("No available plugins found");
         }
@@ -318,6 +331,11 @@ public class ApplicationUpdateManagerImpl extends UpdateManager implements Appli
         return true;
 	}
 
+	@Override
+	public boolean hasPendingUpdates() {
+		return hasUpdates;
+	}
+	
 	@Override
 	public void restart() {
 		Application.restart();

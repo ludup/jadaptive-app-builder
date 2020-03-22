@@ -3,7 +3,6 @@ package com.jadaptive.app.json;
 import java.util.Objects;
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

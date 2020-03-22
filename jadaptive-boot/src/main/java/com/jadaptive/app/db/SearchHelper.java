@@ -57,9 +57,9 @@ public class SearchHelper {
 		return results.toArray(new SearchField[0]);
 	}
 
-	private String[] expandValues(String values) {
+	private Object[] expandValues(String values) {
 		
-		List<String> tmp = new ArrayList<>();
+		List<Object> tmp = new ArrayList<>();
 		for(String s : values.split(",")) {
 			 Matcher m = VARIABLE.matcher(s);
 			 if(m.matches()) {
@@ -71,7 +71,7 @@ public class SearchHelper {
 		return tmp.toArray(new String[0]);
 	}
 
-	private void expandVariable(String name, List<String> tmp) {
+	private void expandVariable(String name, List<Object> tmp) {
 		
 		switch(name) {
 		case "permissions":

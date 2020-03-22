@@ -34,7 +34,7 @@ public class RoleRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<Ro
 
 	@Override
 	public Collection<Role> getAllUserRoles() {
-		return searchObjects(SearchField.eq("allUsers", "true"));
+		return searchObjects(SearchField.eq("allUsers", true));
 	}
 
 }

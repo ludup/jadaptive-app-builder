@@ -141,13 +141,13 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public void createUniqueIndex(String fieldName, String table, String database) {
+	public void createUniqueIndex(String table, String database, String... fieldNames) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void createIndex(String fieldName, String table, String database) {
+	public void createIndex(String table, String database, String... fieldNames) {
 		// TODO Auto-generated method stub
 		
 	}

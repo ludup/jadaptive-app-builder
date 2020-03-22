@@ -14,4 +14,6 @@ public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> {
 	void saveOrUpdate(T obj);
 
 	void deleteObject(T virtualFolder);
+
+	T getObject(Class<T> resourceClass, User user, SearchField... fields);
 }

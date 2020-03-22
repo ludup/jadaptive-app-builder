@@ -2,7 +2,6 @@ package com.jadaptive.app.json;
 
 import java.util.Collection;
 
-import javax.annotation.PostConstruct;
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 

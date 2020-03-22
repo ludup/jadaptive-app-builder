@@ -16,8 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
+import com.jadaptive.app.scheculer.LockableTaskScheduler;
 
 @Configuration
+@EnableAsync
+@EnableScheduling
 public class AppConfig {
 
 	static Logger log = LoggerFactory.getLogger(AppConfig.class);
@@ -61,6 +67,11 @@ public class AppConfig {
         return pluginManager;
     }
 
+    @Bean
+    public LockableTaskScheduler taskScheduler() {
+        return new LockableTaskScheduler();
+    }
+    
 	@PreDestroy
     public void cleanup() {
         pluginManager.stopPlugins();

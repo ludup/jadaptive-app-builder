@@ -30,4 +30,7 @@ public interface RoleService extends AbstractTenantAwareObjectService<Role> {
 
 	void revokePermission(Role role, String... permissions);
 
+	boolean hasRole(User currentUser, Collection<Role> roles);
+
+	boolean hasRole(User currentUser, Role... roles);
 }

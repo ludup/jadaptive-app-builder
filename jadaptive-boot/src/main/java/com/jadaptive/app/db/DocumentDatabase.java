@@ -39,9 +39,9 @@ public interface DocumentDatabase {
 
 	void createTextIndex(String fieldName, String table, String database);
 
-	void createUniqueIndex(String fieldName, String table, String database);
+	void createUniqueIndex(String table, String database, String... fieldNames);
 
-	void createIndex(String fieldName, String table, String database);
+	void createIndex(String table, String database, String... fieldNames);
 	
 
 }

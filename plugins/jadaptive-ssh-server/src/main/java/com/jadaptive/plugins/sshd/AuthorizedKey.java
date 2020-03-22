@@ -11,9 +11,11 @@ import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.UniqueIndex;
 import com.sshtools.common.publickey.SshKeyUtils;
 
 @Template(name = "Authorized Key", resourceKey = "authorizedKeys", type = EntityType.COLLECTION, scope = EntityScope.PERSONAL)
+@UniqueIndex(columns = { "ownerUUID", "name" })
 public class AuthorizedKey extends PersonalUUIDEntity {
 
 	@Column(name = "Name", description = "A name to identify this public key", type = FieldType.TEXT)
