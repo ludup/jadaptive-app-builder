@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import com.jadaptive.app.scheculer.LockableTaskScheduler;
+import com.jadaptive.app.scheduler.LockableTaskScheduler;
 
 @Configuration
 @EnableAsync

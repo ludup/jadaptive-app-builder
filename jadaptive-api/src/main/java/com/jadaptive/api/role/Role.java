@@ -10,9 +10,11 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Role", resourceKey = "role", scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Role", resourceKey = Role.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 public class Role extends NamedUUIDEntity {
 
+	public static final String RESOURCE_KEY = "role";
+	
 	@Column(name = "All Permissions", 
 			description = "Flag to indicate that this role contains all available permissions",
 			defaultValue = "false", 

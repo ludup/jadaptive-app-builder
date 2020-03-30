@@ -24,4 +24,5 @@ public @interface Template {
 		
 		boolean system() default false;
 		
+		boolean recurse() default true;
 }

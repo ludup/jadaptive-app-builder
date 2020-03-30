@@ -47,4 +47,6 @@ public interface TenantService {
 
 	Tenant getTenantByName(String name);
 
+	Tenant getTenantByUUID(String uuid);
+
 }

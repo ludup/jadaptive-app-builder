@@ -1,4 +1,4 @@
-package com.jadaptive.api.scheculer;
+package com.jadaptive.api.scheduler;
 
 public enum ExecutionContext {
 

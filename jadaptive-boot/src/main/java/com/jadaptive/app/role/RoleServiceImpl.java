@@ -7,22 +7,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleRepository;
 import com.jadaptive.api.role.RoleService;
-import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
-import com.jadaptive.api.tenant.events.TenantCreatedEvent;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.User;
-import com.jadaptive.app.tenant.AbstractTenantAwareObjectServiceImpl;
 
 @Service
-public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> implements RoleService {
+public class RoleServiceImpl extends AuthenticatedService implements RoleService, TenantAware {
 
 	private static final String ADMINISTRATOR_UUID = "1bfbaf16-e5af-4825-8f8a-83ce2f5bf81f";
 	private static final String EVERYONE_UUID = "c4b54f49-c478-46cc-8cfa-aaebaa4ea50f";
@@ -30,19 +28,24 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	private static final String ADMINISTRATION = "Administration";
 	
 	@Autowired
-	RoleRepository repository; 
-	
-	@Autowired
-	PermissionService permissionService; 
-	
+	private RoleRepository repository; 
+
 	@Override
-	public AbstractTenantAwareObjectDatabase<Role> getRepository() {
-		return repository;
+	public void initializeSystem(boolean newSchema) {
+		initializeTenant(getCurrentTenant(), newSchema);
 	}
 
-	@EventListener
+
 	@Override
-	public void onTenantCreated(TenantCreatedEvent evt) {
+	public void initializeTenant(Tenant tenant, boolean newSchema) {
+
+		if(newSchema) {
+			setupDefaultRoles(tenant);
+		}
+
+	}
+	
+	private void setupDefaultRoles(Tenant tenant) {
 		
 		Role role = new Role();
 		role.setUuid(ADMINISTRATOR_UUID);
@@ -50,7 +53,7 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 		role.setSystem(true);
 		role.setAllPermissions(true);
 		
-		saveOrUpdate(role);
+		repository.saveOrUpdate(role);
 		
 		role = new Role();
 		role.setUuid(EVERYONE_UUID);
@@ -58,19 +61,18 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 		role.setSystem(true);
 		role.setAllUsers(true);
 		
-		saveOrUpdate(role);
-
-		
+		repository.saveOrUpdate(role);
 	}
-	
+
+
 	@Override
 	public Role getAdministrationRole() {
-		return get(ADMINISTRATOR_UUID);
+		return repository.get(ADMINISTRATOR_UUID);
 	}
 	
 	@Override
 	public Role getEveryoneRole() {
-		return get(EVERYONE_UUID);
+		return repository.get(EVERYONE_UUID);
 	}
 	
 	@Override
@@ -84,8 +86,8 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	
 	@Override
 	public Role getRoleByName(String name) {
-		assertRead();
-		return get(SearchField.eq("name", name));
+		assertRead(Role.RESOURCE_KEY);
+		return repository.get(SearchField.eq("name", name));
 	}
 	
 	@Override
@@ -96,12 +98,12 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	@Override
 	public Role createRole(String roleName, Collection<User> users) {
 		
-		assertReadWrite();
+		assertWrite(Role.RESOURCE_KEY);
 		
 		Role role = new Role();
 		role.setName(roleName);
 		
-		saveOrUpdate(role);
+		repository.saveOrUpdate(role);
 		
 		doAssign(role, users.toArray(new User[0]));
 		
@@ -110,7 +112,7 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	
 	@Override
 	public void assignRole(Role role, User... users) {
-		assertReadWrite();
+		assertWrite(Role.RESOURCE_KEY);
 		doAssign(role, users);
 	}
 	
@@ -131,17 +133,17 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 		
 		role.getUsers().addAll(uuids);
 		
-		saveOrUpdate(role);
+		repository.saveOrUpdate(role);
 	}
 	
 	@Override
 	public void grantPermission(Role role, String... permissions) {
 		
-		assertReadWrite();
+		assertWrite(Role.RESOURCE_KEY);
 		
 		Set<String> resolved = new HashSet<>();
 		for(String permission : permissions) {
-			if(!permissionService.isValidPermission(permission)) {
+			if(!isValidPermission(permission)) {
 				throw new EntityException(String.format("%s is not a valid permission", permission));
 			}
 			if(role.getPermissions().contains(permission)) {
@@ -151,17 +153,17 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 		}
 		
 		role.getPermissions().addAll(resolved);
-		saveOrUpdate(role);
+		repository.saveOrUpdate(role);
 	}
 	
 	@Override
 	public void revokePermission(Role role, String... permissions) {
 		
-		assertReadWrite();
+		assertWrite(Role.RESOURCE_KEY);
 		
 		Set<String> resolved = new HashSet<>();
 		for(String permission : permissions) {
-			if(!permissionService.isValidPermission(permission)) {
+			if(!isValidPermission(permission)) {
 				throw new EntityException(String.format("%s is not a valid permission", permission));
 			}
 			if(!role.getPermissions().contains(permission)) {
@@ -171,13 +173,13 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 		}
 		
 		role.getPermissions().removeAll(resolved);
-		saveOrUpdate(role);
+		repository.saveOrUpdate(role);
 	}
 	
 	@Override
 	public void unassignRole(Role role, User... users) {
 		
-		assertReadWrite();
+		assertWrite(Role.RESOURCE_KEY);
 		
 		Set<String> uuids = new HashSet<>();
 		for(User user : users) {
@@ -199,7 +201,7 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 		
 		role.getUsers().removeAll(uuids);
 		
-		saveOrUpdate(role);
+		repository.saveOrUpdate(role);
 	}
 
 	@Override
@@ -212,4 +214,19 @@ public class RoleServiceImpl extends AbstractTenantAwareObjectServiceImpl<Role> 
 	public boolean hasRole(User user, Role... roles) {
 		return hasRole(user, Arrays.asList(roles));
 	}
+
+
+	@Override
+	public void deleteRole(Role role) {
+		assertWrite(Role.RESOURCE_KEY);
+		repository.delete(role);
+	}
+
+
+	@Override
+	public Collection<Role> listRoles() {
+		assertRead(Role.RESOURCE_KEY);
+		return repository.list();
+	}
+
 }

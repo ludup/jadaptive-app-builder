@@ -28,6 +28,7 @@ import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.policy.ClassLoaderPolicy;
+import com.sshtools.common.policy.FileFactory;
 import com.sshtools.common.policy.FileSystemPolicy;
 import com.sshtools.common.scp.ScpCommand;
 import com.sshtools.common.ssh.ChannelNG;
@@ -104,60 +105,46 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	@Override
 	protected void configureFilesystem(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
 		
-		try {
-			sshContext.setPolicy(FileSystemPolicy.class, new FileSystemPolicy() {
+		sshContext.getPolicy(FileSystemPolicy.class).setFileFactory(new FileFactory() {
 
-				@Override
-				public AbstractFileFactory<?> getFileFactory(SshConnection con) {
-					
-					AbstractFileFactory<?> ff = super.getFileFactory(con);
-					if(Objects.nonNull(ff)) {
-						return ff;
-					}
-					
-					permissionService.setupUserContext(userService.getUser(con.getUsername()));
-					
-					try {
-						List<VirtualMountTemplate> mounts = new ArrayList<>();
-						VirtualMountTemplate home = null;
-						for(PluginFileSystemMount mount : appContext.getBeans(PluginFileSystemMount.class)) {
-							mounts.addAll(mount.getAdditionalMounts());
+			@Override
+			public AbstractFileFactory<?> getFileFactory(SshConnection con) {
+				
+				permissionService.setupUserContext(userService.getUser(con.getUsername()));
+				
+				try {
+					List<VirtualMountTemplate> mounts = new ArrayList<>();
+					VirtualMountTemplate home = null;
+					for(PluginFileSystemMount mount : appContext.getBeans(PluginFileSystemMount.class)) {
+						mounts.addAll(mount.getAdditionalMounts());
+						if(mount.hasHome()) {
+							if(Objects.nonNull(home)) {
+								if(log.isWarnEnabled()) {
+									log.warn("A plugin attempted to configure a home mount but it was already defined.");
+								}
+								continue;
+							}
 							if(mount.hasHome()) {
-								if(Objects.nonNull(home)) {
-									if(log.isWarnEnabled()) {
-										log.warn("A plugin attempted to configure a home mount but it was already defined.");
-									}
-									continue;
-								}
-								if(mount.hasHome()) {
-									home = mount.getHomeMount();
-								}
+								home = mount.getHomeMount();
 							}
 						}
-						
-						if(Objects.isNull(home)) {
-							home = new VirtualMountTemplate("/", "home/${username}", new VFSFileFactory(), true);
-						}
-
-						super.setFileFactory(new VirtualFileFactory(
-								home, mounts.toArray(new VirtualMountTemplate[0])));
-						
-						return super.getFileFactory(con);
-					} catch (IOException e) {
-						throw new IllegalStateException(e.getMessage(), e);
-					} finally {
-						permissionService.clearUserContext();
 					}
+					
+					if(Objects.isNull(home)) {
+						home = new VirtualMountTemplate("/", "home/${username}", new VFSFileFactory(), true);
+					}
+
+					return new VirtualFileFactory(con, home, 
+							mounts.toArray(new VirtualMountTemplate[0]));
+					
+				} catch (IOException | PermissionDeniedException e) {
+					throw new IllegalStateException(e.getMessage(), e);
+				} finally {
+					permissionService.clearUserContext();
 				}
-				
-			});
+			}
 			
-
-
-		
-		} finally {
-			
-		}
+		});
 	}
 	
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {

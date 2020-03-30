@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService, TenantAware {
 	}
 
 	@Override
-	public void initializeSystem() {
+	public void initializeSystem(boolean newSchema) {
 
 		permissionService.registerStandardPermissions(USER_RESOURCE_KEY);
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService, TenantAware {
 	}
 	
 	@Override
-	public void initializeTenant(Tenant tenant) {
+	public void initializeTenant(Tenant tenant, boolean newSchema) {
 
 	}
 

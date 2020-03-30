@@ -1,4 +1,4 @@
-package com.jadaptive.app.scheculer;
+package com.jadaptive.app.scheduler;
 
 import java.util.Objects;
 

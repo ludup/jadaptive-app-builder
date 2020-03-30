@@ -39,8 +39,19 @@ public class TenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity>
 		return getObject(uuid, tenantService.getCurrentTenant().getUuid(), resourceClass);
 	}
 	
+	@Override
 	public T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, EntityException {
 		return getObject(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
+	}
+	
+	@Override
+	public T max(Class<T> resourceClass, String field) throws RepositoryException, EntityException {
+		return max(tenantService.getCurrentTenant().getUuid(), resourceClass, field);
+	}
+	
+	@Override
+	public T min(Class<T> resourceClass, String field) throws RepositoryException, EntityException {
+		return min(tenantService.getCurrentTenant().getUuid(), resourceClass, field);
 	}
 
 	@SuppressWarnings("unchecked")

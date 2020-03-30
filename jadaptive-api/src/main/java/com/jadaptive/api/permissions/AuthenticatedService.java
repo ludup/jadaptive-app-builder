@@ -57,4 +57,8 @@ public class AuthenticatedService {
 	protected void assertAllPermissions(String... permissions) {
 		permissionService.assertAllPermission(permissions);
 	}
+	
+	protected boolean isValidPermission(String permission) {
+		return permissionService.isValidPermission(permission);
+	}
 }

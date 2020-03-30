@@ -23,7 +23,6 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
-import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -34,11 +33,9 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.api.tenant.events.TenantCreatedEvent;
 import com.jadaptive.api.user.BuiltinUserDatabase;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.ApplicationServiceImpl;
-
 
 @Service
 public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant> {
@@ -59,9 +56,6 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	private PermissionService permissionService; 
 	
 	@Autowired
-	private EventService eventService; 
-	
-	@Autowired
 	private BuiltinUserDatabase userService;
 	
 	@Autowired
@@ -73,6 +67,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	Tenant systemTenant;
 	
 	Map<String,Tenant> tenantsByDomain = new HashMap<>();
+	Map<String,Tenant> tenantsByUUID = new HashMap<>();
 	
 	@EventListener
 	public void onApplicationStartup(ApplicationReadyEvent evt) {
@@ -80,12 +75,12 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 		permissionService.setupSystemContext();
 		
 		try {
-			if(repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh")) {
+			boolean newSchema = repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh");
+			if(newSchema) {
 				repository.newSchema();
 				createTenant(SYSTEM_UUID, "System", "localhost", true);
 				
 				setCurrentTenant(getSystemTenant());
-				
 				
 				try {
 					User user = userService.createUser("admin", "Administrator", "", "admin".toCharArray(), true);
@@ -94,17 +89,19 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 					
 					clearCurrentTenant();
 				}
+			} else {
+				
+				initialiseTenant(getSystemTenant(), false);
+				
+				for(Tenant tenant : listTenants()) {
+					if(!tenant.getSystem()) {
+						initialiseTenant(tenant, false);
+					}
+				}	
 			}
+			
 			
 			permissionService.registerStandardPermissions(TENANT_RESOURCE_KEY);
-			
-			initialiseTenant(getSystemTenant());
-			
-			for(Tenant tenant : listTenants()) {
-				if(!tenant.getSystem()) {
-					initialiseTenant(tenant);
-				}
-			}
 			
             List<StartupAware> startups = new ArrayList<>(applicationService.getBeans(StartupAware.class));
             Collections.<StartupAware>sort(startups, new Comparator<StartupAware>() {
@@ -139,11 +136,13 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private Tenant initialiseTenant(Tenant tenant) {
+	private Tenant initialiseTenant(Tenant tenant, boolean newSchema) {
 		
 		setCurrentTenant(tenant);
 		
 		tenantsByDomain.put(tenant.getDomain(), tenant);
+		tenantsByUUID.put(tenant.getUuid(), tenant);
+		
 		for(String domain : tenant.getAlternativeDomains()) {
 			tenantsByDomain.put(domain, tenant);
 		}
@@ -174,9 +173,9 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			
 			for(TenantAware aware : applicationService.getBeans(TenantAware.class)) {
 				if(tenant.getSystem()) {
-					aware.initializeSystem();
+					aware.initializeSystem(newSchema);
 				} else {
-					aware.initializeTenant(tenant);
+					aware.initializeTenant(tenant, newSchema);
 				}
 			}
 	
@@ -194,7 +193,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	
 	@Override
 	public Tenant createTenant(String name, String domain, String... additionalDomains) throws RepositoryException, EntityException {
-		return initialiseTenant(createTenant(UUID.randomUUID().toString(), name, domain, additionalDomains));
+		return createTenant(UUID.randomUUID().toString(), name, domain, additionalDomains);
 	}
 	
 	@Override
@@ -221,10 +220,9 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 		
 		try {
 			repository.saveTenant(tenant);
-			eventService.publishEvent(new TenantCreatedEvent(this, tenant));
+			initialiseTenant(tenant, true);
 			return tenant;
 		} catch (RepositoryException | EntityException e) {
-			eventService.publishEvent(new TenantCreatedEvent(this, tenant, e));
 			throw e;
 		}
 		
@@ -364,5 +362,14 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			}
 		}
 		return getSystemTenant();
+	}
+
+	@Override
+	public Tenant getTenantByUUID(String uuid) {
+		Tenant tenant = tenantsByUUID.get(uuid);
+		if(Objects.isNull(tenant)) {
+			return getSystemTenant();
+		}
+		return tenant;
 	}
 }

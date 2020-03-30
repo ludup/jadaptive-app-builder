@@ -354,7 +354,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                     if(log.isInfoEnabled()) {
 						log.info("Found template {}", classInfo.getName());
 					}
-                    registerAnnotatedTemplate(classInfo.loadClass());
+                    if(classInfo.getPackageName().startsWith(w.getPlugin().getClass().getPackage().getName())) {
+                    	registerAnnotatedTemplate(classInfo.loadClass());
+                    }
                 }
             }
 		}
@@ -397,13 +399,16 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.setSystem(e.system());
 			template.setName(e.name());
 			template.setType(e.type());
-			 
 			template.getFields().clear();
+			template.setTemplateClass(clz.getName());
 			
 			Index[] nonUnique = clz.getAnnotationsByType(Index.class);
 			UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);
 			
-			for(Field f : clz.getDeclaredFields()) {
+			List<Field> fields = new ArrayList<>();
+			resolveFields(clz, fields, e.recurse());
+			
+			for(Field f :fields) {
 				
 				Column[] annotations = f.getAnnotationsByType(Column.class);
 				
@@ -458,6 +463,18 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 	}
 	
+	private void resolveFields(Class<?> clz, List<Field> fields, boolean recurse) {
+		
+		for(Field field : clz.getDeclaredFields()) {
+			fields.add(field);
+		}
+		if(recurse) {
+			if(!clz.getSuperclass().equals(Object.class)) {
+				resolveFields(clz.getSuperclass(), fields, true);
+			}
+		}
+	}
+
 	private FieldType selectFieldType(Class<?> type, FieldType declaredType) {
 		if(Objects.nonNull(declaredType)) {
 			return declaredType;

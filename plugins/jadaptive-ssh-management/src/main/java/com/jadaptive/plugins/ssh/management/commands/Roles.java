@@ -48,7 +48,7 @@ public class Roles extends AbstractTenantAwareCommand {
 		if(CliHelper.hasLongOption(args, "help")) {
 			printUsage();
 		} else if(args.length==1 || CliHelper.hasShortOption(args, 'l') || CliHelper.hasLongOption(args, "list")) {	
-			printRoles(roleService.list());
+			printRoles(roleService.listRoles());
 		} else if(args.length==3 &&  (CliHelper.hasShortOption(args, 'm') || CliHelper.hasLongOption(args, "members"))) {
 			printMembers(resolveRole(args[2]));
 		} else if(CliHelper.hasShortOption(args, 'c') || CliHelper.hasLongOption(args, "create")) {
@@ -88,7 +88,7 @@ public class Roles extends AbstractTenantAwareCommand {
 			case "-d":
 			case "--delete":
 			{
-				roleService.delete(role);
+				roleService.deleteRole(role);
 				console.println(String.format("%s was deleted", role.getName()));
 				break;
 			}

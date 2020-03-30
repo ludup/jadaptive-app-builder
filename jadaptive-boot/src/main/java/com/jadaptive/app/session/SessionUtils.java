@@ -54,9 +54,9 @@ public class SessionUtils {
 		
 		try {
 			if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
-				session = sessionService.get(request.getParameter(SESSION_COOKIE));
+				session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
 			} else if(request.getHeader(SESSION_COOKIE) != null) {
-				session = sessionService.get((String)request.getHeader(SESSION_COOKIE));
+				session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
 			}
 			
 			if (session != null && sessionService.isLoggedOn(session, true)) {
@@ -81,7 +81,7 @@ public class SessionUtils {
 			if(Objects.nonNull(request.getCookies())) {
 				for (Cookie c : request.getCookies()) {
 					if (c.getName().equals(SESSION_COOKIE)) {
-						session = sessionService.get(c.getValue());
+						session = sessionService.getSession(c.getValue());
 						if (session != null && sessionService.isLoggedOn(session, true)) {
 							return session;
 						}
@@ -166,9 +166,9 @@ public class SessionUtils {
 		Session session = null;
 		
 		if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
-			session = sessionService.get(request.getParameter(SESSION_COOKIE));
+			session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
 		} else if(request.getHeader(SESSION_COOKIE) != null) {
-			session = sessionService.get((String)request.getHeader(SESSION_COOKIE));
+			session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
 		}
 		
 		if (session != null && sessionService.isLoggedOn(session, false)) {
@@ -191,7 +191,7 @@ public class SessionUtils {
 		}
 		for (Cookie c : request.getCookies()) {
 			if (c.getName().equals(SESSION_COOKIE)) {
-				session = sessionService.get(c.getValue());
+				session = sessionService.getSession(c.getValue());
 				if (session != null && sessionService.isLoggedOn(session, false)) {
 					return session;
 				}

@@ -16,6 +16,7 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -88,6 +89,20 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		return collection.find(buildFilter(fields)).first();
+	}
+	
+	@Override
+	public Document max(String table, String database, String field) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		return collection.find().sort(new BasicDBObject("field", -1)).first();
+	}
+	
+	@Override
+	public Document min(String table, String database, String field) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		return collection.find().sort(new BasicDBObject("field", 1)).first();
 	}
 	
 	@Override
@@ -218,6 +233,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				break;
 			case IN:
 				tmp.add(Filters.in(field.getColumn(), field.getValue()));
+				break;
+			case NOT:
+				tmp.add(Filters.ne(field.getColumn(), field.getValue()));
 				break;
 			case LIKE:
 				tmp.add(Filters.regex(field.getColumn(), field.getValue()[0].toString()));

@@ -11,23 +11,16 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionRepository;
 import com.jadaptive.api.session.SessionService;
-import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
-import com.jadaptive.app.tenant.AbstractTenantAwareObjectServiceImpl;
 
 @Service
-public class SessionServiceImpl extends AbstractTenantAwareObjectServiceImpl<Session> implements SessionService {
+public class SessionServiceImpl implements SessionService {
 
 	static Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
 	
 	@Autowired
-	SessionRepository repository;
-
-	@Override
-	public AbstractTenantAwareObjectDatabase<Session> getRepository() {
-		return repository;
-	}
+	private SessionRepository repository;
 	
 	@Override
 	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent) {
@@ -40,7 +33,7 @@ public class SessionServiceImpl extends AbstractTenantAwareObjectServiceImpl<Ses
 		session.setUserAgent(userAgent);
 		session.setUsername(user.getUsername());
 		
-		saveOrUpdate(session);
+		repository.saveOrUpdate(session);
 		
 		return session;
 	}
@@ -107,9 +100,13 @@ public class SessionServiceImpl extends AbstractTenantAwareObjectServiceImpl<Ses
 		}
 
 		session.setSignedOut(new Date());
-
 		repository.saveOrUpdate(session);
 
+	}
+
+	@Override
+	public Session getSession(String uuid) {
+		return repository.get(uuid);
 	}
 
 }

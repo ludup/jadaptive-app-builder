@@ -19,6 +19,7 @@ public class EntityTemplate extends NamedUUIDEntity {
 	String defaultFilter;
 	Collection<FieldTemplate> fields = new ArrayList<>();
 	Map<String,FieldTemplate> fieldsByName;
+	String templateClass; 
 	
 	public EntityTemplate() {
 		
@@ -31,8 +32,7 @@ public class EntityTemplate extends NamedUUIDEntity {
 	public void setScope(EntityScope scope) {
 		this.scope = scope;
 	}
-
-
+	
 	public EntityType getType() {
 		return type;
 	}
@@ -79,5 +79,13 @@ public class EntityTemplate extends NamedUUIDEntity {
 			fieldsByName = tmp;
 		}
 		return fieldsByName;
+	}
+
+	public void setTemplateClass(String templateClass) {
+		this.templateClass = templateClass;
+	}
+	
+	public String getTemplateClass() {
+		return templateClass;
 	}
 }

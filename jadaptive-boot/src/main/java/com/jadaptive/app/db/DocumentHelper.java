@@ -22,13 +22,17 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
+import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
+import com.jadaptive.app.entity.MongoEntity;
 import com.jadaptive.utils.Utils;
 
 public class DocumentHelper {
@@ -93,7 +97,11 @@ public class DocumentHelper {
 					} else if(m.getReturnType().isEnum()) {
 						document.put(name, ((Enum<?>)value).name());
 					} else if(AbstractUUIDEntity.class.isAssignableFrom(m.getReturnType())) {
-						buildDocument(name, (AbstractUUIDEntity)value, m.getReturnType(), document);
+						if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
+							buildDocument(name, (AbstractUUIDEntity)value, m.getReturnType(), document);
+						} else if(Objects.nonNull(value)) {
+							document.put(name, ((AbstractUUIDEntity)value).getUuid());
+						}
 					} else if(Collection.class.isAssignableFrom(m.getReturnType())) {
 						buildCollectionDocuments(name, columnDefinition, (Collection<?>)value, m.getReturnType(), document);
 					} else {
@@ -158,11 +166,13 @@ public class DocumentHelper {
 			} else if(AbstractUUIDEntity.class.isAssignableFrom(value.getClass())) {
 
 				AbstractUUIDEntity e = (AbstractUUIDEntity) value;
-				
-				Document embeddedDocument = new Document();
-				convertObjectToDocument(e, embeddedDocument);
-				list.add(embeddedDocument);
-
+				if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
+					Document embeddedDocument = new Document();
+					convertObjectToDocument(e, embeddedDocument);
+					list.add(embeddedDocument);
+				} else {
+					list.add(e.getUuid());
+				}
 			} else {
 				list.add(checkForAndPerformEncryption(columnDefinition,value.toString()));
 			} 
@@ -249,15 +259,24 @@ public class DocumentHelper {
 				} else if(parameter.getType().equals(Date.class)) {
 					m.invoke(obj, document.getDate(name));
 				} else if(AbstractUUIDEntity.class.isAssignableFrom(parameter.getType())) {
-					Object doc = document.get(name);
-					if(Objects.isNull(doc)) {
-						continue;
+					if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
+						Object doc = document.get(name);
+						if(Objects.isNull(doc)) {
+							continue;
+						}
+						if(!(doc instanceof Document) && doc instanceof Map) {
+							doc = new Document((Map<String,Object>)doc);
+						} 
+						
+						m.invoke(obj, convertDocumentToObject(AbstractUUIDEntity.class, (Document) doc, classLoader));
+					} else {
+						String resourceKey = getTemplateResourceKey(parameter.getType());
+						String uuid =  document.getString(name);
+						MongoEntity e = (MongoEntity) ApplicationServiceImpl.getInstance().getBean(EntityService.class).get(resourceKey, uuid);
+						
+						Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+						m.invoke(obj, ref);
 					}
-					if(!(doc instanceof Document) && doc instanceof Map) {
-						doc = new Document((Map<String,Object>)doc);
-					}
-					
-					m.invoke(obj, convertDocumentToObject(AbstractUUIDEntity.class, (Document) doc, classLoader));
 				} else if(parameter.getType().isEnum()) { 
 					String v = (String) value;
 					Enum<?>[] enumConstants = (Enum<?>[]) parameter.getType().getEnumConstants();
@@ -287,8 +306,17 @@ public class DocumentHelper {
 					if(AbstractUUIDEntity.class.isAssignableFrom(type)) {
 						Collection<AbstractUUIDEntity> elements = new ArrayList<>();	
 						for(Object embedded : list) {
-							Document embeddedDocument = (Document) embedded;
-							elements.add(convertDocumentToObject(AbstractUUIDEntity.class, embeddedDocument, classLoader));
+							if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
+								Document embeddedDocument = (Document) embedded;
+								elements.add(convertDocumentToObject(AbstractUUIDEntity.class, embeddedDocument, classLoader));
+							} else {
+								String resourceKey = getTemplateResourceKey(parameter.getType());
+								String uuid =  document.getString(name);
+								MongoEntity e = (MongoEntity) ApplicationServiceImpl.getInstance().getBean(EntityService.class).get(resourceKey, uuid);
+								
+								AbstractUUIDEntity ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+								elements.add(ref);
+							}
 						}
 
 						m.invoke(obj, elements);
@@ -355,7 +383,11 @@ public class DocumentHelper {
 		} else if(type.equals(Double.class)) {
 			return new Double(Double.parseDouble(value));
 		} else if(type.equals(Date.class)) {
-			return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			if(StringUtils.isNotBlank(value)) {
+				return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			} else {
+				return null;
+			}
 		} else {
 			return value;
 		}

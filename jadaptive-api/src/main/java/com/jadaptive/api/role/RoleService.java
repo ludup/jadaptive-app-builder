@@ -2,13 +2,9 @@ package com.jadaptive.api.role;
 
 import java.util.Collection;
 
-import com.jadaptive.api.tenant.AbstractTenantAwareObjectService;
-import com.jadaptive.api.tenant.events.TenantCreatedEvent;
 import com.jadaptive.api.user.User;
 
-public interface RoleService extends AbstractTenantAwareObjectService<Role> {
-
-	void onTenantCreated(TenantCreatedEvent evt);
+public interface RoleService {
 
 	Role getAdministrationRole();
 
@@ -33,4 +29,8 @@ public interface RoleService extends AbstractTenantAwareObjectService<Role> {
 	boolean hasRole(User currentUser, Collection<Role> roles);
 
 	boolean hasRole(User currentUser, Role... roles);
+
+	void deleteRole(Role role);
+
+	Collection<Role> listRoles();
 }

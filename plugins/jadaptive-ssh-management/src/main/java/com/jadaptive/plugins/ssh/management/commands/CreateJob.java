@@ -1,0 +1,84 @@
+package com.jadaptive.plugins.ssh.management.commands;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.jobs.Job;
+import com.jadaptive.api.jobs.JobService;
+import com.jadaptive.api.tasks.Task;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.plugins.ssh.management.ConsoleHelper;
+import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
+import com.sshtools.common.permissions.PermissionDeniedException;
+import com.sshtools.server.vsession.UsageException;
+import com.sshtools.server.vsession.UsageHelper;
+import com.sshtools.server.vsession.VirtualConsole;
+
+public class CreateJob extends AbstractTenantAwareCommand {
+
+	@Autowired
+	private EntityTemplateService templateService; 
+	
+	@Autowired
+	private ConsoleHelper consoleHelper; 
+	
+	@Autowired
+	private JobService jobService; 
+	
+	public CreateJob() {
+		super("create-job", "Automation", 
+				UsageHelper.build("create-job <name> <task>"), 
+				"Create a job");
+	}
+
+	@Override
+	protected void doRun(String[] args, VirtualConsole console)
+			throws IOException, PermissionDeniedException, UsageException {
+		
+		
+		if(args.length < 3) {
+			throw new UsageException("You must provide a name and template for this Job");
+		}
+		
+		String name = args[args.length-2];
+		String template = args[args.length-1];
+		
+		Job job = new Job();
+		
+		try {
+			jobService.getJobByName(name);
+			console.println(String.format("A job already exists called %s", name));
+			return;
+		} catch(EntityNotFoundException e) { }
+		job.setName(name);
+		
+		EntityTemplate taskTemplate = templateService.get(template);
+		
+		if(StringUtils.isBlank(taskTemplate.getTemplateClass())) {
+			throw new UsageException(
+					String.format("%s template does not have a concrete class", 
+							taskTemplate.getTemplateClass()));
+		}
+
+		Map<String,Object> doc = new HashMap<>();
+		try {
+			consoleHelper.promptTemplate(console, doc, taskTemplate, taskTemplate.getTemplateClass());
+			
+			Task task = templateService.createObject(doc, Task.class);
+			
+			job.setTask(task);
+			jobService.createJob(job);
+			console.println(String.format("New job created with ID %d", job.getShortId()));
+		} catch (ParseException e) {
+			throw new IOException(e.getMessage(), e);
+		}
+	}
+
+}

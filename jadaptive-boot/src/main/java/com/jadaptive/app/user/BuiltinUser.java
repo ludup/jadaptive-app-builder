@@ -2,7 +2,7 @@ package com.jadaptive.app.user;
 
 import com.jadaptive.api.entity.EntityScope;
 import com.jadaptive.api.entity.EntityType;
-import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
@@ -10,7 +10,7 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @Template(name = "Builtin User", resourceKey = "builtinUsers", scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
-public class BuiltinUser extends NamedUUIDEntity implements User {
+public class BuiltinUser extends AbstractUUIDEntity implements User {
 
 	@Column(name = "Username", 
 			description = "The logon name of the user",

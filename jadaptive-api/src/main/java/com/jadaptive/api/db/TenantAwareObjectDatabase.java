@@ -33,4 +33,8 @@ public interface TenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
 
 	Iterable<T> iterator(Class<T> resourceClass);
 
+	T max(Class<T> resourceClass, String field) throws RepositoryException, EntityException;
+
+	T min(Class<T> resourceClass, String field) throws RepositoryException, EntityException;
+
 }

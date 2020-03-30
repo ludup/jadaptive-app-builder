@@ -22,16 +22,24 @@ public class TenantUserCommandFactory extends AbstractAutowiredCommandFactory im
 	
 	@Override
 	public CommandFactory<ShellCommand> buildFactory() throws AccessDeniedException {
+		
 		tryCommand("roles", Roles.class, "role.read", "role.readWrite");
 		tryCommand("permissions", Permissions.class, "role.read", "roles.readWrite");
 		tryCommand("users", Users.class, "user.read", "user.readWrite");
-		tryCommand("create-user", CreateUser.class, "user.read", "user.readWrite");
-		tryCommand("update-user", UpdateUser.class, "user.read", "user.readWrite");
-		tryCommand("delete-user", DeleteUser.class, "user.read", "user.readWrite");
+		tryCommand("create-user", CreateUser.class, "user.readWrite");
+		tryCommand("update-user", UpdateUser.class, "user.readWrite");
+		tryCommand("delete-user", DeleteUser.class, "user.readWrite");
+		
 		tryCommand("templates", Templates.class, "entityTemplate.read", "entityTemplate.readWrite");
+		
 		tryCommand("security", Security.class, "tenant.read", "tenant.readWrite");
+		
 		tryCommand("import-csv", ImportCsv.class, "tenant.read", "tenant.readWrite");
-
+		
+		tryCommand("create-job", CreateJob.class, "job.readWrite");
+		tryCommand("schedule-job", ScheduleJob.class, "job.readWrite");
+		tryCommand("cancel-job", CancelJob.class, "job.readWrite");
+		
 		return this;
 	}
 	

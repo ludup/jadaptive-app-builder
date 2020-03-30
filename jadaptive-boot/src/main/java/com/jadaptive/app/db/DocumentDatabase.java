@@ -42,6 +42,10 @@ public interface DocumentDatabase {
 	void createUniqueIndex(String table, String database, String... fieldNames);
 
 	void createIndex(String table, String database, String... fieldNames);
+
+	Document max(String table, String database, String field);
+	
+	Document min(String table, String database, String field);
 	
 
 }

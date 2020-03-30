@@ -73,6 +73,38 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	protected <T extends AbstractUUIDEntity> T max(String database, Class<T> clz, String field) throws RepositoryException, EntityException {
+		try {
+			Document document = db.max(getCollectionName(clz), database, field);
+			if(Objects.isNull(document)) {
+				throw new EntityNotFoundException(String.format("Maximum value from %s not found for fields %s", 
+						getCollectionName(clz),
+						field));
+			}
+			return DocumentHelper.convertDocumentToObject(clz, document);
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
+	protected <T extends AbstractUUIDEntity> T min(String database, Class<T> clz, String field) throws RepositoryException, EntityException {
+		try {
+			Document document = db.min(getCollectionName(clz), database, field);
+			if(Objects.isNull(document)) {
+				throw new EntityNotFoundException(String.format("Minimum value from %s not found for fields %s", 
+						getCollectionName(clz),
+						field));
+			}
+			return DocumentHelper.convertDocumentToObject(clz, document);
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
 	private Object getSearchFieldsText(SearchField[] fields, String condition) {
 		
 		StringBuffer buf = new StringBuffer();
@@ -100,6 +132,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				buf.append(" IN(");
 				buf.append(Utils.csv(field.getValue()));
 				buf.append(")");
+				break;
+			case NOT:
+				buf.append(field.getColumn());
+				buf.append(" IS NOT ");
+				buf.append(Utils.csv(field.getValue()));
 				break;
 			}
 			

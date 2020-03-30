@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -303,7 +304,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		if(log.isInfoEnabled()) {
 			log.info("User {} denied permission from permission set {}", 
 					user.getUsername(), 
-					Utils.csv(resolvedPermissions));
+					StringUtils.defaultIfBlank(Utils.csv(resolvedPermissions), "<empty>"));
 		}
 		throw new AccessDeniedException();
 	}
@@ -360,12 +361,12 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 
 	@Override
-	public void initializeTenant(Tenant tenant) {
+	public void initializeTenant(Tenant tenant, boolean newSchema) {
 	
 	}
 	
 	@Override
-	public void initializeSystem() {
+	public void initializeSystem(boolean newSchema) {
 			
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
@@ -375,29 +376,34 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 						w.getPlugin().getClass().getPackage().getName());
 			}
 			
-			try {
-				try (ScanResult scanResult =
-	                    new ClassGraph()                 
-	                        .enableAllInfo()  
-	                        .addClassLoader(w.getPluginClassLoader())
-	                        .whitelistPackages(w.getPlugin().getClass().getPackage().getName())   
-	                        .scan()) {                  
-	                for (ClassInfo clz : scanResult.getClassesWithAnnotation(Permissions.class.getName())) {
-						if(log.isInfoEnabled()) {
-							log.info("Found annotated permissions {}", clz.getName());
-						}
-						Permissions perms = clz.loadClass().getAnnotation(Permissions.class);
-						for(String key : perms.keys()) {
-							registerCustomPermission(key);
-						}
-	                }
-	            }
-
-			} catch (Exception e) {
-				log.error("Failed to process annotated templates for plugin {}", w.getPluginId(), e);
-			}
+			scanForPermissions(w.getPluginClassLoader(), w.getPlugin().getClass().getPackage().getName());
 		}
 		
+	}
+
+	private void scanForPermissions(ClassLoader classloader, String name) {
+		
+		try {
+			try (ScanResult scanResult =
+                    new ClassGraph()                 
+                        .enableAllInfo()  
+                        .addClassLoader(classloader)
+                        .whitelistPackages(name)   
+                        .scan()) {                  
+                for (ClassInfo clz : scanResult.getClassesWithAnnotation(Permissions.class.getName())) {
+					if(log.isInfoEnabled()) {
+						log.info("Found annotated permissions {}", clz.getName());
+					}
+					Permissions perms = clz.loadClass().getAnnotation(Permissions.class);
+					for(String key : perms.keys()) {
+						registerCustomPermission(key);
+					}
+                }
+            }
+
+		} catch (Exception e) {
+			log.error("Failed to process annotated templates", e);
+		}
 	}
 
 	@Override
