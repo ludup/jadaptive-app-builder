@@ -16,6 +16,7 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -58,13 +59,15 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public <E extends AbstractUUIDEntity> void insertOrUpdate(E obj, Document document, String table, String database) {
+	public <E extends UUIDEntity> void insertOrUpdate(E obj, Document document, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		Date now = new Date();
-		document.put("lastModified", now);
-		if(!document.containsValue("created")) {
-			document.put("created", now);
+		if(obj instanceof AbstractUUIDEntity) {
+			document.put("lastModified", now);
+			if(!document.containsValue("created")) {
+				document.put("created", now);
+			}
 		}
 		
 		if(StringUtils.isBlank(obj.getUuid())) {

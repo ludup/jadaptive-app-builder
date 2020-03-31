@@ -23,7 +23,7 @@ public class TaskServiceImpl extends AuthenticatedService implements TaskService
 	private ApplicationService applicationService; 
 	
 	@Override
-	public <T extends Task> TaskImpl<T> createTaskImpl(T task) {
+	public <T extends Task> TaskImpl<T> getTaskImplementation(T task) {
 		
 		loadTaskImplementations();
 		
@@ -41,6 +41,7 @@ public class TaskServiceImpl extends AuthenticatedService implements TaskService
 		 return taskImpl;
 	}
 
+	
 	private void loadTaskImplementations() {
 		
 		if(taskImplementations.isEmpty()) {

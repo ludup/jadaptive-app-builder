@@ -21,6 +21,6 @@ public class AuditServiceImpl implements AuditService {
 	@Override
 	public <T extends AuditEvent> void publishEvent(T evt) {
 		eventDatabase.saveOrUpdate(evt);
-		eventPublisher.publishEvent(new AbstractUUIDEntityEvent<T>(evt));
+		eventPublisher.publishEvent(new UUIDEntityEvent<T>(evt));
 	}
 }

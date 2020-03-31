@@ -8,39 +8,10 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(value = { "_clz" })
-public abstract class AbstractUUIDEntity {
+public abstract class AbstractUUIDEntity extends UUIDEntity {
 
-	static Logger log = LoggerFactory.getLogger(AbstractUUIDEntity.class);
-	
-	String uuid;
-	Boolean system;
-	Boolean hidden;
 	Date created;
 	Date lastModified;
-	
-	public String getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
-
-	public Boolean getSystem() {
-		return system==null ? Boolean.FALSE : system;
-	}
-
-	public void setSystem(Boolean system) {
-		this.system = system;
-	}
-
-	public Boolean getHidden() {
-		return hidden==null ? Boolean.FALSE : hidden;
-	}
-
-	public void setHidden(Boolean hidden) {
-		this.hidden = hidden;
-	}
 
 	public Date getCreated() {
 		return created;

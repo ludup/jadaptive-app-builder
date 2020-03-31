@@ -3,15 +3,16 @@ package com.jadaptive.api.events;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Date;
 
 import com.jadaptive.api.entity.EntityType;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
 @Template(name = "Audit Event", resourceKey = "auditEvents", type = EntityType.COLLECTION)
-public class AuditEvent extends AbstractUUIDEntity {
+public class AuditEvent extends UUIDEntity {
 
 	@Column(name = "Resource Key", 
 			description = "The identifier of this event", 
@@ -30,8 +31,13 @@ public class AuditEvent extends AbstractUUIDEntity {
 			type = FieldType.TEXT_AREA)
 	String error;
 	
+	@Column(name = "timestamp",
+			description = "The timestamp of the event",
+			searchable = true,
+			type = FieldType.TIMESTAMP)
+	Date timestamp = new Date();
+	
 	public AuditEvent(String resourceKey) {
-
 		this.resourceKey = resourceKey;
 		this.success = true;
 	}
@@ -44,6 +50,14 @@ public class AuditEvent extends AbstractUUIDEntity {
 
 	protected void markSuccess() {
 		this.success = true;
+	}
+	
+	public Boolean getSystem() {
+		return true;
+	}
+	
+	public Boolean getHidden() {
+		return false;
 	}
 	
 	private String generateExceptionText(Throwable e) {
@@ -69,5 +83,13 @@ public class AuditEvent extends AbstractUUIDEntity {
 	
 	public String getError() {
 		return error;
+	}
+
+	public Date getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
 	}
 }

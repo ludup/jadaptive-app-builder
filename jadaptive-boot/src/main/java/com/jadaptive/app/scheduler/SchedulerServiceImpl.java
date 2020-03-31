@@ -1,5 +1,6 @@
 package com.jadaptive.app.scheduler;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	@Autowired
 	private ApplicationService applicationService; 
 	
-	Map<String,JobRunner> scheduledJobs = new HashMap<>();
+	Map<String,ScheduleJobRunner> scheduledJobs = new HashMap<>();
 	
 	@PostConstruct
 	private void postConstruct() {
@@ -69,16 +70,16 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		schedule.setExpression(expression);
 		
 		cronDatabase.saveOrUpdate(schedule);
-		JobRunner runner = new JobRunner();
+		ScheduleJobRunner runner = new ScheduleJobRunner(getCurrentTenant());
 		applicationService.getAutowireCapableBeanFactory().autowireBean(runner);
 
-		runner.schedule(getCurrentTenant(), schedule);
+		runner.schedule(schedule);
 		scheduledJobs.put(schedule.getUuid(), runner);
 	}
 
 	@Override
 	public void cancelSchedule(CronSchedule schedule) {
-		JobRunner runner = scheduledJobs.get(schedule.getUuid());
+		ScheduleJobRunner runner = scheduledJobs.get(schedule.getUuid());
 		if(Objects.nonNull(runner)) {
 			runner.cancel();
 		}
@@ -96,5 +97,19 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	@Override
 	public Collection<CronSchedule> getJobSchedules(Job job) {
 		return cronDatabase.list(CronSchedule.class, SearchField.eq("job", job.getUuid()));
+	}
+
+	@Override
+	public void runNow(Job job) {
+		run(job, Instant.now());
+	}
+	
+	@Override
+	public void run(Job job, Instant startTime) {
+		
+		JobRunner runner = new JobRunner(job, getCurrentTenant());
+		applicationService.getAutowireCapableBeanFactory().autowireBean(runner);
+		scheduler.schedule(runner,startTime);
+		
 	}
 }

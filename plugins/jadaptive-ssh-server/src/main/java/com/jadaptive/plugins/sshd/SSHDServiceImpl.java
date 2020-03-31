@@ -131,10 +131,10 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 					}
 					
 					if(Objects.isNull(home)) {
-						home = new VirtualMountTemplate("/", "home/${username}", new VFSFileFactory(), true);
+						home = new VirtualMountTemplate("/", replaceTokens("home/${username}", con), new VFSFileFactory(), true);
 					}
 
-					return new VirtualFileFactory(con, home, 
+					return new VirtualFileFactory(home, 
 							mounts.toArray(new VirtualMountTemplate[0]));
 					
 				} catch (IOException | PermissionDeniedException e) {
@@ -145,6 +145,12 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			}
 			
 		});
+	}
+	
+	private static String replaceTokens(String str,
+			SshConnection con) {
+		String ret = str.replace("${username}", con.getUsername());
+		return ret;
 	}
 	
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {

@@ -3,10 +3,10 @@ package com.jadaptive.api.db;
 import java.util.Collection;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDEntity;
 
-public interface TenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
+public interface TenantAwareObjectDatabase<T extends UUIDEntity> {
 
 	Collection<T> list(Class<T> resourceClass, SearchField...fields);
 

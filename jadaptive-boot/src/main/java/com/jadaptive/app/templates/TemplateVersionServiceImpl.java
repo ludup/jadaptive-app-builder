@@ -448,10 +448,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			templateRepository.saveOrUpdate(template);
-			templateRepository.createIndexes(template, nonUnique, unique);
+			
 			switch(template.getType()) {
 			case COLLECTION:
 			case SINGLETON:
+				templateRepository.createIndexes(template, nonUnique, unique);
 				permissionService.registerStandardPermissions(template.getResourceKey());
 				break;
 			default:

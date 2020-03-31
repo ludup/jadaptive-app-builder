@@ -87,13 +87,13 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 
 	@Override
 	public void setSystem(Boolean system) {
-		document.put("system",  String.valueOf(system));
+		document.put("system",  system);
 		super.setSystem(system);
 	}
 
 	@Override
 	public void setHidden(Boolean hidden) {
-		document.put("hidden",  String.valueOf(hidden));
+		document.put("hidden",  hidden);
 		super.setHidden(hidden);
 	}
 

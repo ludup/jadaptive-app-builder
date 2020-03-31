@@ -3,11 +3,11 @@ package com.jadaptive.app.db;
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.UUIDEntity;
 
 public interface DocumentDatabase {
 
-	<E extends AbstractUUIDEntity> void insertOrUpdate(E obj, Document document, String table, String database);
+	<E extends UUIDEntity> void insertOrUpdate(E obj, Document document, String table, String database);
 
 	Document get(String uuid, String table, String database);
 	

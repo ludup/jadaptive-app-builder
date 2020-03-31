@@ -11,8 +11,10 @@ import com.jadaptive.api.db.AbstractObjectDatabase;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.template.Template;
 import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
@@ -24,10 +26,18 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 	protected String getCollectionName(Class<?> clz) {
-		return DocumentHelper.getTemplateResourceKey(clz);
+		Template template = clz.getAnnotation(Template.class);
+		while(template!=null && template.type() == EntityType.OBJECT) {
+			clz = clz.getSuperclass();
+			template = clz.getAnnotation(Template.class);
+		} 
+		if(Objects.nonNull(template)) {
+			return template.resourceKey();
+		}
+		return clz.getSimpleName();
 	}
 	
-	protected <T extends AbstractUUIDEntity> void saveObject(T obj, String database) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, EntityException {
 		try {
 
 			Document document = new Document();
@@ -41,7 +51,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, EntityException {
 		try {
 			
 			Document document = db.get(uuid, getCollectionName(clz), database);
@@ -57,7 +67,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> T getObject(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> T getObject(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
 		try {
 			Document document = db.get(getCollectionName(clz), database, fields);
 			if(Objects.isNull(document)) {
@@ -73,7 +83,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> T max(String database, Class<T> clz, String field) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> T max(String database, Class<T> clz, String field) throws RepositoryException, EntityException {
 		try {
 			Document document = db.max(getCollectionName(clz), database, field);
 			if(Objects.isNull(document)) {
@@ -89,7 +99,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> T min(String database, Class<T> clz, String field) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> T min(String database, Class<T> clz, String field) throws RepositoryException, EntityException {
 		try {
 			Document document = db.min(getCollectionName(clz), database, field);
 			if(Objects.isNull(document)) {
@@ -154,7 +164,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, EntityException {
 		try {
 			if(obj.getSystem()) {
 				throw new EntityException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
@@ -167,13 +177,13 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> void onObjectDeleted(T obj) { }
+	protected <T extends UUIDEntity> void onObjectDeleted(T obj) { }
 
-	protected <T extends AbstractUUIDEntity> void onObjectCreated(T obj) { }
+	protected <T extends UUIDEntity> void onObjectCreated(T obj) { }
 	
-	protected <T extends AbstractUUIDEntity> void onObjectUpdated(T obj) { }
+	protected <T extends UUIDEntity> void onObjectUpdated(T obj) { }
 	
-	protected <T extends AbstractUUIDEntity> Collection<T> listObjects(String database, Class<T> clz) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> Collection<T> listObjects(String database, Class<T> clz) throws RepositoryException, EntityException {
 		
 		try {
 
@@ -190,7 +200,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> Collection<T> listObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> Collection<T> listObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
 		
 		try {
 
@@ -207,7 +217,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> Collection<T> searchObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> Collection<T> searchObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
 		try {
 
 			List<T> results = new ArrayList<>();
@@ -223,7 +233,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SearchField... fields) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SearchField... fields) throws RepositoryException, EntityException {
 		try {
 
 			List<T> results = new ArrayList<>();
@@ -239,7 +249,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> Long searchCount(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> Long searchCount(String database, Class<T> clz, SearchField... fields) throws RepositoryException, EntityException {
 		
 		try {
 			return db.searchCount(getCollectionName(clz), database, fields);			
@@ -250,7 +260,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 
-	protected <T extends AbstractUUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, String searchField, String searchValue, int start, int length) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, String searchField, String searchValue, int start, int length) throws RepositoryException, EntityException {
 		
 		try {
 
@@ -267,7 +277,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends AbstractUUIDEntity> Long countObjects(String database, Class<T> clz) throws RepositoryException, EntityException {
+	protected <T extends UUIDEntity> Long countObjects(String database, Class<T> clz) throws RepositoryException, EntityException {
 		
 		try {
 			return db.count(getCollectionName(clz), database);			

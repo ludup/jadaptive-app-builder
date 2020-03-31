@@ -58,9 +58,8 @@ public class JobServiceImpl extends AuthenticatedService implements JobService {
 		
 		if(NumberUtils.isCreatable(id)) {
 			return jobDatabase.get(Job.class, SearchField.or(
-					SearchField.eq("uuid", id),
 					SearchField.eq("name", id),
-					SearchField.eq("uuid", Integer.parseInt(id))));
+					SearchField.eq("shortId", Integer.parseInt(id))));
 		} else {
 			return jobDatabase.get(Job.class, SearchField.or(
 					SearchField.eq("uuid", id),

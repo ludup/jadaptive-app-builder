@@ -14,8 +14,4 @@ public class TaskResult extends AuditEvent {
 	public TaskResult(String resourceKey) {
 		super(resourceKey);
 	}
-
-
-	
-
 }

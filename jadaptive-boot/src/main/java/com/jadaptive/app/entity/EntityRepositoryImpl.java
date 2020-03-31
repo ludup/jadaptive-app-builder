@@ -48,8 +48,8 @@ public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 	private MongoEntity buildEntity(String resourceKey, Document document) {
 		MongoEntity e = new MongoEntity(resourceKey, document);
 		e.setUuid(document.getString("_id"));
-		e.setHidden(Boolean.valueOf(document.getString("hidden")));
-		e.setSystem(Boolean.valueOf(document.getString("system")));
+		e.setHidden(document.getBoolean("hidden"));
+		e.setSystem(document.getBoolean("system"));
 		return e;
 	}
 	

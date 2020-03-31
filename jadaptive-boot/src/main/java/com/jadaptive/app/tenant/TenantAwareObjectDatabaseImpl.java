@@ -12,14 +12,14 @@ import org.springframework.stereotype.Repository;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
 import com.jadaptive.app.db.DocumentDatabase;
 
 @Repository
-public class TenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity> 
+public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity> 
 		extends AbstractObjectDatabaseImpl implements TenantAwareObjectDatabase<T> {
 
 	protected TenantAwareObjectDatabaseImpl(DocumentDatabase db) {

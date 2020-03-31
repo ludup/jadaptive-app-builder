@@ -26,6 +26,7 @@ import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
@@ -47,7 +48,8 @@ public class DocumentHelper {
 		return clz.getSimpleName();
 	}
 	
-	public static void convertObjectToDocument(AbstractUUIDEntity obj, Document document) throws RepositoryException, EntityException {
+	
+	public static void convertObjectToDocument(UUIDEntity obj, Document document) throws RepositoryException, EntityException {
 
 		try {
 			
@@ -67,36 +69,15 @@ public class DocumentHelper {
 					continue;
 				}
 				Column columnDefinition = field.getAnnotation(Column.class);
-//				if(!builtInNames.contains(name) && Objects.isNull(columnDefinition)) {
-//					continue;
-//				}
 				Object value = m.invoke(obj);
 				if(!Objects.isNull(value)) { 
 					if(m.getReturnType().equals(Date.class)) {
 						document.put(name,  value);
-					} else if(m.getReturnType().equals(Integer.class)) {
-						document.put(name,  value);
-					} else if(m.getReturnType().equals(int.class)) {
-						document.put(name,  value);
-					} else if(m.getReturnType().equals(Long.class)) {
-						document.put(name,  value);
-					} else if(m.getReturnType().equals(long.class)) {
-						document.put(name,  value);
-					} else if(m.getReturnType().equals(Float.class)) {
-						document.put(name,  value);
-					} else if(m.getReturnType().equals(float.class)) {
-						document.put(name,  value);
-					} else if(m.getReturnType().equals(Double.class)) {
-						document.put(name,  value);
-					} else if(m.getReturnType().equals(double.class)) {
-						document.put(name,  value);
-					} else if(m.getReturnType().equals(Boolean.class)) {
-						document.put(name,  value);
-					} else if(m.getReturnType().equals(boolean.class)) {
+					} else if(isSupportedPrimative(m.getReturnType())) {
 						document.put(name,  value);
 					} else if(m.getReturnType().isEnum()) {
 						document.put(name, ((Enum<?>)value).name());
-					} else if(AbstractUUIDEntity.class.isAssignableFrom(m.getReturnType())) {
+					} else if(UUIDEntity.class.isAssignableFrom(m.getReturnType())) {
 						if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 							buildDocument(name, (AbstractUUIDEntity)value, m.getReturnType(), document);
 						} else if(Objects.nonNull(value)) {
@@ -115,6 +96,32 @@ public class DocumentHelper {
 		}
 		
 	}
+
+	private static boolean isSupportedPrimative(Class<?> returnType) {
+		if(returnType.equals(Integer.class)) {
+			return true;
+		} else if(returnType.equals(int.class)) {
+			return true;
+		} else if(returnType.equals(Long.class)) {
+			return true;
+		} else if(returnType.equals(long.class)) {
+			return true;
+		} else if(returnType.equals(Float.class)) {
+			return true;
+		} else if(returnType.equals(float.class)) {
+			return true;
+		} else if(returnType.equals(Double.class)) {
+			return true;
+		} else if(returnType.equals(double.class)) {
+			return true;
+		} else if(returnType.equals(Boolean.class)) {
+			return true;
+		} else if(returnType.equals(boolean.class)) {
+			return true;
+		} 
+		return false;
+	}
+
 
 	private static String checkForAndPerformEncryption(Column columnDefinition, String value) {
 		if(Objects.nonNull(columnDefinition) && (columnDefinition.manualEncryption() || columnDefinition.automaticEncryption())) {
@@ -141,29 +148,11 @@ public class DocumentHelper {
 		for(Object value : values) {
 			if(Date.class.equals(value.getClass())) {
 				list.add(value);
-			} else if(Integer.class.equals(value.getClass())) {
-				list.add(value);
-			} else if(int.class.equals(value.getClass())) {
-				list.add(value);
-			} else if(Long.class.equals(value.getClass())) {
-				list.add(value);
-			} else if(long.class.equals(value.getClass())) {
-				list.add(value);
-			} else if(Double.class.equals(value.getClass())) {
-				list.add(value);
-			} else if(double.class.equals(value.getClass())) {
-				list.add(value);
-			} else if(Float.class.equals(value.getClass())) {
-				list.add(value);
-			} else if(float.class.equals(value.getClass())) {
-				list.add(value);
-			} else if(Boolean.class.equals(value.getClass())) {
-				list.add(value);
-			} else if(boolean.class.equals(value.getClass())) {
+			} else if(isSupportedPrimative(value.getClass())) {
 				list.add(value);
 			} else if(value.getClass().isEnum()) {
 				list.add(((Enum<?>)value).name());
-			} else if(AbstractUUIDEntity.class.isAssignableFrom(value.getClass())) {
+			} else if(UUIDEntity.class.isAssignableFrom(value.getClass())) {
 
 				AbstractUUIDEntity e = (AbstractUUIDEntity) value;
 				if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
@@ -188,12 +177,12 @@ public class DocumentHelper {
 		document.put(name, embedded);
 	}
 
-	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<?> baseClass, Document document) throws ParseException {
+	public static <T extends UUIDEntity> T convertDocumentToObject(Class<?> baseClass, Document document) throws ParseException {
 		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends AbstractUUIDEntity> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) throws ParseException {
+	public static <T extends UUIDEntity> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) throws ParseException {
 		
 		try {
 			
@@ -236,29 +225,11 @@ public class DocumentHelper {
 				}
 				if(parameter.getType().equals(String.class)) {
 					m.invoke(obj, checkForAndPerformDecryption(columnDefinition, (String) value));
-				} else if(parameter.getType().equals(Boolean.class)) {
-					m.invoke(obj, value);
-				} else if(parameter.getType().equals(boolean.class)) {
-					m.invoke(obj, value);
-				} else if(parameter.getType().equals(Integer.class)) {
-					m.invoke(obj, value);
-				} else if(parameter.getType().equals(int.class)) {
-					m.invoke(obj, value);
-				} else if(parameter.getType().equals(Long.class)) {
-					m.invoke(obj, value);
-				} else if(parameter.getType().equals(long.class)) {
-					m.invoke(obj, value);
-				} else if(parameter.getType().equals(Float.class)) {
-					m.invoke(obj, value);
-				} else if(parameter.getType().equals(float.class)) {
-					m.invoke(obj, value);
-				} else if(parameter.getType().equals(Double.class)) {
-					m.invoke(obj, value);
-				} else if(parameter.getType().equals(double.class)) {
+				} else if(isSupportedPrimative(parameter.getType())) {
 					m.invoke(obj, value);
 				} else if(parameter.getType().equals(Date.class)) {
 					m.invoke(obj, document.getDate(name));
-				} else if(AbstractUUIDEntity.class.isAssignableFrom(parameter.getType())) {
+				} else if(UUIDEntity.class.isAssignableFrom(parameter.getType())) {
 					if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 						Object doc = document.get(name);
 						if(Objects.isNull(doc)) {
@@ -268,7 +239,7 @@ public class DocumentHelper {
 							doc = new Document((Map<String,Object>)doc);
 						} 
 						
-						m.invoke(obj, convertDocumentToObject(AbstractUUIDEntity.class, (Document) doc, classLoader));
+						m.invoke(obj, convertDocumentToObject(UUIDEntity.class, (Document) doc, classLoader));
 					} else {
 						String resourceKey = getTemplateResourceKey(parameter.getType());
 						String uuid =  document.getString(name);
@@ -303,12 +274,12 @@ public class DocumentHelper {
 					if(Objects.isNull(list)) {
 						continue;
 					}
-					if(AbstractUUIDEntity.class.isAssignableFrom(type)) {
+					if(UUIDEntity.class.isAssignableFrom(type)) {
 						Collection<AbstractUUIDEntity> elements = new ArrayList<>();	
 						for(Object embedded : list) {
 							if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 								Document embeddedDocument = (Document) embedded;
-								elements.add(convertDocumentToObject(AbstractUUIDEntity.class, embeddedDocument, classLoader));
+								elements.add(convertDocumentToObject(UUIDEntity.class, embeddedDocument, classLoader));
 							} else {
 								String resourceKey = getTemplateResourceKey(parameter.getType());
 								String uuid =  document.getString(name);
