@@ -3,10 +3,16 @@ package com.jadaptive.api.tenant;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.jadaptive.api.entity.EntityScope;
+import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.template.Template;
 
+@Template(name = "Tenant", resourceKey = Tenant.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 public class Tenant extends AbstractUUIDEntity {
 
+	public static final String RESOURCE_KEY = "tenant";
+	
 	String name;
 	String hostname;
 	Set<String> alternativeDomains = new HashSet<>();
@@ -57,6 +63,9 @@ public class Tenant extends AbstractUUIDEntity {
 	public void setAlternativeDomains(Set<String> alternativeDomains) {
 		this.alternativeDomains = alternativeDomains;
 	}
-	
-	
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
+	}
 }

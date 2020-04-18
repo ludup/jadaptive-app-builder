@@ -14,9 +14,9 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.EntityTemplateService;
@@ -47,7 +47,9 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 		
 		permissionService.assertRead(RESOURCE_KEY);
 		
-		EntityTemplate e = repository.get(SearchField.eq("resourceKey", resourceKey));
+		EntityTemplate e = repository.get(SearchField.or(
+				SearchField.eq("resourceKey", resourceKey),
+				SearchField.in("aliases", resourceKey)));
 		
 		if(Objects.isNull(e)) {
 			throw new EntityException(String.format("Cannot find entity with resource key %s", resourceKey));
@@ -179,7 +181,7 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	}
 	
 	@Override
-	public <T extends AbstractUUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
+	public <T extends UUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
 		return DocumentHelper.convertDocumentToObject(baseClass, new Document(values));
 	}
 

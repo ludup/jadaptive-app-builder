@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDEntity;
 
 public interface EntityTemplateService {
 
@@ -23,7 +23,7 @@ public interface EntityTemplateService {
 
 	long count();
 
-	<T extends AbstractUUIDEntity> T createObject(Map<String, Object> values, Class<T> baseClass) throws ParseException;
+	<T extends UUIDEntity> T createObject(Map<String, Object> values, Class<T> baseClass) throws ParseException;
 
 
 }

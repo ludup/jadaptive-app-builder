@@ -13,10 +13,14 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 import com.jadaptive.api.template.UniqueIndex;
 import com.sshtools.common.publickey.SshKeyUtils;
+import com.sshtools.common.ssh.components.SshPublicKey;
 
-@Template(name = "Authorized Key", resourceKey = "authorizedKeys", type = EntityType.COLLECTION, scope = EntityScope.PERSONAL)
+@Template(name = "Authorized Key", resourceKey = AuthorizedKey.RESOURCE_KEY, aliases = { "userPrivateKeys" },
+     type = EntityType.COLLECTION, scope = EntityScope.PERSONAL)
 @UniqueIndex(columns = { "ownerUUID", "name" })
 public class AuthorizedKey extends PersonalUUIDEntity {
+
+	public static final String RESOURCE_KEY = "authorizedKeys";
 
 	@Column(name = "Name", description = "A name to identify this public key", type = FieldType.TEXT)
 	String name;
@@ -29,6 +33,9 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 	
 	@Column(name = "Tags", description = "Tags determine how and when keys can be used", type = FieldType.TEXT, searchable = true, hidden = true)
 	Set<String> tags = new HashSet<>();
+	
+	@Column(name = "Type", description = "The type of key", type = FieldType.ENUM)
+	KeyType type;
 	
 	public String getName() {
 		return name;
@@ -43,9 +50,12 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 	}
 	
 	public void setPublicKey(String publicKey) {
-		this.publicKey = publicKey;
+		
 		try {
-			this.fingerprint = SshKeyUtils.getFingerprint(SshKeyUtils.getPublicKey(publicKey));
+			SshPublicKey key = SshKeyUtils.getPublicKey(publicKey);
+			this.fingerprint = SshKeyUtils.getFingerprint(key);
+			this.publicKey = publicKey;
+			this.type = KeyType.fromAlgorithm(key.getAlgorithm());
 		} catch (IOException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
@@ -65,6 +75,19 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 
 	public void setTags(Collection<String> tags) {
 		this.tags = new HashSet<>(tags);
+	}
+
+	public KeyType getType() {
+		return type;
+	}
+
+	public void setType(KeyType type) {
+		this.type = type;
+	}
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
 	}
 	
 	

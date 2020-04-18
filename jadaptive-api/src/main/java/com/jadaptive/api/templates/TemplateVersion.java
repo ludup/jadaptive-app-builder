@@ -10,8 +10,10 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Template Version", resourceKey = "templateVersion", scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Template Version", resourceKey = TemplateVersion.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 public class TemplateVersion extends AbstractUUIDEntity {
+
+	public static final String RESOURCE_KEY = "templateVersion";
 
 	@Column(name = "Version", 
 			description = "The version of this template", 
@@ -40,6 +42,11 @@ public class TemplateVersion extends AbstractUUIDEntity {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
 	}
 
 }

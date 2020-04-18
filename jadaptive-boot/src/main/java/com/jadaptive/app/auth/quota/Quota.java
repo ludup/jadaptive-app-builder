@@ -5,14 +5,16 @@ import java.util.Date;
 import com.jadaptive.api.entity.EntityScope;
 import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
-import com.jadaptive.api.template.Column;
 
-@Template(name = "Quota", resourceKey = "quota", 
+@Template(name = "Quota", resourceKey = Quota.RESOURCE_KEY, 
 	hidden = true, system = true, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 public class Quota extends AbstractUUIDEntity {
 
+	public static final String RESOURCE_KEY = "quota";
+	
 	@Column(name = "Group", description = "A group to identify the quote type", type = FieldType.TEXT)
 	String group;
 	
@@ -77,6 +79,9 @@ public class Quota extends AbstractUUIDEntity {
 	public void setQuotaStarted(Date quotaStarted) {
 		this.quotaStarted = quotaStarted;
 	}
-	
-	
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
+	}
 }

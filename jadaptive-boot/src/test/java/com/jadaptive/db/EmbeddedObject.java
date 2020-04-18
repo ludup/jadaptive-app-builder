@@ -8,8 +8,10 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Embedded Object", resourceKey = "embeddedObject", type = EntityType.OBJECT)
+@Template(name = "Embedded Object", resourceKey = EmbeddedObject.RESOURCE_KEY, type = EntityType.OBJECT)
 public class EmbeddedObject extends AbstractUUIDEntity {
+
+	public static final String RESOURCE_KEY = "embeddedObject";
 
 	@Column(name = "Embedded String", description = "An embedded string", type = FieldType.TEXT)
 	String embeddedString;
@@ -116,6 +118,11 @@ public class EmbeddedObject extends AbstractUUIDEntity {
 
 	public void setEmbeddedBool(Boolean embeddedBool) {
 		this.embeddedBool = embeddedBool;
+	}
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
 	}
 
 	

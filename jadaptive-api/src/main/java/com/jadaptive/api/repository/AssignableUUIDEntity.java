@@ -3,7 +3,7 @@ package com.jadaptive.api.repository;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class AssignableUUIDEntity extends AbstractUUIDEntity {
+public abstract class AssignableUUIDEntity extends AbstractUUIDEntity {
 
 	Collection<String> roles = new HashSet<>();
 	Collection<String> users = new HashSet<>();

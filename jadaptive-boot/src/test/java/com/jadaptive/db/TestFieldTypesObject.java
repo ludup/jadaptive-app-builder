@@ -8,8 +8,10 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Test Field Types Object", resourceKey = "testFieldTypesObject", type = EntityType.COLLECTION)
+@Template(name = "Test Field Types Object", resourceKey = TestFieldTypesObject.RESOURCE_KEY, type = EntityType.COLLECTION)
 public class TestFieldTypesObject extends AbstractUUIDEntity {
+
+	public static final String RESOURCE_KEY = "testFieldTypesObject";
 
 	@Column(name = "String", description = "A string", type = FieldType.TEXT)
 	String string;
@@ -126,6 +128,11 @@ public class TestFieldTypesObject extends AbstractUUIDEntity {
 
 	public void setEmbedded(EmbeddedObject embedded) {
 		this.embedded = embedded;
+	}
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
 	}
 
 	

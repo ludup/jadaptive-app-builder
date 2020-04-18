@@ -8,9 +8,11 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Scheduler Configuration", resourceKey = "schedulerConfig", type = EntityType.SINGLETON)
+@Template(name = "Scheduler Configuration", resourceKey = SchedulerConfiguration.RESOURCE_KEY, type = EntityType.SINGLETON)
 public class SchedulerConfiguration extends SingletonUUIDEntity {
 
+	public static final String RESOURCE_KEY = "schedulerConfig";
+	
 	@Column(name = "Pool Size", 
 			description = "The number of threads available to the scheduler",
 			defaultValue = "10", 
@@ -28,6 +30,11 @@ public class SchedulerConfiguration extends SingletonUUIDEntity {
 	@Override
 	protected final String getSingletonUuid() {
 		return "fe63a4f9-ac4a-461d-b12a-ee76e8a6f1a8";
+	}
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
 	}
 	
 	

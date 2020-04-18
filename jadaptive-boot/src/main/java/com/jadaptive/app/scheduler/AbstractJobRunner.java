@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.events.AuditService;
+import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.jobs.JobRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.tasks.Task;
@@ -30,7 +30,7 @@ public abstract class AbstractJobRunner implements Runnable {
 	private TaskService taskService; 
 	
 	@Autowired
-	private AuditService eventService; 
+	private EventService eventService; 
 	
 	@Autowired
 	private TenantService tenantService; 
@@ -60,7 +60,7 @@ public abstract class AbstractJobRunner implements Runnable {
 			beforeJobStarts(startedExecution);
 			
 			TaskResult result = taskService.getTaskImplementation(task).doTask(task);
-			eventService.publishEvent(result);
+			eventService.publishCustomEvent(result);
 
 			afterJobComplete(startedExecution, new Date(), task);
 			

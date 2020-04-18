@@ -8,14 +8,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.jline.reader.Candidate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.tasks.TriggerMapping;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
@@ -35,9 +37,11 @@ public class ConsoleHelper {
 	@Autowired
 	private ApplicationService applicationService; 
 	
+
 	public Map<String, Object> promptTemplate(VirtualConsole console,
 			Map<String, Object> obj,
 			EntityTemplate template, 
+			List<TriggerMapping> mappings,
 			String objectType) throws ParseException, PermissionDeniedException, IOException {
 		
 		obj.put("_clz", objectType);
@@ -48,28 +52,42 @@ public class ConsoleHelper {
 				console.println(objectTemplate.getName());
 				obj.put(field.getResourceKey(), promptTemplate(console, new HashMap<>(),
 						objectTemplate, 
+						mappings,
 						field.getValidationValue(ValidationType.OBJECT_TYPE)));
 				break;
 			case PASSWORD:
-				obj.put(field.getResourceKey(), 
-						console.getLineReader().readLine(
-								String.format("%s: ", field.getName()), '*'));
+			{
+				String val = console.getLineReader().readLine(
+						String.format("%s: ", field.getName()), '*');
+				if(processMapping(val, field.getResourceKey(), mappings)) {
+					continue;
+				}
+				obj.put(field.getResourceKey(), val);
 				break;
+			}
 			case TEXT:
-				obj.put(field.getResourceKey(), console.readLine(
-						String.format("%s: ", field.getName())));
+			{
+				String val = console.readLine(
+						String.format("%s: ", field.getName()));
+				if(processMapping(val, field.getResourceKey(), mappings)) {
+					continue;
+				}
+				obj.put(field.getResourceKey(), val);
 				break;
+			}
 			case TEXT_AREA:
 			{
 				while(true) {
 					console.println("Enter path to ".concat(field.getName()));
-					String filename = console.readLine("Path: ");
-					
-					if(StringUtils.isNotBlank(filename)) {
-						AbstractFile file = console.getCurrentDirectory().resolveFile(filename);
+					String val = console.readLine("Path: ");
+					if(processMapping(val, field.getResourceKey(), mappings)) {
+						continue;
+					}
+					if(StringUtils.isNotBlank(val)) {
+						AbstractFile file = console.getCurrentDirectory().resolveFile(val);
 						
 						if(!file.exists())  {
-							console.println(String.format("%s does not exist", filename));
+							console.println(String.format("%s does not exist", val));
 						}
 						
 						obj.put(field.getResourceKey(), IOUtils.readUTF8StringFromStream(file.getInputStream()));
@@ -88,6 +106,9 @@ public class ConsoleHelper {
 				String val; 
 				while(true) {
 					val = console.readLine(String.format("%s: ", field.getName()));
+					if(processMapping(val, field.getResourceKey(), mappings)) {
+						continue;
+					}
 					try {
 						Double.parseDouble(val);
 						break;
@@ -103,53 +124,46 @@ public class ConsoleHelper {
 				String val; 
 				Set<String> validAnswers = new HashSet<>(Arrays.asList("y", "n", "yes", "no"));
 				do {
-					val = console.readLine(String.format("%s (y/n): ", field.getName()));		 
-				} while(!validAnswers.contains(val.toLowerCase()));
+					val = console.readLine(String.format("%s (y/n): ", field.getName()));	
+
+				} while(!val.startsWith(":") && !validAnswers.contains(val.toLowerCase()));
+				if(processMapping(val, field.getResourceKey(), mappings)) {
+					continue;
+				}
 				obj.put(field.getResourceKey(), val);
 				break;
 			}
 			case ENUM:
 			{
-				console.println("Select ".concat(field.getName()).concat(" from the list (type name or index number)"));
+				console.println("Select ".concat(field.getName()).concat(" (press tab to cycle through values)"));
 				String enumType = field.getValidationValue(ValidationType.OBJECT_TYPE);
+				
 				try {
 					@SuppressWarnings("unchecked")
 					Class<? extends Enum<?>> clz = (Class<? extends Enum<?>>) applicationService.resolveClass(enumType);
 					
-					List<String> values = new ArrayList<>();
 					Enum<?>[] constants = clz.getEnumConstants();
-					int maximumSize = 0;
+					List<String> values = new ArrayList<>();
+					List<Candidate> completions = new ArrayList<>();
 					for(Enum<?> e : constants) {
-						values.add(e.name());
-						maximumSize = Math.max(maximumSize, e.name().length());
+						values.add(e.name().toUpperCase());
+						completions.add(new Candidate(e.name()));
 					}
-					
-					int columns = console.getTerminal().getSize().getColumns();
-					maximumSize += 8;
-					int perLine = (columns / maximumSize) - 1;
-					int i = 0;
-					int y = 0;
-					for(String name : values) {
-						if(++y > perLine) {
-							y = 1;
-							console.println();
-						}
-						console.print(StringUtils.rightPad(String.format("%02d. %s ", ++i, name), maximumSize));
-					}
+					console.getEnvironment().put("_COMPLETIONS", completions);
 					console.println();
 					String val;
 					while(true) {
-						val = console.readLine(String.format("%s: ", field.getName()));
-						if(NumberUtils.isNumber(val)) {
-							int idx = Integer.parseInt(val);
-							if(idx > 0 && idx <= values.size()) {
-								val = values.get(idx-1);
-								break;
-							}
-						} else if(values.contains(val)) {
+						val = console.readLine(String.format("%s: ", field.getName())).trim();
+						if(values.contains(val.toUpperCase())) {
+							break;
+						} else if(val.startsWith(":")) {
 							break;
 						}
 						console.println("Invalid value. Try again.");
+					}
+					console.getEnvironment().remove("_COMPLETIONS");
+					if(processMapping(val, field.getResourceKey(), mappings)) {
+						continue;
 					}
 					obj.put(field.getResourceKey(), val);
 				} catch (ClassNotFoundException e) {
@@ -163,6 +177,9 @@ public class ConsoleHelper {
 				String val; 
 				while(true) {
 					val = console.readLine(String.format("%s: ", field.getName()));
+					if(processMapping(val, field.getResourceKey(), mappings)) {
+						break;
+					}
 					try {
 						obj.put(field.getResourceKey(), Long.parseLong(val));
 						break;
@@ -177,6 +194,9 @@ public class ConsoleHelper {
 				String val; 
 				while(true) {
 					val = console.readLine(String.format("%s: ", field.getName()));
+					if(processMapping(val, field.getResourceKey(), mappings)) {
+						break;
+					}
 					try {
 						obj.put(field.getResourceKey(), Integer.parseInt(val));
 						break;
@@ -191,6 +211,9 @@ public class ConsoleHelper {
 				String val; 
 				while(true) {
 					val = console.readLine(String.format("%s: ", field.getName()));
+					if(processMapping(val, field.getResourceKey(), mappings)) {
+						break;
+					}
 					try {
 						obj.put(field.getResourceKey(), Utils.parseDate(val, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
 						break;
@@ -207,5 +230,16 @@ public class ConsoleHelper {
 			
 		return obj;	
 		
+	}
+
+	private boolean processMapping(String val, String resourceKey, List<TriggerMapping> mappings) {
+		
+		if(Objects.nonNull(mappings)) {
+			if(val.startsWith(":")) {
+				mappings.add(new TriggerMapping(resourceKey, val));
+				return true;
+			}
+		}
+		return false;
 	}
 }

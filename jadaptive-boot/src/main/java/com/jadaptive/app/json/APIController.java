@@ -5,6 +5,7 @@ import java.util.Collection;
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
+import com.jadaptive.api.json.BootstrapTableController;
+import com.jadaptive.api.json.BootstrapTablePageProcessor;
+import com.jadaptive.api.json.BootstrapTableResult;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.templates.TemplateVersion;
@@ -28,7 +34,7 @@ import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.app.entity.MongoEntity;
 
 @Controller
-public class APIController {
+public class APIController extends BootstrapTableController<MongoEntity>{
 
 	static Logger log = LoggerFactory.getLogger(APIController.class);
 	
@@ -219,24 +225,46 @@ public class APIController {
 	@RequestMapping(value="api/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityTableStatus<MongoEntity> tableEntities(HttpServletRequest request, 
+	public BootstrapTableResult<MongoEntity> tableEntities(HttpServletRequest request, 
 			@PathVariable String resourceKey,
 			@RequestParam(required=false, defaultValue="uuid") String searchField,
 			@RequestParam(required=false, name="search") String searchValue,
+			@RequestParam(required=false, defaultValue = "") String orderColumn,
 			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam(required=false, defaultValue = "0") int offset,
 			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, EntityException {
 		
-		
 		try {
-			   return new EntityTableStatus<MongoEntity>(templateService.get(resourceKey), 
-					   entityService.table(resourceKey, searchField, searchValue, offset, limit),
-					   entityService.count(resourceKey, searchField, searchValue));
+			
+			if(StringUtils.isBlank(orderColumn)) {
+				orderColumn = searchField;
+			}
+			
+			return processDataTablesRequest(request, 
+					templateService.get(resourceKey),
+				new BootstrapTablePageProcessor() {
+
+					@Override
+					public Collection<?> getPage(String searchColumn, String searchPattern, int start,
+							int length, String sortBy)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						return entityService.table(resourceKey, searchField, searchValue, offset, limit);
+					}
+
+					@Override
+					public Long getTotalCount(String searchColumn, String searchPattern)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						return entityService.count(resourceKey, searchField, searchValue);
+					}
+				});
+
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/table", resourceKey, e);
 			}
-			return new EntityTableStatus<MongoEntity>(false, e.getMessage());
+			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
 

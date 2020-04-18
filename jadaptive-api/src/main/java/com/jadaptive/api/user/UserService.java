@@ -1,5 +1,9 @@
 package com.jadaptive.api.user;
 
+import java.util.Collection;
+
+import com.jadaptive.api.template.EntityTemplate;
+
 public interface UserService {
 
 	public static final String CHANGE_PASSWORD_PERMISSION = "user.changePassword";
@@ -20,5 +24,15 @@ public interface UserService {
 	void changePassword(User user, char[] newPassword, boolean passwordChangeRequired);
 
 	Iterable<? extends User> iterateUsers();
+
+	User getUserByEmail(String email);
+
+	Collection<EntityTemplate> getCreateUserTemplates();
+
+	void deleteUser(User confirmedUser);
+
+	void updateUser(User user);
+
+	void createUser(User user, char[] charArray, boolean forceChange);
 
 }

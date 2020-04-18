@@ -146,7 +146,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			case NOT:
 				buf.append(field.getColumn());
 				buf.append(" IS NOT ");
-				buf.append(Utils.csv(field.getValue()));
+				buf.append(field.getValue()[0]);
 				break;
 			}
 			

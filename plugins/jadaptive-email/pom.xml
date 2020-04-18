@@ -1,0 +1,98 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.jadaptive</groupId>
+		<artifactId>plugins</artifactId>
+		<relativePath>..</relativePath>
+		<version>0.0.2-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>jadaptive-email</artifactId>
+	<name>Email Service</name>
+
+	<properties>
+		<plugin.id>jadaptive-email</plugin.id>
+		<plugin.class>com.jadaptive.plugins.email.EmailPlugin</plugin.class>
+		<plugin.version>${project.version}</plugin.version>
+		<plugin.provider>JADAPTIVE Limited</plugin.provider>
+		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder/plugins</plugin.projectUrl>
+		<plugin.dependencies></plugin.dependencies>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.jadaptive</groupId>
+			<artifactId>jadaptive-api</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codemonkey.simplejavamail</groupId>
+			<artifactId>simple-java-mail</artifactId>
+			<version>3.1.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun.mail</groupId>
+					<artifactId>javax.mail</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.8.1</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.sshtools</groupId>
+				<artifactId>pf4j-plugin-generator</artifactId>
+				<version>0.0.2</version>
+				<executions>
+					<execution>
+						<id>generate-plugin</id>
+						<phase>install</phase>
+						<goals>
+							<goal>generate-plugin</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>ext-releases-local</id>
+			<name>artifactory.javassh.com-ext-releases</name>
+			<url>http://artifactory.javassh.com/ext-releases-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases />
+		</repository>
+	</repositories>
+</project>

@@ -6,11 +6,11 @@
 		<groupId>com.jadaptive</groupId>
 		<artifactId>plugins</artifactId>
 		<relativePath>..</relativePath>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jadaptive-web-management-webbits</artifactId>
-	<name>Web Management</name>
+	<name>Web Management Webbits</name>
 
 	<properties>
 		<plugin.id>jadaptive-web-management-webbits</plugin.id>
@@ -44,7 +44,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.jadaptive</groupId>
+				<groupId>com.sshtools</groupId>
 				<artifactId>pf4j-plugin-generator</artifactId>
 				<version>0.0.2</version>
 				<executions>

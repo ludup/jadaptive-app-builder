@@ -3,6 +3,7 @@ package com.jadaptive.api.json;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.jadaptive.api.template.EntityTemplate;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class BootstrapTableResult<T> {
@@ -10,16 +11,18 @@ public class BootstrapTableResult<T> {
 	private long total;
 	private Collection<?> rows;
 	private T resource;
+	private EntityTemplate template; 
 	
-	public BootstrapTableResult() {
-		
-	}
-	
-	public BootstrapTableResult(Collection<?> rows, long total) {
+	public BootstrapTableResult(Collection<?> rows, long total, EntityTemplate template) {
 		this.rows = rows;
 		this.total = total;
+		this.template = template;
 	}
 
+	public EntityTemplate getTemplate() {
+		return template;
+	}
+	
 	public long getTotal() {
 		return total;
 	}

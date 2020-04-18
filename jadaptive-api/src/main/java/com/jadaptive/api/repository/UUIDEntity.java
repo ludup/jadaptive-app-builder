@@ -6,6 +6,8 @@ public abstract class UUIDEntity {
 	Boolean system;
 	Boolean hidden;
 	
+	public abstract String getResourceKey();
+	
 	public String getUuid() {
 		return uuid;
 	}

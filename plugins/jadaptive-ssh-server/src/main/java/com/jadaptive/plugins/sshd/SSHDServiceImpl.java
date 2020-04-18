@@ -131,7 +131,10 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 					}
 					
 					if(Objects.isNull(home)) {
-						home = new VirtualMountTemplate("/", replaceTokens("home/${username}", con), new VFSFileFactory(), true);
+						home = new VirtualMountTemplate("/",
+								replaceTokens("home/" + con.getUsername(), con), 
+								new VFSFileFactory(), 
+								true);
 					}
 
 					return new VirtualFileFactory(home, 

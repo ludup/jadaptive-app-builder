@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.user.BuiltinUserDatabase;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.commands.UserCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.UsageException;
@@ -14,7 +14,7 @@ import com.sshtools.server.vsession.VirtualConsole;
 public class DeleteUser extends UserCommand {
 	
 	@Autowired
-	private BuiltinUserDatabase userService; 
+	private UserService userService; 
 	
 	public DeleteUser() {
 		super("delete-user", "User Management", "delete-user [<username>",

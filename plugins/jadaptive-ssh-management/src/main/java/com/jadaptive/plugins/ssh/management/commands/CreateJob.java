@@ -2,16 +2,24 @@ package com.jadaptive.plugins.ssh.management.commands;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
+import org.jline.reader.Candidate;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.jobs.JobService;
 import com.jadaptive.api.tasks.Task;
+import com.jadaptive.api.tasks.TaskService;
+import com.jadaptive.api.tasks.TriggerMapping;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.plugins.ssh.management.ConsoleHelper;
@@ -31,6 +39,9 @@ public class CreateJob extends AbstractTenantAwareCommand {
 	
 	@Autowired
 	private JobService jobService; 
+	
+	@Autowired
+	TaskService taskService; 
 	
 	public CreateJob() {
 		super("create-job", "Automation", 
@@ -69,7 +80,9 @@ public class CreateJob extends AbstractTenantAwareCommand {
 
 		Map<String,Object> doc = new HashMap<>();
 		try {
-			consoleHelper.promptTemplate(console, doc, taskTemplate, taskTemplate.getTemplateClass());
+			
+			List<TriggerMapping> mappings = new ArrayList<>();
+			consoleHelper.promptTemplate(console, doc, taskTemplate, mappings, taskTemplate.getTemplateClass());
 			
 			Task task = templateService.createObject(doc, Task.class);
 			
@@ -80,5 +93,13 @@ public class CreateJob extends AbstractTenantAwareCommand {
 			throw new IOException(e.getMessage(), e);
 		}
 	}
-
+	
+	@Override
+	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+		if(line.wordIndex()==2) {
+			for(String resourceKey : taskService.getTaskResourceKeys()) {
+				candidates.add(new Candidate(resourceKey));
+			}
+		}
+	}
 }

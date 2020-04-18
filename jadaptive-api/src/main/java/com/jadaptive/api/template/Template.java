@@ -16,7 +16,7 @@ public @interface Template {
 		
 		String resourceKey();
 		
-		EntityType type();
+		EntityType type() default EntityType.COLLECTION;
 		
 		EntityScope scope() default EntityScope.GLOBAL;
 
@@ -25,4 +25,6 @@ public @interface Template {
 		boolean system() default false;
 		
 		boolean recurse() default true;
+		
+		String[] aliases() default { };
 }

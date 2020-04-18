@@ -1,5 +1,7 @@
 package com.jadaptive.app.tasks;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -41,6 +43,11 @@ public class TaskServiceImpl extends AuthenticatedService implements TaskService
 		 return taskImpl;
 	}
 
+	@Override
+	public Collection<String> getTaskResourceKeys() {
+		loadTaskImplementations();
+		return Collections.unmodifiableCollection(taskImplementations.keySet());
+	}
 	
 	private void loadTaskImplementations() {
 		

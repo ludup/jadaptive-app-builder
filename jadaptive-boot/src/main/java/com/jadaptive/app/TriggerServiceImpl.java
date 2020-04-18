@@ -3,7 +3,7 @@ package com.jadaptive.app;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.events.AuditEvent;
+import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.triggers.TriggerService;
 
@@ -11,7 +11,8 @@ import com.jadaptive.api.triggers.TriggerService;
 public class TriggerServiceImpl extends AuthenticatedService implements TriggerService {
 
 	@EventListener
-	public void onAuditEvent(AuditEvent evt) {
+	@Override
+	public void onAuditEvent(SystemEvent<?> evt) {
 		
 		System.out.println("Processing audit event " + evt.getResourceKey());
 	}

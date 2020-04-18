@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -401,6 +402,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.setType(e.type());
 			template.getFields().clear();
 			template.setTemplateClass(clz.getName());
+			template.getAliases().clear();
+			template.getAliases().addAll(Arrays.asList(e.aliases()));
 			
 			Index[] nonUnique = clz.getAnnotationsByType(Index.class);
 			UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);

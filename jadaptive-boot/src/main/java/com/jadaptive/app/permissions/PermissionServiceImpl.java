@@ -93,6 +93,10 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		@Override
 		public void setName(String value) {
 		}
+
+		@Override
+		public void setPasswordChangeRequired(boolean change) {
+		}
 	};
 
 	@Override

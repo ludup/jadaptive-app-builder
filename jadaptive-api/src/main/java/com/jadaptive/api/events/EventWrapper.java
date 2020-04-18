@@ -6,14 +6,14 @@ public class EventWrapper extends ApplicationEvent {
 
 	private static final long serialVersionUID = -214286129911533919L;
 
-	AuditEvent event;
+	CustomEvent event;
 	
-	public EventWrapper(Object source, AuditEvent event) {
+	public EventWrapper(Object source, CustomEvent event) {
 		super(source);
 		this.event = event;
 	}
 
-	public AuditEvent getEvent() {
+	public CustomEvent getEvent() {
 		return event;
 	}
 }

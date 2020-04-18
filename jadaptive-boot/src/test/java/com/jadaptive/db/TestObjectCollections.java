@@ -11,9 +11,11 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Test Object Collections", resourceKey = "testObjectCollections", type = EntityType.COLLECTION)
+@Template(name = "Test Object Collections", resourceKey = TestObjectCollections.RESOURCE_KEY, type = EntityType.COLLECTION)
 public class TestObjectCollections extends AbstractUUIDEntity {
 
+	public static final String RESOURCE_KEY = "testObjectCollections";
+	
 	@Column(name = "Values", description = "A collection of objects", type = FieldType.OBJECT_EMBEDDED)
 	List<TestSimpleObject> values;
 	
@@ -33,5 +35,9 @@ public class TestObjectCollections extends AbstractUUIDEntity {
 		this.values = new ArrayList<>(values);
 	}
 
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
+	}
 
 }

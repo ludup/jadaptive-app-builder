@@ -64,7 +64,7 @@ public class CompoundIterable<T> implements Iterable<T> {
 		}
 		
 		private void ensureReady() {
-			if((Objects.isNull(current) || !current.hasNext()) && !iterators.isEmpty()) {
+			while((Objects.isNull(current) || !current.hasNext()) && !iterators.isEmpty()) {
 				current = iterators.remove(0).iterator();
 			}
 		}

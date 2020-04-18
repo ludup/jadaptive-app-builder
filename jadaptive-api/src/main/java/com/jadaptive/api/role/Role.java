@@ -41,6 +41,10 @@ public class Role extends NamedUUIDEntity {
 			searchable = true)
 	Collection<String> users = new HashSet<>();
 	
+	public String getResourceKey() {
+		return RESOURCE_KEY;
+	}
+	
 	public Collection<String> getPermissions() {
 		return permissions;
 	}

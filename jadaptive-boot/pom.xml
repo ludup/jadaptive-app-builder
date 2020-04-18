@@ -20,7 +20,7 @@
 		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder</plugin.projectUrl>
 		<plugin.dependencies></plugin.dependencies>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -40,17 +40,17 @@
 		</dependency>
 
 		<!-- while this provides a spring factory bean for the embedded mongodb -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>cz.jirutka.spring</groupId> -->
-<!-- 			<artifactId>embedmongo-spring</artifactId> -->
-<!-- 			<version>RELEASE</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>cz.jirutka.spring</groupId> -->
+		<!-- <artifactId>embedmongo-spring</artifactId> -->
+		<!-- <version>RELEASE</version> -->
+		<!-- </dependency> -->
 
 		<!-- finally this one is the spring-boot starter for mongodb -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework.boot</groupId> -->
-<!-- 			<artifactId>spring-boot-starter-data-mongodb</artifactId> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework.boot</groupId> -->
+		<!-- <artifactId>spring-boot-starter-data-mongodb</artifactId> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>io.github.classgraph</groupId>
@@ -108,8 +108,32 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.60</version>
+			<version>1.64</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcmail-jdk15on</artifactId>
+			<version>1.64</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>1.64</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.cache</groupId>
+			<artifactId>cache-api</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast -->
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast</artifactId>
+		</dependency>
+
 	</dependencies>
 
 

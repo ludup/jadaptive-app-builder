@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.user.BuiltinUserDatabase;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.commands.UserCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.CliHelper;
@@ -16,7 +16,7 @@ import com.sshtools.server.vsession.VirtualConsole;
 public class UpdateUser extends UserCommand {
 	
 	@Autowired
-	private BuiltinUserDatabase userService;  
+	private UserService userService;  
 	
 	public UpdateUser() {
 		super("update-user", "User Management", UsageHelper.build("update-user [options] <username>",
@@ -39,7 +39,7 @@ public class UpdateUser extends UserCommand {
 			user.setName(CliHelper.getValue(args, 'n', "name"));
 		}
 		
-		userService.saveOrUpdate(user);
+		userService.updateUser(user);
 		
 		console.println(String.format("Updated user %s", user.getUsername()));
 	}

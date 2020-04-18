@@ -11,6 +11,7 @@ import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
 @Template(name = "Template", resourceKey = "entityTemplate", scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@UniqueIndex(columns = {"resourceKey"})
 public class EntityTemplate extends NamedUUIDEntity {
 
 	EntityType type;
@@ -20,6 +21,7 @@ public class EntityTemplate extends NamedUUIDEntity {
 	Collection<FieldTemplate> fields = new ArrayList<>();
 	Map<String,FieldTemplate> fieldsByName;
 	String templateClass; 
+	Collection<String> aliases = new ArrayList<>();
 	
 	public EntityTemplate() {
 		
@@ -59,6 +61,14 @@ public class EntityTemplate extends NamedUUIDEntity {
 
 	public void setResourceKey(String resourceKey) {
 		this.resourceKey = resourceKey;
+	}
+
+	public Collection<String> getAliases() {
+		return aliases;
+	}
+
+	public void setAliases(Collection<String> aliases) {
+		this.aliases = aliases;
 	}
 
 	public String getDefaultFilter() {

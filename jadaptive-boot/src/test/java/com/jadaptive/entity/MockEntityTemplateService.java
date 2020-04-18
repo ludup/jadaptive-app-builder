@@ -8,8 +8,8 @@ import java.util.Map;
 import org.bson.Document;
 
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.app.db.DocumentHelper;
@@ -50,7 +50,7 @@ public class MockEntityTemplateService implements EntityTemplateService {
 	}
 
 	@Override
-	public <T extends AbstractUUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
+	public <T extends UUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
 		return DocumentHelper.convertDocumentToObject(baseClass, new Document(values));
 	}
 

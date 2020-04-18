@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>jadaptive-web-management</artifactId>
-	<name>Web Management</name>
+	<name>Web Management Core</name>
 
 	<properties>
 		<plugin.id>jadaptive-web-management</plugin.id>

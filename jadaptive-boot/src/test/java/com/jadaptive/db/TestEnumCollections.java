@@ -9,9 +9,11 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Test Enum Collections", resourceKey = "testEnumCollections", type = EntityType.COLLECTION)
+@Template(name = "Test Enum Collections", resourceKey = TestEnumCollections.RESOURCE_KEY, type = EntityType.COLLECTION)
 public class TestEnumCollections extends AbstractUUIDEntity {
 
+	public static final String RESOURCE_KEY = "testEnumCollections";
+	
 	@Column(name = "Values", description = "A collection of enums", type = FieldType.ENUM)
 	Collection<TestEnum> values;
 	
@@ -29,6 +31,11 @@ public class TestEnumCollections extends AbstractUUIDEntity {
 
 	public void setValues(Collection<TestEnum> values) {
 		this.values = values;
+	}
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
 	}
 
 

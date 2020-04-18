@@ -1,31 +1,70 @@
 package com.jadaptive.app.user;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
-import com.jadaptive.api.user.BuiltinUserDatabase;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserDatabase;
+import com.jadaptive.api.user.UserDatabaseCapabilities;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.CompoundIterable;
 
 @Service
-public class UserServiceImpl implements UserService, TenantAware {
-
-	@Autowired
-	private BuiltinUserDatabase userRepository; 
+public class UserServiceImpl extends AuthenticatedService implements UserService, TenantAware {
 	
 	@Autowired
 	private PermissionService permissionService; 
 	
+	@Autowired
+	ApplicationService applicationService; 
+	
+	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
+	
+	private void loadUserDatabases() {
+		if(userDatabases.isEmpty()) {
+			for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {
+				userDatabases.put(userDatabase.getUserClass(), userDatabase);
+			}
+		}
+	}
+	
+	private UserDatabase getDatabase(User user) {
+		UserDatabase database = userDatabases.get(user.getClass());
+		if(Objects.isNull(database)) {
+			throw new IllegalStateException(
+					String.format("User type %s does not have a corresponding database",
+							user.getClass().getSimpleName()));
+		}
+		return database;
+	}
+	
 	@Override
 	public User getUserByUUID(String uuid) {
-		User user = userRepository.getUserByUUID(uuid);
+		
+		User user = null;
+		
+		for(UserDatabase userDatabase : userDatabases.values()) {
+			try {
+				user = userDatabase.getUserByUUID(uuid);
+				if(Objects.nonNull(user)) {
+					break;
+				}
+			} catch(EntityNotFoundException e) { }
+		}
 		
 		if(Objects.isNull(user)) {
 			throw new EntityNotFoundException(String.format("User with id %s not found", uuid));
@@ -36,7 +75,7 @@ public class UserServiceImpl implements UserService, TenantAware {
 	@Override
 	public boolean verifyPassword(User user, char[] password) {
 		try {
-			return userRepository.verifyPassword(user, password);
+			return getDatabase(user).verifyPassword(user, password);
 		} catch(EntityNotFoundException e) {
 			return false;
 		}
@@ -45,9 +84,40 @@ public class UserServiceImpl implements UserService, TenantAware {
 
 	@Override
 	public User getUser(String username) {
-		User user = userRepository.getUser(username);
+
+		User user = null;
+		
+		for(UserDatabase userDatabase : userDatabases.values()) {
+			try {
+				user = userDatabase.getUser(username);
+				if(Objects.nonNull(user)) {
+					break;
+				}
+			} catch(EntityNotFoundException e) { }
+		}
+		
 		if(Objects.isNull(user)) {
 			throw new EntityNotFoundException(String.format("%s not found", username));
+		}
+		return user;
+	}
+	
+	@Override
+	public User getUserByEmail(String email) {
+
+		User user = null;
+		
+		for(UserDatabase userDatabase : userDatabases.values()) {
+			try {
+				user = userDatabase.getUser(email);
+				if(Objects.nonNull(user)) {
+					break;
+				}
+			} catch(EntityNotFoundException e) { }
+		}
+		
+		if(Objects.isNull(user)) {
+			throw new EntityNotFoundException(String.format("%s not found", email));
 		}
 		return user;
 	}
@@ -56,7 +126,7 @@ public class UserServiceImpl implements UserService, TenantAware {
 	public void setPassword(User user, char[] newPassword, boolean passwordChangeRequired) {
 		
 		permissionService.assertPermission(SET_PASSWORD_PERMISSION);
-		userRepository.setPassword(user, newPassword, passwordChangeRequired);
+		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 		
 	}
 	
@@ -65,7 +135,7 @@ public class UserServiceImpl implements UserService, TenantAware {
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
 		verifyPassword(user, oldPassword);
-		userRepository.setPassword(user, newPassword, false);
+		getDatabase(user).setPassword(user, newPassword, false);
 		
 	}
 	
@@ -73,13 +143,15 @@ public class UserServiceImpl implements UserService, TenantAware {
 	public void changePassword(User user, char[] newPassword, boolean passwordChangeRequired) {
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
-		userRepository.setPassword(user, newPassword, passwordChangeRequired);
+		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 		
 	}
 
 	@Override
 	public void initializeSystem(boolean newSchema) {
 
+		loadUserDatabases();
+		
 		permissionService.registerStandardPermissions(USER_RESOURCE_KEY);
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
@@ -95,8 +167,41 @@ public class UserServiceImpl implements UserService, TenantAware {
 	public Iterable<User> iterateUsers() {
 		
 		CompoundIterable<User> iterator = new CompoundIterable<>();
-		iterator.add(userRepository.iterateUsers());
+		userDatabases.forEach((k,v)->{
+			iterator.add(v.iterateUsers());
+		});
 		return iterator;
+	}
+
+	@Override
+	public Collection<EntityTemplate> getCreateUserTemplates() {
+		
+		List<EntityTemplate> templates = new ArrayList<>();
+		userDatabases.forEach((k,v)->{
+			if(v.getCapabilities().contains(UserDatabaseCapabilities.CREATE)){
+				templates.add(v.getUserTemplate());
+			}
+		});
+		return templates;
+	}
+
+	@Override
+	public void deleteUser(User user) {
+		
+		assertWrite(USER_RESOURCE_KEY);
+		getDatabase(user).deleteUser(user);
+	}
+
+	@Override
+	public void updateUser(User user) {
+		assertWrite(USER_RESOURCE_KEY);
+		getDatabase(user).updateUser(user);
+	}
+
+	@Override
+	public void createUser(User user, char[] password, boolean forceChange) {
+		assertWrite(USER_RESOURCE_KEY);
+		getDatabase(user).createUser(user, password, forceChange);
 	}
 
 }

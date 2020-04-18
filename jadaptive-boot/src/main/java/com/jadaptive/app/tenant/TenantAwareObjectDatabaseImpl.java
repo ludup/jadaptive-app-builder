@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.tenant.TenantService;
@@ -29,6 +31,9 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	@Autowired
 	protected TenantService tenantService;
 	
+	@Autowired
+	protected EventService eventService; 
+	
 	@Override
 	public Collection<T> list(Class<T> resourceClass, SearchField... fields) {
 		return listObjects(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
@@ -36,12 +41,31 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 
 	@Override
 	public T get(String uuid, Class<T> resourceClass) throws RepositoryException, EntityException {
-		return getObject(uuid, tenantService.getCurrentTenant().getUuid(), resourceClass);
+		try {
+			T result = getObject(uuid, tenantService.getCurrentTenant().getUuid(), resourceClass);
+			eventService.publishStandardEvent(EventType.READ, result);
+			return result;
+		} catch(RepositoryException | EntityException e) {
+			/**
+			 * TODO failed read events
+			 */
+			throw e;
+		}
 	}
 	
 	@Override
 	public T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, EntityException {
-		return getObject(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
+		try {
+			T result = getObject(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
+			eventService.publishStandardEvent(EventType.READ, result);
+			return result;
+		} catch(RepositoryException | EntityException e) {
+			/**
+			 * TODO failed read events
+			 */
+			throw e;
+		}
+		
 	}
 	
 	@Override

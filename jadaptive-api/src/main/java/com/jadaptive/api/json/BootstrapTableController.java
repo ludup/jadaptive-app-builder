@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.template.EntityTemplate;
 
 public class BootstrapTableController<T> {
 
@@ -16,7 +17,9 @@ public class BootstrapTableController<T> {
 
 	@SuppressWarnings("unchecked")
 	protected BootstrapTableResult<T> processDataTablesRequest(
-			HttpServletRequest request, BootstrapTablePageProcessor processor)
+			HttpServletRequest request, 
+			EntityTemplate template,
+			BootstrapTablePageProcessor processor)
 			throws UnauthorizedException,
 			AccessDeniedException {
 
@@ -57,7 +60,7 @@ public class BootstrapTableController<T> {
 				start,
 				length, 
 				""),
-				processor.getTotalCount(searchColumn, searchPattern));
+				processor.getTotalCount(searchColumn, searchPattern), template);
 
 		if(processor instanceof BootstrapTableResourceProcessor) {
 			try {

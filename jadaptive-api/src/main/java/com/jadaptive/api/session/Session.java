@@ -7,6 +7,8 @@ import com.jadaptive.api.tenant.Tenant;
 
 public class Session extends AbstractUUIDEntity {
 
+	public static final String RESOURCE_KEY = "session";
+	
 	String remoteAddress;
 	Date lastUpdated;
 	Date signedIn;
@@ -20,6 +22,10 @@ public class Session extends AbstractUUIDEntity {
 
 	}
 
+	public String getResourceKey() {
+		return RESOURCE_KEY;
+	}
+	
 	public String getRemoteAddress() {
 		return remoteAddress;
 	}

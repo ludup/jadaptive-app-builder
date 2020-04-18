@@ -33,9 +33,9 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.api.user.BuiltinUserDatabase;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.ApplicationServiceImpl;
+import com.jadaptive.app.user.AdminUserDatabase;
 
 @Service
 public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant> {
@@ -56,13 +56,13 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	private PermissionService permissionService; 
 	
 	@Autowired
-	private BuiltinUserDatabase userService;
-	
-	@Autowired
 	private RoleService roleService; 
 	
 	@Autowired
 	private ApplicationService applicationService; 
+	
+	@Autowired
+	private AdminUserDatabase adminDatabase;
 	
 	Tenant systemTenant;
 	
@@ -83,7 +83,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 				setCurrentTenant(getSystemTenant());
 				
 				try {
-					User user = userService.createUser("admin", "Administrator", "", "admin".toCharArray(), true);
+					User user = adminDatabase.createAdmin("admin".toCharArray(), true);
 					roleService.assignRole(roleService.getAdministrationRole(), user);
 				} finally {
 					
@@ -99,9 +99,6 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 					}
 				}	
 			}
-			
-			
-			permissionService.registerStandardPermissions(TENANT_RESOURCE_KEY);
 			
             List<StartupAware> startups = new ArrayList<>(applicationService.getBeans(StartupAware.class));
             Collections.<StartupAware>sort(startups, new Comparator<StartupAware>() {

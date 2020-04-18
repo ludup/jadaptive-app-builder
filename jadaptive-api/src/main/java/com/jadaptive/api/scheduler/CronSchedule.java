@@ -9,9 +9,10 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Cron Schedule", resourceKey = "cronSchedules", type = EntityType.COLLECTION)
+@Template(name = "Cron Schedule", resourceKey = CronSchedule.RESOURCE_KEY, type = EntityType.COLLECTION)
 public class CronSchedule extends AbstractUUIDEntity {
 
+	public static final String RESOURCE_KEY = "cronSchedules";
 	
 	@Column(name = "Cron Expression", 
 			description = "The crontab expression for this schedule",
@@ -37,6 +38,10 @@ public class CronSchedule extends AbstractUUIDEntity {
 			description = "The timestamp when the last execution started",
 			type = FieldType.TIMESTAMP)
 	Date lastExecutionStarted;
+	
+	public String getResourceKey() {
+		return RESOURCE_KEY;
+	}
 	
 	public String getExpression() {
 		return expression;

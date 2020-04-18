@@ -49,8 +49,6 @@ public class VirtualShell extends VirtualShellNG {
 		setEnvironmentVariable("TENANT_NAME", tenant.getName());
 		setEnvironmentVariable("TENANT_UUID", tenant.getUuid());
 		setEnvironmentVariable("USER", con.getUsername());
-		
-		
 	}
 
 

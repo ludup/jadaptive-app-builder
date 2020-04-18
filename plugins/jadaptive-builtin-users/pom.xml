@@ -1,0 +1,69 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.jadaptive</groupId>
+		<artifactId>plugins</artifactId>
+		<relativePath>..</relativePath>
+		<version>0.0.2-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>jadaptive-builtin-users</artifactId>
+	<name>Builtin User Database</name>
+
+	<properties>
+		<plugin.id>jadaptive-builtin-users</plugin.id>
+		<plugin.class>com.jadaptive.plugins.builtin.BuiltinUsersPlugin</plugin.class>
+		<plugin.version>${project.version}</plugin.version>
+		<plugin.provider>JADAPTIVE Limited</plugin.provider>
+		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder/plugins</plugin.projectUrl>
+		<plugin.dependencies></plugin.dependencies>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.jadaptive</groupId>
+			<artifactId>jadaptive-api</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.sshtools</groupId>
+				<artifactId>pf4j-plugin-generator</artifactId>
+				<version>0.0.2</version>
+				<executions>
+					<execution>
+						<id>generate-plugin</id>
+						<phase>install</phase>
+						<goals>
+							<goal>generate-plugin</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>ext-releases-local</id>
+			<name>artifactory.javassh.com-ext-releases</name>
+			<url>http://artifactory.javassh.com/ext-releases-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases />
+		</repository>
+	</repositories>
+</project>

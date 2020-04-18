@@ -4,6 +4,8 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 public class FieldValidator extends AbstractUUIDEntity {
 
+	public static final String RESOURCE_KEY = "fieldValidator";
+	
 	ValidationType type;
 	String value;
 	
@@ -15,6 +17,10 @@ public class FieldValidator extends AbstractUUIDEntity {
 		this.value = value;
 	}
 
+	public String getResourceKey() {
+		return RESOURCE_KEY;
+	}
+	
 	public ValidationType getType() {
 		return type;
 	}

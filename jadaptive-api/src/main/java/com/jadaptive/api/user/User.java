@@ -1,7 +1,6 @@
 package com.jadaptive.api.user;
 
 public interface User {
-
 	
 	String getUuid();
 	
@@ -10,6 +9,8 @@ public interface User {
 	String getName();
 	
 	boolean getPasswordChangeRequired();
+	
+	void setPasswordChangeRequired(boolean change);
 	
 	String getEmail();
 

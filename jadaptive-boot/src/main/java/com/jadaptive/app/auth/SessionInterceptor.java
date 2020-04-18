@@ -20,11 +20,11 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.app.Request;
 import com.jadaptive.app.session.SessionUtils;
 import com.jadaptive.utils.FileUtils;
 
@@ -60,7 +60,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 		
-		Request.setup(request, response);
+		Request.setUp(request, response);
 		
 		Session session = sessionUtils.getActiveSession(request);
 		Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());

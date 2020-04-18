@@ -1,6 +1,6 @@
 package com.jadaptive.api.repository;
 
-public class PersonalUUIDEntity extends AbstractUUIDEntity {
+public abstract class PersonalUUIDEntity extends AbstractUUIDEntity {
 
 	String ownerUUID;
 

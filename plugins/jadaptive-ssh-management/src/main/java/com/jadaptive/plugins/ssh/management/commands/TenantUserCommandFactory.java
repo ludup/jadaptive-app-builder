@@ -37,6 +37,8 @@ public class TenantUserCommandFactory extends AbstractAutowiredCommandFactory im
 		tryCommand("import-csv", ImportCsv.class, "tenant.read", "tenant.readWrite");
 		
 		tryCommand("create-job", CreateJob.class, "job.readWrite");
+		tryCommand("append-task", AppendTask.class, "job.readWrite");
+	
 		tryCommand("exec-job", ExecuteJob.class, "job.readWrite");
 		tryCommand("schedule-job", ScheduleJob.class, "job.readWrite");
 		tryCommand("cancel-job", CancelJob.class, "job.readWrite");

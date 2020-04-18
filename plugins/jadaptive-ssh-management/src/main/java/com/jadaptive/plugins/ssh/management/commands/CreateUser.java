@@ -1,13 +1,24 @@
 package com.jadaptive.plugins.ssh.management.commands;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.jline.reader.Candidate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.user.BuiltinUserDatabase;
+import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserImpl;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.plugins.ssh.management.ConsoleHelper;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.UsageException;
@@ -16,10 +27,16 @@ import com.sshtools.server.vsession.VirtualConsole;
 public class CreateUser extends AbstractTenantAwareCommand {
 	
 	@Autowired
-	private BuiltinUserDatabase userService; 
+	private UserService userService; 
 	
 	@Autowired
 	private PermissionService permissionService;
+	
+	@Autowired
+	private ConsoleHelper consoleHelper;
+	
+	@Autowired
+	private EntityTemplateService templateService; 
 	
 	public CreateUser() {
 		super("create-user", "User Management", "create-user", "Create a builtin user account");
@@ -29,16 +46,21 @@ public class CreateUser extends AbstractTenantAwareCommand {
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 		
-		createUser();
+		try {
+			createUser();
+		} catch (ParseException e) {
+			throw new IOException(e.getMessage(), e);
+		}
 	}
 
-	private void createUser() {
+	private void createUser() throws ParseException, PermissionDeniedException, IOException {
 		
 		permissionService.assertReadWrite(UserService.USER_RESOURCE_KEY);
 		
-		String username = console.readLine("Username: ");
-		String fullname = console.readLine("Full Name: ");
-		String email = console.readLine("Email Address: ");
+		EntityTemplate userTemplate = selectUserTemplate();
+		
+		Map<String,Object> doc = consoleHelper.promptTemplate(console, new HashMap<>(), userTemplate, null, userTemplate.getTemplateClass());
+		User user = templateService.createObject(doc, UserImpl.class);
 		
 		String password;
 		String confirmPassword;
@@ -52,8 +74,37 @@ public class CreateUser extends AbstractTenantAwareCommand {
 			}
 		} while(!identical);
 		
-		userService.createUser(username, fullname, email, password.toCharArray(), false);
+		userService.createUser(user, password.toCharArray(), false);
 		
-		console.println(String.format("Created user %s", username));
+		console.println(String.format("Created user %s", user.getUsername()));
+	}
+
+	private EntityTemplate selectUserTemplate() {
+		
+		Collection<EntityTemplate> userTemplates = userService.getCreateUserTemplates();
+		List<Candidate> candidates = new ArrayList<>();
+		if(userTemplates.size() == 1) {
+			return userTemplates.iterator().next();
+		}
+		
+		Map<String,EntityTemplate> templates = new HashMap<>();
+		for(EntityTemplate t : userTemplates) {
+			candidates.add(new Candidate(t.getName()));
+			templates.put(t.getName(), t);
+		}
+		console.getEnvironment().put("_COMPLETIONS", candidates);
+		console.println("Select a user template. Use tab to cycle through the available templates.");
+		
+		EntityTemplate val = null;
+		do {
+			String templateName = console.readLine("User Template: ").trim();
+			val = templates.get(templateName);
+		}
+		while(val == null);
+		
+		console.getEnvironment().remove("_COMPLETIONS");
+		return val;
+		
+		
 	}
 }
