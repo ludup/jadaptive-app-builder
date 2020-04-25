@@ -16,17 +16,21 @@ public class ApplicationProperties {
 	
 	static ApplicationProperties instance = new ApplicationProperties();
 	static Properties properties;
+	static File confFolder = new File(System.getProperty("jadaptive.conf", "conf"));
 	
 	ApplicationProperties() {
 		properties = new Properties();
 		try(InputStream in = new FileInputStream(
-				new File(System.getProperty("jadaptive.conf", "conf"), 
-						"jadaptive.properties"))) {
+				new File(confFolder, "jadaptive.properties"))) {
 			properties.load(in);
 		} catch(IOException e) {
 			log.warn("Could not load jadaptive.properties file [{}]", e.getMessage());
 		}
 		checkLoaded();
+	}
+	
+	public static File getConfFolder() {
+		return confFolder;
 	}
 	
 	public static String getValue(String name, String defaultValue) {

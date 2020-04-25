@@ -6,6 +6,9 @@ import com.jadaptive.api.user.User;
 
 public interface RoleService {
 
+	public static final String READ_PERMISSION = "role.read";
+	public static final String READ_WRITE_PERMISSION = "role.readWrite";
+
 	Role getAdministrationRole();
 
 	Role getEveryoneRole();

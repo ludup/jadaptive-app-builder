@@ -12,13 +12,19 @@ import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.jobs.JobService;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.permissions.Permissions;
+import com.jadaptive.api.scheduler.SchedulerService;
 
 @Service
+@Permissions(keys = { JobService.EXECUTE_PERMISSION })
 public class JobServiceImpl extends AuthenticatedService implements JobService {
 
 	@Autowired
 	private TenantAwareObjectDatabase<Job> jobDatabase;
 
+	@Autowired
+	private SchedulerService schedulerService; 
+	
 	@Override
 	public void createJob(Job job) {
 		
@@ -70,7 +76,14 @@ public class JobServiceImpl extends AuthenticatedService implements JobService {
 
 	@Override
 	public void scheduleExecution(Job job, String crontab) {
-		
-		
+		assertPermission(EXECUTE_PERMISSION);
+		schedulerService.schedule(job, crontab);
+	}
+
+
+	@Override
+	public void runNow(Job job) {
+		assertPermission(EXECUTE_PERMISSION);
+		schedulerService.runNow(job);
 	}
 }

@@ -15,12 +15,13 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.plugins.sshd.AuthorizedKey;
-import com.jadaptive.plugins.sshd.AuthorizedKeyService;
-import com.jadaptive.plugins.sshd.AuthorizedKeyServiceImpl;
+import com.jadaptive.plugins.keys.AuthorizedKey;
+import com.jadaptive.plugins.keys.AuthorizedKeyService;
+import com.jadaptive.plugins.keys.AuthorizedKeyServiceImpl;
 import com.sshtools.common.files.AbstractFile;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.publickey.SshKeyPairGenerator;
+import com.sshtools.common.publickey.SshKeyUtils;
 import com.sshtools.common.publickey.SshPrivateKeyFile;
 import com.sshtools.common.publickey.SshPrivateKeyFileFactory;
 import com.sshtools.common.publickey.SshPublicKeyFile;
@@ -124,9 +125,12 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 				
 				AuthorizedKey key = new AuthorizedKey();
 				key.setPublicKey(new String(pubFile.getFormattedKey(), "UTF-8"));
+				key.setFingerprint(SshKeyUtils.getFingerprint(pair.getPublicKey()));
+				key.setType(pair.getPublicKey().getAlgorithm());
 				key.setName(comment);
+				key.getTags().add(AuthorizedKeyServiceImpl.SSH_TAG);
 				
-				authorizedKeyService.saveOrUpdate(key, AuthorizedKeyServiceImpl.SSH_TAG, forUser);
+				authorizedKeyService.saveOrUpdate(key, forUser);
 				
 				if(CliHelper.hasOption(args, 'f', "file")) {
 					String path = CliHelper.getValue(args, 'f', "file");

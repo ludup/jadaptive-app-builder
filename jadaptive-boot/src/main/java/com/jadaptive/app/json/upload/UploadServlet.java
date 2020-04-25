@@ -27,11 +27,11 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionStickyInputStream;
 import com.jadaptive.api.session.SessionTimeoutException;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.upload.UploadHandler;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.json.ResponseHelper;
-import com.jadaptive.app.session.SessionUtils;
 import com.jadaptive.utils.FileUtils;
 
 @WebServlet(name="uploadServlet", description="Servlet for handing file uploads", urlPatterns = { "/upload/*" })
@@ -52,6 +52,13 @@ public class UploadServlet extends HttpServlet {
 	PluginManager pluginManager;
 	
 	Map<String,UploadHandler> uploadHandlers = new HashMap<>();
+	
+	@Override
+	protected void service(HttpServletRequest httpRequest, HttpServletResponse httpResponse)
+			throws ServletException, IOException {
+		
+		super.service(httpRequest, httpResponse);
+	}
 	
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

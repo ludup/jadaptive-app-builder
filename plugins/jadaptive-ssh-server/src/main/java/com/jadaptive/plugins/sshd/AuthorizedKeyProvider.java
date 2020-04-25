@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.plugins.keys.AuthorizedKey;
+import com.jadaptive.plugins.keys.AuthorizedKeyService;
 import com.sshtools.common.auth.AbstractPublicKeyAuthenticationProvider;
 import com.sshtools.common.publickey.SshKeyUtils;
 import com.sshtools.common.ssh.SshConnection;

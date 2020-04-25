@@ -14,7 +14,7 @@
 
 	<properties>
 		<plugin.id>jadaptive-web-management-webbits</plugin.id>
-		<plugin.class></plugin.class>
+		<plugin.class>com.jadaptive.ui.webbits.WebbitsPlugin</plugin.class>
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder/plugins</plugin.projectUrl>
@@ -27,6 +27,12 @@
 			<artifactId>jadaptive-api</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.jadaptive</groupId>
@@ -36,8 +42,26 @@
 		</dependency>
 		<dependency>
 			<groupId>com.codesmith</groupId>
-			<artifactId>webbits-spring</artifactId>
+			<artifactId>webbits-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.websocket</groupId>
+					<artifactId>javax.websocket-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 

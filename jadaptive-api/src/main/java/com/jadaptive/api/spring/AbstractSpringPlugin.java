@@ -41,6 +41,15 @@ public class AbstractSpringPlugin extends SpringPlugin {
 		for(PluginDependency depend : wrapper.getDescriptor().getDependencies()) {
 
 			PluginWrapper dependWrapper = wrapper.getPluginManager().getPlugin(depend.getPluginId());
+			
+			if(dependWrapper==null) {
+				throw new IllegalStateException("Invalid plugin id " + depend.getPluginId());
+			}
+			
+			if(log.isInfoEnabled()) {
+				log.info("Checking dependency {} for Springness", dependWrapper.getPluginId());
+			}
+			
 			if(dependWrapper.getPlugin() instanceof SpringPlugin) {
 				if(log.isInfoEnabled()) {
 					log.info("Plugin {} has Spring parent context from {}",
@@ -54,10 +63,14 @@ public class AbstractSpringPlugin extends SpringPlugin {
 		AnnotationConfigApplicationContext pluginContext = new AnnotationConfigApplicationContext();
 		pluginContext.setParent(parentContext);
 		pluginContext.setClassLoader(getWrapper().getPluginClassLoader());
-		pluginContext.scan(getClass().getPackage().getName());
+		pluginContext.scan(getBasePackages());
 		pluginContext.refresh();
       
         return pluginContext;
+	}
+
+	protected String[] getBasePackages() {
+		return new String[] { getClass().getPackage().getName() };
 	}
 
 }

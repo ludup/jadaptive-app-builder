@@ -12,8 +12,8 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.plugins.sshd.AuthorizedKey;
-import com.jadaptive.plugins.sshd.AuthorizedKeyServiceImpl;
+import com.jadaptive.plugins.keys.AuthorizedKey;
+import com.jadaptive.plugins.keys.AuthorizedKeyServiceImpl;
 import com.sshtools.common.files.AbstractFile;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.publickey.InvalidPassphraseException;
@@ -101,6 +101,8 @@ public class ImportKey extends AbstractTenantAwareCommand {
 		
 		AuthorizedKey key = new AuthorizedKey();
 		key.setPublicKey(publicKey);
+		key.setFingerprint(SshKeyUtils.getFingerprint(pub));
+		key.setType(pub.getAlgorithm());
 		key.setName(comment);
 		key.getTags().add(AuthorizedKeyServiceImpl.SSH_TAG);
 		

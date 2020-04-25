@@ -11,6 +11,9 @@ public interface UserService {
 	
 	public static final String USER_RESOURCE_KEY = "user";
 	
+	public static final String READ_PERMISSION = "user.read";
+	public static final String READ_WRITE_PERMISSION = "user.readWrite";
+	
 	boolean verifyPassword(User username, char[] password);
 
 	User getUser(String username);

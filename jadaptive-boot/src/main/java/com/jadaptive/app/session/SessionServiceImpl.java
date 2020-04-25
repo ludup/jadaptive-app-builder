@@ -13,6 +13,7 @@ import com.jadaptive.api.session.SessionRepository;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
+import com.jadaptive.utils.Utils;
 
 @Service
 public class SessionServiceImpl implements SessionService {
@@ -32,6 +33,7 @@ public class SessionServiceImpl implements SessionService {
 		session.setTenant(tenant);
 		session.setUserAgent(userAgent);
 		session.setUsername(user.getUsername());
+		session.setCsrfToken(Utils.generateRandomAlphaNumericString(32));
 		
 		repository.saveOrUpdate(session);
 		

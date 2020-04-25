@@ -17,11 +17,19 @@ public class Session extends AbstractUUIDEntity {
 	String userAgent;
 	Integer sessionTimeout;
 	String username;
+	String csrfToken; 
 	
 	public Session() {
 
 	}
 
+	public String getId() {
+		/**
+		 * For compatibility with Hypersocket
+		 */
+		return getUuid();
+	}
+	
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}
@@ -90,16 +98,14 @@ public class Session extends AbstractUUIDEntity {
 		this.username = username;
 	}
 
-	public Tenant getCurrentTenant() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public String getCsrfToken() {
-		// TODO Auto-generated method stub
-		return null;
+		return csrfToken;
 	}
 
+	public void setCsrfToken(String csrfToken) {
+		this.csrfToken = csrfToken;
+	}
+	
 	@JsonIgnore
 	public boolean isReadyForUpdate() {
 		// We save our state every minute
@@ -107,5 +113,9 @@ public class Session extends AbstractUUIDEntity {
 			return true;
 		}
 		return System.currentTimeMillis() - lastUpdated.getTime() > 60000L;
+	}
+
+	public boolean isClosed() {
+		return signedOut!=null;
 	}
 }

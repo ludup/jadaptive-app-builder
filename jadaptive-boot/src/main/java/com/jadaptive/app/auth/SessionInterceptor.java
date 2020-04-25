@@ -23,9 +23,9 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.app.session.SessionUtils;
 import com.jadaptive.utils.FileUtils;
 
 @Component
@@ -73,7 +73,7 @@ public class SessionInterceptor extends HandlerInterceptorAdapter {
 		if(Objects.isNull(session) && Boolean.parseBoolean(properties.getProperty("authentication.allowAnonymous", "false"))) {
 			permissionService.setupSystemContext();
 		} else if(Objects.nonNull(session)) {
-			tenantService.setCurrentTenant(session.getCurrentTenant());	
+			tenantService.setCurrentTenant(session.getTenant());	
 			permissionService.setupUserContext(userService.getUser(session.getUsername()));
 		} 
 

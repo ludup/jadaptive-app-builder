@@ -6,15 +6,15 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.user.User;
-import com.jadaptive.plugins.sshd.AuthorizedKey;
-import com.jadaptive.plugins.sshd.AuthorizedKeyService;
+import com.jadaptive.plugins.keys.AuthorizedKey;
+import com.jadaptive.plugins.keys.AuthorizedKeyService;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.CliHelper;
 import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
-public class AuthorizedKeys extends UserCommand {
+public class AuthorizedKeys extends AbstractTenantAwareCommand {
 	
 	@Autowired
 	private AuthorizedKeyService authorizedKeyService;
@@ -22,7 +22,7 @@ public class AuthorizedKeys extends UserCommand {
 	public AuthorizedKeys() {
 		super("authorized-keys", 
 				"Key Management",
-				UsageHelper.build("authorized-keys <user>"),
+				UsageHelper.build("authorized-keys [--user <username>]"),
 						"List your own, or another users authorized keys");
 	}
 
@@ -30,21 +30,20 @@ public class AuthorizedKeys extends UserCommand {
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 	
-		User user = getCommandLineUser(false);
+		User user = getCurrentUser();
+		if(CliHelper.hasOption(args, 'u', "user")) {
+			user = userService.getUser(CliHelper.getValue(args, 'u', "user"));
+		}
 		
 		Collection<AuthorizedKey> keys;
-		if(CliHelper.hasOption(args, 's', "system")) {
-			keys =  authorizedKeyService.getSystemKeys(user);
+		if(CliHelper.hasOption(args, 't', "tag")) {
+			keys =  authorizedKeyService.getAuthorizedKeys(user, 
+					CliHelper.getValue(args, 't', "tag"));
 		} else {
 			keys  = authorizedKeyService.getAuthorizedKeys(user);
 		}
 		for(AuthorizedKey key :keys) {
 			console.println(key.getPublicKey());
 		}
-	}
-
-	@Override
-	protected void assertPermission() {
-		// Any user can list another users keys
 	}
 }

@@ -21,10 +21,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionService;
+import com.jadaptive.api.session.SessionTimeoutException;
+import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.auth.AuthenticationService;
 import com.jadaptive.app.auth.SessionInterceptor;
-import com.jadaptive.app.session.SessionUtils;
 
 @Controller
 public class LogonController {
@@ -46,7 +49,10 @@ public class LogonController {
 	@Autowired
 	private AuthenticationService authenticationService; 
 	
-	@RequestMapping(value="api/logon", method = RequestMethod.POST, produces = {"application/json"})
+	@Autowired
+	private SessionService sessionService; 
+	
+	@RequestMapping(value="api/logon/basic", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus logonUser(HttpServletRequest request, HttpServletResponse response, 
@@ -55,6 +61,12 @@ public class LogonController {
 		permissionService.setupSystemContext();
 		
 		try {
+			Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
+			
+			if("true".equalsIgnoreCase(properties.getProperty("logon.basic.disabled"))) {
+				return new RequestStatus(false, "Permission denied");
+			}
+			
 			Session session = authenticationService.logonUser(username, password,
 					tenantService.getCurrentTenant(), 
 					request.getRemoteAddr(), 
@@ -64,7 +76,6 @@ public class LogonController {
 			
 			String homePage = (String) request.getSession().getAttribute(SessionInterceptor.PRE_LOGON_ORIGINAL_URL);
 			if(Objects.isNull(homePage)) {
-				Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 				homePage = properties.getProperty("authentication.homePage");
 			}
 			if(log.isInfoEnabled()) {
@@ -73,11 +84,30 @@ public class LogonController {
 			return new RequestStatus(true, homePage);
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
-				log.error("POST api/logon", e);
+				log.error("POST api/logon/basic", e);
 			}
 			return new RequestStatus(false, e.getMessage());
 		} finally {
 			permissionService.clearUserContext();
+		}
+	}
+	
+	@RequestMapping(value="api/logoff", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus logoff(HttpServletRequest request, HttpServletResponse response)  {
+
+		try {
+			Session session = sessionUtils.getSession(request);
+			if(session.isClosed()) {
+				return new RequestStatus(false, "Session already closed");
+			}
+			
+			sessionService.closeSession(session);
+			
+			return new RequestStatus(true, "Session closed");
+		} catch(UnauthorizedException | SessionTimeoutException e) {
+			return new RequestStatus(false, e.getMessage());
 		}
 	}
 }

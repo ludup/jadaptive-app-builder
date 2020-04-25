@@ -335,15 +335,15 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
-			if(w.getPlugin()==null) {
-				continue;
-			}
 			if(log.isInfoEnabled()) {
 				log.info("Scanning plugin {} for entity templates in {}", 
 						w.getPluginId(),
 						w.getPlugin().getClass().getPackage().getName());
 			}
-			
+
+			if(w.getPlugin()==null) {
+				continue;
+			}
 
             try (ScanResult scanResult =
                     new ClassGraph()                 
