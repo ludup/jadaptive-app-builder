@@ -24,9 +24,9 @@ import com.jadaptive.app.scheduler.LockableTaskScheduler;
 @Configuration
 @EnableAsync
 @EnableScheduling
-public class AppConfig {
+public class ApplicationConfig {
 
-	static Logger log = LoggerFactory.getLogger(AppConfig.class);
+	static Logger log = LoggerFactory.getLogger(ApplicationConfig.class);
 	
 	SpringPluginManager pluginManager;
 	

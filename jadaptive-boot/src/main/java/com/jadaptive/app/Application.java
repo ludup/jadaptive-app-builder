@@ -1,6 +1,19 @@
 package com.jadaptive.app;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.security.KeyPair;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Properties;
+
+import javax.net.ssl.KeyManagerFactory;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
@@ -15,7 +28,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
+import com.jadaptive.api.x509.MismatchedCertificateException;
+import com.jadaptive.api.x509.X509CertificateUtils;
 
 @ComponentScan({"com.jadaptive.app.**", "com.jadaptive.api.**"})
 @ServletComponentScan
@@ -48,6 +64,15 @@ public class Application {
 	public static void main(String[] args) {
 		 
 		 PropertyConfigurator.configure("conf/app-logging.properties");
+		 
+
+		 try {
+			checkDefaultCertificate();
+		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException
+				| MismatchedCertificateException e) {
+			log.error("Failed to setup default SSL certificate", e);
+			return;
+		}
 		 
 		 app = new SpringApplication(Application.class);
 		 app.setBanner(new Banner() {
@@ -82,8 +107,34 @@ public class Application {
 			 log.info("System exit being called with exitCode={}", exitCode);
 			 System.exit(exitCode);
 		 }
-		 
-		 
+	}
+	
+	private static void checkDefaultCertificate() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, MismatchedCertificateException {
 		
+		if(log.isInfoEnabled()) {
+			log.info(String.format("Generating keystore"));
+		}
+		
+		Properties properties = ApplicationProperties.loadPropertiesFile(new File("application.properties"));
+		
+		File certFile = new File(properties.getProperty("server.ssl.key-store", "conf/cert.p12"));
+		
+		if(!certFile.exists()) {
+			KeyPair kp = X509CertificateUtils.generatePrivateKey("RSA", 2048);
+			 X509Certificate cert = X509CertificateUtils.generateSelfSignedCertificate("localhost", 
+					 "JADAPTIVE Appplication", 
+					 "JADAPTIVE Limited", 
+					 "Penzance", "Cornwall", "GB", kp, "SHA256WithRSAEncryption");
+			 KeyStore ks = X509CertificateUtils.createPKCS12Keystore(kp, 
+					 new X509Certificate[] { cert },
+					 properties.getProperty("server.ssl.key-alias", "server"),
+					 properties.getProperty("server.ssl.key-store-password", "changeit").toCharArray());
+			 
+			 try (OutputStream fout = new FileOutputStream(certFile)) {
+				ks.store(fout, properties.getProperty(
+						"server.ssl.key-store-password", 
+							"changeit").toCharArray());
+			}
+		}
 	}
 }

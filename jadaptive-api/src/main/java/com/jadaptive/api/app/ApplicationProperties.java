@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Provider;
+import java.security.Security;
 import java.util.Objects;
 import java.util.Properties;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,17 +19,35 @@ public class ApplicationProperties {
 	
 	static ApplicationProperties instance = new ApplicationProperties();
 	static Properties properties;
-	static File confFolder = new File(System.getProperty("jadaptive.conf", "conf"));
+	static File confFolder;
 	
 	ApplicationProperties() {
-		properties = new Properties();
-		try(InputStream in = new FileInputStream(
-				new File(confFolder, "jadaptive.properties"))) {
-			properties.load(in);
+		
+		checkBouncyCastleProvider();
+		
+		confFolder = new File(System.getProperty("jadaptive.conf", "conf"));
+		try{
+			properties = loadPropertiesFile(new File(confFolder, "jadaptive.properties"));
 		} catch(IOException e) {
 			log.warn("Could not load jadaptive.properties file [{}]", e.getMessage());
 		}
 		checkLoaded();
+	}
+	
+	private void checkBouncyCastleProvider() {
+		
+		Provider provider = Security.getProvider("BC");
+		if(Objects.isNull(provider)) {
+			Security.addProvider(new BouncyCastleProvider());
+		}
+	}
+
+	public static Properties loadPropertiesFile(File propertiesFile) throws IOException {
+		Properties properties = new Properties();
+		try(InputStream in = new FileInputStream(propertiesFile)) {
+			properties.load(in);
+		} 
+		return properties;
 	}
 	
 	public static File getConfFolder() {
