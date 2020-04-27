@@ -145,6 +145,29 @@
 			<artifactId>hazelcast</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.codesmith</groupId>
+			<artifactId>webbits-spring</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.codesmith</groupId>
+			<artifactId>webbits-bootstrap</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.codesmith</groupId>
+			<artifactId>webbits-jquery</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.codesmith</groupId>
+			<artifactId>webbits-fontawesome</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 

@@ -60,6 +60,13 @@ public class UploadServlet extends HttpServlet {
 		super.service(httpRequest, httpResponse);
 	}
 	
+	
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		resp.sendError(HttpStatus.METHOD_NOT_ALLOWED.value());
+	}
+
+
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		

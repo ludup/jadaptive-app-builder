@@ -42,12 +42,7 @@ public class ResourceController {
 	@Autowired
 	private PluginManager pluginManager; 
 	
-	@RequestMapping(value="", method = RequestMethod.GET)
-	public void doDefaultPath(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityException, IOException {
-		ResponseHelper.sendRedirect("/app/", request, response);
-	}
-	
-	@RequestMapping(value="app/**", method = RequestMethod.GET)
+	@RequestMapping(value="/content/**", method = RequestMethod.GET)
 	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityException, IOException {
 
 		tenantService.setCurrentTenant(request);
@@ -56,7 +51,7 @@ public class ResourceController {
 		
 		try {
 			
-			String resourceUri = uri.length() >= 4 ? uri.substring(4) : "";
+			String resourceUri = uri.length() >= 4 ? uri.substring(12) : "";
 			
 			if(resourceUri.endsWith("security.properties")) {
 				ResponseHelper.send404NotFound(uri, request, response);

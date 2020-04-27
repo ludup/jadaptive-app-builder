@@ -14,11 +14,14 @@ import org.pf4j.PluginRepository;
 import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import com.codesmith.webbits.WebbitsServlet;
+import com.jadaptive.app.json.upload.UploadServlet;
 import com.jadaptive.app.scheduler.LockableTaskScheduler;
 
 @Configuration
@@ -76,4 +79,21 @@ public class ApplicationConfig {
     public void cleanup() {
         pluginManager.stopPlugins();
     }
+	
+	@Bean
+	public ServletRegistrationBean<?> uploadServletBean() {
+	    ServletRegistrationBean<?> bean = new ServletRegistrationBean<>(
+	      new UploadServlet(), "/upload/*");
+	    bean.setLoadOnStartup(1);
+	    return bean;
+	}
+	
+	@Bean
+	public ServletRegistrationBean<?> webbitsServletBean() {
+	    ServletRegistrationBean<?> bean = new ServletRegistrationBean<>(
+	      new WebbitsServlet(), "/ui/*");
+	    bean.setLoadOnStartup(1);
+	    bean.setAsyncSupported(true);
+	    return bean;
+	}
 }
