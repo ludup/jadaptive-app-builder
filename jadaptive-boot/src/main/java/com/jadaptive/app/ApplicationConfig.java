@@ -14,8 +14,10 @@ import org.pf4j.PluginRepository;
 import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -25,6 +27,8 @@ import com.jadaptive.app.json.upload.UploadServlet;
 import com.jadaptive.app.scheduler.LockableTaskScheduler;
 
 @Configuration
+@ComponentScan({"com.jadaptive.app.**", "com.jadaptive.api.**"})
+@ServletComponentScan("com.jadaptive.app.**")
 @EnableAsync
 @EnableScheduling
 public class ApplicationConfig {

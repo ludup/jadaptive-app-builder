@@ -5,17 +5,17 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.app.json.ResponseHelper;
 
-@Component
-public class QuotaInterceptor extends HandlerInterceptorAdapter {
+@Extension
+public class QuotaInterceptor implements PluginInterceptor {
 
 	@Autowired
 	private SecurityPropertyService securityService;
@@ -24,8 +24,7 @@ public class QuotaInterceptor extends HandlerInterceptorAdapter {
 	private QuotaService quotaService; 
 	
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
-			throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
 		Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 		
@@ -42,13 +41,10 @@ public class QuotaInterceptor extends HandlerInterceptorAdapter {
 				return true;
 			}
 		}
-		return super.preHandle(request, response, handler);
+		return true;
 	}
 	
 	@Override
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-			ModelAndView modelAndView) throws Exception {
-
-		super.postHandle(request, response, handler, modelAndView);
+	public void postHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 	}
 }

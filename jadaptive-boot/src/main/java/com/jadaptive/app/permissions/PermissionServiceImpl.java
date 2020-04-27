@@ -125,7 +125,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public User getCurrentUser() {
 		Stack<User> userStack = currentUser.get();
 		if(Objects.isNull(userStack) || userStack.isEmpty()) {
-			throw new IllegalStateException("There is no user context setup on this thread!");
+			throw new AccessDeniedException("There is no user context setup on this thread!");
 		}
 		return userStack.peek();
 	}

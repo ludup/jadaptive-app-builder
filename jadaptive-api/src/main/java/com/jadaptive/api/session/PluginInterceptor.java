@@ -7,8 +7,8 @@ import org.pf4j.ExtensionPoint;
 
 public interface PluginInterceptor extends ExtensionPoint {
 
-	boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
+	boolean preHandle(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
-	void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception;
+	void postHandle(HttpServletRequest request, HttpServletResponse response) throws Exception;
 
 }

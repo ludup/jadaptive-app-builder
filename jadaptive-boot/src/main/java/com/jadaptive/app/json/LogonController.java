@@ -27,7 +27,7 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.auth.AuthenticationService;
-import com.jadaptive.app.auth.SessionInterceptor;
+import com.jadaptive.app.session.SessionFilter;
 
 @Controller
 public class LogonController {
@@ -74,7 +74,7 @@ public class LogonController {
 			
 			sessionUtils.addSessionCookies(request, response, session);
 			
-			String homePage = (String) request.getSession().getAttribute(SessionInterceptor.PRE_LOGON_ORIGINAL_URL);
+			String homePage = (String) request.getSession().getAttribute(SessionFilter.PRE_LOGON_ORIGINAL_URL);
 			if(Objects.isNull(homePage)) {
 				homePage = properties.getProperty("authentication.homePage");
 			}

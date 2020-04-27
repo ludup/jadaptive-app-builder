@@ -1,9 +1,11 @@
 package com.jadaptive.app.json;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -11,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +49,13 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 	
 	@Autowired
 	private EntityService<MongoEntity> entityService; 
+	
+	@ExceptionHandler(AccessDeniedException.class)
+	public void handleException(HttpServletRequest request, 
+			HttpServletResponse response,
+			AccessDeniedException e) throws IOException {
+	   response.sendError(HttpStatus.FORBIDDEN.value(), e.getMessage());
+	}
 	
 	@RequestMapping(value="api/template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
@@ -169,11 +179,18 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		try {
 			   return new EntityStatus<MongoEntity>(entityService.getSingleton(resourceKey));
 		} catch(Throwable e) {
-			if(log.isErrorEnabled()) {
-				log.error("GET api/{}", resourceKey, e);
-			}
-			return new EntityStatus<MongoEntity>(false, e.getMessage());
+			return handleException(e, "GET", resourceKey);
 		}
+	}
+	
+	private EntityStatus<MongoEntity> handleException(Throwable e, String method, String resourceKey) {
+		if(e instanceof AccessDeniedException) {
+			throw (AccessDeniedException)e;
+		}
+		if(log.isErrorEnabled()) {
+			log.error("{} api/{}", method, resourceKey, e);
+		}
+		return new EntityStatus<MongoEntity>(false, e.getMessage());
 	}
 	
 	@RequestMapping(value="api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"})
@@ -185,10 +202,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 			entityService.saveOrUpdate(entity);
 			return new RequestStatus();
 		} catch (Throwable e) {
-			if(log.isErrorEnabled()) {
-				log.error("POST api/{}", resourceKey, e);
-			}
-			return new RequestStatus(false, e.getMessage());
+			return handleException(e, "POST", resourceKey);
 		}
 	}
 	
@@ -201,10 +215,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 			entityService.delete(resourceKey, uuid);
 			return new RequestStatus();
 		} catch (Throwable e) {
-			if(log.isErrorEnabled()) {
-				log.error("DELETE api/{}/{}", resourceKey, uuid, e);
-			}
-			return new RequestStatus(false, e.getMessage());
+			return handleException(e, "DELETE", resourceKey);
 		}
 	}
 	
@@ -267,5 +278,4 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
-
 }

@@ -36,7 +36,6 @@ import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
 import com.jadaptive.app.ui.JadaptiveApp;
 
-@ComponentScan({"com.jadaptive.app.**", "com.jadaptive.api.**"})
 @SpringBootApplication
 @ImportResource({ "classpath*:webbits.xml" })
 @WebbitsComponentScan(basePackageClasses = {
