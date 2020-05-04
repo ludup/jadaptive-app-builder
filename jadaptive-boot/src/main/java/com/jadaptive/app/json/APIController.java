@@ -133,6 +133,21 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
+	
+	@RequestMapping(value="api/template/{uuid}/children", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public EntityStatus<Collection<EntityTemplate>> getChildTemplates(HttpServletRequest request, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
+		try {
+		   return new EntityStatus<Collection<EntityTemplate>>(templateService.children(uuid));
+		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/template/{}/children", uuid, e);
+			}
+			return new EntityStatus<Collection<EntityTemplate>>(false, e.getMessage());
+		}
+	}
+	
 	@RequestMapping(value="api/template/table", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
@@ -147,7 +162,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		   return new TableStatus<EntityTemplate>(templateService.table(searchField, searchValue, order, offset, limit), templateService.count());
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
-				log.error("GET api/template/list", e);
+				log.error("GET api/template/table", e);
 			}
 			return new TableStatus<EntityTemplate>(false, e.getMessage());
 		}

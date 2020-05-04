@@ -1,0 +1,12 @@
+<div class="form-group col-12">
+    <label for="${resourceKey}" class="col-form-label">${name}</label>
+      <div id="${resourceKey}" class="input-group dropdown">
+	  <input class="dropdown-toggle form-control" readonly="readonly" type="text" id="${resourceKey}Input" value="${value}"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	  <small class="form-text text-muted">${description}</small>
+	  <div class="input-group-append">
+          <span class="input-group-text"><i class="fas fa-chevron-down"></i></span>
+      </div>
+	  <div class="dropdown-menu" aria-labelledby="${resourceKey}Input">
+	  </div>
+  </div>
+</div>

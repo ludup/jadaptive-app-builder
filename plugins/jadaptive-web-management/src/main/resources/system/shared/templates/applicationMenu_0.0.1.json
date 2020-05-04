@@ -9,26 +9,23 @@
               "name": "Title",
               "defaultValue": "",
               "description": "The title visible to users",
-              "fieldType": "TEXT"
-       }, {
-              "resourceKey": "resource",
-              "name": "Resource",
-              "defaultValue": "",
-              "description": "The resource key of the entity this menu links to",
-              "fieldType": "TEXT"
+              "fieldType": "TEXT",
+              "searchable": true
        }, {
               "resourceKey": "path",
               "name": "Path",
               "defaultValue": "",
               "description": "The URL path of this resource",
-              "fieldType": "TEXT"
+              "fieldType": "TEXT",
+              "searchable": true
        },{
               "resourceKey": "permissions",
               "name": "Permissions",
               "collection": true,
               "defaultValue": "",
               "description": "The permission(s) required to access this menu",
-              "fieldType": "TEXT"
+              "fieldType": "TEXT",
+              "searchable": true
        }, {
               "resourceKey": "icon",
               "name": "Icon",
@@ -40,7 +37,15 @@
               "name": "Keywords",
               "defaultValue": "",
               "description": "Keywords that users might use to search for this page",
-              "fieldType": "TEXT"
+              "fieldType": "TEXT",
+              "searchable": true
+       },{
+              "resourceKey": "description",
+              "name": "Description",
+              "defaultValue": "",
+              "description": "Description of the page used when searching the menu",
+              "fieldType": "TEXT_AREA",
+              "searchable": true
        }, {
               "resourceKey": "parent",
               "name": "Parent",
@@ -52,5 +57,5 @@
               	"value": "applicationMenu"
               }]
        }],
-  "defaultFilter": "permission in(${permissions})"
+  "defaultFilter": "permissions in(${permissions})"
 }]

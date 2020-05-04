@@ -28,10 +28,15 @@ import com.codesmith.webbits.spring.WebbitsPageScope;
 @View(contentType = "text/html", paths = "/")
 @Component
 @Scope(WebbitsPageScope.ID)
-public class JadaptiveApp {
+public class JadaptiveApp extends AuthenticatedView {
 
 	@Out()
     Document service(@In Document template) {
-		throw new Redirect("/app/content/upload");
+		throw new Redirect(Dashboard.class);
     }
+
+	@Override
+	protected void onCreated() {
+		
+	}
 }

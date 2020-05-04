@@ -17,6 +17,8 @@ public @interface Column {
 		
 		FieldType type();
 		
+		boolean readOnly() default false;
+		
 		boolean required() default false;
 
 		boolean hidden() default false;

@@ -29,6 +29,7 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
+import com.jadaptive.app.user.AdminUser;
 import com.jadaptive.utils.Utils;
 
 import io.github.classgraph.ClassGraph;
@@ -109,8 +110,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Override
 	public void setupUserContext(User user) {
 		
-		if(log.isInfoEnabled()) {
-			log.info(String.format("Creating user context for %s", user.getUsername()));
+		if(log.isDebugEnabled()) {
+			log.debug(String.format("Creating user context for %s", user.getUsername()));
 		}
 		
 		Stack<User> userStack = currentUser.get();
@@ -143,8 +144,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			throw new IllegalStateException("There is no user context to clear on this thread!");
 		}
 		User user = userStack.pop();
-		if(log.isInfoEnabled()) {
-			log.info(String.format("Cleared user context for %s", user.getUsername()));
+		if(log.isDebugEnabled()) {
+			log.debug(String.format("Cleared user context for %s", user.getUsername()));
 		}
 	}
 	
@@ -292,7 +293,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			log.debug(String.format("Asserting permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
 		}
 		
-		if(user.getUuid().equals(SYSTEM_USER_UUID)) {
+		if(user.getUuid().equals(SYSTEM_USER_UUID) || user instanceof AdminUser) {
 			return;
 		}
 
@@ -382,6 +383,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			
 			scanForPermissions(w.getPluginClassLoader(), w.getPlugin().getClass().getPackage().getName());
 		}
+		
+		scanForPermissions(getClass().getClassLoader(), "com.jadaptive.app");
 		
 	}
 

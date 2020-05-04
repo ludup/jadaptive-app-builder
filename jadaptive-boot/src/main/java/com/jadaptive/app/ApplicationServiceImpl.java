@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.spring.AbstractSpringPlugin;
 
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
@@ -123,5 +124,4 @@ public class ApplicationServiceImpl implements ApplicationService {
 	public AutowireCapableBeanFactory getAutowireCapableBeanFactory() {
 		return context.getAutowireCapableBeanFactory();
 	}
-
 }

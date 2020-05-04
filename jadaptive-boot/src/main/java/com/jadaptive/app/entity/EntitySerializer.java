@@ -134,7 +134,7 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 		case PASSWORD:
 		case OBJECT_REFERENCE:
 		case ENUM:
-			gen.writeStringField(t.getResourceKey(), value.toString());
+			gen.writeStringField(t.getResourceKey(), checkNull(value));
 			break;
 		default:
 			throw new IllegalStateException(
@@ -144,6 +144,12 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 		
 	}
 	
+	private String checkNull(Object obj) {
+		if(Objects.nonNull(obj)) {
+			return obj.toString();
+		}
+		return "";
+	}
 	private void writeCollectionField(JsonGenerator gen, FieldTemplate t, Object value) throws IOException {
 		
 		switch (t.getFieldType()) {

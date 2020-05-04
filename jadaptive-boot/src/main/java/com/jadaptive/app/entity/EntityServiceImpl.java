@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.entity.EntityRepository;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.entity.EntityType;
@@ -42,11 +43,15 @@ public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEn
 			throw new EntityException(String.format("%s is not a singleton entity", resourceKey));
 		}
 		
-		MongoEntity e = entityRepository.get(resourceKey, resourceKey);
-		if(!resourceKey.equals(e.getResourceKey())) {
-			throw new IllegalStateException();
+		try {
+			MongoEntity e = entityRepository.get(resourceKey, resourceKey);
+			if(!resourceKey.equals(e.getResourceKey())) {
+				throw new IllegalStateException();
+			}
+			return e;
+		} catch(EntityNotFoundException e) {
+			return new MongoEntity();
 		}
-		return e;
  	}
 	
 	@Override

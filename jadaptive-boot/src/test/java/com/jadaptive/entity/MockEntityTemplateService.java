@@ -53,5 +53,10 @@ public class MockEntityTemplateService implements EntityTemplateService {
 	public <T extends UUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
 		return DocumentHelper.convertDocumentToObject(baseClass, new Document(values));
 	}
+	@Override
+	public Collection<EntityTemplate> children(String uuid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

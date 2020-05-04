@@ -1,0 +1,7 @@
+header {
+	height: 65px;
+}
+
+nav {
+	z-index: 99999;
+}

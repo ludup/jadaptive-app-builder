@@ -126,27 +126,25 @@ public class SessionFilter implements Filter {
 				permissionService.setupUserContext(userService.getUser(session.getUsername()));
 			} 
 	
-			String loginURL = properties.getProperty("authentication.loginURL");
-			String requestURL = request.getRequestURI();
-			
-			if(Objects.nonNull(loginURL) && FileUtils.checkEndsWithNoSlash(requestURL).equals(FileUtils.checkEndsWithNoSlash(loginURL))) {
-				return iteratePluginInterceptors(request, response);
-			}
+//			String loginURL = properties.getProperty("authentication.loginURL", "/app/ui/login");
+//			String requestURL = request.getRequestURI();
+//			
+//			if(Objects.nonNull(loginURL) && FileUtils.checkEndsWithNoSlash(requestURL).equals(FileUtils.checkEndsWithNoSlash(loginURL))) {
+//				return iteratePluginInterceptors(request, response);
+//			}
 		
 			String requireAllPermission = StringUtils.defaultIfBlank(properties.getProperty("permission.requireAll"), null);
 			String requireAnyPermission = StringUtils.defaultIfBlank(properties.getProperty("permission.requireAny"), null);
 			
-			if((Objects.nonNull(requireAllPermission)
-					|| Objects.nonNull(requireAnyPermission))
-						&& Objects.isNull(session)) {
-				request.getSession().setAttribute(PRE_LOGON_ORIGINAL_URL, requestURL);
-				response.sendRedirect(loginURL);
-				return false;
-			}
+//			if(Objects.isNull(session) && "false".equalsIgnoreCase(properties.getProperty("authentication.notRequired", "false"))) {
+//				request.getSession().setAttribute(PRE_LOGON_ORIGINAL_URL, requestURL);
+//				response.sendRedirect(loginURL);
+//				return false;
+//			}
 			
-			if((Objects.isNull(requireAnyPermission) && Objects.isNull(requireAllPermission)) || Objects.isNull(session)) {
-				return iteratePluginInterceptors(request, response);
-			}
+//			if((Objects.isNull(requireAnyPermission) && Objects.isNull(requireAllPermission)) || Objects.isNull(session)) {
+//				return iteratePluginInterceptors(request, response);
+//			}
 	
 			if(Objects.nonNull(requireAllPermission)) {
 				permissionService.assertAllPermission(requireAllPermission.split(","));

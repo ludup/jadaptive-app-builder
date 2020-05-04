@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:webbits="http://webbits.org/webbits"
+	webbits:depends="Bootstrap,Bind,Widgets,FontAwesome,FreeMarker">
+<body>
+<div class="wrapper">
+<header webbits:id="com.jadaptive.app.ui.Header"></header>
+<main class="container mt-3">
+ <div class="row">
+	<ol class="breadcrumb col-12">
+	  <li class="breadcrumb-item"><a href="/app/ui/dashboard">Home</a></li>
+	  <li class="breadcrumb-item active"><a href="/app/ui/table/${view.template.resourceKey}">${view.template.name}</a></li>
+	  <li class="breadcrumb-item active"><a href="/app/ui/create/${view.template.resourceKey}">Create</a></li>
+	</ol>
+  </div>
+   <div class="row my-1">
+   		 <div class="col-8" webbits:id="com.jadaptive.app.ui.Entity"></div>
+   </div>
+   <div class="row my-1">
+         <div class="col-8">
+         	<a class="btn btn-danger" href="/app/ui/table/${view.template.resourceKey}">
+         	<i class="fas fa-step-backward"></i>&nbsp;Back</a>
+         </div>
+   </div>
+</main>
+</div>
+<footer webbits:id="com.jadaptive.app.ui.Footer"></footer>
+</body>
+</html>

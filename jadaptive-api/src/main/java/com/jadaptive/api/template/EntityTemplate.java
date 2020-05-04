@@ -22,6 +22,7 @@ public class EntityTemplate extends NamedUUIDEntity {
 	Map<String,FieldTemplate> fieldsByName;
 	String templateClass; 
 	Collection<String> aliases = new ArrayList<>();
+	String parentTemplate;
 	
 	public EntityTemplate() {
 		
@@ -97,5 +98,13 @@ public class EntityTemplate extends NamedUUIDEntity {
 	
 	public String getTemplateClass() {
 		return templateClass;
+	}
+
+	public String getParentTemplate() {
+		return parentTemplate;
+	}
+
+	public void setParentTemplate(String parentTemplate) {
+		this.parentTemplate = parentTemplate;
 	}
 }

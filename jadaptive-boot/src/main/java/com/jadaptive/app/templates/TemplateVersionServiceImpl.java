@@ -352,10 +352,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                         .whitelistPackages(w.getPlugin().getClass().getPackage().getName())   
                         .scan()) {                  
                 for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Template.class.getName())) {
-                    if(log.isInfoEnabled()) {
-						log.info("Found template {}", classInfo.getName());
-					}
+
                     if(classInfo.getPackageName().startsWith(w.getPlugin().getClass().getPackage().getName())) {
+                        if(log.isInfoEnabled()) {
+    						log.info("Found template {}", classInfo.getName());
+    					}
                     	registerAnnotatedTemplate(classInfo.loadClass());
                     }
                 }
@@ -387,12 +388,25 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			Template e = clz.getAnnotation(Template.class);
 			
+			if(e.resourceKey().equals("builtinUsers")) {
+				System.out.println();
+			}
+
+			
 			EntityTemplate template;
 			try {
 				template = templateRepository.get(clz.getSimpleName());
 			} catch (EntityException ee) {
 				template = new EntityTemplate();
 				template.setUuid(clz.getSimpleName());
+			}
+			
+			Template parent = getParentTemplate(clz);
+			if(Objects.nonNull(parent)) {
+				if(log.isInfoEnabled()) {
+					log.info("{} template has {} as parent", e.resourceKey(), parent.resourceKey());
+				}
+				template.setParentTemplate(parent.resourceKey());
 			}
 			
 			template.setResourceKey(e.resourceKey());
@@ -430,6 +444,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					t.setSearchable(field.searchable());
 					t.setTextIndex(field.textIndex());
 					t.setUnique(field.unique());
+					t.setCollection(f.getType().isAssignableFrom(Collection.class));
+					t.setReadOnly(field.readOnly());
 					
 					switch(field.type()) {
 					case ENUM:
@@ -467,6 +483,22 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 	}
 	
+	private Template getParentTemplate(Class<?> clz) {
+		
+		Class<?> parent = clz.getSuperclass();
+		Template template = null;
+		while(parent!=null){
+			
+			Template t = parent.getAnnotation(Template.class);
+			if(Objects.nonNull(t)) {
+				template = t;
+			}
+			parent = parent.getSuperclass();
+		}
+		
+		return template;
+	}
+
 	private void resolveFields(Class<?> clz, List<Field> fields, boolean recurse) {
 		
 		for(Field field : clz.getDeclaredFields()) {

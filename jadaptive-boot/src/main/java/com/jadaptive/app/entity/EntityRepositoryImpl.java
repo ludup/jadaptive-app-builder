@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.entity.EntityRepository;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.EntityTemplate;
@@ -55,7 +56,11 @@ public class EntityRepositoryImpl implements EntityRepository<MongoEntity> {
 	
 	@Override
 	public MongoEntity get(String uuid, String resourceKey) throws RepositoryException, EntityException {
-		return buildEntity(resourceKey, db.get(uuid, resourceKey, tenantService.getCurrentTenant().getUuid()));
+		Document document = db.get(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
+		if(Objects.isNull(document)) {
+			throw new EntityNotFoundException(String.format("No document for resource %s with uuid %s", resourceKey, uuid));
+		}
+		return buildEntity(resourceKey, document);
 	}
 
 	@Override

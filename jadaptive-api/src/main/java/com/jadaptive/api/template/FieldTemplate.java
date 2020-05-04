@@ -21,6 +21,7 @@ public class FieldTemplate extends NamedUUIDEntity {
 	boolean searchable;
 	boolean unique;
 	boolean textIndex;
+	boolean readOnly;
 	
 	Collection<FieldValidator> validators = new ArrayList<>();
 	
@@ -141,5 +142,11 @@ public class FieldTemplate extends NamedUUIDEntity {
 		throw new IllegalStateException(String.format("There is no validator for type %s on field %s", type.name(), getResourceKey()));
 	}
 
-	
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
 }

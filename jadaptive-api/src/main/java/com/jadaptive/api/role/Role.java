@@ -38,6 +38,7 @@ public class Role extends NamedUUIDEntity {
 			description = "The users assigned to this Role",
 			defaultValue = "false", 
 			type = FieldType.TEXT,
+			
 			searchable = true)
 	Collection<String> users = new HashSet<>();
 	

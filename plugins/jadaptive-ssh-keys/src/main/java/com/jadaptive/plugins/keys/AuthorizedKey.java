@@ -23,22 +23,23 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 	
 	@Column(name = "Key ID", 
 			description = "The ID of this key", 
-			searchable = true, hidden = true, type = FieldType.LONG)
+			searchable = true, 
+			hidden = true, type = FieldType.LONG)
 	Long id;
 	
 	@Column(name = "Name", description = "A name to identify this public key", type = FieldType.TEXT)
 	String name;
 	
-	@Column(name = "Public Key", description = "The formatted public key", type = FieldType.TEXT_AREA)
+	@Column(name = "Public Key", description = "The formatted public key", readOnly = true, type = FieldType.TEXT_AREA)
 	String publicKey;
 	
-	@Column(name = "Fingerprint", description = "The SHA256 fingerprint of the public key", type = FieldType.TEXT, required = false)
+	@Column(name = "Fingerprint", description = "The SHA256 fingerprint of the public key", readOnly = true,  type = FieldType.TEXT, required = false)
 	String fingerprint;
 	
-	@Column(name = "Tags", description = "Tags determine how and when keys can be used", type = FieldType.TEXT, searchable = true, hidden = true)
+	@Column(name = "Tags", description = "Tags determine how and when keys can be used", readOnly = true, type = FieldType.TEXT, searchable = true)
 	Set<String> tags = new HashSet<>();
 	
-	@Column(name = "Type", description = "The type of key", type = FieldType.TEXT)
+	@Column(name = "Type", description = "The type of key", readOnly = true, type = FieldType.TEXT)
 	String type;
 	
 	public Long getId() {

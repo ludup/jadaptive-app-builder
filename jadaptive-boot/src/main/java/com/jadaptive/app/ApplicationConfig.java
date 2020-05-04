@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.lang3.StringUtils;
 import org.pf4j.CompoundPluginRepository;
 import org.pf4j.DefaultPluginRepository;
 import org.pf4j.DevelopmentPluginRepository;
@@ -25,9 +26,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import com.codesmith.webbits.WebbitsServlet;
 import com.jadaptive.app.json.upload.UploadServlet;
 import com.jadaptive.app.scheduler.LockableTaskScheduler;
+import com.jadaptive.app.ui.JadaptiveApp;
 
 @Configuration
 @ComponentScan({"com.jadaptive.app.**", "com.jadaptive.api.**"})
+@ComponentScan(basePackageClasses = JadaptiveApp.class)
 @ServletComponentScan("com.jadaptive.app.**")
 @EnableAsync
 @EnableScheduling
@@ -62,7 +65,9 @@ public class ApplicationConfig {
             		   "jadaptive.developmentPluginDirs", 
             		   "../../jadaptive-vsftp,../../jadaptive-updates,../../jadaptive-key-server").split(",");
                for(String path : additionalDevelopmentPaths) {
-            	   pluginRepository.add(new DevelopmentPluginRepository(Paths.get(path)), this::isDevelopment);
+            	   if(StringUtils.isNotBlank(path)) {
+            		   pluginRepository.add(new DevelopmentPluginRepository(Paths.get(path)), this::isDevelopment);
+            	   }
                }
                pluginRepository.add(new JarPluginRepository(getPluginsRoot()), this::isNotDevelopment);
                pluginRepository.add(new DefaultPluginRepository(getPluginsRoot()), this::isNotDevelopment);

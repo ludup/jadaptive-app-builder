@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.tenant.Tenant;
@@ -14,7 +16,8 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
 @Service
-public class AuthenticationServiceImpl implements AuthenticationService {
+@Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION })
+public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService {
 
 	@Autowired
 	private UserService userService;
@@ -37,12 +40,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				throw new AccessDeniedException("Bad username or password");
 			}
 			
-			if(!userService.verifyPassword(user, password.toCharArray())) {
-				throw new AccessDeniedException("Bad username or password");
+			setupUserContext(user);
+			try {
+				
+				assertPermission(USER_LOGIN_PERMISSION);
+				
+				if(!userService.verifyPassword(user, password.toCharArray())) {
+					throw new AccessDeniedException("Bad username or password");
+				}
+				
+				return sessionService.createSession(tenant, 
+						user, remoteAddress, userAgent);
+				
+			} finally {
+				clearUserContext();
 			}
 			
-			return sessionService.createSession(tenant, 
-					user, remoteAddress, userAgent);
 		
 		} finally {
 			permissionService.clearUserContext();

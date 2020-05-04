@@ -152,7 +152,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 
 		loadUserDatabases();
 		
-		permissionService.registerStandardPermissions(USER_RESOURCE_KEY);
+//		permissionService.registerStandardPermissions(USER_RESOURCE_KEY);
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 		

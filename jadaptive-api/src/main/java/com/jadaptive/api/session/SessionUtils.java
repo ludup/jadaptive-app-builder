@@ -171,11 +171,14 @@ public class SessionUtils {
 				return session;
 			}
 		}
-		for (Cookie c : request.getCookies()) {
-			if (c.getName().equals(SESSION_COOKIE)) {
-				session = sessionService.getSession(c.getValue());
-				if (session != null && sessionService.isLoggedOn(session, false)) {
-					return session;
+		
+		if(request.getCookies()!=null) {
+			for (Cookie c : request.getCookies()) {
+				if (c.getName().equals(SESSION_COOKIE)) {
+					session = sessionService.getSession(c.getValue());
+					if (session != null && sessionService.isLoggedOn(session, false)) {
+						return session;
+					}
 				}
 			}
 		}
@@ -314,7 +317,7 @@ public class SessionUtils {
 	public boolean hasActiveSession(HttpServletRequest request) {
 		try {
 			return getSession(request)!=null;
-		} catch (UnauthorizedException | SessionTimeoutException e) {
+		} catch (EntityNotFoundException | UnauthorizedException | SessionTimeoutException e) {
 			return false;
 		}
 	}

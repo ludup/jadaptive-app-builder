@@ -25,5 +25,7 @@ public interface EntityTemplateService {
 
 	<T extends UUIDEntity> T createObject(Map<String, Object> values, Class<T> baseClass) throws ParseException;
 
+	Collection<EntityTemplate> children(String uuid);
+
 
 }
