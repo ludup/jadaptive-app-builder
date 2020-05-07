@@ -1,0 +1,35 @@
+help
+mem
+ls
+help
+config set
+config getMinimumSFTPWindowSapce
+config getMinDHGroupExchangeKeySize
+config getMinimumSFTPWindowSapce
+config getSendBufferSize
+config getChannelLimit
+config getMaximumSFTPWindowSpace
+config setset
+config setMaximumSFTPWindowSpace 102400000
+config setSocketOptionTcpNoDelay true
+config
+config setPreferredCipherSC aes256-ctr
+
+OA
+OA
+[200~config setPreferredCipherSC aes256-ctr[201~
+[200~config setPreferredCipherSC aes256-ctr[201~
+[200~config setPreferredCipherSC aes256-ctr[201~
+[200~config setPreferredCipherSC aes256-ctr[201~
+[200~config setPreferredCipherSC aes256-ctr[201~
+[200~config setPreferredCipherSC aes256-ctr[201~
+help
+daemon-context
+daemon-context setPermanentTransferThreads 6
+sshd-context --save
+sshd-
+sshd-context save
+OA
+OA
+sshd-context save
+daemon-context save

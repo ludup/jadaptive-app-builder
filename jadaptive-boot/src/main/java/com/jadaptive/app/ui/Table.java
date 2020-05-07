@@ -2,6 +2,7 @@ package com.jadaptive.app.ui;
 
 import java.io.FileNotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,6 +38,10 @@ public class Table extends TemplatePage {
 		} catch(AccessDeniedException e) {
 			throw new FileNotFoundException();
 		}
+	}
+	
+	public boolean isParentTemplate() {
+		return StringUtils.isNotBlank(template.getParentTemplate());
 	}
 	
 	@Out

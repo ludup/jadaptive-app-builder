@@ -10,13 +10,18 @@ import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.Table;
 import com.jadaptive.api.template.Template;
 import com.jadaptive.api.template.UniqueIndex;
 
 
-@Template(name = "Authorized Key", resourceKey = AuthorizedKey.RESOURCE_KEY, aliases = { "userPrivateKeys" },
-     type = EntityType.COLLECTION, scope = EntityScope.PERSONAL)
+@Template(name = "Authorized Keys", 
+	resourceKey = AuthorizedKey.RESOURCE_KEY, 
+	 aliases = { "userPrivateKeys" },
+     type = EntityType.COLLECTION, 
+     scope = EntityScope.PERSONAL)
 @UniqueIndex(columns = { "ownerUUID", "name" })
+@Table(defaultColumns = { "name", "fingerprint", "type" }, optionalColumns = { "id" })
 public class AuthorizedKey extends PersonalUUIDEntity {
 
 	public static final String RESOURCE_KEY = "authorizedKeys";

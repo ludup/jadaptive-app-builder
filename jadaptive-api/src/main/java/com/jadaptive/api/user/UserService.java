@@ -6,13 +6,13 @@ import com.jadaptive.api.template.EntityTemplate;
 
 public interface UserService {
 
-	public static final String CHANGE_PASSWORD_PERMISSION = "user.changePassword";
-	public static final String SET_PASSWORD_PERMISSION = "user.setPassword";
+	public static final String CHANGE_PASSWORD_PERMISSION = "users.changePassword";
+	public static final String SET_PASSWORD_PERMISSION = "users.setPassword";
 	
-	public static final String USER_RESOURCE_KEY = "user";
+	public static final String USER_RESOURCE_KEY = "users";
 	
-	public static final String READ_PERMISSION = "user.read";
-	public static final String READ_WRITE_PERMISSION = "user.readWrite";
+	public static final String READ_PERMISSION = "users.read";
+	public static final String READ_WRITE_PERMISSION = "users.readWrite";
 	
 	boolean verifyPassword(User username, char[] password);
 

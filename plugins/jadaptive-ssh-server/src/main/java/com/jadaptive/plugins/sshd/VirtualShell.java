@@ -23,6 +23,18 @@ public class VirtualShell extends VirtualShellNG {
 	protected RootShell createShell(SshConnection con) throws PermissionDeniedException, IOException {
 		RootShell shell = super.createShell(con);
 		shell.addListener(new MshListener() {
+			
+			@Override
+			public void started(String[] args, VirtualConsole console) {
+				String user = (String) console.getEnvironment().get("USER");
+				permissionService.setupUserContext(userService.getUser(user));
+			}
+			
+			@Override
+			public void finished(String[] args, VirtualConsole console) {
+				permissionService.clearUserContext();
+			}
+			
 			@Override
 			public void commandStarted(Command cmd, String[] args, VirtualConsole console) {
 				String user = (String) console.getEnvironment().get("USER");

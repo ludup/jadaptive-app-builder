@@ -52,6 +52,10 @@ public class ChangePassword extends AuthenticatedView {
     	 */
     	throw new Redirect(Dashboard.class);
     }
+    
+    protected boolean isModal() {
+    	return true;
+    }
 
     public interface PasswordForm {
 

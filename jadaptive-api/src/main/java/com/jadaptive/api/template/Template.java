@@ -22,7 +22,7 @@ public @interface Template {
 
 		boolean hidden() default false;
 		
-		boolean system() default false;
+		boolean system() default true;
 		
 		boolean recurse() default true;
 		

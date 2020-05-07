@@ -45,7 +45,6 @@
 		<module>jadaptive-builtin-users</module>
 		<module>jadaptive-ssh-keys</module>
 		<module>jadaptive-ssh-server</module>
-		<module>jadaptive-ssh-server-legacy</module>
 		<module>jadaptive-ssh-management</module>
 		<module>jadaptive-web-management</module>
 		<module>jadaptive-web-management-webbits</module>

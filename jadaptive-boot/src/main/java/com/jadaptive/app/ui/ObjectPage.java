@@ -10,15 +10,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.app.entity.MongoEntity;
 
-public class ObjectPage extends TemplatePage {
+public abstract class ObjectPage extends TemplatePage {
 
 	@Autowired
 	private EntityService<MongoEntity> objectService; 
 	
+	@Autowired
+	private PermissionService permissionService; 
+	
 	protected String uuid;
 	protected MongoEntity object;
+	protected boolean readOnly;
+	
+	protected boolean isModal() {
+		return true;
+	}
 	
 	protected void onCreated() throws FileNotFoundException {
 
@@ -36,6 +46,18 @@ public class ObjectPage extends TemplatePage {
 			} else if(template.getType()==EntityType.SINGLETON) {
 				object = objectService.getSingleton(template.getResourceKey());
 			}
+			
+			try {
+				permissionService.assertReadWrite(template.getResourceKey());
+			} catch(AccessDeniedException e) { 
+				readOnly = true;
+				try {
+					permissionService.assertRead(template.getResourceKey());
+					
+				} catch(AccessDeniedException ex) {
+					throw new FileNotFoundException(ex.getMessage());
+				}
+ 			}
 		} catch (EntityNotFoundException nse) {
 			throw new FileNotFoundException(String.format("No %s with id %s", resourceKey, uuid));
 		}
@@ -52,5 +74,9 @@ public class ObjectPage extends TemplatePage {
 	
 	public String getUuid() {
 		return StringUtils.defaultString(uuid);
+	}
+
+	public boolean isReadOnly() {
+		return readOnly;
 	}
 }

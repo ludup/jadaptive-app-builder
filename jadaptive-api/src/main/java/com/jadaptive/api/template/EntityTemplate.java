@@ -6,14 +6,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.EntityScope;
 import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
-@Template(name = "Template", resourceKey = "entityTemplate", scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Template", resourceKey = EntityTemplate.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 @UniqueIndex(columns = {"resourceKey"})
 public class EntityTemplate extends NamedUUIDEntity {
 
+	public static final String RESOURCE_KEY = "entityTemplate";
+	
 	EntityType type;
 	EntityScope scope;
 	String resourceKey;
@@ -23,6 +26,8 @@ public class EntityTemplate extends NamedUUIDEntity {
 	String templateClass; 
 	Collection<String> aliases = new ArrayList<>();
 	String parentTemplate;
+	Collection<String> defaultColumns = new ArrayList<>();
+	Collection<String> optionalColumns = new ArrayList<>();
 	
 	public EntityTemplate() {
 		
@@ -80,7 +85,8 @@ public class EntityTemplate extends NamedUUIDEntity {
 		this.defaultFilter = defaultFilter;
 	}
 
-	Map<String,FieldTemplate> toMap() {
+	@JsonIgnore
+	public Map<String,FieldTemplate> toMap() {
 		
 		if(Objects.isNull(fieldsByName)) {
 			Map<String,FieldTemplate> tmp = new HashMap<>();
@@ -107,4 +113,21 @@ public class EntityTemplate extends NamedUUIDEntity {
 	public void setParentTemplate(String parentTemplate) {
 		this.parentTemplate = parentTemplate;
 	}
+
+	public Collection<String> getDefaultColumns() {
+		return defaultColumns;
+	}
+
+	public void setDefaultColumns(Collection<String> defaultColumns) {
+		this.defaultColumns = new ArrayList<>(defaultColumns);
+	}
+
+	public Collection<String> getOptionalColumns() {
+		return optionalColumns;
+	}
+
+	public void setOptionalColumns(Collection<String> optionalColumns) {
+		this.optionalColumns = new ArrayList<>(optionalColumns);
+	}
+	
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
+import com.codesmith.webbits.ParentView;
 import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.Widget;
@@ -26,15 +27,15 @@ public class Header {
 	}
 
 	@Out
-    public Elements service(@In Elements contents) {
+    public Elements service(@In Elements contents, @ParentView AbstractPage page) {
     	
-		
-
-		
 		if(!isLoggedOn()) {
 			contents.select("script").remove();
 			contents.select("#searchForm").remove();
 			contents.select("#logoff").remove();
+		} else if(page.isModal()) {
+			contents.select("script").remove();
+			contents.select("#searchForm").remove();
 		}
 		
 		return contents;

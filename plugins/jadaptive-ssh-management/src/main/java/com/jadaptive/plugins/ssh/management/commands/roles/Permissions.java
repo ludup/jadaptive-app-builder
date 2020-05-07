@@ -14,13 +14,10 @@ import com.sshtools.server.vsession.VirtualConsole;
 public class Permissions extends AbstractTenantAwareCommand {
 
 	@Autowired
-	PermissionService permissionService; 
-	
-	@Autowired
-	UserService userService; 
+	private PermissionService permissionService; 
 	
 	public Permissions() {
-		super("permissions", "User Management", "permissions",
+		super("permissions", "Role Management", "permissions",
 				"List all permissions");
 	}
 

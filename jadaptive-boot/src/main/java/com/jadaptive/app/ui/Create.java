@@ -28,4 +28,5 @@ public class Create extends ObjectPage {
     public Document service(@In Document contents) throws IOException {
     	return contents;
     }
+
 }

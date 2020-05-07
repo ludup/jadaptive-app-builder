@@ -5,7 +5,7 @@ import com.jadaptive.api.tenant.Tenant;
 
 public interface AuthenticationService {
 
-	public static final String USER_LOGIN_PERMISSION =  "user.login";
+	public static final String USER_LOGIN_PERMISSION =  "users.login";
 	
 	Session logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent);
 

@@ -76,7 +76,9 @@ public class Entity {
 					SecurityScope.TENANT, 
 					page.getTemplate().getResourceKey() + ".properties");
 			
-			renderObject(contents, page.getTemplate(), page.getObject(), properties);
+			boolean readOnly = page.isReadOnly();
+			
+			renderObject(contents, page.getTemplate(), page.getObject(), properties, readOnly);
 			return contents;
 		} catch (IOException e) {
 			throw new IOException(e.getMessage(), e);
@@ -85,7 +87,7 @@ public class Entity {
 	
     }
 
-	private void renderObject(Elements contents, EntityTemplate template, MongoEntity entity, Properties properties) {
+	private void renderObject(Elements contents, EntityTemplate template, MongoEntity entity, Properties properties, boolean readOnly) {
 		
 		contents.append("<div id=\"entityForm\" class=\"row\"><form class=\"col-12\"></form></div>");
 		Elements parentElement = contents.select("#entityForm");
@@ -94,59 +96,59 @@ public class Entity {
 		List<FieldTemplate> fields = new ArrayList<>();
 		orderFields(objects, fields, template, properties);
 		
-		renderFields(fields, entity, parentElement, properties);
-		renderObjects(objects, entity, parentElement, properties);
+		renderFields(fields, entity, parentElement, properties, readOnly);
+		renderObjects(objects, entity, parentElement, properties, readOnly);
 	}
 
-	private void renderObjects(List<FieldTemplate> objects, MongoEntity entity, Elements parentElement, Properties properties) {
+	private void renderObjects(List<FieldTemplate> objects, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 		
 		for(FieldTemplate object : objects) {
-			renderObject(parentElement, entity, object);
+			renderObject(parentElement, entity, object, readOnly);
 		}
 	}
 
-	private void renderFields(List<FieldTemplate> fields, MongoEntity entity, Elements parentElement, Properties properties) {
+	private void renderFields(List<FieldTemplate> fields, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 		
 		for(FieldTemplate field : fields) {
-			renderField(parentElement, entity, field, properties);
+			renderField(parentElement, entity, field, properties, readOnly);
 		}
 	}
 
-	private void renderField(Elements parentElement, MongoEntity entity, FieldTemplate fieldTemplate, Properties properties) {
+	private void renderField(Elements parentElement, MongoEntity entity, FieldTemplate fieldTemplate, Properties properties, boolean readOnly) {
 		
 		if(fieldTemplate.getCollection()) {
-			renderColletion(parentElement, entity, fieldTemplate, properties); 
+			renderColletion(parentElement, entity, fieldTemplate, properties, readOnly); 
 		} else {
-			renderFormField(parentElement, entity, fieldTemplate, properties);
+			renderFormField(parentElement, entity, fieldTemplate, properties, readOnly);
 		}
 	}
 	
 	private void renderFormField(Elements parentElement, MongoEntity entity, FieldTemplate fieldTemplate,
-			Properties properties) {
+			Properties properties, boolean readOnly) {
 		
 		switch(fieldTemplate.getFieldType()) {
 		case TEXT:
-			renderTextBox(fieldTemplate, entity, parentElement, properties);
+			renderTextBox(fieldTemplate, entity, parentElement, properties, readOnly);
 			break;
 		case TEXT_AREA:
-			renderTextArea(fieldTemplate, entity, parentElement, properties);
+			renderTextArea(fieldTemplate, entity, parentElement, properties, readOnly);
 			break;
 		case PASSWORD:
-			renderPassword(fieldTemplate, entity, parentElement, properties);
+			renderPassword(fieldTemplate, entity, parentElement, properties, readOnly);
 			break;
 		case TIMESTAMP:
-			renderDate(fieldTemplate, entity, parentElement, properties);
+			renderDate(fieldTemplate, entity, parentElement, properties, readOnly);
 			break;
 		case BOOL:
-			renderBool(fieldTemplate, entity, parentElement, properties);
+			renderBool(fieldTemplate, entity, parentElement, properties, readOnly);
 			break;
 		case ENUM:
-			renderEnum(fieldTemplate, entity, parentElement, properties);
+			renderEnum(fieldTemplate, entity, parentElement, properties, readOnly);
 			break;
 		case DECIMAL:
 		case INTEGER:
 		case LONG:
-			renderNumber(fieldTemplate, entity, parentElement, properties);
+			renderNumber(fieldTemplate, entity, parentElement, properties, readOnly);
 			break;
 		case OBJECT_EMBEDDED:
 		case OBJECT_REFERENCE:
@@ -157,9 +159,9 @@ public class Entity {
 	}
 
 	private void renderColletion(Elements parentElement, MongoEntity entity, FieldTemplate fieldTemplate,
-			Properties properties) {
+			Properties properties, boolean readOnly) {
 		
-		Elements elements = addElement(COLLECTION_TEMPLATE, fieldTemplate, entity, parentElement);
+		Elements elements = addElement(COLLECTION_TEMPLATE, fieldTemplate, entity, parentElement, readOnly);
 		
 //	    <tr>
 //	      <th scope="col">#</th>
@@ -177,30 +179,30 @@ public class Entity {
 //	    </tr>
 	}
 
-	private void renderTextBox(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties) {
+	private void renderTextBox(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement);
+		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 	
-	private void renderPassword(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties) {
+	private void renderPassword(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement);
+		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 
-	private void renderEnum(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties) {
+	private void renderEnum(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
-		Elements elements = addElement(templateHtml, fieldTemplate, entity, parentElement);
+		Elements elements = addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 		
 		fieldTemplate.getValidationValue(ValidationType.OBJECT_TYPE);
 	}
 
-	private void renderBool(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties) {
+	private void renderBool(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
-		Elements elements = addElement(templateHtml, fieldTemplate, entity, parentElement);
+		Elements elements = addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 		if(Objects.nonNull(entity)) {
 			if("true".equalsIgnoreCase(entity.getValue(fieldTemplate).toString())) {
 				elements.select("#" + fieldTemplate.getResourceKey()).attr("checked", "checked");
@@ -208,29 +210,29 @@ public class Entity {
 		}
 	}
 	
-	private void renderNumber(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties) {
+	private void renderNumber(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement);
+		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 	
-	private void renderDate(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties) {
+	private void renderDate(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement);
+		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 	
-	private void renderTextArea(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties) {
+	private void renderTextArea(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement);
+		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 	
 	private String getTemplate(FieldTemplate fieldTemplate, Properties properties) {
 		return DEFAULT_TEMPLATES.get(fieldTemplate.getFieldType());
 	}
 
-	private Elements addElement(String templateHtml, FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement) {
+	private Elements addElement(String templateHtml, FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, boolean readOnly) {
 		templateHtml = templateHtml.replace("${resourceKey}", fieldTemplate.getResourceKey());
 		templateHtml = templateHtml.replace("${name}", fieldTemplate.getName());
 		templateHtml = templateHtml.replace("${description}", fieldTemplate.getDescription());
@@ -246,19 +248,20 @@ public class Entity {
 		if(fieldTemplate.isRequired()) {
 			thisElement.attr("required", "required");
 		}
-		if(fieldTemplate.isReadOnly()) {
+		if(fieldTemplate.isReadOnly() || readOnly) {
 			thisElement.attr("readonly", "readonly");
 		}
 		
 		return thisElement;
 	}
 
-	private void renderObject(Elements parentElement, MongoEntity entity, FieldTemplate object) {
+	private void renderObject(Elements parentElement, MongoEntity entity, FieldTemplate object, boolean readOnly) {
 		
 		
 	}
 
 	private void orderFields(List<FieldTemplate> objects, List<FieldTemplate> fields, EntityTemplate template, Properties properties) {
+		
 		for(FieldTemplate field : template.getFields()) {
 			if(field.getHidden()) {
 				continue;

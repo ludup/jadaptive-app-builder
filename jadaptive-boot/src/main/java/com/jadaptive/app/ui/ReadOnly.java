@@ -28,4 +28,9 @@ public class ReadOnly extends ObjectPage {
     public Document service(@In Document contents) throws IOException {
     	return contents;
     }
+
+	@Override
+	public boolean isReadOnly() {
+		return true;
+	}
 }

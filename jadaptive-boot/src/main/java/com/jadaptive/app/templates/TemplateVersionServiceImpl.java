@@ -44,6 +44,7 @@ import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.Index;
+import com.jadaptive.api.template.Table;
 import com.jadaptive.api.template.Template;
 import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.api.template.ValidationType;
@@ -466,6 +467,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				}
 			}
 			
+			Table table = clz.getAnnotation(Table.class);
+			if(Objects.nonNull(table)) {
+				;
+				template.setDefaultColumns(verifyColumnNames(template, Arrays.asList(table.defaultColumns())));
+				template.setOptionalColumns(verifyColumnNames(template, Arrays.asList(table.optionalColumns())));
+			}
 			templateRepository.saveOrUpdate(template);
 			
 			switch(template.getType()) {
@@ -481,6 +488,16 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		} catch(RepositoryException | EntityException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
 		}
+	}
+	
+	private Collection<String> verifyColumnNames(EntityTemplate template, Collection<String> columns) {
+		Map<String,FieldTemplate> definedColumns = template.toMap();
+		for(String column : columns) {
+			if(!definedColumns.containsKey(column)) {
+				throw new IllegalArgumentException(String.format("%s is not a valid column name", column));
+			}
+		}
+		return columns;
 	}
 	
 	private Template getParentTemplate(Class<?> clz) {

@@ -181,6 +181,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 					}
 					
 					VirtualShell shell = new VirtualShell(con, scf);
+					
 					shell.addProtectedEnvironmentVar("USER");
 					shell.addProtectedEnvironmentVar("TENANT_NAME");
 					shell.addProtectedEnvironmentVar("TENANT_UUID");

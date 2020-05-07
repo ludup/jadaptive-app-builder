@@ -40,7 +40,7 @@ import com.jadaptive.app.auth.AuthenticationService;
 	Enablement.class, I18N.class })
 @View(contentType = "text/html", paths = { "/login"})
 @Resource
-public class Login {
+public class Login extends AbstractPage {
 
 	@Autowired
 	private UserService userService; 

@@ -18,7 +18,6 @@
   </div>
   <div class="row">
   	  <div id="tableholder" class="col-12">
-	  
 	  </div>
 	  <div class="readWrite col-12 mt-3">
 	  	<a href="/app/ui/create/${view.template.resourceKey}" class="btn btn-dark mr-3">Create</a>
@@ -45,7 +44,7 @@ $(document).ready(function() {
 			var t = data.result;
 			
 			var columns = [];
-						
+
 			$.each(t.fields, function(idx, obj) {
 				
 				// TODO based off rendering template
@@ -139,7 +138,7 @@ $(document).ready(function() {
 					    },
 					    callback: function (result) {
 					        if(result) {
-					        	var url = '/app/api/' + t.uuid + '/' + uuid;
+					        	var url = '/app/api/' + t.resourceKey + '/' + uuid;
 					    		
 					    		$.ajax({
 					                url: url,

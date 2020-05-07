@@ -9,7 +9,7 @@ import com.codesmith.webbits.Redirect;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 
-public abstract class AuthenticatedView {
+public abstract class AuthenticatedView extends AbstractPage {
 
 	@Autowired
 	private SessionUtils sessionUtils;
@@ -20,7 +20,7 @@ public abstract class AuthenticatedView {
 		verifySession();
 		onCreated();
 	}
-
+	
 	void verifySession() {
 		if(!sessionUtils.hasActiveSession(Request.get())) {
 			throw new Redirect(Login.class);
