@@ -3,8 +3,13 @@ package com.jadaptive.app.session;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
@@ -24,7 +29,10 @@ import org.springframework.http.HttpHeaders;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.SecurityPropertyService;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.redirect.Redirect;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.api.session.Session;
@@ -32,7 +40,6 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.auth.AuthenticationService;
-import com.jadaptive.utils.FileUtils;
 
 @WebFilter(urlPatterns = { "/*" }, dispatcherTypes = DispatcherType.REQUEST)
 public class SessionFilter implements Filter {
@@ -62,6 +69,11 @@ public class SessionFilter implements Filter {
 	@Autowired
 	private ApplicationService applicationService; 
 	
+	@Autowired
+	private TenantAwareObjectDatabase<Redirect> redirectDatabase;
+	
+	Map<String,String> cachedRedirects = new HashMap<>();
+	
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
@@ -73,6 +85,10 @@ public class SessionFilter implements Filter {
 		
 		try {
 
+			if(checkRedirects(req, resp)) {
+				return;
+			}
+			
 			if(!preHandle(req, resp)) {
 				return;
 			}
@@ -200,5 +216,50 @@ public class SessionFilter implements Filter {
 			}
 		}
 		return null;
+	}
+	
+	private boolean checkRedirects(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		
+		try {
+				
+			String location = cachedRedirects.get(request.getRequestURI());
+			
+			if(Objects.nonNull(location)) {
+				response.sendRedirect(location);
+				return true;
+			} else {
+				
+				log.info("Checking redirect {}", request.getRequestURI());
+				
+				// TODO cache this lookup
+				Collection<Redirect> redirects = redirectDatabase.list(Redirect.class);
+				
+				for(Redirect redirect : redirects) {
+					Pattern pattern = Pattern.compile(redirect.getPath());
+					Matcher matcher = pattern.matcher(request.getRequestURI());
+					if(matcher.matches()) {
+						
+						location = redirect.getLocation();
+						for(int i = 0; i <= matcher.groupCount(); i++) { 
+							location = location.replace("$" + i, matcher.group(i));
+						}
+						
+						cachedRedirects.put(request.getRequestURI(), location);
+						response.sendRedirect(location);
+						return true;
+					}
+				}
+			}
+			
+		} catch(EntityNotFoundException e) {
+		}
+		
+		if(request.getRequestURI().equals("/")) {
+			response.sendRedirect("/app/ui/");
+			return true;
+		}
+		
+	
+		return false;
 	}
 }

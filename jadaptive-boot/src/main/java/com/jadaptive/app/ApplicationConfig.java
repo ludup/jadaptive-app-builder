@@ -15,8 +15,10 @@ import org.pf4j.PluginRepository;
 import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +41,9 @@ public class ApplicationConfig {
 	static Logger log = LoggerFactory.getLogger(ApplicationConfig.class);
 	
 	SpringPluginManager pluginManager;
+	
+	@Autowired
+	private ApplicationContext applicationContext;
 	
     @Bean
     public SpringPluginManager pluginManager() {
@@ -91,8 +96,10 @@ public class ApplicationConfig {
 	
 	@Bean
 	public ServletRegistrationBean<?> uploadServletBean() {
+		UploadServlet servlet = new UploadServlet();
+		applicationContext.getAutowireCapableBeanFactory().autowireBean(servlet);
 	    ServletRegistrationBean<?> bean = new ServletRegistrationBean<>(
-	      new UploadServlet(), "/upload/*");
+	      servlet, "/upload/*");
 	    bean.setLoadOnStartup(1);
 	    return bean;
 	}
@@ -100,7 +107,7 @@ public class ApplicationConfig {
 	@Bean
 	public ServletRegistrationBean<?> webbitsServletBean() {
 	    ServletRegistrationBean<?> bean = new ServletRegistrationBean<>(
-	      new WebbitsServlet(), "/ui/*");
+	      new WebbitsServlet(), "/app/ui/*");
 	    bean.setLoadOnStartup(1);
 	    bean.setAsyncSupported(true);
 	    return bean;

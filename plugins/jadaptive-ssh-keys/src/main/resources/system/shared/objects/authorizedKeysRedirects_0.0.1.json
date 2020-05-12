@@ -1,0 +1,5 @@
+[{
+   "resourceKey": "redirects",
+   "path": "/authorizedKeys/(.+)",
+   "location": "/app/api/agent/authorizedKeys/$1"
+}]

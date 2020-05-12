@@ -3,14 +3,18 @@ package com.jadaptive.app.entity;
 import java.util.Collection;
 import java.util.List;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.entity.EntityRepository;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -18,22 +22,29 @@ import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.SearchHelper;
 
 @Service
 public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEnabledService<MongoEntity> {
 
 	@Autowired
-	EntityRepository<MongoEntity> entityRepository;
+	private EntityRepository<MongoEntity> entityRepository;
 	
 	@Autowired
-	EntityTemplateService templateService;
+	private EntityTemplateService templateService;
 	
 	@Autowired
-	PermissionService permissionService; 
+	private PermissionService permissionService; 
 	
 	@Autowired
-	SearchHelper searchHelper;
+	private SearchHelper searchHelper;
+	
+	@Autowired
+	private EventService eventService;
+	
+	@Autowired
+	private ClassLoaderService classService; 
 	
 	@Override
 	public MongoEntity getSingleton(String resourceKey) throws RepositoryException, EntityException {
@@ -82,6 +93,7 @@ public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEn
 		if(template.getType()==EntityType.SINGLETON && !entity.getUuid().equals(entity.getResourceKey())) {	
 			throw new EntityException("You cannot save a Singleton Entity with a new UUID");
 		}
+		
 		return entityRepository.save(entity);
 		
 	}
@@ -98,7 +110,24 @@ public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEn
 		if(e.getSystem()) {
 			throw new EntityException("You cannot delete a system object");
 		}
-		entityRepository.delete(resourceKey, uuid);
+		
+		try {
+			
+			Class<?> clz = classService.resolveClass((String)e.getDocument().get("_clz"));
+			DocumentHelper.convertDocumentToObject(clz, new Document(e.getDocument()));
+			
+			entityRepository.delete(resourceKey, uuid);
+			
+			eventService.publishStandardEvent(EventType.DELETE, 
+					DocumentHelper.convertDocumentToObject(clz, 
+							new Document(e.getDocument())));
+			
+		} catch(RepositoryException | EntityException ex) {
+			throw ex;
+		} catch(Throwable ex) {
+			// 
+			throw new EntityException(ex.getMessage(), ex);
+		}
 	}
 
 	@Override
