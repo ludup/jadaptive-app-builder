@@ -23,7 +23,7 @@ import com.codesmith.webbits.spring.WebbitsPageScope;
 @Page
 @App({ Bootstrapify.class, FontAwesomeify.class, 
 	Relativize.class, PageResources.class, 
-	PageResourcesElement.class, Absolutify.class, 
+	Absolutify.class, 
 	Enablement.class, I18N.class })
 @View(contentType = "text/html", paths = "/")
 @Component

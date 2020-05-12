@@ -13,20 +13,10 @@ import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
-import com.codesmith.webbits.bootstrap.Bootstrapify;
-import com.codesmith.webbits.extensions.Absolutify;
-import com.codesmith.webbits.extensions.Enablement;
-import com.codesmith.webbits.extensions.I18N;
-import com.codesmith.webbits.extensions.PageResources;
-import com.codesmith.webbits.extensions.PageResourcesElement;
-import com.codesmith.webbits.fontawesome.FontAwesomeify;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 
-@Page({ BootstrapTable.class, Bootstrapify.class, FontAwesomeify.class, 
-	PageResources.class, 
-	PageResourcesElement.class, Absolutify.class, 
-	Enablement.class, I18N.class })
+@Page(BootstrapTable.class)
 @View(contentType = "text/html", paths = { "/import/{resourceKey}"})
 @Component
 @Resource
