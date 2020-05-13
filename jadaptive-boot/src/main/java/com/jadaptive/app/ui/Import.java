@@ -18,7 +18,6 @@ import com.jadaptive.api.permissions.PermissionService;
 
 @Page(BootstrapTable.class)
 @View(contentType = "text/html", paths = { "/import/{resourceKey}"})
-@Component
 @Resource
 public class Import extends TemplatePage {
     

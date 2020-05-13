@@ -17,7 +17,6 @@ import com.codesmith.webbits.freemarker.FreeMarker;
 
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class })
 @View(contentType = "text/html", paths = { "/view/{resourceKey}/{uuid}" })
-@Component
 @Resource
 public class ReadOnly extends ObjectPage {
 

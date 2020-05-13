@@ -26,10 +26,7 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
-@Page({ Bootstrapify.class, FontAwesomeify.class, 
-	PageResources.class, 
-	PageResourcesElement.class, Absolutify.class, 
-	Enablement.class, I18N.class })
+@Page
 @View(contentType = "text/html", paths = { "/changePassword"})
 @Resource
 public class ChangePassword extends AuthenticatedView {

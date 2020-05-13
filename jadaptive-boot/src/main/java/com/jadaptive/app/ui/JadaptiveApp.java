@@ -21,12 +21,11 @@ import com.codesmith.webbits.fontawesome.FontAwesomeify;
 import com.codesmith.webbits.spring.WebbitsPageScope;
 
 @Page
-@App({ Bootstrapify.class, FontAwesomeify.class, 
+@App({ FontAwesomeify.class, 
 	Relativize.class, PageResources.class, 
 	Absolutify.class, 
 	Enablement.class, I18N.class })
 @View(contentType = "text/html", paths = "/")
-@Component
 @Scope(WebbitsPageScope.ID)
 public class JadaptiveApp extends AuthenticatedView {
 

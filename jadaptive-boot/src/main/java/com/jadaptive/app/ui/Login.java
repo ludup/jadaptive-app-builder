@@ -33,7 +33,7 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.auth.AuthenticationService;
 
-@Page()
+@Page
 @View(contentType = "text/html", paths = { "/login"})
 @Resource
 public class Login extends AbstractPage {

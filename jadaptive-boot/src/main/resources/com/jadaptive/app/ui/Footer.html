@@ -1,2 +1,12 @@
 <div id="footer" class="navbar bg-dark">
 </div>
+<script type="text/javascript">
+
+$(document).ready(function(e) {
+	
+	$('.dropdown-item').on('click', function(e) {
+		$(this).closest(".dropdown").find('input[type="hidden"]').val($(this).data('resourcekey'));
+		$(this).closest(".dropdown").find('input[type="text"]').val($(this).text());
+	});
+});
+</script>

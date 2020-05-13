@@ -25,20 +25,24 @@ import com.codesmith.webbits.extensions.PageResources;
 import com.codesmith.webbits.extensions.PageResourcesElement;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.app.SecurityScope;
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.entity.MongoEntity;
+import com.jadaptive.app.ui.renderers.DropdownInput;
 
 @Widget({ PageResources.class, PageResourcesElement.class })
 @View(contentType = "text/html")
 @Resource
-@Component
 public class Entity {
 
 	@Autowired
 	private SecurityPropertyService propertyService; 
+	
+	@Autowired
+	private ClassLoaderService classLoader;
 	
 	Map<FieldType,String> DEFAULT_TEMPLATES = new HashMap<>();
 	String COLLECTION_TEMPLATE;
@@ -89,7 +93,7 @@ public class Entity {
 
 	private void renderObject(Elements contents, EntityTemplate template, MongoEntity entity, Properties properties, boolean readOnly) {
 		
-		contents.append("<div id=\"entityForm\" class=\"row\"><form class=\"col-12\"></form></div>");
+		contents.append("<form id=\"entityForm\" class=\"row\"></form>");
 		Elements parentElement = contents.select("#entityForm");
 		
 		List<FieldTemplate> objects = new ArrayList<>();
@@ -191,12 +195,33 @@ public class Entity {
 		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 
-	private void renderEnum(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderEnum2(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
 		Elements elements = addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
+		elements = elements.select(".dropdown-menu");
 		
-		fieldTemplate.getValidationValue(ValidationType.OBJECT_TYPE);
+		try {
+			Class<?> values = classLoader.resolveClass(
+					fieldTemplate.getValidationValue(ValidationType.OBJECT_TYPE));
+			for(Enum<?> value : (Enum<?>[]) values.getEnumConstants()) {
+				elements.append("<a data-resourcekey=\"" + value.ordinal() + "\" class=\"" 
+						+ "dropdown-item\" href=\"#\">" + value.name() + "</a>");
+			}
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+	
+	private void renderEnum(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
+
+		try {
+			Class<?> values = classLoader.resolveClass(
+					fieldTemplate.getValidationValue(ValidationType.OBJECT_TYPE));
+			new DropdownInput(parentElement, fieldTemplate).renderValues((Enum<?>[])values.getEnumConstants());
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 
 	private void renderBool(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {

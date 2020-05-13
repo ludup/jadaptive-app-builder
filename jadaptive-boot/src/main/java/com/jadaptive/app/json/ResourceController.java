@@ -42,7 +42,7 @@ public class ResourceController {
 	@Autowired
 	private PluginManager pluginManager; 
 	
-	@RequestMapping(value="/content/**", method = RequestMethod.GET)
+	@RequestMapping(value="/app/content/**", method = RequestMethod.GET)
 	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityException, IOException {
 
 		tenantService.setCurrentTenant(request);

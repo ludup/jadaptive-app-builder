@@ -16,3 +16,7 @@ body {
 	height: 65px;
     width: 100%;
 }
+
+input[readonly] {
+  background-color:transparent !important;
+}

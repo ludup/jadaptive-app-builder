@@ -14,16 +14,13 @@ import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.BootBox;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
-import com.codesmith.webbits.extensions.PageResources;
-import com.codesmith.webbits.extensions.PageResourcesElement;
 import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 
-@Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class, PageResources.class, PageResourcesElement.class })
+@Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class })
 @View(contentType = "text/html", paths = { "/table/{resourceKey}" })
-@Component
 @Resource
 public class Table extends TemplatePage {
 

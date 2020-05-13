@@ -57,7 +57,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 	   response.sendError(HttpStatus.FORBIDDEN.value(), e.getMessage());
 	}
 	
-	@RequestMapping(value="api/template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<EntityTemplate> doEntityGet(@PathVariable String resourceKey, HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityException {
@@ -72,7 +72,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		} 
 	}
 	
-	@RequestMapping(value="api/template", method = RequestMethod.POST, produces = {"application/json"})
+	@RequestMapping(value="/app/api/template", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus saveTemplate(@RequestBody EntityTemplate template, HttpServletRequest request) {
@@ -88,7 +88,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
-	@RequestMapping(value="api/template/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
+	@RequestMapping(value="/app/api/template/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus deleteTemplate(@PathVariable String uuid, HttpServletRequest request) {
@@ -104,7 +104,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
-	@RequestMapping(value="api/template/versions", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/template/versions", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<Collection<TemplateVersion>> getTemplateVersions(HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityException {
@@ -119,7 +119,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
-	@RequestMapping(value="api/template/list", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/template/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<Collection<EntityTemplate>> getEntityTemplates(HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityException {
@@ -134,7 +134,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 	}
 	
 	
-	@RequestMapping(value="api/template/{uuid}/children", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/template/{uuid}/children", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<Collection<EntityTemplate>> getChildTemplates(HttpServletRequest request, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
@@ -148,7 +148,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
-	@RequestMapping(value="api/template/table", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/template/table", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public TableStatus<EntityTemplate> getTemplateTable(HttpServletRequest request,
@@ -168,7 +168,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
-	@RequestMapping(value="api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<MongoEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
@@ -182,7 +182,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
-	@RequestMapping(value="api/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<MongoEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
@@ -208,7 +208,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		return new EntityStatus<MongoEntity>(false, e.getMessage());
 	}
 	
-	@RequestMapping(value="api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"})
+	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus saveEntity(HttpServletRequest request, @PathVariable String resourceKey, @RequestBody MongoEntity entity)  {
@@ -221,7 +221,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
-	@RequestMapping(value="api/{resourceKey}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
+	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus saveEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
@@ -234,7 +234,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
-	@RequestMapping(value="api/{resourceKey}/list", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/{resourceKey}/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<Collection<MongoEntity>> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
@@ -248,7 +248,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 		}
 	}
 	
-	@RequestMapping(value="api/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
+	@RequestMapping(value="/app/api/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public BootstrapTableResult<MongoEntity> tableEntities(HttpServletRequest request, 
