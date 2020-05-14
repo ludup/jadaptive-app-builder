@@ -161,7 +161,7 @@ public class ResourceController {
 			}
 		}
 		
-		URL url = getClass().getClassLoader().getResource(resourceUri);
+		URL url = getClass().getClassLoader().getResource(uri);
 		if(Objects.nonNull(url)) {
 			try {
 				return Paths.get(url.toURI());

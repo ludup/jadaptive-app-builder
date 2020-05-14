@@ -108,19 +108,23 @@ public class UploadServlet extends HttpServlet {
 				    	continue;
 				    }
 				    
-				    InputStream stream = new SessionStickyInputStream(
-				    		item.openStream(), 
-				    		session) {
-				    	protected void touchSession() {
-							if((System.currentTimeMillis() - lastTouch) >  30000) {
-								try {
-									sessionUtils.touchSession(session);
-								} catch (SessionTimeoutException e) {
+				    InputStream stream = item.openStream();
+				    
+				    if(Objects.nonNull(session)) {
+					    stream = new SessionStickyInputStream(
+					    		stream, 
+					    		session) {
+					    	protected void touchSession() {
+								if((System.currentTimeMillis() - lastTouch) >  30000) {
+									try {
+										sessionUtils.touchSession(session);
+									} catch (SessionTimeoutException e) {
+									}
+									lastTouch = System.currentTimeMillis();
 								}
-								lastTouch = System.currentTimeMillis();
 							}
-						}
-				    };
+					    };
+				    }
 		
 				    try {
 				    	handler.handleUpload(handlerName, uri, parameters, item.getName(), stream);    
@@ -131,11 +135,13 @@ public class UploadServlet extends HttpServlet {
 			    
 			}
 		
-			resp.setStatus(HttpStatus.OK.value());
+			handler.sendSuccessfulResponse(resp);
+			
+			
 			
 		} catch (FileUploadException | SessionTimeoutException | UnauthorizedException e) {
 			log.error("Upload failure", e);
-			resp.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal error. Please see application log for more information.");
+			handler.sendFailedResponse(resp, e);
 		} finally {
 			if(Objects.nonNull(session)) {
 				permissionService.clearUserContext();

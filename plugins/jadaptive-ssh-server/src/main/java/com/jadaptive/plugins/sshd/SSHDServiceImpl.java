@@ -20,6 +20,7 @@ import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.commands.UserCommandFactory;
 import com.sshtools.common.files.AbstractFileFactory;
@@ -109,51 +110,50 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 
 			@Override
 			public AbstractFileFactory<?> getFileFactory(SshConnection con) {
-				
-				permissionService.setupUserContext(userService.getUser(con.getUsername()));
-				
-				try {
-					List<VirtualMountTemplate> mounts = new ArrayList<>();
-					VirtualMountTemplate home = null;
-					for(PluginFileSystemMount mount : appContext.getBeans(PluginFileSystemMount.class)) {
-						mounts.addAll(mount.getAdditionalMounts());
-						if(mount.hasHome()) {
-							if(Objects.nonNull(home)) {
-								if(log.isWarnEnabled()) {
-									log.warn("A plugin attempted to configure a home mount but it was already defined.");
-								}
-								continue;
-							}
-							if(mount.hasHome()) {
-								home = mount.getHomeMount();
-							}
-						}
-					}
-					
-					if(Objects.isNull(home)) {
-						home = new VirtualMountTemplate("/",
-								replaceTokens("home/" + con.getUsername(), con), 
-								new VFSFileFactory(), 
-								true);
-					}
-
-					return new VirtualFileFactory(home, 
-							mounts.toArray(new VirtualMountTemplate[0]));
-					
-				} catch (IOException | PermissionDeniedException e) {
-					throw new IllegalStateException(e.getMessage(), e);
-				} finally {
-					permissionService.clearUserContext();
-				}
+				return SSHDServiceImpl.this.getFileFactory(userService.getUser(con.getUsername()));
 			}
 			
 		});
 	}
 	
-	private static String replaceTokens(String str,
-			SshConnection con) {
-		String ret = str.replace("${username}", con.getUsername());
-		return ret;
+	@Override
+	public AbstractFileFactory<?> getFileFactory(User user) {
+		
+		permissionService.setupUserContext(user);
+		
+		try {
+			List<VirtualMountTemplate> mounts = new ArrayList<>();
+			VirtualMountTemplate home = null;
+			for(PluginFileSystemMount mount : appContext.getBeans(PluginFileSystemMount.class)) {
+				mounts.addAll(mount.getAdditionalMounts());
+				if(mount.hasHome()) {
+					if(Objects.nonNull(home)) {
+						if(log.isWarnEnabled()) {
+							log.warn("A plugin attempted to configure a home mount but it was already defined.");
+						}
+						continue;
+					}
+					if(mount.hasHome()) {
+						home = mount.getHomeMount();
+					}
+				}
+			}
+			
+			if(Objects.isNull(home)) {
+				home = new VirtualMountTemplate("/",
+						"home/" + user.getUsername(), 
+						new VFSFileFactory(), 
+						true);
+			}
+
+			return new VirtualFileFactory(home, 
+					mounts.toArray(new VirtualMountTemplate[0]));
+			
+		} catch (IOException | PermissionDeniedException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			permissionService.clearUserContext();
+		}
 	}
 	
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
