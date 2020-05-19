@@ -234,9 +234,9 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 			validateText(node, field);
 			return node.asText();
 		case OBJECT_REFERENCE:
-			if(node.isObject()) {
-				return validateReference(node, field);
-			}
+//			if(node.isObject()) {
+//				return validateReference(node, field);
+//			}
 			return node.asText();
 		default:
 			throw new ValidationException(
