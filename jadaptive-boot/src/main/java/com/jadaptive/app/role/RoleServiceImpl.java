@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.entity.ObjectReference2;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleRepository;
