@@ -134,7 +134,7 @@
   "resourceKey" : "applicationMenu",
   "uuid": "c8d39ed7-9f9d-484b-8305-04d1743d47ab",
   "title": "Users",
-  "path": "/app/ui/table/users",
+  "path": "/app/ui/tables/users",
   "permissions": [ "users.read" ],
   "keywords": "",
   "description": "",
