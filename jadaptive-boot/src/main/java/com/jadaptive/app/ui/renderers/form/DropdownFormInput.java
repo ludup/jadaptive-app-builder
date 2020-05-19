@@ -1,4 +1,4 @@
-package com.jadaptive.app.ui.renderers;
+package com.jadaptive.app.ui.renderers.form;
 
 import java.util.Collection;
 import java.util.Map;
@@ -9,25 +9,28 @@ import org.jsoup.select.Elements;
 
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.app.ui.renderers.InputRender;
 
-public class DropdownInput extends InputRender {
+public class DropdownFormInput extends FormInputRender {
 
 	Elements inputElements;
 	Element valueElement;
 	Element nameElement;
-	public DropdownInput(Elements rootElement, String resourceKey, String defaultValue) {
-		super(rootElement, resourceKey, defaultValue);
+	public DropdownFormInput(Elements rootElement, FieldTemplate template, String defaultValue) {
+		super(rootElement, template, defaultValue);
 	}
 
 	@Override
-	protected void renderInput(Elements rootElement, String resourceKey, String defaultValue) {
+	protected void renderInput(Elements rootElement, FieldTemplate template, String value) {
 
-		rootElement.append(replaceResourceKey("<div id=\"${resourceKey}Dropdown\" style=\"position: relative\" class=\"input-group dropdown\"></div>"));
+		rootElement.append(replaceResourceKey("<div class=\"form-group col-12\"><label for=\"${resourceKey}\" class=\"col-form-label\">" 
+				+ template.getName() + "</label><div id=\"${resourceKey}Dropdown\" style=\"position: relative\" class=\"input-group dropdown\"></div></div>"));
 		Elements dropdown = rootElement.select(replaceResourceKey("#${resourceKey}Dropdown"));
 		dropdown.append(replaceResourceKey("<input id=\"${resourceKey}\" name=\"${resourceKey}\" type=\"hidden\">"));
 		dropdown.append(replaceResourceKey("<input id=\"${resourceKey}Text\" data-display=\"static\" class=\"dropdown-toggle form-control\" readonly=\"readonly\" type=\"text\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">"));
 		dropdown.append(replaceResourceKey("<div class=\"input-group-append\"><span class=\"jdropdown input-group-text\"><i class=\"fas fa-chevron-down\"></i></span></div>"));
 		dropdown.append(replaceResourceKey("<div class=\"dropdown-menu\" aria-labelledby=\"${resourceKey}Dropdown\"></div>"));
+		dropdown.parents().first().append("<small class=\"form-text text-muted\">" + template.getDescription() + "</small>");
 		inputElements = dropdown.select(".dropdown-menu");
 		nameElement = dropdown.select(replaceResourceKey("#${resourceKey}Text")).first();
 		valueElement = dropdown.select(replaceResourceKey("#${resourceKey}")).first();
@@ -70,7 +73,7 @@ public class DropdownInput extends InputRender {
 	public void renderValues(Collection<? extends NamedUUIDEntity> fields) {
 		NamedUUIDEntity selected = null;
 		for(NamedUUIDEntity field : fields) {
-			if(Objects.isNull(selected)) {
+			if(Objects.isNull(field)) {
 				selected = field;
 			}
 

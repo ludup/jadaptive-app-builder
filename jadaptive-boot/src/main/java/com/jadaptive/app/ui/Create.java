@@ -17,7 +17,7 @@ import com.codesmith.webbits.freemarker.FreeMarker;
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class })
 @View(contentType = "text/html", paths = { "/create/{resourceKey}" })
 @Resource
-public class Create extends ObjectPage {
+public class Create extends TemplatePage {
 	
     @Out
     public Document service(@In Document contents) throws IOException {

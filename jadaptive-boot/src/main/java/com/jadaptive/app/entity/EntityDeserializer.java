@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectReference2;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
@@ -153,8 +154,6 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 
 		if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
 			processEmbeddedObjects(field, node, e);
-		} else if(field.getFieldType()==FieldType.OBJECT_REFERENCE) {
-			processReferenceObjects(field, node, e);
 		} else {
 			processSimpleTypes(field, node, e);
 		}
@@ -234,11 +233,22 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 		case PASSWORD:
 			validateText(node, field);
 			return node.asText();
+		case OBJECT_REFERENCE:
+			if(node.isObject()) {
+				return validateReference(node, field);
+			}
+			return node.asText();
 		default:
 			throw new ValidationException(
 					String.format("Missing field type %s in validate method", 
 						field.getFieldType().name()));
 		}
+		
+	}
+
+	
+	private ObjectReference2 validateReference(JsonNode node, FieldTemplate field) {
+		return new ObjectReference2(node.get("uuid").asText(), node.get("name").asText());
 		
 	}
 

@@ -120,6 +120,10 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 	public Collection<String> getCollection(String fieldName) {
 		return document.getList(fieldName, String.class);
 	}
+	
+//	public Collection<?> getReferenceCollection(String fieldName) {
+//		return document.getList(fieldName, Map.class);
+//	}
 
 	@Override
 	public void setValue(FieldTemplate t, Object value) {

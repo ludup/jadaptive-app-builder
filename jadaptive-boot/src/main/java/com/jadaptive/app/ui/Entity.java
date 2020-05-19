@@ -13,7 +13,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
@@ -31,7 +30,8 @@ import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.entity.MongoEntity;
-import com.jadaptive.app.ui.renderers.DropdownInput;
+import com.jadaptive.app.ui.renderers.form.DropdownFormInput;
+import com.jadaptive.app.ui.renderers.form.SearchFormInput;
 
 @Widget({ PageResources.class, PageResourcesElement.class })
 @View(contentType = "text/html")
@@ -73,7 +73,7 @@ public class Entity {
 	}
 	
     @Out
-    public Elements service(@In Elements contents, @ParentView ObjectPage page) throws IOException {
+    public Elements service(@In Elements contents, @ParentView TemplatePage page) throws IOException {
     	
     	try {
 			Properties properties = propertyService.getOverrideProperties(
@@ -82,7 +82,11 @@ public class Entity {
 			
 			boolean readOnly = page.isReadOnly();
 			
-			renderObject(contents, page.getTemplate(), page.getObject(), properties, readOnly);
+			MongoEntity object = null;
+			if(page instanceof ObjectPage) {
+				object = ((ObjectPage)page).getObject();
+			}
+			renderObject(contents, page.getTemplate(), object, properties, readOnly);
 			return contents;
 		} catch (IOException e) {
 			throw new IOException(e.getMessage(), e);
@@ -165,22 +169,7 @@ public class Entity {
 	private void renderColletion(Elements parentElement, MongoEntity entity, FieldTemplate fieldTemplate,
 			Properties properties, boolean readOnly) {
 		
-		Elements elements = addElement(COLLECTION_TEMPLATE, fieldTemplate, entity, parentElement, readOnly);
-		
-//	    <tr>
-//	      <th scope="col">#</th>
-//	      <th scope="col">First</th>
-//	      <th scope="col">Last</th>
-//	      <th scope="col">Handle</th>
-//	    </tr>
-		
-		
-//	    <tr>
-//	      <th scope="row">1</th>
-//	      <td>Mark</td>
-//	      <td>Otto</td>
-//	      <td>@mdo</td>
-//	    </tr>
+		new SearchFormInput(parentElement, fieldTemplate, getDefaultValue(fieldTemplate, entity));
 	}
 
 	private void renderTextBox(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
@@ -194,34 +183,26 @@ public class Entity {
 		String templateHtml = getTemplate(fieldTemplate, properties);
 		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
-
-	private void renderEnum2(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
-
-		String templateHtml = getTemplate(fieldTemplate, properties);
-		Elements elements = addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
-		elements = elements.select(".dropdown-menu");
-		
-		try {
-			Class<?> values = classLoader.resolveClass(
-					fieldTemplate.getValidationValue(ValidationType.OBJECT_TYPE));
-			for(Enum<?> value : (Enum<?>[]) values.getEnumConstants()) {
-				elements.append("<a data-resourcekey=\"" + value.ordinal() + "\" class=\"" 
-						+ "dropdown-item\" href=\"#\">" + value.name() + "</a>");
-			}
-		} catch (ClassNotFoundException e) {
-			throw new IllegalStateException(e.getMessage(), e);
-		}
-	}
 	
 	private void renderEnum(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		try {
 			Class<?> values = classLoader.resolveClass(
 					fieldTemplate.getValidationValue(ValidationType.OBJECT_TYPE));
-			new DropdownInput(parentElement, fieldTemplate).renderValues((Enum<?>[])values.getEnumConstants());
+			
+			new DropdownFormInput(parentElement, fieldTemplate, getDefaultValue(fieldTemplate, entity))
+						.renderValues((Enum<?>[])values.getEnumConstants());
 		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
+	}
+
+	private String getDefaultValue(FieldTemplate fieldTemplate, MongoEntity entity) {
+		String defaultValue = fieldTemplate.getDefaultValue();
+		if(Objects.nonNull(entity)) {
+			defaultValue = String.valueOf(entity.getValue(fieldTemplate));
+		}
+		return defaultValue;
 	}
 
 	private void renderBool(FieldTemplate fieldTemplate, MongoEntity entity, Elements parentElement, Properties properties, boolean readOnly) {
@@ -292,8 +273,14 @@ public class Entity {
 				continue;
 			}
 			switch(field.getFieldType()) {
-			case OBJECT_EMBEDDED:
 			case OBJECT_REFERENCE:
+				if(field.getCollection()) {
+					fields.add(field);
+				} else {
+					objects.add(field);
+				}
+				break;
+			case OBJECT_EMBEDDED:
 				objects.add(field);
 				break;
 			default:

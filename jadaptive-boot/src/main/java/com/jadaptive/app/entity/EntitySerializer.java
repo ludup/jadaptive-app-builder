@@ -3,6 +3,7 @@ package com.jadaptive.app.entity;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.utils.Utils;
@@ -98,9 +100,19 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 				default:
 					if(t.getCollection()) {
 						gen.writeArrayFieldStart(t.getResourceKey());
-						for(Object v : value.getCollection(t.getResourceKey())) {
-							writeCollectionField(gen, t, v);
-						}
+//						if(t.getFieldType()==FieldType.OBJECT_REFERENCE) {
+//							for(Object ref : value.getReferenceCollection(t.getResourceKey())) {
+//								Map<?,?> m = (Map<?,?>) ref;
+//								gen.writeStartObject();
+//								gen.writeStringField("uuid", (String) m.get("uuid"));
+//								gen.writeStringField("name", (String) m.get("name"));
+//								gen.writeEndObject();
+//							}
+//						} else {
+							for(Object v : value.getCollection(t.getResourceKey())) {
+								writeCollectionField(gen, t, v);
+							}
+//						}
 						gen.writeEndArray();
 					} else {
 						writeField(gen, t, value.getValue(t.getResourceKey()));

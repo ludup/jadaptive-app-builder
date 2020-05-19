@@ -29,6 +29,7 @@ import com.codesmith.webbits.WebbitsServlet;
 import com.jadaptive.app.json.upload.UploadServlet;
 import com.jadaptive.app.scheduler.LockableTaskScheduler;
 import com.jadaptive.app.ui.JadaptiveApp;
+import com.jadaptive.utils.Utils;
 
 @Configuration
 @ComponentScan({"com.jadaptive.app.**", "com.jadaptive.api.**"})
@@ -68,7 +69,9 @@ public class ApplicationConfig {
                
                String[] additionalDevelopmentPaths = System.getProperty(
             		   "jadaptive.developmentPluginDirs", 
-            		   "../../jadaptive-vsftp,../../jadaptive-updates,../../jadaptive-key-server").split(",");
+            		   Utils.csv("../../jadaptive-vsftp",
+            				    "../../jadaptive-updates",
+            				    "../../jadaptive-key-server")).split(",");
                for(String path : additionalDevelopmentPaths) {
             	   if(StringUtils.isNotBlank(path)) {
             		   pluginRepository.add(new DevelopmentPluginRepository(Paths.get(path)), this::isDevelopment);

@@ -52,7 +52,7 @@ public class LogonController {
 	@Autowired
 	private SessionService sessionService; 
 	
-	@RequestMapping(value="api/logon/basic", method = RequestMethod.POST, produces = {"application/json"})
+	@RequestMapping(value="/app/api/logon/basic", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus logonUser(HttpServletRequest request, HttpServletResponse response, 
@@ -92,7 +92,7 @@ public class LogonController {
 		}
 	}
 	
-	@RequestMapping(value="api/logoff", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/logoff", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus logoff(HttpServletRequest request, HttpServletResponse response)  {
@@ -106,6 +106,23 @@ public class LogonController {
 			sessionService.closeSession(session);
 			
 			return new RequestStatus(true, "Session closed");
+		} catch(UnauthorizedException | SessionTimeoutException e) {
+			return new RequestStatus(false, e.getMessage());
+		}
+	}
+	
+	@RequestMapping(value="/app/api/session/touch", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus touchSession(HttpServletRequest request, HttpServletResponse response)  {
+
+		try {
+			Session session = sessionUtils.getSession(request);
+			if(!sessionService.isLoggedOn(session, true)) {
+				return new RequestStatus(false, "Session closed");
+			}
+			
+			return new RequestStatus(true, "");
 		} catch(UnauthorizedException | SessionTimeoutException e) {
 			return new RequestStatus(false, e.getMessage());
 		}

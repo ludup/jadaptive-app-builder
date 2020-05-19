@@ -15,9 +15,11 @@ import org.springframework.stereotype.Repository;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -84,35 +86,55 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document get(String uuid, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.find(Filters.eq("_id", uuid)).first();
+		FindIterable<Document> result = collection.find(Filters.eq("_id", uuid));
+		if(!result.cursor().hasNext()) {
+			throw new EntityNotFoundException(String.format("Id %s entity %s was not found", uuid, table));
+		}
+		return result.first();
 	}
 
 	@Override
 	public Document get(String table, String database, SearchField... fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.find(buildFilter(fields)).first();
+		FindIterable<Document> result = collection.find(buildFilter(fields));
+		if(!result.cursor().hasNext()) {
+			throw new EntityNotFoundException(String.format("No entity %s was not found for search", table));
+		}
+		return result.first();
 	}
 	
 	@Override
 	public Document max(String table, String database, String field) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.find().sort(new BasicDBObject("field", -1)).first();
+		FindIterable<Document> result = collection.find().sort(new BasicDBObject("field", -1));
+		if(!result.cursor().hasNext()) {
+			throw new EntityNotFoundException(String.format("No entity %s was not found", table));
+		}
+		return result.first();
 	}
 	
 	@Override
 	public Document min(String table, String database, String field) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.find().sort(new BasicDBObject("field", 1)).first();
+		FindIterable<Document> result = collection.find().sort(new BasicDBObject("field", 1));
+		if(!result.cursor().hasNext()) {
+			throw new EntityNotFoundException(String.format("No entity %s was not found", table));
+		}
+		return result.first();
 	}
 	
 	@Override
 	public Document find(String field, String value, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.find(Filters.eq(field, value)).first();
+		FindIterable<Document> result = collection.find(Filters.eq(field, value));
+		if(!result.cursor().hasNext()) {
+			throw new EntityNotFoundException(String.format("%s %s for entity %s was not found", field, value, table));
+		}
+		return result.first();
 	}
 
 	@Override
@@ -210,11 +232,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public Document getFirst(String uuid, String table, String database) {
-		Document e = getCollection(table, database).find(Filters.eq("_id", uuid)).first();
-		if(Objects.isNull(e)) {
-			throw new EntityException(String.format("id %s for entity %s was not found", uuid, table));
+		MongoCollection<Document> collection = getCollection(table, database);
+		FindIterable<Document> result = collection.find(Filters.eq("_id", uuid));
+		if(!result.cursor().hasNext()) {
+			throw new EntityNotFoundException(String.format("id %s for entity %s was not found", uuid, table));
 		}
-		return e;
+		return result.first();
 	}
 
 	@Override

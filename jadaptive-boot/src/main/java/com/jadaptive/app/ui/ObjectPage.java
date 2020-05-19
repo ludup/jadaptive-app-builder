@@ -24,7 +24,6 @@ public abstract class ObjectPage extends TemplatePage {
 	
 	protected String uuid;
 	protected MongoEntity object;
-	protected boolean readOnly;
 	
 	protected boolean isModal() {
 		return true;
@@ -74,9 +73,5 @@ public abstract class ObjectPage extends TemplatePage {
 	
 	public String getUuid() {
 		return StringUtils.defaultString(uuid);
-	}
-
-	public boolean isReadOnly() {
-		return readOnly;
 	}
 }

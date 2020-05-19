@@ -9,7 +9,7 @@ import com.jadaptive.api.template.Template;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
 
-@Template(name = "Admin User", resourceKey = AdminUser.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Administration Users", resourceKey = AdminUser.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 public class AdminUser extends PasswordEnabledUser {
 
 	public static final String RESOURCE_KEY = "adminUser";

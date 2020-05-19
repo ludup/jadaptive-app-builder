@@ -1,6 +1,7 @@
 package com.jadaptive.app.ui;
 
 import java.io.FileNotFoundException;
+import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
@@ -17,12 +18,14 @@ import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.app.ui.renderers.DropdownInput;
 
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class })
-@View(contentType = "text/html", paths = { "/table/{resourceKey}" })
+@View(contentType = "text/html", paths = { "/tables/{resourceKey}" })
 @Resource
-public class Table extends TemplatePage {
+public class ParentTable extends TemplatePage {
 
 	@Autowired
 	private PermissionService permissionService;
@@ -52,7 +55,19 @@ public class Table extends TemplatePage {
 		} catch(AccessDeniedException e) {
 			content.select(".readWrite").remove();
 		}
-
+		
+		new DropdownInput(content.select("#searchDropdown"),
+				"searchField", "name")
+					.renderValues(template.getFields());
+		
+		Collection<EntityTemplate> children = templateService.children(template.getResourceKey());
+		if(children.isEmpty()) {
+			content.select("#childDropdown").remove();
+		} else {
+			new DropdownInput(content.select("#childDropdown"), "searchTable", 
+					children.iterator().next().getResourceKey())
+				.renderValues(children);
+		}
 		return content;
 	}
 }

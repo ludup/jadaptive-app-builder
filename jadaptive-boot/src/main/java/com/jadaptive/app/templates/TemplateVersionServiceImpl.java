@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -452,12 +453,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					case ENUM:
 					case OBJECT_EMBEDDED:
 					case OBJECT_REFERENCE:
-						t.getValidators().add(new FieldValidator(
-								ValidationType.OBJECT_TYPE, 
-								f.getType().getName()));
-						t.getValidators().add(new FieldValidator(
-								ValidationType.RESOURCE_KEY, 
-								DocumentHelper.getTemplateResourceKey(f.getType())));
+						if(StringUtils.isBlank(field.references())) {
+							t.getValidators().add(new FieldValidator(
+									ValidationType.OBJECT_TYPE, 
+									f.getType().getName()));
+							t.getValidators().add(new FieldValidator(
+									ValidationType.RESOURCE_KEY, 
+									DocumentHelper.getTemplateResourceKey(f.getType())));
+						} else {
+							t.getValidators().add(new FieldValidator(
+									ValidationType.OBJECT_TYPE, 
+									field.references()));
+							t.getValidators().add(new FieldValidator(
+									ValidationType.RESOURCE_KEY, 
+									field.references()));
+						}
 						break;
 					default:
 						break;

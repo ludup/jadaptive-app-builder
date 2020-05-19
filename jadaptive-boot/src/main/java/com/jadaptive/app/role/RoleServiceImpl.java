@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectReference2;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleRepository;
@@ -18,6 +19,7 @@ import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.User;
+import com.jadaptive.app.auth.AuthenticationService;
 
 @Service
 public class RoleServiceImpl extends AuthenticatedService implements RoleService, TenantAware {
@@ -58,6 +60,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		role = new Role();
 		role.setUuid(EVERYONE_UUID);
 		role.setName(EVERYONE);
+		role.setPermissions(Arrays.asList(AuthenticationService.USER_LOGIN_PERMISSION));
 		role.setSystem(true);
 		role.setAllUsers(true);
 		
@@ -124,10 +127,6 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		
 		Set<String> uuids = new HashSet<>();
 		for(User user : users) {
-			if(role.getUsers().contains(user.getUuid())) {
-				throw new EntityException(String.format(
-						"%s is already a member of the %s role", user.getUsername(), role.getName()));
-			}
 			uuids.add(user.getUuid());
 		}
 		

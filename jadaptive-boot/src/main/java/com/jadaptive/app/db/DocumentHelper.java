@@ -152,6 +152,8 @@ public class DocumentHelper {
 				list.add(value);
 			} else if(value.getClass().isEnum()) {
 				list.add(((Enum<?>)value).name());
+//			} else if(value instanceof ObjectReference2) {
+//				list.add(((ObjectReference2)value).toMap());
 			} else if(UUIDEntity.class.isAssignableFrom(value.getClass())) {
 
 				AbstractUUIDEntity e = (AbstractUUIDEntity) value;
@@ -310,6 +312,8 @@ public class DocumentHelper {
 							m.invoke(obj, buildDateCollection(columnDefinition, list));
 						} else if(type.isEnum()) {  
 							m.invoke(obj, buildEnumCollection(list, type));
+//						} else if(type.equals(ObjectReference2.class)) {  
+//							m.invoke(obj, buildReferenceCollection(list, type));
 						} else {
 							throw new IllegalStateException(
 									String.format("Unexpected collection type %s in object setter %s",
@@ -372,6 +376,15 @@ public class DocumentHelper {
 		return v;
 	}
 
+
+//	private static Object buildReferenceCollection(List<?> list, Class<?> type) {
+//		Collection<ObjectReference2> v = new HashSet<>();
+//		for(Object item : list) {
+//			v.add(new ObjectReference2((Map<String,String>) item));
+//		}
+//		return v;
+//	}
+	
 	private static Object buildEnumCollection(List<?> items, Class<?> type) {
 
 		Collection<Enum<?>> v = new HashSet<>();

@@ -27,14 +27,24 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	
 	@Override
 	public Collection<T> getPersonalObjects(Class<T> resourceClass, User user, SearchField... search) {
-		return objectDatabase.searchObjects(resourceClass, 
+		if(search.length > 0) {
+			return objectDatabase.searchObjects(resourceClass, 
 				SearchField.eq("ownerUUID", user.getUuid()), SearchField.and(search));
+		} else {
+			return objectDatabase.searchObjects(resourceClass, 
+					SearchField.eq("ownerUUID", user.getUuid()));
+		}
 	}
 	
 	@Override
 	public T getPersonalObject(Class<T> resourceClass, User user, SearchField... search) {
-		return objectDatabase.get(resourceClass, 
+		if(search.length > 0) {
+			return objectDatabase.get(resourceClass, 
 				SearchField.eq("ownerUUID", user.getUuid()), SearchField.and(search));
+		} else {
+			return objectDatabase.get(resourceClass, 
+					SearchField.eq("ownerUUID", user.getUuid()));
+		}
 	}
 	
 	@Override

@@ -2,19 +2,20 @@ package com.jadaptive.app.ui.renderers;
 
 import org.jsoup.select.Elements;
 
-import com.jadaptive.api.template.FieldTemplate;
-
 public abstract class InputRender {
 
-	FieldTemplate template;
-	public InputRender(Elements rootElement, FieldTemplate template) {
-		this.template = template;
-		renderInput(rootElement, template);
+	String resourceKey;
+	String defaultValue;
+	
+	public InputRender(Elements rootElement, String resourceKey, String defaultValue) {
+		this.resourceKey = resourceKey;
+		this.defaultValue = defaultValue;
+		renderInput(rootElement, resourceKey, defaultValue);
 	}
 	
-	protected abstract void renderInput(Elements rootElement, FieldTemplate template);
+	protected abstract void renderInput(Elements rootElement, String resourceKey, String defaultValue);
 
 	protected String replaceResourceKey(String str) {
-		return str.replace("${resourceKey}", template.getResourceKey());
+		return str.replace("${resourceKey}", resourceKey);
 	}
 }

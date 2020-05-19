@@ -1,7 +1,6 @@
 package com.jadaptive.app.ui;
 
 import java.io.FileNotFoundException;
-import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,7 +15,9 @@ public abstract class TemplatePage extends AuthenticatedView {
 	
 	protected String resourceKey;
 	protected EntityTemplate template; 
+	protected boolean readOnly;
 	
+
     public EntityTemplate getTemplate() {
     	return template;
     }
@@ -29,5 +30,9 @@ public abstract class TemplatePage extends AuthenticatedView {
 	    throw new FileNotFoundException(String.format("No resource named %s", resourceKey));
 	}
     }
+    
+	public boolean isReadOnly() {
+		return readOnly;
+	}
  
 }
