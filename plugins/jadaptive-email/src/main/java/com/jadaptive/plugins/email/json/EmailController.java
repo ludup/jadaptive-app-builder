@@ -27,7 +27,7 @@ public class EmailController implements PluginController {
 	@Autowired
 	private EmailVerificationService verificationService; 
 	
-	@RequestMapping(value = "api/registration/verifyEmail", method = RequestMethod.POST, produces = { "application/json" })
+	@RequestMapping(value = "/app/api/registration/verifyEmail", method = RequestMethod.POST, produces = { "application/json" })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.OK)
 	public ResourceStatus<Boolean> verifyEmail(
@@ -38,7 +38,7 @@ public class EmailController implements PluginController {
 		return new ResourceStatus<Boolean>(true, verificationService.verifyEmail(email), "");
 	}
 	
-	@RequestMapping(value = "api/registration/assertCode", method = RequestMethod.POST, produces = { "application/json" })
+	@RequestMapping(value = "/app/api/registration/assertCode", method = RequestMethod.POST, produces = { "application/json" })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.OK)
 	public ResourceStatus<Boolean> verifyCode(
