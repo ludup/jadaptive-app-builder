@@ -37,8 +37,9 @@ public class Role extends NamedUUIDEntity {
 	@Column(name = "Users", 
 			description = "The users assigned to this Role",
 			defaultValue = "false", 
-			type = FieldType.TEXT,
-			searchable = true)
+			type = FieldType.OBJECT_REFERENCE,
+			searchable = true,
+			references = "users")
 	Collection<String> users = new HashSet<>();
 	
 	public String getResourceKey() {

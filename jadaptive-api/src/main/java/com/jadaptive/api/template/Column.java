@@ -9,14 +9,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Column {
 		
-		String defaultValue() default "";
+		FieldType type();	
 		
 		String name();
 		
-		String description();
-		
-		FieldType type();
-		
+		String defaultValue() default "";
+
 		boolean readOnly() default false;
 		
 		boolean required() default false;
@@ -32,5 +30,10 @@ public @interface Column {
 		boolean unique() default false;
 		
 		boolean textIndex() default false;
+		
+		String references() default "";
 
+		// USER INTERFACE PROPERTIES
+		String description();
+		
 }

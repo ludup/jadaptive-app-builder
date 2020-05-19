@@ -325,10 +325,6 @@ public class Utils {
 		}
 		return set;
 	}
-
-	public static String csv(String[] items) {
-		return csv(",", items);
-	}
 	
 	public static String csv(String delim, String[] items) {
 		StringBuffer b = new StringBuffer();
@@ -350,6 +346,10 @@ public class Utils {
 			b.append(i);
 		}
 		return b.toString();
+	}
+	
+	public static String csv(String... items) {
+		return csv(Arrays.asList(items));
 	}
 	
 	public static String csv(Object[] items) {
@@ -399,4 +399,5 @@ public class Utils {
 	public static List<String> fromCsv(String value) {
 		return new ArrayList<String>(Arrays.asList(value.split(",")));
 	}
+
 }
