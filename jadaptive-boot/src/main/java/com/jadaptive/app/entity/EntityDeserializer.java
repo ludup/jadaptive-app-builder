@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.entity.ObjectReference2;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
@@ -184,10 +183,10 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
  		}	
 	}
 
-	private void processReferenceObjects(FieldTemplate field, JsonNode node, MongoEntity e) {
-		// EntityService currently validates references
-		setProperty(node.asText(), field, e);
-	}
+//	private void processReferenceObjects(FieldTemplate field, JsonNode node, MongoEntity e) {
+//		// EntityService currently validates references
+//		setProperty(node.asText(), field, e);
+//	}
 
 	private void processSimpleTypes(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
 		if(node.isArray()) {
@@ -247,10 +246,10 @@ public class EntityDeserializer extends StdDeserializer<MongoEntity> {
 	}
 
 	
-	private ObjectReference2 validateReference(JsonNode node, FieldTemplate field) {
-		return new ObjectReference2(node.get("uuid").asText(), node.get("name").asText());
-		
-	}
+//	private ObjectReference2 validateReference(JsonNode node, FieldTemplate field) {
+//		return new ObjectReference2(node.get("uuid").asText(), node.get("name").asText());
+//		
+//	}
 
 	private void validateDate(JsonNode node, FieldTemplate field) {
 		
