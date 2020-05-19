@@ -41,7 +41,7 @@ public class AuthorizedKeyController extends AuthenticatedController implements 
 	@Autowired
 	private AuthorizedKeyService keyService; 
 	
-	@RequestMapping(value = { "api/agent/authorizedKeys/{username}", "authorizedKeys/{username}" }, method = { RequestMethod.GET, RequestMethod.POST }, produces = { "text/plain" })
+	@RequestMapping(value = { "/app/api/agent/authorizedKeys/{username}", "/authorizedKeys/{username}" }, method = { RequestMethod.GET, RequestMethod.POST }, produces = { "text/plain" })
 	@ResponseBody
 	@GetMapping()
 	public String listAuthorizedKeys(HttpServletRequest request, HttpServletResponse response, @PathVariable String username) throws IOException, AccessDeniedException, UnauthorizedException {
