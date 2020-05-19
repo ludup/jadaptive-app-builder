@@ -8,7 +8,7 @@ import com.jadaptive.api.template.Template;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
 
-@Template(name = "Builtin User", resourceKey = BuiltinUser.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Builtin Users", resourceKey = BuiltinUser.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
 public class BuiltinUser extends PasswordEnabledUser {
 
 	public static final String RESOURCE_KEY = "builtinUsers";
