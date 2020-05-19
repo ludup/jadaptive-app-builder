@@ -69,7 +69,7 @@ public class UnassignRole extends AbstractTenantAwareCommand {
 			// Users
 			Role role = roleService.getRoleByName(line.words().get(1));
 			for(String user : role.getUsers()) {
-				candidates.add(new Candidate(user));
+				candidates.add(new Candidate(userService.getUserByUUID(user).getUsername()));
 			}
 		}
 	}
