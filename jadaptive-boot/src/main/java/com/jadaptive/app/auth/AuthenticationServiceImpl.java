@@ -36,7 +36,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		try {
 			User user = userService.getUser(username);
-			if(Objects.isNull(user) || userService.supportsLogin(user)) {
+			if(Objects.isNull(user) ||!userService.supportsLogin(user)) {
 				throw new AccessDeniedException("Bad username or password");
 			}
 			

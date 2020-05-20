@@ -73,8 +73,8 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	}
 
 	@Override
-	public void setName(String value) {
-		throw new UnsupportedOperationException();
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override

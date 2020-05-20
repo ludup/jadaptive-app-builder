@@ -27,6 +27,8 @@ public class EmailController implements PluginController {
 	@Autowired
 	private EmailVerificationService verificationService; 
 	
+	
+	
 	@RequestMapping(value = "/app/api/registration/verifyEmail", method = RequestMethod.POST, produces = { "application/json" })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.OK)

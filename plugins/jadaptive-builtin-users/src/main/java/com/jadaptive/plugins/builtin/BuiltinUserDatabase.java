@@ -12,4 +12,5 @@ public interface BuiltinUserDatabase extends UserDatabase {
 	void deleteUser(User user);
 
 	User getUserByEmail(String email);
+
 }
