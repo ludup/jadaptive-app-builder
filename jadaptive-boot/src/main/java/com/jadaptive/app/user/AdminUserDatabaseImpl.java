@@ -30,7 +30,8 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 	private EntityTemplateService templateService; 
 	
 	private final Set<UserDatabaseCapabilities> capabilities = new HashSet<>(
-			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD));
+			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD,
+					UserDatabaseCapabilities.LOGON));
 	
 	@Override
 	public User getUser(String username) {

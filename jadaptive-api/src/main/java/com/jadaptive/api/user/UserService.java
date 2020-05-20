@@ -38,4 +38,6 @@ public interface UserService {
 
 	void createUser(User user, char[] charArray, boolean forceChange);
 
+	boolean supportsLogin(User user);
+
 }

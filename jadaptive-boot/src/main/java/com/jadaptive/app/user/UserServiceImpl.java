@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.EntityTemplate;
@@ -126,6 +127,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public void setPassword(User user, char[] newPassword, boolean passwordChangeRequired) {
 		
 		permissionService.assertPermission(SET_PASSWORD_PERMISSION);
+		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
 		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 		
 	}
@@ -134,6 +136,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public void changePassword(User user, char[] oldPassword, char[] newPassword) {
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
+		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
 		verifyPassword(user, oldPassword);
 		getDatabase(user).setPassword(user, newPassword, false);
 		
@@ -143,6 +146,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public void changePassword(User user, char[] newPassword, boolean passwordChangeRequired) {
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
+		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
 		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 		
 	}
@@ -152,7 +156,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 
 		loadUserDatabases();
 		
-//		permissionService.registerStandardPermissions(USER_RESOURCE_KEY);
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 		
@@ -189,19 +192,33 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public void deleteUser(User user) {
 		
 		assertWrite(USER_RESOURCE_KEY);
+		assertCapability(user, UserDatabaseCapabilities.DELETE);
 		getDatabase(user).deleteUser(user);
 	}
 
 	@Override
 	public void updateUser(User user) {
 		assertWrite(USER_RESOURCE_KEY);
+		assertCapability(user, UserDatabaseCapabilities.UPDATE);
 		getDatabase(user).updateUser(user);
 	}
 
 	@Override
 	public void createUser(User user, char[] password, boolean forceChange) {
 		assertWrite(USER_RESOURCE_KEY);
+		assertCapability(user, UserDatabaseCapabilities.CREATE);
 		getDatabase(user).createUser(user, password, forceChange);
+	}
+
+	protected void assertCapability(User user, UserDatabaseCapabilities capability) {
+		if(!getDatabase(user).getCapabilities().contains(capability)) {
+			throw new AccessDeniedException(String.format("User database does not support %s", capability.name()));
+		}
+	}
+	
+	@Override
+	public boolean supportsLogin(User user) {
+		return getDatabase(user).getCapabilities().contains(UserDatabaseCapabilities.LOGON);
 	}
 
 }

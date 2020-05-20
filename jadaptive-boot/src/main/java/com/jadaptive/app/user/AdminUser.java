@@ -6,11 +6,12 @@ import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
+import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @Template(name = "Administration Users", resourceKey = AdminUser.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
-public class AdminUser extends PasswordEnabledUser {
+public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 
 	public static final String RESOURCE_KEY = "adminUser";
 	
@@ -73,6 +74,7 @@ public class AdminUser extends PasswordEnabledUser {
 
 	@Override
 	public void setName(String value) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

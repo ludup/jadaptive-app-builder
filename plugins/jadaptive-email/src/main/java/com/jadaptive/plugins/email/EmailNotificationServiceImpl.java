@@ -32,8 +32,10 @@ import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.api.user.UserUtils;
 
 @Service
 public class EmailNotificationServiceImpl extends AuthenticatedService implements EmailNotificationService {
@@ -403,11 +405,13 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 		}
 
 		// Not an email address? Is this a principal of the realm?
-		User principal = userService.getUser(val);
+		User user = userService.getUser(val);
 		
-		if(principal!=null) {
-			return StringUtils.isNotBlank(principal.getEmail());
+		
+		if(user!=null) {
+			return StringUtils.isNotBlank(UserUtils.getEmailAddress(user));
 		}
+		
 		return false;
 	}
 	
@@ -416,7 +420,7 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 		Pattern p = Pattern.compile(EmailNotificationServiceImpl.EMAIL_NAME_PATTERN);
 
 		Matcher m = p.matcher(val);
-		User principal = null;
+		User user = null;
 		
 		if (m.find()) {
 			String name = m.group(1).replaceAll("[\\n\\r]+", "");
@@ -430,20 +434,20 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 			name = WordUtils.capitalize(name.replace('.',  ' ').replace('_', ' '));
 			
 			try {
-				principal = userService.getUserByEmail(email);
+				user = userService.getUserByEmail(email);
 			} catch(EntityNotFoundException e) { }
 		} else {
 
 			// Not an email address? Is this a principal of the realm?
 			try {
-				principal = userService.getUser(val);
+				user = userService.getUser(val);
 			} catch(EntityNotFoundException e) { }
 			
 		}
 		
-		if(principal==null) {
+		if(user==null) {
 			try {
-				principal = userService.getUserByEmail(val);
+				user = userService.getUserByEmail(val);
 			} catch (EntityNotFoundException e) {
 			}
 		}
@@ -454,11 +458,12 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 //			} catch(AccessDeniedException | NumberFormatException e) { };
 //		}
 		
-		if(principal!=null) {
-			if(StringUtils.isNotBlank(principal.getEmail())) {
-				recipients.add(new RecipientHolder(principal, principal.getEmail()));
-				return;
+		if(user!=null) {
+			String email = UserUtils.getEmailAddress(user);
+			if(StringUtils.isNotBlank(email)) {
+				recipients.add(new RecipientHolder(user, email));
 			}
+			
 		}
 		
 		if(Pattern.matches(EmailNotificationServiceImpl.EMAIL_PATTERN, val)) {

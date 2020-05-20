@@ -13,6 +13,7 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.api.user.UserUtils;
 import com.sshtools.common.auth.PasswordAuthenticationProvider;
 import com.sshtools.common.auth.PasswordChangeException;
 import com.sshtools.common.logger.Log;
@@ -53,7 +54,7 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 					return false;
 				}
 				
-				if(success && user.getPasswordChangeRequired()) {
+				if(success && UserUtils.getPasswordChangeRequired(user)) {
 					try {
 						permissionService.assertAnyPermission( 
 								UserService.CHANGE_PASSWORD_PERMISSION,

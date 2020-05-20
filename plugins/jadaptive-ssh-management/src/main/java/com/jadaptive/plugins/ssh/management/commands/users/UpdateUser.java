@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.api.user.UserUtils;
 import com.jadaptive.plugins.sshd.commands.UserCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.CliHelper;
@@ -32,7 +33,7 @@ public class UpdateUser extends UserCommand {
 		User user = getCommandLineUser(false);
 		
 		if(CliHelper.hasOption(args, 'e', "email")) {
-			user.setEmail(CliHelper.getValue(args, 'e', "email"));
+			UserUtils.setEmailAddress(user, CliHelper.getValue(args, 'e', "email"));
 		}
 		
 		if(CliHelper.hasOption(args, 'n', "name")) {

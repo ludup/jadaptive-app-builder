@@ -16,4 +16,8 @@ public abstract class PasswordEnabledUser extends UserImpl {
 
 	public abstract void setEncodingType(PasswordEncryptionType encodingType);
 
+	public abstract void setPasswordChangeRequired(boolean passwordChangeRequired);
+
+	public abstract boolean getPasswordChangeRequired();
+
 }

@@ -31,7 +31,8 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Bui
 			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD,
 					UserDatabaseCapabilities.CREATE,
 					UserDatabaseCapabilities.UPDATE,
-					UserDatabaseCapabilities.DELETE));
+					UserDatabaseCapabilities.DELETE,
+					UserDatabaseCapabilities.LOGON));
 	
 	@Override
 	public BuiltinUser getUser(String username) {

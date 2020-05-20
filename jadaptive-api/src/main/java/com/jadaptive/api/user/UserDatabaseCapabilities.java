@@ -5,5 +5,6 @@ public enum UserDatabaseCapabilities {
 	MODIFY_PASSWORD,
 	CREATE,
 	UPDATE,
-	DELETE
+	DELETE, 
+	LOGON
 }

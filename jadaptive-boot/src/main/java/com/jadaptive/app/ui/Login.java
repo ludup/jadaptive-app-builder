@@ -16,19 +16,13 @@ import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Redirect;
 import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
-import com.codesmith.webbits.bootstrap.Bootstrapify;
-import com.codesmith.webbits.extensions.Absolutify;
-import com.codesmith.webbits.extensions.Enablement;
-import com.codesmith.webbits.extensions.I18N;
-import com.codesmith.webbits.extensions.PageResources;
-import com.codesmith.webbits.extensions.PageResourcesElement;
-import com.codesmith.webbits.fontawesome.FontAwesomeify;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.auth.AuthenticationService;
@@ -69,8 +63,10 @@ public class Login extends AbstractPage {
 	    	sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
 	    	
 	    	User user = userService.getUser(session.getUsername());
-	    	if(user.getPasswordChangeRequired()) {
-	    		throw new Redirect(ChangePassword.class);
+	    	if(user instanceof PasswordEnabledUser) {
+		    	if(((PasswordEnabledUser)user).getPasswordChangeRequired()) {
+		    		throw new Redirect(ChangePassword.class);
+		    	}
 	    	}
 	    	
 	    	throw new Redirect(JadaptiveApp.class);

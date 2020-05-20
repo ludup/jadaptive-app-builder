@@ -77,27 +77,11 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		public String getName() {
 			return "System";
 		}
-		
-		public boolean getPasswordChangeRequired() {
-			return false;
-		}
-
-		@Override
-		public String getEmail() {
-			return "";
-		}
-
-		@Override
-		public void setEmail(String value) {
-		}
 
 		@Override
 		public void setName(String value) {
 		}
 
-		@Override
-		public void setPasswordChangeRequired(boolean change) {
-		}
 	};
 
 	@Override
