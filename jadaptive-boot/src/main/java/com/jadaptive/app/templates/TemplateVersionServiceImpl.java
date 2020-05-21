@@ -393,7 +393,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(e.resourceKey().equals("builtinUsers")) {
 				System.out.println();
 			}
-
 			
 			EntityTemplate template;
 			try {
@@ -420,6 +419,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.setTemplateClass(clz.getName());
 			template.getAliases().clear();
 			template.getAliases().addAll(Arrays.asList(e.aliases()));
+			template.setDefaultFilter(e.defaultFilter());
 			
 			Index[] nonUnique = clz.getAnnotationsByType(Index.class);
 			UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);

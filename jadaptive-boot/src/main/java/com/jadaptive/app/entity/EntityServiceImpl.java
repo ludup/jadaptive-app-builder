@@ -15,6 +15,7 @@ import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.EventType;
+import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -26,7 +27,7 @@ import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.SearchHelper;
 
 @Service
-public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEnabledService<MongoEntity> {
+public class EntityServiceImpl extends AuthenticatedService implements EntityService<MongoEntity>, TemplateEnabledService<MongoEntity> {
 
 	@Autowired
 	private EntityRepository<MongoEntity> entityRepository;
@@ -83,6 +84,7 @@ public class EntityServiceImpl implements EntityService<MongoEntity>, TemplateEn
 
 	@Override
 	public Collection<MongoEntity> list(String resourceKey) throws RepositoryException, EntityException {
+		
 		EntityTemplate template = templateService.get(resourceKey);
 		return entityRepository.list(resourceKey, searchHelper.parseFilterField(template.getDefaultFilter()));
 	}

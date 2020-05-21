@@ -69,8 +69,8 @@ $(document).ready(function() {
 			$.getJSON('/api/' + t.uuid + '/list', function(data) {
 				
 				if(data.success) {
-					if(data.result.length > 0) {
-						$.each(data.result, function(idx, obj) {
+					if(data.resources.length > 0) {
+						$.each(data.resources, function(idx, obj) {
 							$('#uuid').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.uuid + '</option>');
 							$('#' + obj.uuid).data('object', obj);
 						});		
@@ -99,7 +99,7 @@ $(document).ready(function() {
 		
 		$.getJSON(url, function(data) {
 			if(data.success) {
-				$('#json').val(JSON.stringify(data.result, null, 4));
+				$('#json').val(JSON.stringify(data.resource, null, 4));
 			} else {
 				alert(data.message);
 			}
@@ -109,7 +109,7 @@ $(document).ready(function() {
 	$.getJSON('/api/template/list', function(data) {
 		
 		if(data.success) {
-			$.each(data.result, function(idx, obj) {
+			$.each(data.resources, function(idx, obj) {
 				$('#template').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.name + '</option>');
 				$('#' + obj.uuid).data('template', obj);
 				if(idx==0) {

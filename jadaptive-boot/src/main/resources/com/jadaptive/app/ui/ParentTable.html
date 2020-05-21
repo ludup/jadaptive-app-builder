@@ -44,7 +44,7 @@ $(document).ready(function() {
 		debugger;
 		$.getJSON('/app/api/template/' + $('#searchTable').val(), function(data) {
 			if(data.success) {
-				var t = data.result;
+				var t = data.resource;
 				
 				var columns = [];
 

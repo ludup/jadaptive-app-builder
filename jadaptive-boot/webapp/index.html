@@ -37,7 +37,7 @@ $.getJSON('/api/template/customer', function(data) {
 		var app7 = new Vue({
 			  el: '#appForm2',
 			  data: {
-				  template: data.result
+				  template: data.resource
 			  }  mounted() {
 				    axios.get("https://api.nytimes.com/svc/topstories/v2/home.json?api-key=your_api_key")
 				    .then(response => {this.results = response.data.results})

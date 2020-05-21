@@ -10,10 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.user.UserUtils;
 
 @Component
-public class SearchHelper {
+public class SearchHelper extends AuthenticatedService {
 
 	@Autowired
 	private PermissionService permissionService; 
@@ -76,6 +78,15 @@ public class SearchHelper {
 		switch(name) {
 		case "permissions":
 			tmp.addAll(permissionService.resolveCurrentPermissions());
+			break;
+		case "currentUser.uuid":
+			tmp.add(getCurrentUser().getUuid());
+			break;
+		case "currentUser.username":
+			tmp.add(getCurrentUser().getUsername());
+			break;
+		case "currentUser.email":
+			tmp.add(UserUtils.getEmailAddress(getCurrentUser()));
 			break;
 		default:
 			break;

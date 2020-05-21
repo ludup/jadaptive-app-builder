@@ -27,4 +27,6 @@ public @interface Template {
 		boolean recurse() default true;
 		
 		String[] aliases() default { };
+		
+		String defaultFilter() default "";
 }

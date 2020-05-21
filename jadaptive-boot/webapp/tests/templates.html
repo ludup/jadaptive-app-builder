@@ -54,7 +54,7 @@ var reloadTemplates = function() {
 	$("#template").empty();
 	$.getJSON('/api/template/list', function(data) {
 		if(data.success) {
-			$.each(data.result, function(idx, obj) {
+			$.each(data.resources, function(idx, obj) {
 				$('#template').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.name + '</option>');
 				$('#' + obj.uuid).data('template', obj);
 				if(idx==0) {
@@ -76,7 +76,7 @@ $(document).ready(function() {
 			$('#json').val('');
 			$.getJSON('/api/template/' + t.uuid, function(data) {
 				if(data.success) {
-					$('#json').val(JSON.stringify(data.result, null, 4));
+					$('#json').val(JSON.stringify(data.resource, null, 4));
 				} else {
 					alert(data.message);
 				}

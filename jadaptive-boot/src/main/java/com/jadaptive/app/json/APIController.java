@@ -237,14 +237,14 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 	@RequestMapping(value="/app/api/{resourceKey}/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<Collection<MongoEntity>> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityListStatus<MongoEntity> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
-			   return new EntityStatus<Collection<MongoEntity>>(entityService.list(resourceKey));
+			   return new EntityListStatus<MongoEntity>(entityService.list(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/list", resourceKey, e);
 			}
-			return new EntityStatus<Collection<MongoEntity>>(false, e.getMessage());
+			return new EntityListStatus<MongoEntity>(false, e.getMessage());
 		}
 	}
 	

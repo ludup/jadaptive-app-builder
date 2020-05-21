@@ -55,7 +55,7 @@ public class LogonController {
 	@RequestMapping(value="/app/api/logon/basic", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus logonUser(HttpServletRequest request, HttpServletResponse response, 
+	public SessionStatus logonUser(HttpServletRequest request, HttpServletResponse response, 
 			@RequestParam String username, @RequestParam String password)  {
 
 		permissionService.setupSystemContext();
@@ -64,7 +64,7 @@ public class LogonController {
 			Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 			
 			if("true".equalsIgnoreCase(properties.getProperty("logon.basic.disabled"))) {
-				return new RequestStatus(false, "Permission denied");
+				return new SessionStatus("Permission denied");
 			}
 			
 			Session session = authenticationService.logonUser(username, password,
@@ -81,12 +81,12 @@ public class LogonController {
 			if(log.isInfoEnabled()) {
 				log.info("Logged user {} on with home {}", username, homePage);
 			}
-			return new RequestStatus(true, homePage);
+			return new SessionStatus(session, homePage);
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("POST api/logon/basic", e);
 			}
-			return new RequestStatus(false, e.getMessage());
+			return new SessionStatus(e.getMessage());
 		} finally {
 			permissionService.clearUserContext();
 		}

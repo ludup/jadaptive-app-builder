@@ -2,22 +2,22 @@ package com.jadaptive.app.json;
 
 public class EntityStatus<T> extends RequestStatus {
 
-	T result;
+	T resource;
 	
-	public EntityStatus(T result) {
-		this.result = result;
+	public EntityStatus(T resource) {
+		this.resource = resource;
 	}
 
 	public EntityStatus(boolean success, String message) {
 		super(success, message);
 	}
 
-	public T getResult() {
-		return result;
+	public T getResource() {
+		return resource;
 	}
 
-	public void setResult(T result) {
-		this.result = result;
+	public void setResource(T resource) {
+		this.resource = resource;
 	}
 	
 	

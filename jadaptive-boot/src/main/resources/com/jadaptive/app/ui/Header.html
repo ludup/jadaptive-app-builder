@@ -23,7 +23,7 @@
 			if(data.success) {
 				var menus = [];
 				var top = [];
-				$.each(data.result, function(idx, obj) {
+				$.each(data.resources, function(idx, obj) {
 					if(obj.parent != '') {
 						if(!menus[obj.parent]) {
 							menus[obj.parent] = [];

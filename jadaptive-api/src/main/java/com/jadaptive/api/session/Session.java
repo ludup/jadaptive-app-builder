@@ -66,6 +66,7 @@ public class Session extends AbstractUUIDEntity {
 		this.signedOut = signedOut;
 	}
 
+	@JsonIgnore
 	public Tenant getTenant() {
 		return tenant;
 	}

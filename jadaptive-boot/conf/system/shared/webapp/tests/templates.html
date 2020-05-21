@@ -137,7 +137,7 @@ $(document).ready(function() {
 			$('#jsonContent').val('');
 			$.getJSON('/api/template/' + uuid, function(data) {
 				if(data.success) {
-					$('#jsonContent').val(JSON.stringify(data.result, null, 4));
+					$('#jsonContent').val(JSON.stringify(data.resource, null, 4));
 					$('#json').modal('show');
 				} else {
 					alert(data.message);

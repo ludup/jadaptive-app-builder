@@ -191,7 +191,7 @@ $(document).ready(function() {
 					debugger;
 					$.getJSON(uri, function(data) {
 						if(data.success) {
-							$('#jsonContent').val(JSON.stringify(data.result, null, 4));
+							$('#jsonContent').val(JSON.stringify(data.resource, null, 4));
 							$('#json').modal('show');
 						} else {
 							alert(data.message);
@@ -310,7 +310,7 @@ $(document).ready(function() {
 	$.getJSON('/api/template/list', function(data) {
 		
 		if(data.success) {
-			$.each(data.result, function(idx, obj) {
+			$.each(data.resources, function(idx, obj) {
 				debugger;
 				$('#template').append('<option id="' + obj.uuid + '" value="' + obj.uuid + '">' + obj.name + '</option>');
 				$('#' + obj.uuid).data('template', obj);

@@ -45,8 +45,6 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	@Override
 	public EntityTemplate get(String resourceKey) throws RepositoryException, EntityException {
 		
-		permissionService.assertRead(RESOURCE_KEY);
-		
 		EntityTemplate e = repository.get(SearchField.or(
 				SearchField.eq("resourceKey", resourceKey),
 				SearchField.in("aliases", resourceKey)));
@@ -68,8 +66,6 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	
 	@Override
 	public Collection<EntityTemplate> children(String uuid) {
-		
-		permissionService.assertRead(RESOURCE_KEY);
 		
 		return repository.list(SearchField.eq("parentTemplate", uuid));
 	}

@@ -35,7 +35,7 @@ $.getJSON('/api/template/' + getAnchorByName('template'), function(data) {
 		var app7 = new Vue({
 			  el: '#appForm',
 			  data: {
-				  template: data.result
+				  template: data.resource
 			  }
 			});
 	} else {
