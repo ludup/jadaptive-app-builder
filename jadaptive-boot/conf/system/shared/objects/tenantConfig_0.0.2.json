@@ -1,7 +1,0 @@
-[{ 
-  "uuid": "tenantConfig",
-  "resourceKey" : "tenantConfig",
-  "system" : true,
-  "hidden" : false,
-  "applicationName" : "JADAPTIVE Entity Builder v2"
-}]
