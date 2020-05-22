@@ -9,11 +9,13 @@ import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
+import org.pf4j.PluginClassLoader;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPlugin;
 import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
@@ -54,7 +56,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 		if(Objects.nonNull(context)) {
 			Collection<E> beans = getBeans(clz);
 			if(beans.isEmpty()) {
-				throw new IllegalStateException("Missing bean of type " + clz.getName());
+				throw new NoSuchBeanDefinitionException("Missing bean of type " + clz.getName());
 			}
 			if(beans.size() > 1) {
 				throw new IllegalStateException("Multiple beans of type " + clz.getName());
@@ -110,6 +112,26 @@ public class ApplicationServiceImpl implements ApplicationService {
 	}
 	
 	@Override
+	public <T> T autowire(T obj) {
+		
+		if(obj.getClass().getClassLoader() instanceof PluginClassLoader) {
+			PluginClassLoader classLoader = (PluginClassLoader) obj.getClass().getClassLoader();
+			for(PluginWrapper w : pluginManager.getPlugins()) {
+				if(w.getPluginClassLoader().equals(classLoader)) {
+					if(w.getPlugin() instanceof SpringPlugin) {
+						SpringPlugin plugin = (SpringPlugin) w.getPlugin();
+						plugin.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(obj);
+						return obj;
+					}
+				}
+			}
+		}
+		
+		context.getAutowireCapableBeanFactory().autowireBean(obj);
+		return obj;
+	}
+	
+	@Override
 	public void registerTestingBean(Class<?> clz, Object obj) {
 		testingBeans.put(clz, obj);
 	}
@@ -118,9 +140,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 	public Class<?> resolveClass(String type) throws ClassNotFoundException {
 		return classLoaderService.resolveClass(type);
 	}
+//
+//	@Override
+//	public AutowireCapableBeanFactory getAutowireCapableBeanFactory() {
+//		return context.getAutowireCapableBeanFactory();
+//	}
 
-	@Override
-	public AutowireCapableBeanFactory getAutowireCapableBeanFactory() {
-		return context.getAutowireCapableBeanFactory();
-	}
+
 }

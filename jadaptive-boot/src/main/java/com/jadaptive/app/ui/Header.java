@@ -27,15 +27,17 @@ public class Header {
 	}
 
 	@Out
-    public Elements service(@In Elements contents, @ParentView AbstractPage page) {
+    public Elements service(@In Elements contents, @ParentView Object page) {
     	
 		if(!isLoggedOn()) {
 			contents.select("script").remove();
 			contents.select("#searchForm").remove();
 			contents.select("#logoff").remove();
-		} else if(page.isModal()) {
-			contents.select("script").remove();
-			contents.select("#searchForm").remove();
+		} else if(page instanceof AbstractPage) {
+			if(((AbstractPage)page).isModal()) {
+				contents.select("script").remove();
+				contents.select("#searchForm").remove();
+			}
 		}
 		
 		return contents;

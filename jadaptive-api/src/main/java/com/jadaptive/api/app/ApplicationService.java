@@ -14,6 +14,8 @@ public interface ApplicationService {
 
 	Class<?> resolveClass(String type) throws ClassNotFoundException;
 
-	AutowireCapableBeanFactory getAutowireCapableBeanFactory();
+//	AutowireCapableBeanFactory getAutowireCapableBeanFactory();
+
+	<T> T autowire(T obj);
 
 }

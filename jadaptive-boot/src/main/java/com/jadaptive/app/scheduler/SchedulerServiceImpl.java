@@ -71,7 +71,7 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		
 		cronDatabase.saveOrUpdate(schedule);
 		ScheduleJobRunner runner = new ScheduleJobRunner(getCurrentTenant());
-		applicationService.getAutowireCapableBeanFactory().autowireBean(runner);
+		applicationService.autowire(runner);
 
 		runner.schedule(schedule);
 		scheduledJobs.put(schedule.getUuid(), runner);
@@ -108,7 +108,7 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	public void run(Job job, Instant startTime) {
 		
 		JobRunner runner = new JobRunner(job, getCurrentTenant());
-		applicationService.getAutowireCapableBeanFactory().autowireBean(runner);
+		applicationService.autowire(runner);
 		scheduler.schedule(runner,startTime);
 		
 	}

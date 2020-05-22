@@ -22,21 +22,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.env.Environment;
 
 import com.codesmith.webbits.bootstrap.Bootstrap;
 import com.codesmith.webbits.fontawesome.FontAwesome;
 import com.codesmith.webbits.jquery.JQuery;
-import com.codesmith.webbits.spring.WebbitsComponentScan;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
 import com.jadaptive.app.ui.JadaptiveApp;
+import com.jadaptive.app.webbits.WebbitsComponentScan;
 
 @SpringBootApplication
-@ImportResource({ "classpath*:webbits.xml" })
 @WebbitsComponentScan(basePackageClasses = {
 	JadaptiveApp.class,
 	Bootstrap.class,
