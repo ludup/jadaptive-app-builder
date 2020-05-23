@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserUtils;
 

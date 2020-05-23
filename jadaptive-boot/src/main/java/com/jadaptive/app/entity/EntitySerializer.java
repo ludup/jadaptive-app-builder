@@ -3,7 +3,6 @@ package com.jadaptive.app.entity;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
-import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.utils.Utils;

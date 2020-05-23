@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
+import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -68,6 +69,12 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	public Collection<EntityTemplate> children(String uuid) {
 		
 		return repository.list(SearchField.eq("parentTemplate", uuid));
+	}
+	
+
+	@Override
+	public Collection<EntityTemplate> singletons() throws RepositoryException, EntityException {
+		return repository.list(SearchField.eq("type", EntityType.SINGLETON.name()));
 	}
 	
 	@Override

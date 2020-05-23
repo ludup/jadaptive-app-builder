@@ -79,6 +79,7 @@ public class HazelcastSpringConfiguration {
 		return Hazelcast.newHazelcastInstance(config);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Bean
 	NetworkConfig networkConfig(JoinConfig joinConfig,
 			@Qualifier("hazelcastProperties") Properties hazelcastProperties) {
@@ -155,6 +156,7 @@ public class HazelcastSpringConfiguration {
 		return properties;
 	}
 
+	@SuppressWarnings("deprecation")
 	private void tcpIpConfig(JoinConfig joinConfig, Properties hazelcastProperties) {
 		TcpIpConfig tcpIpConfig = new TcpIpConfig();
 		if (environment.acceptsProfiles("HA")
@@ -185,6 +187,7 @@ public class HazelcastSpringConfiguration {
 		joinConfig.setTcpIpConfig(tcpIpConfig);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void multicastConfig(JoinConfig joinConfig, Properties hazelcastProperties) {
 		MulticastConfig multicastConfig = new MulticastConfig();
 		if (environment.acceptsProfiles("HA")

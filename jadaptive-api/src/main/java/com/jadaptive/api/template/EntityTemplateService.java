@@ -15,6 +15,8 @@ public interface EntityTemplateService {
 
 	Collection<EntityTemplate> list() throws RepositoryException, EntityException;
 	
+	Collection<EntityTemplate> singletons() throws RepositoryException, EntityException;
+	
 	Collection<EntityTemplate> table(String searchField, String searchValue, String order, int start, int length) throws RepositoryException, EntityException;
 
 	void saveOrUpdate(EntityTemplate template) throws RepositoryException, EntityException;

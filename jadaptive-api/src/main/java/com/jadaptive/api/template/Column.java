@@ -11,8 +11,6 @@ public @interface Column {
 		
 		FieldType type();	
 		
-		String name();
-		
 		String defaultValue() default "";
 
 		boolean readOnly() default false;
@@ -34,6 +32,8 @@ public @interface Column {
 		String references() default "";
 
 		// USER INTERFACE PROPERTIES
+		String name();
+		
 		String description();
 		
 }

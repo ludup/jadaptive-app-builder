@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.jline.utils.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
@@ -22,9 +21,6 @@ public abstract class AbstractTenantAwareCommand extends ShellCommand {
 
 	@Autowired
 	private TenantService tenantService; 
-	
-	@Autowired
-	private PermissionService permissionService;
 	
 	@Autowired
 	protected UserService userService; 

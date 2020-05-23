@@ -34,7 +34,9 @@ public class SearchFormInput extends FormInputRender {
 		dropdown.append(replaceResourceKey("<div class=\"input-group-append\"><span class=\"jsearchClick input-group-text\"><i class=\"fas fa-search\"></i></span></div>"));
 		dropdown.append(replaceResourceKey("<div class=\"dropdown-menu\" aria-labelledby=\"${resourceKey}Dropdown\"></div>"));
 		dropdown.parents().first().append("<small class=\"form-text text-muted\">" + template.getDescription() + "</small>");
+		@SuppressWarnings("unused")
 		Element name = dropdown.select(replaceResourceKey("#${resourceKey}Text")).first();
+		@SuppressWarnings("unused")
 		Element value = dropdown.select(replaceResourceKey("#${resourceKey}")).first();
 		
 		if(Objects.nonNull(defaultValue)) {

@@ -9,7 +9,6 @@ import org.jsoup.select.Elements;
 
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
-import com.jadaptive.app.ui.renderers.InputRender;
 
 public class DropdownFormInput extends FormInputRender {
 

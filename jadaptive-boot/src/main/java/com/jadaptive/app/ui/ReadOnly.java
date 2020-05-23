@@ -3,7 +3,6 @@ package com.jadaptive.app.ui;
 import java.io.IOException;
 
 import org.jsoup.nodes.Document;
-import org.springframework.stereotype.Component;
 
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;

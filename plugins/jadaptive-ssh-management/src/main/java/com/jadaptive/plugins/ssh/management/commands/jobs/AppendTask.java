@@ -23,7 +23,6 @@ import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ValidationType;
-import com.jadaptive.plugins.ssh.management.ConsoleHelper;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.UsageException;
@@ -57,7 +56,9 @@ public class AppendTask extends AbstractTenantAwareCommand {
 		}
 		
 		String name = args[args.length-3];
+		@SuppressWarnings("unused")
 		String template = args[args.length-2];
+		@SuppressWarnings("unused")
 		TriggerType trigger = null;
 		
 		try {

@@ -15,7 +15,6 @@ import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
-import com.jadaptive.api.user.User;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.UsageException;

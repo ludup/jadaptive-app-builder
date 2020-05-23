@@ -16,7 +16,6 @@ import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.permissions.AuthenticatedService;
-import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.template.EntityTemplate;
@@ -33,10 +32,7 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 	private EntityRepository<MongoEntity> entityRepository;
 	
 	@Autowired
-	private EntityTemplateService templateService;
-	
-	@Autowired
-	private PermissionService permissionService; 
+	private EntityTemplateService templateService; 
 	
 	@Autowired
 	private SearchHelper searchHelper;

@@ -58,5 +58,10 @@ public class MockEntityTemplateService implements EntityTemplateService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@Override
+	public Collection<EntityTemplate> singletons() throws RepositoryException, EntityException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

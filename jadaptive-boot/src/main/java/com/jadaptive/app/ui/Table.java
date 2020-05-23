@@ -17,7 +17,6 @@ import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.template.EntityTemplateService;
 
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class })
 @View(contentType = "text/html", paths = { "/table/{resourceKey}" })
@@ -26,9 +25,6 @@ public class Table extends TemplatePage {
 
 	@Autowired
 	private PermissionService permissionService;
-	
-	@Autowired
-	private EntityTemplateService templateService; 
 	
 	protected void onCreated() throws FileNotFoundException {
 		

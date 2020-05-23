@@ -5,7 +5,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.pf4j.Extension;
-import org.pf4j.PluginManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -30,9 +29,6 @@ public class BuiltinUserController extends AuthenticatedController implements Pl
 
 	@Autowired
 	private ApplicationService applicationService;
-	
-	@Autowired
-	private PluginManager pluginManager;
 	
 	@RequestMapping(value = "/app/api/registration/user", method = RequestMethod.POST, produces = { "application/json" })
 	@ResponseBody

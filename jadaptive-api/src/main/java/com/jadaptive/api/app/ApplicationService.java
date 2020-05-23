@@ -2,8 +2,6 @@ package com.jadaptive.api.app;
 
 import java.util.Collection;
 
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-
 public interface ApplicationService {
 
 	<E> E getBean(Class<E> clz);

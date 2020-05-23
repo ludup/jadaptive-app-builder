@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.permissions.AccessDeniedException;
