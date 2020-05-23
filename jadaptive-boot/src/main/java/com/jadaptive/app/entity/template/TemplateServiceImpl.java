@@ -18,7 +18,7 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
@@ -149,7 +149,7 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 	private ObjectTemplate validateTemplate(ObjectTemplate obj) {
 		
 		if(!Objects.isNull(obj.getFields())) {
-			for(FieldTemplate t : obj.getFields()) {
+			for(FieldDefinition t : obj.getFields()) {
 				switch(t.getFieldType()) {
 				case OBJECT_EMBEDDED:
 				case OBJECT_REFERENCE:
@@ -166,7 +166,7 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 		return obj;
 	}
 
-	private boolean validatorPresent(FieldTemplate field, ValidationType validator) {
+	private boolean validatorPresent(FieldDefinition field, ValidationType validator) {
 		for(FieldValidator v : field.getValidators()) {
 			if(v.getType() == validator) {
 				return true;

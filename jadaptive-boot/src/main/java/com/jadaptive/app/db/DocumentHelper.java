@@ -28,7 +28,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 import com.jadaptive.app.ApplicationServiceImpl;
@@ -68,7 +68,7 @@ public class DocumentHelper {
 				if(Objects.isNull(field)) {
 					continue;
 				}
-				Column columnDefinition = field.getAnnotation(Column.class);
+				ObjectField columnDefinition = field.getAnnotation(ObjectField.class);
 				Object value = m.invoke(obj);
 				if(!Objects.isNull(value)) { 
 					if(m.getReturnType().equals(Date.class)) {
@@ -123,7 +123,7 @@ public class DocumentHelper {
 	}
 
 
-	private static String checkForAndPerformEncryption(Column columnDefinition, String value) {
+	private static String checkForAndPerformEncryption(ObjectField columnDefinition, String value) {
 		if(Objects.nonNull(columnDefinition) && (columnDefinition.manualEncryption() || columnDefinition.automaticEncryption())) {
 			if(Objects.nonNull(value) && !EncryptionServiceImpl.getInstance().isEncrypted(value)) {
 				return EncryptionServiceImpl.getInstance().encrypt(value);
@@ -132,7 +132,7 @@ public class DocumentHelper {
 		return value;
 	}
 	
-	private static String checkForAndPerformDecryption(Column columnDefinition, String value) {
+	private static String checkForAndPerformDecryption(ObjectField columnDefinition, String value) {
 		if(Objects.nonNull(columnDefinition) && columnDefinition.automaticEncryption()) {
 			if(Objects.nonNull(value) && EncryptionServiceImpl.getInstance().isEncrypted(value)) {
 				return EncryptionServiceImpl.getInstance().decrypt(value);
@@ -141,7 +141,7 @@ public class DocumentHelper {
 		return value;
 	}
 
-	public static void buildCollectionDocuments(String name, Column columnDefinition, Collection<?> values, Class<?> returnType, Map<String,Object> document) throws ParseException, ObjectException {
+	public static void buildCollectionDocuments(String name, ObjectField columnDefinition, Collection<?> values, Class<?> returnType, Map<String,Object> document) throws ParseException, ObjectException {
 		
 		List<Object> list = new ArrayList<>();
 
@@ -212,7 +212,7 @@ public class DocumentHelper {
 				if(Objects.isNull(field)) {
 					continue;
 				}
-				Column columnDefinition = field.getAnnotation(Column.class);
+				ObjectField columnDefinition = field.getAnnotation(ObjectField.class);
 //				if(!builtInNames.contains(name) && Objects.isNull(columnDefinition)) {
 //					continue;
 //				}
@@ -368,7 +368,7 @@ public class DocumentHelper {
 		}
 	}
 
-	private static Object buildStringCollection(Column columnDefinition, List<?> list) {
+	private static Object buildStringCollection(ObjectField columnDefinition, List<?> list) {
 		Collection<String> v = new HashSet<>();
 		for(Object item : list) {
 			v.add(checkForAndPerformDecryption(columnDefinition, item.toString()));
@@ -406,7 +406,7 @@ public class DocumentHelper {
 		return v;		
 	}
 
-	private static Collection<Date> buildDateCollection(Column columnDefinition, List<?> items) throws ParseException {
+	private static Collection<Date> buildDateCollection(ObjectField columnDefinition, List<?> items) throws ParseException {
 		Collection<Date> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Utils.parseDateTime(checkForAndPerformDecryption(columnDefinition, item.toString())));
@@ -414,7 +414,7 @@ public class DocumentHelper {
 		return v;
 	}
 
-	private static Collection<Double> buildDoubleCollection(Column columnDefinition, List<?> items) {
+	private static Collection<Double> buildDoubleCollection(ObjectField columnDefinition, List<?> items) {
 		Collection<Double> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Double.parseDouble(checkForAndPerformDecryption(columnDefinition, item.toString())));
@@ -422,7 +422,7 @@ public class DocumentHelper {
 		return v;
 	}
 
-	private static Collection<Float> buildFloatCollection(Column columnDefinition, List<?> items) {
+	private static Collection<Float> buildFloatCollection(ObjectField columnDefinition, List<?> items) {
 		Collection<Float> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Float.parseFloat(checkForAndPerformDecryption(columnDefinition, item.toString())));
@@ -430,7 +430,7 @@ public class DocumentHelper {
 		return v;
 	}
 
-	private static Collection<Long> buildLongCollection(Column columnDefinition, List<?> items) {
+	private static Collection<Long> buildLongCollection(ObjectField columnDefinition, List<?> items) {
 		Collection<Long> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Long.parseLong(checkForAndPerformDecryption(columnDefinition, item.toString())));
@@ -438,7 +438,7 @@ public class DocumentHelper {
 		return v;
 	}
 
-	private static Collection<Integer> buildIntegerCollection(Column columnDefinition, List<?> items) {
+	private static Collection<Integer> buildIntegerCollection(ObjectField columnDefinition, List<?> items) {
 		Collection<Integer> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Integer.parseInt(checkForAndPerformDecryption(columnDefinition, item.toString())));
@@ -446,7 +446,7 @@ public class DocumentHelper {
 		return v;
 	}
 
-	private static Collection<Boolean> buildBooleanCollection(Column columnDefinition, List<?> items) {
+	private static Collection<Boolean> buildBooleanCollection(ObjectField columnDefinition, List<?> items) {
 		Collection<Boolean> v = new HashSet<>();
 		for(Object item : items) {
 			v.add(Boolean.parseBoolean(checkForAndPerformDecryption(columnDefinition, item.toString())));

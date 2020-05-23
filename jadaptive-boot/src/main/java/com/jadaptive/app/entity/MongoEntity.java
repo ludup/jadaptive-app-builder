@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldDefinition;
 
 @JsonDeserialize(using=AbstractObjectDeserializer.class)
 @JsonSerialize(using=AbstractObjectSerializer.class)
@@ -58,7 +58,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	}
 
 	@Override
-	public MongoEntity getChild(FieldTemplate c) {
+	public MongoEntity getChild(FieldDefinition c) {
 		return children.get(c.getResourceKey());
 	}
 
@@ -104,7 +104,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	}
 	
 	@Override
-	public Object getValue(FieldTemplate t) {
+	public Object getValue(FieldDefinition t) {
 		switch(t.getFieldType()) {
 		case OBJECT_EMBEDDED:
 			throw new IllegalArgumentException("Use getChild to object embedded object");
@@ -126,11 +126,11 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 //	}
 
 	@Override
-	public void setValue(FieldTemplate t, Object value) {
+	public void setValue(FieldDefinition t, Object value) {
 		document.put(t.getResourceKey(), value);
 	}
 
-	public void setValue(FieldTemplate t, List<Object> values) {
+	public void setValue(FieldDefinition t, List<Object> values) {
 		document.put(t.getResourceKey(), values);
 	}
 

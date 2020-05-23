@@ -38,10 +38,10 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.Index;
@@ -429,18 +429,16 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			for(Field f :fields) {
 				
-				Column[] annotations = f.getAnnotationsByType(Column.class);
+				ObjectField[] annotations = f.getAnnotationsByType(ObjectField.class);
 				
 				if(Objects.nonNull(annotations) && annotations.length > 0) {
 					
-					Column field = annotations[0];
-					FieldTemplate t = new FieldTemplate();
+					ObjectField field = annotations[0];
+					FieldDefinition t = new FieldDefinition();
 					t.setResourceKey(f.getName());
 					t.setDefaultValue(field.defaultValue());
-					t.setDescription(field.description());
 					t.setFieldType(selectFieldType(f.getType(), field.type()));
 					t.setHidden(field.hidden());
-					t.setName(field.name());
 					t.setRequired(field.required());
 					t.setSystem(false);
 					t.setSearchable(field.searchable());
@@ -448,6 +446,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					t.setUnique(field.unique());
 					t.setCollection(f.getType().isAssignableFrom(Collection.class));
 					t.setReadOnly(field.readOnly());
+					
+					t.setDescription(field.description());
+					t.setName(field.name());
 					
 					switch(field.type()) {
 					case ENUM:
@@ -501,7 +502,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 	
 	private Collection<String> verifyColumnNames(ObjectTemplate template, Collection<String> columns) {
-		Map<String,FieldTemplate> definedColumns = template.toMap();
+		Map<String,FieldDefinition> definedColumns = template.toMap();
 		for(String column : columns) {
 			if(!definedColumns.containsKey(column)) {
 				throw new IllegalArgumentException(String.format("%s is not a valid column name", column));

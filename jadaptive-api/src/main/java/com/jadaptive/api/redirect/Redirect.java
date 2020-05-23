@@ -1,7 +1,7 @@
 package com.jadaptive.api.redirect;
 
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -10,10 +10,10 @@ public class Redirect extends UUIDEntity {
 
 	public static final String RESOURCE_KEY = "redirects";
 	
-	@Column(name = "Path", description = "The path to redirect", required = true, searchable = true, type = FieldType.TEXT)
+	@ObjectField(name = "Path", description = "The path to redirect", required = true, searchable = true, type = FieldType.TEXT)
 	String path;
 	
-	@Column(name = "Location", description = "The location to redirect to", required = true, type = FieldType.TEXT)
+	@ObjectField(name = "Location", description = "The location to redirect to", required = true, type = FieldType.TEXT)
 	String location;
 	
 	

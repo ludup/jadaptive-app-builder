@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -14,7 +14,7 @@ public class TestEnumCollections extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testEnumCollections";
 	
-	@Column(name = "Values", description = "A collection of enums", type = FieldType.ENUM)
+	@ObjectField(name = "Values", description = "A collection of enums", type = FieldType.ENUM)
 	Collection<TestEnum> values;
 	
 	public TestEnumCollections() {

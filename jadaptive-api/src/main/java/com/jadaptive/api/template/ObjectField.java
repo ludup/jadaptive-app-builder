@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Column {
+public @interface ObjectField {
 		
 		FieldType type();	
 		
@@ -32,8 +32,10 @@ public @interface Column {
 		String references() default "";
 
 		// USER INTERFACE PROPERTIES
+		@Deprecated
 		String name();
 		
+		@Deprecated
 		String description();
 		
 }

@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -14,7 +14,7 @@ public class TestStringCollections extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testStringCollections";
 	
-	@Column(name = "Strings", description = "A collectionn of strings", type = FieldType.TEXT)
+	@ObjectField(name = "Strings", description = "A collectionn of strings", type = FieldType.TEXT)
 	Collection<String> strings;
 	
 	public TestStringCollections() {

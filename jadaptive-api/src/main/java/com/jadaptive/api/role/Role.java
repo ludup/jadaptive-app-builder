@@ -6,7 +6,7 @@ import java.util.HashSet;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -15,26 +15,26 @@ public class Role extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "roles";
 	
-	@Column(name = "All Permissions", 
+	@ObjectField(name = "All Permissions", 
 			description = "Flag to indicate that this role contains all available permissions",
 			defaultValue = "false", 
 			type = FieldType.BOOL)
 	boolean allPermissions;
 	
-	@Column(name = "All Users", 
+	@ObjectField(name = "All Users", 
 			description = "Flag to indicate that this role contains all available users",
 			defaultValue = "false", 
 			type = FieldType.BOOL)
 	boolean allUsers;
 	
-	@Column(name = "Permissions", 
+	@ObjectField(name = "Permissions", 
 			description = "The permissions assigned to this Role",
 			defaultValue = "false", 
 			type = FieldType.TEXT,
 			searchable = true)
 	Collection<String> permissions = new HashSet<>();
 	
-	@Column(name = "Users", 
+	@ObjectField(name = "Users", 
 			description = "The users assigned to this Role",
 			defaultValue = "false", 
 			type = FieldType.OBJECT_REFERENCE,

@@ -2,7 +2,7 @@ package com.jadaptive.plugins.email;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -11,10 +11,10 @@ public class HTMLTemplate extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "htmlTemplates";
 	
-	@Column(name = "HTML", description = "The HTML content of this template", required = true, type = FieldType.TEXT)
+	@ObjectField(name = "HTML", description = "The HTML content of this template", required = true, type = FieldType.TEXT)
 	String html;
 
-	@Column(name = "Content Selector", description = "The selector that identifies the element to insert message content", required = true, defaultValue = "body", type = FieldType.TEXT)
+	@ObjectField(name = "Content Selector", description = "The selector that identifies the element to insert message content", required = true, defaultValue = "body", type = FieldType.TEXT)
 	String contentSelector;
 	
 	@Override

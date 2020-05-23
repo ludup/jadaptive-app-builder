@@ -21,8 +21,8 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	ObjectScope scope;
 	String resourceKey;
 	String defaultFilter;
-	Collection<FieldTemplate> fields = new ArrayList<>();
-	Map<String,FieldTemplate> fieldsByName;
+	Collection<FieldDefinition> fields = new ArrayList<>();
+	Map<String,FieldDefinition> fieldsByName;
 	String templateClass; 
 	Collection<String> aliases = new ArrayList<>();
 	String parentTemplate;
@@ -49,15 +49,15 @@ public class ObjectTemplate extends NamedUUIDEntity {
 		this.type = type;
 	}
 
-	public Collection<FieldTemplate> getFields() {
+	public Collection<FieldDefinition> getFields() {
 		return fields;
 	}
 
-	public void setFields(Collection<FieldTemplate> fields) {
+	public void setFields(Collection<FieldDefinition> fields) {
 		this.fields = fields;
 	}
 
-	public FieldTemplate getField(String name) {
+	public FieldDefinition getField(String name) {
 		return toMap().get(name);
 	}
 
@@ -86,11 +86,11 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	}
 
 	@JsonIgnore
-	public Map<String,FieldTemplate> toMap() {
+	public Map<String,FieldDefinition> toMap() {
 		
 		if(Objects.isNull(fieldsByName)) {
-			Map<String,FieldTemplate> tmp = new HashMap<>();
-			for(FieldTemplate t : fields) {
+			Map<String,FieldDefinition> tmp = new HashMap<>();
+			for(FieldDefinition t : fields) {
 				tmp.put(t.getResourceKey(), t);
 			}
 			fieldsByName = tmp;

@@ -2,7 +2,7 @@ package com.jadaptive.api.tasks;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -19,12 +19,12 @@ public class TriggerMapping extends UUIDEntity {
 		this.variableExpression = variableExpression;
 	}
 	
-	@Column(name = "Field Name", 
+	@ObjectField(name = "Field Name", 
 			description = "The name of the field that will accept this value", 
 			type = FieldType.TEXT)
 	String fieldName;
 	
-	@Column(name = "Expression", 
+	@ObjectField(name = "Expression", 
 			description = "The value of this variable, or expression used to calculate it", 
 			type = FieldType.TEXT_AREA)
 	String variableExpression;

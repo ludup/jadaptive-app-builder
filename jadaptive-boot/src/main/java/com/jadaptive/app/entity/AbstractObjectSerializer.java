@@ -12,7 +12,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.jadaptive.api.entity.AbstractObject;
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationType;
@@ -77,10 +77,10 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		gen.writeEndObject();
 	}
 	
-	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, AbstractObject value) throws IOException {
+	private void writeFields(JsonGenerator gen, Collection<FieldDefinition> templates, AbstractObject value) throws IOException {
 		
 		if(!Objects.isNull(templates)) {
-			for (FieldTemplate t : templates) {
+			for (FieldDefinition t : templates) {
 
 				switch(t.getFieldType()) {
 				case OBJECT_EMBEDDED:
@@ -122,7 +122,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		}
 	}
 
-	private void writeField(JsonGenerator gen, FieldTemplate t, Object value) throws IOException {
+	private void writeField(JsonGenerator gen, FieldDefinition t, Object value) throws IOException {
 		
 		switch (t.getFieldType()) {
 		case BOOL:
@@ -161,7 +161,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		}
 		return "";
 	}
-	private void writeCollectionField(JsonGenerator gen, FieldTemplate t, Object value) throws IOException {
+	private void writeCollectionField(JsonGenerator gen, FieldDefinition t, Object value) throws IOException {
 		
 		switch (t.getFieldType()) {
 		case BOOL:

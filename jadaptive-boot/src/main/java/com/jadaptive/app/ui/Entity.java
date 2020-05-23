@@ -27,7 +27,7 @@ import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ui.renderers.form.DropdownFormInput;
@@ -100,29 +100,29 @@ public class Entity {
 		contents.append("<form id=\"entityForm\" class=\"row\"></form>");
 		Elements parentElement = contents.select("#entityForm");
 		
-		List<FieldTemplate> objects = new ArrayList<>();
-		List<FieldTemplate> fields = new ArrayList<>();
+		List<FieldDefinition> objects = new ArrayList<>();
+		List<FieldDefinition> fields = new ArrayList<>();
 		orderFields(objects, fields, template, properties);
 		
 		renderFields(fields, entity, parentElement, properties, readOnly);
 		renderObjects(objects, entity, parentElement, properties, readOnly);
 	}
 
-	private void renderObjects(List<FieldTemplate> objects, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderObjects(List<FieldDefinition> objects, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 		
-		for(FieldTemplate object : objects) {
+		for(FieldDefinition object : objects) {
 			renderObject(parentElement, entity, object, readOnly);
 		}
 	}
 
-	private void renderFields(List<FieldTemplate> fields, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderFields(List<FieldDefinition> fields, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 		
-		for(FieldTemplate field : fields) {
+		for(FieldDefinition field : fields) {
 			renderField(parentElement, entity, field, properties, readOnly);
 		}
 	}
 
-	private void renderField(Elements parentElement, AbstractObject entity, FieldTemplate fieldTemplate, Properties properties, boolean readOnly) {
+	private void renderField(Elements parentElement, AbstractObject entity, FieldDefinition fieldTemplate, Properties properties, boolean readOnly) {
 		
 		if(fieldTemplate.getCollection()) {
 			renderColletion(parentElement, entity, fieldTemplate, properties, readOnly); 
@@ -131,7 +131,7 @@ public class Entity {
 		}
 	}
 	
-	private void renderFormField(Elements parentElement, AbstractObject entity, FieldTemplate fieldTemplate,
+	private void renderFormField(Elements parentElement, AbstractObject entity, FieldDefinition fieldTemplate,
 			Properties properties, boolean readOnly) {
 		
 		switch(fieldTemplate.getFieldType()) {
@@ -166,25 +166,25 @@ public class Entity {
 		}
 	}
 
-	private void renderColletion(Elements parentElement, AbstractObject entity, FieldTemplate fieldTemplate,
+	private void renderColletion(Elements parentElement, AbstractObject entity, FieldDefinition fieldTemplate,
 			Properties properties, boolean readOnly) {
 		
 		new SearchFormInput(parentElement, fieldTemplate, getDefaultValue(fieldTemplate, entity));
 	}
 
-	private void renderTextBox(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderTextBox(FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
 		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 	
-	private void renderPassword(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderPassword(FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
 		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 	
-	private void renderEnum(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderEnum(FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		try {
 			Class<?> values = classLoader.resolveClass(
@@ -197,7 +197,7 @@ public class Entity {
 		}
 	}
 
-	private String getDefaultValue(FieldTemplate fieldTemplate, AbstractObject entity) {
+	private String getDefaultValue(FieldDefinition fieldTemplate, AbstractObject entity) {
 		String defaultValue = fieldTemplate.getDefaultValue();
 		if(Objects.nonNull(entity)) {
 			defaultValue = String.valueOf(entity.getValue(fieldTemplate));
@@ -205,7 +205,7 @@ public class Entity {
 		return defaultValue;
 	}
 
-	private void renderBool(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderBool(FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
 		Elements elements = addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
@@ -216,29 +216,29 @@ public class Entity {
 		}
 	}
 	
-	private void renderNumber(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderNumber(FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
 		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 	
-	private void renderDate(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderDate(FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
 		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 	
-	private void renderTextArea(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderTextArea(FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		String templateHtml = getTemplate(fieldTemplate, properties);
 		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
 	}
 	
-	private String getTemplate(FieldTemplate fieldTemplate, Properties properties) {
+	private String getTemplate(FieldDefinition fieldTemplate, Properties properties) {
 		return DEFAULT_TEMPLATES.get(fieldTemplate.getFieldType());
 	}
 
-	private Elements addElement(String templateHtml, FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, boolean readOnly) {
+	private Elements addElement(String templateHtml, FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, boolean readOnly) {
 		templateHtml = templateHtml.replace("${resourceKey}", fieldTemplate.getResourceKey());
 		templateHtml = templateHtml.replace("${name}", fieldTemplate.getName());
 		templateHtml = templateHtml.replace("${description}", fieldTemplate.getDescription());
@@ -261,14 +261,14 @@ public class Entity {
 		return thisElement;
 	}
 
-	private void renderObject(Elements parentElement, AbstractObject entity, FieldTemplate object, boolean readOnly) {
+	private void renderObject(Elements parentElement, AbstractObject entity, FieldDefinition object, boolean readOnly) {
 		
 		
 	}
 
-	private void orderFields(List<FieldTemplate> objects, List<FieldTemplate> fields, ObjectTemplate template, Properties properties) {
+	private void orderFields(List<FieldDefinition> objects, List<FieldDefinition> fields, ObjectTemplate template, Properties properties) {
 		
-		for(FieldTemplate field : template.getFields()) {
+		for(FieldDefinition field : template.getFields()) {
 			if(field.isHidden()) {
 				continue;
 			}

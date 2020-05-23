@@ -5,7 +5,7 @@ import java.util.Date;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -15,19 +15,19 @@ public class Quota extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "quota";
 	
-	@Column(name = "Group", description = "A group to identify the quote type", type = FieldType.TEXT)
+	@ObjectField(name = "Group", description = "A group to identify the quote type", type = FieldType.TEXT)
 	String group;
 	
-	@Column(name = "Key", description = "An individual quote within the group", type = FieldType.TEXT)
+	@ObjectField(name = "Key", description = "An individual quote within the group", type = FieldType.TEXT)
 	String key;
 	
-	@Column(name = "Quota", description = "The maximum available value of this quota", type = FieldType.LONG)
+	@ObjectField(name = "Quota", description = "The maximum available value of this quota", type = FieldType.LONG)
 	long quota;
 	
-	@Column(name = "Period", description = "The period of time in seconds that the quote applies", type = FieldType.LONG)
+	@ObjectField(name = "Period", description = "The period of time in seconds that the quote applies", type = FieldType.LONG)
 	long period;
 	
-	@Column(name = "Value", description = "The current value of this quota", type = FieldType.LONG)
+	@ObjectField(name = "Value", description = "The current value of this quota", type = FieldType.LONG)
 	long value;
 
 	Date quotaStarted;

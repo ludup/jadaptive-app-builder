@@ -8,7 +8,7 @@ import java.util.UUID;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.PersonalUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Table;
 import com.jadaptive.api.template.Template;
@@ -26,25 +26,25 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 
 	public static final String RESOURCE_KEY = "authorizedKeys";
 	
-	@Column(name = "Key ID", 
+	@ObjectField(name = "Key ID", 
 			description = "The ID of this key", 
 			searchable = true, 
 			hidden = true, type = FieldType.LONG)
 	Long id;
 	
-	@Column(name = "Name", description = "A name to identify this public key", type = FieldType.TEXT)
+	@ObjectField(name = "Name", description = "A name to identify this public key", type = FieldType.TEXT)
 	String name;
 	
-	@Column(name = "Public Key", description = "The formatted public key", readOnly = true, type = FieldType.TEXT_AREA)
+	@ObjectField(name = "Public Key", description = "The formatted public key", readOnly = true, type = FieldType.TEXT_AREA)
 	String publicKey;
 	
-	@Column(name = "Fingerprint", description = "The SHA256 fingerprint of the public key", readOnly = true,  type = FieldType.TEXT, required = false)
+	@ObjectField(name = "Fingerprint", description = "The SHA256 fingerprint of the public key", readOnly = true,  type = FieldType.TEXT, required = false)
 	String fingerprint;
 	
-	@Column(name = "Tags", description = "Tags determine how and when keys can be used", readOnly = true, type = FieldType.TEXT, searchable = true)
+	@ObjectField(name = "Tags", description = "Tags determine how and when keys can be used", readOnly = true, type = FieldType.TEXT, searchable = true)
 	Set<String> tags = new HashSet<>();
 	
-	@Column(name = "Type", description = "The type of key", readOnly = true, type = FieldType.TEXT)
+	@ObjectField(name = "Type", description = "The type of key", readOnly = true, type = FieldType.TEXT)
 	String type;
 	
 	public Long getId() {

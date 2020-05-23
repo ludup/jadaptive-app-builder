@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -16,7 +16,7 @@ public class TestObjectCollections extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testObjectCollections";
 	
-	@Column(name = "Values", description = "A collection of objects", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(name = "Values", description = "A collection of objects", type = FieldType.OBJECT_EMBEDDED)
 	List<TestSimpleObject> values;
 	
 	public TestObjectCollections() {

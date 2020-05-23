@@ -6,7 +6,7 @@ import java.util.Objects;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -15,14 +15,14 @@ public class TemplateVersion extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "templateVersion";
 
-	@Column(name = "Version", 
+	@ObjectField(name = "Version", 
 			description = "The version of this template", 
 			required = true,
 			searchable = true,
 			type = FieldType.TEXT)
 	String version; 
 	
-	@Column(name = "Timestamp", 
+	@ObjectField(name = "Timestamp", 
 			description = "The timestamp this template was installed", 
 			required = true,
 			type = FieldType.TIMESTAMP)

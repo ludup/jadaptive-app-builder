@@ -3,7 +3,7 @@ package com.jadaptive.app.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 import com.jadaptive.api.user.EmailEnabledUser;
@@ -20,7 +20,7 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	PasswordEncryptionType encodingType;
 	boolean passwordChangeRequired;
 	
-	@Column(name = "Username", 
+	@ObjectField(name = "Username", 
 			description = "The logon name of the user",
 			required = true,
 			searchable = true,
@@ -28,14 +28,14 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 			unique = true)
 	String username;
 	
-	@Column(name = "Full Name", 
+	@ObjectField(name = "Full Name", 
 			description = "The full name of the user",
 			required = true,
 			searchable = true,
 			type = FieldType.TEXT)
 	String name;
 	
-	@Column(name = "Email", 
+	@ObjectField(name = "Email", 
 			description = "The user's email address",
 			required = false,
 			searchable = true,

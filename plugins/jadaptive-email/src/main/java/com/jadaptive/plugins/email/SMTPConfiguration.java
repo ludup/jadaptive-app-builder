@@ -4,7 +4,7 @@ import org.codemonkey.simplejavamail.TransportStrategy;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -13,37 +13,37 @@ public class SMTPConfiguration extends UUIDEntity{
 
 	public static final String RESOURCE_KEY = "smtpConfiguration";
 	
-	@Column(name = "Enabled", defaultValue="false", description = "Enable the SMTP email service", type = FieldType.BOOL)
+	@ObjectField(name = "Enabled", defaultValue="false", description = "Enable the SMTP email service", type = FieldType.BOOL)
 	Boolean enabled;
 	
-	@Column(name = "Protocol", defaultValue= "SMTP_PLAIN", description = "The transport protocol to use to connect to the SMTP server", type = FieldType.ENUM)
+	@ObjectField(name = "Protocol", defaultValue= "SMTP_PLAIN", description = "The transport protocol to use to connect to the SMTP server", type = FieldType.ENUM)
 	TransportStrategy protocol;
 	
-	@Column(name = "Hostname", defaultValue="localhost", description = "The hostname of the SMTP server", type = FieldType.TEXT)
+	@ObjectField(name = "Hostname", defaultValue="localhost", description = "The hostname of the SMTP server", type = FieldType.TEXT)
 	String hostname;
 	
-	@Column(name = "Port", defaultValue="25", description = "The port to use", type = FieldType.TEXT)
+	@ObjectField(name = "Port", defaultValue="25", description = "The port to use", type = FieldType.TEXT)
 	int port;
 	
-	@Column(name = "Username", description = "The username for SMTP authentication", type = FieldType.TEXT)
+	@ObjectField(name = "Username", description = "The username for SMTP authentication", type = FieldType.TEXT)
 	String username;
 	
-	@Column(name = "Password", description = "The password for SMTP authentication", type = FieldType.PASSWORD, manualEncryption = true)
+	@ObjectField(name = "Password", description = "The password for SMTP authentication", type = FieldType.PASSWORD, manualEncryption = true)
 	String password;
 
-	@Column(name = "From Name", description = "The name of the user to place in the From field", type = FieldType.TEXT)
+	@ObjectField(name = "From Name", description = "The name of the user to place in the From field", type = FieldType.TEXT)
 	String fromName;
 	
-	@Column(name = "From Address", description = "The email address to use in the From field", type = FieldType.TEXT)
+	@ObjectField(name = "From Address", description = "The email address to use in the From field", type = FieldType.TEXT)
 	String fromAddress;
 	
-	@Column(name = "Reply-To Address", description = "The email address to use in the Reply-To field", type = FieldType.TEXT)
+	@ObjectField(name = "Reply-To Address", description = "The email address to use in the Reply-To field", type = FieldType.TEXT)
 	String replyToAddress;
 
-	@Column(name = "Reply-To Name", description = "The name of the user to place in the Reply-To field", type = FieldType.TEXT)
+	@ObjectField(name = "Reply-To Name", description = "The name of the user to place in the Reply-To field", type = FieldType.TEXT)
 	String replyToName;
 	
-	@Column(name = "Archive Address", description = "An email address that should receive archived emails", type = FieldType.TEXT)
+	@ObjectField(name = "Archive Address", description = "An email address that should receive archived emails", type = FieldType.TEXT)
 	String archiveAddress;
 	
 	public Boolean getEnabled() {

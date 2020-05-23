@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -13,7 +13,7 @@ public class SchedulerConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "schedulerConfig";
 	
-	@Column(name = "Pool Size", 
+	@ObjectField(name = "Pool Size", 
 			description = "The number of threads available to the scheduler",
 			defaultValue = "10", 
 			type = FieldType.INTEGER)

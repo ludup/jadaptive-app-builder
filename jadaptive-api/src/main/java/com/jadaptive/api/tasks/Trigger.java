@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -14,19 +14,19 @@ public class Trigger extends UUIDEntity {
 
 	public static final String RESOURCE_KEY = "trigger";
 	
-	@Column(name = "Trigger Type", description = "When to trigger the tasks", type = FieldType.ENUM)
+	@ObjectField(name = "Trigger Type", description = "When to trigger the tasks", type = FieldType.ENUM)
 	TriggerType type;
 	
-	@Column(name = "Task Mappings", description = "A set of variables that map parameters from the previous task to the executing task", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(name = "Task Mappings", description = "A set of variables that map parameters from the previous task to the executing task", type = FieldType.OBJECT_EMBEDDED)
 	List<TriggerMapping> taskMappings = new ArrayList<>();
 
-	@Column(name = "Global Mappings", description = "Variables that should be stored for future use future tasks", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(name = "Global Mappings", description = "Variables that should be stored for future use future tasks", type = FieldType.OBJECT_EMBEDDED)
 	List<TriggerMapping> globalMappings = new ArrayList<>();
 	
-	@Column(name = "Task", description = "The task to execute", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(name = "Task", description = "The task to execute", type = FieldType.OBJECT_EMBEDDED)
 	Task task;
 	
-	@Column(name = "Triggers", 
+	@ObjectField(name = "Triggers", 
 			description = "Additional tasks to conditionally execute",
 			type = FieldType.OBJECT_EMBEDDED)
 	List<Trigger> triggers = new ArrayList<>();

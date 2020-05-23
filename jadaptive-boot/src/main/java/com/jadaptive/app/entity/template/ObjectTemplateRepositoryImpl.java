@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
@@ -66,8 +66,8 @@ public class ObjectTemplateRepositoryImpl extends AbstractTenantAwareObjectDatab
 			}
 		}
 		
-		FieldTemplate textIndexField = null;
-		for(FieldTemplate field : template.getFields()) {
+		FieldDefinition textIndexField = null;
+		for(FieldDefinition field : template.getFields()) {
 			if(!field.getResourceKey().equalsIgnoreCase("uuid")) {
 				if(field.isUnique()) {
 					if(log.isInfoEnabled()) {

@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -13,51 +13,51 @@ public class Message extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "messages";
 	
-	@Column(name = "Message Group", description = "The group of messages this belongs to", 
+	@ObjectField(name = "Message Group", description = "The group of messages this belongs to", 
 			required = true, readOnly = true, type = FieldType.TEXT)
 	String group;
 	
-	@Column(name = "Subject", description = "The subject of this message", 
+	@ObjectField(name = "Subject", description = "The subject of this message", 
 				required = true, searchable = true, type = FieldType.TEXT)
 	String subject;
 	
-	@Column(name = "Plain Text", description = "The plain text content of this message", 
+	@ObjectField(name = "Plain Text", description = "The plain text content of this message", 
 			required = true, searchable = true, type = FieldType.TEXT_AREA)
 	String plainText;
 	
-	@Column(name = "HTML Template", 
+	@ObjectField(name = "HTML Template", 
 			description = "The base HTML template for inserting content", 
 			type = FieldType.OBJECT_REFERENCE)
 	HTMLTemplate htmlTemplate;
 	
-	@Column(name = "HTML Content", 
+	@ObjectField(name = "HTML Content", 
 			description = "The HTML content of this message.", 
 			type = FieldType.TEXT_AREA)
 	String html;
 	
-	@Column(name = "Enabled", 
+	@ObjectField(name = "Enabled", 
 			description = "Disabling this message prevents it from being sent", 
 		    defaultValue = "true", 
 		    type = FieldType.BOOL)
 	boolean enabled = true;
 	
-	@Column(name = "Reply-To Name", 
+	@ObjectField(name = "Reply-To Name", 
 			description = "Override the Reply-To option in this message", 
 			type = FieldType.TEXT)
 	String replyToName;
 	
-	@Column(name = "Reply-To Email", 
+	@ObjectField(name = "Reply-To Email", 
 			description = "Override the Reply-To option in this message", 
 			type = FieldType.TEXT)
 	String replyToEmail;
 	
-	@Column(name = "Archive", 
+	@ObjectField(name = "Archive", 
 			description = "Send a copy of this email to the archive address", 
 		    defaultValue = "true", 
 		    type = FieldType.BOOL)
 	boolean archive = true;
 	
-	@Column(name = "Replacement Variables", 
+	@ObjectField(name = "Replacement Variables", 
 			description = "You may use these variables in your content",
 			type = FieldType.TEXT)
 	Collection<String> replacementVariables;

@@ -21,7 +21,7 @@ import com.jadaptive.api.tasks.Trigger;
 import com.jadaptive.api.tasks.TriggerType;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
@@ -162,7 +162,7 @@ public class AppendTask extends AbstractTenantAwareCommand {
 	
 	private void printSourceParameters(ObjectTemplate entityTemplate, String obj) {
 		
-		for(FieldTemplate field : entityTemplate.getFields()) {
+		for(FieldDefinition field : entityTemplate.getFields()) {
 			
 			if(StringUtils.isNotBlank(obj)) {
 				console.println("${" + obj + "." + field.getResourceKey() + "}");

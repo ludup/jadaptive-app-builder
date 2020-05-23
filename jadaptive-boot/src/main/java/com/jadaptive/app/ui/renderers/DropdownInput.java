@@ -8,7 +8,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.jadaptive.api.repository.NamedUUIDEntity;
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldDefinition;
 
 public class DropdownInput extends InputRender {
 
@@ -87,10 +87,10 @@ public class DropdownInput extends InputRender {
 		}
 	}
 	
-	public void renderTemplateFields(Collection<FieldTemplate> fields) {
+	public void renderTemplateFields(Collection<FieldDefinition> fields) {
 		
-		FieldTemplate selected = null;
-		for(FieldTemplate field : fields) {
+		FieldDefinition selected = null;
+		for(FieldDefinition field : fields) {
 			if(Objects.isNull(field)) {
 				selected = field;
 			}

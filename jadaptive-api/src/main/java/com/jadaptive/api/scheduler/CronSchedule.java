@@ -5,7 +5,7 @@ import java.util.Date;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -14,27 +14,27 @@ public class CronSchedule extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "cronSchedules";
 	
-	@Column(name = "Cron Expression", 
+	@ObjectField(name = "Cron Expression", 
 			description = "The crontab expression for this schedule",
 			type = FieldType.TEXT)
 	String expression;
 
-	@Column(name = "Job", 
+	@ObjectField(name = "Job", 
 			description = "The job to execute",
 			type = FieldType.OBJECT_REFERENCE)
 	Job job;
 	
-	@Column(name = "Disabled", 
+	@ObjectField(name = "Disabled", 
 			description = "Set this flag to disable execution of this job",
 			type = FieldType.BOOL)
 	Boolean disabled;
 	
-	@Column(name = "Last Execution Finished", 
+	@ObjectField(name = "Last Execution Finished", 
 			description = "The timestamp when the last execution finished",
 			type = FieldType.TIMESTAMP)
 	Date lastExecutionFinished;
 	
-	@Column(name = "Last Execution Started", 
+	@ObjectField(name = "Last Execution Started", 
 			description = "The timestamp when the last execution started",
 			type = FieldType.TIMESTAMP)
 	Date lastExecutionStarted;

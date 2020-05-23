@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -120,16 +120,16 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 	}
 
 
-	private void iterateFields(JsonNode current, Collection<FieldTemplate> fields, MongoEntity e) throws IOException, ValidationException {
+	private void iterateFields(JsonNode current, Collection<FieldDefinition> fields, MongoEntity e) throws IOException, ValidationException {
 		
 		if(!Objects.isNull(fields)) {
-			for(FieldTemplate field : fields) {
+			for(FieldDefinition field : fields) {
 				validateNode(current, field, e);
 			}
 		}
 	}
 
-	private void validateNode(JsonNode node, FieldTemplate field,
+	private void validateNode(JsonNode node, FieldDefinition field,
 			MongoEntity e) throws IOException, ValidationException {
 		
 		if(log.isInfoEnabled()) {
@@ -160,7 +160,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 
 	}
 
-	private void processEmbeddedObjects(FieldTemplate field, JsonNode node, MongoEntity e) throws ValidationException, IOException {
+	private void processEmbeddedObjects(FieldDefinition field, JsonNode node, MongoEntity e) throws ValidationException, IOException {
 		
 		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
 		
@@ -189,7 +189,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 //		setProperty(node.asText(), field, e);
 //	}
 
-	private void processSimpleTypes(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
+	private void processSimpleTypes(FieldDefinition field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
 		if(node.isArray()) {
 			setCollectionProperty(field, node, e);
 		} else {
@@ -197,7 +197,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		}
 	}
 
-	private void setCollectionProperty(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
+	private void setCollectionProperty(FieldDefinition field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
 		
 		List<Object> values = new ArrayList<>();
 		for(JsonNode element : node) {
@@ -207,7 +207,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		
 	}
 
-	private Object validate(FieldTemplate field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
+	private Object validate(FieldDefinition field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
 		
 		switch(field.getFieldType()) {
 		case BOOL:
@@ -252,15 +252,15 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 //		
 //	}
 
-	private void validateDate(JsonNode node, FieldTemplate field) {
+	private void validateDate(JsonNode node, FieldDefinition field) {
 		
 	}
 
-	private void validateEnum(JsonNode node, FieldTemplate field) {
+	private void validateEnum(JsonNode node, FieldDefinition field) {
 	
 	}
 
-	private void validateNumber(JsonNode node, FieldTemplate field) throws ValidationException {
+	private void validateNumber(JsonNode node, FieldDefinition field) throws ValidationException {
 		try {
 			long value = Long.parseLong(node.asText());
 			
@@ -292,7 +292,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		}
 	}
 
-	private void validateDecimal(JsonNode node, FieldTemplate field) throws ValidationException {
+	private void validateDecimal(JsonNode node, FieldDefinition field) throws ValidationException {
 		try {
 			double value = Double.parseDouble(node.asText());
 			
@@ -324,7 +324,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		}
 	}
 
-	private void validateBoolean(JsonNode node, FieldTemplate field) throws ValidationException {
+	private void validateBoolean(JsonNode node, FieldDefinition field) throws ValidationException {
 		if(node.isBoolean()) {
 			return;
 		}
@@ -340,7 +340,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		}
 	}
 
-	private void validateText(JsonNode node, FieldTemplate field) throws ValidationException {
+	private void validateText(JsonNode node, FieldDefinition field) throws ValidationException {
 		
 		String value = node.asText();
 		
@@ -367,13 +367,13 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		}
 	}
 
-	private void setProperty(Object value, FieldTemplate t, MongoEntity e) {
+	private void setProperty(Object value, FieldDefinition t, MongoEntity e) {
 		if(!Objects.isNull(value)) {
 			e.setValue(t, value);
 		} 
 	}
 	
-	private void setPropertyDefault(FieldTemplate t, MongoEntity e) {
+	private void setPropertyDefault(FieldDefinition t, MongoEntity e) {
 		e.setValue(t, t.getDefaultValue()); 
 	}
 

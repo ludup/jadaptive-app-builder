@@ -2,7 +2,7 @@ package com.jadaptive.plugins.builtin;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 import com.jadaptive.api.user.PasswordEnabledUser;
@@ -12,7 +12,7 @@ import com.jadaptive.utils.PasswordEncryptionType;
 public class BuiltinUser extends PasswordEnabledUser {
 
 	public static final String RESOURCE_KEY = "builtinUsers";
-	@Column(name = "Username", 
+	@ObjectField(name = "Username", 
 			description = "The logon name of the user",
 			required = true,
 			searchable = true,
@@ -20,7 +20,7 @@ public class BuiltinUser extends PasswordEnabledUser {
 			unique = true)
 	String username;
 	
-	@Column(name = "Full Name", 
+	@ObjectField(name = "Full Name", 
 			description = "The full name of the user",
 			required = true,
 			searchable = true,
@@ -32,7 +32,7 @@ public class BuiltinUser extends PasswordEnabledUser {
 	PasswordEncryptionType encodingType;
 	boolean passwordChangeRequired;
 	
-	@Column(name = "Email", 
+	@ObjectField(name = "Email", 
 			description = "The user's email address",
 			required = false,
 			searchable = true,

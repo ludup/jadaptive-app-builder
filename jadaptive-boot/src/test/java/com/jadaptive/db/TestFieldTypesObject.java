@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.Column;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
@@ -13,31 +13,31 @@ public class TestFieldTypesObject extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testFieldTypesObject";
 
-	@Column(name = "String", description = "A string", type = FieldType.TEXT)
+	@ObjectField(name = "String", description = "A string", type = FieldType.TEXT)
 	String string;
 	
-	@Column(name = "Long", description = "A long", type = FieldType.LONG)
+	@ObjectField(name = "Long", description = "A long", type = FieldType.LONG)
 	Long longNumber;
 	
-	@Column(name = "Integer", description = "An int", type = FieldType.INTEGER)
+	@ObjectField(name = "Integer", description = "An int", type = FieldType.INTEGER)
 	Integer intNumber;
 	
-	@Column(name = "Float", description = "A float", type = FieldType.DECIMAL)
+	@ObjectField(name = "Float", description = "A float", type = FieldType.DECIMAL)
 	Float floatNumber;
 	
-	@Column(name = "Double", description = "A double", type = FieldType.DECIMAL)
+	@ObjectField(name = "Double", description = "A double", type = FieldType.DECIMAL)
 	Double doubleNumber;
 	
-	@Column(name = "Date", description = "A date", type = FieldType.TIMESTAMP)
+	@ObjectField(name = "Date", description = "A date", type = FieldType.TIMESTAMP)
 	Date date;
 	
-	@Column(name = "Enum", description = "An enum", type = FieldType.ENUM)
+	@ObjectField(name = "Enum", description = "An enum", type = FieldType.ENUM)
 	TestEnum enumField;
 	
-	@Column(name = "Bool", description = "A boolean", type = FieldType.BOOL)
+	@ObjectField(name = "Bool", description = "A boolean", type = FieldType.BOOL)
 	Boolean bool;
 	
-	@Column(name = "Object", description = "An object", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(name = "Object", description = "An object", type = FieldType.OBJECT_EMBEDDED)
 	EmbeddedObject embedded;
 	
 	public TestFieldTypesObject() {
