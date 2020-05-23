@@ -3,13 +3,13 @@ package com.jadaptive.api.tasks;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Trigger", resourceKey = Trigger.RESOURCE_KEY, type = EntityType.OBJECT)
+@Template(name = "Trigger", resourceKey = Trigger.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class Trigger extends UUIDEntity {
 
 	public static final String RESOURCE_KEY = "trigger";

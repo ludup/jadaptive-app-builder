@@ -1,12 +1,12 @@
 package com.jadaptive.plugins.email;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "HTML Templates", resourceKey = HTMLTemplate.RESOURCE_KEY, type = EntityType.COLLECTION)
+@Template(name = "HTML Templates", resourceKey = HTMLTemplate.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class HTMLTemplate extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "htmlTemplates";

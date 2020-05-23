@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
@@ -31,7 +31,7 @@ public class TenantController {
 	@RequestMapping(value="api/tenant/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<Collection<Tenant>> getEntityTemplates(HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<Collection<Tenant>> getEntityTemplates(HttpServletRequest request) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
 		   return new EntityStatus<Collection<Tenant>>(tenantService.listTenants());
 		} catch(Throwable e) {

@@ -6,9 +6,9 @@ import java.util.Map;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.FieldTemplate;
 
-public interface AbstractEntity extends UUIDDocument {
+public interface AbstractObject extends UUIDDocument {
 
-	AbstractEntity getChild(FieldTemplate c);
+	AbstractObject getChild(FieldTemplate c);
 
 	String getResourceKey();
 
@@ -28,7 +28,7 @@ public interface AbstractEntity extends UUIDDocument {
 
 	Boolean isHidden();
 
-	Collection<AbstractEntity> getObjectCollection(String resourceKey);
+	Collection<AbstractObject> getObjectCollection(String resourceKey);
 
 	Collection<String> getCollection(String resourceKey);
 

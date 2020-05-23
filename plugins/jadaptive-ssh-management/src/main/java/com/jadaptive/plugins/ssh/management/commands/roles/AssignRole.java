@@ -11,7 +11,7 @@ import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.user.User;
@@ -52,7 +52,7 @@ public class AssignRole extends AbstractTenantAwareCommand {
 					console.println(String.format("%s was assigned to %s", user.getUsername(), role.getName()));
 				}
 				
-			} catch(EntityNotFoundException e) {
+			} catch(ObjectNotFoundException e) {
 				console.println(String.format("There is no Role named %s", roleName));
 			}
 		} 

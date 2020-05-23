@@ -5,13 +5,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Test Object Collections", resourceKey = TestObjectCollections.RESOURCE_KEY, type = EntityType.COLLECTION)
+@Template(name = "Test Object Collections", resourceKey = TestObjectCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class TestObjectCollections extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testObjectCollections";

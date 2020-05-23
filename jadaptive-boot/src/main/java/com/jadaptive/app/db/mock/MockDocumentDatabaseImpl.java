@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.app.db.DocumentDatabase;
 
@@ -46,7 +46,7 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		Document doc = getCollection(table, database).get(uuid);
 		
 		if(Objects.isNull(doc)) {
-			throw new EntityException(String.format("%s not found for id %s", table, uuid));
+			throw new ObjectException(String.format("%s not found for id %s", table, uuid));
 		}
 		
 		return doc;

@@ -3,7 +3,7 @@ package com.jadaptive.api.jobs;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.tasks.Task;
 import com.jadaptive.api.tasks.Trigger;
@@ -11,7 +11,7 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Job", resourceKey = Job.RESOURCE_KEY, type = EntityType.COLLECTION)
+@Template(name = "Job", resourceKey = Job.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class Job extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "job";

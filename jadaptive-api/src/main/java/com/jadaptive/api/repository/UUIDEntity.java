@@ -1,7 +1,5 @@
 package com.jadaptive.api.repository;
 
-import com.jadaptive.api.entity.AbstractEntity;
-
 public abstract class UUIDEntity implements UUIDDocument {
 
 	String uuid;

@@ -12,15 +12,15 @@ import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.jobs.JobService;
 import com.jadaptive.api.tasks.Task;
 import com.jadaptive.api.tasks.TaskService;
 import com.jadaptive.api.tasks.Trigger;
 import com.jadaptive.api.tasks.TriggerType;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
@@ -32,7 +32,7 @@ import com.sshtools.server.vsession.VirtualConsole;
 public class AppendTask extends AbstractTenantAwareCommand {
 
 	@Autowired
-	private EntityTemplateService templateService;  
+	private TemplateService templateService;  
 	
 	@Autowired
 	private JobService jobService; 
@@ -72,7 +72,7 @@ public class AppendTask extends AbstractTenantAwareCommand {
 		
 		try {
 			job = jobService.getJob(name);
-		} catch(EntityNotFoundException e) {
+		} catch(ObjectNotFoundException e) {
 			console.println(String.format("There is no job with name or id %s", name));
 			return;
 		}
@@ -81,7 +81,7 @@ public class AppendTask extends AbstractTenantAwareCommand {
 		
 		console.println(String.format("Appending to %s task", task.getResourceKey()));
 		
-		EntityTemplate sourceTemplate = templateService.get(job.getTask().getResourceKey());
+		ObjectTemplate sourceTemplate = templateService.get(job.getTask().getResourceKey());
 		printSourceParameters(sourceTemplate);
 		
 
@@ -149,7 +149,7 @@ public class AppendTask extends AbstractTenantAwareCommand {
 //		return trigger;
 //	}
 
-	private void printSourceParameters(EntityTemplate entityTemplate) {
+	private void printSourceParameters(ObjectTemplate entityTemplate) {
 		console.println("You can use the following parameters to reference the output of previous task:");
 		printSourceParameters(entityTemplate, "");
 		printGlobalParameters();
@@ -160,7 +160,7 @@ public class AppendTask extends AbstractTenantAwareCommand {
 
 	}
 	
-	private void printSourceParameters(EntityTemplate entityTemplate, String obj) {
+	private void printSourceParameters(ObjectTemplate entityTemplate, String obj) {
 		
 		for(FieldTemplate field : entityTemplate.getFields()) {
 			

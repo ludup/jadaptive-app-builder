@@ -13,8 +13,8 @@ import org.jline.reader.Candidate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserImpl;
 import com.jadaptive.api.user.UserService;
@@ -36,7 +36,7 @@ public class CreateUser extends AbstractTenantAwareCommand {
 	private ConsoleHelper consoleHelper;
 	
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	public CreateUser() {
 		super("create-user", "User Management", "create-user", "Create a builtin user account");
@@ -57,7 +57,7 @@ public class CreateUser extends AbstractTenantAwareCommand {
 		
 		permissionService.assertReadWrite(UserService.USER_RESOURCE_KEY);
 		
-		EntityTemplate userTemplate = selectUserTemplate();
+		ObjectTemplate userTemplate = selectUserTemplate();
 		
 		Map<String,Object> doc = consoleHelper.promptTemplate(console, new HashMap<>(), userTemplate, null, userTemplate.getTemplateClass());
 		User user = templateService.createObject(doc, UserImpl.class);
@@ -79,23 +79,23 @@ public class CreateUser extends AbstractTenantAwareCommand {
 		console.println(String.format("Created user %s", user.getUsername()));
 	}
 
-	private EntityTemplate selectUserTemplate() {
+	private ObjectTemplate selectUserTemplate() {
 		
-		Collection<EntityTemplate> userTemplates = userService.getCreateUserTemplates();
+		Collection<ObjectTemplate> userTemplates = userService.getCreateUserTemplates();
 		List<Candidate> candidates = new ArrayList<>();
 		if(userTemplates.size() == 1) {
 			return userTemplates.iterator().next();
 		}
 		
-		Map<String,EntityTemplate> templates = new HashMap<>();
-		for(EntityTemplate t : userTemplates) {
+		Map<String,ObjectTemplate> templates = new HashMap<>();
+		for(ObjectTemplate t : userTemplates) {
 			candidates.add(new Candidate(t.getName()));
 			templates.put(t.getName(), t);
 		}
 		console.getEnvironment().put("_COMPLETIONS", candidates);
 		console.println("Select a user template. Use tab to cycle through the available templates.");
 		
-		EntityTemplate val = null;
+		ObjectTemplate val = null;
 		do {
 			String templateName = console.readLine("User Template: ").trim();
 			val = templates.get(templateName);

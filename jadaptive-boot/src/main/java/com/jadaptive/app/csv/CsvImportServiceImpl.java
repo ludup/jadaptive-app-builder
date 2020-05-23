@@ -19,8 +19,8 @@ import org.supercsv.prefs.CsvPreference;
 
 import com.jadaptive.api.csv.CsvImportService;
 import com.jadaptive.api.csv.ImportCallback;
-import com.jadaptive.api.entity.EntityService;
-import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.app.entity.MongoEntity;
 
 @Service
@@ -29,7 +29,7 @@ public class CsvImportServiceImpl implements CsvImportService {
 	static Logger log = LoggerFactory.getLogger(CsvImportServiceImpl.class);
 	
 	@Autowired
-	private EntityService entityService;
+	private ObjectService entityService;
 	
 	private ThreadLocal<ImportCallback> callbacks = new ThreadLocal<>();
 	
@@ -39,13 +39,13 @@ public class CsvImportServiceImpl implements CsvImportService {
 	}
 	
 	@Override
-	public long importCsv(EntityTemplate template, InputStream in, boolean containsHeader, String... orderedFields)
+	public long importCsv(ObjectTemplate template, InputStream in, boolean containsHeader, String... orderedFields)
 			throws IOException {
 		return importCsv(template, in, '"', ',', true, 0, false, false, containsHeader, orderedFields);
 	}
 	
 	@Override
-	public long importCsv(EntityTemplate template, InputStream in, char quoteChar, char delimiterChar, boolean ignoreEmptyLines, 
+	public long importCsv(ObjectTemplate template, InputStream in, char quoteChar, char delimiterChar, boolean ignoreEmptyLines, 
 			int maxLinesPerRow, boolean surroundingSpacesNeedQuotes, boolean skipComments, boolean containsHeader, String... orderedFields) 
 				throws IOException {
 		
@@ -127,7 +127,7 @@ public class CsvImportServiceImpl implements CsvImportService {
   
 	}
 	
-	private String[] validateFields(String[] fields, EntityTemplate template) throws IOException {
+	private String[] validateFields(String[] fields, ObjectTemplate template) throws IOException {
 		for(String field : fields) {
 			if(StringUtils.isNotBlank(field) && Objects.isNull(template.getField(field))) {
 				if(!field.equalsIgnoreCase("UUID")) {

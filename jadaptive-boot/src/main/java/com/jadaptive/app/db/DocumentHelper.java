@@ -21,9 +21,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 
-import com.jadaptive.api.entity.AbstractEntity;
-import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.entity.EntityService;
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
@@ -49,7 +49,7 @@ public class DocumentHelper {
 	}
 	
 	
-	public static void convertObjectToDocument(UUIDEntity obj, Document document) throws RepositoryException, EntityException {
+	public static void convertObjectToDocument(UUIDEntity obj, Document document) throws RepositoryException, ObjectException {
 
 		try {
 			
@@ -141,7 +141,7 @@ public class DocumentHelper {
 		return value;
 	}
 
-	public static void buildCollectionDocuments(String name, Column columnDefinition, Collection<?> values, Class<?> returnType, Map<String,Object> document) throws ParseException, EntityException {
+	public static void buildCollectionDocuments(String name, Column columnDefinition, Collection<?> values, Class<?> returnType, Map<String,Object> document) throws ParseException, ObjectException {
 		
 		List<Object> list = new ArrayList<>();
 
@@ -172,7 +172,7 @@ public class DocumentHelper {
 		document.put(name, list);
 	}
 
-	public static void buildDocument(String name, AbstractUUIDEntity object, Class<?> type, Document document) throws RepositoryException, ParseException, EntityException {
+	public static void buildDocument(String name, AbstractUUIDEntity object, Class<?> type, Document document) throws RepositoryException, ParseException, ObjectException {
 		
 		Document embedded = new Document();
 		convertObjectToDocument(object, embedded);
@@ -245,7 +245,7 @@ public class DocumentHelper {
 					} else {
 						String resourceKey = getTemplateResourceKey(parameter.getType());
 						String uuid =  document.getString(name);
-						AbstractEntity e = (AbstractEntity) ApplicationServiceImpl.getInstance().getBean(EntityService.class).get(resourceKey, uuid);
+						AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, uuid);
 						
 						Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
 						m.invoke(obj, ref);
@@ -285,7 +285,7 @@ public class DocumentHelper {
 							} else {
 								String resourceKey = getTemplateResourceKey(parameter.getType());
 								String uuid =  document.getString(name);
-								AbstractEntity e = (AbstractEntity) ApplicationServiceImpl.getInstance().getBean(EntityService.class).get(resourceKey, uuid);
+								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, uuid);
 								
 								AbstractUUIDEntity ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
 								elements.add(ref);

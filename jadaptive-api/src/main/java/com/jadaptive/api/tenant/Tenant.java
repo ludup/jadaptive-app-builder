@@ -3,12 +3,12 @@ package com.jadaptive.api.tenant;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.jadaptive.api.entity.EntityScope;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Tenant", resourceKey = Tenant.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Tenant", resourceKey = Tenant.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class Tenant extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "tenant";

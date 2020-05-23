@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.jobs.JobService;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -43,7 +43,7 @@ public class JobServiceImpl extends AuthenticatedService implements JobService {
 		try {
 			Job j = jobDatabase.max(Job.class, "shortId");
 			job.setShortId(j.getShortId() + 1);
-		} catch(EntityNotFoundException e) {
+		} catch(ObjectNotFoundException e) {
 			job.setShortId(100);
 		}
 	}

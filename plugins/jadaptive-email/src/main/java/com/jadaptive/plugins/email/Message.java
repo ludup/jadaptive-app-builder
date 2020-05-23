@@ -2,13 +2,13 @@ package com.jadaptive.plugins.email;
 
 import java.util.Collection;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Messages", resourceKey = Message.RESOURCE_KEY, type = EntityType.COLLECTION)
+@Template(name = "Messages", resourceKey = Message.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class Message extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "messages";

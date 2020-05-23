@@ -6,8 +6,8 @@ import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.csv.CsvImportService;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.files.AbstractFile;
 import com.sshtools.common.permissions.PermissionDeniedException;
@@ -22,7 +22,7 @@ public class ImportCsv extends AbstractTenantAwareCommand {
 	private CsvImportService importService; 
 	
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	public ImportCsv() {
 		super("import-csv", "Object Management", UsageHelper.build("import-csv [options]",
@@ -61,7 +61,7 @@ public class ImportCsv extends AbstractTenantAwareCommand {
 		String resourceKey = CliHelper.getValue(args, 't', "template");
 		String filename = CliHelper.getValue(args, 'f', "file");
 		
-		EntityTemplate template = templateService.get(resourceKey);
+		ObjectTemplate template = templateService.get(resourceKey);
 		
 		String[] orderedFields = args[args.length-1].split(",");
 		

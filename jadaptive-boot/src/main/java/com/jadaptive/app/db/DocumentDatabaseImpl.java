@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.mongodb.BasicDBObject;
@@ -86,7 +86,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		FindIterable<Document> result = collection.find(Filters.eq("_id", uuid));
 		if(!result.cursor().hasNext()) {
-			throw new EntityNotFoundException(String.format("Id %s entity %s was not found", uuid, table));
+			throw new ObjectNotFoundException(String.format("Id %s entity %s was not found", uuid, table));
 		}
 		return result.first();
 	}
@@ -97,7 +97,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		FindIterable<Document> result = collection.find(buildFilter(fields));
 		if(!result.cursor().hasNext()) {
-			throw new EntityNotFoundException(String.format("No entity %s was not found for search", table));
+			throw new ObjectNotFoundException(String.format("No entity %s was not found for search", table));
 		}
 		return result.first();
 	}
@@ -108,7 +108,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		FindIterable<Document> result = collection.find().sort(new BasicDBObject("field", -1));
 		if(!result.cursor().hasNext()) {
-			throw new EntityNotFoundException(String.format("No entity %s was not found", table));
+			throw new ObjectNotFoundException(String.format("No entity %s was not found", table));
 		}
 		return result.first();
 	}
@@ -119,7 +119,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		FindIterable<Document> result = collection.find().sort(new BasicDBObject("field", 1));
 		if(!result.cursor().hasNext()) {
-			throw new EntityNotFoundException(String.format("No entity %s was not found", table));
+			throw new ObjectNotFoundException(String.format("No entity %s was not found", table));
 		}
 		return result.first();
 	}
@@ -130,7 +130,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		FindIterable<Document> result = collection.find(Filters.eq(field, value));
 		if(!result.cursor().hasNext()) {
-			throw new EntityNotFoundException(String.format("%s %s for entity %s was not found", field, value, table));
+			throw new ObjectNotFoundException(String.format("%s %s for entity %s was not found", field, value, table));
 		}
 		return result.first();
 	}
@@ -233,7 +233,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		FindIterable<Document> result = collection.find(Filters.eq("_id", uuid));
 		if(!result.cursor().hasNext()) {
-			throw new EntityNotFoundException(String.format("id %s for entity %s was not found", uuid, table));
+			throw new ObjectNotFoundException(String.format("id %s for entity %s was not found", uuid, table));
 		}
 		return result.first();
 	}

@@ -8,11 +8,10 @@ import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.db.ClassLoaderService;
-import com.jadaptive.api.entity.AbstractEntity;
-import com.jadaptive.api.entity.EntityService;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.plugins.ssh.management.ConsoleHelper;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
@@ -23,16 +22,13 @@ import com.sshtools.server.vsession.VirtualConsole;
 public class ShowConfig extends AbstractTenantAwareCommand {
 	
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	@Autowired
 	private ConsoleHelper consoleHelper;
-	 
-	@Autowired
-	private ClassLoaderService classLoader;
 	
 	@Autowired
-	private EntityService objectService; 
+	private ObjectService objectService; 
 	
 	public ShowConfig() {
 		super("show-config", "Object Management", UsageHelper.build("show-config <template>"),
@@ -47,9 +43,9 @@ public class ShowConfig extends AbstractTenantAwareCommand {
 			throw new UsageException("Not enough arguments!");
 		}
 		
-		EntityTemplate template = templateService.get(args[1]);
+		ObjectTemplate template = templateService.get(args[1]);
 		
-		AbstractEntity e = objectService.getSingleton(template.getResourceKey()); 
+		AbstractObject e = objectService.getSingleton(template.getResourceKey()); 
 		consoleHelper.displayTemplate(console, e, template);
 		
 	}
@@ -59,7 +55,7 @@ public class ShowConfig extends AbstractTenantAwareCommand {
 		
 		switch(line.wordIndex()) {
 		case 1:
-			for(EntityTemplate t : templateService.singletons()) {
+			for(ObjectTemplate t : templateService.singletons()) {
 				candidates.add(new Candidate(t.getResourceKey()));
 			}
 			break;

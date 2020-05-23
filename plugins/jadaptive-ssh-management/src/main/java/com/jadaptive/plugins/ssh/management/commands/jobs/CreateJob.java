@@ -13,14 +13,14 @@ import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.jobs.JobService;
 import com.jadaptive.api.tasks.Task;
 import com.jadaptive.api.tasks.TaskService;
 import com.jadaptive.api.tasks.TriggerMapping;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.plugins.ssh.management.ConsoleHelper;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
@@ -31,7 +31,7 @@ import com.sshtools.server.vsession.VirtualConsole;
 public class CreateJob extends AbstractTenantAwareCommand {
 
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	@Autowired
 	private ConsoleHelper consoleHelper; 
@@ -66,10 +66,10 @@ public class CreateJob extends AbstractTenantAwareCommand {
 			jobService.getJobByName(name);
 			console.println(String.format("A job already exists called %s", name));
 			return;
-		} catch(EntityNotFoundException e) { }
+		} catch(ObjectNotFoundException e) { }
 		job.setName(name);
 		
-		EntityTemplate taskTemplate = templateService.get(template);
+		ObjectTemplate taskTemplate = templateService.get(template);
 		
 		if(StringUtils.isBlank(taskTemplate.getTemplateClass())) {
 			throw new UsageException(

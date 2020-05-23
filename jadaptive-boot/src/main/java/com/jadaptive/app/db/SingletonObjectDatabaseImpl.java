@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
 
@@ -22,7 +22,7 @@ public class SingletonObjectDatabaseImpl<T extends SingletonUUIDEntity> implemen
 			T tmp = resourceClass.newInstance();
 			try {
 				return objectDatabase.get(tmp.getUuid(), resourceClass);
-			} catch(EntityNotFoundException e) {
+			} catch(ObjectNotFoundException e) {
 				return tmp;
 			}	
 		} catch(Throwable t) {

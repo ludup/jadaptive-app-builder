@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.csv.CsvImportService;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.upload.UploadHandler;
 import com.jadaptive.utils.FileUtils;
 
@@ -27,7 +27,7 @@ public class EntityUploadHandler implements UploadHandler {
 	static Logger log = LoggerFactory.getLogger(EntityUploadHandler.class);
 	
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 
 	@Autowired
 	private CsvImportService importService; 
@@ -39,7 +39,7 @@ public class EntityUploadHandler implements UploadHandler {
 	public void handleUpload(String handlerName, String uri, Map<String,String> parameters, String filename, InputStream in) throws IOException, SessionTimeoutException, UnauthorizedException {
 		
 		String templateName = FileUtils.firstPathElement(uri);
-		EntityTemplate template = templateService.get(templateName);
+		ObjectTemplate template = templateService.get(templateName);
 		
 		boolean containsHeader = Boolean.parseBoolean(
 				StringUtils.defaultString(parameters.get("containsHeader"), "false"));

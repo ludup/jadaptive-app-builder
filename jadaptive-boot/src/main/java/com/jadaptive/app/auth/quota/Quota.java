@@ -2,15 +2,15 @@ package com.jadaptive.app.auth.quota;
 
 import java.util.Date;
 
-import com.jadaptive.api.entity.EntityScope;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
 @Template(name = "Quota", resourceKey = Quota.RESOURCE_KEY, 
-	hidden = true, system = true, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+	hidden = true, system = true, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class Quota extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "quota";

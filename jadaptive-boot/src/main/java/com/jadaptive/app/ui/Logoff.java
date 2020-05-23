@@ -19,7 +19,7 @@ import com.codesmith.webbits.extensions.I18N;
 import com.codesmith.webbits.extensions.PageResources;
 import com.codesmith.webbits.extensions.PageResourcesElement;
 import com.codesmith.webbits.fontawesome.FontAwesomeify;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionService;
@@ -50,7 +50,7 @@ public class Logoff {
 	
     	try {
 	    	sessionService.closeSession(sessionUtils.getActiveSession(Request.get()));
-    	} catch(AccessDeniedException | EntityNotFoundException e) {
+    	} catch(AccessDeniedException | ObjectNotFoundException e) {
     	}
     	throw new Redirect(Login.class);
     }

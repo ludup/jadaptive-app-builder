@@ -33,14 +33,14 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.template.Column;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateRepository;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
@@ -49,7 +49,7 @@ import com.jadaptive.api.template.Table;
 import com.jadaptive.api.template.Template;
 import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.api.template.ValidationType;
-import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
 import com.jadaptive.api.templates.TemplateVersionService;
@@ -76,18 +76,18 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	private PluginManager pluginManager; 
 	
 	@Autowired
-	private EntityTemplateRepository templateRepository;
+	private ObjectTemplateRepository templateRepository;
 	
 	@Autowired
 	private PermissionService permissionService; 
 	
 	@Override
-	public Collection<TemplateVersion> list() throws RepositoryException, EntityException {
+	public Collection<TemplateVersion> list() throws RepositoryException, ObjectException {
 		return versionRepository.list();
 	}
 	
 	@Override
-	public <E extends AbstractUUIDEntity> void processTemplates(Tenant tenant, TemplateEnabledService<E> templateEnabledService) {
+	public <E extends AbstractUUIDEntity> void processTemplates(Tenant tenant, JsonTemplateEnabledService<E> templateEnabledService) {
 		
 		if(log.isInfoEnabled()) {
 			log.info("Processing templates for {}", templateEnabledService.getResourceKey());
@@ -137,7 +137,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 
-	private List<PathInfo> buildTemplatePaths(Tenant tenant, TemplateEnabledService<?> templateEnabledService) throws IOException {
+	private List<PathInfo> buildTemplatePaths(Tenant tenant, JsonTemplateEnabledService<?> templateEnabledService) throws IOException {
 		
 		List<PathInfo> paths = new ArrayList<>();
 		
@@ -268,7 +268,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 	@SuppressWarnings("unchecked")
-	private <E extends AbstractUUIDEntity> void processTemplate(PathInfo resource, String resourceKey, TemplateEnabledService<E> repository, Version version) {
+	private <E extends AbstractUUIDEntity> void processTemplate(PathInfo resource, String resourceKey, JsonTemplateEnabledService<E> repository, Version version) {
 		try {
 			
 			if(log.isInfoEnabled()) {
@@ -282,7 +282,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			repository.saveTemplateObjects(objects, new TransactionAdapter<E>() {
 
 				@Override
-				public void afterSave(E object) throws RepositoryException, EntityException {
+				public void afterSave(E object) throws RepositoryException, ObjectException {
 					TemplateVersion  t = new TemplateVersion();
 					t.setUuid(resourceKey);
 					t.setVersion(version.toString());
@@ -394,11 +394,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				System.out.println();
 			}
 			
-			EntityTemplate template;
+			ObjectTemplate template;
 			try {
 				template = templateRepository.get(clz.getSimpleName());
-			} catch (EntityException ee) {
-				template = new EntityTemplate();
+			} catch (ObjectException ee) {
+				template = new ObjectTemplate();
 				template.setUuid(clz.getSimpleName());
 			}
 			
@@ -495,12 +495,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				// Embedded objects do not have direct permissions
 			}
 			
-		} catch(RepositoryException | EntityException e) {
+		} catch(RepositoryException | ObjectException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
 		}
 	}
 	
-	private Collection<String> verifyColumnNames(EntityTemplate template, Collection<String> columns) {
+	private Collection<String> verifyColumnNames(ObjectTemplate template, Collection<String> columns) {
 		Map<String,FieldTemplate> definedColumns = template.toMap();
 		for(String column : columns) {
 			if(!definedColumns.containsKey(column)) {

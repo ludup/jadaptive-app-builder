@@ -17,10 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.entity.AbstractEntity;
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.tasks.TriggerMapping;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.utils.Utils;
@@ -33,7 +33,7 @@ import com.sshtools.server.vsession.VirtualConsole;
 public class ConsoleHelper {
 
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	@Autowired
 	private ApplicationService applicationService; 
@@ -41,7 +41,7 @@ public class ConsoleHelper {
 
 	public Map<String, Object> promptTemplate(VirtualConsole console,
 			Map<String, Object> obj,
-			EntityTemplate template, 
+			ObjectTemplate template, 
 			List<TriggerMapping> mappings,
 			String objectType) throws ParseException, PermissionDeniedException, IOException {
 		
@@ -49,7 +49,7 @@ public class ConsoleHelper {
 		for(FieldTemplate field : template.getFields()) {
 			switch(field.getFieldType()) {
 			case OBJECT_EMBEDDED:
-				EntityTemplate objectTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
+				ObjectTemplate objectTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
 				console.println(objectTemplate.getName());
 				obj.put(field.getResourceKey(), promptTemplate(console, new HashMap<>(),
 						objectTemplate, 
@@ -244,12 +244,12 @@ public class ConsoleHelper {
 		return false;
 	}
 
-	public void displayTemplate(VirtualConsole console, AbstractEntity e, EntityTemplate template) {
+	public void displayTemplate(VirtualConsole console, AbstractObject e, ObjectTemplate template) {
 		
 		for(FieldTemplate field : template.getFields()) {
 			switch(field.getFieldType()) {
 			case OBJECT_EMBEDDED:
-				EntityTemplate objectTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
+				ObjectTemplate objectTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
 				console.println(objectTemplate.getName());
 				displayTemplate(console, 
 						e.getChild(field),

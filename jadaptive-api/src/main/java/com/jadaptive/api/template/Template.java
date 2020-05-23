@@ -5,8 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.jadaptive.api.entity.EntityScope;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -16,9 +16,9 @@ public @interface Template {
 		
 		String resourceKey();
 		
-		EntityType type() default EntityType.COLLECTION;
+		ObjectType type() default ObjectType.COLLECTION;
 		
-		EntityScope scope() default EntityScope.GLOBAL;
+		ObjectScope scope() default ObjectScope.GLOBAL;
 
 		boolean hidden() default false;
 		

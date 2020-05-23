@@ -21,13 +21,13 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.StartupAware;
-import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.role.RoleService;
-import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
@@ -38,7 +38,7 @@ import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.user.AdminUserDatabase;
 
 @Service
-public class TenantServiceImpl implements TenantService, TemplateEnabledService<Tenant> {
+public class TenantServiceImpl implements TenantService, JsonTemplateEnabledService<Tenant> {
 
 	ThreadLocal<Tenant> currentTenant = new ThreadLocal<>();
 	
@@ -127,7 +127,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	public Collection<Tenant> listTenants()  {
 		try {
 			return repository.listTenants();
-		} catch (RepositoryException | EntityException e) {
+		} catch (RepositoryException | ObjectException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
@@ -148,21 +148,21 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			
 			templateService.registerAnnotatedTemplates();
 			
-			Collection<TemplateEnabledService> templateServices
+			Collection<JsonTemplateEnabledService> templateServices
 				= ApplicationServiceImpl.getInstance().getBeans(
-						TemplateEnabledService.class);
+						JsonTemplateEnabledService.class);
 			
-			List<TemplateEnabledService> ordered = new ArrayList<TemplateEnabledService>(templateServices);
+			List<JsonTemplateEnabledService> ordered = new ArrayList<JsonTemplateEnabledService>(templateServices);
 			
-			Collections.<TemplateEnabledService>sort(ordered, new  Comparator<TemplateEnabledService>() {
+			Collections.<JsonTemplateEnabledService>sort(ordered, new  Comparator<JsonTemplateEnabledService>() {
 				@Override
-				public int compare(TemplateEnabledService o1, TemplateEnabledService o2) {
+				public int compare(JsonTemplateEnabledService o1, JsonTemplateEnabledService o2) {
 					return o1.getWeight().compareTo(o2.getWeight());
 				}
 			});
 			
 			
-			for(TemplateEnabledService<?> repository : ordered) {
+			for(JsonTemplateEnabledService<?> repository : ordered) {
 				if(tenant.isSystem() || !repository.isSystemOnly()) { 
 					templateService.processTemplates(tenant, repository);		
 				}
@@ -184,30 +184,30 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 		
 	}
 	
-	public Tenant getSystemTenant() throws RepositoryException, EntityException {
+	public Tenant getSystemTenant() throws RepositoryException, ObjectException {
 		return repository.getSystemTenant();
 	}
 	
 	@Override
-	public Tenant createTenant(String name, String domain, String... additionalDomains) throws RepositoryException, EntityException {
+	public Tenant createTenant(String name, String domain, String... additionalDomains) throws RepositoryException, ObjectException {
 		return createTenant(UUID.randomUUID().toString(), name, domain, additionalDomains);
 	}
 	
 	@Override
-	public Tenant createTenant(String uuid, String name, String primaryDomain, String... additionalDomains) throws RepositoryException, EntityException {
+	public Tenant createTenant(String uuid, String name, String primaryDomain, String... additionalDomains) throws RepositoryException, ObjectException {
 		return createTenant(uuid, name, primaryDomain, false);
 	}
 	
 	@Override
-	public Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, String... additionalDomains) throws RepositoryException, EntityException {
+	public Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, String... additionalDomains) throws RepositoryException, ObjectException {
 		
 		if(tenantsByDomain.containsKey(primaryDomain)) {
-			throw new EntityException(String.format("%s is already used by another tenant", primaryDomain));
+			throw new ObjectException(String.format("%s is already used by another tenant", primaryDomain));
 		}
 		
 		for(String domain : additionalDomains) {
 			if(tenantsByDomain.containsKey(domain)) {
-				throw new EntityException(String.format("%s is already used by another tenant", primaryDomain));
+				throw new ObjectException(String.format("%s is already used by another tenant", primaryDomain));
 			}
 		}
 		
@@ -219,14 +219,14 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			repository.saveTenant(tenant);
 			initialiseTenant(tenant, true);
 			return tenant;
-		} catch (RepositoryException | EntityException e) {
+		} catch (RepositoryException | ObjectException e) {
 			throw e;
 		}
 		
 	}
 
 	@Override
-	public Tenant getCurrentTenant() throws RepositoryException, EntityException {
+	public Tenant getCurrentTenant() throws RepositoryException, ObjectException {
 		Tenant tenant = currentTenant.get();
 		if(Objects.isNull(tenant)) {
 			return getSystemTenant();
@@ -278,7 +278,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	
 	@Override
 	public void saveTemplateObjects(List<Tenant> tenants, @SuppressWarnings("unchecked") TransactionAdapter<Tenant>... ops)
-			throws RepositoryException, EntityException {
+			throws RepositoryException, ObjectException {
 
 		for(Tenant tenant : tenants) {
 			repository.saveTenant(tenant);
@@ -309,7 +309,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	public Tenant getTenantByDomain(String name) {
 		Tenant tenant = tenantsByDomain.get(name);
 		if(Objects.isNull(tenant)) {
-			throw new EntityNotFoundException(String.format("Tenant %s not found", name));
+			throw new ObjectNotFoundException(String.format("Tenant %s not found", name));
 		}
 		return tenant;
 	}
@@ -327,7 +327,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 	public Tenant getTenantByName(String name) {
 		Tenant tenant = repository.getTenantByName(name);
 		if(Objects.isNull(tenant)) {
-			throw new EntityNotFoundException(name + " not found!");
+			throw new ObjectNotFoundException(name + " not found!");
 		}
 		return tenant;
 	}

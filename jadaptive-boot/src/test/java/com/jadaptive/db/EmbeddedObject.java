@@ -2,13 +2,13 @@ package com.jadaptive.db;
 
 import java.util.Date;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Embedded Object", resourceKey = EmbeddedObject.RESOURCE_KEY, type = EntityType.OBJECT)
+@Template(name = "Embedded Object", resourceKey = EmbeddedObject.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class EmbeddedObject extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "embeddedObject";

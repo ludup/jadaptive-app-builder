@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantRepository;
@@ -26,32 +26,32 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 	}
 	
 	@Override
-	public void saveTenant(Tenant tenant) throws RepositoryException, EntityException {
+	public void saveTenant(Tenant tenant) throws RepositoryException, ObjectException {
 		saveObject(tenant, TENANT_DATABASE);
 	}
 		
 	@Override
-	public Collection<Tenant> listTenants() throws RepositoryException, EntityException {
+	public Collection<Tenant> listTenants() throws RepositoryException, ObjectException {
 		return listObjects(TENANT_DATABASE, Tenant.class);
 	}
 	
 	@Override
-	public void deleteTenant(Tenant tenant) throws RepositoryException, EntityException {
+	public void deleteTenant(Tenant tenant) throws RepositoryException, ObjectException {
 		deleteObject(tenant, TENANT_DATABASE);
 	}
 	
 	@Override
-	public Tenant getTenant(String uuid) throws RepositoryException, EntityException {
+	public Tenant getTenant(String uuid) throws RepositoryException, ObjectException {
 		return getObject(uuid, TENANT_DATABASE, Tenant.class);
 	}
 	
 	@Override
-	public Tenant getSystemTenant() throws RepositoryException, EntityException {
+	public Tenant getSystemTenant() throws RepositoryException, ObjectException {
 		return getTenant(TenantService.SYSTEM_UUID);
 	}
 	
 	@Override
-	public void dropSchema() throws RepositoryException, EntityException {
+	public void dropSchema() throws RepositoryException, ObjectException {
 		
 		for(Tenant tenant : listTenants()) {
 			db.dropDatabase(tenant.getUuid());
@@ -62,7 +62,7 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 	}
 	
 	@Override
-	public void newSchema() throws RepositoryException, EntityException {
+	public void newSchema() throws RepositoryException, ObjectException {
 		
 		dropSchema();
 		

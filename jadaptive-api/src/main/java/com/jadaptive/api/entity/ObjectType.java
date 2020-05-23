@@ -1,6 +1,6 @@
 package com.jadaptive.api.entity;
 
-public enum EntityType {
+public enum ObjectType {
 
 	SINGLETON,
 	COLLECTION,

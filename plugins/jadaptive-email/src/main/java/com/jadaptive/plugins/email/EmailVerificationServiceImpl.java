@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.cache.CacheService;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.servlet.Request;
@@ -38,7 +38,7 @@ public class EmailVerificationServiceImpl extends AuthenticatedService implement
 		try {
 			userService.getUserByEmail(email);
 			return true;
-		} catch (EntityNotFoundException e) {
+		} catch (ObjectNotFoundException e) {
 		}
 		
 		String code;

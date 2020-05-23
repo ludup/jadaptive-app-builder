@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
@@ -35,7 +35,7 @@ public class CreateRole extends AbstractTenantAwareCommand {
 			try {
 				resolveRole(roleName);
 				console.println(String.format("There is already a Role named %s", roleName));
-			} catch(EntityNotFoundException e) {
+			} catch(ObjectNotFoundException e) {
 				Role role = roleService.createRole(roleName);
 				console.println(String.format("Role %s created", role.getName()));
 			}

@@ -16,7 +16,7 @@ import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Redirect;
 import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
@@ -71,7 +71,7 @@ public class Login extends AbstractPage {
 	    	
 	    	throw new Redirect(JadaptiveApp.class);
     	
-    	} catch(AccessDeniedException | EntityNotFoundException e) {
+    	} catch(AccessDeniedException | ObjectNotFoundException e) {
     		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
     		content.selectFirst("#feedback").append("<div class=\"alert alert-danger\">Bad username or password</div>");
     		return content;

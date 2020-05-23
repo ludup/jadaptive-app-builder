@@ -8,8 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
@@ -88,7 +88,7 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 		if(assign) {
 			try {
 				forUser = userService.getUser(CliHelper.getValue(args, 'a', "assign"));
-			} catch(EntityNotFoundException e) {
+			} catch(ObjectNotFoundException e) {
 				throw new IOException(e.getMessage(), e);
 			}
 			try {
@@ -155,7 +155,7 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 				console.println();
 				
 				break;
-			} catch (NumberFormatException | RepositoryException | EntityException | SshException e) {
+			} catch (NumberFormatException | RepositoryException | ObjectException | SshException e) {
 				throw new IOException(e.getMessage(), e);
 			}
 		}

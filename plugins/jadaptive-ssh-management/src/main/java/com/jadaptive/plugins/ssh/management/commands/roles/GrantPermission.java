@@ -11,7 +11,7 @@ import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
@@ -51,7 +51,7 @@ public class GrantPermission extends AbstractTenantAwareCommand {
 					console.println(String.format("%s was granted to %s", permission, role.getName()));
 				}
 				
-			} catch(EntityNotFoundException e) {
+			} catch(ObjectNotFoundException e) {
 				console.println(String.format("There is no Role named %s", roleName));
 			}
 		} 

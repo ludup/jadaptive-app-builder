@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
@@ -40,7 +40,7 @@ public class DeleteTenant extends AbstractTenantAwareCommand {
 		
 		try {
 			tenant = tenantService.getTenantByDomain(domain);
-		} catch(EntityNotFoundException e) {
+		} catch(ObjectNotFoundException e) {
 			tenant = tenantService.getTenantByName(domain);
 		}
 		

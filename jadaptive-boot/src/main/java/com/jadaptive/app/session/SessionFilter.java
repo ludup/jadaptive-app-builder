@@ -30,7 +30,7 @@ import org.springframework.http.HttpHeaders;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.redirect.Redirect;
 import com.jadaptive.api.servlet.Request;
@@ -251,7 +251,7 @@ public class SessionFilter implements Filter {
 				}
 			}
 			
-		} catch(EntityNotFoundException e) {
+		} catch(ObjectNotFoundException e) {
 		}
 		
 		if(request.getRequestURI().equals("/")) {

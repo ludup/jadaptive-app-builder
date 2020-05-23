@@ -2,13 +2,13 @@ package com.jadaptive.app.scheduler;
 
 import java.util.Objects;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Scheduler Configuration", resourceKey = SchedulerConfiguration.RESOURCE_KEY, type = EntityType.SINGLETON)
+@Template(name = "Scheduler Configuration", resourceKey = SchedulerConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
 public class SchedulerConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "schedulerConfig";

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
@@ -43,7 +43,7 @@ public class ResourceController {
 	private PluginManager pluginManager; 
 	
 	@RequestMapping(value="/app/content/**", method = RequestMethod.GET)
-	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, EntityException, IOException {
+	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
 		tenantService.setCurrentTenant(request);
 		

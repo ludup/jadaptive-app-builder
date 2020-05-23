@@ -8,45 +8,45 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.Index;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 import com.jadaptive.utils.Utils;
 
 @Repository
-public class EntityTemplateRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<EntityTemplate>
-		implements EntityTemplateRepository {
+public class ObjectTemplateRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<ObjectTemplate>
+		implements ObjectTemplateRepository {
 
-	static Logger log = LoggerFactory.getLogger(EntityTemplateRepositoryImpl.class);
+	static Logger log = LoggerFactory.getLogger(ObjectTemplateRepositoryImpl.class);
 	
-	Map<String,EntityTemplate> cache = new HashMap<>();
-	public EntityTemplateRepositoryImpl(DocumentDatabase db) {
+	Map<String,ObjectTemplate> cache = new HashMap<>();
+	public ObjectTemplateRepositoryImpl(DocumentDatabase db) {
 		super(db);
 	}
 
 	@Override
-	public Class<EntityTemplate> getResourceClass() {
-		return EntityTemplate.class;
+	public Class<ObjectTemplate> getResourceClass() {
+		return ObjectTemplate.class;
 	}
 
-	private void createTextIndex(EntityTemplate template, String fieldName) {
+	private void createTextIndex(ObjectTemplate template, String fieldName) {
 		db.createTextIndex(fieldName, template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
 	}
 	
-	private void createIndex(EntityTemplate template, String... fieldNames) {
+	private void createIndex(ObjectTemplate template, String... fieldNames) {
 		db.createIndex(template.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fieldNames);
 	}
 	
-	private void createUniqueIndex(EntityTemplate template, String... fieldNames) {
+	private void createUniqueIndex(ObjectTemplate template, String... fieldNames) {
 		db.createUniqueIndex(template.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fieldNames);
 	}
 
 	@Override
-	public void createIndexes(EntityTemplate template, Index[] nonUnique, UniqueIndex[] unique) {
+	public void createIndexes(ObjectTemplate template, Index[] nonUnique, UniqueIndex[] unique) {
 			
 		if(Objects.nonNull(nonUnique)) {
 			for(Index idx : nonUnique) {

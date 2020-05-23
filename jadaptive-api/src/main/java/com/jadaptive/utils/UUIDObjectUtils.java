@@ -6,10 +6,8 @@ import java.util.List;
 
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 
-public class EntityUtils {
+public class UUIDObjectUtils {
 
-	
-	
 	public static Collection<String> getUUIDs(Collection<? extends AbstractUUIDEntity> entities) {
 		List<String> tmp = new ArrayList<>();
 		for(AbstractUUIDEntity e : entities) {

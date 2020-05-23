@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
@@ -46,19 +46,19 @@ public class TemplateVersionRepositoryImpl extends AbstractObjectDatabaseImpl im
 		try {
 			t = getObject(uuid, tenantService.getCurrentTenant().getUuid(), TemplateVersion.class);
 			return new Version(t.getVersion());
-		} catch (EntityException e) {
+		} catch (ObjectException e) {
 			return null;
 		}
 
 	}
 
 	@Override
-	public void save(TemplateVersion version) throws RepositoryException, EntityException {
+	public void save(TemplateVersion version) throws RepositoryException, ObjectException {
 		saveObject(version, tenantService.getCurrentTenant().getUuid());
 	}
 
 	@Override
-	public Collection<TemplateVersion> list() throws RepositoryException, EntityException {
+	public Collection<TemplateVersion> list() throws RepositoryException, ObjectException {
 		return listObjects(tenantService.getCurrentTenant().getUuid(), TemplateVersion.class);
 	}
 }

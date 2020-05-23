@@ -12,7 +12,7 @@ import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleRepository;
 import com.jadaptive.api.user.User;
-import com.jadaptive.utils.EntityUtils;
+import com.jadaptive.utils.UUIDObjectUtils;
 
 @Repository
 public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implements AssignableObjectDatabase<T> {
@@ -43,7 +43,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 		return objectDatabase.searchObjects(resourceClass, 
 				SearchField.or(
 						SearchField.in("users", user.getUuid()),
-						SearchField.in("roles", EntityUtils.getUUIDs(userRoles))
+						SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
 				));
 	}
 
@@ -70,11 +70,11 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 		if(fields.length > 0) {
 			return objectDatabase.get(resourceClass, SearchField.and(SearchField.and(fields), 
 					SearchField.or(SearchField.in("users", user.getUuid()),
-									SearchField.in("roles", EntityUtils.getUUIDs(userRoles)))));
+									SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));
 		} else {
 			return objectDatabase.get(resourceClass, SearchField.or(
 				SearchField.in("users", user.getUuid()),
-				SearchField.in("roles", EntityUtils.getUUIDs(userRoles))));
+				SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))));
 		}
 	}
 	

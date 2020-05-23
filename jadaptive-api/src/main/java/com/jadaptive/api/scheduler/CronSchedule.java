@@ -2,14 +2,14 @@ package com.jadaptive.api.scheduler;
 
 import java.util.Date;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Cron Schedule", resourceKey = CronSchedule.RESOURCE_KEY, type = EntityType.COLLECTION)
+@Template(name = "Cron Schedule", resourceKey = CronSchedule.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class CronSchedule extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "cronSchedules";

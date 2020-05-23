@@ -5,7 +5,7 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
@@ -25,7 +25,7 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 	protected TenantService tenantService;
 	
 	@Override
-	public Collection<T> list() throws RepositoryException, EntityException {
+	public Collection<T> list() throws RepositoryException, ObjectException {
 		return listObjects(tenantService.getCurrentTenant().getUuid(), getResourceClass());
 	}
 	
@@ -50,26 +50,26 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 	}
 
 	@Override
-	public T get(String uuid) throws RepositoryException, EntityException {
+	public T get(String uuid) throws RepositoryException, ObjectException {
 		return getObject(uuid, tenantService.getCurrentTenant().getUuid(), getResourceClass());
 	}
 	
-	public T get(SearchField... fields) throws RepositoryException, EntityException {
+	public T get(SearchField... fields) throws RepositoryException, ObjectException {
 		return getObject(tenantService.getCurrentTenant().getUuid(), getResourceClass(), fields);
 	}
 
 	@Override
-	public void delete(T obj) throws RepositoryException, EntityException {
+	public void delete(T obj) throws RepositoryException, ObjectException {
 		delete(obj.getUuid());
 	}
 	
 	@Override
-	public void delete(String uuid) throws RepositoryException, EntityException {
+	public void delete(String uuid) throws RepositoryException, ObjectException {
 		deleteObject(get(uuid), tenantService.getCurrentTenant().getUuid());
 	}
 
 	@Override
-	public void saveOrUpdate(T obj) throws RepositoryException, EntityException {
+	public void saveOrUpdate(T obj) throws RepositoryException, ObjectException {
 		saveObject(obj, tenantService.getCurrentTenant().getUuid());
 	}
 

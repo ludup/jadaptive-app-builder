@@ -11,8 +11,8 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jadaptive.api.entity.EntityType;
-import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
@@ -25,9 +25,9 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 	
 	private ObjectMapper buildCompanyTemplate(boolean required, FieldValidator... validators) {
 		
-		EntityTemplate template = new EntityTemplate();
+		ObjectTemplate template = new ObjectTemplate();
 		
-		template.setType(EntityType.COLLECTION);
+		template.setType(ObjectType.COLLECTION);
 
 		FieldTemplate t1 = new FieldTemplate();
 		t1.setResourceKey("name");
@@ -39,7 +39,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 
 		template.getFields().add(t1);
 
-		Map<String,EntityTemplate> templates = new HashMap<>();
+		Map<String,ObjectTemplate> templates = new HashMap<>();
 		templates.put("company", template);
 		
 		return getMapper(templates);

@@ -7,18 +7,18 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jadaptive.api.entity.EntityScope;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
-@Template(name = "Template", resourceKey = EntityTemplate.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Template", resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 @UniqueIndex(columns = {"resourceKey"})
-public class EntityTemplate extends NamedUUIDEntity {
+public class ObjectTemplate extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "entityTemplate";
 	
-	EntityType type;
-	EntityScope scope;
+	ObjectType type;
+	ObjectScope scope;
 	String resourceKey;
 	String defaultFilter;
 	Collection<FieldTemplate> fields = new ArrayList<>();
@@ -29,23 +29,23 @@ public class EntityTemplate extends NamedUUIDEntity {
 	Collection<String> defaultColumns = new ArrayList<>();
 	Collection<String> optionalColumns = new ArrayList<>();
 	
-	public EntityTemplate() {
+	public ObjectTemplate() {
 		
 	}
 	
-	public EntityScope getScope() {
+	public ObjectScope getScope() {
 		return scope;
 	}
 
-	public void setScope(EntityScope scope) {
+	public void setScope(ObjectScope scope) {
 		this.scope = scope;
 	}
 	
-	public EntityType getType() {
+	public ObjectType getType() {
 		return type;
 	}
 	
-	public void setType(EntityType type) {
+	public void setType(ObjectType type) {
 		this.type = type;
 	}
 

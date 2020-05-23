@@ -8,7 +8,7 @@ import java.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.utils.PasswordEncryptionType;
 import com.jadaptive.utils.PasswordUtils;
@@ -39,7 +39,7 @@ public abstract class PasswordEnabledUserDatabaseImpl<T extends PasswordEnabledU
 			objectDatabase.saveOrUpdate(user);
 			
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			throw new EntityException(e);
+			throw new ObjectException(e);
 		}
 	}
 	
@@ -59,7 +59,7 @@ public abstract class PasswordEnabledUserDatabaseImpl<T extends PasswordEnabledU
 			
 			return Arrays.equals(encodedPassword, storedPassword);
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			throw new EntityException(e);
+			throw new ObjectException(e);
 		}
 	}
 }

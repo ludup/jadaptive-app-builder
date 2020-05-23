@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
@@ -25,7 +25,7 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Bui
 	private TenantAwareObjectDatabase<BuiltinUser> objectDatabase;
 	
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	private final Set<UserDatabaseCapabilities> capabilities = new HashSet<>(
 			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD,
@@ -115,7 +115,7 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Bui
 	}
 
 	@Override
-	public EntityTemplate getUserTemplate() {
+	public ObjectTemplate getUserTemplate() {
 		return templateService.get(BuiltinUser.RESOURCE_KEY);
 	}
 

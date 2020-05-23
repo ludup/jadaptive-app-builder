@@ -1,6 +1,6 @@
 package com.jadaptive.api.entity;
 
-public enum EntityScope {
+public enum ObjectScope {
 
 	GLOBAL,
 	ASSIGNED,

@@ -1,8 +1,8 @@
 package com.jadaptive.app.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.jadaptive.api.entity.EntityScope;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
@@ -10,7 +10,7 @@ import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
 
-@Template(name = "Administration Users", resourceKey = AdminUser.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Administration Users", resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 
 	public static final String RESOURCE_KEY = "adminUser";

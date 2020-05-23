@@ -7,41 +7,41 @@ import java.util.Map;
 
 import org.bson.Document;
 
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.app.db.DocumentHelper;
 
-public class MockEntityTemplateService implements EntityTemplateService {
+public class MockEntityTemplateService implements TemplateService {
 
-	Map<String,EntityTemplate> templates;
+	Map<String,ObjectTemplate> templates;
 	
-	public MockEntityTemplateService(Map<String,EntityTemplate> templates) {
+	public MockEntityTemplateService(Map<String,ObjectTemplate> templates) {
 		this.templates = templates;
 	}
 	@Override
-	public EntityTemplate get(String uuid) throws RepositoryException, EntityException {
+	public ObjectTemplate get(String uuid) throws RepositoryException, ObjectException {
 		return templates.get(uuid);
 	}
 
 	@Override
-	public Collection<EntityTemplate> list() throws RepositoryException, EntityException {
+	public Collection<ObjectTemplate> list() throws RepositoryException, ObjectException {
 		return templates.values();
 	}
 
 	@Override
-	public void saveOrUpdate(EntityTemplate template) throws RepositoryException, EntityException {
+	public void saveOrUpdate(ObjectTemplate template) throws RepositoryException, ObjectException {
 
 	}
 
 	@Override
-	public void delete(String uuid) throws EntityException {
+	public void delete(String uuid) throws ObjectException {
 
 	}
 	@Override
-	public Collection<EntityTemplate> table(String searchField, String searchValue,  String order, int start, int length) throws RepositoryException, EntityException {
+	public Collection<ObjectTemplate> table(String searchField, String searchValue,  String order, int start, int length) throws RepositoryException, ObjectException {
 		return new ArrayList<>(templates.values()).subList(start, Math.min(start + length, templates.values().size()-1));
 	}
 	@Override
@@ -54,12 +54,12 @@ public class MockEntityTemplateService implements EntityTemplateService {
 		return DocumentHelper.convertDocumentToObject(baseClass, new Document(values));
 	}
 	@Override
-	public Collection<EntityTemplate> children(String uuid) {
+	public Collection<ObjectTemplate> children(String uuid) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	@Override
-	public Collection<EntityTemplate> singletons() throws RepositoryException, EntityException {
+	public Collection<ObjectTemplate> singletons() throws RepositoryException, ObjectException {
 		// TODO Auto-generated method stub
 		return null;
 	}

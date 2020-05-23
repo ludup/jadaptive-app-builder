@@ -8,32 +8,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.ClassLoaderService;
-import com.jadaptive.api.entity.AbstractEntity;
-import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.entity.EntityNotFoundException;
-import com.jadaptive.api.entity.EntityRepository;
-import com.jadaptive.api.entity.EntityService;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.entity.ObjectRepository;
+import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.templates.SystemTemplates;
-import com.jadaptive.api.templates.TemplateEnabledService;
+import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.SearchHelper;
 
 @Service
-public class EntityServiceImpl extends AuthenticatedService implements EntityService, TemplateEnabledService<MongoEntity> {
+public class ObjectServiceImpl extends AuthenticatedService implements ObjectService, JsonTemplateEnabledService<MongoEntity> {
 
 	@Autowired
-	private EntityRepository entityRepository;
+	private ObjectRepository entityRepository;
 	
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	@Autowired
 	private SearchHelper searchHelper;
@@ -45,13 +45,13 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 	private ClassLoaderService classService; 
 	
 	@Override
-	public AbstractEntity getSingleton(String resourceKey) throws RepositoryException, EntityException {
+	public AbstractObject getSingleton(String resourceKey) throws RepositoryException, ObjectException {
 
-		EntityTemplate template = templateService.get(resourceKey);
-		if(template.getType()!=EntityType.SINGLETON) {
-			throw new EntityException(String.format("%s is not a singleton entity", resourceKey));
+		ObjectTemplate template = templateService.get(resourceKey);
+		if(template.getType()!=ObjectType.SINGLETON) {
+			throw new ObjectException(String.format("%s is not a singleton entity", resourceKey));
 		}
-		AbstractEntity e;
+		AbstractObject e;
 		
 		try {
 			e = entityRepository.get(resourceKey, resourceKey);
@@ -59,7 +59,7 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 				throw new IllegalStateException();
 			}
 			return e;
-		} catch(EntityNotFoundException ex) {
+		} catch(ObjectNotFoundException ex) {
 			e = new MongoEntity();
 			e.setResourceKey(resourceKey);
 			e.setUuid(resourceKey);
@@ -68,14 +68,14 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
  	}
 	
 	@Override
-	public AbstractEntity get(String resourceKey, String uuid) throws RepositoryException, EntityException {
+	public AbstractObject get(String resourceKey, String uuid) throws RepositoryException, ObjectException {
 
-		EntityTemplate template = templateService.get(resourceKey);
-		if(template.getType()!=EntityType.COLLECTION) {
-			throw new EntityException(String.format("%s is not a collection entity", resourceKey));
+		ObjectTemplate template = templateService.get(resourceKey);
+		if(template.getType()!=ObjectType.COLLECTION) {
+			throw new ObjectException(String.format("%s is not a collection entity", resourceKey));
 		}
 		
-		AbstractEntity e = entityRepository.get(uuid, resourceKey);
+		AbstractObject e = entityRepository.get(uuid, resourceKey);
 		if(!resourceKey.equals(e.getResourceKey())) {
 			throw new IllegalStateException();
 		}
@@ -84,17 +84,17 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 
 
 	@Override
-	public Collection<AbstractEntity> list(String resourceKey) throws RepositoryException, EntityException {
+	public Collection<AbstractObject> list(String resourceKey) throws RepositoryException, ObjectException {
 		
-		EntityTemplate template = templateService.get(resourceKey);
+		ObjectTemplate template = templateService.get(resourceKey);
 		return entityRepository.list(resourceKey, searchHelper.parseFilterField(template.getDefaultFilter()));
 	}
 
 	@Override
-	public String saveOrUpdate(AbstractEntity entity) throws RepositoryException, EntityException {
-		EntityTemplate template = templateService.get(entity.getResourceKey());
-		if(template.getType()==EntityType.SINGLETON && !entity.getUuid().equals(entity.getResourceKey())) {	
-			throw new EntityException("You cannot save a Singleton Entity with a new UUID");
+	public String saveOrUpdate(AbstractObject entity) throws RepositoryException, ObjectException {
+		ObjectTemplate template = templateService.get(entity.getResourceKey());
+		if(template.getType()==ObjectType.SINGLETON && !entity.getUuid().equals(entity.getResourceKey())) {	
+			throw new ObjectException("You cannot save a Singleton Entity with a new UUID");
 		}
 		
 		return entityRepository.save(entity);
@@ -102,16 +102,16 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 	}
 
 	@Override
-	public void delete(String resourceKey, String uuid) throws RepositoryException, EntityException {
+	public void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException {
 		
-		EntityTemplate template = templateService.get(resourceKey);
-		if(template.getType()==EntityType.SINGLETON) {	
-			throw new EntityException("You cannot delete a Singleton Entity");
+		ObjectTemplate template = templateService.get(resourceKey);
+		if(template.getType()==ObjectType.SINGLETON) {	
+			throw new ObjectException("You cannot delete a Singleton Entity");
 		}
 		
-		AbstractEntity e = get(resourceKey, uuid);
+		AbstractObject e = get(resourceKey, uuid);
 		if(e.isSystem()) {
-			throw new EntityException("You cannot delete a system object");
+			throw new ObjectException("You cannot delete a system object");
 		}
 		
 		try {
@@ -125,20 +125,20 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 					DocumentHelper.convertDocumentToObject(clz, 
 							new Document(e.getDocument())));
 			
-		} catch(RepositoryException | EntityException ex) {
+		} catch(RepositoryException | ObjectException ex) {
 			throw ex;
 		} catch(Throwable ex) {
 			// 
-			throw new EntityException(ex.getMessage(), ex);
+			throw new ObjectException(ex.getMessage(), ex);
 		}
 	}
 
 	@Override
-	public void deleteAll(String resourceKey) throws EntityException {
+	public void deleteAll(String resourceKey) throws ObjectException {
 		
-		EntityTemplate template = templateService.get(resourceKey);
-		if(template.getType()==EntityType.SINGLETON) {	
-			throw new EntityException("You cannot delete a Singleton Entity");
+		ObjectTemplate template = templateService.get(resourceKey);
+		if(template.getType()==ObjectType.SINGLETON) {	
+			throw new ObjectException("You cannot delete a Singleton Entity");
 		}
 		
 		entityRepository.deleteAll(resourceKey);
@@ -171,7 +171,7 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 	}
 
 	@Override
-	public void saveTemplateObjects(List<MongoEntity> objects, @SuppressWarnings("unchecked") TransactionAdapter<MongoEntity>... ops) throws RepositoryException, EntityException {
+	public void saveTemplateObjects(List<MongoEntity> objects, @SuppressWarnings("unchecked") TransactionAdapter<MongoEntity>... ops) throws RepositoryException, ObjectException {
 		
 		for(MongoEntity obj : objects) {
 			saveOrUpdate(obj);
@@ -192,7 +192,7 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 	}
 
 	@Override
-	public Collection<AbstractEntity> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
+	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
 		templateService.get(resourceKey);
 		return entityRepository.table(resourceKey, searchField, searchValue, offset, limit);
 	}

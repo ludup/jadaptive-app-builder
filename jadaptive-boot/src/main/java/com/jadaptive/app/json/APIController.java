@@ -22,34 +22,34 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.jadaptive.api.entity.AbstractEntity;
-import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.entity.EntityService;
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.json.BootstrapTableController;
 import com.jadaptive.api.json.BootstrapTablePageProcessor;
 import com.jadaptive.api.json.BootstrapTableResult;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.UnauthorizedException;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.app.entity.MongoEntity;
 
 @Controller
-public class APIController extends BootstrapTableController<AbstractEntity>{
+public class APIController extends BootstrapTableController<AbstractObject>{
 
 	static Logger log = LoggerFactory.getLogger(APIController.class);
 	
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	@Autowired
 	private TemplateVersionService versionService; 
 	
 	@Autowired
-	private EntityService entityService; 
+	private ObjectService entityService; 
 	
 	@ExceptionHandler(AccessDeniedException.class)
 	public void handleException(HttpServletRequest request, 
@@ -61,22 +61,22 @@ public class APIController extends BootstrapTableController<AbstractEntity>{
 	@RequestMapping(value="/app/api/template/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<EntityTemplate> doEntityGet(@PathVariable String resourceKey, HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<ObjectTemplate> doEntityGet(@PathVariable String resourceKey, HttpServletRequest request) throws RepositoryException, UnknownEntityException, ObjectException {
 		
 		try {
-		   return new EntityStatus<EntityTemplate>(templateService.get(resourceKey));
+		   return new EntityStatus<ObjectTemplate>(templateService.get(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/template/{}", resourceKey, e);
 			}
-			return new EntityStatus<EntityTemplate>(false, e.getMessage());
+			return new EntityStatus<ObjectTemplate>(false, e.getMessage());
 		} 
 	}
 	
 	@RequestMapping(value="/app/api/template", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus saveTemplate(@RequestBody EntityTemplate template, HttpServletRequest request) {
+	public RequestStatus saveTemplate(@RequestBody ObjectTemplate template, HttpServletRequest request) {
 
 		try {
 			templateService.saveOrUpdate(template);
@@ -108,7 +108,7 @@ public class APIController extends BootstrapTableController<AbstractEntity>{
 	@RequestMapping(value="/app/api/template/versions", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<Collection<TemplateVersion>> getTemplateVersions(HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<Collection<TemplateVersion>> getTemplateVersions(HttpServletRequest request) throws RepositoryException, UnknownEntityException, ObjectException {
 
 		try {
 		   return new EntityStatus<Collection<TemplateVersion>>(versionService.list());
@@ -123,14 +123,14 @@ public class APIController extends BootstrapTableController<AbstractEntity>{
 	@RequestMapping(value="/app/api/template/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<Collection<EntityTemplate>> getEntityTemplates(HttpServletRequest request) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<Collection<ObjectTemplate>> getEntityTemplates(HttpServletRequest request) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-		   return new EntityStatus<Collection<EntityTemplate>>(templateService.list());
+		   return new EntityStatus<Collection<ObjectTemplate>>(templateService.list());
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/template/list", e);
 			}
-			return new EntityStatus<Collection<EntityTemplate>>(false, e.getMessage());
+			return new EntityStatus<Collection<ObjectTemplate>>(false, e.getMessage());
 		}
 	}
 	
@@ -138,75 +138,75 @@ public class APIController extends BootstrapTableController<AbstractEntity>{
 	@RequestMapping(value="/app/api/template/{uuid}/children", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<Collection<EntityTemplate>> getChildTemplates(HttpServletRequest request, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<Collection<ObjectTemplate>> getChildTemplates(HttpServletRequest request, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-		   return new EntityStatus<Collection<EntityTemplate>>(templateService.children(uuid));
+		   return new EntityStatus<Collection<ObjectTemplate>>(templateService.children(uuid));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/template/{}/children", uuid, e);
 			}
-			return new EntityStatus<Collection<EntityTemplate>>(false, e.getMessage());
+			return new EntityStatus<Collection<ObjectTemplate>>(false, e.getMessage());
 		}
 	}
 	
 	@RequestMapping(value="/app/api/template/table", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public TableStatus<EntityTemplate> getTemplateTable(HttpServletRequest request,
+	public TableStatus<ObjectTemplate> getTemplateTable(HttpServletRequest request,
 			@RequestParam(required=false, defaultValue="uuid") String searchField,
 			@RequestParam(required=false, name="search") String searchValue,
 			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam int offset,
-			@RequestParam int limit) throws RepositoryException, UnknownEntityException, EntityException {
+			@RequestParam int limit) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
 
-		   return new TableStatus<EntityTemplate>(templateService.table(searchField, searchValue, order, offset, limit), templateService.count());
+		   return new TableStatus<ObjectTemplate>(templateService.table(searchField, searchValue, order, offset, limit), templateService.count());
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/template/table", e);
 			}
-			return new TableStatus<EntityTemplate>(false, e.getMessage());
+			return new TableStatus<ObjectTemplate>(false, e.getMessage());
 		}
 	}
 	
 	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<AbstractEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<AbstractObject> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-		   return new EntityStatus<AbstractEntity>(entityService.get(resourceKey, uuid));
+		   return new EntityStatus<AbstractObject>(entityService.get(resourceKey, uuid));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/{}", resourceKey, uuid, e);
 			}
-			return new EntityStatus<AbstractEntity>(false, e.getMessage());
+			return new EntityStatus<AbstractObject>(false, e.getMessage());
 		}
 	}
 	
 	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<AbstractEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<AbstractObject> getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
 		
 		if(resourceKey.equals("logon")) {
-			return new EntityStatus<AbstractEntity>(false, "Logon API requires POST request");
+			return new EntityStatus<AbstractObject>(false, "Logon API requires POST request");
 		}
 		
 		try {
-			   return new EntityStatus<AbstractEntity>(entityService.getSingleton(resourceKey));
+			   return new EntityStatus<AbstractObject>(entityService.getSingleton(resourceKey));
 		} catch(Throwable e) {
 			return handleException(e, "GET", resourceKey);
 		}
 	}
 	
-	private EntityStatus<AbstractEntity> handleException(Throwable e, String method, String resourceKey) {
+	private EntityStatus<AbstractObject> handleException(Throwable e, String method, String resourceKey) {
 		if(e instanceof AccessDeniedException) {
 			throw (AccessDeniedException)e;
 		}
 		if(log.isErrorEnabled()) {
 			log.error("{} api/{}", method, resourceKey, e);
 		}
-		return new EntityStatus<AbstractEntity>(false, e.getMessage());
+		return new EntityStatus<AbstractObject>(false, e.getMessage());
 	}
 	
 	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"})
@@ -225,7 +225,7 @@ public class APIController extends BootstrapTableController<AbstractEntity>{
 	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus saveEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
+	public RequestStatus saveEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
 
 		try {
 			entityService.delete(resourceKey, uuid);
@@ -238,28 +238,28 @@ public class APIController extends BootstrapTableController<AbstractEntity>{
 	@RequestMapping(value="/app/api/{resourceKey}/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityListStatus<AbstractEntity> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityListStatus<AbstractObject> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-			   return new EntityListStatus<AbstractEntity>(entityService.list(resourceKey));
+			   return new EntityListStatus<AbstractObject>(entityService.list(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/list", resourceKey, e);
 			}
-			return new EntityListStatus<AbstractEntity>(false, e.getMessage());
+			return new EntityListStatus<AbstractObject>(false, e.getMessage());
 		}
 	}
 	
 	@RequestMapping(value="/app/api/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public BootstrapTableResult<AbstractEntity> tableEntities(HttpServletRequest request, 
+	public BootstrapTableResult<AbstractObject> tableEntities(HttpServletRequest request, 
 			@PathVariable String resourceKey,
 			@RequestParam(required=false, defaultValue="uuid") String searchField,
 			@RequestParam(required=false, name="search") String searchValue,
 			@RequestParam(required=false, defaultValue = "") String orderColumn,
 			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam(required=false, defaultValue = "0") int offset,
-			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, EntityException {
+			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, ObjectException {
 		
 		try {
 			

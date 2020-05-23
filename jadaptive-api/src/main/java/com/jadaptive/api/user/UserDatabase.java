@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.pf4j.ExtensionPoint;
 
-import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.ObjectTemplate;
 
 public interface UserDatabase extends ExtensionPoint {
 
@@ -18,7 +18,7 @@ public interface UserDatabase extends ExtensionPoint {
 	
 	Iterable<User> iterateUsers();
 
-	EntityTemplate getUserTemplate();
+	ObjectTemplate getUserTemplate();
 
 	boolean isDatabaseUser(User user);
 

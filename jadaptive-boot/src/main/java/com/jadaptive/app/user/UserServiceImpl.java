@@ -11,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.User;
@@ -64,11 +64,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 				if(Objects.nonNull(user)) {
 					break;
 				}
-			} catch(EntityNotFoundException e) { }
+			} catch(ObjectNotFoundException e) { }
 		}
 		
 		if(Objects.isNull(user)) {
-			throw new EntityNotFoundException(String.format("User with id %s not found", uuid));
+			throw new ObjectNotFoundException(String.format("User with id %s not found", uuid));
 		}
 		return user;
 	}
@@ -77,7 +77,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public boolean verifyPassword(User user, char[] password) {
 		try {
 			return getDatabase(user).verifyPassword(user, password);
-		} catch(EntityNotFoundException e) {
+		} catch(ObjectNotFoundException e) {
 			return false;
 		}
 	}
@@ -94,11 +94,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 				if(Objects.nonNull(user)) {
 					break;
 				}
-			} catch(EntityNotFoundException e) { }
+			} catch(ObjectNotFoundException e) { }
 		}
 		
 		if(Objects.isNull(user)) {
-			throw new EntityNotFoundException(String.format("%s not found", username));
+			throw new ObjectNotFoundException(String.format("%s not found", username));
 		}
 		return user;
 	}
@@ -114,11 +114,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 				if(Objects.nonNull(user)) {
 					break;
 				}
-			} catch(EntityNotFoundException e) { }
+			} catch(ObjectNotFoundException e) { }
 		}
 		
 		if(Objects.isNull(user)) {
-			throw new EntityNotFoundException(String.format("%s not found", email));
+			throw new ObjectNotFoundException(String.format("%s not found", email));
 		}
 		return user;
 	}
@@ -177,9 +177,9 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	}
 
 	@Override
-	public Collection<EntityTemplate> getCreateUserTemplates() {
+	public Collection<ObjectTemplate> getCreateUserTemplates() {
 		
-		List<EntityTemplate> templates = new ArrayList<>();
+		List<ObjectTemplate> templates = new ArrayList<>();
 		userDatabases.forEach((k,v)->{
 			if(v.getCapabilities().contains(UserDatabaseCapabilities.CREATE)){
 				templates.add(v.getUserTemplate());

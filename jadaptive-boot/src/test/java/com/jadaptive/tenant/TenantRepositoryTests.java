@@ -9,7 +9,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
@@ -71,7 +71,7 @@ public class TenantRepositoryTests {
 		assertEquals(tenant.getUuid(), uuid);
 	}
 	
-	@Test(expected=EntityException.class)
+	@Test(expected=ObjectException.class)
 	public void testCannotDeleteSystemTenant() {
 		
 		tenantRepository.deleteTenant(tenantRepository.getSystemTenant());

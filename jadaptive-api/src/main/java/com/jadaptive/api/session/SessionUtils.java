@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationProperties;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 
 @Component
@@ -83,7 +83,7 @@ public class SessionUtils {
 				}
 			}
 			
-		} catch(EntityNotFoundException e) { 
+		} catch(ObjectNotFoundException e) { 
 
 		} finally {
 			permissionService.clearUserContext();
@@ -317,7 +317,7 @@ public class SessionUtils {
 	public boolean hasActiveSession(HttpServletRequest request) {
 		try {
 			return getSession(request)!=null;
-		} catch (EntityNotFoundException | UnauthorizedException | SessionTimeoutException e) {
+		} catch (ObjectNotFoundException | UnauthorizedException | SessionTimeoutException e) {
 			return false;
 		}
 	}

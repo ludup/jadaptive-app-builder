@@ -3,14 +3,14 @@ package com.jadaptive.api.role;
 import java.util.Collection;
 import java.util.HashSet;
 
-import com.jadaptive.api.entity.EntityScope;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Roles", resourceKey = Role.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Roles", resourceKey = Role.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class Role extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "roles";

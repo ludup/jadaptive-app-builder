@@ -7,7 +7,7 @@ import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.PersonalObjectDatabase;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.user.User;
@@ -61,7 +61,7 @@ public class ImportKey extends AbstractTenantAwareCommand {
 		if(assign) {
 			try {
 				forUser = userService.getUser(CliHelper.getValue(args, 'a', "assign"));
-			} catch(EntityNotFoundException e) {
+			} catch(ObjectNotFoundException e) {
 				throw new IOException(e.getMessage(), e);
 			}
 			try {

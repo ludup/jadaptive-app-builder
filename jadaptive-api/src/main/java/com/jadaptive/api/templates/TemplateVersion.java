@@ -3,14 +3,14 @@ package com.jadaptive.api.templates;
 import java.util.Date;
 import java.util.Objects;
 
-import com.jadaptive.api.entity.EntityScope;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Template Version", resourceKey = TemplateVersion.RESOURCE_KEY, scope = EntityScope.GLOBAL, type = EntityType.COLLECTION)
+@Template(name = "Template Version", resourceKey = TemplateVersion.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class TemplateVersion extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "templateVersion";

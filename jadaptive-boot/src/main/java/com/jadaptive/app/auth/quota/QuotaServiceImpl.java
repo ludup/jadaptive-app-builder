@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 
 @Service
@@ -33,7 +33,7 @@ public class QuotaServiceImpl implements QuotaService {
 		try {
 			q = objectDatbase.get(Quota.class, SearchField.eq("key", key),
 					SearchField.eq("group", group));
-		} catch (EntityException e) {
+		} catch (ObjectException e) {
 			q = new Quota();
 			q.setGroup(group);
 			q.setKey(key);

@@ -11,13 +11,13 @@ import org.bson.Document;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.jadaptive.api.entity.AbstractEntity;
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
 
-@JsonDeserialize(using=EntityDeserializer.class)
-@JsonSerialize(using=EntitySerializer.class)
-public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
+@JsonDeserialize(using=AbstractObjectDeserializer.class)
+@JsonSerialize(using=AbstractObjectSerializer.class)
+public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 
 	MongoEntity parent;
 	Map<String,MongoEntity> children = new HashMap<>();
@@ -135,8 +135,8 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractEntity {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Collection<AbstractEntity> getObjectCollection(String fieldName) {
-		List<AbstractEntity> tmp = new ArrayList<>();
+	public Collection<AbstractObject> getObjectCollection(String fieldName) {
+		List<AbstractObject> tmp = new ArrayList<>();
 		for(Map<String,Object> child : document.getList(fieldName, Map.class)) {
 			tmp.add(new MongoEntity(fieldName, child));
 		}

@@ -2,24 +2,24 @@ package com.jadaptive.api.tenant;
 
 import java.util.Collection;
 
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 
 public interface TenantRepository {
 
-	void saveTenant(Tenant tenant) throws RepositoryException, EntityException;
+	void saveTenant(Tenant tenant) throws RepositoryException, ObjectException;
 
-	void deleteTenant(Tenant tenant) throws RepositoryException, EntityException;
+	void deleteTenant(Tenant tenant) throws RepositoryException, ObjectException;
 	
-	Collection<Tenant> listTenants() throws RepositoryException, EntityException;
+	Collection<Tenant> listTenants() throws RepositoryException, ObjectException;
 
-	void newSchema() throws RepositoryException, EntityException;
+	void newSchema() throws RepositoryException, ObjectException;
 
-	void dropSchema() throws RepositoryException, EntityException;
+	void dropSchema() throws RepositoryException, ObjectException;
 
-	Tenant getTenant(String uuid) throws RepositoryException, EntityException;
+	Tenant getTenant(String uuid) throws RepositoryException, ObjectException;
 
-	Tenant getSystemTenant() throws RepositoryException, EntityException;
+	Tenant getSystemTenant() throws RepositoryException, ObjectException;
 
 	boolean isEmpty();
 

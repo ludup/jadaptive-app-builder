@@ -4,11 +4,11 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.EntityScope;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.CliHelper;
@@ -22,7 +22,7 @@ public class Templates extends AbstractTenantAwareCommand {
 	PermissionService permissionService; 
 	
 	@Autowired
-	EntityTemplateService templateService; 
+	TemplateService templateService; 
 	
 	public Templates() {
 		super("templates", "Object Management", UsageHelper.build("templates [option]",
@@ -58,17 +58,17 @@ public class Templates extends AbstractTenantAwareCommand {
 	private void createTemplate() {
 		
 
-		EntityTemplate template = new EntityTemplate();
+		ObjectTemplate template = new ObjectTemplate();
 		
 		String uuid = console.readLine("Resource Key: ");
 		String name = console.readLine("Name: ");
 		
 		template.setResourceKey(uuid);
 		template.setName(name);
-		template.setScope(CliHelper.hasShortOption(args, 'p') ? EntityScope.PERSONAL 
-				: CliHelper.hasShortOption(args, 'a') ? EntityScope.ASSIGNED : EntityScope.GLOBAL);
-		template.setType(CliHelper.hasShortOption(args, 's') ? EntityType.SINGLETON 
-				: CliHelper.hasShortOption(args, 'e') ? EntityType.OBJECT : EntityType.COLLECTION);
+		template.setScope(CliHelper.hasShortOption(args, 'p') ? ObjectScope.PERSONAL 
+				: CliHelper.hasShortOption(args, 'a') ? ObjectScope.ASSIGNED : ObjectScope.GLOBAL);
+		template.setType(CliHelper.hasShortOption(args, 's') ? ObjectType.SINGLETON 
+				: CliHelper.hasShortOption(args, 'e') ? ObjectType.OBJECT : ObjectType.COLLECTION);
 		
 		templateService.saveOrUpdate(template);
 		console.println(String.format("Created template %s", template.getName()));
@@ -76,7 +76,7 @@ public class Templates extends AbstractTenantAwareCommand {
 	
 
 	private void printTemplates() {
-		for(EntityTemplate template : templateService.list()) {
+		for(ObjectTemplate template : templateService.list()) {
 			console.println(template.getName());
 		}
 	}

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
@@ -37,7 +37,7 @@ public class DeleteRole extends AbstractTenantAwareCommand {
 				roleService.deleteRole(resolveRole(roleName));
 				console.println(String.format("Role %s deleted", roleName));
 				
-			} catch(EntityNotFoundException e) {
+			} catch(ObjectNotFoundException e) {
 				console.println(String.format("There is no Role named %s", roleName));
 			}
 		} 

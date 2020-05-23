@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.encrypt.EncryptionService;
-import com.jadaptive.api.entity.EntityNotFoundException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.template.ValidationException;
@@ -267,7 +267,7 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 		} else {
 			try {
 				p = userService.getUserByEmail(r.getEmail());
-			} catch (EntityNotFoundException e) {
+			} catch (ObjectNotFoundException e) {
 			}
 		}
 		
@@ -434,20 +434,20 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 			
 			try {
 				user = userService.getUserByEmail(email);
-			} catch(EntityNotFoundException e) { }
+			} catch(ObjectNotFoundException e) { }
 		} else {
 
 			// Not an email address? Is this a principal of the realm?
 			try {
 				user = userService.getUser(val);
-			} catch(EntityNotFoundException e) { }
+			} catch(ObjectNotFoundException e) { }
 			
 		}
 		
 		if(user==null) {
 			try {
 				user = userService.getUserByEmail(val);
-			} catch (EntityNotFoundException e) {
+			} catch (ObjectNotFoundException e) {
 			}
 		}
 		

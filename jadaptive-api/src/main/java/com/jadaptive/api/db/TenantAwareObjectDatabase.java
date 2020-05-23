@@ -2,7 +2,7 @@ package com.jadaptive.api.db;
 
 import java.util.Collection;
 
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 
@@ -10,15 +10,15 @@ public interface TenantAwareObjectDatabase<T extends UUIDEntity> {
 
 	Collection<T> list(Class<T> resourceClass, SearchField...fields);
 
-	T get(String uuid, Class<T> resourceClass) throws RepositoryException, EntityException;
+	T get(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException;
 	
-	T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, EntityException;
+	T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException;
 
-	void delete(T obj) throws RepositoryException, EntityException;
+	void delete(T obj) throws RepositoryException, ObjectException;
 
-	void delete(String uuid, Class<T> resourceClass) throws RepositoryException, EntityException;
+	void delete(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException;
 	
-	void saveOrUpdate(T obj) throws RepositoryException, EntityException;
+	void saveOrUpdate(T obj) throws RepositoryException, ObjectException;
 
 	Collection<T> table(String searchField, String searchValue, String order, int start, int length,
 			Class<T> resourceClass);
@@ -33,8 +33,8 @@ public interface TenantAwareObjectDatabase<T extends UUIDEntity> {
 
 	Iterable<T> iterator(Class<T> resourceClass);
 
-	T max(Class<T> resourceClass, String field) throws RepositoryException, EntityException;
+	T max(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
 
-	T min(Class<T> resourceClass, String field) throws RepositoryException, EntityException;
+	T min(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
 
 }

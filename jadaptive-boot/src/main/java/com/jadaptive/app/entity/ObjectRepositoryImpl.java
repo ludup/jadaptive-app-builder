@@ -11,20 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.entity.AbstractEntity;
-import com.jadaptive.api.entity.EntityException;
-import com.jadaptive.api.entity.EntityNotFoundException;
-import com.jadaptive.api.entity.EntityRepository;
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.entity.ObjectRepository;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateRepository;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.DocumentDatabase;
 
 @Repository
-public class EntityRepositoryImpl implements EntityRepository {
+public class ObjectRepositoryImpl implements ObjectRepository {
 
 	@Autowired
 	DocumentDatabase db;
@@ -33,12 +33,12 @@ public class EntityRepositoryImpl implements EntityRepository {
 	TenantService tenantService; 
 
 	@Autowired
-	EntityTemplateRepository templateRepository; 
+	ObjectTemplateRepository templateRepository; 
 	
 	@Override
-	public Collection<AbstractEntity> list(String resourceKey, SearchField... fields) throws RepositoryException, EntityException {
+	public Collection<AbstractObject> list(String resourceKey, SearchField... fields) throws RepositoryException, ObjectException {
 		
-		List<AbstractEntity> results = new ArrayList<>();
+		List<AbstractObject> results = new ArrayList<>();
 		
 		for(Document document : db.list(resourceKey, tenantService.getCurrentTenant().getUuid(), fields)) {
 			results.add(buildEntity(resourceKey, document));
@@ -47,7 +47,7 @@ public class EntityRepositoryImpl implements EntityRepository {
 		return results;
 	}
 
-	private AbstractEntity buildEntity(String resourceKey, Document document) {
+	private AbstractObject buildEntity(String resourceKey, Document document) {
 		MongoEntity e = new MongoEntity(resourceKey, document);
 		e.setUuid(document.getString("_id"));
 		e.setHidden(document.getBoolean("hidden"));
@@ -56,30 +56,30 @@ public class EntityRepositoryImpl implements EntityRepository {
 	}
 	
 	@Override
-	public AbstractEntity get(String uuid, String resourceKey) throws RepositoryException, EntityException {
+	public AbstractObject get(String uuid, String resourceKey) throws RepositoryException, ObjectException {
 		Document document = db.get(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
 		if(Objects.isNull(document)) {
-			throw new EntityNotFoundException(String.format("No document for resource %s with uuid %s", resourceKey, uuid));
+			throw new ObjectNotFoundException(String.format("No document for resource %s with uuid %s", resourceKey, uuid));
 		}
 		return buildEntity(resourceKey, document);
 	}
 
 	@Override
-	public void delete(String resourceKey, String uuid) throws RepositoryException, EntityException {
+	public void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException {
 		db.delete(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
 	}
 
 	@Override
-	public void deleteAll(String resourceKey) throws RepositoryException, EntityException {
+	public void deleteAll(String resourceKey) throws RepositoryException, ObjectException {
 		
 		db.dropCollection(resourceKey, tenantService.getCurrentTenant().getUuid());
 	
 	}
 	
 	@Override
-	public String save(AbstractEntity entity) throws RepositoryException, EntityException {
+	public String save(AbstractObject entity) throws RepositoryException, ObjectException {
 		
-		EntityTemplate template = templateRepository.get(SearchField.eq("resourceKey", entity.getResourceKey()));
+		ObjectTemplate template = templateRepository.get(SearchField.eq("resourceKey", entity.getResourceKey()));
 		
 		validateReferences(template, entity);
 		
@@ -88,11 +88,11 @@ public class EntityRepositoryImpl implements EntityRepository {
 		return doc.getString("_id");
 	}
 
-	private void validateReferences(EntityTemplate template, AbstractEntity entity) {
+	private void validateReferences(ObjectTemplate template, AbstractObject entity) {
 		validateReferences(template.getFields(), entity);
 	}
 
-	private void validateReferences(Collection<FieldTemplate> fields, AbstractEntity entity) {
+	private void validateReferences(Collection<FieldTemplate> fields, AbstractObject entity) {
 		if(!Objects.isNull(fields)) {
 			for(FieldTemplate t : fields) {
 				switch(t.getFieldType()) {
@@ -118,8 +118,8 @@ public class EntityRepositoryImpl implements EntityRepository {
 	}
 
 	@Override
-	public Collection<AbstractEntity> table(String resourceKey, String field, String search, int offset, int limit) {
-		List<AbstractEntity> results = new ArrayList<>();
+	public Collection<AbstractObject> table(String resourceKey, String field, String search, int offset, int limit) {
+		List<AbstractObject> results = new ArrayList<>();
 		
 		for(Document document : db.table(resourceKey, field, search, tenantService.getCurrentTenant().getUuid(), offset, limit)) {
 			results.add(buildEntity(resourceKey, document));

@@ -11,30 +11,30 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import com.jadaptive.api.entity.AbstractEntity;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.utils.Utils;
 
-public class EntitySerializer extends StdSerializer<AbstractEntity> {
+public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 
 	private static final long serialVersionUID = 5624312163275460262L;
 
-	static Logger log = LoggerFactory.getLogger(EntitySerializer.class);
+	static Logger log = LoggerFactory.getLogger(AbstractObjectSerializer.class);
 	
-	public EntitySerializer() {
-		super(AbstractEntity.class);
+	public AbstractObjectSerializer() {
+		super(AbstractObject.class);
 	}
 
 	@Override
-	public void serialize(AbstractEntity value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+	public void serialize(AbstractObject value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 		try {
-			EntityTemplate template = ApplicationServiceImpl.getInstance().getBean(
-					EntityTemplateService.class).get(value.getResourceKey());
+			ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(
+					TemplateService.class).get(value.getResourceKey());
 
 			writeObject(value, template, gen);
 		} catch (Throwable e) {
@@ -44,7 +44,7 @@ public class EntitySerializer extends StdSerializer<AbstractEntity> {
 
 	}
 	
-	private void writeObject(AbstractEntity value, EntityTemplate template, JsonGenerator gen) throws IOException {
+	private void writeObject(AbstractObject value, ObjectTemplate template, JsonGenerator gen) throws IOException {
 		
 		gen.writeStartObject();
 		
@@ -59,7 +59,7 @@ public class EntitySerializer extends StdSerializer<AbstractEntity> {
 	}
 
 
-	private void writeEmbeddedObject(AbstractEntity value, EntityTemplate template, JsonGenerator gen, boolean collection) throws IOException {
+	private void writeEmbeddedObject(AbstractObject value, ObjectTemplate template, JsonGenerator gen, boolean collection) throws IOException {
 
 		if(collection) {
 			gen.writeStartObject();
@@ -77,7 +77,7 @@ public class EntitySerializer extends StdSerializer<AbstractEntity> {
 		gen.writeEndObject();
 	}
 	
-	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, AbstractEntity value) throws IOException {
+	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, AbstractObject value) throws IOException {
 		
 		if(!Objects.isNull(templates)) {
 			for (FieldTemplate t : templates) {
@@ -85,10 +85,10 @@ public class EntitySerializer extends StdSerializer<AbstractEntity> {
 				switch(t.getFieldType()) {
 				case OBJECT_EMBEDDED:
 					String type = t.getValidationValue(ValidationType.OBJECT_TYPE);
-					EntityTemplate template = ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class).get(type);
+					ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(type);
 					if(t.getCollection()) {
 						gen.writeArrayFieldStart(t.getResourceKey());
-						for(AbstractEntity child : value.getObjectCollection(t.getResourceKey())) {
+						for(AbstractObject child : value.getObjectCollection(t.getResourceKey())) {
 							writeEmbeddedObject(child, template, gen, true);
 						}
 						gen.writeEndArray();

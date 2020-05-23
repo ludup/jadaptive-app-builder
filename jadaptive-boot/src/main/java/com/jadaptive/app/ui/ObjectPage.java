@@ -6,23 +6,23 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.entity.AbstractEntity;
-import com.jadaptive.api.entity.EntityNotFoundException;
-import com.jadaptive.api.entity.EntityService;
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 
 public abstract class ObjectPage extends TemplatePage {
 
 	@Autowired
-	private EntityService objectService; 
+	private ObjectService objectService; 
 	
 	@Autowired
 	private PermissionService permissionService; 
 	
 	protected String uuid;
-	protected AbstractEntity object;
+	protected AbstractObject object;
 	
 	protected boolean isModal() {
 		return true;
@@ -32,16 +32,16 @@ public abstract class ObjectPage extends TemplatePage {
 
 		super.onCreated();
 	
-		if(Objects.isNull(uuid) && (template.getType()==EntityType.COLLECTION || template.getType()==EntityType.OBJECT)) {
+		if(Objects.isNull(uuid) && (template.getType()==ObjectType.COLLECTION || template.getType()==ObjectType.OBJECT)) {
 			throw new FileNotFoundException("UUID required for COLLECTION or OBJECT type");
-		} else if(Objects.nonNull(uuid) && template.getType()==EntityType.SINGLETON) {
+		} else if(Objects.nonNull(uuid) && template.getType()==ObjectType.SINGLETON) {
 			throw new FileNotFoundException("UUID not required for SINGLETON type");
 		}
 		
 		try {
 			if(Objects.nonNull(uuid)) {
 				object = objectService.get(template.getResourceKey(), uuid);
-			} else if(template.getType()==EntityType.SINGLETON) {
+			} else if(template.getType()==ObjectType.SINGLETON) {
 				object = objectService.getSingleton(template.getResourceKey());
 			}
 			
@@ -56,13 +56,13 @@ public abstract class ObjectPage extends TemplatePage {
 					throw new FileNotFoundException(ex.getMessage());
 				}
  			}
-		} catch (EntityNotFoundException nse) {
+		} catch (ObjectNotFoundException nse) {
 			throw new FileNotFoundException(String.format("No %s with id %s", resourceKey, uuid));
 		}
 		
 	}
 
-	public AbstractEntity getObject() {
+	public AbstractObject getObject() {
 		return object;
 	}
 	

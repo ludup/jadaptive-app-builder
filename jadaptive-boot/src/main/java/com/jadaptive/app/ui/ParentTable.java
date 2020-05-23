@@ -18,8 +18,8 @@ import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.app.ui.renderers.DropdownInput;
 
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class })
@@ -31,7 +31,7 @@ public class ParentTable extends TemplatePage {
 	private PermissionService permissionService;
 	
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	protected void onCreated() throws FileNotFoundException {
 		
@@ -60,7 +60,7 @@ public class ParentTable extends TemplatePage {
 				"searchField", "name")
 					.renderValues(template.getFields());
 		
-		Collection<EntityTemplate> children = templateService.children(template.getResourceKey());
+		Collection<ObjectTemplate> children = templateService.children(template.getResourceKey());
 		if(children.isEmpty()) {
 			content.select("#childDropdown").remove();
 		} else {

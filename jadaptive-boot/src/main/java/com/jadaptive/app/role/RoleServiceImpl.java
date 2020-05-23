@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleRepository;
@@ -121,7 +121,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	private void doAssign(Role role, User... users) {
 		
 		if(EVERYONE_UUID.equals(role.getUuid())) {
-			throw new EntityException("You cannot assign a user to the Everyone role");
+			throw new ObjectException("You cannot assign a user to the Everyone role");
 		}
 		
 		Set<String> uuids = new HashSet<>();
@@ -142,10 +142,10 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		Set<String> resolved = new HashSet<>();
 		for(String permission : permissions) {
 			if(!isValidPermission(permission)) {
-				throw new EntityException(String.format("%s is not a valid permission", permission));
+				throw new ObjectException(String.format("%s is not a valid permission", permission));
 			}
 			if(role.getPermissions().contains(permission)) {
-				throw new EntityException(String.format("%s is already granted on %s", permission, role.getName()));
+				throw new ObjectException(String.format("%s is already granted on %s", permission, role.getName()));
 			}
 			resolved.add(permission);
 		}
@@ -162,10 +162,10 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		Set<String> resolved = new HashSet<>();
 		for(String permission : permissions) {
 			if(!isValidPermission(permission)) {
-				throw new EntityException(String.format("%s is not a valid permission", permission));
+				throw new ObjectException(String.format("%s is not a valid permission", permission));
 			}
 			if(!role.getPermissions().contains(permission)) {
-				throw new EntityException(String.format("%s is not granted on %s", permission, role.getName()));
+				throw new ObjectException(String.format("%s is not granted on %s", permission, role.getName()));
 			}
 			resolved.add(permission);
 		}
@@ -189,12 +189,12 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 			Set<String> roleUuids = new HashSet<>(role.getUsers());
 			roleUuids.removeAll(uuids);
 			if(roleUuids.isEmpty()) {
-				throw new EntityException("This operation would remove the last user from the Administration role");
+				throw new ObjectException("This operation would remove the last user from the Administration role");
 			}
 		}
 		
 		if(EVERYONE_UUID.equals(role.getUuid())) {
-			throw new EntityException("You cannot unassign a user from the Everyone role");
+			throw new ObjectException("You cannot unassign a user from the Everyone role");
 		}
 		
 		role.getUsers().removeAll(uuids);

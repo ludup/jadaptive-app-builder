@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.entity.EntityNotFoundException;
-import com.jadaptive.api.template.EntityTemplate;
-import com.jadaptive.api.template.EntityTemplateService;
+import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
@@ -27,7 +27,7 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 	private TenantAwareObjectDatabase<AdminUser> objectDatabase;
 	
 	@Autowired
-	private EntityTemplateService templateService; 
+	private TemplateService templateService; 
 	
 	private final Set<UserDatabaseCapabilities> capabilities = new HashSet<>(
 			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD,
@@ -36,7 +36,7 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 	@Override
 	public User getUser(String username) {
 		if(!"admin".equals(username)) {
-			throw new EntityNotFoundException("Not an Administration user");
+			throw new ObjectNotFoundException("Not an Administration user");
 		}
 		return objectDatabase.get(AdminUser.class, SearchField.eq("uuid", ADMIN_USER_UUID));
 	}
@@ -64,7 +64,7 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 	}
 
 	@Override
-	public EntityTemplate getUserTemplate() {
+	public ObjectTemplate getUserTemplate() {
 		return templateService.get(AdminUser.RESOURCE_KEY);
 	}
 

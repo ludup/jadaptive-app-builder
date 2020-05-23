@@ -1,10 +1,10 @@
 package com.jadaptive.api.tasks;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.CustomEvent;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Task Result", recurse = false, resourceKey = "taskResult", type = EntityType.OBJECT)
+@Template(name = "Task Result", recurse = false, resourceKey = "taskResult", type = ObjectType.OBJECT)
 public class TaskResult extends CustomEvent {
 
 	public TaskResult(String resourceKey, Throwable e) {

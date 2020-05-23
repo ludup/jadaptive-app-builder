@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.entity.EntityException;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.repository.RepositoryException;
@@ -40,12 +40,12 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 
 	@Override
-	public T get(String uuid, Class<T> resourceClass) throws RepositoryException, EntityException {
+	public T get(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException {
 		try {
 			T result = getObject(uuid, tenantService.getCurrentTenant().getUuid(), resourceClass);
 			eventService.publishStandardEvent(EventType.READ, result);
 			return result;
-		} catch(RepositoryException | EntityException e) {
+		} catch(RepositoryException | ObjectException e) {
 			/**
 			 * TODO failed read events
 			 */
@@ -54,12 +54,12 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 	
 	@Override
-	public T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, EntityException {
+	public T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 			T result = getObject(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
 			eventService.publishStandardEvent(EventType.READ, result);
 			return result;
-		} catch(RepositoryException | EntityException e) {
+		} catch(RepositoryException | ObjectException e) {
 			/**
 			 * TODO failed read events
 			 */
@@ -69,28 +69,28 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 	
 	@Override
-	public T max(Class<T> resourceClass, String field) throws RepositoryException, EntityException {
+	public T max(Class<T> resourceClass, String field) throws RepositoryException, ObjectException {
 		return max(tenantService.getCurrentTenant().getUuid(), resourceClass, field);
 	}
 	
 	@Override
-	public T min(Class<T> resourceClass, String field) throws RepositoryException, EntityException {
+	public T min(Class<T> resourceClass, String field) throws RepositoryException, ObjectException {
 		return min(tenantService.getCurrentTenant().getUuid(), resourceClass, field);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void delete(T obj) throws RepositoryException, EntityException {
+	public void delete(T obj) throws RepositoryException, ObjectException {
 		delete(obj.getUuid(), (Class<T>) obj.getClass());
 	}
 	
 	@Override
-	public void delete(String uuid, Class<T> resourceClass) throws RepositoryException, EntityException {
+	public void delete(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException {
 		deleteObject(get(uuid, resourceClass), tenantService.getCurrentTenant().getUuid());
 	}
 
 	@Override
-	public void saveOrUpdate(T obj) throws RepositoryException, EntityException {
+	public void saveOrUpdate(T obj) throws RepositoryException, ObjectException {
 		saveObject(obj, tenantService.getCurrentTenant().getUuid());
 	}
 

@@ -3,7 +3,7 @@ package com.jadaptive.api.user;
 import java.util.Collection;
 import java.util.Map;
 
-import com.jadaptive.api.template.EntityTemplate;
+import com.jadaptive.api.template.ObjectTemplate;
 
 public interface UserService {
 
@@ -31,7 +31,7 @@ public interface UserService {
 
 	User getUserByEmail(String email);
 
-	Collection<EntityTemplate> getCreateUserTemplates();
+	Collection<ObjectTemplate> getCreateUserTemplates();
 
 	void deleteUser(User confirmedUser);
 

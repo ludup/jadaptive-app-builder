@@ -3,13 +3,13 @@ package com.jadaptive.db;
 import java.util.Arrays;
 import java.util.Collection;
 
-import com.jadaptive.api.entity.EntityType;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "Test String Collections", resourceKey = TestStringCollections.RESOURCE_KEY, type = EntityType.COLLECTION)
+@Template(name = "Test String Collections", resourceKey = TestStringCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class TestStringCollections extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testStringCollections";
