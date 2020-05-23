@@ -11,7 +11,9 @@ import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.utils.StaticResolver;
 import com.jadaptive.utils.Utils;
 
 @Service
@@ -19,6 +21,7 @@ public class EmailVerificationServiceImpl extends AuthenticatedService implement
 
 	static Logger log = LoggerFactory.getLogger(EmailVerificationServiceImpl.class);
 
+	public final static String USER_REGISTRATION_CONFIRMATION_CODE = "9a1fe4b0-e0c4-4b9e-a9e2-913b25fb39df";
 	
 	@Autowired
 	private CacheService cacheService; 
@@ -26,15 +29,16 @@ public class EmailVerificationServiceImpl extends AuthenticatedService implement
 	@Autowired
 	private UserService userService; 
 	
+	@Autowired
+	private MessageService messageService; 
+	
 	@Override
 	public boolean verifyEmail(String email) {
-
 
 		try {
 			userService.getUserByEmail(email);
 			return true;
 		} catch (EntityNotFoundException e) {
-		
 		}
 		
 		String code;
@@ -45,9 +49,11 @@ public class EmailVerificationServiceImpl extends AuthenticatedService implement
 			code = Utils.generateRandomAlphaNumericString(6).toUpperCase();
 		}
 
-		/**
-		 * TODO send message
-		 */
+		StaticResolver data = new StaticResolver();
+		data.addToken("code", code);
+		data.addToken("hostname", Request.get().getServerName());
+		
+		messageService.sendMessage(USER_REGISTRATION_CONFIRMATION_CODE, data, email);
 		
 		Cache<String,String> codes = cacheService.getCacheOrCreate("emailVerification", String.class, String.class);
 		log.info("Registration code is {}", code);

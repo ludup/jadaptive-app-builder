@@ -13,6 +13,10 @@ public class Message extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "messages";
 	
+	@Column(name = "Message Group", description = "The group of messages this belongs to", 
+			required = true, readOnly = true, type = FieldType.TEXT)
+	String group;
+	
 	@Column(name = "Subject", description = "The subject of this message", 
 				required = true, searchable = true, type = FieldType.TEXT)
 	String subject;
@@ -63,6 +67,14 @@ public class Message extends NamedUUIDEntity {
 		return RESOURCE_KEY;
 	}
 
+	public void setGroup(String group) {
+		this.group = group;
+	}
+	
+	public String getGroup() {
+		return group;
+	}
+	
 	public String getSubject() {
 		return subject;
 	}
@@ -125,5 +137,13 @@ public class Message extends NamedUUIDEntity {
 
 	public void setArchive(boolean archive) {
 		this.archive = archive;
+	}
+
+	public Collection<String> getReplacementVariables() {
+		return replacementVariables;
+	}
+
+	public void setReplacementVariables(Collection<String> replacementVariables) {
+		this.replacementVariables = replacementVariables;
 	}
 }

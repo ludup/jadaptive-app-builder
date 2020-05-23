@@ -6,7 +6,7 @@ import com.jadaptive.api.template.Column;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Template;
 
-@Template(name = "HTML Templates", resourceKey = Message.RESOURCE_KEY, type = EntityType.COLLECTION)
+@Template(name = "HTML Templates", resourceKey = HTMLTemplate.RESOURCE_KEY, type = EntityType.COLLECTION)
 public class HTMLTemplate extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "htmlTemplates";

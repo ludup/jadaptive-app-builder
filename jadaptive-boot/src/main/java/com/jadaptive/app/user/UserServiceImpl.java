@@ -221,4 +221,10 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		return getDatabase(user).getCapabilities().contains(UserDatabaseCapabilities.LOGON);
 	}
 
+	@Override
+	public Map<String, String> getUserProperties(User user) {
+		// TODO Return from user database implementation
+		return new HashMap<>();
+	}
+
 }

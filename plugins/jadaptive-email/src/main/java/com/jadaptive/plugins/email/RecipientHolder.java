@@ -80,11 +80,11 @@ public class RecipientHolder {
 		return "";
 	}
 	
-	public boolean hasPrincipal() {
+	public boolean hasUserObject() {
 		return !Objects.isNull(principal);
 	}
 	
-	public User getPrincipal() {
+	public User getUser() {
 		return principal;
 	}
 	

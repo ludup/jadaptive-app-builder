@@ -262,8 +262,8 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 		User p = null;
 		SMTPConfiguration config = getConfig();
 		
-		if(r.hasPrincipal()) {
-			p = r.getPrincipal();
+		if(r.hasUserObject()) {
+			p = r.getUser();
 		} else {
 			try {
 				p = userService.getUserByEmail(r.getEmail());

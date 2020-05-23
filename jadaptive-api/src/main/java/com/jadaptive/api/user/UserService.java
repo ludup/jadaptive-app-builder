@@ -1,6 +1,7 @@
 package com.jadaptive.api.user;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.jadaptive.api.template.EntityTemplate;
 
@@ -39,5 +40,7 @@ public interface UserService {
 	void createUser(User user, char[] charArray, boolean forceChange);
 
 	boolean supportsLogin(User user);
+
+	Map<String, String> getUserProperties(User user);
 
 }

@@ -12,6 +12,7 @@ import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.plugins.ssh.management.ConsoleHelper;
@@ -49,10 +50,14 @@ public class Singleton extends AbstractTenantAwareCommand {
 		Map<String,Object> obj = new HashMap<>();
 		
 		try {
+			
+			// TODO get the current object for defaults
+			
 			consoleHelper.promptTemplate(console, obj, template, null, template.getTemplateClass());
 			@SuppressWarnings("unused")
 			Class<?> baseClass = classLoader.resolveClass(template.getTemplateClass());
 			
+			// TODO save the singleton object
 		} catch (ParseException | PermissionDeniedException | IOException | ClassNotFoundException e) {
 			throw new IOException(e.getMessage(), e);
 		}

@@ -1,8 +1,12 @@
 [{
+    "uuid": "9a1fe4b0-e0c4-4b9e-a9e2-913b25fb39df",
 	"resourceKey": "messages",
+	"group": "User Registration",
+	"name": "Confirmation Code",
 	"subject": "Your email confirmation code",
-	"message": "As part of the user registration process on ${hostname} we require that you confirm your email address.\n\nPlease enter the confirmation code below into the registration form when requested\n\nYour confirmation code is ${code}",
+	"plainText": "As part of the user registration process on ${hostname} we require that you confirm your email address.\n\nPlease enter the confirmation code below into the registration form when requested\n\nYour confirmation code is ${code}",
 	"enabled": true,
 	"archive": true,
-	"replacementVariables": [ "hostname", "code"]
+	"replacementVariables": [ "hostname", "code"],
+	"system": true
 }]
