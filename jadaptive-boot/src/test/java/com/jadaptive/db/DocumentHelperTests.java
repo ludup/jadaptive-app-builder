@@ -49,8 +49,8 @@ public class DocumentHelperTests {
 	
 	private void assertKnownFields(AbstractUUIDEntity obj, AbstractUUIDEntity des) {
 		
-		assertEquals(obj.getHidden(), des.getHidden());
-		assertEquals(obj.getSystem(), des.getSystem());
+		assertEquals(obj.isHidden(), des.isHidden());
+		assertEquals(obj.isSystem(), des.isSystem());
 		assertEquals(obj.getUuid(), des.getUuid());
 		
 	}
@@ -262,8 +262,8 @@ public class DocumentHelperTests {
         Assert.assertEquals(date, obj.getDate());
         Assert.assertEquals(TestEnum.THREE, obj.getEnumField());
         Assert.assertEquals(Boolean.TRUE, obj.getBool());
-        Assert.assertEquals(Boolean.FALSE, obj.getHidden());
-        Assert.assertEquals(Boolean.FALSE, obj.getSystem());
+        Assert.assertEquals(Boolean.FALSE, obj.isHidden());
+        Assert.assertEquals(Boolean.FALSE, obj.isSystem());
         
         Assert.assertNotNull(obj.getEmbedded());
         
@@ -276,8 +276,8 @@ public class DocumentHelperTests {
         Assert.assertEquals(date, e.getEmbeddedDate());
         Assert.assertEquals(TestEnum.FIVE, e.getEmbeddedEnum());
         Assert.assertEquals(Boolean.FALSE, e.getEmbeddedBool());
-        Assert.assertEquals(Boolean.FALSE, e.getHidden());
-        Assert.assertEquals(Boolean.FALSE, e.getSystem());
+        Assert.assertEquals(Boolean.FALSE, e.isHidden());
+        Assert.assertEquals(Boolean.FALSE, e.isSystem());
 	}
 	
 	

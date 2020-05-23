@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.entity.AbstractEntity;
 import com.jadaptive.api.tasks.TriggerMapping;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
@@ -130,7 +131,7 @@ public class ConsoleHelper {
 				if(processMapping(val, field.getResourceKey(), mappings)) {
 					continue;
 				}
-				obj.put(field.getResourceKey(), val);
+				obj.put(field.getResourceKey(), val.toLowerCase().startsWith("y"));
 				break;
 			}
 			case ENUM:
@@ -241,5 +242,39 @@ public class ConsoleHelper {
 			}
 		}
 		return false;
+	}
+
+	public void displayTemplate(VirtualConsole console, AbstractEntity e, EntityTemplate template) {
+		
+		for(FieldTemplate field : template.getFields()) {
+			switch(field.getFieldType()) {
+			case OBJECT_EMBEDDED:
+				EntityTemplate objectTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
+				console.println(objectTemplate.getName());
+				displayTemplate(console, 
+						e.getChild(field),
+						template);
+				break;
+			case PASSWORD:
+			{
+				console.println(String.format("%-25s: %s", field.getName(), "**********"));
+				break;
+			}
+			case TEXT:
+			case TEXT_AREA:
+			case DECIMAL:
+			case ENUM:
+			case LONG:
+			case INTEGER:
+			case TIMESTAMP:
+			case BOOL:
+			{
+				console.println(String.format("%-25s: %s", field.getName(), e.getValue(field).toString()));
+				break;
+			}
+			default:
+				
+			}
+		}
 	}
 }

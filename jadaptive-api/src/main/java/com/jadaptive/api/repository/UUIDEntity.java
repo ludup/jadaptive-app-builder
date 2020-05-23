@@ -1,6 +1,8 @@
 package com.jadaptive.api.repository;
 
-public abstract class UUIDEntity {
+import com.jadaptive.api.entity.AbstractEntity;
+
+public abstract class UUIDEntity implements UUIDDocument {
 
 	String uuid;
 	Boolean system;
@@ -16,7 +18,7 @@ public abstract class UUIDEntity {
 		this.uuid = uuid;
 	}
 	
-	public Boolean getSystem() {
+	public Boolean isSystem() {
 		return system==null ? Boolean.FALSE : system;
 	}
 
@@ -24,7 +26,7 @@ public abstract class UUIDEntity {
 		this.system = system;
 	}
 
-	public Boolean getHidden() {
+	public Boolean isHidden() {
 		return hidden==null ? Boolean.FALSE : hidden;
 	}
 

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.jadaptive.api.entity.AbstractEntity;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
 import com.jadaptive.api.template.FieldTemplate;
@@ -18,18 +19,18 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.utils.Utils;
 
-public class EntitySerializer extends StdSerializer<MongoEntity> {
+public class EntitySerializer extends StdSerializer<AbstractEntity> {
 
 	private static final long serialVersionUID = 5624312163275460262L;
 
 	static Logger log = LoggerFactory.getLogger(EntitySerializer.class);
 	
 	public EntitySerializer() {
-		super(MongoEntity.class);
+		super(AbstractEntity.class);
 	}
 
 	@Override
-	public void serialize(MongoEntity value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+	public void serialize(AbstractEntity value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 		try {
 			EntityTemplate template = ApplicationServiceImpl.getInstance().getBean(
@@ -43,14 +44,14 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 
 	}
 	
-	private void writeObject(MongoEntity value, EntityTemplate template, JsonGenerator gen) throws IOException {
+	private void writeObject(AbstractEntity value, EntityTemplate template, JsonGenerator gen) throws IOException {
 		
 		gen.writeStartObject();
 		
 		gen.writeStringField("uuid", value.getUuid());
 		gen.writeStringField("resourceKey", value.getResourceKey());
-		gen.writeBooleanField("system", value.getSystem());
-		gen.writeBooleanField("hidden", value.getHidden());
+		gen.writeBooleanField("system", value.isSystem());
+		gen.writeBooleanField("hidden", value.isHidden());
 
 		writeFields(gen, template.getFields(), value);
 
@@ -58,7 +59,7 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 	}
 
 
-	private void writeEmbeddedObject(MongoEntity value, EntityTemplate template, JsonGenerator gen, boolean collection) throws IOException {
+	private void writeEmbeddedObject(AbstractEntity value, EntityTemplate template, JsonGenerator gen, boolean collection) throws IOException {
 
 		if(collection) {
 			gen.writeStartObject();
@@ -68,15 +69,15 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 		
 		gen.writeStringField("uuid", value.getUuid());
 		gen.writeStringField("resourceKey", value.getResourceKey());
-		gen.writeBooleanField("system", value.getSystem());
-		gen.writeBooleanField("hidden", value.getHidden());
+		gen.writeBooleanField("system", value.isSystem());
+		gen.writeBooleanField("hidden", value.isHidden());
 
 		writeFields(gen, template.getFields(), value);
 
 		gen.writeEndObject();
 	}
 	
-	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, MongoEntity value) throws IOException {
+	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, AbstractEntity value) throws IOException {
 		
 		if(!Objects.isNull(templates)) {
 			for (FieldTemplate t : templates) {
@@ -87,7 +88,7 @@ public class EntitySerializer extends StdSerializer<MongoEntity> {
 					EntityTemplate template = ApplicationServiceImpl.getInstance().getBean(EntityTemplateService.class).get(type);
 					if(t.getCollection()) {
 						gen.writeArrayFieldStart(t.getResourceKey());
-						for(MongoEntity child : value.getObjectCollection(t.getResourceKey())) {
+						for(AbstractEntity child : value.getObjectCollection(t.getResourceKey())) {
 							writeEmbeddedObject(child, template, gen, true);
 						}
 						gen.writeEndArray();

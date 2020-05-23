@@ -148,7 +148,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		Tenant tenant = tenantService.getCurrentTenant();	
 		
-		if(tenant.getSystem()) {
+		if(tenant.isSystem()) {
 			doRegisterPermission(systemPermissions, systemPermissionsAlias, permission, aliases);
 		} else {
 			
@@ -250,7 +250,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 		Set<String> resolvedPermissions = new HashSet<>(allPermissions);
 		processAliases(systemPermissionsAlias, allPermissions, resolvedPermissions);
-		if(!tenant.getSystem()) {
+		if(!tenant.isSystem()) {
 			processAliases(tenantPermissionsAlias.get(tenant), allPermissions, resolvedPermissions);
 		}		
 		return resolvedPermissions;

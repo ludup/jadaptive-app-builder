@@ -27,7 +27,6 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.templates.TemplateEnabledService;
 import com.jadaptive.app.db.DocumentHelper;
-import com.jadaptive.app.entity.MongoEntity;
 
 @Service
 public class EntityTemplateServiceImpl implements EntityTemplateService, TemplateEnabledService<EntityTemplate> {
@@ -38,7 +37,7 @@ public class EntityTemplateServiceImpl implements EntityTemplateService, Templat
 	private EntityTemplateRepository repository; 
 	
 	@Autowired
-	private EntityService<MongoEntity> entityService;
+	private EntityService entityService;
 	
 	@Autowired
 	private PermissionService permissionService; 

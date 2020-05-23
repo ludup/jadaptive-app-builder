@@ -6,23 +6,23 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.entity.AbstractEntity;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.entity.EntityType;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.app.entity.MongoEntity;
 
 public abstract class ObjectPage extends TemplatePage {
 
 	@Autowired
-	private EntityService<MongoEntity> objectService; 
+	private EntityService objectService; 
 	
 	@Autowired
 	private PermissionService permissionService; 
 	
 	protected String uuid;
-	protected MongoEntity object;
+	protected AbstractEntity object;
 	
 	protected boolean isModal() {
 		return true;
@@ -62,7 +62,7 @@ public abstract class ObjectPage extends TemplatePage {
 		
 	}
 
-	public MongoEntity getObject() {
+	public AbstractEntity getObject() {
 		return object;
 	}
 	

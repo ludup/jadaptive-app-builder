@@ -62,7 +62,7 @@ public class ConfigHelper {
 	}
 	
 	public static File getTenantFolder(Tenant tenant) {
-		if(tenant.getSystem()) {
+		if(tenant.isSystem()) {
 			return getSystemPrivateFolder();
 		}
 		return new File(getTenantsFolder(), tenant.getDomain());

@@ -94,7 +94,7 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 				initialiseTenant(getSystemTenant(), false);
 				
 				for(Tenant tenant : listTenants()) {
-					if(!tenant.getSystem()) {
+					if(!tenant.isSystem()) {
 						initialiseTenant(tenant, false);
 					}
 				}	
@@ -163,13 +163,13 @@ public class TenantServiceImpl implements TenantService, TemplateEnabledService<
 			
 			
 			for(TemplateEnabledService<?> repository : ordered) {
-				if(tenant.getSystem() || !repository.isSystemOnly()) { 
+				if(tenant.isSystem() || !repository.isSystemOnly()) { 
 					templateService.processTemplates(tenant, repository);		
 				}
 			}
 			
 			for(TenantAware aware : applicationService.getBeans(TenantAware.class)) {
-				if(tenant.getSystem()) {
+				if(tenant.isSystem()) {
 					aware.initializeSystem(newSchema);
 				} else {
 					aware.initializeTenant(tenant, newSchema);

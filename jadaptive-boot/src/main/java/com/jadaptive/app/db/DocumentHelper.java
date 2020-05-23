@@ -21,6 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
 
+import com.jadaptive.api.entity.AbstractEntity;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
@@ -33,7 +34,6 @@ import com.jadaptive.api.template.Template;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
-import com.jadaptive.app.entity.MongoEntity;
 import com.jadaptive.utils.Utils;
 
 public class DocumentHelper {
@@ -245,7 +245,7 @@ public class DocumentHelper {
 					} else {
 						String resourceKey = getTemplateResourceKey(parameter.getType());
 						String uuid =  document.getString(name);
-						MongoEntity e = (MongoEntity) ApplicationServiceImpl.getInstance().getBean(EntityService.class).get(resourceKey, uuid);
+						AbstractEntity e = (AbstractEntity) ApplicationServiceImpl.getInstance().getBean(EntityService.class).get(resourceKey, uuid);
 						
 						Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
 						m.invoke(obj, ref);
@@ -285,7 +285,7 @@ public class DocumentHelper {
 							} else {
 								String resourceKey = getTemplateResourceKey(parameter.getType());
 								String uuid =  document.getString(name);
-								MongoEntity e = (MongoEntity) ApplicationServiceImpl.getInstance().getBean(EntityService.class).get(resourceKey, uuid);
+								AbstractEntity e = (AbstractEntity) ApplicationServiceImpl.getInstance().getBean(EntityService.class).get(resourceKey, uuid);
 								
 								AbstractUUIDEntity ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
 								elements.add(ref);

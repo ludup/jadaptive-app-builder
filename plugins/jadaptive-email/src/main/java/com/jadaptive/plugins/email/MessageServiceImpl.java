@@ -18,6 +18,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -26,6 +27,7 @@ import com.jadaptive.utils.ITokenResolver;
 
 import freemarker.template.Template;
 
+@Service
 public class MessageServiceImpl extends AuthenticatedService implements MessageService {
 
 	static Logger log = LoggerFactory.getLogger(MessageServiceImpl.class);

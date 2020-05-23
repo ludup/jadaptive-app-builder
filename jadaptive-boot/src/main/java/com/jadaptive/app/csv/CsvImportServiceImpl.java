@@ -29,7 +29,7 @@ public class CsvImportServiceImpl implements CsvImportService {
 	static Logger log = LoggerFactory.getLogger(CsvImportServiceImpl.class);
 	
 	@Autowired
-	private EntityService<MongoEntity> entityService;
+	private EntityService entityService;
 	
 	private ThreadLocal<ImportCallback> callbacks = new ThreadLocal<>();
 	

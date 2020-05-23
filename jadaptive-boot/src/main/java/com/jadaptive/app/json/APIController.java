@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.jadaptive.api.entity.AbstractEntity;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.json.BootstrapTableController;
@@ -37,7 +38,7 @@ import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.app.entity.MongoEntity;
 
 @Controller
-public class APIController extends BootstrapTableController<MongoEntity>{
+public class APIController extends BootstrapTableController<AbstractEntity>{
 
 	static Logger log = LoggerFactory.getLogger(APIController.class);
 	
@@ -48,7 +49,7 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 	private TemplateVersionService versionService; 
 	
 	@Autowired
-	private EntityService<MongoEntity> entityService; 
+	private EntityService entityService; 
 	
 	@ExceptionHandler(AccessDeniedException.class)
 	public void handleException(HttpServletRequest request, 
@@ -171,41 +172,41 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<MongoEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<AbstractEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
-		   return new EntityStatus<MongoEntity>(entityService.get(resourceKey, uuid));
+		   return new EntityStatus<AbstractEntity>(entityService.get(resourceKey, uuid));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/{}", resourceKey, uuid, e);
 			}
-			return new EntityStatus<MongoEntity>(false, e.getMessage());
+			return new EntityStatus<AbstractEntity>(false, e.getMessage());
 		}
 	}
 	
 	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<MongoEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityStatus<AbstractEntity> getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
 		
 		if(resourceKey.equals("logon")) {
-			return new EntityStatus<MongoEntity>(false, "Logon API requires POST request");
+			return new EntityStatus<AbstractEntity>(false, "Logon API requires POST request");
 		}
 		
 		try {
-			   return new EntityStatus<MongoEntity>(entityService.getSingleton(resourceKey));
+			   return new EntityStatus<AbstractEntity>(entityService.getSingleton(resourceKey));
 		} catch(Throwable e) {
 			return handleException(e, "GET", resourceKey);
 		}
 	}
 	
-	private EntityStatus<MongoEntity> handleException(Throwable e, String method, String resourceKey) {
+	private EntityStatus<AbstractEntity> handleException(Throwable e, String method, String resourceKey) {
 		if(e instanceof AccessDeniedException) {
 			throw (AccessDeniedException)e;
 		}
 		if(log.isErrorEnabled()) {
 			log.error("{} api/{}", method, resourceKey, e);
 		}
-		return new EntityStatus<MongoEntity>(false, e.getMessage());
+		return new EntityStatus<AbstractEntity>(false, e.getMessage());
 	}
 	
 	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"})
@@ -237,21 +238,21 @@ public class APIController extends BootstrapTableController<MongoEntity>{
 	@RequestMapping(value="/app/api/{resourceKey}/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityListStatus<MongoEntity> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
+	public EntityListStatus<AbstractEntity> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, EntityException {
 		try {
-			   return new EntityListStatus<MongoEntity>(entityService.list(resourceKey));
+			   return new EntityListStatus<AbstractEntity>(entityService.list(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/list", resourceKey, e);
 			}
-			return new EntityListStatus<MongoEntity>(false, e.getMessage());
+			return new EntityListStatus<AbstractEntity>(false, e.getMessage());
 		}
 	}
 	
 	@RequestMapping(value="/app/api/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public BootstrapTableResult<MongoEntity> tableEntities(HttpServletRequest request, 
+	public BootstrapTableResult<AbstractEntity> tableEntities(HttpServletRequest request, 
 			@PathVariable String resourceKey,
 			@RequestParam(required=false, defaultValue="uuid") String searchField,
 			@RequestParam(required=false, name="search") String searchValue,

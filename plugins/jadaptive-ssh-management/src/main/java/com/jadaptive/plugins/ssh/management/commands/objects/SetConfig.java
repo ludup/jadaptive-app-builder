@@ -2,9 +2,7 @@ package com.jadaptive.plugins.ssh.management.commands.objects;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jline.reader.Candidate;
 import org.jline.reader.LineReader;
@@ -12,6 +10,7 @@ import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.entity.AbstractEntity;
 import com.jadaptive.api.entity.EntityService;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
@@ -22,7 +21,7 @@ import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.UsageHelper;
 import com.sshtools.server.vsession.VirtualConsole;
 
-public class Singleton extends AbstractTenantAwareCommand {
+public class SetConfig extends AbstractTenantAwareCommand {
 	
 	@Autowired
 	private EntityTemplateService templateService; 
@@ -33,9 +32,12 @@ public class Singleton extends AbstractTenantAwareCommand {
 	@Autowired
 	private ClassLoaderService classLoader;
 	
-	public Singleton() {
-		super("singleton", "Object Management", UsageHelper.build("singleton <template> [<field> <value>]"),
-				"Configure a singleton object");
+	@Autowired
+	private EntityService objectService; 
+	
+	public SetConfig() {
+		super("set-config", "Object Management", UsageHelper.build("set-config <template>"),
+				"Configure a singleton (configuration) object");
 	}
 	
 	@Override
@@ -47,18 +49,13 @@ public class Singleton extends AbstractTenantAwareCommand {
 		}
 		
 		EntityTemplate template = templateService.get(args[1]);
-		Map<String,Object> obj = new HashMap<>();
 		
 		try {
 			
-			// TODO get the current object for defaults
-			
-			consoleHelper.promptTemplate(console, obj, template, null, template.getTemplateClass());
-			@SuppressWarnings("unused")
-			Class<?> baseClass = classLoader.resolveClass(template.getTemplateClass());
-			
-			// TODO save the singleton object
-		} catch (ParseException | PermissionDeniedException | IOException | ClassNotFoundException e) {
+			AbstractEntity e = objectService.getSingleton(template.getResourceKey()); 
+			consoleHelper.promptTemplate(console, e.getDocument(), template, null, template.getTemplateClass());
+			objectService.saveOrUpdate(e);
+		} catch (ParseException | PermissionDeniedException | IOException e) {
 			throw new IOException(e.getMessage(), e);
 		}
 	}

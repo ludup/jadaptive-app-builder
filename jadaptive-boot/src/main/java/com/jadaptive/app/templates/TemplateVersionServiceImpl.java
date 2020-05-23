@@ -158,7 +158,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			addClasspathResources("system/shared/" + templateEnabledService.getTemplateFolder(), paths);
 			
-			if(!tenant.getSystem()) {
+			if(!tenant.isSystem()) {
 
 				File tenantConf = new File(ConfigHelper.getTenantsFolder(), tenant.getDomain());
 				File templateConf = new File(tenantConf, templateEnabledService.getTemplateFolder());

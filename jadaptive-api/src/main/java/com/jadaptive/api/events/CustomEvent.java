@@ -52,11 +52,11 @@ public class CustomEvent extends UUIDEntity {
 		this.success = true;
 	}
 	
-	public Boolean getSystem() {
+	public Boolean isSystem() {
 		return true;
 	}
 	
-	public Boolean getHidden() {
+	public Boolean isHidden() {
 		return false;
 	}
 	

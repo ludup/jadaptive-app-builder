@@ -5,19 +5,19 @@ import java.util.Collection;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.RepositoryException;
 
-public interface EntityRepository<E extends AbstractEntity> {
+public interface EntityRepository {
 
-	Collection<E> list(String resourceKey, SearchField... fields) throws RepositoryException, EntityException;
+	Collection<AbstractEntity> list(String resourceKey, SearchField... fields) throws RepositoryException, EntityException;
 
-	E get(String uuid, String resourceKey) throws RepositoryException, EntityException;
+	AbstractEntity get(String uuid, String resourceKey) throws RepositoryException, EntityException;
 
 	void delete(String resourceKey, String uuid) throws RepositoryException, EntityException;
 
 	void deleteAll(String resourceKey) throws RepositoryException, EntityException;
 
-	String save(E entity) throws RepositoryException, EntityException;
+	String save(AbstractEntity entity) throws RepositoryException, EntityException;
 
-	Collection<E> table(String resourceKey, String searchField, String searchValue, int offset, int limit);
+	Collection<AbstractEntity> table(String resourceKey, String searchField, String searchValue, int offset, int limit);
 
 	long count(String resourceKey);
 

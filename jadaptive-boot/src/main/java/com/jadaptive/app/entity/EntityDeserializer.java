@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.jadaptive.api.entity.AbstractEntity;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.template.EntityTemplate;
 import com.jadaptive.api.template.EntityTemplateService;
@@ -32,7 +33,7 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.utils.Utils;
 
-public class EntityDeserializer extends StdDeserializer<MongoEntity> {
+public class EntityDeserializer extends StdDeserializer<AbstractEntity> {
 
 	private static final long serialVersionUID = -7322676764669077046L;
 

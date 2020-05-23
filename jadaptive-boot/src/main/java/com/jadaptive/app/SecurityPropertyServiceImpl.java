@@ -66,7 +66,7 @@ public class SecurityPropertyServiceImpl implements SecurityPropertyService {
 			log.error("Failed to read security properties from system classpath", e);
 		}
 		
-		if(!tenant.getSystem()) {
+		if(!tenant.isSystem()) {
 			
 		    try {
 				securityProperties.addAll(resolveSecurityFiles(resourceUri, 

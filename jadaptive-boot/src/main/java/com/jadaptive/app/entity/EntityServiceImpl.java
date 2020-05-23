@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.entity.AbstractEntity;
 import com.jadaptive.api.entity.EntityException;
 import com.jadaptive.api.entity.EntityNotFoundException;
 import com.jadaptive.api.entity.EntityRepository;
@@ -26,10 +27,10 @@ import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.SearchHelper;
 
 @Service
-public class EntityServiceImpl extends AuthenticatedService implements EntityService<MongoEntity>, TemplateEnabledService<MongoEntity> {
+public class EntityServiceImpl extends AuthenticatedService implements EntityService, TemplateEnabledService<MongoEntity> {
 
 	@Autowired
-	private EntityRepository<MongoEntity> entityRepository;
+	private EntityRepository entityRepository;
 	
 	@Autowired
 	private EntityTemplateService templateService; 
@@ -44,33 +45,37 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 	private ClassLoaderService classService; 
 	
 	@Override
-	public MongoEntity getSingleton(String resourceKey) throws RepositoryException, EntityException {
+	public AbstractEntity getSingleton(String resourceKey) throws RepositoryException, EntityException {
 
 		EntityTemplate template = templateService.get(resourceKey);
 		if(template.getType()!=EntityType.SINGLETON) {
 			throw new EntityException(String.format("%s is not a singleton entity", resourceKey));
 		}
+		AbstractEntity e;
 		
 		try {
-			MongoEntity e = entityRepository.get(resourceKey, resourceKey);
+			e = entityRepository.get(resourceKey, resourceKey);
 			if(!resourceKey.equals(e.getResourceKey())) {
 				throw new IllegalStateException();
 			}
 			return e;
-		} catch(EntityNotFoundException e) {
-			return new MongoEntity();
+		} catch(EntityNotFoundException ex) {
+			e = new MongoEntity();
+			e.setResourceKey(resourceKey);
+			e.setUuid(resourceKey);
+			return e;
 		}
  	}
 	
 	@Override
-	public MongoEntity get(String resourceKey, String uuid) throws RepositoryException, EntityException {
+	public AbstractEntity get(String resourceKey, String uuid) throws RepositoryException, EntityException {
 
 		EntityTemplate template = templateService.get(resourceKey);
 		if(template.getType()!=EntityType.COLLECTION) {
 			throw new EntityException(String.format("%s is not a collection entity", resourceKey));
 		}
 		
-		MongoEntity e = entityRepository.get(uuid, resourceKey);
+		AbstractEntity e = entityRepository.get(uuid, resourceKey);
 		if(!resourceKey.equals(e.getResourceKey())) {
 			throw new IllegalStateException();
 		}
@@ -79,14 +84,14 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 
 
 	@Override
-	public Collection<MongoEntity> list(String resourceKey) throws RepositoryException, EntityException {
+	public Collection<AbstractEntity> list(String resourceKey) throws RepositoryException, EntityException {
 		
 		EntityTemplate template = templateService.get(resourceKey);
 		return entityRepository.list(resourceKey, searchHelper.parseFilterField(template.getDefaultFilter()));
 	}
 
 	@Override
-	public String saveOrUpdate(MongoEntity entity) throws RepositoryException, EntityException {
+	public String saveOrUpdate(AbstractEntity entity) throws RepositoryException, EntityException {
 		EntityTemplate template = templateService.get(entity.getResourceKey());
 		if(template.getType()==EntityType.SINGLETON && !entity.getUuid().equals(entity.getResourceKey())) {	
 			throw new EntityException("You cannot save a Singleton Entity with a new UUID");
@@ -104,14 +109,14 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 			throw new EntityException("You cannot delete a Singleton Entity");
 		}
 		
-		MongoEntity e = get(resourceKey, uuid);
-		if(e.getSystem()) {
+		AbstractEntity e = get(resourceKey, uuid);
+		if(e.isSystem()) {
 			throw new EntityException("You cannot delete a system object");
 		}
 		
 		try {
 			
-			Class<?> clz = classService.resolveClass((String)e.getDocument().get("_clz"));
+			Class<?> clz = classService.resolveClass((String)e.getValue("_clz"));
 			DocumentHelper.convertDocumentToObject(clz, new Document(e.getDocument()));
 			
 			entityRepository.delete(resourceKey, uuid);
@@ -187,7 +192,7 @@ public class EntityServiceImpl extends AuthenticatedService implements EntitySer
 	}
 
 	@Override
-	public Collection<MongoEntity> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
+	public Collection<AbstractEntity> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
 		templateService.get(resourceKey);
 		return entityRepository.table(resourceKey, searchField, searchValue, offset, limit);
 	}

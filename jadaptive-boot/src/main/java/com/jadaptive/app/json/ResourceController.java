@@ -94,7 +94,7 @@ public class ResourceController {
 		
 		String uri = "webapp" + resourceUri;
 		
-		if(!tenant.getSystem()) {
+		if(!tenant.isSystem()) {
 			
 			/**
 			 * Process tenant files, then packages
