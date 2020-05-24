@@ -28,11 +28,6 @@ public class SchedulerConfiguration extends SingletonUUIDEntity {
 	}
 
 	@Override
-	protected final String getSingletonUuid() {
-		return "fe63a4f9-ac4a-461d-b12a-ee76e8a6f1a8";
-	}
-
-	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}

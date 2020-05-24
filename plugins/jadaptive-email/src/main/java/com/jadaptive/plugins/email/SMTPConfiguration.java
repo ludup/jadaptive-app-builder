@@ -3,13 +3,13 @@ package com.jadaptive.plugins.email;
 import org.codemonkey.simplejavamail.TransportStrategy;
 
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.Template;
 
 @Template(name = "SMTP Configuration", resourceKey = SMTPConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
-public class SMTPConfiguration extends UUIDEntity{
+public class SMTPConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "smtpConfiguration";
 	
