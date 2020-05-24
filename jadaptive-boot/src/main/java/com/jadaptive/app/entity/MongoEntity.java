@@ -19,8 +19,8 @@ import com.jadaptive.api.template.FieldDefinition;
 @JsonSerialize(using=AbstractObjectSerializer.class)
 public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 
-	MongoEntity parent;
-	Map<String,MongoEntity> children = new HashMap<>();
+	AbstractObject parent;
+	Map<String,AbstractObject> children = new HashMap<>();
 	String resourceKey;
 	Document document;
 	
@@ -42,7 +42,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 		}
 	}
 	
-	public MongoEntity(MongoEntity parent, String resourceKey, Map<String,Object> document) {
+	public MongoEntity(AbstractObject parent, String resourceKey, Map<String,Object> document) {
 		this.parent = parent;
 		this.resourceKey = resourceKey;
 		this.document = new Document(document);
@@ -52,13 +52,14 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 		}
 	}
 	
-	private void addChild(MongoEntity e) {
+	@Override
+	public void addChild(AbstractObject e) {
 		children.put(e.getResourceKey(), e);
 		document.put(e.getResourceKey(), e.getDocument());
 	}
 
 	@Override
-	public MongoEntity getChild(FieldDefinition c) {
+	public AbstractObject getChild(FieldDefinition c) {
 		return children.get(c.getResourceKey());
 	}
 

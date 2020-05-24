@@ -15,7 +15,7 @@ import com.jadaptive.api.repository.NamedUUIDEntity;
 @UniqueIndex(columns = {"resourceKey"})
 public class ObjectTemplate extends NamedUUIDEntity {
 
-	public static final String RESOURCE_KEY = "entityTemplate";
+	public static final String RESOURCE_KEY = "objectTemplates";
 	
 	ObjectType type;
 	ObjectScope scope;

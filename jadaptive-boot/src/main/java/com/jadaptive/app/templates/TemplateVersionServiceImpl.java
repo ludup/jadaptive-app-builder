@@ -390,16 +390,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			Template e = clz.getAnnotation(Template.class);
 			
-			if(e.resourceKey().equals("builtinUsers")) {
-				System.out.println();
-			}
-			
 			ObjectTemplate template;
 			try {
-				template = templateRepository.get(clz.getSimpleName());
+				template = templateRepository.get(e.resourceKey());
 			} catch (ObjectException ee) {
 				template = new ObjectTemplate();
-				template.setUuid(clz.getSimpleName());
+				template.setUuid(e.resourceKey());
 			}
 			
 			Template parent = getParentTemplate(clz);

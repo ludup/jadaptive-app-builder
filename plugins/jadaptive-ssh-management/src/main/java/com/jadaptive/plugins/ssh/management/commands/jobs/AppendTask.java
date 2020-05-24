@@ -149,9 +149,9 @@ public class AppendTask extends AbstractTenantAwareCommand {
 //		return trigger;
 //	}
 
-	private void printSourceParameters(ObjectTemplate entityTemplate) {
+	private void printSourceParameters(ObjectTemplate template) {
 		console.println("You can use the following parameters to reference the output of previous task:");
-		printSourceParameters(entityTemplate, "");
+		printSourceParameters(template, "");
 		printGlobalParameters();
 	}
 	

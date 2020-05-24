@@ -239,6 +239,11 @@ public class Entity {
 	}
 
 	private Elements addElement(String templateHtml, FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, boolean readOnly) {
+		
+		if(Objects.isNull(templateHtml)) {
+			return null;
+		}
+		
 		templateHtml = templateHtml.replace("${resourceKey}", fieldTemplate.getResourceKey());
 		templateHtml = templateHtml.replace("${name}", fieldTemplate.getName());
 		templateHtml = templateHtml.replace("${description}", fieldTemplate.getDescription());

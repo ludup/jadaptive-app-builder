@@ -18,7 +18,7 @@ public class ObjectCommandFactory extends AbstractAutowiredCommandFactory implem
 	@Override
 	public CommandFactory<ShellCommand> buildFactory() throws AccessDeniedException {
 		
-		tryCommand("templates", Templates.class, "entityTemplate.read", "entityTemplate.readWrite");
+		tryCommand("templates", Templates.class, "objectTemplates.read", "objectTemplates.readWrite");
 		tryCommand("import-csv", ImportCsv.class, "tenant.read", "tenant.readWrite");
 		tryCommand("set-config", SetConfig.class, "tenant.read", "tenant.readWrite");
 		tryCommand("show-config", ShowConfig.class, "tenant.read", "tenant.readWrite");

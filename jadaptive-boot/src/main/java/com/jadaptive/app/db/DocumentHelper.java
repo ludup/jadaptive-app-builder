@@ -245,10 +245,11 @@ public class DocumentHelper {
 					} else {
 						String resourceKey = getTemplateResourceKey(parameter.getType());
 						String uuid =  document.getString(name);
-						AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, uuid);
-						
-						Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
-						m.invoke(obj, ref);
+						if(StringUtils.isNotBlank(uuid)) {
+							AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, uuid);
+							Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+							m.invoke(obj, ref);
+						}
 					}
 				} else if(parameter.getType().isEnum()) { 
 					String v = (String) value;

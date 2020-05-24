@@ -32,7 +32,7 @@ public class EmailController extends AuthenticatedController implements PluginCo
 	@Autowired
 	private EmailVerificationService verificationService; 
 	
-	@RequestMapping(value = "/app/api/registration/verifyEmail", method = RequestMethod.POST, produces = { "application/json" })
+	@RequestMapping(value = "/app/api/registration/verifyEmail", method = { RequestMethod.POST, RequestMethod.GET }, produces = { "application/json" })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.OK)
 	public ResourceStatus<Boolean> verifyEmail(

@@ -68,7 +68,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 	}
 
 	@Override
-	public MongoEntity deserialize(JsonParser parser, DeserializationContext ctx)
+	public AbstractObject deserialize(JsonParser parser, DeserializationContext ctx)
 			throws IOException, JsonProcessingException {
 
 		try {
@@ -84,7 +84,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 			
 			ObjectTemplate template = templateService.get(rkNode.asText());
 			
-			MongoEntity e = new MongoEntity(template.getResourceKey(), new Document());
+			AbstractObject e = new MongoEntity(template.getResourceKey(), new Document());
 			
 			iterateType(node, template, e, true);
 
@@ -95,7 +95,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		}
 	}
 
-	private void iterateType(JsonNode node, ObjectTemplate template, MongoEntity e, boolean requiresUUID) throws IOException, ValidationException {
+	private void iterateType(JsonNode node, ObjectTemplate template, AbstractObject e, boolean requiresUUID) throws IOException, ValidationException {
 		
 
 		JsonNode uuidNode = node.findValue("uuid");
@@ -120,7 +120,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 	}
 
 
-	private void iterateFields(JsonNode current, Collection<FieldDefinition> fields, MongoEntity e) throws IOException, ValidationException {
+	private void iterateFields(JsonNode current, Collection<FieldDefinition> fields, AbstractObject e) throws IOException, ValidationException {
 		
 		if(!Objects.isNull(fields)) {
 			for(FieldDefinition field : fields) {
@@ -130,7 +130,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 	}
 
 	private void validateNode(JsonNode node, FieldDefinition field,
-			MongoEntity e) throws IOException, ValidationException {
+			AbstractObject e) throws IOException, ValidationException {
 		
 		if(log.isInfoEnabled()) {
 			log.info("Validating node {}", field.getResourceKey());
@@ -160,7 +160,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 
 	}
 
-	private void processEmbeddedObjects(FieldDefinition field, JsonNode node, MongoEntity e) throws ValidationException, IOException {
+	private void processEmbeddedObjects(FieldDefinition field, JsonNode node, AbstractObject e) throws ValidationException, IOException {
 		
 		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
 		
@@ -189,7 +189,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 //		setProperty(node.asText(), field, e);
 //	}
 
-	private void processSimpleTypes(FieldDefinition field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
+	private void processSimpleTypes(FieldDefinition field, JsonNode node, AbstractObject e) throws IOException, ValidationException {
 		if(node.isArray()) {
 			setCollectionProperty(field, node, e);
 		} else {
@@ -197,7 +197,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		}
 	}
 
-	private void setCollectionProperty(FieldDefinition field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
+	private void setCollectionProperty(FieldDefinition field, JsonNode node, AbstractObject e) throws IOException, ValidationException {
 		
 		List<Object> values = new ArrayList<>();
 		for(JsonNode element : node) {
@@ -207,7 +207,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		
 	}
 
-	private Object validate(FieldDefinition field, JsonNode node, MongoEntity e) throws IOException, ValidationException {
+	private Object validate(FieldDefinition field, JsonNode node, AbstractObject e) throws IOException, ValidationException {
 		
 		switch(field.getFieldType()) {
 		case BOOL:
@@ -367,14 +367,16 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		}
 	}
 
-	private void setProperty(Object value, FieldDefinition t, MongoEntity e) {
+	private void setProperty(Object value, FieldDefinition t, AbstractObject e) {
 		if(!Objects.isNull(value)) {
 			e.setValue(t, value);
 		} 
 	}
 	
-	private void setPropertyDefault(FieldDefinition t, MongoEntity e) {
-		e.setValue(t, t.getDefaultValue()); 
+	private void setPropertyDefault(FieldDefinition t, AbstractObject e) {
+		if(StringUtils.isNotBlank(t.getDefaultValue())) {
+			e.setValue(t, t.getDefaultValue()); 
+		}
 	}
 
 

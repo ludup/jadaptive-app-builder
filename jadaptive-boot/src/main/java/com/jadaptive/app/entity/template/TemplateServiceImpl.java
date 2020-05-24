@@ -30,8 +30,6 @@ import com.jadaptive.app.db.DocumentHelper;
 
 @Service
 public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabledService<ObjectTemplate> {
-
-	public static final String RESOURCE_KEY = "entityTemplate";
 	
 	@Autowired
 	private ObjectTemplateRepository repository; 
@@ -59,7 +57,7 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 	@Override
 	public Collection<ObjectTemplate> list() throws RepositoryException, ObjectException {
 		
-		permissionService.assertRead(RESOURCE_KEY);
+		permissionService.assertRead(ObjectTemplate.RESOURCE_KEY);
 		
 		return repository.list();
 	}
@@ -79,7 +77,7 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 	@Override
 	public Collection<ObjectTemplate> table(String searchField, String searchValue, String order, int start, int length) throws RepositoryException, ObjectException {
 		
-		permissionService.assertRead(RESOURCE_KEY);
+		permissionService.assertRead(ObjectTemplate.RESOURCE_KEY);
 		
 		return repository.table(searchField, searchValue, order, start, length);
 	}
@@ -92,7 +90,7 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 	@Override
 	public void saveOrUpdate(ObjectTemplate template) throws RepositoryException, ObjectException {
 		
-		permissionService.assertReadWrite(RESOURCE_KEY);
+		permissionService.assertReadWrite(ObjectTemplate.RESOURCE_KEY);
 		
 		repository.saveOrUpdate(template);
 		
@@ -101,7 +99,7 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 	@Override
 	public void delete(String uuid) throws ObjectException {
 		
-		permissionService.assertReadWrite(RESOURCE_KEY);
+		permissionService.assertReadWrite(ObjectTemplate.RESOURCE_KEY);
 		
 		entityService.deleteAll(uuid);
 		repository.delete(uuid);
@@ -177,7 +175,7 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 
 	@Override
 	public String getResourceKey() {
-		return RESOURCE_KEY;
+		return ObjectTemplate.RESOURCE_KEY;
 	}
 
 	@Override
