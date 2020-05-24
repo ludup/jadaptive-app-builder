@@ -70,7 +70,7 @@
 			<plugin>
 				<groupId>com.sshtools</groupId>
 				<artifactId>pf4j-plugin-generator</artifactId>
-				<version>0.0.2</version>
+				<version>0.0.3</version>
 				<executions>
 					<execution>
 						<id>generate-plugin</id>
