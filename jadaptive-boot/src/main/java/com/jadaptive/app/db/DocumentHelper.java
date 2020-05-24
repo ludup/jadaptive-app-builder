@@ -228,7 +228,11 @@ public class DocumentHelper {
 				if(parameter.getType().equals(String.class)) {
 					m.invoke(obj, checkForAndPerformDecryption(columnDefinition, (String) value));
 				} else if(isSupportedPrimative(parameter.getType())) {
-					m.invoke(obj, value);
+					if(!parameter.getType().equals(String.class) && value instanceof String) {
+						m.invoke(obj, fromString(parameter.getType(), (String) value));
+					} else {
+						m.invoke(obj, value);
+					}
 				} else if(parameter.getType().equals(Date.class)) {
 					m.invoke(obj, document.getDate(name));
 				} else if(UUIDEntity.class.isAssignableFrom(parameter.getType())) {

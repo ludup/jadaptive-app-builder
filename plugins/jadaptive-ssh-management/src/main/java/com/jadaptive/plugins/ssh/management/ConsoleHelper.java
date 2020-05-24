@@ -19,9 +19,9 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.tasks.TriggerMapping;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
-import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.utils.Utils;
 import com.sshtools.common.files.AbstractFile;
@@ -47,189 +47,200 @@ public class ConsoleHelper {
 		
 		obj.put("_clz", objectType);
 		for(FieldDefinition field : template.getFields()) {
-			switch(field.getFieldType()) {
-			case OBJECT_EMBEDDED:
-				ObjectTemplate objectTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
-				console.println(objectTemplate.getName());
-				obj.put(field.getResourceKey(), promptTemplate(console, new HashMap<>(),
-						objectTemplate, 
-						mappings,
-						field.getValidationValue(ValidationType.OBJECT_TYPE)));
-				break;
-			case PASSWORD:
-			{
-				String val = console.getLineReader().readLine(
-						String.format("%s: ", field.getName()), '*');
-				if(processMapping(val, field.getResourceKey(), mappings)) {
-					continue;
-				}
-				obj.put(field.getResourceKey(), val);
-				break;
-			}
-			case TEXT:
-			{
-				String val = console.readLine(
-						String.format("%s: ", field.getName()));
-				if(processMapping(val, field.getResourceKey(), mappings)) {
-					continue;
-				}
-				obj.put(field.getResourceKey(), val);
-				break;
-			}
-			case TEXT_AREA:
-			{
-				while(true) {
-					console.println("Enter path to ".concat(field.getName()));
-					String val = console.readLine("Path: ");
-					if(processMapping(val, field.getResourceKey(), mappings)) {
-						continue;
-					}
-					if(StringUtils.isNotBlank(val)) {
-						AbstractFile file = console.getCurrentDirectory().resolveFile(val);
-						
-						if(!file.exists())  {
-							console.println(String.format("%s does not exist", val));
-						}
-						
-						obj.put(field.getResourceKey(), IOUtils.readUTF8StringFromStream(file.getInputStream()));
-						break;
-					} else if(field.isRequired()) {
-						console.println(String.format("%s is required", field.getName()));
-					} else {
-						break;
-					}
-				}
-
-				break;
-			}
-			case DECIMAL:
-			{
-				String val; 
-				while(true) {
-					val = console.readLine(String.format("%s: ", field.getName()));
-					if(processMapping(val, field.getResourceKey(), mappings)) {
-						continue;
-					}
-					try {
-						Double.parseDouble(val);
-						break;
-					} catch(NumberFormatException e) {
-						continue;
-					}
-				}
-				obj.put(field.getResourceKey(), val);
-				break;
-			}
-			case BOOL:
-			{
-				String val; 
-				Set<String> validAnswers = new HashSet<>(Arrays.asList("y", "n", "yes", "no"));
-				do {
-					val = console.readLine(String.format("%s (y/n): ", field.getName()));	
-
-				} while(!val.startsWith(":") && !validAnswers.contains(val.toLowerCase()));
-				if(processMapping(val, field.getResourceKey(), mappings)) {
-					continue;
-				}
-				obj.put(field.getResourceKey(), val.toLowerCase().startsWith("y"));
-				break;
-			}
-			case ENUM:
-			{
-				console.println("Select ".concat(field.getName()).concat(" (press tab to cycle through values)"));
-				String enumType = field.getValidationValue(ValidationType.OBJECT_TYPE);
-				
-				try {
-					@SuppressWarnings("unchecked")
-					Class<? extends Enum<?>> clz = (Class<? extends Enum<?>>) applicationService.resolveClass(enumType);
-					
-					Enum<?>[] constants = clz.getEnumConstants();
-					List<String> values = new ArrayList<>();
-					List<Candidate> completions = new ArrayList<>();
-					for(Enum<?> e : constants) {
-						values.add(e.name().toUpperCase());
-						completions.add(new Candidate(e.name()));
-					}
-					console.getEnvironment().put("_COMPLETIONS", completions);
-					console.println();
-					String val;
-					while(true) {
-						val = console.readLine(String.format("%s: ", field.getName())).trim();
-						if(values.contains(val.toUpperCase())) {
-							break;
-						} else if(val.startsWith(":")) {
-							break;
-						}
-						console.println("Invalid value. Try again.");
-					}
-					console.getEnvironment().remove("_COMPLETIONS");
-					if(processMapping(val, field.getResourceKey(), mappings)) {
-						continue;
-					}
-					obj.put(field.getResourceKey(), val);
-				} catch (ClassNotFoundException e) {
-					throw new IOException(e.getMessage(), e);
-				}
-				
-				break;
-			}
-			case LONG:
-			{
-				String val; 
-				while(true) {
-					val = console.readLine(String.format("%s: ", field.getName()));
-					if(processMapping(val, field.getResourceKey(), mappings)) {
-						break;
-					}
-					try {
-						obj.put(field.getResourceKey(), Long.parseLong(val));
-						break;
-					} catch(NumberFormatException e) {
-						console.println(String.format("Invalid entry: %s expecting long value but got %s instead", field.getName(), val));
-					}
-				}
-				break;
-			}
-			case INTEGER:
-			{
-				String val; 
-				while(true) {
-					val = console.readLine(String.format("%s: ", field.getName()));
-					if(processMapping(val, field.getResourceKey(), mappings)) {
-						break;
-					}
-					try {
-						obj.put(field.getResourceKey(), Integer.parseInt(val));
-						break;
-					} catch(NumberFormatException e) {
-						console.println(String.format("Invalid entry: %s expecting int value but got %s instead", field.getName(), val));
-					}
-				}
-				break;
-			}
-			case TIMESTAMP:
-			{
-				String val; 
-				while(true) {
-					val = console.readLine(String.format("%s: ", field.getName()));
-					if(processMapping(val, field.getResourceKey(), mappings)) {
-						break;
-					}
-					try {
-						obj.put(field.getResourceKey(), Utils.parseDate(val, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
-						break;
-					} catch(IllegalStateException e) {
-						throw new IOException(String.format("%s is a timestamp field and %s is not a timestamp", field.getName(), val));
-					}
-				}
-				break;
-			}
-			default:
-				
-			}
+			promptField(console, field, obj, template, mappings, objectType);
 		}
 			
 		return obj;	
+		
+	}
+
+	public void promptField(VirtualConsole console,
+			FieldDefinition field,
+			Map<String, Object> obj,
+			ObjectTemplate template, 
+			List<TriggerMapping> mappings,
+			String objectType) throws ParseException, PermissionDeniedException, IOException {
+		
+		switch(field.getFieldType()) {
+		case OBJECT_EMBEDDED:
+			ObjectTemplate objectTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
+			console.println(objectTemplate.getName());
+			obj.put(field.getResourceKey(), promptTemplate(console, new HashMap<>(),
+					objectTemplate, 
+					mappings,
+					field.getValidationValue(ValidationType.OBJECT_TYPE)));
+			break;
+		case PASSWORD:
+		{
+			String val = console.getLineReader().readLine(
+					String.format("%s: ", field.getName()), '*');
+			if(processMapping(val, field.getResourceKey(), mappings)) {
+				return;
+			}
+			obj.put(field.getResourceKey(), val);
+			break;
+		}
+		case TEXT:
+		{
+			String val = console.readLine(
+					String.format("%s: ", field.getName()));
+			if(processMapping(val, field.getResourceKey(), mappings)) {
+				return;
+			}
+			obj.put(field.getResourceKey(), val);
+			break;
+		}
+		case TEXT_AREA:
+		{
+			while(true) {
+				console.println("Enter path to ".concat(field.getName()));
+				String val = console.readLine("Path: ");
+				if(processMapping(val, field.getResourceKey(), mappings)) {
+					continue;
+				}
+				if(StringUtils.isNotBlank(val)) {
+					AbstractFile file = console.getCurrentDirectory().resolveFile(val);
+					
+					if(!file.exists())  {
+						console.println(String.format("%s does not exist", val));
+					}
+					
+					obj.put(field.getResourceKey(), IOUtils.readUTF8StringFromStream(file.getInputStream()));
+					break;
+				} else if(field.isRequired()) {
+					console.println(String.format("%s is required", field.getName()));
+				} else {
+					break;
+				}
+			}
+
+			break;
+		}
+		case DECIMAL:
+		{
+			String val; 
+			while(true) {
+				val = console.readLine(String.format("%s: ", field.getName()));
+				if(processMapping(val, field.getResourceKey(), mappings)) {
+					continue;
+				}
+				try {
+					Double.parseDouble(val);
+					break;
+				} catch(NumberFormatException e) {
+					continue;
+				}
+			}
+			obj.put(field.getResourceKey(), val);
+			break;
+		}
+		case BOOL:
+		{
+			String val; 
+			Set<String> validAnswers = new HashSet<>(Arrays.asList("y", "n", "yes", "no"));
+			do {
+				val = console.readLine(String.format("%s (y/n): ", field.getName()));	
+
+			} while(!val.startsWith(":") && !validAnswers.contains(val.toLowerCase()));
+			if(processMapping(val, field.getResourceKey(), mappings)) {
+				return;
+			}
+			obj.put(field.getResourceKey(), val.toLowerCase().startsWith("y"));
+			break;
+		}
+		case ENUM:
+		{
+			console.println("Select ".concat(field.getName()).concat(" (press tab to cycle through values)"));
+			String enumType = field.getValidationValue(ValidationType.OBJECT_TYPE);
+			
+			try {
+				@SuppressWarnings("unchecked")
+				Class<? extends Enum<?>> clz = (Class<? extends Enum<?>>) applicationService.resolveClass(enumType);
+				
+				Enum<?>[] constants = clz.getEnumConstants();
+				List<String> values = new ArrayList<>();
+				List<Candidate> completions = new ArrayList<>();
+				for(Enum<?> e : constants) {
+					values.add(e.name().toUpperCase());
+					completions.add(new Candidate(e.name()));
+				}
+				console.getEnvironment().put("_COMPLETIONS", completions);
+				console.println();
+				String val;
+				while(true) {
+					val = console.readLine(String.format("%s: ", field.getName())).trim();
+					if(values.contains(val.toUpperCase())) {
+						break;
+					} else if(val.startsWith(":")) {
+						break;
+					}
+					console.println("Invalid value. Try again.");
+				}
+				console.getEnvironment().remove("_COMPLETIONS");
+				if(processMapping(val, field.getResourceKey(), mappings)) {
+					return;
+				}
+				obj.put(field.getResourceKey(), val);
+			} catch (ClassNotFoundException e) {
+				throw new IOException(e.getMessage(), e);
+			}
+			
+			break;
+		}
+		case LONG:
+		{
+			String val; 
+			while(true) {
+				val = console.readLine(String.format("%s: ", field.getName()));
+				if(processMapping(val, field.getResourceKey(), mappings)) {
+					break;
+				}
+				try {
+					obj.put(field.getResourceKey(), Long.parseLong(val));
+					break;
+				} catch(NumberFormatException e) {
+					console.println(String.format("Invalid entry: %s expecting long value but got %s instead", field.getName(), val));
+				}
+			}
+			break;
+		}
+		case INTEGER:
+		{
+			String val; 
+			while(true) {
+				val = console.readLine(String.format("%s: ", field.getName()));
+				if(processMapping(val, field.getResourceKey(), mappings)) {
+					break;
+				}
+				try {
+					obj.put(field.getResourceKey(), Integer.parseInt(val));
+					break;
+				} catch(NumberFormatException e) {
+					console.println(String.format("Invalid entry: %s expecting int value but got %s instead", field.getName(), val));
+				}
+			}
+			break;
+		}
+		case TIMESTAMP:
+		{
+			String val; 
+			while(true) {
+				val = console.readLine(String.format("%s: ", field.getName()));
+				if(processMapping(val, field.getResourceKey(), mappings)) {
+					break;
+				}
+				try {
+					obj.put(field.getResourceKey(), Utils.parseDate(val, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+					break;
+				} catch(IllegalStateException e) {
+					throw new IOException(String.format("%s is a timestamp field and %s is not a timestamp", field.getName(), val));
+				}
+			}
+			break;
+		}
+		default:
+			
+		}
 		
 	}
 

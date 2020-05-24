@@ -79,8 +79,8 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 
 	@Override
 	@SafeVarargs
-	public final void sendEmail(String subject, String text, String html, RecipientHolder[] recipients, boolean archive, boolean track, int delay, String context, EmailAttachment... attachments) throws MailException, AccessDeniedException, ValidationException {
-		sendEmail(subject, text, html, recipients, archive, track, delay, context, attachments);
+	public final void sendEmail(String subject, String text, String html, RecipientHolder[] recipients, boolean archive, EmailAttachment... attachments) throws MailException, AccessDeniedException, ValidationException {
+		sendEmail(subject, text, html, "", "", recipients, archive, attachments);
 	}
 
 	private SMTPConfiguration getConfig() {
@@ -110,9 +110,6 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 			String replyToEmail, 
 			RecipientHolder[] recipients, 
 			boolean archive,
-			boolean track,
-			int delay,
-			String context, 
 			EmailAttachment... attachments) throws MailException, ValidationException, AccessDeniedException {
 		
 		SMTPConfiguration config = getConfig();
@@ -136,13 +133,6 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 					config.getProtocol());
 		} else {
 			mail = new Mailer(createSession());
-		}
-		
-		String archiveAddress = config.getArchiveAddress();
-		List<RecipientHolder> archiveRecipients = new ArrayList<RecipientHolder>();
-
-		if(archive && StringUtils.isNotBlank(archiveAddress)) {
-			populateEmailList(new String[] {archiveAddress} , archiveRecipients, RecipientType.TO);
 		}
 		
 		boolean noNoReply = true;
@@ -173,20 +163,20 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 				 * only the recipients get a tracking email. We don't want to 
 				 * track the archive emails.
 				 */
-				String trackingImage = "";
-				String nonTrackingUri = "";
+//				String trackingImage = "";
+//				String nonTrackingUri = "";
 				
 				String messageHtml = processDefaultReplacements(receipientHtml, r);
-				messageHtml = messageHtml.replace("${htmlTitle}", messageSubject);
-				
-				String archiveRecipientHtml = messageHtml.replace("__trackingImage__", nonTrackingUri);
-
-				if(track && StringUtils.isNotBlank(trackingImage)) {
-					String trackingUri = "";
-					messageHtml = messageHtml.replace("__trackingImage__", trackingUri);
-				} else {
-					messageHtml = messageHtml.replace("__trackingImage__", nonTrackingUri);
-				}
+//				messageHtml = messageHtml.replace("${htmlTitle}", messageSubject);
+//				
+//				String archiveRecipientHtml = messageHtml.replace("__trackingImage__", nonTrackingUri);
+//
+//				if(track && StringUtils.isNotBlank(trackingImage)) {
+//					String trackingUri = "";
+//					messageHtml = messageHtml.replace("__trackingImage__", trackingUri);
+//				} else {
+//					messageHtml = messageHtml.replace("__trackingImage__", nonTrackingUri);
+//				}
 
 				send(mail, 
 						messageSubject, 
@@ -195,13 +185,13 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 						replyToName, 
 						replyToEmail, 
 						r, 
-						delay,
-						context, attachments);
+						archive,
+						attachments);
 				
-				for(RecipientHolder recipient : archiveRecipients) {
-					send(mail, messageSubject, messageText, archiveRecipientHtml, 
-							replyToName, replyToEmail, recipient, delay, context, attachments);
-				}
+//				for(RecipientHolder recipient : archiveRecipients) {
+//					send(mail, messageSubject, messageText, archiveRecipientHtml, 
+//							replyToName, replyToEmail, recipient, delay, context, attachments);
+//				}
 				
 			} else {
 			
@@ -215,13 +205,13 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 						replyToName, 
 						replyToEmail, 
 						r, 
-						delay,
-						context, attachments);
+						archive,
+						attachments);
 				
-				for(RecipientHolder recipient : archiveRecipients) {
-					send(mail, messageSubject, messageText, "", 
-							replyToName, replyToEmail, recipient, delay, context, attachments);
-				}
+//				for(RecipientHolder recipient : archiveRecipients) {
+//					send(mail, messageSubject, messageText, "", 
+//							replyToName, replyToEmail, recipient, delay, context, attachments);
+//				}
 			}
 		}
 	}
@@ -255,8 +245,8 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 			String replyToName, 
 			String replyToEmail, 
 			RecipientHolder r, 
-			int delay,
-			String context, EmailAttachment... attachments) throws AccessDeniedException {
+			boolean archive,
+			EmailAttachment... attachments) throws AccessDeniedException, ValidationException {
 		
 		@SuppressWarnings("unused")
 		User p = null;
@@ -288,6 +278,14 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 			return;
 		}
 		
+		Email email = new Email();
+		email.setFromAddress(config.getFromName(), fromAddress);
+		
+		String archiveAddress = config.getArchiveAddress();
+		if(archive && StringUtils.isNotBlank(archiveAddress)) {
+			email.addRecipient("", archiveAddress, RecipientType.BCC);
+		}
+		
 //		List<String> blocked = Arrays.asList(configurationService.getValues(realm, "email.blocked"));
 //		for(String emailAddress : blocked) {
 //			if(r.getEmail().equalsIgnoreCase(emailAddress)) {
@@ -298,8 +296,7 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 //			}
 //		}
 		
-		Email email = new Email();
-		email.setFromAddress(config.getFromName(), fromAddress);
+
 		
 		if(StringUtils.isNotBlank(replyToName) && StringUtils.isNotBlank(replyToEmail)) {
 			email.setReplyToAddress(replyToName, replyToEmail);
@@ -352,14 +349,7 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 		
 		try {
 			
-			if(delay > 0) {
-				try {
-					Thread.sleep(delay);
-				} catch (InterruptedException e) {
-				};
-			}
-			
-			if("true".equals(System.getProperty("hypersocket.email", "true")))
+			if("true".equals(System.getProperty("jadaptive.email", "true")))
 				mail.sendMail(email);
 			
 //			eventService.publishEvent(new EmailEvent(this, realm, subject, plainText, r.getEmail(), context));

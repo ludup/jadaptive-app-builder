@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.plugins.ssh.management.ConsoleHelper;
@@ -40,20 +41,33 @@ public class SetConfig extends AbstractTenantAwareCommand {
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 
-		if(args.length < 2) {
+		if(args.length !=2 && args.length != 3) {
 			throw new UsageException("Not enough arguments!");
 		}
 		
 		ObjectTemplate template = templateService.get(args[1]);
 		
-		try {
+		AbstractObject e = objectService.getSingleton(template.getResourceKey()); 
+		
+		if(args.length == 3) {
+			String fieldName = args[2];
 			
-			AbstractObject e = objectService.getSingleton(template.getResourceKey()); 
-			consoleHelper.promptTemplate(console, e.getDocument(), template, null, template.getTemplateClass());
-			objectService.saveOrUpdate(e);
-		} catch (ParseException | PermissionDeniedException | IOException e) {
-			throw new IOException(e.getMessage(), e);
+			try {
+				consoleHelper.promptField(console, template.getField(fieldName), e.getDocument(), template, null, template.getTemplateClass());			
+			} catch (ParseException | PermissionDeniedException | IOException ex) {
+				throw new IOException(ex.getMessage(), ex);
+			}
+		} else {
+			
+			try {
+				consoleHelper.promptTemplate(console, e.getDocument(), template, null, template.getTemplateClass());			
+			} catch (ParseException | PermissionDeniedException | IOException ex) {
+				throw new IOException(ex.getMessage(), ex);
+			}
 		}
+		
+		objectService.saveOrUpdate(e);
+		
 	}
 	
 	@Override
@@ -65,6 +79,11 @@ public class SetConfig extends AbstractTenantAwareCommand {
 				candidates.add(new Candidate(t.getResourceKey()));
 			}
 			break;
+		case 2:
+			ObjectTemplate t = templateService.get(line.words().get(1));
+			for(FieldDefinition d : t.getFields()) {
+				candidates.add(new Candidate(d.getResourceKey()));
+			}
 		default:
 			break;
 		}

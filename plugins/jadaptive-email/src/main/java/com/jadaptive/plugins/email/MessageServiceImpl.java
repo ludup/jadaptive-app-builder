@@ -303,8 +303,8 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 
 				emailService.sendEmail(subjectWriter.toString(), bodyWriter.toString(),
 						htmlWriter.toString(), message.getReplyToName(), message.getReplyToEmail(),
-						new RecipientHolder[] { recipient }, message.isArchive(), false, 50,
-						"", emailAttachments.toArray(new EmailAttachment[0]));
+						new RecipientHolder[] { recipient }, message.isArchive(),
+						emailAttachments.toArray(new EmailAttachment[0]));
 
 //			}
 			

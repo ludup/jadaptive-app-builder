@@ -21,12 +21,12 @@ public interface EmailNotificationService {
 			RecipientType type) throws ValidationException;
 
 	void sendEmail(String subject, String text, String html, RecipientHolder[] recipients,
-			boolean archive, boolean track, int delay, String context, EmailAttachment... attachments)
+			boolean archive, EmailAttachment... attachments)
 			throws MailException, AccessDeniedException, ValidationException;
 
 
 	void sendEmail(String subject, String text, String html, String replyToName, String replyToEmail,
-			RecipientHolder[] recipients, boolean archive, boolean track, int delay, String context, EmailAttachment... attachments)
+			RecipientHolder[] recipients, boolean archive, EmailAttachment... attachments)
 			throws MailException, ValidationException, AccessDeniedException;
 
 	boolean isEnabled();

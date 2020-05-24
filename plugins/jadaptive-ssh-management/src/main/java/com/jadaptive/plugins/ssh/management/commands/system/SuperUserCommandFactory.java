@@ -1,13 +1,10 @@
-package com.jadaptive.plugins.ssh.management.commands;
+package com.jadaptive.plugins.ssh.management.commands.system;
 
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.plugins.ssh.management.commands.system.Restart;
-import com.jadaptive.plugins.ssh.management.commands.system.Shutdown;
-import com.jadaptive.plugins.ssh.management.commands.system.Updates;
 import com.jadaptive.plugins.sshd.PluginCommandFactory;
 import com.jadaptive.plugins.sshd.commands.AbstractAutowiredCommandFactory;
 import com.sshtools.server.vsession.CommandFactory;
@@ -27,6 +24,7 @@ public class SuperUserCommandFactory extends AbstractAutowiredCommandFactory imp
 	public CommandFactory<ShellCommand> buildFactory() throws AccessDeniedException {
 		permissionService.assertAdministrator();
 		installCommand("updates", Updates.class);
+		installCommand("email", Email.class);
 		installCommand("shutdown", Shutdown.class);
 		installCommand("restart", Restart.class);
 		installCommand("con", Connections.class);
