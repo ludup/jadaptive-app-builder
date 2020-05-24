@@ -37,11 +37,11 @@ public class SMTPConfiguration extends UUIDEntity{
 	@ObjectField(name = "From Address", description = "The email address to use in the From field", type = FieldType.TEXT)
 	String fromAddress;
 	
-	@ObjectField(name = "Reply-To Address", description = "The email address to use in the Reply-To field", type = FieldType.TEXT)
-	String replyToAddress;
-
 	@ObjectField(name = "Reply-To Name", description = "The name of the user to place in the Reply-To field", type = FieldType.TEXT)
 	String replyToName;
+	
+	@ObjectField(name = "Reply-To Address", description = "The email address to use in the Reply-To field", type = FieldType.TEXT)
+	String replyToAddress;
 	
 	@ObjectField(name = "Archive Address", description = "An email address that should receive archived emails", type = FieldType.TEXT)
 	String archiveAddress;
