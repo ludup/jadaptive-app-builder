@@ -23,4 +23,6 @@ public interface ObjectService {
 	long count(String resourceKey);
 
 	long count(String resourceKey, String searchField, String searchValue);
+
+	Collection<AbstractObject> personal(String resourceKey) throws RepositoryException, ObjectException;
 }

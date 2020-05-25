@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.user.User;
 
 public interface ObjectRepository {
 
@@ -23,5 +24,6 @@ public interface ObjectRepository {
 
 	long count(String resourceKey, String searchField, String searchValue);
 
+	Collection<AbstractObject> personal(String resourceKey, User currentUser);
 
 }

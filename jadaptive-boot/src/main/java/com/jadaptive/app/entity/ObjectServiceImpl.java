@@ -12,6 +12,7 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectRepository;
+import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.EventService;
@@ -21,8 +22,8 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
-import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
+import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.SearchHelper;
 
@@ -87,7 +88,20 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	public Collection<AbstractObject> list(String resourceKey) throws RepositoryException, ObjectException {
 		
 		ObjectTemplate template = templateService.get(resourceKey);
-		return entityRepository.list(resourceKey, searchHelper.parseFilterField(template.getDefaultFilter()));
+		if(template.getScope()==ObjectScope.PERSONAL) {
+			throw new ObjectException(String.format("%s is a personal scoped object. Use personal API", resourceKey));
+		}
+		return entityRepository.list(resourceKey);
+	}
+	
+	@Override
+	public Collection<AbstractObject> personal(String resourceKey) throws RepositoryException, ObjectException {
+		
+		ObjectTemplate template = templateService.get(resourceKey);
+		if(template.getScope()!=ObjectScope.PERSONAL) {
+			throw new ObjectException(String.format("%s is a not personal scoped object. Use list API", resourceKey));
+		}
+		return entityRepository.personal(resourceKey, getCurrentUser());
 	}
 
 	@Override

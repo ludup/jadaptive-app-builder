@@ -238,9 +238,23 @@ public class APIController extends BootstrapTableController<AbstractObject>{
 	@RequestMapping(value="/app/api/{resourceKey}/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityListStatus<AbstractObject> listEntities(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
+	public EntityListStatus<AbstractObject> listObjects(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
 			   return new EntityListStatus<AbstractObject>(entityService.list(resourceKey));
+		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/{}/list", resourceKey, e);
+			}
+			return new EntityListStatus<AbstractObject>(false, e.getMessage());
+		}
+	}
+
+	@RequestMapping(value="/app/api/{resourceKey}/personal", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public EntityListStatus<AbstractObject> listPersonal(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
+		try {
+			   return new EntityListStatus<AbstractObject>(entityService.personal(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/{}/list", resourceKey, e);
@@ -252,7 +266,7 @@ public class APIController extends BootstrapTableController<AbstractObject>{
 	@RequestMapping(value="/app/api/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public BootstrapTableResult<AbstractObject> tableEntities(HttpServletRequest request, 
+	public BootstrapTableResult<AbstractObject> tablObjects(HttpServletRequest request, 
 			@PathVariable String resourceKey,
 			@RequestParam(required=false, defaultValue="uuid") String searchField,
 			@RequestParam(required=false, name="search") String searchValue,

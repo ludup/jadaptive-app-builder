@@ -21,6 +21,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.User;
 import com.jadaptive.app.db.DocumentDatabase;
 
 @Repository
@@ -41,6 +42,18 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		List<AbstractObject> results = new ArrayList<>();
 		
 		for(Document document : db.list(resourceKey, tenantService.getCurrentTenant().getUuid(), fields)) {
+			results.add(buildEntity(resourceKey, document));
+		}
+		
+		return results;
+	}
+	
+	@Override
+	public Collection<AbstractObject> personal(String resourceKey, User user) throws RepositoryException, ObjectException {
+		
+		List<AbstractObject> results = new ArrayList<>();
+		
+		for(Document document : db.list(resourceKey, tenantService.getCurrentTenant().getUuid(), SearchField.eq("ownerUUID", user.getUuid()))) {
 			results.add(buildEntity(resourceKey, document));
 		}
 		
@@ -127,7 +140,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		
 		return results;
 	}
-
+	
 	@Override
 	public long count(String resourceKey) {
 		return db.count(resourceKey, tenantService.getCurrentTenant().getUuid());
