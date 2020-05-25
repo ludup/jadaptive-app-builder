@@ -22,7 +22,7 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 
 @Service
-public class ClassLoaderServiceImpl implements ClassLoaderService {
+public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderService {
 
 	static ClassLoaderServiceImpl instance;
 	
@@ -41,7 +41,7 @@ public class ClassLoaderServiceImpl implements ClassLoaderService {
 	}
 	
 	@Override
-	public Class<?> resolveClass(String name) throws ClassNotFoundException {
+	public Class<?> findClass(String name) throws ClassNotFoundException {
 		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 			try {
@@ -100,5 +100,10 @@ public class ClassLoaderServiceImpl implements ClassLoaderService {
         }
 
         return results;
+	}
+
+	@Override
+	public ClassLoader getClassLoader() {
+		return this;
 	}
 }

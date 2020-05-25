@@ -187,7 +187,7 @@ public class Entity {
 	private void renderEnum(FieldDefinition fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
 
 		try {
-			Class<?> values = classLoader.resolveClass(
+			Class<?> values = classLoader.findClass(
 					fieldTemplate.getValidationValue(ValidationType.OBJECT_TYPE));
 			
 			new DropdownFormInput(parentElement, fieldTemplate, getDefaultValue(fieldTemplate, entity))

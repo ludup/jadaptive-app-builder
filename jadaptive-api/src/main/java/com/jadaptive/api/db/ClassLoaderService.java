@@ -5,8 +5,10 @@ import java.util.Collection;
 
 public interface ClassLoaderService {
 
-	Class<?> resolveClass(String name) throws ClassNotFoundException;
+	Class<?> findClass(String name) throws ClassNotFoundException;
 
 	Collection<Class<?>> resolveAnnotatedClasses(Class<? extends Annotation> clz);
+
+	ClassLoader getClassLoader();
 
 }

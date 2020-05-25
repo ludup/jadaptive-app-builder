@@ -137,7 +137,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
 	@Override
 	public Class<?> resolveClass(String type) throws ClassNotFoundException {
-		return classLoaderService.resolveClass(type);
+		return classLoaderService.findClass(type);
 	}
 //
 //	@Override

@@ -38,6 +38,7 @@ import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.jadaptive.api.db.ClassLoaderService;
 //import com.hazelcast.hibernate.HazelcastCacheRegionFactory;
 
 @Configuration
@@ -49,7 +50,9 @@ public class HazelcastSpringConfiguration {
 	private ApplicationContext applicationContext;
 	@Autowired
 	private Environment environment;
-
+	@Autowired
+	private ClassLoaderService classLoaderService; 
+	
 	@Value("${user.dir}")
 	private String userDir;
 
@@ -70,7 +73,7 @@ public class HazelcastSpringConfiguration {
 				new MaxSizeConfig(Integer.parseInt(System.getProperty("performance.maxSynchronizeCacheSize", "32")),
 						MaxSizePolicy.PER_NODE));
 		config.addMapConfig(mapConfig);
-
+		config.setClassLoader(classLoaderService.getClassLoader());
 		return config;
 	}
 

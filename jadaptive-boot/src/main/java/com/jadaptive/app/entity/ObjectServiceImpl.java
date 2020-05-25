@@ -116,7 +116,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		try {
 			
-			Class<?> clz = classService.resolveClass((String)e.getValue("_clz"));
+			Class<?> clz = classService.findClass((String)e.getValue("_clz"));
 			DocumentHelper.convertDocumentToObject(clz, new Document(e.getDocument()));
 			
 			entityRepository.delete(resourceKey, uuid);

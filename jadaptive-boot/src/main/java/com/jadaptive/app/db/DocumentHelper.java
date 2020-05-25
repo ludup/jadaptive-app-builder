@@ -201,7 +201,7 @@ public class DocumentHelper {
 			try {
 				obj = (T) classLoader.loadClass(clz).newInstance();
 			} catch(ClassNotFoundException e) {
-				obj = (T) ClassLoaderServiceImpl.getInstance().resolveClass(clz).newInstance();
+				obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).newInstance();
 			}
 
 			Map<String,Field> fields = ReflectionUtils.getFields(obj.getClass());
