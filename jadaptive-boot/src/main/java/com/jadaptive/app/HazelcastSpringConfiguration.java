@@ -48,8 +48,10 @@ public class HazelcastSpringConfiguration {
 
 	@Autowired
 	private ApplicationContext applicationContext;
+	
 	@Autowired
 	private Environment environment;
+	
 	@Autowired
 	private ClassLoaderService classLoaderService; 
 	
@@ -130,7 +132,8 @@ public class HazelcastSpringConfiguration {
 	@Bean(destroyMethod = "close")
 	CacheManager cacheManager(HazelcastInstance instance) throws URISyntaxException {
 		CachingProvider cachingProvider = Caching
-				.getCachingProvider("com.hazelcast.cache.impl.HazelcastServerCachingProvider", null);
+				.getCachingProvider("com.hazelcast.cache.impl.HazelcastServerCachingProvider", 
+						classLoaderService.getClassLoader());
 
 		Properties properties = HazelcastCachingProvider.propertiesByInstanceName(applicationContext.getId());
 

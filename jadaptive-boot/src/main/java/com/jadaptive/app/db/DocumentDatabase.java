@@ -9,17 +9,19 @@ public interface DocumentDatabase {
 
 	<E extends UUIDDocument> void insertOrUpdate(E obj, Document document, String table, String database);
 
-	Document get(String uuid, String table, String database);
+	Document getByUUID(String uuid, String table, String database);
 	
 	Document get(String table, String database, SearchField... fields);
 
-	void delete(String uuid, String table, String database);
+	void deleteByUUID(String uuid, String table, String database);
+	
+	void delete(String table, String database, SearchField... fields);
 
 	Long count(String name, String database);
 
 	Long count(String table, String searchField, String searchValue, String database);
 	
-	void dropCollection(String resourceKey, String uuid);
+	void dropCollection(String table, String uuid);
 
 	Document getFirst(String uuid, String resourceKey, String uuid2);
 

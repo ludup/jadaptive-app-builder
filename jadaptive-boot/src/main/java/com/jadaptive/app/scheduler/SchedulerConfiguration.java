@@ -6,9 +6,9 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Scheduler Configuration", resourceKey = SchedulerConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
+@ObjectDefinition(name = "Scheduler Configuration", resourceKey = SchedulerConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
 public class SchedulerConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "schedulerConfig";

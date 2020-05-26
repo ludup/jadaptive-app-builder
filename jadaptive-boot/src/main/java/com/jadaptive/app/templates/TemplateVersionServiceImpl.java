@@ -46,7 +46,7 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.Table;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
@@ -353,7 +353,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                         .addClassLoader(w.getPluginClassLoader())
                         .whitelistPackages(w.getPlugin().getClass().getPackage().getName())   
                         .scan()) {                  
-                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Template.class.getName())) {
+                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectDefinition.class.getName())) {
 
                     if(classInfo.getPackageName().startsWith(w.getPlugin().getClass().getPackage().getName())) {
                         if(log.isInfoEnabled()) {
@@ -371,7 +371,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                     .addClassLoader(getClass().getClassLoader())
                     .whitelistPackages("com.jadaptive")   
                     .scan()) {                  
-            for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Template.class.getName())) {
+            for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectDefinition.class.getName())) {
                 if(log.isInfoEnabled()) {
 					log.info("Found template {}", classInfo.getName());
 				}
@@ -388,7 +388,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				log.info("Registering template from annotations on class {}", clz.getSimpleName());
 			}
 			
-			Template e = clz.getAnnotation(Template.class);
+			ObjectDefinition e = clz.getAnnotation(ObjectDefinition.class);
 			
 			ObjectTemplate template;
 			try {
@@ -398,7 +398,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template.setUuid(e.resourceKey());
 			}
 			
-			Template parent = getParentTemplate(clz);
+			ObjectDefinition parent = getParentTemplate(clz);
 			if(Objects.nonNull(parent)) {
 				if(log.isInfoEnabled()) {
 					log.info("{} template has {} as parent", e.resourceKey(), parent.resourceKey());
@@ -443,6 +443,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					t.setUnique(field.unique());
 					t.setCollection(f.getType().isAssignableFrom(Collection.class));
 					t.setReadOnly(field.readOnly());
+					t.setAlternativeId(field.alternativeId());
 					
 					t.setDescription(field.description());
 					t.setName(field.name());
@@ -508,13 +509,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return columns;
 	}
 	
-	private Template getParentTemplate(Class<?> clz) {
+	private ObjectDefinition getParentTemplate(Class<?> clz) {
 		
 		Class<?> parent = clz.getSuperclass();
-		Template template = null;
+		ObjectDefinition template = null;
 		while(parent!=null){
 			
-			Template t = parent.getAnnotation(Template.class);
+			ObjectDefinition t = parent.getAnnotation(ObjectDefinition.class);
 			if(Objects.nonNull(t)) {
 				template = t;
 			}

@@ -7,9 +7,9 @@ import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Cron Schedule", resourceKey = CronSchedule.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(name = "Cron Schedule", resourceKey = CronSchedule.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class CronSchedule extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "cronSchedules";

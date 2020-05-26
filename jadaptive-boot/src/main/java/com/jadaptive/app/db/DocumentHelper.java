@@ -29,8 +29,9 @@ import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.FieldDefinition;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
@@ -41,7 +42,7 @@ public class DocumentHelper {
 	static Set<String> builtInNames = new HashSet<>(Arrays.asList("uuid", "system", "hidden"));
 	
 	public static String getTemplateResourceKey(Class<?> clz) {
-		Template template = (Template) clz.getAnnotation(Template.class);
+		ObjectDefinition template = (ObjectDefinition) clz.getAnnotation(ObjectDefinition.class);
 		if(Objects.nonNull(template)) {
 			return template.resourceKey();
 		}
@@ -341,7 +342,7 @@ public class DocumentHelper {
 		
 	}
 
-	private static Object fromString(Class<?> type, String value) {
+	public static Object fromString(Class<?> type, String value) {
 		if(type.equals(boolean.class)) {
 			return Boolean.parseBoolean(value);
 		} else if(type.equals(Boolean.class)) {
@@ -370,6 +371,48 @@ public class DocumentHelper {
 			}
 		} else {
 			return value;
+		}
+	}
+	
+	public static Object fromString(FieldDefinition def, String value) {
+		switch(def.getFieldType()) {
+		case BOOL:
+			if(StringUtils.isNotBlank(value)) {
+				return Boolean.parseBoolean(value);
+			} else {
+				return false;
+			}
+		case DECIMAL:
+			if(StringUtils.isNotBlank(value)) {
+				return Double.parseDouble(value);
+			} else {
+				return null;
+			}
+		case INTEGER:
+			if(StringUtils.isNotBlank(value)) {
+				return Integer.parseInt(value);
+			} else {
+				return null;
+			}
+		case LONG:
+			if(StringUtils.isNotBlank(value)) {
+				return Long.parseLong(value);
+			} else {
+				return null;
+			}
+		case PASSWORD:
+		case TEXT:
+		case TEXT_AREA:
+		case ENUM:
+			return value;
+		case TIMESTAMP:
+			if(StringUtils.isNotBlank(value)) {
+				return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			} else {
+				return null;
+			}
+		default:
+			throw new IllegalStateException("Unhandled field type " + def.getFieldType() + " in DocumentHelper.fromString");
 		}
 	}
 

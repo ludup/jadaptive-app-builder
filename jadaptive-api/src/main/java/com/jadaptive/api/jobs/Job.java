@@ -9,9 +9,9 @@ import com.jadaptive.api.tasks.Task;
 import com.jadaptive.api.tasks.Trigger;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Job", resourceKey = Job.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(name = "Job", resourceKey = Job.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class Job extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "job";

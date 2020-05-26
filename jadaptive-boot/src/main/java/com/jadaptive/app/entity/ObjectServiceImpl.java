@@ -25,7 +25,6 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.app.db.DocumentHelper;
-import com.jadaptive.app.db.SearchHelper;
 
 @Service
 public class ObjectServiceImpl extends AuthenticatedService implements ObjectService, JsonTemplateEnabledService<MongoEntity> {
@@ -35,9 +34,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Autowired
 	private TemplateService templateService; 
-	
-	@Autowired
-	private SearchHelper searchHelper;
 	
 	@Autowired
 	private EventService eventService;
@@ -55,7 +51,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		AbstractObject e;
 		
 		try {
-			e = entityRepository.get(resourceKey, resourceKey);
+			e = entityRepository.getById(template, resourceKey);
 			if(!resourceKey.equals(e.getResourceKey())) {
 				throw new IllegalStateException();
 			}
@@ -69,14 +65,14 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
  	}
 	
 	@Override
-	public AbstractObject get(String resourceKey, String uuid) throws RepositoryException, ObjectException {
+	public AbstractObject get(String resourceKey, String value) throws RepositoryException, ObjectException {
 
 		ObjectTemplate template = templateService.get(resourceKey);
 		if(template.getType()!=ObjectType.COLLECTION) {
 			throw new ObjectException(String.format("%s is not a collection entity", resourceKey));
 		}
 		
-		AbstractObject e = entityRepository.get(uuid, resourceKey);
+		AbstractObject e = entityRepository.getById(template, value);
 		if(!resourceKey.equals(e.getResourceKey())) {
 			throw new IllegalStateException();
 		}
@@ -91,7 +87,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		if(template.getScope()==ObjectScope.PERSONAL) {
 			throw new ObjectException(String.format("%s is a personal scoped object. Use personal API", resourceKey));
 		}
-		return entityRepository.list(resourceKey);
+		return entityRepository.list(template);
 	}
 	
 	@Override
@@ -101,7 +97,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		if(template.getScope()!=ObjectScope.PERSONAL) {
 			throw new ObjectException(String.format("%s is a not personal scoped object. Use list API", resourceKey));
 		}
-		return entityRepository.personal(resourceKey, getCurrentUser());
+		return entityRepository.personal(template, getCurrentUser());
 	}
 
 	@Override
@@ -133,7 +129,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			Class<?> clz = classService.findClass((String)e.getValue("_clz"));
 			DocumentHelper.convertDocumentToObject(clz, new Document(e.getDocument()));
 			
-			entityRepository.delete(resourceKey, uuid);
+			entityRepository.deleteByUUID(template, uuid);
 			
 			eventService.publishStandardEvent(EventType.DELETE, 
 					DocumentHelper.convertDocumentToObject(clz, 
@@ -155,8 +151,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new ObjectException("You cannot delete a Singleton Entity");
 		}
 		
-		entityRepository.deleteAll(resourceKey);
-		
+		entityRepository.deleteAll(template);
 	}
 	
 	@Override
@@ -207,19 +202,16 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 	@Override
 	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
-		templateService.get(resourceKey);
-		return entityRepository.table(resourceKey, searchField, searchValue, offset, limit);
+		return entityRepository.table(templateService.get(resourceKey), searchField, searchValue, offset, limit);
 	}
 
 	@Override
 	public long count(String resourceKey) {
-		templateService.get(resourceKey);
-		return entityRepository.count(resourceKey);
+		return entityRepository.count(templateService.get(resourceKey));
 	}
 	
 	@Override
 	public long count(String resourceKey, String searchField, String searchValue) {
-		templateService.get(resourceKey);
-		return entityRepository.count(resourceKey, searchField, searchValue);
+		return entityRepository.count(templateService.get(resourceKey), searchField, searchValue);
 	}
 }

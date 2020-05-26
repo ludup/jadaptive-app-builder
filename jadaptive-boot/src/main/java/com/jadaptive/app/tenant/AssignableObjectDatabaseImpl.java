@@ -77,6 +77,11 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 				SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))));
 		}
 	}
+
+	@Override
+	public Collection<T> getObjects(Class<T> resourceClass) {
+		return objectDatabase.list(resourceClass);
+	}
 	
 	
 	

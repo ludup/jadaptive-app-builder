@@ -14,7 +14,7 @@ import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.tasks.Task;
 import com.jadaptive.api.tasks.TaskImpl;
 import com.jadaptive.api.tasks.TaskService;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
 @Service
 public class TaskServiceImpl extends AuthenticatedService implements TaskService {
@@ -29,7 +29,7 @@ public class TaskServiceImpl extends AuthenticatedService implements TaskService
 		
 		loadTaskImplementations();
 		
-		Template template = task.getClass().getAnnotation(Template.class);
+		ObjectDefinition template = task.getClass().getAnnotation(ObjectDefinition.class);
 		if(Objects.isNull(template)) {
 			throw new IllegalStateException(String.format("%s is not annontated template", task.getClass().getSimpleName()));
 		}

@@ -7,9 +7,9 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Trigger", resourceKey = Trigger.RESOURCE_KEY, type = ObjectType.OBJECT)
+@ObjectDefinition(name = "Trigger", resourceKey = Trigger.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class Trigger extends UUIDEntity {
 
 	public static final String RESOURCE_KEY = "trigger";

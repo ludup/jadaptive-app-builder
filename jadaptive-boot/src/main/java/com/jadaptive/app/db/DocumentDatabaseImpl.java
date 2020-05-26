@@ -81,7 +81,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public Document get(String uuid, String table, String database) {
+	public Document getByUUID(String uuid, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		FindIterable<Document> result = collection.find(Filters.eq("_id", uuid));
@@ -136,11 +136,18 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public void delete(String uuid, String table, String database) {
+	public void deleteByUUID(String uuid, String table, String database) {
 		
-		get(uuid, table, database);
+		getByUUID(uuid, table, database);
 		MongoCollection<Document> collection = getCollection(table, database);
 		collection.deleteOne(Filters.eq("_id", uuid));
+	}
+	
+	@Override
+	public void delete(String table, String database, SearchField... fields) {
+
+		MongoCollection<Document> collection = getCollection(table, database);
+		collection.deleteMany(buildFilter(fields));
 	}
 	
 	@Override

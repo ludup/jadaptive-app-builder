@@ -29,6 +29,8 @@ public @interface ObjectField {
 		
 		boolean textIndex() default false;
 		
+		boolean alternativeId() default false;
+		
 		String references() default "";
 
 		// USER INTERFACE PROPERTIES

@@ -2,9 +2,9 @@ package com.jadaptive.db;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Test Simple Object", resourceKey = TestSimpleObject.RESOURCE_KEY, type = ObjectType.OBJECT)
+@ObjectDefinition(name = "Test Simple Object", resourceKey = TestSimpleObject.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class TestSimpleObject extends NamedUUIDEntity {
 	
 	public static final String RESOURCE_KEY = "testSimpleObject";

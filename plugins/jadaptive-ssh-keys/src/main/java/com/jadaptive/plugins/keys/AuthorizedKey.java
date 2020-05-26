@@ -11,11 +11,11 @@ import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Table;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.UniqueIndex;
 
 
-@Template(name = "Authorized Keys", 
+@ObjectDefinition(name = "Authorized Keys", 
 	resourceKey = AuthorizedKey.RESOURCE_KEY, 
 	 aliases = { "userPrivateKeys" },
      type = ObjectType.COLLECTION, 

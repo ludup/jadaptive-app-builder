@@ -3,9 +3,9 @@ package com.jadaptive.api.redirect;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Redirects", resourceKey =  Redirect.RESOURCE_KEY)
+@ObjectDefinition(name = "Redirects", resourceKey =  Redirect.RESOURCE_KEY)
 public class Redirect extends UUIDEntity {
 
 	public static final String RESOURCE_KEY = "redirects";

@@ -23,6 +23,7 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.db.DocumentHelper;
 
 @Repository
 public class ObjectRepositoryImpl implements ObjectRepository {
@@ -37,31 +38,31 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	ObjectTemplateRepository templateRepository; 
 	
 	@Override
-	public Collection<AbstractObject> list(String resourceKey, SearchField... fields) throws RepositoryException, ObjectException {
+	public Collection<AbstractObject> list(ObjectTemplate def, SearchField... fields) throws RepositoryException, ObjectException {
 		
 		List<AbstractObject> results = new ArrayList<>();
 		
-		for(Document document : db.list(resourceKey, tenantService.getCurrentTenant().getUuid(), fields)) {
-			results.add(buildEntity(resourceKey, document));
+		for(Document document : db.list(def.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fields)) {
+			results.add(buildEntity(def, document));
 		}
 		
 		return results;
 	}
 	
 	@Override
-	public Collection<AbstractObject> personal(String resourceKey, User user) throws RepositoryException, ObjectException {
+	public Collection<AbstractObject> personal(ObjectTemplate def, User user) throws RepositoryException, ObjectException {
 		
 		List<AbstractObject> results = new ArrayList<>();
 		
-		for(Document document : db.list(resourceKey, tenantService.getCurrentTenant().getUuid(), SearchField.eq("ownerUUID", user.getUuid()))) {
-			results.add(buildEntity(resourceKey, document));
+		for(Document document : db.list(def.getResourceKey(), tenantService.getCurrentTenant().getUuid(), SearchField.eq("ownerUUID", user.getUuid()))) {
+			results.add(buildEntity(def, document));
 		}
 		
 		return results;
 	}
 
-	private AbstractObject buildEntity(String resourceKey, Document document) {
-		MongoEntity e = new MongoEntity(resourceKey, document);
+	private AbstractObject buildEntity(ObjectTemplate def, Document document) {
+		MongoEntity e = new MongoEntity(def.getResourceKey(), document);
 		e.setUuid(document.getString("_id"));
 		e.setHidden(document.getBoolean("hidden"));
 		e.setSystem(document.getBoolean("system"));
@@ -69,24 +70,43 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 	
 	@Override
-	public AbstractObject get(String uuid, String resourceKey) throws RepositoryException, ObjectException {
-		Document document = db.get(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
-		if(Objects.isNull(document)) {
-			throw new ObjectNotFoundException(String.format("No document for resource %s with uuid %s", resourceKey, uuid));
-		}
-		return buildEntity(resourceKey, document);
-	}
-
-	@Override
-	public void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException {
-		db.delete(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
-	}
-
-	@Override
-	public void deleteAll(String resourceKey) throws RepositoryException, ObjectException {
+	public AbstractObject getById(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
 		
-		db.dropCollection(resourceKey, tenantService.getCurrentTenant().getUuid());
+		List<SearchField> search = new ArrayList<>();
+		for(FieldDefinition field : def.getFields()) {
+			if(field.isAlternativeId()) {
+				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
+			}
+		}
+		Document document = db.get(def.getResourceKey(),
+				tenantService.getCurrentTenant().getUuid(), 
+				SearchField.or(search.toArray(new SearchField[0])));
+		if(Objects.isNull(document)) {
+			throw new ObjectNotFoundException(String.format("No document for resource %s with value %s", def.getResourceKey(), value));
+		}
+		return buildEntity(def, document);
+	}
+
+	@Override
+	public void deleteByUUID(ObjectTemplate def, String uuid) throws RepositoryException, ObjectException {
+		db.deleteByUUID(uuid, def.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+	}
+
+	@Override
+	public void deleteAll(ObjectTemplate def) throws RepositoryException, ObjectException {
+		db.dropCollection(def.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+	}
 	
+	@Override
+	public void deleteById(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
+		List<SearchField> search = new ArrayList<>();
+		for(FieldDefinition field : def.getFields()) {
+			if(field.isAlternativeId()) {
+				search.add(SearchField.eq(field.getResourceKey(), value));
+			}
+		}
+		db.delete(def.getResourceKey(), tenantService.getCurrentTenant().getUuid(), 
+				SearchField.or(search.toArray(new SearchField[0])));
 	}
 	
 	@Override
@@ -131,24 +151,24 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 
 	@Override
-	public Collection<AbstractObject> table(String resourceKey, String field, String search, int offset, int limit) {
+	public Collection<AbstractObject> table(ObjectTemplate def, String field, String search, int offset, int limit) {
 		List<AbstractObject> results = new ArrayList<>();
 		
-		for(Document document : db.table(resourceKey, field, search, tenantService.getCurrentTenant().getUuid(), offset, limit)) {
-			results.add(buildEntity(resourceKey, document));
+		for(Document document : db.table(def.getResourceKey(), field, search, tenantService.getCurrentTenant().getUuid(), offset, limit)) {
+			results.add(buildEntity(def, document));
 		}
 		
 		return results;
 	}
 	
 	@Override
-	public long count(String resourceKey) {
-		return db.count(resourceKey, tenantService.getCurrentTenant().getUuid());
+	public long count(ObjectTemplate def) {
+		return db.count(def.getResourceKey(), tenantService.getCurrentTenant().getUuid());
 	}
 	
 	@Override
-	public long count(String resourceKey, String searchField, String searchValue) {
-		return db.count(resourceKey, searchField, searchValue, tenantService.getCurrentTenant().getUuid());
+	public long count(ObjectTemplate def, String searchField, String searchValue) {
+		return db.count(def.getResourceKey(), searchField, searchValue, tenantService.getCurrentTenant().getUuid());
 	}
 
 

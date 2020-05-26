@@ -6,9 +6,9 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Embedded Object", resourceKey = EmbeddedObject.RESOURCE_KEY, type = ObjectType.OBJECT)
+@ObjectDefinition(name = "Embedded Object", resourceKey = EmbeddedObject.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class EmbeddedObject extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "embeddedObject";

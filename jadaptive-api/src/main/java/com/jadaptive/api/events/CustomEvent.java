@@ -9,9 +9,9 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Event", resourceKey = "events", type = ObjectType.COLLECTION)
+@ObjectDefinition(name = "Event", resourceKey = "events", type = ObjectType.COLLECTION)
 public class CustomEvent extends UUIDEntity {
 
 	@ObjectField(name = "Resource Key", 

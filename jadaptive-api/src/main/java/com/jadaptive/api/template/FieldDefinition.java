@@ -22,6 +22,7 @@ public class FieldDefinition extends NamedUUIDEntity {
 	boolean unique;
 	boolean textIndex;
 	boolean readOnly;
+	boolean alternativeId;
 	
 	Collection<FieldValidator> validators = new ArrayList<>();
 	
@@ -148,5 +149,13 @@ public class FieldDefinition extends NamedUUIDEntity {
 
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
+	}
+
+	public boolean isAlternativeId() {
+		return alternativeId;
+	}
+
+	public void setAlternativeId(boolean alternativeId) {
+		this.alternativeId = alternativeId;
 	}
 }

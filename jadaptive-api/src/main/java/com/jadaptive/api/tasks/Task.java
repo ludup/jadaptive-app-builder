@@ -2,9 +2,9 @@ package com.jadaptive.api.tasks;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Task", resourceKey = "task", type = ObjectType.OBJECT)
+@ObjectDefinition(name = "Task", resourceKey = "task", type = ObjectType.OBJECT)
 public abstract class Task extends AbstractUUIDEntity {
 
 	

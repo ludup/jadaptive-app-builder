@@ -14,7 +14,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
@@ -26,10 +26,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 	protected String getCollectionName(Class<?> clz) {
-		Template template = clz.getAnnotation(Template.class);
+		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
 		while(template!=null && template.type() == ObjectType.OBJECT) {
 			clz = clz.getSuperclass();
-			template = clz.getAnnotation(Template.class);
+			template = clz.getAnnotation(ObjectDefinition.class);
 		} 
 		if(Objects.nonNull(template)) {
 			return template.resourceKey();
@@ -54,7 +54,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends UUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, ObjectException {
 		try {
 			
-			Document document = db.get(uuid, getCollectionName(clz), database);
+			Document document = db.getByUUID(uuid, getCollectionName(clz), database);
 			if(Objects.isNull(document)) {
 				throw new ObjectNotFoundException(String.format("Object from %s not found with id %s", 
 						getCollectionName(clz), uuid));
@@ -169,7 +169,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			if(obj.isSystem()) {
 				throw new ObjectException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
 			}
-			db.delete(obj.getUuid(), getCollectionName(obj.getClass()), database);
+			db.deleteByUUID(obj.getUuid(), getCollectionName(obj.getClass()), database);
 			onObjectDeleted(obj);
 		} catch(Throwable e) {
 			checkException(e);

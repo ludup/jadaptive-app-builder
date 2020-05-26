@@ -6,9 +6,9 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Template;
+import com.jadaptive.api.template.ObjectDefinition;
 
-@Template(name = "Test Field Types Object", resourceKey = TestFieldTypesObject.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(name = "Test Field Types Object", resourceKey = TestFieldTypesObject.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class TestFieldTypesObject extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testFieldTypesObject";

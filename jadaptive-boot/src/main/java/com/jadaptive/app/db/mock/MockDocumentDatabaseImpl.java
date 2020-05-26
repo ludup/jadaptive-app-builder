@@ -41,7 +41,7 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public Document get(String uuid, String table, String database) {
+	public Document getByUUID(String uuid, String table, String database) {
 			
 		Document doc = getCollection(table, database).get(uuid);
 		
@@ -53,9 +53,9 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public void delete(String uuid, String table, String database) {
+	public void deleteByUUID(String uuid, String table, String database) {
 		
-		get(uuid, table, database);
+		getByUUID(uuid, table, database);
 		getCollection(table, database).remove(uuid);
 	}
 
@@ -162,6 +162,12 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	public Document min(String table, String database, String field) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void delete(String table, String database, SearchField... fields) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
