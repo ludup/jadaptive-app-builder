@@ -41,7 +41,7 @@ import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
-import com.jadaptive.api.template.FieldDefinition;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.Index;
@@ -431,7 +431,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				if(Objects.nonNull(annotations) && annotations.length > 0) {
 					
 					ObjectField field = annotations[0];
-					FieldDefinition t = new FieldDefinition();
+					FieldTemplate t = new FieldTemplate();
 					t.setResourceKey(f.getName());
 					t.setDefaultValue(field.defaultValue());
 					t.setFieldType(selectFieldType(f.getType(), field.type()));
@@ -500,7 +500,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 	
 	private Collection<String> verifyColumnNames(ObjectTemplate template, Collection<String> columns) {
-		Map<String,FieldDefinition> definedColumns = template.toMap();
+		Map<String,FieldTemplate> definedColumns = template.toMap();
 		for(String column : columns) {
 			if(!definedColumns.containsKey(column)) {
 				throw new IllegalArgumentException(String.format("%s is not a valid column name", column));

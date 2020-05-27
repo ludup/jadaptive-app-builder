@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
-import com.jadaptive.api.template.FieldDefinition;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.plugins.ssh.management.ConsoleHelper;
@@ -81,7 +81,7 @@ public class SetConfig extends AbstractTenantAwareCommand {
 			break;
 		case 2:
 			ObjectTemplate t = templateService.get(line.words().get(1));
-			for(FieldDefinition d : t.getFields()) {
+			for(FieldTemplate d : t.getFields()) {
 				candidates.add(new Candidate(d.getResourceKey()));
 			}
 		default:

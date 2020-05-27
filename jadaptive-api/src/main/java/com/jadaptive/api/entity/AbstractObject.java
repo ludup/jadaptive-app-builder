@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.jadaptive.api.repository.UUIDDocument;
-import com.jadaptive.api.template.FieldDefinition;
+import com.jadaptive.api.template.FieldTemplate;
 
 public interface AbstractObject extends UUIDDocument {
 
-	AbstractObject getChild(FieldDefinition c);
+	AbstractObject getChild(FieldTemplate c);
 
 	String getResourceKey();
 
@@ -16,9 +16,9 @@ public interface AbstractObject extends UUIDDocument {
 
 	Object getValue(String fieldName);
 
-	Object getValue(FieldDefinition t);
+	Object getValue(FieldTemplate t);
 
-	void setValue(FieldDefinition t, Object value);
+	void setValue(FieldTemplate t, Object value);
 
 	Boolean isSystem();
 

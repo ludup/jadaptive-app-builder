@@ -8,19 +8,19 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.jadaptive.api.repository.NamedUUIDEntity;
-import com.jadaptive.api.template.FieldDefinition;
+import com.jadaptive.api.template.FieldTemplate;
 
 public class DropdownFormInput extends FormInputRender {
 
 	Elements inputElements;
 	Element valueElement;
 	Element nameElement;
-	public DropdownFormInput(Elements rootElement, FieldDefinition template, String defaultValue) {
+	public DropdownFormInput(Elements rootElement, FieldTemplate template, String defaultValue) {
 		super(rootElement, template, defaultValue);
 	}
 
 	@Override
-	protected void renderInput(Elements rootElement, FieldDefinition template, String value) {
+	protected void renderInput(Elements rootElement, FieldTemplate template, String value) {
 
 		rootElement.append(replaceResourceKey("<div class=\"form-group col-12\"><label for=\"${resourceKey}\" class=\"col-form-label\">" 
 				+ template.getName() + "</label><div id=\"${resourceKey}Dropdown\" style=\"position: relative\" class=\"input-group dropdown\"></div></div>"));
@@ -89,10 +89,10 @@ public class DropdownFormInput extends FormInputRender {
 		}
 	}
 	
-	public void renderTemplateFields(Collection<FieldDefinition> fields) {
+	public void renderTemplateFields(Collection<FieldTemplate> fields) {
 		
-		FieldDefinition selected = null;
-		for(FieldDefinition field : fields) {
+		FieldTemplate selected = null;
+		for(FieldTemplate field : fields) {
 			if(Objects.isNull(field)) {
 				selected = field;
 			}

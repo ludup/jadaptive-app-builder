@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.FieldDefinition;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ValidationException;
@@ -29,7 +29,7 @@ public class EntityDecimalFieldTests extends AbstractDeserializerTest {
 		
 		template.setType(ObjectType.COLLECTION);
 
-		FieldDefinition t1 = new FieldDefinition();
+		FieldTemplate t1 = new FieldTemplate();
 		t1.setResourceKey("revenue");
 		t1.setDefaultValue("1.25");
 		t1.setRequired(required);

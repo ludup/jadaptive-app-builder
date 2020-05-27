@@ -22,11 +22,11 @@ public interface UploadHandler extends ExtensionPoint {
 	
 	String getURIName();
 
-	default void sendSuccessfulResponse(HttpServletResponse resp) {
+	default void sendSuccessfulResponse(HttpServletResponse resp, String handlerName, String uri) throws IOException {
 		resp.setStatus(HttpStatus.OK.value());
 	};
 
-	default void sendFailedResponse(HttpServletResponse resp, Exception e) throws IOException {
+	default void sendFailedResponse(HttpServletResponse resp, String handlerName, String uri, Exception e) throws IOException {
 		resp.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 	}
 }

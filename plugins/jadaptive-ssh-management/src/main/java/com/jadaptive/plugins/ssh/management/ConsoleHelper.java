@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.tasks.TriggerMapping;
-import com.jadaptive.api.template.FieldDefinition;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationType;
@@ -46,7 +46,7 @@ public class ConsoleHelper {
 			String objectType) throws ParseException, PermissionDeniedException, IOException {
 		
 		obj.put("_clz", objectType);
-		for(FieldDefinition field : template.getFields()) {
+		for(FieldTemplate field : template.getFields()) {
 			promptField(console, field, obj, template, mappings, objectType);
 		}
 			
@@ -55,7 +55,7 @@ public class ConsoleHelper {
 	}
 
 	public void promptField(VirtualConsole console,
-			FieldDefinition field,
+			FieldTemplate field,
 			Map<String, Object> obj,
 			ObjectTemplate template, 
 			List<TriggerMapping> mappings,
@@ -257,7 +257,7 @@ public class ConsoleHelper {
 
 	public void displayTemplate(VirtualConsole console, AbstractObject e, ObjectTemplate template) {
 		
-		for(FieldDefinition field : template.getFields()) {
+		for(FieldTemplate field : template.getFields()) {
 			switch(field.getFieldType()) {
 			case OBJECT_EMBEDDED:
 				ObjectTemplate objectTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));

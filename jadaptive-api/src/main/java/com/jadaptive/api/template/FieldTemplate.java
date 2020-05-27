@@ -9,7 +9,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
-public class FieldDefinition extends NamedUUIDEntity {
+public class FieldTemplate extends NamedUUIDEntity {
 	
 	String resourceKey;
 	String defaultValue;
@@ -26,7 +26,7 @@ public class FieldDefinition extends NamedUUIDEntity {
 	
 	Collection<FieldValidator> validators = new ArrayList<>();
 	
-	public FieldDefinition() {
+	public FieldTemplate() {
 	}
 
 	public String getResourceKey() {
@@ -81,8 +81,8 @@ public class FieldDefinition extends NamedUUIDEntity {
 	}
 
 	public boolean equals(Object obj) {
-		if(obj instanceof FieldDefinition) {
-			FieldDefinition template = (FieldDefinition) obj;
+		if(obj instanceof FieldTemplate) {
+			FieldTemplate template = (FieldTemplate) obj;
 		return new EqualsBuilder().append(getUuid(), template.getUuid())
 				.append(resourceKey, template.getResourceKey())
 				.append(fieldType.ordinal(), template.getFieldType().ordinal()).isEquals();

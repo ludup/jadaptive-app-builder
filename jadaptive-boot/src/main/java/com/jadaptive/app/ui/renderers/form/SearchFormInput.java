@@ -5,19 +5,19 @@ import java.util.Objects;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.jadaptive.api.template.FieldDefinition;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ValidationType;
 
 public class SearchFormInput extends FormInputRender {
 
-	FieldDefinition template;
-	public SearchFormInput(Elements rootElement, FieldDefinition template, String defaultValue) {
+	FieldTemplate template;
+	public SearchFormInput(Elements rootElement, FieldTemplate template, String defaultValue) {
 		super(rootElement, template, defaultValue);
 	}
 
 	@Override
-	protected void renderInput(Elements rootElement, FieldDefinition template, String defaultValue) {
+	protected void renderInput(Elements rootElement, FieldTemplate template, String defaultValue) {
 
 		String url = "";
 		if(template.getFieldType()==FieldType.OBJECT_REFERENCE) {

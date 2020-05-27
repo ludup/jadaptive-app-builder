@@ -135,13 +135,11 @@ public class UploadServlet extends HttpServlet {
 			    
 			}
 		
-			handler.sendSuccessfulResponse(resp);
-			
-			
-			
+			handler.sendSuccessfulResponse(resp, handlerName, uri);
+
 		} catch (FileUploadException | SessionTimeoutException | UnauthorizedException e) {
 			log.error("Upload failure", e);
-			handler.sendFailedResponse(resp, e);
+			handler.sendFailedResponse(resp, handlerName, uri, e);
 		} finally {
 			if(Objects.nonNull(session)) {
 				permissionService.clearUserContext();
@@ -150,7 +148,7 @@ public class UploadServlet extends HttpServlet {
 		
 		
 	}
-
+		
 	private UploadHandler getUploadHandler(String handlerName) {
 		
 		UploadHandler handler = uploadHandlers.get(handlerName);

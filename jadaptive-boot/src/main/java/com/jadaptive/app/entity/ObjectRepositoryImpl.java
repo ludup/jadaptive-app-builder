@@ -16,7 +16,7 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectRepository;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.template.FieldDefinition;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.ValidationType;
@@ -73,7 +73,8 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	public AbstractObject getById(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
 		
 		List<SearchField> search = new ArrayList<>();
-		for(FieldDefinition field : def.getFields()) {
+		search.add(SearchField.eq("uuid", value));
+		for(FieldTemplate field : def.getFields()) {
 			if(field.isAlternativeId()) {
 				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
 			}
@@ -100,7 +101,8 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	@Override
 	public void deleteById(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
 		List<SearchField> search = new ArrayList<>();
-		for(FieldDefinition field : def.getFields()) {
+		search.add(SearchField.eq("uuid", value));
+		for(FieldTemplate field : def.getFields()) {
 			if(field.isAlternativeId()) {
 				search.add(SearchField.eq(field.getResourceKey(), value));
 			}
@@ -125,9 +127,9 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		validateReferences(template.getFields(), entity);
 	}
 
-	private void validateReferences(Collection<FieldDefinition> fields, AbstractObject entity) {
+	private void validateReferences(Collection<FieldTemplate> fields, AbstractObject entity) {
 		if(!Objects.isNull(fields)) {
-			for(FieldDefinition t : fields) {
+			for(FieldTemplate t : fields) {
 				switch(t.getFieldType()) {
 				case OBJECT_REFERENCE:
 					if(StringUtils.isNotBlank((String)entity.getValue(t))) {

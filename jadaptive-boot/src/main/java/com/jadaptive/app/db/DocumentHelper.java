@@ -29,7 +29,7 @@ import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.FieldDefinition;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.app.ApplicationServiceImpl;
@@ -374,7 +374,7 @@ public class DocumentHelper {
 		}
 	}
 	
-	public static Object fromString(FieldDefinition def, String value) {
+	public static Object fromString(FieldTemplate def, String value) {
 		switch(def.getFieldType()) {
 		case BOOL:
 			if(StringUtils.isNotBlank(value)) {
