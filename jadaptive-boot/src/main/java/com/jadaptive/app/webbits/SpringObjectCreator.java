@@ -4,11 +4,11 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.codesmith.webbits.ObjectCreator;
+import com.codesmith.webbits.DefaultObjectCreator;
 import com.jadaptive.api.app.ApplicationService;
 
 @Component
-public class SpringObjectCreator implements ObjectCreator {
+public class SpringObjectCreator extends DefaultObjectCreator {
 
 	@Autowired
 	private ApplicationService applicationService;
@@ -16,27 +16,12 @@ public class SpringObjectCreator implements ObjectCreator {
 
     @Override
     public <T> T create(Class<T> clazz, Object parent) {
-//	if (parent == null) {
 	    try {
-		T o = applicationService.getBean(clazz);
-		return o;
+	    	return applicationService.getBean(clazz);
 	    } catch (NoSuchBeanDefinitionException nsbde) {
-	    	T obj;
-			try {
-				obj = clazz.newInstance();
-				return applicationService.autowire(obj);
-			} catch (InstantiationException | IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return null;
-			}
-	    	
+	    	T obj = super.create(clazz, parent);
+			return applicationService.autowire(obj);
 	    }
-//	} else {
-//	    // TODO does this work?
-//	    T o = context.getBean(clazz, parent);
-//	    return o;
-//	}
     }
 
 }
