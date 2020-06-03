@@ -229,7 +229,7 @@ public class SessionFilter implements Filter {
 				return true;
 			} else {
 				
-				log.info("Checking redirect {}", request.getRequestURI());
+				log.debug("Checking redirect {}", request.getRequestURI());
 				
 				// TODO cache this lookup
 				Collection<Redirect> redirects = redirectDatabase.list(Redirect.class);
