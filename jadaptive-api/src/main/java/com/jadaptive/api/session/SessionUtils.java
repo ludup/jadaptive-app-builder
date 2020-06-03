@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.user.User;
 
 @Component
 public class SessionUtils {
@@ -34,11 +35,25 @@ public class SessionUtils {
 	public static final String USER_LOCALE = "userLocale";
 	public static final String LOCALE_COOKIE = "JADAPTIVE_LOCALE";
 
+	static ThreadLocal<User> threadUsers = new ThreadLocal<>();
+	
 	@Autowired
 	private SessionService sessionService;; 
 	
 	@Autowired
 	private PermissionService permissionService; 
+	 
+	public void setUser(User user) {
+		threadUsers.set(user);
+	}
+	
+	public void removeUser() {
+		threadUsers.remove();
+	}
+	
+	public User getUser() {
+		return threadUsers.get();
+	}
 	
 	public Session getActiveSession(HttpServletRequest request) {
 		

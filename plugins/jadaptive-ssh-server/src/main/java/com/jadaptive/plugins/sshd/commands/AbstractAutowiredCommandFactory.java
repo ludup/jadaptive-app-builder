@@ -31,7 +31,9 @@ public class AbstractAutowiredCommandFactory extends CommandFactory<ShellCommand
 	
 	protected void tryCommand(String name, Class<? extends ShellCommand> clz, String... permissions) {
 		try {
-			permissionService.assertAnyPermission(permissions);
+			if(permissions.length > 0) {
+				permissionService.assertAnyPermission(permissions);
+			}
 			installCommand(name, clz);
 		} catch(AccessDeniedException e) {
 			log.info("{} will not be available to {}", name, permissionService.getCurrentUser().getUsername());

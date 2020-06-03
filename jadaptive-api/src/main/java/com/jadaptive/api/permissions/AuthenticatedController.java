@@ -15,6 +15,8 @@ import com.jadaptive.api.user.UserService;
 
 public class AuthenticatedController {
 
+	public static final String SESSION_SCOPE_USER = "com.jadaptive.sessionScopeUser";
+	
 	@Autowired
 	private PermissionService permissionService; 
 	
@@ -36,12 +38,20 @@ public class AuthenticatedController {
 	}
 	
 	protected void setupUserContext(HttpServletRequest request) {
-		Session session = sessionUtils.getActiveSession(request);
-		if(Objects.isNull(session)) {
-			throw new AccessDeniedException();
+		
+		User user = sessionUtils.getUser();
+		if(Objects.isNull(user)) {
+			user = (User) request.getSession().getAttribute(SESSION_SCOPE_USER);
+			if(Objects.isNull(user)) {
+				Session session = sessionUtils.getActiveSession(request);
+				if(Objects.isNull(session)) {
+					throw new AccessDeniedException();
+				}
+				user = userService.getUser(session.getUsername());
+			}
 		}
 		
-		permissionService.setupUserContext(userService.getUser(session.getUsername()));
+		permissionService.setupUserContext(user);
 	}
 	
 	protected void setupSystemContext() {

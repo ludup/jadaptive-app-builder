@@ -41,7 +41,7 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.auth.AuthenticationService;
 
-@WebFilter(urlPatterns = { "/*" }, dispatcherTypes = DispatcherType.REQUEST)
+@WebFilter(urlPatterns = { "/*" }, dispatcherTypes = DispatcherType.REQUEST )
 public class SessionFilter implements Filter {
 
 	static Logger log = LoggerFactory.getLogger(SessionFilter.class);
