@@ -227,4 +227,10 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		return repository.list();
 	}
 
+
+	@Override
+	public Role getRoleByUUID(String uuid) {
+		return repository.get(uuid);
+	}
+
 }

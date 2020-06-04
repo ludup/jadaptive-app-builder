@@ -21,4 +21,6 @@ public interface PersonalObjectDatabase<T extends PersonalUUIDEntity> {
 	Long searchPersonalObjectsCount(Class<T> resourceClass, String searchColumn, String searchPattern);
 
 	void deletePersonalObject(T obj);
+
+	Iterable<T> allObjects(Class<T> resourceClass);
 }

@@ -11,6 +11,8 @@ import com.jadaptive.utils.PasswordEncryptionType;
 @ObjectDefinition(name = "Builtin Users", resourceKey = BuiltinUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class BuiltinUser extends PasswordEnabledUser {
 
+	private static final long serialVersionUID = -4186606233520076592L;
+
 	public static final String RESOURCE_KEY = "builtinUsers";
 	@ObjectField(name = "Username", 
 			description = "The logon name of the user",

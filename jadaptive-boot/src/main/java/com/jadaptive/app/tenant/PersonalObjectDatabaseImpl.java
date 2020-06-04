@@ -68,4 +68,9 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	public void deletePersonalObject(T obj) {
 		objectDatabase.delete(obj);
 	}
+
+	@Override
+	public Iterable<T> allObjects(Class<T> resourceClass) {
+		return objectDatabase.iterator(resourceClass);
+	}
 }

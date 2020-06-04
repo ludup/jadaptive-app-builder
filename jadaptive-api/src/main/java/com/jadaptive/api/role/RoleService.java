@@ -36,4 +36,6 @@ public interface RoleService {
 	void deleteRole(Role role);
 
 	Collection<Role> listRoles();
+
+	Role getRoleByUUID(String roleUUID);
 }

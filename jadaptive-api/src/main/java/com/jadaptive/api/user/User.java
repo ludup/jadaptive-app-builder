@@ -1,6 +1,8 @@
 package com.jadaptive.api.user;
 
-public interface User {
+import java.io.Serializable;
+
+public interface User extends Serializable {
 	
 	String getUuid();
 	

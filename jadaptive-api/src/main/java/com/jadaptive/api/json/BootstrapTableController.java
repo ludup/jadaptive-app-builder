@@ -8,10 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
 
-public class BootstrapTableController<T> {
+public class BootstrapTableController<T> extends AuthenticatedController {
 
 	Logger log = LoggerFactory.getLogger(BootstrapTableController.class);
 
