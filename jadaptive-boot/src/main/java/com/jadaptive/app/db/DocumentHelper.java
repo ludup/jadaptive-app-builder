@@ -197,6 +197,7 @@ public class DocumentHelper {
 				clz = baseClass.getName();
 			}
 			
+			clz = clz.replace("FieldDefinition", "FieldTemplate");
 			T obj;
 			
 			try {
