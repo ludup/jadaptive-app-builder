@@ -201,6 +201,7 @@ public class APIController extends BootstrapTableController<AbstractObject>{
 	
 	private EntityStatus<AbstractObject> handleException(Throwable e, String method, String resourceKey) {
 		if(e instanceof AccessDeniedException) {
+			log.error("{} api/{} Access Denied", method, resourceKey);
 			throw (AccessDeniedException)e;
 		}
 		if(log.isErrorEnabled()) {
