@@ -1,12 +1,10 @@
 package com.jadaptive.app.permissions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -203,13 +201,13 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
-	public Collection<String> getAllPermissions(Tenant tenant) {
-		List<String> tmp = new ArrayList<>();
+	public Set<String> getAllPermissions(Tenant tenant) {
+		Set<String> tmp = new TreeSet<>();
 		tmp.addAll(systemPermissions);
 		if(tenantPermissions.containsKey(tenant)) {
 			tmp.addAll(tenantPermissions.get(tenant));
 		}
-		return Collections.unmodifiableCollection(tmp);
+		return Collections.unmodifiableSet(tmp);
 	}
 	
 	@Override
@@ -337,7 +335,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public boolean isValidPermission(String permission) {
 		
 		Tenant tenant = tenantService.getCurrentTenant();
-		Set<String> allPermissions = tenantPermissions.get(tenant);
+		Set<String> allPermissions = getAllPermissions(tenant);
 		return allPermissions.contains(permission);
 	}
 
