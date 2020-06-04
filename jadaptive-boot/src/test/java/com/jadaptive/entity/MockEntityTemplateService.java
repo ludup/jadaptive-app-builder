@@ -8,6 +8,7 @@ import java.util.Map;
 import org.bson.Document;
 
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -60,6 +61,11 @@ public class MockEntityTemplateService implements TemplateService {
 	}
 	@Override
 	public Collection<ObjectTemplate> singletons() throws RepositoryException, ObjectException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public Collection<ObjectTemplate> getTemplatesWithScope(ObjectScope personal) {
 		// TODO Auto-generated method stub
 		return null;
 	}

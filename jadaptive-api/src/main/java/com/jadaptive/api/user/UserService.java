@@ -27,7 +27,7 @@ public interface UserService {
 
 	void changePassword(User user, char[] newPassword, boolean passwordChangeRequired);
 
-	Iterable<? extends User> iterateUsers();
+	Iterable<? extends User> allUsers();
 
 	User getUserByEmail(String email);
 
@@ -42,5 +42,6 @@ public interface UserService {
 	boolean supportsLogin(User user);
 
 	Map<String, String> getUserProperties(User user);
+
 
 }

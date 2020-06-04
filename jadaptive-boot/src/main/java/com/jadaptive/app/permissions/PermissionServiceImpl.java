@@ -63,6 +63,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	final static User SYSTEM_USER = new User() {
 
+		private static final long serialVersionUID = 900617280859406080L;
+
 		@Override
 		public String getUuid() {
 			return SYSTEM_USER_UUID;

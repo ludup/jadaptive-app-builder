@@ -57,7 +57,7 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
 		
-		for(CronSchedule schedule : cronDatabase.list(CronSchedule.class, SearchField.not("disabled", true))) {
+		for(CronSchedule schedule : cronDatabase.list(CronSchedule.class)) {
 			schedule(schedule.getJob(), schedule.getExpression());
 		}
 	}

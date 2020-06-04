@@ -38,4 +38,10 @@ public interface RoleService {
 	Collection<Role> listRoles();
 
 	Role getRoleByUUID(String roleUUID);
+
+	Iterable<Role> allRoles();
+
+	Collection<Role> getRolesByUser(User user);
+
+	Collection<Role> getAllUserRoles();
 }

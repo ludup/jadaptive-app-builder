@@ -4,6 +4,8 @@ import com.jadaptive.utils.PasswordEncryptionType;
 
 public abstract class PasswordEnabledUser extends UserImpl {
 
+	private static final long serialVersionUID = 8159475827968045376L;
+
 	public abstract String getEncodedPassword();
 
 	public abstract void setEncodedPassword(String encodedPassword);

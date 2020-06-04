@@ -1,27 +1,30 @@
 package com.jadaptive.app.role;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.role.Role;
-import com.jadaptive.api.role.RoleRepository;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserAware;
 import com.jadaptive.app.auth.AuthenticationService;
 
 @Service
-public class RoleServiceImpl extends AuthenticatedService implements RoleService, TenantAware {
+public class RoleServiceImpl extends AuthenticatedService implements RoleService, TenantAware, UserAware {
 
 	private static final String ADMINISTRATOR_UUID = "1bfbaf16-e5af-4825-8f8a-83ce2f5bf81f";
 	private static final String EVERYONE_UUID = "c4b54f49-c478-46cc-8cfa-aaebaa4ea50f";
@@ -29,13 +32,12 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	private static final String ADMINISTRATION = "Administration";
 	
 	@Autowired
-	private RoleRepository repository; 
+	private TenantAwareObjectDatabase<Role> repository; 
 
 	@Override
 	public void initializeSystem(boolean newSchema) {
 		initializeTenant(getCurrentTenant(), newSchema);
 	}
-
 
 	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
@@ -43,7 +45,6 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		if(newSchema) {
 			setupDefaultRoles(tenant);
 		}
-
 	}
 	
 	private void setupDefaultRoles(Tenant tenant) {
@@ -69,27 +70,27 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 
 	@Override
 	public Role getAdministrationRole() {
-		return repository.get(ADMINISTRATOR_UUID);
+		return repository.get(ADMINISTRATOR_UUID, Role.class);
 	}
 	
 	@Override
 	public Role getEveryoneRole() {
-		return repository.get(EVERYONE_UUID);
+		return repository.get(EVERYONE_UUID, Role.class);
 	}
 	
 	@Override
 	public Collection<Role> getRoles(User user) {
 		
 		Set<Role> roles = new HashSet<>();
-		roles.addAll(repository.getRolesByUser(user));
-		roles.addAll(repository.getAllUserRoles());
+		roles.addAll(getRolesByUser(user));
+		roles.addAll(getAllUserRoles());
 		return roles;
 	}
 	
 	@Override
 	public Role getRoleByName(String name) {
 		assertRead(Role.RESOURCE_KEY);
-		return repository.get(SearchField.eq("name", name));
+		return repository.get(Role.class, SearchField.eq("name", name));
 	}
 	
 	@Override
@@ -224,13 +225,43 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	@Override
 	public Collection<Role> listRoles() {
 		assertRead(Role.RESOURCE_KEY);
-		return repository.list();
+		return repository.list(Role.class);
 	}
 
 
 	@Override
 	public Role getRoleByUUID(String uuid) {
-		return repository.get(uuid);
+		return repository.get(uuid, Role.class);
+	}
+
+
+	@Override
+	public void onDeleteUser(User user) {
+		
+		for(Role role : repository.iterator(Role.class)) {
+			if(role.getUsers().contains(user.getUuid())) {
+				role.getUsers().remove(user.getUuid());
+				repository.saveOrUpdate(role);
+			}
+		}
+		
+	}
+	
+	@Override
+	public Collection<Role> getRolesByUser(User user) {
+		List<Role> results = new ArrayList<>(getAllUserRoles());
+		results.addAll(repository.searchObjects(Role.class, SearchField.in("users", user.getUuid())));
+		return results;
+	}
+
+	@Override
+	public Collection<Role> getAllUserRoles() {
+		return repository.searchObjects(Role.class, SearchField.eq("allUsers", true));
+	}
+
+	@Override
+	public Iterable<Role> allRoles() {
+		return repository.iterator(Role.class);
 	}
 
 }

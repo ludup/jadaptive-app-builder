@@ -10,7 +10,7 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
-import com.jadaptive.api.role.RoleRepository;
+import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.UUIDObjectUtils;
 
@@ -18,7 +18,7 @@ import com.jadaptive.utils.UUIDObjectUtils;
 public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implements AssignableObjectDatabase<T> {
 	
 	@Autowired
-	private RoleRepository roleRepository; 
+	private RoleService roleService; 
 	
 	@Autowired
 	private TenantAwareObjectDatabase<T> objectDatabase;
@@ -39,7 +39,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	@Override
 	public Collection<T> getAssignedObjects(Class<T> resourceClass, User user) {
 		
-		Collection<Role> userRoles = roleRepository.getRolesByUser(user);
+		Collection<Role> userRoles = roleService.getRolesByUser(user);
 		return objectDatabase.searchObjects(resourceClass, 
 				SearchField.or(
 						SearchField.in("users", user.getUuid()),
@@ -65,7 +65,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	@Override
 	public T getObject(Class<T> resourceClass, User user, SearchField... fields) {
 		
-		Collection<Role> userRoles = roleRepository.getRolesByUser(user);
+		Collection<Role> userRoles = roleService.getRolesByUser(user);
 		
 		if(fields.length > 0) {
 			return objectDatabase.get(resourceClass, SearchField.and(SearchField.and(fields), 
@@ -82,7 +82,6 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	public Collection<T> getObjects(Class<T> resourceClass) {
 		return objectDatabase.list(resourceClass);
 	}
-	
-	
+
 	
 }

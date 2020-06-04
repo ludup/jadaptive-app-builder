@@ -28,7 +28,7 @@ public class Users extends AbstractTenantAwareCommand {
 	}
 
 	private void printUsers() {
-		for(User user : userService.iterateUsers()) {
+		for(User user : userService.allUsers()) {
 			console.println(user.getUsername());
 		}
 	}

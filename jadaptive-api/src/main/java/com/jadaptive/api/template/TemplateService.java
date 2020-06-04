@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 
@@ -28,6 +29,8 @@ public interface TemplateService {
 	<T extends UUIDEntity> T createObject(Map<String, Object> values, Class<T> baseClass) throws ParseException;
 
 	Collection<ObjectTemplate> children(String uuid);
+
+	Collection<ObjectTemplate> getTemplatesWithScope(ObjectScope personal);
 
 
 }

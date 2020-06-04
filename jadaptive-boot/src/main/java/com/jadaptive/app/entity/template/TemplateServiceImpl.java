@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.permissions.PermissionService;
@@ -191,6 +192,11 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 	@Override
 	public <T extends UUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
 		return DocumentHelper.convertDocumentToObject(baseClass, new Document(values));
+	}
+
+	@Override
+	public Collection<ObjectTemplate> getTemplatesWithScope(ObjectScope personal) {
+		return repository.list(SearchField.eq("scope", ObjectScope.PERSONAL.name()));
 	}
 
 }

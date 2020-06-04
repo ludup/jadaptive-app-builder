@@ -67,7 +67,7 @@ public class AssignRole extends AbstractTenantAwareCommand {
 			}
 		} else if(line.wordIndex() >= 2) {
 			// Users
-			for(User user : userService.iterateUsers()) {
+			for(User user : userService.allUsers()) {
 				candidates.add(new Candidate(user.getUsername()));
 			}
 		}

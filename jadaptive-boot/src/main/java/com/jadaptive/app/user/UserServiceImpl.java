@@ -19,6 +19,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserAware;
 import com.jadaptive.api.user.UserDatabase;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
 import com.jadaptive.api.user.UserService;
@@ -31,7 +32,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	private PermissionService permissionService; 
 	
 	@Autowired
-	ApplicationService applicationService; 
+	private ApplicationService applicationService; 
 	
 	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
 	
@@ -167,7 +168,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	}
 
 	@Override
-	public Iterable<User> iterateUsers() {
+	public Iterable<User> allUsers() {
 		
 		CompoundIterable<User> iterator = new CompoundIterable<>();
 		userDatabases.forEach((k,v)->{
@@ -193,6 +194,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		assertWrite(USER_RESOURCE_KEY);
 		assertCapability(user, UserDatabaseCapabilities.DELETE);
+		
+		for(UserAware ua : applicationService.getBeans(UserAware.class)) {
+			ua.onDeleteUser(user);
+		}
+		
 		getDatabase(user).deleteUser(user);
 	}
 

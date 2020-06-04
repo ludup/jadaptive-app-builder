@@ -47,7 +47,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			onObjectUpdated(obj);
 		} catch(Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", obj.getClass().getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -63,7 +63,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -79,7 +79,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -95,7 +95,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -111,7 +111,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -173,7 +173,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			onObjectDeleted(obj);
 		} catch(Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", obj.getClass().getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -196,7 +196,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -213,7 +213,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -229,7 +229,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -245,7 +245,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -255,7 +255,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			return db.searchCount(getCollectionName(clz), database, fields);			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -273,7 +273,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -283,7 +283,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			return db.count(getCollectionName(clz), database);			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(e.getMessage(), e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 }
