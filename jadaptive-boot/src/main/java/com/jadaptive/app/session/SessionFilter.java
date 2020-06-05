@@ -41,7 +41,7 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.auth.AuthenticationService;
 
-@WebFilter(urlPatterns = { "/*" }, dispatcherTypes = DispatcherType.REQUEST )
+@WebFilter(urlPatterns = { "/*" }, dispatcherTypes = { DispatcherType.REQUEST, DispatcherType.INCLUDE,  DispatcherType.ERROR,  DispatcherType.FORWARD,  DispatcherType.ASYNC})
 public class SessionFilter implements Filter {
 
 	static Logger log = LoggerFactory.getLogger(SessionFilter.class);
@@ -81,6 +81,10 @@ public class SessionFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest)request;
 		HttpServletResponse resp = (HttpServletResponse)response;
 		
+		log.info(req.getMethod() + " " + req.getRequestURI().toString());
+		if(req.getMethod().equals("DELETE")) {
+			log.info("");
+		}
 		tenantService.setCurrentTenant(req);
 		
 		try {

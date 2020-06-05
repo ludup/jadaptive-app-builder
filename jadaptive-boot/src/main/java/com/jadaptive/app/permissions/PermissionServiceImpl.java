@@ -17,8 +17,10 @@ import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.PropertyService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.PermissionUtils;
 import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
@@ -37,9 +39,7 @@ import io.github.classgraph.ScanResult;
 @Service
 public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements PermissionService, TenantAware {
 
-	public static final String READ = "read";
-	public static final String READ_WRITE = "readWrite";
-	
+
 	@Autowired
 	private TenantService tenantService; 
 	
@@ -48,6 +48,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Autowired
 	private PluginManager pluginManager;
+	
+	@Autowired
+	private PropertyService propertyService;
 	
 	Map<Tenant,Set<String>> tenantPermissions = new HashMap<>();
 	Map<Tenant,Map<String,Set<String>>> tenantPermissionsAlias = new HashMap<>();
@@ -87,8 +90,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Override
 	public void registerStandardPermissions(String resourceKey) {
 		
-		registerPermission(getReadPermission(resourceKey));
-		registerPermission(getReadWritePermission(resourceKey), getReadPermission(resourceKey));
+		registerPermission(PermissionUtils.getReadPermission(resourceKey));
+		registerPermission(PermissionUtils.getReadWritePermission(resourceKey), PermissionUtils.getReadPermission(resourceKey));
 	}
 	
 	@Override
@@ -212,22 +215,12 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Override
 	public void assertRead(String resourceKey) throws AccessDeniedException {
-		assertAnyPermission(getReadPermission(resourceKey));
-	}
-	
-	@Override
-	public String getReadWritePermission(String resourceKey) {
-		return String.format("%s.%s", resourceKey, READ_WRITE);
-	}
-
-	@Override
-	public String getReadPermission(String resourceKey) {
-		return String.format("%s.%s", resourceKey, READ);
+		assertAnyPermission(PermissionUtils.getReadPermission(resourceKey));
 	}
 
 	@Override 
 	public void assertReadWrite(String resourceKey) throws AccessDeniedException {
-		assertAnyPermission(getReadWritePermission(resourceKey));
+		assertAnyPermission(PermissionUtils.getReadWritePermission(resourceKey));
 	}
 	
 	@Override
@@ -365,14 +358,14 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 						w.getPlugin().getClass().getPackage().getName());
 			}
 			
-			scanForPermissions(w.getPluginClassLoader(), w.getPlugin().getClass().getPackage().getName());
+			scanForPermissions(w.getPluginClassLoader(), w.getPlugin().getClass().getPackage().getName(), newSchema);
 		}
 		
-		scanForPermissions(getClass().getClassLoader(), "com.jadaptive.app");
+		scanForPermissions(getClass().getClassLoader(), "com.jadaptive.app", newSchema);
 		
 	}
 
-	private void scanForPermissions(ClassLoader classloader, String name) {
+	private void scanForPermissions(ClassLoader classloader, String name, boolean newSchema) {
 		
 		try {
 			try (ScanResult scanResult =
@@ -389,6 +382,18 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 					for(String key : perms.keys()) {
 						registerCustomPermission(key);
 					}
+					
+					Role everyoneRole = roleService.getEveryoneRole();
+					
+					for(String permission : perms.defaultPermissions()) {
+						if(!propertyService.getBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), false)) {
+							if(!everyoneRole.getPermissions().contains(permission)) {
+								roleService.grantPermission(everyoneRole, permission);
+							}
+							propertyService.setBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), true);
+						}
+					}
+	
                 }
             }
 

@@ -154,8 +154,10 @@ public class SecurityPropertyServiceImpl implements SecurityPropertyService {
 	private Properties readPropertes(Path path) throws IOException {
 		
 		Properties properties = new Properties();
-		properties.load(Files.newInputStream(path));
-		return properties;
+		try(InputStream in = Files.newInputStream(path)) {
+			properties.load(in);
+			return properties;
+		}
 	}
 	
 	private List<Path> resolveSecurityFiles(String resourceUri, File rootFolder, Collection<ResourcePackage> packages, boolean uriOnly) {

@@ -35,6 +35,10 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	private TenantAwareObjectDatabase<Role> repository; 
 
 	@Override
+	public Integer getWeight() {
+		return Integer.MIN_VALUE;
+	}
+	@Override
 	public void initializeSystem(boolean newSchema) {
 		initializeTenant(getCurrentTenant(), newSchema);
 	}
@@ -60,7 +64,6 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		role = new Role();
 		role.setUuid(EVERYONE_UUID);
 		role.setName(EVERYONE);
-		role.setPermissions(Arrays.asList(AuthenticationService.USER_LOGIN_PERMISSION));
 		role.setSystem(true);
 		role.setAllUsers(true);
 		

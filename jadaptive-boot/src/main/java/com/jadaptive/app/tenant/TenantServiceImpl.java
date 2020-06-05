@@ -168,7 +168,17 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				}
 			}
 			
-			for(TenantAware aware : applicationService.getBeans(TenantAware.class)) {
+			List<TenantAware> awareServices = new ArrayList<>(applicationService.getBeans(TenantAware.class));
+			Collections.sort(awareServices, new Comparator<TenantAware>() {
+
+				@Override
+				public int compare(TenantAware o1, TenantAware o2) {
+					return o1.getWeight().compareTo(o2.getWeight());
+				}
+				
+			});
+			
+			for(TenantAware aware : awareServices) {
 				if(tenant.isSystem()) {
 					aware.initializeSystem(newSchema);
 				} else {

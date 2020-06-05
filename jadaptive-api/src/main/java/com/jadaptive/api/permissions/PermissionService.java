@@ -8,6 +8,9 @@ import com.jadaptive.api.user.User;
 
 public interface PermissionService {
 
+	public static final String READ = "read";
+	public static final String READ_WRITE = "readWrite";
+	
 	void assertAnyPermission(String... permissions) throws AccessDeniedException;
 
 	void assertPermission(String permission) throws AccessDeniedException;
@@ -37,10 +40,6 @@ public interface PermissionService {
 	void assertAllPermission(String... permissions);
 
 	boolean hasUserContext();
-
-	String getReadWritePermission(String resourceKey);
-
-	String getReadPermission(String resourceKey);
 
 	Set<String> resolvePermissions(User user);
 

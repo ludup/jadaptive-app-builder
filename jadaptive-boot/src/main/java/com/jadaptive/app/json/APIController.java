@@ -228,6 +228,8 @@ public class APIController extends BootstrapTableController<AbstractObject>{
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus saveEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
 
+		setupUserContext(request);
+		
 		try {
 			entityService.delete(resourceKey, uuid);
 			return new RequestStatus();

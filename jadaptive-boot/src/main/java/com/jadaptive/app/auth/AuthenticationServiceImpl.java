@@ -16,7 +16,7 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
 @Service
-@Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION })
+@Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION }, defaultPermissions = { AuthenticationService.USER_LOGIN_PERMISSION } )
 public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService {
 
 	@Autowired

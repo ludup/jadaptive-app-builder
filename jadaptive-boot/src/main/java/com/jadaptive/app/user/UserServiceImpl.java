@@ -36,6 +36,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	
 	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
 	
+	@Override
+	public Integer getWeight() {
+		return 0;
+	}
+	
 	private void loadUserDatabases() {
 		if(userDatabases.isEmpty()) {
 			for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {

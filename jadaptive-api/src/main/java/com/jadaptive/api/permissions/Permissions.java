@@ -9,5 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Permissions {
 
-	String[] keys();
+	String[] keys() default { };
+	
+	String[] defaultPermissions() default { };
 }

@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.session.Session;
@@ -16,6 +18,8 @@ import com.jadaptive.api.user.UserService;
 public class AuthenticatedController {
 
 	public static final String SESSION_SCOPE_USER = "com.jadaptive.sessionScopeUser";
+	
+	static Logger log = LoggerFactory.getLogger(AuthenticatedController.class);
 	
 	@Autowired
 	private PermissionService permissionService; 
@@ -45,6 +49,7 @@ public class AuthenticatedController {
 			if(Objects.isNull(user)) {
 				Session session = sessionUtils.getActiveSession(request);
 				if(Objects.isNull(session)) {
+					log.info(request.getMethod() + " " + request.getRequestURI().toString());
 					throw new AccessDeniedException();
 				}
 				user = userService.getUser(session.getUsername());
