@@ -345,25 +345,25 @@ public class DocumentHelper {
 
 	public static Object fromString(Class<?> type, String value) {
 		if(type.equals(boolean.class)) {
-			return Boolean.parseBoolean(value);
+			return Boolean.parseBoolean(StringUtils.defaultIfEmpty(value, "false"));
 		} else if(type.equals(Boolean.class)) {
-			return new Boolean(Boolean.parseBoolean(value));
+			return new Boolean(Boolean.parseBoolean(StringUtils.defaultIfEmpty(value, "false")));
 		} else if(type.equals(int.class)) {
-			return Integer.parseInt(value);
+			return Integer.parseInt(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Integer.class)) {
-			return new Integer(Integer.parseInt(value));
+			return new Integer(Integer.parseInt(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(long.class)) {
-			return Long.parseLong(value);
+			return Long.parseLong(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Long.class)) {
-			return new Long(Long.parseLong(value));
+			return new Long(Long.parseLong(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(float.class)) {
-			return Float.parseFloat(value);
+			return Float.parseFloat(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Float.class)) {
-			return new Float(Float.parseFloat(value));
+			return new Float(Float.parseFloat(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(double.class)) {
-			return Double.parseDouble(value);
+			return Double.parseDouble(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Double.class)) {
-			return new Double(Double.parseDouble(value));
+			return new Double(Double.parseDouble(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(Date.class)) {
 			if(StringUtils.isNotBlank(value)) {
 				return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
