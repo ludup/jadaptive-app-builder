@@ -23,4 +23,8 @@ public interface PersonalObjectDatabase<T extends PersonalUUIDEntity> {
 	void deletePersonalObject(T obj);
 
 	Iterable<T> allObjects(Class<T> resourceClass);
+	
+	Iterable<T> allObjects(Class<T> resourceClass, SearchField... searchFields);
+
+	void saveOrUpdate(T obj);
 }

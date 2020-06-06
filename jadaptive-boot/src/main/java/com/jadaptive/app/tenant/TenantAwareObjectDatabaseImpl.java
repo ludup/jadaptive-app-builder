@@ -118,8 +118,8 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public Long searchCount(Class<T> resourceClass, SearchField... fields) {
 		return searchCount(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
 	}
-	
-	public Iterable<T> iterator(Class<T> resourceClass) {
+
+	public Iterable<T> iterator(Class<T> resourceClass, SearchField... searchFields) {
 		return new Iterable<T>() {
 
 			@Override
@@ -146,7 +146,7 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 					
 					private boolean loadObjects() {
 						
-						page = new ArrayList<>(searchTable(resourceClass, start, 10));
+						page = new ArrayList<>(searchTable(resourceClass, start, 10, searchFields));
 						start += 10;
 						return !page.isEmpty();
 					}

@@ -155,11 +155,10 @@ public class Utils {
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-//		date.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return date;
 	}
 	
-	public static Date tomorrow() {
+	public static Calendar tomorrowCalendar() {
 		
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 0);
@@ -169,10 +168,20 @@ public class Utils {
 		
 		date.add(Calendar.DAY_OF_MONTH, 1);
 		
-		return date.getTime();
+		return date;
+	}
+	
+	public static Date tomorrow() {
+		return tomorrowCalendar().getTime();
 	}
 	
 	public static Date yesterday() {
+		
+		return yesterdayCalendar().getTime();
+	}
+	
+
+	public static Calendar yesterdayCalendar() {
 		
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 0);
@@ -181,8 +190,10 @@ public class Utils {
 		date.set(Calendar.MILLISECOND, 0);
 		
 		date.add(Calendar.DAY_OF_MONTH, -1);
-		return date.getTime();
+		
+		return date;
 	}
+
 
 	/**
 	 * Strip the port from a host header.
@@ -399,5 +410,4 @@ public class Utils {
 	public static List<String> fromCsv(String value) {
 		return new ArrayList<String>(Arrays.asList(value.split(",")));
 	}
-
 }

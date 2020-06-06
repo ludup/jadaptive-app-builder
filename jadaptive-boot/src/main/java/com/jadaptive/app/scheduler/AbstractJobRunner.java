@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.jobs.JobRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
@@ -93,14 +94,23 @@ public abstract class AbstractJobRunner implements Runnable {
 
 	protected void onSetupContext() { }
 	
+	protected void cancel() { }
+	
 	private void setupJobContext() {
-		tenantService.setCurrentTenant(tenantService.getTenantByUUID(tenantUUID));
-		permissionService.setupSystemContext();
 		
-		for(JobRunnerContext ctx : applicationService.getBeans(JobRunnerContext.class)) {
-			ctx.setupContext();
+		try {
+			tenantService.setCurrentTenant(tenantService.getTenantByUUID(tenantUUID));
+			permissionService.setupSystemContext();
+			
+			for(JobRunnerContext ctx : applicationService.getBeans(JobRunnerContext.class)) {
+				ctx.setupContext();
+			}
+			
+			onSetupContext();
+		
+		} catch(ObjectNotFoundException e) {
+			log.error("Tenant not found for scheduled task");
+			cancel();
 		}
-		
-		onSetupContext();
 	}
 }

@@ -177,7 +177,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		if(fields.length == 0) {
-			return collection.find().skip(start).limit(length).sort(new BasicDBObject("stars",1));
+			return collection.find().skip(start).limit(length);
 		} else {
 			return collection.find(buildFilter(fields)).skip(start).limit(length);
 		}

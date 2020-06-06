@@ -9,6 +9,7 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
@@ -18,6 +19,7 @@ import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.scheduler.CronSchedule;
+import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
@@ -36,6 +38,7 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	
 	@Autowired
 	private ApplicationService applicationService; 
+	
 	
 	Map<String,ScheduleJobRunner> scheduledJobs = new HashMap<>();
 	
@@ -59,6 +62,15 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		
 		for(CronSchedule schedule : cronDatabase.list(CronSchedule.class)) {
 			schedule(schedule.getJob(), schedule.getExpression());
+		}
+		
+		for(ScheduledTask task  : applicationService.getBeans(ScheduledTask.class)) {
+			if(task.isSystemOnly() && !tenant.isSystem()) {
+				continue;
+			}
+			TenantJobRunner job = new TenantJobRunner(tenant);
+			applicationService.autowire(job);
+			job.schedule(task);
 		}
 	}
 

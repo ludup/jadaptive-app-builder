@@ -31,10 +31,10 @@ public interface TenantAwareObjectDatabase<T extends UUIDEntity> {
 
 	Long searchCount(Class<T> resourceClass, SearchField... fields);
 
-	Iterable<T> iterator(Class<T> resourceClass);
-
 	T max(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
 
 	T min(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
+
+	Iterable<T> iterator(Class<T> resourceClass, SearchField... searchFields);
 
 }

@@ -375,7 +375,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public Tenant getTenantByUUID(String uuid) {
 		Tenant tenant = tenantsByUUID.get(uuid);
 		if(Objects.isNull(tenant)) {
-			return getSystemTenant();
+			throw new ObjectNotFoundException("Tenant does not exist for UUID");
 		}
 		return tenant;
 	}
