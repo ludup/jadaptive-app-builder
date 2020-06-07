@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -40,6 +41,8 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.auth.AuthenticationService;
+import com.jadaptive.utils.ReplacementUtils;
+import com.jadaptive.utils.StaticResolver;
 
 @WebFilter(urlPatterns = { "/*" }, dispatcherTypes = { DispatcherType.REQUEST })
 public class SessionFilter implements Filter {
@@ -229,6 +232,13 @@ public class SessionFilter implements Filter {
 							location = location.replace("$" + i, matcher.group(i));
 						}
 						
+						StaticResolver resolver = new StaticResolver();
+						resolver.addToken("version", ApplicationVersion.getVersion());
+						resolver.addToken("host", request.getHeader(HttpHeaders.HOST));
+						resolver.addToken("serverName", request.getServerName());
+						
+						
+						location = ReplacementUtils.processTokenReplacements(location, resolver);
 						cachedRedirects.put(request.getRequestURI(), location);
 						response.sendRedirect(location);
 						return true;

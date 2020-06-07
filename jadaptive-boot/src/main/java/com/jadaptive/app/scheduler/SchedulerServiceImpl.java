@@ -9,7 +9,6 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;

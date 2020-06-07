@@ -21,7 +21,6 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
-import com.jadaptive.app.auth.AuthenticationService;
 
 @Service
 public class RoleServiceImpl extends AuthenticatedService implements RoleService, TenantAware, UserAware {
@@ -38,6 +37,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	public Integer getWeight() {
 		return Integer.MIN_VALUE;
 	}
+	
 	@Override
 	public void initializeSystem(boolean newSchema) {
 		initializeTenant(getCurrentTenant(), newSchema);

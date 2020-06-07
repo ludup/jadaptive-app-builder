@@ -1,8 +1,10 @@
 package com.jadaptive.app;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.security.KeyPair;
@@ -11,7 +13,10 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Properties;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
@@ -29,6 +34,8 @@ import com.codesmith.webbits.fontawesome.FontAwesome;
 import com.codesmith.webbits.jquery.JQuery;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
+import com.jadaptive.api.x509.FileFormatException;
+import com.jadaptive.api.x509.InvalidPassphraseException;
 import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
 import com.jadaptive.app.ui.JadaptiveApp;
@@ -115,27 +122,93 @@ public class Application {
 	
 	private static void checkDefaultCertificate() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, MismatchedCertificateException {
 		
-		if(log.isInfoEnabled()) {
-			log.info(String.format("Generating keystore"));
+		
+		
+		KeyPair key = null;
+		X509Certificate[] chain = null;
+		X509Certificate cert = null;
+		File keystoreFile = new File(ApplicationProperties.getValue("server.ssl.key-store", "conf/cert.p12"));
+		File keyFile = new File(ApplicationProperties.getValue("server.ssl.private-key", "conf/key.pem"));
+		
+		if(keyFile.exists() && (!keystoreFile.exists() || keyFile.lastModified()!=keystoreFile.lastModified())) {
+			
+			if(log.isInfoEnabled()) {
+				log.info("Loading PEM private key {}", keyFile.getName());
+			}
+			
+			try(InputStream in = new FileInputStream(keyFile)) {
+				key = X509CertificateUtils.loadKeyPairFromPEM(in, 
+						ApplicationProperties.getValue("server.ssl.private-key-password", "").toCharArray());
+			} catch (InvalidPassphraseException | FileFormatException e) {
+				log.error("Failed to read PEM private key file", e);
+			}
+			
+			File chainFile = new File(ApplicationProperties.getValue("server.ssl.ca-bundle", "conf/chain.pem"));
+			if(chainFile.exists()) {
+				try(InputStream cin = new FileInputStream(chainFile)) {
+					chain = X509CertificateUtils.loadCertificateChainFromPEM(cin);
+				} catch (FileFormatException e) {
+					log.error("Failed to read PEM certificate chain file", e);
+				}
+			}
+			
+			File certFile = new File(ApplicationProperties.getValue("server.ssl.certificate", "conf/cert.pem"));
+			if(certFile.exists()) {
+				try(InputStream cin = new FileInputStream(certFile)) {
+					cert = X509CertificateUtils.loadCertificateFromPEM(cin);
+				} catch (FileFormatException e) {
+					log.error("Failed to read PEM certificate file", e);
+				}
+			}
+			
+			if(Objects.nonNull(key) && Objects.nonNull(cert)) {
+				
+				List<X509Certificate> tmp = new ArrayList<>();
+				tmp.add(cert);
+				if(Objects.nonNull(chain)) {
+					tmp.addAll(Arrays.asList(chain));
+				}
+				 
+				KeyStore ks = X509CertificateUtils.createPKCS12Keystore(key, tmp.toArray(new X509Certificate[0]), 
+						ApplicationProperties.getValue("server.ssl.key-alias", "server"), 
+						ApplicationProperties.getValue("server.ssl.key-store-password", "changeit").toCharArray());
+				
+				
+				 try (OutputStream fout = new FileOutputStream(keystoreFile)) {
+					ks.store(fout, ApplicationProperties.getValue(
+								"server.ssl.key-store-password", 
+									"changeit").toCharArray());
+				}
+				 
+
+			    keystoreFile.setLastModified(keyFile.lastModified());
+				
+			    if(log.isInfoEnabled()) {
+					log.info(String.format("Converted PEM files to keystore"));
+				}
+					
+				return;
+			}
 		}
 		
-		Properties properties = ApplicationProperties.loadPropertiesFile(new File("application.properties"));
-		
-		File certFile = new File(properties.getProperty("server.ssl.key-store", "conf/cert.p12"));
-		
-		if(!certFile.exists()) {
+		if(!keystoreFile.exists()) {
+			
+			if(log.isInfoEnabled()) {
+				log.info(String.format("Generating default certificate and keystore"));
+			}
+			
 			KeyPair kp = X509CertificateUtils.generatePrivateKey("RSA", 2048);
-			 X509Certificate cert = X509CertificateUtils.generateSelfSignedCertificate("localhost", 
+			cert = X509CertificateUtils.generateSelfSignedCertificate("localhost", 
 					 "JADAPTIVE Appplication", 
 					 "JADAPTIVE Limited", 
 					 "Penzance", "Cornwall", "GB", kp, "SHA256WithRSAEncryption");
-			 KeyStore ks = X509CertificateUtils.createPKCS12Keystore(kp, 
+			KeyStore ks = X509CertificateUtils.createPKCS12Keystore(kp, 
 					 new X509Certificate[] { cert },
-					 properties.getProperty("server.ssl.key-alias", "server"),
-					 properties.getProperty("server.ssl.key-store-password", "changeit").toCharArray());
+					 ApplicationProperties.getValue("server.ssl.key-alias", "server"),
+					 ApplicationProperties.getValue("server.ssl.key-store-password", "changeit").toCharArray());
 			 
-			 try (OutputStream fout = new FileOutputStream(certFile)) {
-				ks.store(fout, properties.getProperty(
+			 try (OutputStream fout = new FileOutputStream(keystoreFile)) {
+				ks.store(fout, ApplicationProperties.getValue(
 						"server.ssl.key-store-password", 
 							"changeit").toCharArray());
 			}

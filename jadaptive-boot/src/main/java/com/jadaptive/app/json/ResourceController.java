@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
@@ -42,6 +43,12 @@ public class ResourceController {
 	@Autowired
 	private PluginManager pluginManager; 
 	
+	@RequestMapping(value="/ping", method = RequestMethod.GET, produces = "text/plain")
+	@ResponseBody
+	public String ping(HttpServletRequest request, HttpServletResponse response) {
+		return "PONG\r\n";
+	}
+
 	@RequestMapping(value="/app/content/**", method = RequestMethod.GET)
 	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
