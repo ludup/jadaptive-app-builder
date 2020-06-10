@@ -17,7 +17,6 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.keys.AuthorizedKey;

@@ -212,7 +212,8 @@ public class DocumentHelper {
 			T obj;
 			
 			try {
-				obj = (T) classLoader.loadClass(processChanges(clz, classLoader)).newInstance();
+				clz = processChanges(clz, classLoader);
+				obj = (T) classLoader.loadClass(clz).newInstance();
 			} catch(ClassNotFoundException e) {
 				obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).newInstance();
 			}
@@ -362,7 +363,10 @@ public class DocumentHelper {
 		}
 		
 		String value = "";
-		URL url = classLoader.getResource("/classpath.changes");
+		URL url = classLoader.getResource("classpath.properties");
+		if(Objects.isNull(url)) {
+			url = DocumentHelper.class.getResource("classpath.properties");
+		}
 		if(Objects.nonNull(url)) {
 			Properties declaredChanges = new Properties();
 			try(InputStream in = url.openStream()) {
