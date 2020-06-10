@@ -5,11 +5,12 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(name = "Builtin Users", resourceKey = BuiltinUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
-public class BuiltinUser extends PasswordEnabledUser {
+public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser {
 
 	private static final long serialVersionUID = -4186606233520076592L;
 
