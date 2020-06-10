@@ -86,5 +86,4 @@ public class UnassignRole extends AbstractTenantAwareCommand {
 	private Role resolveRole(String name) {
 		return roleService.getRoleByName(name);
 	}
-
 }

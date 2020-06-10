@@ -41,4 +41,5 @@ public class DeleteUser extends UserCommand {
 		
 		console.println(String.format("The user %s has been deleted", confirmedUser.getUsername()));
 	}
+	
 }

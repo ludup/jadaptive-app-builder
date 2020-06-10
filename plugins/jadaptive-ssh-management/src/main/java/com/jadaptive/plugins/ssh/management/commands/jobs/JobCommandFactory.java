@@ -19,11 +19,11 @@ public class JobCommandFactory extends AbstractAutowiredCommandFactory implement
 	@Override
 	public CommandFactory<ShellCommand> buildFactory() throws AccessDeniedException {
 		
-		tryCommand("create-job", CreateJob.class, JobService.READ_WRITE_PERMISSION);
-		tryCommand("append-task", AppendTask.class, JobService.READ_WRITE_PERMISSION);
-		tryCommand("exec-job", ExecuteJob.class, JobService.EXECUTE_PERMISSION);
-		tryCommand("schedule-job", ScheduleJob.class, JobService.EXECUTE_PERMISSION);
-		tryCommand("cancel-job", CancelJob.class, JobService.READ_WRITE_PERMISSION);
+//		tryCommand("create-job", CreateJob.class, JobService.READ_WRITE_PERMISSION);
+//		tryCommand("append-task", AppendTask.class, JobService.READ_WRITE_PERMISSION);
+//		tryCommand("exec-job", ExecuteJob.class, JobService.EXECUTE_PERMISSION);
+//		tryCommand("schedule-job", ScheduleJob.class, JobService.EXECUTE_PERMISSION);
+//		tryCommand("cancel-job", CancelJob.class, JobService.READ_WRITE_PERMISSION);
 		
 		return this;
 	}

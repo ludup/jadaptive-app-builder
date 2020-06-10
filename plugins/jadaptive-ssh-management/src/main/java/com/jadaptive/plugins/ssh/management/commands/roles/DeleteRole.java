@@ -1,7 +1,11 @@
 package com.jadaptive.plugins.ssh.management.commands.roles;
 
 import java.io.IOException;
+import java.util.List;
 
+import org.jline.reader.Candidate;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -45,6 +49,20 @@ public class DeleteRole extends AbstractTenantAwareCommand {
 	
 	private Role resolveRole(String name) {
 		return roleService.getRoleByName(name);
+	}
+	
+	@Override
+	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+		
+		switch(line.wordIndex()) {
+		case 1:
+			for(Role role : roleService.allRoles()) {
+				candidates.add(new Candidate(role.getName()));
+			}
+			break;
+		default:
+			break;
+		}
 	}
 
 }

@@ -1,7 +1,11 @@
 package com.jadaptive.plugins.sshd.commands;
 
 import java.io.IOException;
+import java.util.List;
 
+import org.jline.reader.Candidate;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -32,11 +36,19 @@ public class DeleteKey extends AbstractTenantAwareCommand {
 	public DeleteKey() {
 		super("delete-key", 
 				"Key Management",
-				UsageHelper.build("delete-key [options] <name>",
-						"-a, --assign <user>     Delete a key assigned to another user (requires administrative or authorizedKey.assign permission"),
+				UsageHelper.build("delete-key <name>"),
 						"Delete an authorized key");
 	}
 
+	@Override
+	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+		if(line.wordIndex() == 1) {
+			for(AuthorizedKey key : authorizedKeyService.getAuthorizedKeys()) {
+				candidates.add(new Candidate(key.getName()));
+			}
+		} 
+	}
+	
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {

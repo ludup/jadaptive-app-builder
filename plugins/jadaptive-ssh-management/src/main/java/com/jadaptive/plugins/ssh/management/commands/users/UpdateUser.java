@@ -20,7 +20,7 @@ public class UpdateUser extends UserCommand {
 	private UserService userService;  
 	
 	public UpdateUser() {
-		super("update-user", "User Management", UsageHelper.build("update-user [options] <username>",
+		super("update-user", "User Management", UsageHelper.build("update-user <username> [options]",
 				"-e, --email <email>    Change the email address of the account",
 				"-n, --name  <name>     Change the full name of the account"),
 				"Update a builtin user account");

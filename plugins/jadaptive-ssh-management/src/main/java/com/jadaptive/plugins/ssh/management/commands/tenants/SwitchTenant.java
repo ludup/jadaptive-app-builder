@@ -1,7 +1,11 @@
 package com.jadaptive.plugins.ssh.management.commands.tenants;
 
 import java.io.IOException;
+import java.util.List;
 
+import org.jline.reader.Candidate;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.tenant.Tenant;
@@ -44,5 +48,15 @@ public class SwitchTenant extends AbstractTenantAwareCommand {
 
 	private Tenant resolveTenant(String name) {
 		return tenantService.getTenantByDomain(name);
+	}
+	
+	@Override
+	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+		if(line.wordIndex() == 1) {
+			// Users
+			for(Tenant tenant : tenantService.listTenants()) {
+				candidates.add(new Candidate(tenant.getDomain()));
+			}
+		} 
 	}
 }

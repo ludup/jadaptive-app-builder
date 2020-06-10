@@ -2,7 +2,11 @@ package com.jadaptive.plugins.ssh.management.commands.roles;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
+import org.jline.reader.Candidate;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.role.Role;
@@ -84,5 +88,18 @@ public class Roles extends AbstractTenantAwareCommand {
 		}
 	}
 		
+	@Override
+	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+		
+		switch(line.wordIndex()) {
+		case 2:
+			for(Role role : roleService.allRoles()) {
+				candidates.add(new Candidate(role.getName()));
+			}
+			break;
+		default:
+			break;
+		}
+	}
 
 }

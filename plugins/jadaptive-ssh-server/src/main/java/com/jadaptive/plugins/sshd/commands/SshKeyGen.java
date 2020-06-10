@@ -3,9 +3,13 @@ package com.jadaptive.plugins.sshd.commands;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.jline.reader.Candidate;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.ObjectException;
@@ -13,6 +17,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.keys.AuthorizedKey;
@@ -56,6 +61,22 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 						"Generate an authorized key");
 	}
 
+	@Override
+	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+		if(line.wordIndex() > 2) {
+			String prev = line.words().get(line.wordIndex()-1);
+			if(prev.equals("-t") || prev.equals("--type")) {
+				candidates.add(new Candidate("rsa"));
+				candidates.add(new Candidate("ecdsa"));
+				candidates.add(new Candidate("ed25519"));
+			} else if(prev.equals("-a") || prev.equals("--assign")) {
+				for(User user : userService.allUsers()) {
+					candidates.add(new Candidate(user.getUsername()));
+				}
+			}
+		} 
+	}
+	
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {

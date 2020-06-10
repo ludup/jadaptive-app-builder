@@ -22,7 +22,7 @@ public class Passwd extends UserCommand {
 	public Passwd() {
 		super("passwd", 
 				"User Management",
-				UsageHelper.build("passwd [options] <user>",
+				UsageHelper.build("passwd <user> [options]",
 						"-f, --forceChange		       Force the user to change password at next logon"),
 						"Change the current user or another users password.");
 	}

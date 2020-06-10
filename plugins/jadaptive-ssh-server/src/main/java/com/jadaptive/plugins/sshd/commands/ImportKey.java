@@ -3,7 +3,13 @@ package com.jadaptive.plugins.sshd.commands;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
+import org.jline.reader.Candidate;
+import org.jline.reader.LineReader;
+import org.jline.reader.ParsedLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.PersonalObjectDatabase;
@@ -30,6 +36,8 @@ import com.sshtools.server.vsession.VirtualConsole;
 
 public class ImportKey extends AbstractTenantAwareCommand {
 
+	static Logger log = LoggerFactory.getLogger(ImportKey.class);
+	
 	@Autowired
 	UserService userService; 
 	
@@ -42,12 +50,27 @@ public class ImportKey extends AbstractTenantAwareCommand {
 	public ImportKey() {
 		super("import-key", 
 				"Key Management",
-				UsageHelper.build("import-key [options] <filename>",
+				UsageHelper.build("import-key <filename> [options]",
 						"-n, --name   <name>      The name to assign to this key",
 						"-a, --assign <user>      Assign the key to another user (requires administrative or authorizedKey.assign permission)"),
 						"Import an authorized key");
 	}
 
+	@Override
+	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
+		if(line.wordIndex() == 1) {
+			try {
+				for(AbstractFile file : console.getCurrentDirectory().getChildren()) {
+					if(file.isFile()) {
+						candidates.add(new Candidate(file.getName()));
+					}
+				}
+			} catch (IOException | PermissionDeniedException e) {
+				log.error("Failure iterating current directory files during auto-completion", e);
+			}
+		} 
+	}
+	
 	@Override
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
@@ -71,11 +94,7 @@ public class ImportKey extends AbstractTenantAwareCommand {
 			}
 		}
 		
-		if(!CliHelper.hasOption(args, 'f', "file")) {
-			throw new IOException("-f or --file option required to import key");
-		}
-		
-		String filename = args[args.length-1];
+		String filename = args[1];
 		
 		AbstractFile f = console.getCurrentDirectory().resolveFile(filename);
 		if(!f.exists()) {
