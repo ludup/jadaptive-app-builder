@@ -135,6 +135,18 @@ public class SessionFilter implements Filter {
 			Session session = sessionUtils.getActiveSession(request);
 			Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 			
+			if(Boolean.parseBoolean(properties.getProperty("cors.enabled", "true")) 
+					&& sessionUtils.isValidCORSRequest(request)) {
+				
+				/**
+				 * Allow CORS to this realm. We must allow credentials as the
+				 * API will be useless without them.
+				 */
+				response.addHeader("Access-Control-Allow-Credentials", "true");
+				response.addHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+				
+			}
+			
 			if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))
 					&& Objects.nonNull(request.getHeader(HttpHeaders.AUTHORIZATION))) {
 				session = performBasicAuthentication(request, response);

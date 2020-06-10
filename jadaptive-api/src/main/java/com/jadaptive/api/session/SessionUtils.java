@@ -255,6 +255,7 @@ public class SessionUtils {
 			if(log.isInfoEnabled()) {
 				log.info("CORS request for origin {}", requestOrigin);
 			}
+			
 			if(origins.contains(requestOrigin)) {
 				return true;
 			}
