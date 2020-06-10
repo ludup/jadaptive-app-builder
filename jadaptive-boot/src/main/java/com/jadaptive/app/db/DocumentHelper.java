@@ -1,25 +1,32 @@
 package com.jadaptive.app.db;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
+import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
@@ -28,10 +35,10 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
@@ -39,7 +46,11 @@ import com.jadaptive.utils.Utils;
 
 public class DocumentHelper {
 
+	static Logger log = LoggerFactory.getLogger(DocumentHelper.class);
+	
 	static Set<String> builtInNames = new HashSet<>(Arrays.asList("uuid", "system", "hidden"));
+	
+	static Map<String,String> classNameChanges = new HashMap<>();
 	
 	public static String getTemplateResourceKey(Class<?> clz) {
 		ObjectDefinition template = (ObjectDefinition) clz.getAnnotation(ObjectDefinition.class);
@@ -201,7 +212,7 @@ public class DocumentHelper {
 			T obj;
 			
 			try {
-				obj = (T) classLoader.loadClass(clz).newInstance();
+				obj = (T) classLoader.loadClass(processChanges(clz, classLoader)).newInstance();
 			} catch(ClassNotFoundException e) {
 				obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).newInstance();
 			}
@@ -342,6 +353,32 @@ public class DocumentHelper {
 		}
 		
 	}
+
+	private static String processChanges(String clz, ClassLoader classLoader) {
+		
+		String change = classNameChanges.get(clz);
+		if(Objects.nonNull(change)) {
+			return StringUtils.isNotBlank(change) ? change : clz;
+		}
+		
+		String value = "";
+		URL url = classLoader.getResource("/classpath.changes");
+		if(Objects.nonNull(url)) {
+			Properties declaredChanges = new Properties();
+			try(InputStream in = url.openStream()) {
+				declaredChanges.load(in);
+			} catch(IOException e) { 
+				log.warn("Expected to load properties file for classpath.changes", e);
+			}
+			
+			value = declaredChanges.getProperty(clz, "");
+		}
+		
+		classNameChanges.put(clz, value);
+		change = classNameChanges.get(clz);
+		return StringUtils.isNotBlank(change) ? change : clz;
+	}
+
 
 	public static Object fromString(Class<?> type, String value) {
 		if(type.equals(boolean.class)) {
