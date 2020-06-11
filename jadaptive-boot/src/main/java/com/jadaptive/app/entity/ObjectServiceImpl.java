@@ -126,10 +126,12 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		try {
 			
-			Class<?> clz = classService.findClass((String)e.getValue("_clz"));
+			Class<?> clz = classService.findClass(DocumentHelper.processClassNameChanges(
+					(String)e.getValue("_clz"), classService.getClassLoader()));
+			
 			DocumentHelper.convertDocumentToObject(clz, new Document(e.getDocument()));
 			
-			entityRepository.deleteByUUID(template, uuid);
+			entityRepository.deleteByUUIDOrAltId(template, uuid);
 			
 			eventService.publishStandardEvent(EventType.DELETE, 
 					DocumentHelper.convertDocumentToObject(clz, 

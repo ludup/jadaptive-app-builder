@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.UUIDDocument;
@@ -24,6 +25,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.result.DeleteResult;
 
 @Repository
 public class DocumentDatabaseImpl implements DocumentDatabase {
@@ -147,7 +149,10 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void delete(String table, String database, SearchField... fields) {
 
 		MongoCollection<Document> collection = getCollection(table, database);
-		collection.deleteMany(buildFilter(fields));
+		DeleteResult result = collection.deleteMany(buildFilter(fields));
+		if(result.getDeletedCount() == 0) {
+			throw new ObjectException("Object not deleted!");
+		}
 	}
 	
 	@Override

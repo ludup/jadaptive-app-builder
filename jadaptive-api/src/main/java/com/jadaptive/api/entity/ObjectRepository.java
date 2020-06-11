@@ -17,7 +17,7 @@ public interface ObjectRepository {
 
 	void deleteAll(ObjectTemplate def) throws RepositoryException, ObjectException;
 
-	void deleteById(ObjectTemplate def, String value) throws RepositoryException, ObjectException;
+	void deleteByUUIDOrAltId(ObjectTemplate def, String value) throws RepositoryException, ObjectException;
 
 	String save(AbstractObject entity) throws RepositoryException, ObjectException;
 

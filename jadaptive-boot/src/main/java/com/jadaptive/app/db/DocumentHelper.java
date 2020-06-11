@@ -212,7 +212,7 @@ public class DocumentHelper {
 			T obj;
 			
 			try {
-				clz = processChanges(clz, classLoader);
+				clz = processClassNameChanges(clz, classLoader);
 				obj = (T) classLoader.loadClass(clz).newInstance();
 			} catch(ClassNotFoundException e) {
 				obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).newInstance();
@@ -355,7 +355,7 @@ public class DocumentHelper {
 		
 	}
 
-	private static String processChanges(String clz, ClassLoader classLoader) {
+	public static String processClassNameChanges(String clz, ClassLoader classLoader) {
 		
 		String change = classNameChanges.get(clz);
 		if(Objects.nonNull(change)) {

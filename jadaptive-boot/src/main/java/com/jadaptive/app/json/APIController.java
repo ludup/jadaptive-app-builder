@@ -226,7 +226,22 @@ public class APIController extends BootstrapTableController<AbstractObject>{
 	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus saveEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
+	public RequestStatus delete(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
+
+		setupUserContext(request);
+		
+		try {
+			entityService.delete(resourceKey, uuid);
+			return new RequestStatus();
+		} catch (Throwable e) {
+			return handleException(e, "DELETE", resourceKey);
+		}
+	}
+	
+	@RequestMapping(value="/app/api/{resourceKey}/{name}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus delete(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String name, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
 
 		setupUserContext(request);
 		

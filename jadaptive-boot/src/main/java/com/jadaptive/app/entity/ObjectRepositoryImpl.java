@@ -99,12 +99,12 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 	
 	@Override
-	public void deleteById(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
+	public void deleteByUUIDOrAltId(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
 		List<SearchField> search = new ArrayList<>();
 		search.add(SearchField.eq("uuid", value));
 		for(FieldTemplate field : def.getFields()) {
 			if(field.isAlternativeId()) {
-				search.add(SearchField.eq(field.getResourceKey(), value));
+				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
 			}
 		}
 		db.delete(def.getResourceKey(), tenantService.getCurrentTenant().getUuid(), 
