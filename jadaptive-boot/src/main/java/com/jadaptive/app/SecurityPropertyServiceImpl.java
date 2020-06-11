@@ -54,9 +54,6 @@ public class SecurityPropertyServiceImpl implements SecurityPropertyService {
 	public Properties resolveSecurityProperties(String resourceUri, boolean uriOnly) throws FileNotFoundException {
 		
 		Tenant tenant = tenantService.getCurrentTenant();
-		
-		resourceUri = resourceUri.replaceFirst("/app/", "");
-		
 		List<Path> securityProperties = new ArrayList<>();
 		
 		

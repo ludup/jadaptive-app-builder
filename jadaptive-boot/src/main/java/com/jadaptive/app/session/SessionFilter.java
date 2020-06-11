@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
@@ -133,24 +134,34 @@ public class SessionFilter implements Filter {
 			Request.setUp(request, response);
 			
 			Session session = sessionUtils.getActiveSession(request);
+			
+			/**
+			 * Get the security.properties hierarchy from the web application
+			 */
 			Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 			
-			if(Boolean.parseBoolean(properties.getProperty("cors.enabled", "true")) 
-					&& sessionUtils.isValidCORSRequest(request)) {
-				
-				/**
-				 * Allow CORS to this realm. We must allow credentials as the
-				 * API will be useless without them.
-				 */
-				response.addHeader("Access-Control-Allow-Credentials", "true");
-				response.addHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-				
-			}
-			
+			/**
+			 * Check if we have a valid CORS request
+			 */
+			boolean validCORS = sessionUtils.isValidCORSRequest(request, response, properties);		
+					
 			if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))
 					&& Objects.nonNull(request.getHeader(HttpHeaders.AUTHORIZATION))) {
 				session = performBasicAuthentication(request, response);
 			}
+			
+			/**
+			 * If the request is not a valid CORS then check we have valid CSRF token in the request.
+			 * 
+			 * THIS IS CURRENTLY DISABLED AS THE UI IS INCOMPLETE
+			 */
+			/**
+			if(Objects.nonNull(session) && !validCORS 
+					&& (ApplicationProperties.getValue("security.enableCSRFProtection", true) || 
+							Boolean.parseBoolean(properties.getProperty("security.enableCSRFProtection", "true")))) {
+				sessionUtils.verifySameSiteRequest(request, response, session);
+			}**/
+			
 			
 			if(Objects.isNull(session) && Boolean.parseBoolean(properties.getProperty("authentication.allowAnonymous", "false"))) {
 				permissionService.setupSystemContext();

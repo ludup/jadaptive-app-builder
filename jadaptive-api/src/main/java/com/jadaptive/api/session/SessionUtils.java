@@ -1,11 +1,13 @@
 package com.jadaptive.api.session;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -17,9 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationProperties;
+import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.user.User;
+import com.jadaptive.utils.Utils;
 
 @Component
 public class SessionUtils {
@@ -42,7 +46,10 @@ public class SessionUtils {
 	
 	@Autowired
 	private PermissionService permissionService; 
-	 
+	
+	@Autowired
+	private SecurityPropertyService securityService; 
+	
 	public void setUser(User user) {
 		threadUsers.set(user);
 	}
@@ -110,12 +117,6 @@ public class SessionUtils {
 	public Session touchSession(HttpServletRequest request,
 			HttpServletResponse response) throws UnauthorizedException,
 			SessionTimeoutException {
-		return touchSession(request, response, true);
-	}
-	
-	public Session touchSession(HttpServletRequest request,
-			HttpServletResponse response, boolean performCsrfCheck) throws UnauthorizedException,
-			SessionTimeoutException {
 
 		Session session = null;
 		
@@ -141,9 +142,7 @@ public class SessionUtils {
 			}
 		}
 
-		if(performCsrfCheck) {
-			verifySameSiteRequest(request, session);
-		}
+
 		// Preserve the session for future lookups in this request and session
 		request.setAttribute(AUTHENTICATED_SESSION, session);
 		request.getSession().setAttribute(AUTHENTICATED_SESSION, session);
@@ -200,18 +199,10 @@ public class SessionUtils {
 
 		throw new UnauthorizedException();
 	}
-	
-	private void verifySameSiteRequest(HttpServletRequest request, Session session) throws UnauthorizedException {
-		
 
-		if(isValidCORSRequest(request)) {
-			return;
-		}
-		
-		if(!ApplicationProperties.getValue("security.enableCSRFProtection", true)) {
-			return;
-		}
-		
+	
+	public void verifySameSiteRequest(HttpServletRequest request,HttpServletResponse response, Session session) throws UnauthorizedException {
+				
 		String requestToken = request.getHeader("X-Csrf-Token");
 		if(requestToken==null) {
 			requestToken = request.getParameter("token");
@@ -244,23 +235,54 @@ public class SessionUtils {
 		}
 	}
 
-	public boolean isValidCORSRequest(HttpServletRequest request) {
+	public boolean isValidCORSRequest(HttpServletRequest request, HttpServletResponse response, Properties properties) {
 		
 		String requestOrigin = request.getHeader("Origin");
 		
+		if(Objects.nonNull(requestOrigin) && log.isInfoEnabled()) {
+			log.info("CORS request for origin {}", requestOrigin);
+		} else if(Objects.isNull(requestOrigin)) {
+			return false;
+		}
+		
+		boolean pathAllowsCORS = Boolean.parseBoolean(properties.getProperty("cors.enabled", "true"));
+		if(!pathAllowsCORS) {
+			if(log.isInfoEnabled()) {
+				log.info("Security properties of URI {} explicitly deny CORS", request.getRequestURI());
+			}
+			return false;
+		}
+		
+		List<String> origins = Arrays.asList(properties.getProperty("cors.origins", "").split(","));
+		
+		if(origins.size() > 0 && log.isInfoEnabled()) {
+			log.info("Security properties allows origins {}", Utils.csv(origins));
+		}
+		
 		if(ApplicationProperties.getValue("cors.enabled", false) && !Objects.isNull(requestOrigin)) {
 			
-			List<String> origins = Arrays.asList(ApplicationProperties.getValue("cors.origins", "").split(","));
-		
-			if(log.isInfoEnabled()) {
-				log.info("CORS request for origin {}", requestOrigin);
-			}
+			List<String> tmp = Arrays.asList(ApplicationProperties.getValue("cors.origins", "").split(","));
+			if(tmp.size() > 0 && log.isInfoEnabled()) {
+				log.info("Global configuration allows origins {}", Utils.csv(tmp));
+			}	
 			
-			if(origins.contains(requestOrigin)) {
-				return true;
-			}
+			origins.addAll(tmp);
 		}
 
+		if(origins.contains(requestOrigin)) {
+			if(log.isInfoEnabled()) {
+				log.info("Origin {} allowed for URI {}", requestOrigin, request.getRequestURI());
+			}
+			/**
+			 * Allow CORS to this realm. We must allow credentials as the
+			 * API will be useless without them.
+			 */
+			response.addHeader("Access-Control-Allow-Credentials", "true");
+			response.addHeader("Access-Control-Allow-Origin", requestOrigin);
+			
+			return true;
+		}
+		
 		return false;
 	}
 
