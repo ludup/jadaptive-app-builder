@@ -283,8 +283,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			return;
 		}
 		
-		if(log.isInfoEnabled()) {
-			log.info("User {} denied permission from permission set {}", 
+		if(log.isDebugEnabled()) {
+			log.debug("User {} denied permission from permission set {}", 
 					user.getUsername(), 
 					StringUtils.defaultIfBlank(Utils.csv(resolvedPermissions), "<empty>"));
 		}
