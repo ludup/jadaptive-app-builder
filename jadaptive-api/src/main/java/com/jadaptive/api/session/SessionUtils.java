@@ -1,6 +1,5 @@
 package com.jadaptive.api.session;
 
-import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationProperties;
-import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.user.User;
@@ -46,9 +44,6 @@ public class SessionUtils {
 	
 	@Autowired
 	private PermissionService permissionService; 
-	
-	@Autowired
-	private SecurityPropertyService securityService; 
 	
 	public void setUser(User user) {
 		threadUsers.set(user);

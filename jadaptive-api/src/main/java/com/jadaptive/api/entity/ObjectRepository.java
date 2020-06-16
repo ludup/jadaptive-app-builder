@@ -9,7 +9,7 @@ import com.jadaptive.api.user.User;
 
 public interface ObjectRepository {
 
-	Collection<AbstractObject> list(ObjectTemplate def, SearchField... fields) throws RepositoryException, ObjectException;
+	Iterable<AbstractObject> list(ObjectTemplate def, SearchField... fields) throws RepositoryException, ObjectException;
 
 	AbstractObject getById(ObjectTemplate def, String uuid) throws RepositoryException, ObjectException;
 

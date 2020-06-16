@@ -1,7 +1,6 @@
 package com.jadaptive.api.scheduler;
 
 import java.time.Instant;
-import java.util.Collection;
 
 import com.jadaptive.api.jobs.Job;
 
@@ -15,11 +14,13 @@ public interface SchedulerService {
 
 	void cancelSchedule(CronSchedule schedule);
 
-	Collection<CronSchedule> getJobSchedules(Job job);
+	Iterable<CronSchedule> getJobSchedules(Job job);
 
 	void runNow(Job job);
 
 	void run(Job job, Instant startTime);
+
+	long getJobSchedulesCount(Job job);
 
 
 }

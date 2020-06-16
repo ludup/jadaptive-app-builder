@@ -9,6 +9,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Trigger Mapping", resourceKey = TriggerMapping.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class TriggerMapping extends UUIDEntity {
 
+	private static final long serialVersionUID = 5441807182444804328L;
+
 	public static final String RESOURCE_KEY = "triggerMapping";
 	
 	public TriggerMapping() {	

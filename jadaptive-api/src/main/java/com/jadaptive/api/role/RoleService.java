@@ -36,7 +36,7 @@ public interface RoleService {
 
 	void deleteRole(Role role);
 
-	Collection<Role> listRoles();
+	Iterable<Role> listRoles();
 
 	Role getRoleByUUID(String roleUUID);
 

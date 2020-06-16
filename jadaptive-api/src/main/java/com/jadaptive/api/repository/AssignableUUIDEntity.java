@@ -5,6 +5,8 @@ import java.util.HashSet;
 
 public abstract class AssignableUUIDEntity extends AbstractUUIDEntity {
 
+	private static final long serialVersionUID = -5734236381558890213L;
+	
 	Collection<String> roles = new HashSet<>();
 	Collection<String> users = new HashSet<>();
 	

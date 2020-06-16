@@ -1,12 +1,22 @@
 package com.jadaptive.api.template;
 
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 
+@ObjectDefinition(name = "Validator", resourceKey = FieldValidator.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT)
 public class FieldValidator extends AbstractUUIDEntity {
 
-	public static final String RESOURCE_KEY = "fieldValidator";
+	private static final long serialVersionUID = 5940642806418577079L;
+
+	public static final String RESOURCE_KEY = "fieldValidators";
 	
+	@ObjectField(name = "Type", description = "The validator type",
+			type = FieldType.ENUM, required = true)
 	ValidationType type;
+	
+	@ObjectField(name = "Value", description = "The validator value",
+			type = FieldType.TEXT, required = true)
 	String value;
 	
 	public FieldValidator() {

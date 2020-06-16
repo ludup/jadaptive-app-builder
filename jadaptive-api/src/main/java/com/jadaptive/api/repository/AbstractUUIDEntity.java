@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(value = { "_clz" })
 public abstract class AbstractUUIDEntity extends UUIDEntity {
 
+	private static final long serialVersionUID = -1903178803319512374L;
+	
 	Date created;
 	Date lastModified;
 

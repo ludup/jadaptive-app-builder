@@ -8,6 +8,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Redirects", resourceKey =  Redirect.RESOURCE_KEY)
 public class Redirect extends UUIDEntity {
 
+	private static final long serialVersionUID = 3127030622719884860L;
+
 	public static final String RESOURCE_KEY = "redirects";
 	
 	@ObjectField(name = "Path", description = "The path to redirect", required = true, searchable = true, type = FieldType.TEXT)

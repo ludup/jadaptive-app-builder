@@ -7,23 +7,80 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
+@ObjectDefinition(name = "Field", resourceKey = FieldTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT)
 public class FieldTemplate extends NamedUUIDEntity {
+
+	private static final long serialVersionUID = -9164781667373808388L;
+
+	public static final String RESOURCE_KEY = "objectFields";
 	
+	@ObjectField(name = "Resource Key",
+			description = "The identifier for this template",
+			type = FieldType.TEXT, required = true)
 	String resourceKey;
+	
+	@ObjectField(name = "Default Value",
+			description = "The default value of this field",
+			type = FieldType.TEXT)
 	String defaultValue;
+	
+	@ObjectField(name = "Description",
+			description = "The description of this field",
+			type = FieldType.TEXT)
 	String description;
+	
+	@ObjectField(name = "Type",
+			description = "The type of this field",
+			type = FieldType.ENUM, required = true)
 	FieldType fieldType; 
+	
+	@ObjectField(name = "Collection",
+			description = "Indicates if this field contains a collection of the field type",
+			type = FieldType.BOOL)
 	boolean collection;
+	
+	@ObjectField(name = "Required",
+			description = "Indicates if this field is required to be present in data",
+			type = FieldType.BOOL)
 	boolean required;
+	
+	@ObjectField(name = "Encrypted",
+			description = "Indicates if this field should be encrypted in storage",
+			type = FieldType.BOOL)
 	boolean encrypted;
+	
+	@ObjectField(name = "Searchable",
+			description = "Indicates if this field should be searchable",
+			type = FieldType.BOOL)
 	boolean searchable;
+	
+	@ObjectField(name = "Unique",
+			description = "Indicates if this field should be unique",
+			type = FieldType.BOOL)
 	boolean unique;
+	
+	@ObjectField(name = "Text Index",
+			description = "Indicates if this field should be the text index for the template",
+			type = FieldType.BOOL)
 	boolean textIndex;
+	
+	@ObjectField(name = "Text Index",
+			description = "Indicates if this field is read-only after creation",
+			type = FieldType.BOOL)
 	boolean readOnly;
+	
+	@ObjectField(name = "Alternative ID",
+			description = "Indicates if this field is an alternative identifier for the template",
+			type = FieldType.BOOL)
 	boolean alternativeId;
 	
+	@ObjectField(name = "Validators",
+			description = "A set of validators that will be applied to the field",
+			type = FieldType.OBJECT_EMBEDDED, references = FieldValidator.RESOURCE_KEY)
 	Collection<FieldValidator> validators = new ArrayList<>();
 	
 	public FieldTemplate() {

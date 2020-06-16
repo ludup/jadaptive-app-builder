@@ -2,7 +2,11 @@ package com.jadaptive.api.user;
 
 import java.io.Serializable;
 
-public interface User extends Serializable {
+import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.ObjectUUIDBean;
+
+@ObjectUUIDBean(bean = UserService.class)
+public interface User extends Serializable, UUIDDocument {
 	
 	String getUuid();
 	

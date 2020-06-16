@@ -14,9 +14,9 @@ public interface TemplateService {
 	ObjectTemplate get(String uuid)
 			throws RepositoryException, ObjectException;
 
-	Collection<ObjectTemplate> list() throws RepositoryException, ObjectException;
+	Iterable<ObjectTemplate> list() throws RepositoryException, ObjectException;
 	
-	Collection<ObjectTemplate> singletons() throws RepositoryException, ObjectException;
+	Iterable<ObjectTemplate> singletons() throws RepositoryException, ObjectException;
 	
 	Collection<ObjectTemplate> table(String searchField, String searchValue, String order, int start, int length) throws RepositoryException, ObjectException;
 
@@ -28,9 +28,9 @@ public interface TemplateService {
 
 	<T extends UUIDEntity> T createObject(Map<String, Object> values, Class<T> baseClass) throws ParseException;
 
-	Collection<ObjectTemplate> children(String uuid);
+	Iterable<ObjectTemplate> children(String uuid);
 
-	Collection<ObjectTemplate> getTemplatesWithScope(ObjectScope personal);
+	Iterable<ObjectTemplate> getTemplatesWithScope(ObjectScope personal);
 
 
 }

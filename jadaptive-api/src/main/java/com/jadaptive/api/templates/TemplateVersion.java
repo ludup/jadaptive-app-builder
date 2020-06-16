@@ -13,6 +13,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Template Version", resourceKey = TemplateVersion.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class TemplateVersion extends AbstractUUIDEntity {
 
+	private static final long serialVersionUID = -6308059064398663312L;
+
 	public static final String RESOURCE_KEY = "templateVersion";
 
 	@ObjectField(name = "Version", 

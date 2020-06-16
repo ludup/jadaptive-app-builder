@@ -1,7 +1,5 @@
 package com.jadaptive.api.templates;
 
-import java.util.Collection;
-
 import com.jadaptive.api.db.AbstractObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
@@ -15,6 +13,6 @@ public interface TemplateVersionRepository extends AbstractObjectDatabase {
 
 	void save(TemplateVersion version) throws RepositoryException, ObjectException;
 
-	Collection<TemplateVersion> list() throws RepositoryException, ObjectException;
+	Iterable<TemplateVersion> list() throws RepositoryException, ObjectException;
 
 }

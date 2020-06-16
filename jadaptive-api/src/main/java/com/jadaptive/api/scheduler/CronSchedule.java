@@ -12,6 +12,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Cron Schedule", resourceKey = CronSchedule.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class CronSchedule extends AbstractUUIDEntity {
 
+	private static final long serialVersionUID = -3022610943013191464L;
+
 	public static final String RESOURCE_KEY = "cronSchedules";
 	
 	@ObjectField(name = "Cron Expression", 

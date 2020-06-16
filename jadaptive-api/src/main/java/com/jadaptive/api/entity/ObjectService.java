@@ -10,7 +10,7 @@ public interface ObjectService {
 
 	AbstractObject getSingleton(String resourceKey) throws RepositoryException, ObjectException;
 
-	Collection<AbstractObject> list(String resourceKey) throws RepositoryException, ObjectException;
+	Iterable<AbstractObject> list(String resourceKey) throws RepositoryException, ObjectException;
 
 	String saveOrUpdate(AbstractObject entity) throws RepositoryException, ObjectException;
 

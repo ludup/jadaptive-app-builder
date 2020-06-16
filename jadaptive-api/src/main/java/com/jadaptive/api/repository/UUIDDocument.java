@@ -1,6 +1,8 @@
 package com.jadaptive.api.repository;
 
-public interface UUIDDocument {
+import java.io.Serializable;
+
+public interface UUIDDocument extends Serializable {
 
 	public String getUuid();
 	

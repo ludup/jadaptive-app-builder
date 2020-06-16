@@ -7,6 +7,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Task Result", recurse = false, resourceKey = "taskResult", type = ObjectType.OBJECT)
 public class TaskResult extends CustomEvent {
 
+	private static final long serialVersionUID = 5269923561715448655L;
+
 	public TaskResult(String resourceKey, Throwable e) {
 		super(resourceKey, e);
 	}

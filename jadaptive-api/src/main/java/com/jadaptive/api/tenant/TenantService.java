@@ -1,14 +1,13 @@
 package com.jadaptive.api.tenant;
 
-import java.util.Collection;
-
 import javax.servlet.http.HttpServletRequest;
 
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocumentService;
 
-public interface TenantService {
+public interface TenantService extends UUIDDocumentService {
 
 	public static final String SYSTEM_UUID = "4f1b781c-581d-474f-9505-4fea9c5e3909";
 	
@@ -18,7 +17,7 @@ public interface TenantService {
 
 	void clearCurrentTenant();
 
-	Collection<Tenant> listTenants();
+	Iterable<Tenant> listTenants();
 
 	Tenant getSystemTenant() throws RepositoryException, ObjectException;
 

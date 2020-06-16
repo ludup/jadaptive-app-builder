@@ -9,7 +9,7 @@ import com.jadaptive.api.repository.RepositoryException;
 
 public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
 
-	Collection<T> list() throws RepositoryException, ObjectException;
+	
 
 	T get(String uuid) throws RepositoryException, ObjectException;
 	
@@ -25,7 +25,9 @@ public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity>
 
 	void delete(T obj) throws RepositoryException, ObjectException;
 
-	Collection<T> list(SearchField... fields);
+	Iterable<T> list() throws RepositoryException, ObjectException;
+	
+	Iterable<T> list(SearchField... fields);
 	
 	Class<T> getResourceClass();
 

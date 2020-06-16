@@ -13,7 +13,6 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserService;
 
 public class AuthenticatedController {
 
@@ -29,9 +28,6 @@ public class AuthenticatedController {
 	
 	@Autowired
 	private SessionUtils sessionUtils;
-	
-	@Autowired
-	private UserService userService; 
 	
 	protected Tenant getCurrentTenant() {
 		return tenantService.getCurrentTenant();
@@ -52,7 +48,7 @@ public class AuthenticatedController {
 					log.info(request.getMethod() + " " + request.getRequestURI().toString());
 					throw new AccessDeniedException();
 				}
-				user = userService.getUser(session.getUsername());
+				user = session.getUser();
 			}
 		}
 		

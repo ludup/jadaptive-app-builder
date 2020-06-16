@@ -2,6 +2,8 @@ package com.jadaptive.api.repository;
 
 public abstract class UUIDEntity implements UUIDDocument {
 
+	private static final long serialVersionUID = 4463484601829889960L;
+	
 	String uuid;
 	Boolean system;
 	Boolean hidden;

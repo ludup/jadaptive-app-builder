@@ -15,4 +15,6 @@ public interface SessionService {
 
 	Session getSession(String uuid);
 
+	Iterable<Session> iterateSessions();
+
 }

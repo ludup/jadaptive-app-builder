@@ -2,21 +2,53 @@ package com.jadaptive.api.session;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.user.User;
 
+@ObjectDefinition(name = "Sessions", resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL)
 public class Session extends AbstractUUIDEntity {
 
-	public static final String RESOURCE_KEY = "session";
+	private static final long serialVersionUID = -3842259533277443038L;
+
+	public static final String RESOURCE_KEY = "sessions";
 	
+	@ObjectField(name = "Remote Address", description = "The remote IP address of the user", 
+			type = FieldType.TEXT, required = true)
 	String remoteAddress;
+	
+	@ObjectField(name = "Last Updated", description = "The timestamp that this session was last updated", 
+			type = FieldType.TIMESTAMP, required = true)
 	Date lastUpdated;
+	
+	@ObjectField(name = "Signed In", description = "The timestamp when this session was created", 
+			type = FieldType.TIMESTAMP, required = true)
 	Date signedIn;
+	
+	@ObjectField(name = "Signed Out", description = "The timestamp when this session signed out", 
+			type = FieldType.TIMESTAMP)
 	Date signedOut;
+	
+	@ObjectField(name = "Tenant", description = "The tenant of this session", 
+			type = FieldType.OBJECT_REFERENCE, references = Tenant.RESOURCE_KEY)
 	Tenant tenant;
+	
+	@ObjectField(name = "User Agent", description = "The user agent used for this session", 
+			type = FieldType.TEXT, required = true)
 	String userAgent;
+	
+	@ObjectField(name = "Session Timeout", description = "The session timeout applied to this session", 
+			type = FieldType.INTEGER, required = true)
 	Integer sessionTimeout;
-	String username;
+	
+	@ObjectField(name = "User", description = "The user for this session", 
+			type = FieldType.OBJECT_REFERENCE, required = true)
+	User user;
+	
 	String csrfToken; 
 	
 	public Session() {
@@ -91,12 +123,12 @@ public class Session extends AbstractUUIDEntity {
 		this.sessionTimeout = sessionTimeout;
 	}
 
-	public String getUsername() {
-		return username;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public String getCsrfToken() {

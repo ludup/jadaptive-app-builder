@@ -14,6 +14,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Event", resourceKey = "events", type = ObjectType.COLLECTION)
 public class CustomEvent extends UUIDEntity {
 
+	private static final long serialVersionUID = -5647655839475687686L;
+
 	@ObjectField(name = "Resource Key", 
 			description = "The identifier of this event", 
 			searchable = true,

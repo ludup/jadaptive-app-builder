@@ -17,5 +17,5 @@ public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> {
 
 	T getObject(Class<T> resourceClass, User user, SearchField... fields);
 
-	Collection<T> getObjects(Class<T> class1);
+	Iterable<T> getObjects(Class<T> class1);
 }

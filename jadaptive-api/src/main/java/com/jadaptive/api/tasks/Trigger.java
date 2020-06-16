@@ -12,6 +12,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Trigger", resourceKey = Trigger.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class Trigger extends UUIDEntity {
 
+	private static final long serialVersionUID = -8047595311868714763L;
+
 	public static final String RESOURCE_KEY = "trigger";
 	
 	@ObjectField(name = "Trigger Type", description = "When to trigger the tasks", type = FieldType.ENUM)

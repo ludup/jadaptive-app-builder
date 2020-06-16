@@ -8,7 +8,7 @@ import com.jadaptive.api.repository.UUIDEntity;
 
 public interface TenantAwareObjectDatabase<T extends UUIDEntity> {
 
-	Collection<T> list(Class<T> resourceClass, SearchField...fields);
+	Iterable<T> list(Class<T> resourceClass, SearchField...fields);
 
 	T get(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException;
 	
@@ -23,7 +23,7 @@ public interface TenantAwareObjectDatabase<T extends UUIDEntity> {
 	Collection<T> table(String searchField, String searchValue, String order, int start, int length,
 			Class<T> resourceClass);
 
-	long count(Class<T> resourceClass);
+	long count(Class<T> resourceClass, SearchField... fields);
 
 	Collection<T> searchTable(Class<T> resourceClass, int start, int length, SearchField... fields);
 
@@ -34,7 +34,5 @@ public interface TenantAwareObjectDatabase<T extends UUIDEntity> {
 	T max(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
 
 	T min(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
-
-	Iterable<T> iterator(Class<T> resourceClass, SearchField... searchFields);
 
 }
