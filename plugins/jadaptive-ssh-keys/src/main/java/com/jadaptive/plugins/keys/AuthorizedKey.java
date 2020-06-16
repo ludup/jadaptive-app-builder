@@ -106,6 +106,10 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 	}
 	
 	public String getKeyType() {
+		
+		/**
+		 * TODO change this to store
+		 */
 		if(tags.contains(AuthorizedKeyService.SYSTEM_TAG)) {
 			return AuthorizedKeyService.SYSTEM_TAG;
 		}
