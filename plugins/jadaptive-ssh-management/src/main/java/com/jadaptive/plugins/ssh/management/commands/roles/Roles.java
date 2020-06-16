@@ -1,7 +1,6 @@
 package com.jadaptive.plugins.ssh.management.commands.roles;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 import org.jline.reader.Candidate;
@@ -72,7 +71,7 @@ public class Roles extends AbstractTenantAwareCommand {
 		}
 	}
 	
-	private void printRoles(Collection<Role> roles) {
+	private void printRoles(Iterable<Role> roles) {
 		for(Role role : roles) {
 			console.println(role.getName());
 		}

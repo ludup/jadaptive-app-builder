@@ -11,6 +11,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "SMTP Configuration", resourceKey = SMTPConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
 public class SMTPConfiguration extends SingletonUUIDEntity {
 
+	private static final long serialVersionUID = -2175601630716215887L;
+
 	public static final String RESOURCE_KEY = "smtpConfiguration";
 	
 	@ObjectField(name = "Enabled", defaultValue="false", description = "Enable the SMTP email service", type = FieldType.BOOL)

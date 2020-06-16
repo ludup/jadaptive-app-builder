@@ -11,6 +11,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Messages", resourceKey = Message.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class Message extends NamedUUIDEntity {
 
+	private static final long serialVersionUID = 2912430699573395419L;
+
 	public static final String RESOURCE_KEY = "messages";
 	
 	@ObjectField(name = "Message Group", description = "The group of messages this belongs to", 

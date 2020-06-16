@@ -8,10 +8,10 @@ import java.util.UUID;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.PersonalUUIDEntity;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Table;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.Table;
 import com.jadaptive.api.template.UniqueIndex;
 
 
@@ -23,6 +23,8 @@ import com.jadaptive.api.template.UniqueIndex;
 @UniqueIndex(columns = { "ownerUUID", "name" })
 @Table(defaultColumns = { "name", "fingerprint", "type" }, optionalColumns = { "id" })
 public class AuthorizedKey extends PersonalUUIDEntity {
+
+	private static final long serialVersionUID = 9215617764035887442L;
 
 	public static final String RESOURCE_KEY = "authorizedKeys";
 	

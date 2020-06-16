@@ -27,6 +27,7 @@ import com.sshtools.common.files.AbstractFileFactory;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
+import com.sshtools.common.nio.SshEngineContext;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.policy.ClassLoaderPolicy;
 import com.sshtools.common.policy.FileFactory;
@@ -92,6 +93,10 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			
 			addInterface(extenalAccess ? "::" : "::1", port);
 
+			for(SshInterface iface : appContext.getBeans(SshInterface.class)) {
+				addInterface(iface.getAddressToBind(),  iface.getPort(), iface.getContextFactory());
+			}
+			
 			start(true);
 		} catch (IOException e) {
 			log.error("SSHD service failed to start", e);
@@ -114,6 +119,12 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			}
 			
 		});
+	}
+	
+	@Override
+	public SshServerContext createContext(SshEngineContext daemonContext, SocketChannel sc)
+			throws IOException, SshException {
+		return createServerContext(daemonContext, sc);
 	}
 	
 	@Override

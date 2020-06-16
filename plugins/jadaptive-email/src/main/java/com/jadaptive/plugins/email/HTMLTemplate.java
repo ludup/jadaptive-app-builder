@@ -9,6 +9,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "HTML Templates", resourceKey = HTMLTemplate.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class HTMLTemplate extends NamedUUIDEntity {
 
+	private static final long serialVersionUID = 1070995818848710214L;
+
 	public static final String RESOURCE_KEY = "htmlTemplates";
 	
 	@ObjectField(name = "HTML", description = "The HTML content of this template", required = true, type = FieldType.TEXT)

@@ -67,7 +67,7 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Bui
 
 	@Override
 	public Iterable<User> iterateUsers() {
-		return new UserIterable(objectDatabase.iterator(BuiltinUser.class));
+		return new UserIterable(objectDatabase.list(BuiltinUser.class));
 	}
 	
 	class UserIterable implements Iterable<User> {

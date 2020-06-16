@@ -1,7 +1,6 @@
 package com.jadaptive.plugins.ssh.management.commands.jobs;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,10 +40,16 @@ public class CancelJob extends AbstractTenantAwareCommand {
 		String name = args[1];
 				
 		Job job = jobService.getJob(name);
-		Collection<CronSchedule> schedules = schedulerService.getJobSchedules(job);
-		if(schedules.isEmpty()) {
+		long count = schedulerService.getJobSchedulesCount(job);
+	
+		if(count==0) {
 			console.println(String.format("There are no schedules for job %s", name));
-		} else if(schedules.size()==1) {
+			return;
+		}
+		
+		Iterable<CronSchedule> schedules = schedulerService.getJobSchedules(job);
+		
+		if(count==1) {
 			CronSchedule cs = schedules.iterator().next();
 			String resp = console.readLine(String.format("Cancel job %s with schedule %s (y/n): ", name, cs.getExpression()));
 			if(resp.toLowerCase().contains("y")) {
