@@ -12,6 +12,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Test String Collections", resourceKey = TestStringCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class TestStringCollections extends AbstractUUIDEntity {
 
+	private static final long serialVersionUID = -222634087659887670L;
+
 	public static final String RESOURCE_KEY = "testStringCollections";
 	
 	@ObjectField(name = "Strings", description = "A collectionn of strings", type = FieldType.TEXT)

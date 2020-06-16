@@ -1,14 +1,11 @@
 package com.jadaptive.app.tenant;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
@@ -34,8 +31,11 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	@Autowired
 	protected EventService eventService; 
 	
+	@Autowired
+	private CacheService cacheService; 
+	
 	@Override
-	public Collection<T> list(Class<T> resourceClass, SearchField... fields) {
+	public Iterable<T> list(Class<T> resourceClass, SearchField... fields) {
 		return listObjects(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
 	}
 
@@ -100,8 +100,8 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 
 	@Override
-	public long count(Class<T> resourceClass) {
-		return countObjects(tenantService.getCurrentTenant().getUuid(), resourceClass);
+	public long count(Class<T> resourceClass, SearchField... fields) {
+		return countObjects(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
 	}
 	
 	@Override
@@ -118,42 +118,4 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public Long searchCount(Class<T> resourceClass, SearchField... fields) {
 		return searchCount(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
 	}
-
-	public Iterable<T> iterator(Class<T> resourceClass, SearchField... searchFields) {
-		return new Iterable<T>() {
-
-			@Override
-			public Iterator<T> iterator() {
-				return new Iterator<T>() {
-					
-					List<T> page = null;
-					int start = 0;
-					
-					@Override
-					public boolean hasNext() {
-						return (Objects.nonNull(page) && !page.isEmpty()) || loadObjects();
-					}
-
-					@Override
-					public T next() {
-						if(Objects.isNull(page) || page.isEmpty()) {
-							if(!loadObjects()) {
-								throw new IllegalStateException();
-							}
-						}
-						return page.remove(0);
-					}
-					
-					private boolean loadObjects() {
-						
-						page = new ArrayList<>(searchTable(resourceClass, start, 10, searchFields));
-						start += 10;
-						return !page.isEmpty();
-					}
-				};
-			}
-			
-		};
-	}
-
 }

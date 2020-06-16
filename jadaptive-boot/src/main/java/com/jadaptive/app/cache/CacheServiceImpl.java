@@ -1,5 +1,6 @@
 package com.jadaptive.app.cache;
 
+import javax.annotation.PostConstruct;
 import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.configuration.CompleteConfiguration;
@@ -18,6 +19,11 @@ public class CacheServiceImpl implements CacheService {
 	@Autowired
 	private CacheManager cacheManager;
 	
+	
+	@PostConstruct
+	private void postConstruct() {
+		System.out.println();
+	}
 	
 	public <K,V> Cache<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value){
 		return cache(name, key, value, baseConfiguration(key, value));

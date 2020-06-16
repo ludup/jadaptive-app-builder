@@ -20,5 +20,4 @@ public class ExtensionWebSocketConfig implements WebSocketConfigurer {
 	public WebSocketHandler myHandler() {
 		return new ExtensionWebSocketHandler();
 	}
-
 }

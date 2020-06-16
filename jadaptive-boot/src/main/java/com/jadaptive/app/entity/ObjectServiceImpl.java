@@ -81,7 +81,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 
 	@Override
-	public Collection<AbstractObject> list(String resourceKey) throws RepositoryException, ObjectException {
+	public Iterable<AbstractObject> list(String resourceKey) throws RepositoryException, ObjectException {
 		
 		ObjectTemplate template = templateService.get(resourceKey);
 		if(template.getScope()==ObjectScope.PERSONAL) {

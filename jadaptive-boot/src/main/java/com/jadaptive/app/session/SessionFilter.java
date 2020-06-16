@@ -3,7 +3,6 @@ package com.jadaptive.app.session;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 
-import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
@@ -167,7 +165,7 @@ public class SessionFilter implements Filter {
 				permissionService.setupSystemContext();
 			} else if(Objects.nonNull(session)) {
 				tenantService.setCurrentTenant(session.getTenant());	
-				permissionService.setupUserContext(userService.getUser(session.getUsername()));
+				permissionService.setupUserContext(session.getUser());
 			} 
 		
 			String requireAllPermission = StringUtils.defaultIfBlank(properties.getProperty("permission.requireAll"), null);
@@ -242,10 +240,8 @@ public class SessionFilter implements Filter {
 				
 				log.debug("Checking redirect {}", request.getRequestURI());
 				
-				// TODO cache this lookup
-				Collection<Redirect> redirects = redirectDatabase.list(Redirect.class);
 				
-				for(Redirect redirect : redirects) {
+				for(Redirect redirect : redirectDatabase.list(Redirect.class)) {
 					Pattern pattern = Pattern.compile(redirect.getPath());
 					Matcher matcher = pattern.matcher(request.getRequestURI());
 					if(matcher.matches()) {

@@ -1,7 +1,5 @@
 package com.jadaptive.app.json;
 
-import java.util.Collection;
-
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,7 +21,7 @@ import com.jadaptive.api.tenant.TenantService;
 @Controller
 public class TenantController {
 
-	static Logger log = LoggerFactory.getLogger(APIController.class);
+	static Logger log = LoggerFactory.getLogger(ObjectController.class);
 	
 	@Autowired
 	TenantService tenantService; 
@@ -31,14 +29,14 @@ public class TenantController {
 	@RequestMapping(value="api/tenant/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public EntityStatus<Collection<Tenant>> getEntityTemplates(HttpServletRequest request) throws RepositoryException, UnknownEntityException, ObjectException {
+	public EntityResultsStatus<Tenant> getEntityTemplates(HttpServletRequest request) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-		   return new EntityStatus<Collection<Tenant>>(tenantService.listTenants());
+		   return new EntityResultsStatus<Tenant>(tenantService.listTenants());
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/tenant/list", e);
 			}
-			return new EntityStatus<Collection<Tenant>>(false, e.getMessage());
+			return new EntityResultsStatus<Tenant>(false, e.getMessage());
 		}
 	}
 

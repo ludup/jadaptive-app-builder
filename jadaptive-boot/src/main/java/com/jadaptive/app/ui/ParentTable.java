@@ -1,7 +1,7 @@
 package com.jadaptive.app.ui;
 
 import java.io.FileNotFoundException;
-import java.util.Collection;
+import java.util.Iterator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
@@ -60,12 +60,13 @@ public class ParentTable extends TemplatePage {
 				"searchField", "name")
 					.renderValues(template.getFields());
 		
-		Collection<ObjectTemplate> children = templateService.children(template.getResourceKey());
-		if(children.isEmpty()) {
+		Iterable<ObjectTemplate> children = templateService.children(template.getResourceKey());
+		Iterator<ObjectTemplate> it = children.iterator();
+		if(!it.hasNext()) {
 			content.select("#childDropdown").remove();
 		} else {
 			new DropdownInput(content.select("#childDropdown"), "searchTable", 
-					children.iterator().next().getResourceKey())
+					it.next().getResourceKey())
 				.renderValues(children);
 		}
 		return content;

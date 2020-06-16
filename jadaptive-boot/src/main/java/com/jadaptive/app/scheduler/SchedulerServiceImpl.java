@@ -1,7 +1,6 @@
 package com.jadaptive.app.scheduler;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -106,8 +105,13 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	}
 
 	@Override
-	public Collection<CronSchedule> getJobSchedules(Job job) {
+	public Iterable<CronSchedule> getJobSchedules(Job job) {
 		return cronDatabase.list(CronSchedule.class, SearchField.eq("job", job.getUuid()));
+	}
+	
+	@Override
+	public long getJobSchedulesCount(Job job) {
+		return cronDatabase.count(CronSchedule.class, SearchField.eq("job", job.getUuid()));
 	}
 
 	@Override

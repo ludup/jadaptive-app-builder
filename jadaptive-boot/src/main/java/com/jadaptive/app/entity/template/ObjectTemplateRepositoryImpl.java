@@ -1,13 +1,16 @@
 package com.jadaptive.app.entity.template;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
+
+import javax.cache.Cache;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.cache.CacheService;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -23,7 +26,9 @@ public class ObjectTemplateRepositoryImpl extends AbstractTenantAwareObjectDatab
 
 	static Logger log = LoggerFactory.getLogger(ObjectTemplateRepositoryImpl.class);
 	
-	Map<String,ObjectTemplate> cache = new HashMap<>();
+	@Autowired
+	private CacheService cacheService; 
+	
 	public ObjectTemplateRepositoryImpl(DocumentDatabase db) {
 		super(db);
 	}
@@ -98,6 +103,11 @@ public class ObjectTemplateRepositoryImpl extends AbstractTenantAwareObjectDatab
 			}
 			createTextIndex(template, textIndexField.getResourceKey());
 		}
+	}
+
+	@Override
+	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
+		return cacheService.getCacheOrCreate("objectTemplates.uuidCache", String.class, obj);
 	}		
 }
 

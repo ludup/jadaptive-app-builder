@@ -2,6 +2,7 @@ package com.jadaptive.app.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,15 +39,8 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	ObjectTemplateRepository templateRepository; 
 	
 	@Override
-	public Collection<AbstractObject> list(ObjectTemplate def, SearchField... fields) throws RepositoryException, ObjectException {
-		
-		List<AbstractObject> results = new ArrayList<>();
-		
-		for(Document document : db.list(def.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fields)) {
-			results.add(buildEntity(def, document));
-		}
-		
-		return results;
+	public Iterable<AbstractObject> list(ObjectTemplate def, SearchField... fields) throws RepositoryException, ObjectException {
+		return new ObjectIterable(def, db.list(def.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fields));
 	}
 	
 	@Override
@@ -173,5 +167,39 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		return db.count(def.getResourceKey(), searchField, searchValue, tenantService.getCurrentTenant().getUuid());
 	}
 
+	
+	class ObjectIterable implements Iterable<AbstractObject> {
+
+		Iterable<Document> iterator;
+		ObjectTemplate def;
+		public ObjectIterable(ObjectTemplate def, Iterable<Document> iterator) {
+			this.def = def;
+			this.iterator = iterator;
+		}
+
+		@Override
+		public Iterator<AbstractObject> iterator() {
+			return new ConvertingIterator(iterator.iterator());
+		}
+	
+		class ConvertingIterator implements Iterator<AbstractObject> {
+
+			Iterator<Document> iterator;
+			
+			public ConvertingIterator(Iterator<Document> iterator) {
+				this.iterator = iterator;
+			}
+
+			@Override
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
+
+			@Override
+			public AbstractObject next() {
+				return buildEntity(def, iterator.next());
+			}
+		}
+	}
 
 }

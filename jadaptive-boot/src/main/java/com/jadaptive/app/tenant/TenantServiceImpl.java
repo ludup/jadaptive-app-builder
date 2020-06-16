@@ -26,6 +26,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
@@ -33,9 +34,7 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.api.user.User;
 import com.jadaptive.app.ApplicationServiceImpl;
-import com.jadaptive.app.user.AdminUserDatabase;
 
 @Service
 public class TenantServiceImpl implements TenantService, JsonTemplateEnabledService<Tenant> {
@@ -60,9 +59,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	@Autowired
 	private ApplicationService applicationService; 
-	
-	@Autowired
-	private AdminUserDatabase adminDatabase;
+
 	
 	Tenant systemTenant;
 	
@@ -79,16 +76,6 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			if(newSchema) {
 				repository.newSchema();
 				createTenant(SYSTEM_UUID, "System", "localhost", true);
-				
-				setCurrentTenant(getSystemTenant());
-				
-				try {
-					User user = adminDatabase.createAdmin("admin".toCharArray(), true);
-					roleService.assignRole(roleService.getAdministrationRole(), user);
-				} finally {
-					
-					clearCurrentTenant();
-				}
 			} else {
 				
 				initialiseTenant(getSystemTenant(), false);
@@ -124,7 +111,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 	
 	@Override
-	public Collection<Tenant> listTenants()  {
+	public Iterable<Tenant> listTenants()  {
 		try {
 			return repository.listTenants();
 		} catch (RepositoryException | ObjectException e) {
@@ -227,7 +214,12 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		try {
 			repository.saveTenant(tenant);
-			initialiseTenant(tenant, true);
+			setCurrentTenant(tenant);
+			try {
+				initialiseTenant(tenant, true);
+			} finally {
+				clearCurrentTenant();
+			}
 			return tenant;
 		} catch (RepositoryException | ObjectException e) {
 			throw e;
@@ -378,5 +370,10 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			throw new ObjectNotFoundException("Tenant does not exist for UUID");
 		}
 		return tenant;
+	}
+
+	@Override
+	public UUIDDocument getDocumentByUUID(String uuid) {
+		return getTenantByUUID(uuid);
 	}
 }

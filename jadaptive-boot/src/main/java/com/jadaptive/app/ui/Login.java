@@ -62,7 +62,7 @@ public class Login extends AbstractPage {
 	    	
 	    	sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
 	    	
-	    	User user = userService.getUser(session.getUsername());
+	    	User user = session.getUser();
 	    	if(user instanceof PasswordEnabledUser) {
 		    	if(((PasswordEnabledUser)user).getPasswordChangeRequired()) {
 		    		throw new Redirect(ChangePassword.class);

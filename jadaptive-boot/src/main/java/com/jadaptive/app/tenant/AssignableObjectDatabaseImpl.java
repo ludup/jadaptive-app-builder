@@ -79,7 +79,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	}
 
 	@Override
-	public Collection<T> getObjects(Class<T> resourceClass) {
+	public Iterable<T> getObjects(Class<T> resourceClass) {
 		return objectDatabase.list(resourceClass);
 	}
 

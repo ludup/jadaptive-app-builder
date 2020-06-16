@@ -8,8 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionRepository;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
@@ -21,7 +22,7 @@ public class SessionServiceImpl implements SessionService {
 	static Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
 	
 	@Autowired
-	private SessionRepository repository;
+	private TenantAwareObjectDatabase<Session> repository;
 	
 	@Override
 	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent) {
@@ -32,7 +33,7 @@ public class SessionServiceImpl implements SessionService {
 		session.setSignedIn(new Date());
 		session.setTenant(tenant);
 		session.setUserAgent(userAgent);
-		session.setUsername(user.getUsername());
+		session.setUser(user);
 		session.setCsrfToken(Utils.generateRandomAlphaNumericString(32));
 		
 		repository.saveOrUpdate(session);
@@ -43,7 +44,7 @@ public class SessionServiceImpl implements SessionService {
 	@Override
 	public boolean isLoggedOn(Session session, boolean touch) {
 		
-		session = repository.get(session.getUuid());
+		session = repository.get(session.getUuid(), Session.class);
 		
 		if (session.getSignedOut() == null) {
 
@@ -69,7 +70,7 @@ public class SessionServiceImpl implements SessionService {
 	
 					if (log.isDebugEnabled()) {
 						log.debug("Session "
-								+ session.getUsername() + "/"
+								+ session.getUser().getUsername() + "/"
 								+ session.getUuid() + " is now closed");
 					}
 	
@@ -108,7 +109,12 @@ public class SessionServiceImpl implements SessionService {
 
 	@Override
 	public Session getSession(String uuid) {
-		return repository.get(uuid);
+		return repository.get(uuid, Session.class);
+	}
+
+	@Override
+	public Iterable<Session> iterateSessions() {
+		return repository.list(Session.class, SearchField.eq("signedOut", null));
 	}
 
 }

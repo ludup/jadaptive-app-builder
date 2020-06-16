@@ -5,8 +5,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import org.bson.Document;
+import javax.cache.Cache;
 
+import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.AbstractObjectDatabase;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
@@ -19,7 +25,14 @@ import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 
+	private static final String DEFAULT_ITERATOR = "default";
+
+	static Logger log = LoggerFactory.getLogger(AbstractObjectDatabaseImpl.class);
+	
 	protected final DocumentDatabase db;
+	
+	@Autowired
+	private CacheService cacheService; 
 	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
@@ -37,6 +50,24 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		return clz.getSimpleName();
 	}
 	
+	protected  <T extends UUIDEntity> Cache<String, T> getCache(Class<T> clz) {
+		return cacheService.getCacheOrCreate(String.format("%s.uuidCache", clz.getName()), String.class, clz);
+	}
+	
+	protected  <T extends UUIDEntity> Cache<String, UUIDList> getIteratorCache(Class<T> clz) {
+		return cacheService.getCacheOrCreate(String.format("%s.iterator", clz.getName()), String.class, UUIDList.class);
+	}
+	
+	protected  <T extends UUIDEntity> Cache<String,UUIDList> getIteratorCache(Class<T> clz, String cacheName) {
+		return cacheService.getCacheOrCreate(String.format("%s.searchCache",
+				clz.getName()), String.class, UUIDList.class);
+	}
+
+//	@SuppressWarnings("rawtypes")
+//	protected <T extends UUIDEntity> Cache<Class<T>, List> getIteratorCache(String name, Class<T> clz) {
+//		return cacheService.getCacheOrCreate(String.format("iterator.%s.%s", clz.getSimpleName(), name), clz, List.class);
+//	}
+	
 	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
 		try {
 
@@ -44,7 +75,16 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			DocumentHelper.convertObjectToDocument(obj, document);
 			
 			db.insertOrUpdate(obj, document, getCollectionName(obj.getClass()), database);
-			onObjectUpdated(obj);
+			
+			/**
+			 * Perform caching which will also inform us whether event
+			 */
+			@SuppressWarnings("unchecked")
+			Cache<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+			
+			T prevObject = cachedObjects.getAndPut(obj.getUuid(), obj);
+			onObjectUpdated(prevObject, obj);
+			
 		} catch(Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", obj.getClass().getSimpleName(), e.getMessage()), e);
@@ -54,13 +94,19 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends UUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, ObjectException {
 		try {
 			
+			Cache<String,T> cachedObjects = getCache(clz);
+			T result = cachedObjects.get(uuid);
+			if(Objects.nonNull(result)) {
+				return result;
+			}
 			Document document = db.getByUUID(uuid, getCollectionName(clz), database);
 			if(Objects.isNull(document)) {
 				throw new ObjectNotFoundException(String.format("Object from %s not found with id %s", 
 						getCollectionName(clz), uuid));
 			}
-			return DocumentHelper.convertDocumentToObject(clz, document);
-			
+			result = DocumentHelper.convertDocumentToObject(clz, document);
+			cachedObjects.put(result.getUuid(), result);
+			return result;
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
@@ -69,29 +115,45 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	protected <T extends UUIDEntity> T getObject(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
+
 			Document document = db.get(getCollectionName(clz), database, fields);
 			if(Objects.isNull(document)) {
 				throw new ObjectNotFoundException(String.format("Object from %s not found for fields %s", 
 						getCollectionName(clz),
 						getSearchFieldsText(fields, "AND")));
 			}
-			return DocumentHelper.convertDocumentToObject(clz, document);
+			
+			T result = DocumentHelper.convertDocumentToObject(clz, document);
+			Cache<String,T> cachedObjects = getCache(clz);
+			cachedObjects.put(result.getUuid(), result);
+			return result;
 			
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
-	
+
 	protected <T extends UUIDEntity> T max(String database, Class<T> clz, String field) throws RepositoryException, ObjectException {
 		try {
+			
 			Document document = db.max(getCollectionName(clz), database, field);
 			if(Objects.isNull(document)) {
 				throw new ObjectNotFoundException(String.format("Maximum value from %s not found for fields %s", 
 						getCollectionName(clz),
 						field));
 			}
-			return DocumentHelper.convertDocumentToObject(clz, document);
+			
+			String uuid = document.getString("_id");
+			Cache<String,T> cachedObjects = getCache(clz);
+			T result = cachedObjects.get(uuid);
+			if(Objects.nonNull(result)) {
+				return result;
+			}
+			
+			result = DocumentHelper.convertDocumentToObject(clz, document);
+			cachedObjects.put(result.getUuid(), result);
+			return result;
 			
 		} catch (Throwable e) {
 			checkException(e);
@@ -99,6 +161,8 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+
+
 	protected <T extends UUIDEntity> T min(String database, Class<T> clz, String field) throws RepositoryException, ObjectException {
 		try {
 			Document document = db.min(getCollectionName(clz), database, field);
@@ -107,7 +171,17 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 						getCollectionName(clz),
 						field));
 			}
-			return DocumentHelper.convertDocumentToObject(clz, document);
+			
+			String uuid = document.getString("_id");
+			Cache<String,T> cachedObjects = getCache(clz);
+			T result = cachedObjects.get(uuid);
+			if(Objects.nonNull(result)) {
+				return result;
+			}
+			
+			result = DocumentHelper.convertDocumentToObject(clz, document);
+			cachedObjects.put(result.getUuid(), result);
+			return result;
 			
 		} catch (Throwable e) {
 			checkException(e);
@@ -115,7 +189,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	private Object getSearchFieldsText(SearchField[] fields, String condition) {
+	private String getSearchFieldsText(SearchField[] fields, String condition) {
 		
 		StringBuffer buf = new StringBuffer();
 		for(int i=0;i<fields.length;i++) {
@@ -155,6 +229,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			}
 		}
 		
+		log.info("Search {}", buf.toString());
 		return buf.toString();
 	}
 
@@ -162,6 +237,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		if(e instanceof ObjectException) {
 			throw (ObjectException)e;
 		}
+		log.error("Document error", e);
 	}
 	
 	protected <T extends UUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, ObjectException {
@@ -170,6 +246,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				throw new ObjectException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
 			}
 			db.deleteByUUID(obj.getUuid(), getCollectionName(obj.getClass()), database);
+			
+			@SuppressWarnings("unchecked")
+			Cache<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
+			cachedObjects.remove(obj.getUuid());
 			onObjectDeleted(obj);
 		} catch(Throwable e) {
 			checkException(e);
@@ -181,42 +261,62 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 	protected <T extends UUIDEntity> void onObjectCreated(T obj) { }
 	
-	protected <T extends UUIDEntity> void onObjectUpdated(T obj) { }
+	protected <T extends UUIDEntity> void onObjectUpdated(T previousObject, T obj) { }
 	
-	protected <T extends UUIDEntity> Collection<T> listObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {
 		
 		try {
-
-			List<T> results = new ArrayList<>();
-			for(Document document : db.list(getCollectionName(clz), database)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz, document));
+			Cache<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
+			Cache<String,T> cachedObjects = getCache(clz);
+			
+			List<String> uuids = cachedUUIDs.get(DEFAULT_ITERATOR);
+			
+			if(Objects.nonNull(uuids) && uuids.size() > 0) {
+				return new CachedIterable<T>(clz, 
+						cachedObjects,
+						uuids);
+			} else {
+				return new TypeIterable<T>(clz, 
+						db.list(getCollectionName(clz), database), 
+						cachedObjects,
+						cachedUUIDs,
+						DEFAULT_ITERATOR);
 			}
-			
-			return results;
-			
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
-	protected <T extends UUIDEntity> Collection<T> listObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		
 		try {
-
-			List<T> results = new ArrayList<>();
-			for(Document document : db.list(getCollectionName(clz), database, fields)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz, document));
+			String cacheName = getSearchFieldsText(fields, "AND");
+			Cache<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
+			Cache<String,T> cachedObjects = getCache(clz);
+			
+			UUIDList uuids = cachedUUIDs.get(cacheName);
+			if(Objects.nonNull(uuids) && uuids.size() > 0) {
+				return new CachedIterable<T>(clz, 
+						cachedObjects,
+						uuids);
+			} else {
+				return new TypeIterable<T>(clz, 
+						db.list(getCollectionName(clz), database, fields), 
+						cachedObjects,
+						cachedUUIDs,
+						cacheName);
 			}
-			
-			return results;
-			
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
+	private <T extends UUIDEntity> String createFilterCacheKey(Class<T> clz, String condition, SearchField...fields) {
+		return String.format("%s.%s", clz.getSimpleName(), getSearchFieldsText(fields, condition));
+	}
+
 	protected <T extends UUIDEntity> Collection<T> searchObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
@@ -270,20 +370,22 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			}
 			
 			return results;
-			
+
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
-	protected <T extends UUIDEntity> Long countObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> Long countObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		
 		try {
-			return db.count(getCollectionName(clz), database);			
+			return db.count(getCollectionName(clz), database, fields);			
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
+	
+	
 }

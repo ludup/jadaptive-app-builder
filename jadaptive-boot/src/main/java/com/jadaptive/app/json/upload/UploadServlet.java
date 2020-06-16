@@ -84,7 +84,7 @@ public class UploadServlet extends HttpServlet {
 		}
 		
 		if(Objects.nonNull(session)) {
-			permissionService.setupUserContext(userService.getUser(session.getUsername()));
+			permissionService.setupUserContext(session.getUser());
 		}
 		
 		try {

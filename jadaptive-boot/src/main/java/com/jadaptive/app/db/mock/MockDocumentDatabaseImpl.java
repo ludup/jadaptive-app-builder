@@ -71,7 +71,7 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public Long count(String table, String database) {
+	public Long count(String table, String database, SearchField... fields) {
 		return new Long(getCollection(table, database).size());
 	}
 

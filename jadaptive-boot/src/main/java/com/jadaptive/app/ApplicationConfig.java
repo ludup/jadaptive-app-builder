@@ -71,6 +71,7 @@ public class ApplicationConfig {
             		   "jadaptive.developmentPluginDirs", 
             		   Utils.csv("../../jadaptive-vsftp",
             				    "../../jadaptive-updates",
+            				    "../../jadaptive-ssh-proxy",
             				    "../../jadaptive-key-server")).split(",");
                for(String path : additionalDevelopmentPaths) {
             	   if(StringUtils.isNotBlank(path)) {

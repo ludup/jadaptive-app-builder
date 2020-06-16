@@ -12,6 +12,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 @ObjectDefinition(name = "Test Enum Collections", resourceKey = TestEnumCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class TestEnumCollections extends AbstractUUIDEntity {
 
+	private static final long serialVersionUID = 2379492937315526686L;
+
 	public static final String RESOURCE_KEY = "testEnumCollections";
 	
 	@ObjectField(name = "Values", description = "A collection of enums", type = FieldType.ENUM)

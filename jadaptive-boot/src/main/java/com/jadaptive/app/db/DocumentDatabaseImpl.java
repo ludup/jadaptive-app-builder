@@ -211,9 +211,14 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public Long count(String table, String database) {
+	public Long count(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
-		return collection.countDocuments();
+		if(fields.length > 0) {
+			return collection.countDocuments(buildFilter(fields));
+		} else {
+			return collection.countDocuments();
+		}
+		
 	}
 	
 	@Override

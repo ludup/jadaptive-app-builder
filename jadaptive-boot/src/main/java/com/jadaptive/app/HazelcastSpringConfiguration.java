@@ -130,7 +130,7 @@ public class HazelcastSpringConfiguration {
 //	}
 
 	@Bean(destroyMethod = "close")
-	CacheManager cacheManager(HazelcastInstance instance) throws URISyntaxException {
+	public CacheManager cacheManager(HazelcastInstance instance) throws URISyntaxException {
 		CachingProvider cachingProvider = Caching
 				.getCachingProvider("com.hazelcast.cache.impl.HazelcastServerCachingProvider", 
 						classLoaderService.getClassLoader());
@@ -138,7 +138,7 @@ public class HazelcastSpringConfiguration {
 		Properties properties = HazelcastCachingProvider.propertiesByInstanceName(applicationContext.getId());
 
 		URI cacheManagerName = new URI("hypersocket-cache-manager");
-		return cachingProvider.getCacheManager(cacheManagerName, null, properties);
+		return cachingProvider.getCacheManager(cacheManagerName, classLoaderService.getClassLoader(), properties);
 	}
 
 	@Bean

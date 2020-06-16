@@ -13,6 +13,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 	hidden = true, system = true, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class Quota extends AbstractUUIDEntity {
 
+	private static final long serialVersionUID = 2226026565046618484L;
+
 	public static final String RESOURCE_KEY = "quota";
 	
 	@ObjectField(name = "Group", description = "A group to identify the quote type", type = FieldType.TEXT)

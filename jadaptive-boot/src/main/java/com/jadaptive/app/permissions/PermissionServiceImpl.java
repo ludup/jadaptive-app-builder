@@ -84,6 +84,17 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		@Override
 		public void setName(String value) {
 		}
+		
+		public void setUuid(String uuid) {
+		}
+		
+		public Boolean isSystem() {
+			return true;
+		}
+		
+		public Boolean isHidden() {
+			return true;
+		}
 
 	};
 

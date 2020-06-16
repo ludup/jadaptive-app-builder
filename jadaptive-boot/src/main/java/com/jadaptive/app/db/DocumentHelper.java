@@ -34,9 +34,12 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.repository.UUIDDocumentService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.ObjectUUIDBean;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.app.ApplicationServiceImpl;
@@ -61,7 +64,7 @@ public class DocumentHelper {
 	}
 	
 	
-	public static void convertObjectToDocument(UUIDEntity obj, Document document) throws RepositoryException, ObjectException {
+	public static void convertObjectToDocument(UUIDDocument obj, Document document) throws RepositoryException, ObjectException {
 
 		try {
 			
@@ -89,11 +92,11 @@ public class DocumentHelper {
 						document.put(name,  value);
 					} else if(m.getReturnType().isEnum()) {
 						document.put(name, ((Enum<?>)value).name());
-					} else if(UUIDEntity.class.isAssignableFrom(m.getReturnType())) {
+					} else if(UUIDDocument.class.isAssignableFrom(m.getReturnType())) {
 						if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
-							buildDocument(name, (AbstractUUIDEntity)value, m.getReturnType(), document);
+							buildDocument(name, (UUIDDocument)value, m.getReturnType(), document);
 						} else if(Objects.nonNull(value)) {
-							document.put(name, ((AbstractUUIDEntity)value).getUuid());
+							document.put(name, ((UUIDDocument)value).getUuid());
 						}
 					} else if(Collection.class.isAssignableFrom(m.getReturnType())) {
 						buildCollectionDocuments(name, columnDefinition, (Collection<?>)value, m.getReturnType(), document);
@@ -184,7 +187,7 @@ public class DocumentHelper {
 		document.put(name, list);
 	}
 
-	public static void buildDocument(String name, AbstractUUIDEntity object, Class<?> type, Document document) throws RepositoryException, ParseException, ObjectException {
+	public static void buildDocument(String name, UUIDDocument object, Class<?> type, Document document) throws RepositoryException, ParseException, ObjectException {
 		
 		Document embedded = new Document();
 		convertObjectToDocument(object, embedded);
@@ -218,10 +221,16 @@ public class DocumentHelper {
 				obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).newInstance();
 			}
 
+			String uuid = (String) document.get("_id");
+			obj.setUuid(uuid);
+			
 			Map<String,Field> fields = ReflectionUtils.getFields(obj.getClass());
 			
 			for(Method m : ReflectionUtils.getSetters(obj.getClass())) {
 				String name = ReflectionUtils.calculateFieldName(m);
+				if(name.equals("uuid")) {
+					continue;
+				}
 				Field field = fields.get(name);
 				if(Objects.isNull(field)) {
 					continue;
@@ -249,7 +258,7 @@ public class DocumentHelper {
 					}
 				} else if(parameter.getType().equals(Date.class)) {
 					m.invoke(obj, document.getDate(name));
-				} else if(UUIDEntity.class.isAssignableFrom(parameter.getType())) {
+				} else if(UUIDDocument.class.isAssignableFrom(parameter.getType())) {
 					if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 						Object doc = document.get(name);
 						if(Objects.isNull(doc)) {
@@ -261,12 +270,20 @@ public class DocumentHelper {
 						
 						m.invoke(obj, convertDocumentToObject(UUIDEntity.class, (Document) doc, classLoader));
 					} else {
-						String resourceKey = getTemplateResourceKey(parameter.getType());
-						String uuid =  document.getString(name);
-						if(StringUtils.isNotBlank(uuid)) {
-							AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, uuid);
-							Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+						String objectUUID =  document.getString(name);
+						ObjectUUIDBean service = parameter.getType().getAnnotation(ObjectUUIDBean.class);
+						if(Objects.nonNull(service)) {
+							UUIDDocumentService bean = (UUIDDocumentService) ApplicationServiceImpl.getInstance().getBean(service.bean());
+							Object ref = bean.getDocumentByUUID(objectUUID);
 							m.invoke(obj, ref);
+						} else {
+							String resourceKey = getTemplateResourceKey(parameter.getType());
+							
+							if(StringUtils.isNotBlank(objectUUID)) {
+								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, objectUUID);
+								Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+								m.invoke(obj, ref);
+							}
 						}
 					}
 				} else if(parameter.getType().isEnum()) { 
@@ -303,8 +320,8 @@ public class DocumentHelper {
 								elements.add(convertDocumentToObject(UUIDEntity.class, embeddedDocument, classLoader));
 							} else {
 								String resourceKey = getTemplateResourceKey(parameter.getType());
-								String uuid =  document.getString(name);
-								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, uuid);
+								String objectUUID =  document.getString(name);
+								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, objectUUID);
 								
 								AbstractUUIDEntity ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
 								elements.add(ref);

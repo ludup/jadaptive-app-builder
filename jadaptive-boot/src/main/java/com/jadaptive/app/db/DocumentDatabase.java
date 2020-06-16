@@ -17,7 +17,7 @@ public interface DocumentDatabase {
 	
 	void delete(String table, String database, SearchField... fields);
 
-	Long count(String name, String database);
+	Long count(String name, String database, SearchField... fields);
 
 	Long count(String table, String searchField, String searchValue, String database);
 	

@@ -12,14 +12,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
 
 @Extension
-public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<AdminUser> implements AdminUserDatabase {
+public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<AdminUser> implements AdminUserDatabase, TenantAware {
 
 	public static final String ADMIN_USER_UUID = "ac94a50d-c8db-4297-bbf8-dd0adab5c2e6";
 	
@@ -28,6 +31,9 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 	
 	@Autowired
 	private TemplateService templateService; 
+	
+	@Autowired
+	private RoleService roleService; 
 	
 	private final Set<UserDatabaseCapabilities> capabilities = new HashSet<>(
 			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD,
@@ -97,5 +103,20 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 	public void createUser(User user, char[] password, boolean forceChange) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public void initializeSystem(boolean newSchema) {
+		if(newSchema) {
+			User user = createAdmin("admin".toCharArray(), true);
+			roleService.assignRole(roleService.getAdministrationRole(), user);
+		}
+	}
+
+	@Override
+	public void initializeTenant(Tenant tenant, boolean newSchema) {
+
+	}
+	
+	public Integer getWeight() { return Integer.MIN_VALUE + 1; };
 
 }

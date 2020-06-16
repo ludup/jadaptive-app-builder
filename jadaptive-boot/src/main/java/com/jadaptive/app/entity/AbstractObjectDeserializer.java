@@ -300,9 +300,9 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 				for(FieldValidator v : field.getValidators()) {
 					switch(v.getType()) {
 					case RANGE:
-						String[] range = v.getValue().split(",");
+						String[] range = v.getValue().split("-");
 						if(range.length != 2) {
-							throw new ValidationException(String.format("Invalid range %s value in validator use \"<min>,<max>\" format", v.getValue()));
+							throw new ValidationException(String.format("Invalid range %s value in validator use \"<min>-<max>\" format", v.getValue()));
 						}
 						try {
 							double min = Double.parseDouble(range[0]);
@@ -311,7 +311,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 								throw new ValidationException(String.format("%s must be in the range %d to %d", field.getResourceKey(), min, max));
 							}
 						} catch (NumberFormatException e) {
-							throw new ValidationException(String.format("Invalid range %s value in validator use \"<min>,<max>\" format", v.getValue()));
+							throw new ValidationException(String.format("Invalid range %s value in validator use \"<min>-<max>\" format", v.getValue()));
 						}
 						break;
 					default:

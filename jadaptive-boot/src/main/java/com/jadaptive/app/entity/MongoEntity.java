@@ -19,6 +19,8 @@ import com.jadaptive.api.template.FieldTemplate;
 @JsonSerialize(using=AbstractObjectSerializer.class)
 public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 
+	private static final long serialVersionUID = 7834313955696773158L;
+	
 	AbstractObject parent;
 	Map<String,AbstractObject> children = new HashMap<>();
 	String resourceKey;

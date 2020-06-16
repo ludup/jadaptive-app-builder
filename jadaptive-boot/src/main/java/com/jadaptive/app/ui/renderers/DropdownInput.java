@@ -67,7 +67,7 @@ public class DropdownInput extends InputRender {
 				+ "dropdown-item\" href=\"#\">" + value + "</a>");
 	}
 
-	public void renderValues(Collection<? extends NamedUUIDEntity> fields) {
+	public void renderValues(Iterable<? extends NamedUUIDEntity> fields) {
 		NamedUUIDEntity selected = null;
 		for(NamedUUIDEntity field : fields) {
 			if(Objects.isNull(selected)) {

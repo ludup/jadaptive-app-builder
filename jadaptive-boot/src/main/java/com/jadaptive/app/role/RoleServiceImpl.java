@@ -226,7 +226,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 
 
 	@Override
-	public Collection<Role> listRoles() {
+	public Iterable<Role> listRoles() {
 		assertRead(Role.RESOURCE_KEY);
 		return repository.list(Role.class);
 	}
@@ -241,7 +241,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	@Override
 	public void onDeleteUser(User user) {
 		
-		for(Role role : repository.iterator(Role.class)) {
+		for(Role role : repository.list(Role.class)) {
 			if(role.getUsers().contains(user.getUuid())) {
 				role.getUsers().remove(user.getUuid());
 				repository.saveOrUpdate(role);
@@ -264,7 +264,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 
 	@Override
 	public Iterable<Role> allRoles() {
-		return repository.iterator(Role.class);
+		return repository.list(Role.class);
 	}
 
 }

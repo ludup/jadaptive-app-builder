@@ -10,6 +10,8 @@ import com.jadaptive.api.template.ObjectField;
 @ObjectDefinition(name = "Properties", resourceKey = Property.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class Property extends UUIDEntity {
 
+	private static final long serialVersionUID = -4021700778301136286L;
+
 	public static final String RESOURCE_KEY = "properties";
 	
 	@ObjectField(name = "Key", description = "The unique key of this property", type=FieldType.TEXT, unique = true)

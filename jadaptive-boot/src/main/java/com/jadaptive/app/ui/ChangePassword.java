@@ -34,7 +34,7 @@ public class ChangePassword extends AuthenticatedView {
     Document service(@In Document content, @Form PasswordForm form) {
     	
     	Session session = sessionUtils.getActiveSession(Request.get());
-    	User user = userService.getUser(session.getUsername());
+    	User user = session.getUser();
     	userService.changePassword(user, form.getPassword().toCharArray(), false);
     	
     	/**

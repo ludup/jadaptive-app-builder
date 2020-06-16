@@ -81,11 +81,11 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 
 	@Override
 	public Iterable<T> allObjects(Class<T> resourceClass) {
-		return objectDatabase.iterator(resourceClass);
+		return objectDatabase.list(resourceClass);
 	}
 
 	@Override
 	public Iterable<T> allObjects(Class<T> resourceClass, SearchField... searchFields) {
-		return objectDatabase.iterator(resourceClass, searchFields);
+		return objectDatabase.list(resourceClass, searchFields);
 	}
 }

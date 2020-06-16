@@ -56,7 +56,7 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 	}
 
 	@Override
-	public Collection<ObjectTemplate> list() throws RepositoryException, ObjectException {
+	public Iterable<ObjectTemplate> list() throws RepositoryException, ObjectException {
 		
 		permissionService.assertRead(ObjectTemplate.RESOURCE_KEY);
 		
@@ -64,14 +64,13 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 	}
 	
 	@Override
-	public Collection<ObjectTemplate> children(String uuid) {
-		
+	public Iterable<ObjectTemplate> children(String uuid) {
 		return repository.list(SearchField.eq("parentTemplate", uuid));
 	}
 	
 
 	@Override
-	public Collection<ObjectTemplate> singletons() throws RepositoryException, ObjectException {
+	public Iterable<ObjectTemplate> singletons() throws RepositoryException, ObjectException {
 		return repository.list(SearchField.eq("type", ObjectType.SINGLETON.name()));
 	}
 	
@@ -195,7 +194,7 @@ public class TemplateServiceImpl implements TemplateService, JsonTemplateEnabled
 	}
 
 	@Override
-	public Collection<ObjectTemplate> getTemplatesWithScope(ObjectScope personal) {
+	public Iterable<ObjectTemplate> getTemplatesWithScope(ObjectScope personal) {
 		return repository.list(SearchField.eq("scope", ObjectScope.PERSONAL.name()));
 	}
 
