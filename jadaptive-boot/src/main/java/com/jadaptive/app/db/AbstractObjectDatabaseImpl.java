@@ -79,14 +79,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			/**
 			 * Perform caching which will also inform us whether event
 			 */
+			@SuppressWarnings("unchecked")
+			Cache<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
 			
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				@SuppressWarnings("unchecked")
-				Cache<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
-				
-				T prevObject = cachedObjects.getAndPut(obj.getUuid(), obj);
-				onObjectUpdated(prevObject, obj);
-			}
+			T prevObject = cachedObjects.getAndPut(obj.getUuid(), obj);
+			onObjectUpdated(prevObject, obj);
 			
 		} catch(Throwable e) {
 			checkException(e);
@@ -98,22 +95,17 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		try {
 			
 			Cache<String,T> cachedObjects = getCache(clz);
-			
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				T result = cachedObjects.get(uuid);
-				if(Objects.nonNull(result)) {
-					return result;
-			}
+			T result = cachedObjects.get(uuid);
+			if(Objects.nonNull(result)) {
+				return result;
 			}
 			Document document = db.getByUUID(uuid, getCollectionName(clz), database);
 			if(Objects.isNull(document)) {
 				throw new ObjectNotFoundException(String.format("Object from %s not found with id %s", 
 						getCollectionName(clz), uuid));
 			}
-			T result = DocumentHelper.convertDocumentToObject(clz, document);
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				cachedObjects.put(result.getUuid(), result);
-			}
+			result = DocumentHelper.convertDocumentToObject(clz, document);
+			cachedObjects.put(result.getUuid(), result);
 			return result;
 		} catch (Throwable e) {
 			checkException(e);
@@ -132,10 +124,8 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			}
 			
 			T result = DocumentHelper.convertDocumentToObject(clz, document);
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				Cache<String,T> cachedObjects = getCache(clz);
-				cachedObjects.put(result.getUuid(), result);
-			}
+			Cache<String,T> cachedObjects = getCache(clz);
+			cachedObjects.put(result.getUuid(), result);
 			return result;
 			
 		} catch (Throwable e) {
@@ -156,17 +146,13 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			String uuid = document.getString("_id");
 			Cache<String,T> cachedObjects = getCache(clz);
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				T result = cachedObjects.get(uuid);
-				if(Objects.nonNull(result)) {
-					return result;
-				}
+			T result = cachedObjects.get(uuid);
+			if(Objects.nonNull(result)) {
+				return result;
 			}
 			
-			T result = DocumentHelper.convertDocumentToObject(clz, document);
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				cachedObjects.put(result.getUuid(), result);
-			}
+			result = DocumentHelper.convertDocumentToObject(clz, document);
+			cachedObjects.put(result.getUuid(), result);
 			return result;
 			
 		} catch (Throwable e) {
@@ -186,19 +172,15 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 						field));
 			}
 			
-			Cache<String,T> cachedObjects = getCache(clz);
 			String uuid = document.getString("_id");
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				
-				T result = cachedObjects.get(uuid);
-				if(Objects.nonNull(result)) {
-					return result;
-				}
+			Cache<String,T> cachedObjects = getCache(clz);
+			T result = cachedObjects.get(uuid);
+			if(Objects.nonNull(result)) {
+				return result;
 			}
-			T result = DocumentHelper.convertDocumentToObject(clz, document);
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				cachedObjects.put(result.getUuid(), result);
-			}
+			
+			result = DocumentHelper.convertDocumentToObject(clz, document);
+			cachedObjects.put(result.getUuid(), result);
 			return result;
 			
 		} catch (Throwable e) {
@@ -264,11 +246,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				throw new ObjectException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
 			}
 			db.deleteByUUID(obj.getUuid(), getCollectionName(obj.getClass()), database);
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				@SuppressWarnings("unchecked")
-				Cache<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
-				cachedObjects.remove(obj.getUuid());
-			}
+			
+			@SuppressWarnings("unchecked")
+			Cache<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
+			cachedObjects.remove(obj.getUuid());
 			onObjectDeleted(obj);
 		} catch(Throwable e) {
 			checkException(e);
@@ -290,7 +271,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			List<String> uuids = cachedUUIDs.get(DEFAULT_ITERATOR);
 			
-			if(Boolean.getBoolean("jadaptive.cache") && Objects.nonNull(uuids) && uuids.size() > 0) {
+			if(Objects.nonNull(uuids) && uuids.size() > 0) {
 				return new CachedIterable<T>(clz, 
 						cachedObjects,
 						uuids);
@@ -315,7 +296,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			Cache<String,T> cachedObjects = getCache(clz);
 			
 			UUIDList uuids = cachedUUIDs.get(cacheName);
-			if(Boolean.getBoolean("jadaptive.cache") && Objects.nonNull(uuids) && uuids.size() > 0) {
+			if(Objects.nonNull(uuids) && uuids.size() > 0) {
 				return new CachedIterable<T>(clz, 
 						cachedObjects,
 						uuids);
