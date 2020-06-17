@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 
-public class TypeIterable<T extends UUIDEntity> implements Iterable<T> {
+public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 
-		static Logger log = LoggerFactory.getLogger(TypeIterable.class);
+		static Logger log = LoggerFactory.getLogger(CachingIterable.class);
 		
 		Iterable<Document> iterator;
 		Class<T> clz;
@@ -25,7 +25,7 @@ public class TypeIterable<T extends UUIDEntity> implements Iterable<T> {
 		UUIDList processedUUIDs = new UUIDList();
 		int maximumCachedUUIDs = Integer.parseInt(System.getProperty("jadaptive.iteratorCache.maxUUIDs", "100"));
 		
-		public TypeIterable(Class<T> clz, 
+		public CachingIterable(Class<T> clz, 
 				Iterable<Document> iterator, 
 				Cache<String,T> cachedObjects,
 				Cache<String,UUIDList> cachedUUIDs,
