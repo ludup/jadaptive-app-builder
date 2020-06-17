@@ -62,6 +62,9 @@ public class TypeIterable<T extends UUIDEntity> implements Iterable<T> {
 			public T next() {
 				try {
 					Document doc = iterator.next();
+					if(!Boolean.getBoolean("jadaptive.cache")) {
+						return DocumentHelper.convertDocumentToObject(clz, doc);
+					}
 					String uuid = doc.getString("_id");
 					T obj = cachedObjects.get(uuid);
 					if(Objects.nonNull(obj)) {
