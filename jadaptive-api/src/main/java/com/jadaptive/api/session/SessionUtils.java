@@ -1,5 +1,6 @@
 package com.jadaptive.api.session;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -248,7 +249,8 @@ public class SessionUtils {
 			return false;
 		}
 		
-		List<String> origins = Arrays.asList(properties.getProperty("cors.origins", "").split(","));
+		List<String> origins = new ArrayList<>();
+		origins.addAll(Arrays.asList(properties.getProperty("cors.origins", "").split(",")));
 		
 		if(origins.size() > 0 && log.isInfoEnabled()) {
 			log.info("Security properties allows origins {}", Utils.csv(origins));
@@ -256,7 +258,9 @@ public class SessionUtils {
 		
 		if(ApplicationProperties.getValue("cors.enabled", false) && !Objects.isNull(requestOrigin)) {
 			
-			List<String> tmp = Arrays.asList(ApplicationProperties.getValue("cors.origins", "").split(","));
+			List<String> tmp =  new ArrayList<>();
+			tmp.addAll(Arrays.asList(ApplicationProperties.getValue("cors.origins", "").split(",")));
+			
 			if(tmp.size() > 0 && log.isInfoEnabled()) {
 				log.info("Global configuration allows origins {}", Utils.csv(tmp));
 			}	
