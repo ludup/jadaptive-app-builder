@@ -3,6 +3,7 @@ package com.jadaptive.api.role;
 import java.util.Collection;
 
 import com.jadaptive.api.permissions.PermissionUtils;
+import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.user.User;
 
 public interface RoleService {
@@ -45,4 +46,6 @@ public interface RoleService {
 	Collection<Role> getRolesByUser(User user);
 
 	Collection<Role> getAllUserRoles();
+	
+	boolean isAssigned(AssignableUUIDEntity obj, User user);
 }

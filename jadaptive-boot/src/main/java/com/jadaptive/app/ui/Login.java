@@ -24,16 +24,12 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.auth.AuthenticationService;
 
 @Page
 @View(contentType = "text/html", paths = { "/login"})
 @Resource
 public class Login extends AbstractPage {
-
-	@Autowired
-	private UserService userService; 
 	
 	@Autowired
 	private AuthenticationService authenticationService; 

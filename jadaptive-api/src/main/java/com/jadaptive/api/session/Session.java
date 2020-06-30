@@ -34,7 +34,7 @@ public class Session extends AbstractUUIDEntity {
 	Date signedOut;
 	
 	@ObjectField(name = "Tenant", description = "The tenant of this session", 
-			type = FieldType.OBJECT_REFERENCE, references = Tenant.RESOURCE_KEY)
+			type = FieldType.OBJECT_REFERENCE)
 	Tenant tenant;
 	
 	@ObjectField(name = "User Agent", description = "The user agent used for this session", 

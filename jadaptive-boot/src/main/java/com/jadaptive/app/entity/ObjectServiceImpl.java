@@ -157,7 +157,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
-	public Integer getWeight() {
+	public Integer getTemplateOrder() {
 		return SystemTemplates.ENTITY.ordinal();
 	}
 

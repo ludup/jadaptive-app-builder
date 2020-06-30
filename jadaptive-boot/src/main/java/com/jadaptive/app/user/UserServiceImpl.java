@@ -39,7 +39,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
 	
 	@Override
-	public Integer getWeight() {
+	public Integer getOrder() {
 		return 0;
 	}
 	
@@ -241,7 +241,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	}
 
 	@Override
-	public UUIDDocument getDocumentByUUID(String uuid) {
+	public UUIDDocument getObjectByUUID(String uuid) {
 		return getUserByUUID(uuid);
 	}
 

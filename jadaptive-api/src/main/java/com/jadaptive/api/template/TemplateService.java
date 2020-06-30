@@ -32,5 +32,6 @@ public interface TemplateService {
 
 	Iterable<ObjectTemplate> getTemplatesWithScope(ObjectScope personal);
 
+	void registerObjectDependency(String resourceKey, ObjectTemplate template);
 
 }

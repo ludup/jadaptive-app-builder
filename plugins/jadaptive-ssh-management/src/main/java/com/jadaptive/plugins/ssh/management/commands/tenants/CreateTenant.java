@@ -18,7 +18,7 @@ public class CreateTenant extends AbstractTenantAwareCommand {
 	TenantService tenantService; 
 	
 	public CreateTenant() {
-		super("create-tenant", "System Management", UsageHelper.build("create-tenant [domain]",
+		super("create-tenant", "System Management", UsageHelper.build("create-tenant <domain>",
 				"-n, --name  <name>   Create a new Tenant"), "Create a tenant domain");
 	}
 

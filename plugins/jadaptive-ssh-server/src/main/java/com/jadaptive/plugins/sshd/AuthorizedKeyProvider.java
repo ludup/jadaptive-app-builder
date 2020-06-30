@@ -3,6 +3,7 @@ package com.jadaptive.plugins.sshd;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.tenant.TenantService;
@@ -16,6 +17,7 @@ import com.sshtools.common.ssh.SshConnection;
 import com.sshtools.common.ssh.components.SshPublicKey;
 
 @Component
+@Qualifier(value = "defaultPkAuthentication")
 public class AuthorizedKeyProvider extends AbstractPublicKeyAuthenticationProvider {
 
 	@Autowired

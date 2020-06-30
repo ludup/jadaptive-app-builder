@@ -117,6 +117,6 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 
 	}
 	
-	public Integer getWeight() { return Integer.MIN_VALUE + 1; };
+	public Integer getOrder() { return Integer.MIN_VALUE + 1; };
 
 }

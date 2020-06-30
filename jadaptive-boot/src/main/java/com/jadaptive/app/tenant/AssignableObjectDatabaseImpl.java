@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.jadaptive.api.db.AssignableObjectDatabase;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
@@ -23,6 +24,9 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	@Autowired
 	private TenantAwareObjectDatabase<T> objectDatabase;
 	
+	@Autowired
+	private PermissionService permissionService; 
+	
 	protected void assign(T e, Collection<Role> roles, Collection<User> users) {
 		
 		for(Role role : roles) {
@@ -37,14 +41,18 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	}
 	
 	@Override
-	public Collection<T> getAssignedObjects(Class<T> resourceClass, User user) {
+	public Iterable<T> getAssignedObjects(Class<T> resourceClass, User user) {
 		
-		Collection<Role> userRoles = roleService.getRolesByUser(user);
-		return objectDatabase.searchObjects(resourceClass, 
-				SearchField.or(
-						SearchField.in("users", user.getUuid()),
-						SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
-				));
+		if(permissionService.isAdministrator(user)) {
+			 return getObjects(resourceClass);
+		} else {
+			Collection<Role> userRoles = roleService.getRolesByUser(user);
+			return objectDatabase.searchObjects(resourceClass, 
+					SearchField.or(
+							SearchField.in("users", user.getUuid()),
+							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
+					));
+		}
 	}
 
 	@Override
@@ -65,16 +73,20 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	@Override
 	public T getObject(Class<T> resourceClass, User user, SearchField... fields) {
 		
-		Collection<Role> userRoles = roleService.getRolesByUser(user);
-		
-		if(fields.length > 0) {
-			return objectDatabase.get(resourceClass, SearchField.and(SearchField.and(fields), 
-					SearchField.or(SearchField.in("users", user.getUuid()),
-									SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));
+		if(permissionService.isAdministrator(user)) {
+			 return getObject(resourceClass, fields);
 		} else {
-			return objectDatabase.get(resourceClass, SearchField.or(
-				SearchField.in("users", user.getUuid()),
-				SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))));
+			Collection<Role> userRoles = roleService.getRolesByUser(user);
+			
+			if(fields.length > 0) {
+				return objectDatabase.get(resourceClass, SearchField.and(SearchField.and(fields), 
+						SearchField.or(SearchField.in("users", user.getUuid()),
+										SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));
+			} else {
+				return objectDatabase.get(resourceClass, SearchField.or(
+					SearchField.in("users", user.getUuid()),
+					SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))));
+			}
 		}
 	}
 
@@ -83,5 +95,9 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 		return objectDatabase.list(resourceClass);
 	}
 
+	@Override
+	public T getObject(Class<T> resourceClass, SearchField... fields) {
+		return objectDatabase.get(resourceClass, fields);
+	}
 	
 }

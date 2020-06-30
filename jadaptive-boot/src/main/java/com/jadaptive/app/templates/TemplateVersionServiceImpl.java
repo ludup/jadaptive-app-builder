@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.FileSystemNotFoundException;
@@ -49,8 +50,10 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
@@ -82,6 +85,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	@Autowired
 	private PermissionService permissionService; 
+	
+	@Autowired
+	private TemplateService templateService; 
 	
 	@Override
 	public Iterable<TemplateVersion> list() throws RepositoryException, ObjectException {
@@ -430,58 +436,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			resolveFields(clz, fields, e.recurse());
 			
 			
-			for(Field f :fields) {
+			for(Field field :fields) {
 				
-				ObjectField[] annotations = f.getAnnotationsByType(ObjectField.class);
+				ObjectField objectAnnotation = field.getAnnotation(ObjectField.class);
 				
-				if(Objects.nonNull(annotations) && annotations.length > 0) {
+				if(Objects.nonNull(objectAnnotation)) {
 					
-					ObjectField field = annotations[0];
-					
-					i18n.setProperty(String.format("%s.%s.name", template.getResourceKey(), f.getName()), field.name());
-					i18n.setProperty(String.format("%s.%s.desc", template.getResourceKey(), f.getName()), field.description());
-					
-					FieldTemplate t = new FieldTemplate();
-					t.setResourceKey(f.getName());
-					t.setDefaultValue(field.defaultValue());
-					t.setFieldType(selectFieldType(f.getType(), field.type()));
-					t.setHidden(field.hidden());
-					t.setRequired(field.required());
-					t.setSystem(false);
-					t.setSearchable(field.searchable());
-					t.setTextIndex(field.textIndex());
-					t.setUnique(field.unique());
-					t.setCollection(f.getType().isAssignableFrom(Collection.class));
-					t.setReadOnly(field.readOnly());
-					t.setAlternativeId(field.alternativeId());
-					
-					t.setDescription(field.description());
-					t.setName(field.name());
-					
-					switch(field.type()) {
-					case ENUM:
-					case OBJECT_EMBEDDED:
-					case OBJECT_REFERENCE:
-						if(StringUtils.isBlank(field.references())) {
-							t.getValidators().add(new FieldValidator(
-									ValidationType.OBJECT_TYPE, 
-									f.getType().getName()));
-							t.getValidators().add(new FieldValidator(
-									ValidationType.RESOURCE_KEY, 
-									DocumentHelper.getTemplateResourceKey(f.getType())));
-						} else {
-							t.getValidators().add(new FieldValidator(
-									ValidationType.OBJECT_TYPE, 
-									field.references()));
-							t.getValidators().add(new FieldValidator(
-									ValidationType.RESOURCE_KEY, 
-									field.references()));
-						}
-						break;
-					default:
-						break;
-					}
-					
+					FieldTemplate t = processFieldAnnotations(objectAnnotation, field, i18n, template);
 					template.getFields().add(t);
 				}
 			}
@@ -512,6 +473,71 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 	}
 	
+	private FieldTemplate processFieldAnnotations(ObjectField field, Field f, Properties i18n, ObjectTemplate template) {
+		i18n.setProperty(String.format("%s.%s.name", template.getResourceKey(), f.getName()), field.name());
+		i18n.setProperty(String.format("%s.%s.desc", template.getResourceKey(), f.getName()), field.description());
+		
+		FieldTemplate t = new FieldTemplate();
+		t.setResourceKey(f.getName());
+		t.setDefaultValue(field.defaultValue());
+		t.setFieldType(selectFieldType(f.getType(), field.type()));
+		t.setHidden(field.hidden());
+		t.setRequired(field.required());
+		t.setSystem(false);
+		t.setSearchable(field.searchable());
+		t.setTextIndex(field.textIndex());
+		t.setUnique(field.unique());
+		t.setCollection(f.getType().isAssignableFrom(Collection.class));
+		t.setReadOnly(field.readOnly());
+		t.setAlternativeId(field.alternativeId());
+		
+		t.setDescription(field.description());
+		t.setName(field.name());
+		
+		switch(field.type()) {
+		case ENUM:
+		case OBJECT_EMBEDDED:
+		case OBJECT_REFERENCE:
+			String resourceKey = field.references();
+			if(StringUtils.isBlank(resourceKey)) {
+				Class<?> clz = f.getType();
+				if(Collections.class.isAssignableFrom(clz)) {
+					clz = (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
+				}
+				resourceKey = clz.getName();
+			}
+			if(StringUtils.isBlank(field.references())) {
+				t.getValidators().add(new FieldValidator(
+						ValidationType.OBJECT_TYPE, 
+						f.getType().getName()));
+				t.getValidators().add(new FieldValidator(
+						ValidationType.RESOURCE_KEY, 
+						resourceKey));
+				templateService.registerObjectDependency(resourceKey, template);
+			} else {
+				t.getValidators().add(new FieldValidator(
+						ValidationType.OBJECT_TYPE, 
+						field.references()));
+				t.getValidators().add(new FieldValidator(
+						ValidationType.RESOURCE_KEY, 
+						field.references()));
+				templateService.registerObjectDependency(field.references(), template);
+			}
+			break;
+		default:
+			break;
+		}
+		
+		Validator[] validators = f.getAnnotationsByType(Validator.class);
+		if(Objects.nonNull(validators)) {
+			for(Validator validator : validators) {
+				t.getValidators().add(new FieldValidator(validator.type(), validator.value()));
+			}
+		}
+		
+		return t;
+	}
+
 	private Collection<String> verifyColumnNames(ObjectTemplate template, Collection<String> columns) {
 		Map<String,FieldTemplate> definedColumns = template.toMap();
 		for(String column : columns) {

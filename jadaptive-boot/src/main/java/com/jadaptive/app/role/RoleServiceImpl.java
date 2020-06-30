@@ -15,6 +15,7 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
@@ -34,7 +35,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	private TenantAwareObjectDatabase<Role> repository; 
 
 	@Override
-	public Integer getWeight() {
+	public Integer getOrder() {
 		return Integer.MIN_VALUE;
 	}
 	
@@ -265,6 +266,21 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	@Override
 	public Iterable<Role> allRoles() {
 		return repository.list(Role.class);
+	}
+
+	@Override
+	public boolean isAssigned(AssignableUUIDEntity obj, User user) {
+		
+		if(obj.getUsers().contains(user.getUuid())) {
+			return true;
+		}
+		
+		for(Role role : getRoles(user)) {
+			if(obj.getRoles().contains(role.getUuid())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

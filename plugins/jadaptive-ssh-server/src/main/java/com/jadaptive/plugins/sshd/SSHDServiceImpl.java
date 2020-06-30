@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -43,6 +45,7 @@ import com.sshtools.server.vsession.ShellCommandFactory;
 import com.sshtools.server.vsession.VirtualChannelFactory;
 import com.sshtools.server.vsession.VirtualSessionPolicy;
 import com.sshtools.server.vsession.commands.fs.FileSystemCommandFactory;
+import com.sshtools.vsession.commands.ssh.SshClientsCommandFactory;
 
 @Service
 public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAware {
@@ -73,6 +76,8 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	@Autowired
 	private UserService userService; 
 	
+	Map<String,SSHInterface> interfaces = new HashMap<>();
+	
 	public SSHDServiceImpl() throws UnknownHostException {
 		super();
 	}
@@ -93,8 +98,10 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			
 			addInterface(extenalAccess ? "::" : "::1", port);
 
-			for(SshInterface iface : appContext.getBeans(SshInterface.class)) {
-				addInterface(iface.getAddressToBind(),  iface.getPort(), iface.getContextFactory());
+			for(SSHInterfaceFactory factory : appContext.getBeans(SSHInterfaceFactory.class)) {
+				for(SSHInterface iface : factory.getInterfaces()) {
+					addInterface(iface.getAddressToBind(),  iface.getPort(), iface.getContextFactory());
+				}
 			}
 			
 			start(true);
@@ -179,6 +186,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 				
 				ShellCommandFactory scf = new ShellCommandFactory(
 						new FileSystemCommandFactory(),
+						new SshClientsCommandFactory(),
 						userCommands);
 				
 				permissionService.setupUserContext(userService.getUser(con.getUsername()));
@@ -231,5 +239,21 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		sshContext.getPolicy(VirtualSessionPolicy.class).setWelcomeText(out.toString());
 		ClassLoader classLoader = getClass().getClassLoader();
 		sshContext.getPolicy(ClassLoaderPolicy.class).setClassLoader(classLoader);
+	}
+
+	@Override
+	public void addInterface(SSHInterface sshInterface) throws IOException {
+		addInterface(sshInterface.getAddressToBind(), sshInterface.getPort(), sshInterface.getContextFactory());
+		interfaces.put(sshInterface.getInterface(), sshInterface);
+	}
+
+	@Override
+	public boolean isListening(String intf) {
+		return interfaces.containsKey(intf);
+	}
+
+	@Override
+	public SSHInterface getInterface(String intf) {
+		return interfaces.get(intf);
 	}
 }

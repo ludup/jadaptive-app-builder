@@ -27,7 +27,6 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
-import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
@@ -53,10 +52,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	@Autowired
 	private PermissionService permissionService; 
-	
-	@Autowired
-	private RoleService roleService; 
-	
+
 	@Autowired
 	private ApplicationService applicationService; 
 
@@ -144,7 +140,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			Collections.<JsonTemplateEnabledService>sort(ordered, new  Comparator<JsonTemplateEnabledService>() {
 				@Override
 				public int compare(JsonTemplateEnabledService o1, JsonTemplateEnabledService o2) {
-					return o1.getWeight().compareTo(o2.getWeight());
+					return o1.getTemplateOrder().compareTo(o2.getTemplateOrder());
 				}
 			});
 			
@@ -160,7 +156,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 
 				@Override
 				public int compare(TenantAware o1, TenantAware o2) {
-					return o1.getWeight().compareTo(o2.getWeight());
+					return o1.getOrder().compareTo(o2.getOrder());
 				}
 				
 			});
@@ -247,7 +243,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 
 	@Override
-	public Integer getWeight() {
+	public Integer getTemplateOrder() {
 		return Integer.MIN_VALUE;
 	}
 
@@ -373,7 +369,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 
 	@Override
-	public UUIDDocument getDocumentByUUID(String uuid) {
+	public UUIDDocument getObjectByUUID(String uuid) {
 		return getTenantByUUID(uuid);
 	}
 }

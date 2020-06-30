@@ -6,5 +6,5 @@ public interface TenantAware {
 	
 	public void initializeTenant(Tenant tenant, boolean newSchema);
 
-	public default Integer getWeight() { return Integer.MAX_VALUE; };
+	public default Integer getOrder() { return Integer.MAX_VALUE; };
 }

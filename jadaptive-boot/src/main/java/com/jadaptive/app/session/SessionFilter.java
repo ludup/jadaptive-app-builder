@@ -38,7 +38,6 @@ import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.auth.AuthenticationService;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
@@ -60,10 +59,7 @@ public class SessionFilter implements Filter {
 	private PermissionService permissionService; 
 	
 	@Autowired
-	private SecurityPropertyService securityService; 
-	
-	@Autowired
-	private UserService userService;  
+	private SecurityPropertyService securityService;  
 	
 	@Autowired
 	private AuthenticationService authenticationService; 
@@ -141,6 +137,7 @@ public class SessionFilter implements Filter {
 			/**
 			 * Check if we have a valid CORS request
 			 */
+			@SuppressWarnings("unused")
 			boolean validCORS = sessionUtils.isValidCORSRequest(request, response, properties);		
 					
 			if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))

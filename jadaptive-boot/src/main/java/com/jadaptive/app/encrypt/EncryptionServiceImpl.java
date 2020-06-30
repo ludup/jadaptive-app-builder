@@ -20,6 +20,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.encrypt.EncryptionService;
@@ -29,6 +31,8 @@ import com.jadaptive.app.db.RsaEncryptionProvider;
 @Service
 public class EncryptionServiceImpl implements EncryptionService {
 
+	static Logger log = LoggerFactory.getLogger(EncryptionServiceImpl.class);
+	
 	public static final String ENCRYPTION_MARKER = "!!ENC!!";
 	
 	public static EncryptionService instance;
@@ -87,7 +91,11 @@ public class EncryptionServiceImpl implements EncryptionService {
 			byte[] iv = Base64.getDecoder().decode(elements[1]);
 			byte[] encrypted = Base64.getDecoder().decode(elements[2]);
 			
-			return new String(decryptAES(encrypted, key, iv), "UTF-8");
+			String tmp = new String(decryptAES(encrypted, key, iv), "UTF-8");
+			if(log.isInfoEnabled()) {
+				log.info("Decrypted " + tmp);
+			}
+			return tmp;
 		} catch (Exception e) {
 			throw new RepositoryException(e.getMessage(), e);
 		}

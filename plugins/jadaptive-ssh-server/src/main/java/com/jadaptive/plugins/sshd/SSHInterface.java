@@ -1,15 +1,15 @@
 package com.jadaptive.plugins.sshd;
 
-import org.pf4j.ExtensionPoint;
-
 import com.sshtools.common.nio.ProtocolContextFactory;
 
-public interface SshInterface extends ExtensionPoint {
+public interface SSHInterface {
 
 	String getAddressToBind();
 
 	int getPort();
 
 	ProtocolContextFactory<?> getContextFactory();
+
+	default String getInterface() { return String.format("%s:%d", getAddressToBind(), getPort()); }
 
 }

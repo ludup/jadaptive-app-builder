@@ -122,8 +122,6 @@ public class Application {
 	
 	private static void checkDefaultCertificate() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, MismatchedCertificateException {
 		
-		
-		
 		KeyPair key = null;
 		X509Certificate[] chain = null;
 		X509Certificate cert = null;

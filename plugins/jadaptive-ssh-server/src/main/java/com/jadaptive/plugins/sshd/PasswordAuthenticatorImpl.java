@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationProperties;
@@ -20,6 +21,7 @@ import com.sshtools.common.logger.Log;
 import com.sshtools.common.ssh.SshConnection;
 
 @Component
+@Qualifier(value = "defaultPasswordAuthenticator")
 public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 
 	@Autowired

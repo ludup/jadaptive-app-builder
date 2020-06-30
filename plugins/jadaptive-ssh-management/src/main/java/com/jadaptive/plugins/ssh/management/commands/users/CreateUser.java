@@ -18,7 +18,7 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserImpl;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.plugins.ssh.management.ConsoleHelper;
+import com.jadaptive.plugins.sshd.ConsoleHelper;
 import com.jadaptive.plugins.sshd.commands.AbstractTenantAwareCommand;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.UsageException;

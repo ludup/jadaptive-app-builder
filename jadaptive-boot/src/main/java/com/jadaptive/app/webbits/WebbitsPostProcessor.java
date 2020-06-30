@@ -19,8 +19,10 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.codesmith.webbits.CacheFactory;
 import com.codesmith.webbits.ContentHandler;
 import com.codesmith.webbits.Context;
+import com.codesmith.webbits.DefaultCacheFactory;
 import com.codesmith.webbits.Extension;
 import com.codesmith.webbits.ExtensionLocator;
 import com.codesmith.webbits.MimeService;
@@ -34,6 +36,7 @@ import com.codesmith.webbits.Widget;
 import com.codesmith.webbits.WidgetLocator;
 import com.codesmith.webbits.i18n.BundleResolver;
 import com.codesmith.webbits.util.Invoker;
+import com.jadaptive.api.cache.CacheService;
 
 import io.socket.engineio.server.EngineIoServer;
 
@@ -216,6 +219,11 @@ public class WebbitsPostProcessor implements BeanFactoryPostProcessor, Applicati
 	    public EngineIoServer getIo() {
 		return context.getIo();
 	    }
+
+		@Override
+		public CacheFactory getCacheFactory() {
+			return new DefaultCacheFactory();
+		}
 	});
 	if (isRunningInEmbeddedWebServer()) {
 	    ClassPathScanningCandidateComponentProvider componentProvider = createComponentProvider();

@@ -9,7 +9,7 @@ import com.jadaptive.api.repository.TransactionAdapter;
 
 public interface JsonTemplateEnabledService<T extends AbstractUUIDEntity> {
 
-	Integer getWeight();
+	Integer getTemplateOrder();
 
 	T createEntity();
 

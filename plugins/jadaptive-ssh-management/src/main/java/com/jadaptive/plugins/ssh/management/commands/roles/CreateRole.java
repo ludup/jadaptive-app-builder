@@ -19,7 +19,7 @@ public class CreateRole extends AbstractTenantAwareCommand {
 	private RoleService roleService; 
 	
 	public CreateRole() {
-		super("create-role", "Role Management", UsageHelper.build("create-role [role]"), "Create a Role");
+		super("create-role", "Role Management", UsageHelper.build("create-role <name>"), "Create a Role");
 	}
 
 	@Override

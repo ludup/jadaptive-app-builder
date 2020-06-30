@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.ssh.management;
+package com.jadaptive.plugins.sshd;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -38,6 +38,113 @@ public class ConsoleHelper {
 	@Autowired
 	private ApplicationService applicationService; 
 	
+	public String promptString(VirtualConsole console,
+			String prompt) {
+		return promptString(console, prompt, null, null, null);
+	}
+	
+	public String promptPassword(VirtualConsole console,
+			String prompt) {
+		return promptString(console, prompt, null, null, '*');
+	}
+	
+	public String promptString(VirtualConsole console,
+			String prompt,
+			String defaultValue) {
+		return promptString(console, prompt, defaultValue, null, null);
+	}
+	
+	public String promptString(VirtualConsole console,
+			String prompt,
+			String defaultValue,
+			String regex,
+			Character mask) {
+		
+		String value;
+		
+		while(true) {
+			if(Objects.nonNull(mask)) {
+				value = console.readLine(prompt, mask);
+			} else {
+				value = console.readLine(prompt);
+			}
+			if(StringUtils.isBlank(value)) {
+				if(Objects.nonNull(defaultValue)) {
+					return defaultValue;
+				} else {
+					console.println("A non-empty value is required");
+				}
+			} else {
+				if(Objects.isNull(regex) || value.matches(regex)) {
+					return value;
+				}
+				console.println("Value does not match required input");
+			}
+		}
+	}
+	
+	public AbstractFile promptFile(VirtualConsole console,
+			String prompt,
+			AbstractFile defaultValue,
+			AbstractFile folder,
+			boolean requireValue, 
+			boolean allowNonExisting) throws IOException, PermissionDeniedException {
+		
+		String value;
+		
+		while(true) {
+			value = console.readLine(prompt);
+			
+			if(StringUtils.isBlank(value)) {
+				if(Objects.nonNull(defaultValue)) {
+					return defaultValue;
+				} else if(requireValue){
+					console.println("A non-empty value is required");
+				} else {
+					return null;
+				}
+			} else {
+				AbstractFile file = folder.resolveFile(value);
+				if(file.exists() || allowNonExisting) {
+					return file;
+				} else {
+					console.println(String.format("%s is not a valid file", value));
+				}
+			}
+		}
+	}
+	
+	public int promptInt(VirtualConsole console, 
+			String prompt, 
+			Integer defaultValue, 
+			int min, 
+			int max) {
+		
+		int value;
+		
+		while(true) {
+			String v = console.readLine(prompt);
+			if(StringUtils.isBlank(v)) {
+				if(Objects.nonNull(defaultValue)) {
+					return defaultValue;
+				} else {
+					console.println(String.format("An integer value is required between %d and %d", min, max));
+					continue;
+				}
+			}
+			try {
+				value = Integer.parseInt(v);
+				if(value < min || value > max) {
+					console.println(String.format("Value must be between %d and %d", min, max));
+					continue;
+				}
+				break;
+			} catch(NumberFormatException e) {
+				console.println(String.format("%s is not a valid entry", v));
+			}
+		}
+		return value;
+	}
 
 	public Map<String, Object> promptTemplate(VirtualConsole console,
 			Map<String, Object> obj,

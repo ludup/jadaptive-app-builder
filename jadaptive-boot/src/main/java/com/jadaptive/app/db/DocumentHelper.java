@@ -39,9 +39,9 @@ import com.jadaptive.api.repository.UUIDDocumentService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.ObjectUUIDBean;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectUUIDBean;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
@@ -274,7 +274,7 @@ public class DocumentHelper {
 						ObjectUUIDBean service = parameter.getType().getAnnotation(ObjectUUIDBean.class);
 						if(Objects.nonNull(service)) {
 							UUIDDocumentService bean = (UUIDDocumentService) ApplicationServiceImpl.getInstance().getBean(service.bean());
-							Object ref = bean.getDocumentByUUID(objectUUID);
+							Object ref = bean.getObjectByUUID(objectUUID);
 							m.invoke(obj, ref);
 						} else {
 							String resourceKey = getTemplateResourceKey(parameter.getType());

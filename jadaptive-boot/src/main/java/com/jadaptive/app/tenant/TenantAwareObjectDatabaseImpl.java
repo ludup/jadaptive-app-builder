@@ -5,7 +5,6 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
@@ -31,8 +30,8 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	@Autowired
 	protected EventService eventService; 
 	
-	@Autowired
-	private CacheService cacheService; 
+//	@Autowired
+//	private CacheService cacheService; 
 	
 	@Override
 	public Iterable<T> list(Class<T> resourceClass, SearchField... fields) {

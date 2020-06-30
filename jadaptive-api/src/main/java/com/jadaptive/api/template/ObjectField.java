@@ -31,6 +31,7 @@ public @interface ObjectField {
 		
 		boolean alternativeId() default false;
 		
+		@Deprecated
 		String references() default "";
 
 		// USER INTERFACE PROPERTIES
