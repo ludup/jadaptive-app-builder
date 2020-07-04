@@ -14,6 +14,7 @@ import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.template.FieldView;
 
 @Page(BootstrapTable.class)
 @View(contentType = "text/html", paths = { "/import/{resourceKey}"})
@@ -43,4 +44,9 @@ public class Import extends TemplatePage {
     Document service(@In Document content) {
     	return content;
     }
+
+	@Override
+	public FieldView getScope() {
+		return FieldView.IMPORT;
+	}
 }

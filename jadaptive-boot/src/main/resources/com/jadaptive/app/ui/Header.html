@@ -7,53 +7,9 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul id="topMenu" class="navbar-nav mr-auto">
     </ul>
-    <form id="searchForm" class="form-inline my-2 my-lg-0">
-      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-      <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button>
-    </form>
-    <div id="logoff" class="pl-3"><a href="/app/ui/logoff"><i class="text-light fas fa-sign-out-alt"></i></a></div>
+<!--     <form id="searchForm" class="form-inline my-2 my-lg-0"> -->
+<!--       <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"> -->
+<!--       <button class="btn btn-outline-light my-2 my-sm-0" type="submit">Search</button> -->
+<!--     </form> -->
   </div>
 </nav>
-<script type="text/javascript">
-
-	$(document).ready(function() {
-		debugger;
-		$.getJSON('/app/api/applicationMenu/list', function(data) {
-			debugger;
-			if(data.success) {
-				var menus = [];
-				var top = [];
-				$.each(data.resources, function(idx, obj) {
-					if(obj.parent != '') {
-						if(!menus[obj.parent]) {
-							menus[obj.parent] = [];
-						}
-						menus[obj.parent].push(obj);
-					} else {
-						if(!menus[obj.uuid]) {
-							menus[obj.uuid] = [];
-						}
-						top.push(obj);
-					}
-				});
-				
-				$.each(top, function(idx, obj) {
-				
-					if(menus[obj.uuid].length > 0) {
-						$('#topMenu').append('<li class="nav-item dropdown mr-3">'
-								+ '<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'
-								+ obj.title + '</a><div id="' + obj.uuid + '" class="dropdown-menu" aria-labelledby="navbarDropdown"></div></li>');
-						
-						$.each(menus[obj.uuid], function(idx, child) {
-							$('#' + child.parent).append('<a class="dropdown-item mr-3" href="' 
-									+ child.path + '"><i class="' + child.icon + ' w-25"></i>&nbsp;' + child.title + '</a>');
-					
-						});
-					}
-				});
-				
-				
-			}
-		});
-	});
-</script>

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.FieldView;
 
 public abstract class TemplatePage extends AuthenticatedView {
 
@@ -15,8 +16,6 @@ public abstract class TemplatePage extends AuthenticatedView {
 	
 	protected String resourceKey;
 	protected ObjectTemplate template; 
-	protected boolean readOnly;
-	
 
     public ObjectTemplate getTemplate() {
     	return template;
@@ -31,8 +30,6 @@ public abstract class TemplatePage extends AuthenticatedView {
 	}
     }
     
-	public boolean isReadOnly() {
-		return readOnly;
-	}
+	public abstract FieldView getScope();
  
 }

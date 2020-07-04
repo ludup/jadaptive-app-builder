@@ -18,6 +18,7 @@ import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.app.ui.renderers.DropdownInput;
@@ -56,9 +57,12 @@ public class ParentTable extends TemplatePage {
 			content.select(".readWrite").remove();
 		}
 		
+		/**
+		 * TODO: Fix this 
+		 */
 		new DropdownInput(content.select("#searchDropdown"),
-				"searchField", "name")
-					.renderValues(template.getFields());
+				"searchField", "name");
+//					.renderValues(new ArrayList<FieldTemplate>(template.getFields()));
 		
 		Iterable<ObjectTemplate> children = templateService.children(template.getResourceKey());
 		Iterator<ObjectTemplate> it = children.iterator();
@@ -70,5 +74,10 @@ public class ParentTable extends TemplatePage {
 				.renderValues(children);
 		}
 		return content;
+	}
+
+	@Override
+	public FieldView getScope() {
+		return FieldView.TABLE;
 	}
 }

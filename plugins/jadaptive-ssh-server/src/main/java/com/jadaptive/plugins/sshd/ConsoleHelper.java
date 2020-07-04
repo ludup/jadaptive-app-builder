@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -15,9 +16,11 @@ import org.apache.commons.lang.StringUtils;
 import org.jline.reader.Candidate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.support.WebBindingInitializer;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.tasks.TriggerMapping;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -37,6 +40,9 @@ public class ConsoleHelper {
 	
 	@Autowired
 	private ApplicationService applicationService; 
+	
+	@Autowired
+	private I18nService i18n; 
 	
 	public String promptString(VirtualConsole console,
 			String prompt) {
@@ -179,8 +185,8 @@ public class ConsoleHelper {
 			break;
 		case PASSWORD:
 		{
-			String val = console.getLineReader().readLine(
-					String.format("%s: ", field.getName()), '*');
+			String val = console.getLineReader().readLine(String.format("%s: ",
+							getFieldName(template, field)), '*');
 			if(processMapping(val, field.getResourceKey(), mappings)) {
 				return;
 			}
@@ -190,7 +196,7 @@ public class ConsoleHelper {
 		case TEXT:
 		{
 			String val = console.readLine(
-					String.format("%s: ", field.getName()));
+					String.format("%s: ", getFieldName(template, field)));
 			if(processMapping(val, field.getResourceKey(), mappings)) {
 				return;
 			}
@@ -200,7 +206,7 @@ public class ConsoleHelper {
 		case TEXT_AREA:
 		{
 			while(true) {
-				console.println("Enter path to ".concat(field.getName()));
+				console.println("Enter path to ".concat(getFieldName(template, field)));
 				String val = console.readLine("Path: ");
 				if(processMapping(val, field.getResourceKey(), mappings)) {
 					continue;
@@ -215,7 +221,7 @@ public class ConsoleHelper {
 					obj.put(field.getResourceKey(), IOUtils.readUTF8StringFromStream(file.getInputStream()));
 					break;
 				} else if(field.isRequired()) {
-					console.println(String.format("%s is required", field.getName()));
+					console.println(String.format("%s is required", getFieldName(template, field)));
 				} else {
 					break;
 				}
@@ -227,7 +233,7 @@ public class ConsoleHelper {
 		{
 			String val; 
 			while(true) {
-				val = console.readLine(String.format("%s: ", field.getName()));
+				val = console.readLine(String.format("%s: ", getFieldName(template, field)));
 				if(processMapping(val, field.getResourceKey(), mappings)) {
 					continue;
 				}
@@ -246,7 +252,7 @@ public class ConsoleHelper {
 			String val; 
 			Set<String> validAnswers = new HashSet<>(Arrays.asList("y", "n", "yes", "no"));
 			do {
-				val = console.readLine(String.format("%s (y/n): ", field.getName()));	
+				val = console.readLine(String.format("%s (y/n): ", getFieldName(template, field)));	
 
 			} while(!val.startsWith(":") && !validAnswers.contains(val.toLowerCase()));
 			if(processMapping(val, field.getResourceKey(), mappings)) {
@@ -257,7 +263,7 @@ public class ConsoleHelper {
 		}
 		case ENUM:
 		{
-			console.println("Select ".concat(field.getName()).concat(" (press tab to cycle through values)"));
+			console.println("Select ".concat(getFieldName(template, field)).concat(" (press tab to cycle through values)"));
 			String enumType = field.getValidationValue(ValidationType.OBJECT_TYPE);
 			
 			try {
@@ -275,7 +281,7 @@ public class ConsoleHelper {
 				console.println();
 				String val;
 				while(true) {
-					val = console.readLine(String.format("%s: ", field.getName())).trim();
+					val = console.readLine(String.format("%s: ", getFieldName(template, field))).trim();
 					if(values.contains(val.toUpperCase())) {
 						break;
 					} else if(val.startsWith(":")) {
@@ -298,7 +304,7 @@ public class ConsoleHelper {
 		{
 			String val; 
 			while(true) {
-				val = console.readLine(String.format("%s: ", field.getName()));
+				val = console.readLine(String.format("%s: ", getFieldName(template, field)));
 				if(processMapping(val, field.getResourceKey(), mappings)) {
 					break;
 				}
@@ -306,7 +312,8 @@ public class ConsoleHelper {
 					obj.put(field.getResourceKey(), Long.parseLong(val));
 					break;
 				} catch(NumberFormatException e) {
-					console.println(String.format("Invalid entry: %s expecting long value but got %s instead", field.getName(), val));
+					console.println(String.format("Invalid entry: %s expecting long value but got %s instead", 
+							getFieldName(template, field), val));
 				}
 			}
 			break;
@@ -315,7 +322,7 @@ public class ConsoleHelper {
 		{
 			String val; 
 			while(true) {
-				val = console.readLine(String.format("%s: ", field.getName()));
+				val = console.readLine(String.format("%s: ", getFieldName(template, field)));
 				if(processMapping(val, field.getResourceKey(), mappings)) {
 					break;
 				}
@@ -323,7 +330,8 @@ public class ConsoleHelper {
 					obj.put(field.getResourceKey(), Integer.parseInt(val));
 					break;
 				} catch(NumberFormatException e) {
-					console.println(String.format("Invalid entry: %s expecting int value but got %s instead", field.getName(), val));
+					console.println(String.format("Invalid entry: %s expecting int value but got %s instead",
+							getFieldName(template, field), val));
 				}
 			}
 			break;
@@ -332,7 +340,7 @@ public class ConsoleHelper {
 		{
 			String val; 
 			while(true) {
-				val = console.readLine(String.format("%s: ", field.getName()));
+				val = console.readLine(String.format("%s: ", getFieldName(template, field)));
 				if(processMapping(val, field.getResourceKey(), mappings)) {
 					break;
 				}
@@ -340,7 +348,7 @@ public class ConsoleHelper {
 					obj.put(field.getResourceKey(), Utils.parseDate(val, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
 					break;
 				} catch(IllegalStateException e) {
-					throw new IOException(String.format("%s is a timestamp field and %s is not a timestamp", field.getName(), val));
+					throw new IOException(String.format("%s is a timestamp field and %s is not a timestamp", getFieldName(template, field), val));
 				}
 			}
 			break;
@@ -349,6 +357,15 @@ public class ConsoleHelper {
 			
 		}
 		
+	}
+
+	private String getFieldName(ObjectTemplate template, FieldTemplate field) {
+		return i18n.getFieldName(template, field);
+	}
+	
+	@SuppressWarnings("unused")
+	private String getFieldDesc(ObjectTemplate template, FieldTemplate field) {
+		return i18n.getFieldDesc(template, field);
 	}
 
 	private boolean processMapping(String val, String resourceKey, List<TriggerMapping> mappings) {
@@ -375,7 +392,7 @@ public class ConsoleHelper {
 				break;
 			case PASSWORD:
 			{
-				console.println(String.format("%-25s: %s", field.getName(), "**********"));
+				console.println(String.format("%-25s: %s", getFieldName(template, field), "**********"));
 				break;
 			}
 			case TEXT:
@@ -387,7 +404,7 @@ public class ConsoleHelper {
 			case TIMESTAMP:
 			case BOOL:
 			{
-				console.println(String.format("%-25s: %s", field.getName(), e.getValue(field).toString()));
+				console.println(String.format("%-25s: %s", getFieldName(template, field), e.getValue(field).toString()));
 				break;
 			}
 			default:

@@ -1,0 +1,119 @@
+$(document).ready(function() {
+
+	$.getJSON('/app/api/template/${view.template.resourceKey}', function(data) {
+		if(data.success) {
+			var t = data.resource;
+			
+			var columns = [];
+
+// 			$.each(t.fields, function(idx, obj) {
+				
+// 				if(obj.views.includes("TABLE")) {
+// 					columns.push({
+// 						title: obj.name,
+// 						field: obj.resourceKey,
+// 						visible: true
+// 					});
+// 				}
+				
+// 			});
+			
+// 			columns.push({
+// 				title: 'Actions',
+// 				formatter: function(val, obj) {
+// 					var ret = '<a href="/app/ui/update/${view.template.resourceKey}/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-edit"></i></a>&nbsp;';
+// 					ret += '<a href="/app/ui/view/${view.template.resourceKey}/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-eye"></i></a>&nbsp;';
+// 					if(!obj.system) {
+// 						ret += '<a class="clickDelete" href="#" data-uuid="' + obj.uuid + '"><i class="far fa-trash-alt"></i></a>';
+// 					}
+// 					return ret;
+// 				}
+// 			});
+
+			$('#table').bootstrapTable({
+				sidePagination: 'server',
+				totalField: 'total',
+				dataField: 'rows',
+				url: '/app/api/' + t.resourceKey + '/table',
+				pagination: true,
+				columns: columns,
+				search: true,
+// 				showColumns: columns.length > 2,
+				showRefresh: true,
+				mobileResponsive: true,
+				queryParams: function(params) {
+					params['searchField'] = $('#searchValue').val();
+					return params;
+				}
+			});
+			
+			
+			
+			$('#table').off('post-header.bs.table');
+			$('#table').on('post-header.bs.table', function(e) {
+				
+				if($('#searchField').length == 0) {
+					$('.search').parent().append('<div id="searchDropdownHolder" class="columns columns-right mr-1 float-right"></div>');
+					
+					$('#searchDropdownMenu').empty();
+
+					$.each(t.fields, function(idx, obj) {
+						if(!obj.hidden && obj.searchable) {
+							$('#searchDropdownMenu').append('<a data-resourcekey="' + obj.resourceKey +'" + class="clickSearch dropdown-item" href="#">' + obj.name + '</a>');
+						}
+					});
+						
+						
+					
+					$("#searchDropdown").appendTo("#searchDropdownHolder");
+					$('#searchDropdown').show();
+					
+					$('.clickSearch').click(function(e) {
+						debugger;
+						e.preventDefault();
+						var value = $(this).data('resourcekey');
+						var text = $(this).text();
+						$('#searchValue').val(value);
+						$('#searchText').val(text);
+					});
+				}
+
+				$('.clickDelete').off('click');
+				
+				$('.clickDelete').on('click', function(e) {
+					e.preventDefault();
+					var uuid = $(this).data('uuid');
+					bootbox.confirm({
+					    message: "Are you sure you want to delete the entity with uuid " + uuid + "?",
+					    buttons: {
+					        confirm: {
+					            label: 'Yes',
+					            className: 'btn-success'
+					        },
+					        cancel: {
+					            label: 'No',
+					            className: 'btn-danger'
+					        }
+					    },
+					    callback: function (result) {
+					        if(result) {
+					        	var url = '/app/api/' + t.resourceKey + '/' + uuid;
+					    		
+					    		$.ajax({
+					                url: url,
+					                type: 'delete',
+					                dataType: 'json',
+					                success: function (data) {
+					                	$('#table').bootstrapTable('refresh');
+					                }
+					            });
+					        }
+					    }
+					});
+				});
+			});
+		} else {
+			alert(data.message);
+		}
+	});
+});

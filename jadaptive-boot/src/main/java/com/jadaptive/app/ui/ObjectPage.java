@@ -48,13 +48,23 @@ public abstract class ObjectPage extends TemplatePage {
 			try {
 				permissionService.assertReadWrite(template.getResourceKey());
 			} catch(AccessDeniedException e) { 
-				readOnly = true;
-				try {
-					permissionService.assertRead(template.getResourceKey());
-					
-				} catch(AccessDeniedException ex) {
-					throw new FileNotFoundException(ex.getMessage());
+				switch(getScope()) {
+				case CREATE:
+				case UPDATE:
+				case IMPORT:
+					throw new FileNotFoundException(String.format(
+							"You do not have permission to %s", 
+							getScope().name().toLowerCase()));
+				default:
+					try {
+						permissionService.assertRead(template.getResourceKey());
+					} catch(AccessDeniedException ex) {
+						throw new FileNotFoundException(String.format(
+								"You do not have permission to %s", 
+								getScope().name().toLowerCase()));
+					}
 				}
+
  			}
 		} catch (ObjectNotFoundException nse) {
 			throw new FileNotFoundException(String.format("No %s with id %s", resourceKey, uuid));

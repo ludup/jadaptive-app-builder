@@ -6,17 +6,23 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.ObjectTemplate;
 
 public class DropdownInput extends InputRender {
 
+	@Autowired
+	private I18nService i18n;
+	
 	Elements inputElements;
 	Element valueElement;
 	Element nameElement;
 	public DropdownInput(Elements rootElement, String resourceKey, String defaultValue) {
-		super(rootElement, resourceKey, defaultValue);
+		super(resourceKey);
 	}
 
 	@Override
@@ -87,26 +93,26 @@ public class DropdownInput extends InputRender {
 		}
 	}
 	
-	public void renderTemplateFields(Collection<FieldTemplate> fields) {
-		
-		FieldTemplate selected = null;
-		for(FieldTemplate field : fields) {
-			if(Objects.isNull(field)) {
-				selected = field;
-			}
-			if(field.isSearchable()) {
-				addInputValue(field.getResourceKey(), field.getName());
-				if(field.getResourceKey().equals(defaultValue)) {
-					selected = field;
-				}
-			}
-		}
-		
-		if(Objects.nonNull(selected)) {
-			nameElement.val(selected.getName());
-			valueElement.val(selected.getResourceKey());
-		}
-	}
+//	public void renderTemplateFields(ObjectTemplate template, Collection<FieldTemplate> fields) {
+//		
+//		FieldTemplate selected = null;
+//		for(FieldTemplate field : fields) {
+//			if(Objects.isNull(field)) {
+//				selected = field;
+//			}
+//			if(field.isSearchable()) {
+//				addInputValue(field.getResourceKey(), i18n.getFieldName(template, field));
+//				if(field.getResourceKey().equals(defaultValue)) {
+//					selected = field;
+//				}
+//			}
+//		}
+//		
+//		if(Objects.nonNull(selected)) {
+//			nameElement.val(i18n.getFieldName(template, selected));
+//			valueElement.val(selected.getResourceKey());
+//		}
+//	}
 
 	
 }

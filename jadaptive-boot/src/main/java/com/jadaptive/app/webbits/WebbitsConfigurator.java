@@ -19,6 +19,7 @@ import com.codesmith.webbits.ExtensionLocator;
 import com.codesmith.webbits.ObjectCreator;
 import com.codesmith.webbits.ViewLocator;
 import com.codesmith.webbits.WidgetLocator;
+import com.codesmith.webbits.i18n.BundleResolver;
 import com.jadaptive.utils.FileUtils;
 
 @Component
@@ -39,6 +40,9 @@ public class WebbitsConfigurator extends Configurator {
     @Autowired
     private SpringObjectCreator springObjectCreator;
 
+    @Autowired
+    private WebbitsBundleResolver webbitsBundleResolver; 
+    
     @Autowired
     private PluginManager pluginManager; 
     
@@ -62,7 +66,13 @@ public class WebbitsConfigurator extends Configurator {
 	return widgetLocator;
     }
 
+    
     @Override
+	public BundleResolver createBundleResolver() {
+		return webbitsBundleResolver;
+	}
+
+	@Override
     protected void onInit(Context context) {
 	postProcessor.setContext(context);
     }

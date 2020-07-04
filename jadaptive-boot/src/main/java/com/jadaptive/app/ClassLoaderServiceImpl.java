@@ -1,10 +1,16 @@
 package com.jadaptive.app;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -40,6 +46,51 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 		return instance;
 	}
 	
+	@Override
+	protected URL findResource(String name) {
+		
+		for(PluginWrapper w : pluginManager.getPlugins()) {
+			URL url = w.getPluginClassLoader().getResource(name);
+			if(Objects.nonNull(url)) {
+				return url;
+			}
+		}
+
+		return getClass().getClassLoader().getResource(name);
+	}
+
+	@Override
+	protected Enumeration<URL> findResources(String name) throws IOException {
+		return new Enumeration<URL>() {
+
+			Set<URL> tmp = new HashSet<>();
+			Iterator<URL> it;
+			{
+				Enumeration<URL> e;
+				for(PluginWrapper w : pluginManager.getPlugins()) {
+					e = w.getPluginClassLoader().getResources(name);
+					while(e.hasMoreElements()) {
+						tmp.add(e.nextElement());
+					}
+				}
+				e = getClass().getClassLoader().getResources(name);
+				while(e.hasMoreElements()) {
+					tmp.add(e.nextElement());
+				}
+				it = tmp.iterator();
+			}
+			@Override
+			public boolean hasMoreElements() {
+				return it.hasNext();
+			}
+
+			@Override
+			public URL nextElement() {
+				return it.next();
+			}
+		};
+	}
+
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
 		

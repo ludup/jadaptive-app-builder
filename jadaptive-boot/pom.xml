@@ -153,6 +153,12 @@
 		
 		<dependency>
 			<groupId>com.codesmith</groupId>
+			<artifactId>webbits-bootswatch</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.codesmith</groupId>
 			<artifactId>webbits-jquery</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>

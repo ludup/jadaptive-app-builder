@@ -7,10 +7,8 @@ public abstract class InputRender {
 	String resourceKey;
 	String defaultValue;
 	
-	public InputRender(Elements rootElement, String resourceKey, String defaultValue) {
+	public InputRender(String resourceKey) {
 		this.resourceKey = resourceKey;
-		this.defaultValue = defaultValue;
-		renderInput(rootElement, resourceKey, defaultValue);
 	}
 	
 	protected abstract void renderInput(Elements rootElement, String resourceKey, String defaultValue);

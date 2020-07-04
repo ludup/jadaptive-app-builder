@@ -9,10 +9,10 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 @ObjectDefinition(name = "Field", resourceKey = FieldTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT)
-public class FieldTemplate extends NamedUUIDEntity {
+public class FieldTemplate extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -9164781667373808388L;
 
@@ -68,7 +68,7 @@ public class FieldTemplate extends NamedUUIDEntity {
 			type = FieldType.BOOL)
 	boolean textIndex;
 	
-	@ObjectField(name = "Text Index",
+	@ObjectField(name = "Read Only",
 			description = "Indicates if this field is read-only after creation",
 			type = FieldType.BOOL)
 	boolean readOnly;
@@ -82,6 +82,18 @@ public class FieldTemplate extends NamedUUIDEntity {
 			description = "A set of validators that will be applied to the field",
 			type = FieldType.OBJECT_EMBEDDED, references = FieldValidator.RESOURCE_KEY)
 	Collection<FieldValidator> validators = new ArrayList<>();
+	
+	@ObjectField(name = "View Scopes", description = "The scopes in which this field will be viewed",
+			type = FieldType.ENUM)
+	Collection<FieldView> views = new ArrayList<>();
+	
+	@ObjectField(name = "View Permissions", description = "The permissions required by a user to view this field",
+			type = FieldType.TEXT)
+	Collection<String> viewPermissions = new ArrayList<>();
+	
+	@ObjectField(name = "Require All Permissions", description = "Should the user have all the listed permissions in order to view this field",
+			type = FieldType.BOOL)
+	boolean requireAllPermissions = false;
 	
 	public FieldTemplate() {
 	}
@@ -118,7 +130,7 @@ public class FieldTemplate extends NamedUUIDEntity {
 		this.fieldType = propertyType;
 	}
 
-	public void setRequired(Boolean required) {
+	public void setRequired(boolean required) {
 		this.required = required;
 	}
 
@@ -214,5 +226,29 @@ public class FieldTemplate extends NamedUUIDEntity {
 
 	public void setAlternativeId(boolean alternativeId) {
 		this.alternativeId = alternativeId;
+	}
+
+	public Collection<FieldView> getViews() {
+		return views;
+	}
+
+	public void setViews(Collection<FieldView> views) {
+		this.views = views;
+	}
+
+	public Collection<String> getViewPermissions() {
+		return viewPermissions;
+	}
+
+	public void setViewPermissions(Collection<String> viewPermissions) {
+		this.viewPermissions = viewPermissions;
+	}
+
+	public boolean isRequireAllPermissions() {
+		return requireAllPermissions;
+	}
+
+	public void setRequireAllPermissions(boolean requireAllPermissions) {
+		this.requireAllPermissions = requireAllPermissions;
 	}
 }

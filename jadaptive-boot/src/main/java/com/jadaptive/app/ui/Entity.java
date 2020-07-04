@@ -2,16 +2,15 @@ package com.jadaptive.app.ui;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.io.IOUtils;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.codesmith.webbits.In;
@@ -26,50 +25,36 @@ import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.AbstractObject;
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.FieldTemplate;
-import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.app.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.app.ui.renderers.form.DropdownFormInput;
-import com.jadaptive.app.ui.renderers.form.SearchFormInput;
+import com.jadaptive.app.ui.renderers.form.FieldInputRender;
+import com.jadaptive.app.ui.renderers.form.NumberFormInput;
+import com.jadaptive.app.ui.renderers.form.PasswordFormInput;
+import com.jadaptive.app.ui.renderers.form.TextAreaFormInput;
+import com.jadaptive.app.ui.renderers.form.TextFormInput;
+import com.jadaptive.app.ui.renderers.form.TimestampFormInput;
+import com.jadaptive.utils.Utils;
 
 @Widget({ PageResources.class, PageResourcesElement.class })
 @View(contentType = "text/html")
 @Resource
 public class Entity {
 
+	static Logger log = LoggerFactory.getLogger(Entity.class);
+	
 	@Autowired
 	private SecurityPropertyService propertyService; 
 	
 	@Autowired
 	private ClassLoaderService classLoader;
 	
-	Map<FieldType,String> DEFAULT_TEMPLATES = new HashMap<>();
-	String COLLECTION_TEMPLATE;
-	
 	@PostConstruct
 	private void postConstruct() {
-		
-		DEFAULT_TEMPLATES.put(FieldType.TEXT, loadTemplate("text"));
-		DEFAULT_TEMPLATES.put(FieldType.TEXT_AREA, loadTemplate("textarea"));
-		DEFAULT_TEMPLATES.put(FieldType.PASSWORD, loadTemplate("password"));
-		DEFAULT_TEMPLATES.put(FieldType.BOOL, loadTemplate("bool"));
-		DEFAULT_TEMPLATES.put(FieldType.DECIMAL, loadTemplate("decimal"));
-		DEFAULT_TEMPLATES.put(FieldType.ENUM, loadTemplate("enum"));
-		DEFAULT_TEMPLATES.put(FieldType.INTEGER, loadTemplate("integer"));
-		DEFAULT_TEMPLATES.put(FieldType.LONG, loadTemplate("long"));
-		DEFAULT_TEMPLATES.put(FieldType.TIMESTAMP, loadTemplate("timestamp"));
-
-		COLLECTION_TEMPLATE = loadTemplate("collection");
-	}
 	
-	private String loadTemplate(String name) {
-		try {
-			return IOUtils.toString(getClass().getResourceAsStream(
-						String.format("/com/jadaptive/app/ui/templates/%s.html", name)), "UTF-8");
-		} catch (IOException e) {
-			throw new IllegalStateException(e.getMessage(), e);
-		}
 	}
 	
     @Out
@@ -80,193 +65,134 @@ public class Entity {
 					SecurityScope.TENANT, 
 					page.getTemplate().getResourceKey() + ".properties");
 			
-			boolean readOnly = page.isReadOnly();
+			FieldView view = page.getScope();
 			
 			AbstractObject object = null;
 			if(page instanceof ObjectPage) {
 				object = ((ObjectPage)page).getObject();
 			}
-			renderObject(contents, page.getTemplate(), object, properties, readOnly);
+			renderObject(contents, page.getTemplate(), object, properties, view);
 			return contents;
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new IOException(e.getMessage(), e);
 		}
     	
 	
     }
 
-	private void renderObject(Elements contents, ObjectTemplate template, AbstractObject entity, Properties properties, boolean readOnly) {
+	private void renderObject(Elements contents, ObjectTemplate template, AbstractObject obj, Properties properties, FieldView view) {
 		
 		contents.append("<form id=\"entityForm\" class=\"row\"></form>");
-		Elements parentElement = contents.select("#entityForm");
+		Elements element = contents.select("#entityForm");
 		
 		List<FieldTemplate> objects = new ArrayList<>();
 		List<FieldTemplate> fields = new ArrayList<>();
 		orderFields(objects, fields, template, properties);
 		
-		renderFields(fields, entity, parentElement, properties, readOnly);
-		renderObjects(objects, entity, parentElement, properties, readOnly);
+		renderFields(template, fields, obj, element, properties, view);
+		renderObjects(template, objects, obj, element, properties, view);
 	}
 
-	private void renderObjects(List<FieldTemplate> objects, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderObjects(ObjectTemplate template, List<FieldTemplate> objects, AbstractObject obj, Elements element, Properties properties, FieldView view) {
 		
 		for(FieldTemplate object : objects) {
-			renderObject(parentElement, entity, object, readOnly);
+			renderObject(element, obj, object, view);
 		}
 	}
 
-	private void renderFields(List<FieldTemplate> fields, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
+	private void renderFields(ObjectTemplate template, List<FieldTemplate> fields, AbstractObject obj, Elements element, Properties properties, FieldView view) {
 		
 		for(FieldTemplate field : fields) {
-			renderField(parentElement, entity, field, properties, readOnly);
+			renderField(template, element, obj, field, properties, view);
 		}
 	}
 
-	private void renderField(Elements parentElement, AbstractObject entity, FieldTemplate fieldTemplate, Properties properties, boolean readOnly) {
+	private void renderField(ObjectTemplate template, Elements element, AbstractObject obj, FieldTemplate field, Properties properties, FieldView view) {
 		
-		if(fieldTemplate.getCollection()) {
-			renderColletion(parentElement, entity, fieldTemplate, properties, readOnly); 
+		if(field.getCollection()) {
+//			renderColletion(template, element, obj, field, properties, view); 
 		} else {
-			renderFormField(parentElement, entity, fieldTemplate, properties, readOnly);
+			renderFormField(template, element, obj, field, properties, view);
 		}
 	}
 	
-	private void renderFormField(Elements parentElement, AbstractObject entity, FieldTemplate fieldTemplate,
-			Properties properties, boolean readOnly) {
+	private void renderFormField(ObjectTemplate template, Elements element, AbstractObject obj, FieldTemplate field,
+			Properties properties, FieldView view) {
 		
-		switch(fieldTemplate.getFieldType()) {
+		if(!field.getViews().isEmpty()) {
+			if(!field.getViews().contains(view)) {
+				if(log.isDebugEnabled()) {
+					log.debug("Skipping field {} as its view scopes {} are not in the current scope {}",
+							field.getResourceKey(),
+							Utils.csv(field.getViews()),
+							view.name());
+				}
+				return;
+			}
+		}
+		
+		FieldInputRender render;
+		switch(field.getFieldType()) {
 		case TEXT:
-			renderTextBox(fieldTemplate, entity, parentElement, properties, readOnly);
+			render = new TextFormInput(template, field);
 			break;
 		case TEXT_AREA:
-			renderTextArea(fieldTemplate, entity, parentElement, properties, readOnly);
+			render = new TextAreaFormInput(template, field);
 			break;
 		case PASSWORD:
-			renderPassword(fieldTemplate, entity, parentElement, properties, readOnly);
+			render = new PasswordFormInput(template, field);
 			break;
 		case TIMESTAMP:
-			renderDate(fieldTemplate, entity, parentElement, properties, readOnly);
+			render = new TimestampFormInput(template, field);
 			break;
 		case BOOL:
-			renderBool(fieldTemplate, entity, parentElement, properties, readOnly);
+			render = new BooleanFormInput(template, field);
 			break;
 		case ENUM:
-			renderEnum(fieldTemplate, entity, parentElement, properties, readOnly);
+		{
+			Class<?> values;
+			try {
+				values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
+				render = new DropdownFormInput(template, field, (Enum<?>[])values.getEnumConstants());
+			} catch (ClassNotFoundException e) {
+				throw new IllegalStateException(e.getMessage(), e);
+			}
+			
 			break;
+		}
 		case DECIMAL:
 		case INTEGER:
 		case LONG:
-			renderNumber(fieldTemplate, entity, parentElement, properties, readOnly);
+			render = new NumberFormInput(template, field);
 			break;
 		case OBJECT_EMBEDDED:
 		case OBJECT_REFERENCE:
 			throw new IllegalStateException("Object cannot be rendered by renderField");
 		default:
-			throw new IllegalStateException("Missing field type " + fieldTemplate.getFieldType().name());
+			throw new IllegalStateException("Missing field type " + field.getFieldType().name());
 		}
-	}
-
-	private void renderColletion(Elements parentElement, AbstractObject entity, FieldTemplate fieldTemplate,
-			Properties properties, boolean readOnly) {
 		
-		new SearchFormInput(parentElement, fieldTemplate, getDefaultValue(fieldTemplate, entity));
-	}
-
-	private void renderTextBox(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
-
-		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
-	}
-	
-	private void renderPassword(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
-
-		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
-	}
-	
-	private void renderEnum(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
-
-		try {
-			Class<?> values = classLoader.findClass(
-					fieldTemplate.getValidationValue(ValidationType.OBJECT_TYPE));
-			
-			new DropdownFormInput(parentElement, fieldTemplate, getDefaultValue(fieldTemplate, entity))
-						.renderValues((Enum<?>[])values.getEnumConstants());
-		} catch (ClassNotFoundException e) {
-			throw new IllegalStateException(e.getMessage(), e);
+		render.renderInput(element, getDefaultValue(field, obj));
+		
+		Elements thisElement = element.select("#" + field.getResourceKey());
+		if(field.isRequired()) {
+			thisElement.attr("required", "required");
+		}
+		if(field.isReadOnly() || view == FieldView.READ) {
+			thisElement.attr("readonly", "readonly");
 		}
 	}
 
-	private String getDefaultValue(FieldTemplate fieldTemplate, AbstractObject entity) {
-		String defaultValue = fieldTemplate.getDefaultValue();
-		if(Objects.nonNull(entity)) {
-			defaultValue = String.valueOf(entity.getValue(fieldTemplate));
+	private String getDefaultValue(FieldTemplate field, AbstractObject obj) {
+		String defaultValue = field.getDefaultValue();
+		if(Objects.nonNull(obj)) {
+			defaultValue = String.valueOf(obj.getValue(field));
 		}
 		return defaultValue;
 	}
 
-	private void renderBool(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
-
-		String templateHtml = getTemplate(fieldTemplate, properties);
-		Elements elements = addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
-		if(Objects.nonNull(entity)) {
-			if("true".equalsIgnoreCase(entity.getValue(fieldTemplate).toString())) {
-				elements.select("#" + fieldTemplate.getResourceKey()).attr("checked", "checked");
-			}
-		}
-	}
-	
-	private void renderNumber(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
-
-		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
-	}
-	
-	private void renderDate(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
-
-		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
-	}
-	
-	private void renderTextArea(FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, Properties properties, boolean readOnly) {
-
-		String templateHtml = getTemplate(fieldTemplate, properties);
-		addElement(templateHtml, fieldTemplate, entity, parentElement, readOnly);
-	}
-	
-	private String getTemplate(FieldTemplate fieldTemplate, Properties properties) {
-		return DEFAULT_TEMPLATES.get(fieldTemplate.getFieldType());
-	}
-
-	private Elements addElement(String templateHtml, FieldTemplate fieldTemplate, AbstractObject entity, Elements parentElement, boolean readOnly) {
-		
-		if(Objects.isNull(templateHtml)) {
-			return null;
-		}
-		
-		templateHtml = templateHtml.replace("${resourceKey}", fieldTemplate.getResourceKey());
-		templateHtml = templateHtml.replace("${name}", fieldTemplate.getName());
-		templateHtml = templateHtml.replace("${description}", fieldTemplate.getDescription());
-		if(Objects.nonNull(entity)) {
-			templateHtml = templateHtml.replace("${value}", entity.getValue(fieldTemplate).toString());
-		} else {
-			templateHtml = templateHtml.replace("${value}", fieldTemplate.getDefaultValue());
-		}
-		
-		parentElement.append(templateHtml);
-		
-		Elements thisElement = parentElement.select("#" + fieldTemplate.getResourceKey());
-		if(fieldTemplate.isRequired()) {
-			thisElement.attr("required", "required");
-		}
-		if(fieldTemplate.isReadOnly() || readOnly) {
-			thisElement.attr("readonly", "readonly");
-		}
-		
-		return thisElement;
-	}
-
-	private void renderObject(Elements parentElement, AbstractObject entity, FieldTemplate object, boolean readOnly) {
+	private void renderObject(Elements element, AbstractObject obj, FieldTemplate field, FieldView view) {
 		
 		
 	}

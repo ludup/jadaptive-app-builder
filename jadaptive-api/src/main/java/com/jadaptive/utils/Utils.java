@@ -348,9 +348,9 @@ public class Utils {
 		return b.toString();
 	}
 	
-	public static String csv(Collection<String> items) {
+	public static <T> String csv(Collection<T> items) {
 		StringBuffer b = new StringBuffer();
-		for(String i : items) {
+		for(T i : items) {
 			if(b.length() > 0) {
 				b.append(",");
 			}

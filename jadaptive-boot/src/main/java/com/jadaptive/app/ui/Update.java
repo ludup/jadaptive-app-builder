@@ -13,6 +13,7 @@ import com.codesmith.webbits.bootstrap.BootBox;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
 import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
+import com.jadaptive.api.template.FieldView;
 
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class })
 @View(contentType = "text/html", paths = { "/update/{resourceKey}/{uuid}", "/update/{resourceKey}" })
@@ -24,4 +25,9 @@ public class Update extends ObjectPage {
     public Document service(@In Document contents) throws IOException {
     	return contents;
     }
+
+	@Override
+	public FieldView getScope() {
+		return FieldView.UPDATE;
+	}
 }

@@ -7,18 +7,20 @@
 <main class="container mt-3">
  <div class="row">
 	<ol class="breadcrumb col-12">
-	  <li class="breadcrumb-item"><a href="/app/ui/dashboard">Home</a></li>
+	  <li class="breadcrumb-item"><a href="/app/ui/dashboard" webbits:i18n="i18n/default.home.name">[Home]</a></li>
 	  <li class="breadcrumb-item active"><a href="/app/ui/table/${view.template.resourceKey}">${view.template.name}</a></li>
-	  <li class="breadcrumb-item active"><a href="/app/ui/create/${view.template.resourceKey}">Create</a></li>
+	  <li class="breadcrumb-item active"><a href="/app/ui/create/${view.template.resourceKey}" webbits:i18n="i18n/default.create.name">[Create]</a></li>
 	</ol>
   </div>
    <div class="row my-1">
-   		 <div class="col-8" webbits:id="com.jadaptive.app.ui.Entity"></div>
+   		 <div class="col-12" webbits:id="com.jadaptive.app.ui.Entity"></div>
    </div>
    <div class="row my-1">
-         <div class="col-8">
-         	<a class="btn btn-danger" href="/app/ui/table/${view.template.resourceKey}">
-         	<i class="fas fa-step-backward"></i>&nbsp;Back</a>
+         <div class="col-12">
+         	<a class="btn btn-danger float-left" href="/app/ui/table/${view.template.resourceKey}">
+         	<i class="fas fa-ban"></i>&nbsp;<span webbits:i18n="i18n/default.cancel.name">[Back]</span></a>
+         	<a class="btn btn-success float-right" href="/app/ui/table/${view.template.resourceKey}">
+         	<i class="fas fa-save"></i>&nbsp;<span webbits:i18n="i18n/default.save.name">[Save]</span></a>
          </div>
    </div>
 </main>

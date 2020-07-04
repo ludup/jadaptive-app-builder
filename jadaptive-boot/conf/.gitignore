@@ -8,3 +8,11 @@
 /legacy_host_key_rsa_2048
 /legacy_host_key_rsa_2048.pub
 /sshd-license.txt
+/sshproxy_host_key_ecdsa_256
+/sshproxy_host_key_ecdsa_256.pub
+/sshproxy_host_key_ecdsa_384
+/sshproxy_host_key_ecdsa_384.pub
+/sshproxy_host_key_ecdsa_521
+/sshproxy_host_key_ecdsa_521.pub
+/sshproxy_host_key_rsa
+/sshproxy_host_key_rsa.pub

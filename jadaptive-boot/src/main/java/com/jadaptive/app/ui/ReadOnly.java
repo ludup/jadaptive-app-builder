@@ -13,6 +13,7 @@ import com.codesmith.webbits.bootstrap.BootBox;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
 import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
+import com.jadaptive.api.template.FieldView;
 
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class })
 @View(contentType = "text/html", paths = { "/view/{resourceKey}/{uuid}" })
@@ -26,7 +27,8 @@ public class ReadOnly extends ObjectPage {
     }
 
 	@Override
-	public boolean isReadOnly() {
-		return true;
+	public FieldView getScope() {
+		return FieldView.READ;
 	}
+
 }

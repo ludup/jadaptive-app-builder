@@ -8,7 +8,10 @@ import java.util.UUID;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.PersonalUUIDEntity;
+import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.template.IncludeView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.Table;
@@ -32,21 +35,26 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 			description = "The ID of this key", 
 			searchable = true, 
 			hidden = true, type = FieldType.LONG)
+	@ExcludeView(values = { FieldView.CREATE })
 	Long id;
 	
 	@ObjectField(name = "Name", description = "A name to identify this public key", type = FieldType.TEXT)
 	String name;
 	
 	@ObjectField(name = "Public Key", description = "The formatted public key", readOnly = true, type = FieldType.TEXT_AREA)
+	@ExcludeView(values = { FieldView.TABLE })
 	String publicKey;
 	
 	@ObjectField(name = "Fingerprint", description = "The SHA256 fingerprint of the public key", readOnly = true,  type = FieldType.TEXT, required = false)
+	@ExcludeView(values = { FieldView.CREATE })
 	String fingerprint;
 	
 	@ObjectField(name = "Tags", description = "Tags determine how and when keys can be used", readOnly = true, type = FieldType.TEXT, searchable = true)
+	@IncludeView(values = { FieldView.UPDATE, FieldView.READ })
 	Set<String> tags = new HashSet<>();
 	
 	@ObjectField(name = "Type", description = "The type of key", readOnly = true, type = FieldType.TEXT)
+	@ExcludeView(values = { FieldView.CREATE })
 	String type;
 	
 	public Long getId() {
