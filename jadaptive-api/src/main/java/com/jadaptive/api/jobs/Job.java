@@ -11,7 +11,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Job", resourceKey = Job.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = Job.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class Job extends NamedUUIDEntity {
 
 	private static final long serialVersionUID = 4771165221351562318L;

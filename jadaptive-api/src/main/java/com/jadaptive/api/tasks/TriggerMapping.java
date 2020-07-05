@@ -6,7 +6,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Trigger Mapping", resourceKey = TriggerMapping.RESOURCE_KEY, type = ObjectType.OBJECT)
+@ObjectDefinition(resourceKey = TriggerMapping.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class TriggerMapping extends UUIDEntity {
 
 	private static final long serialVersionUID = 5441807182444804328L;

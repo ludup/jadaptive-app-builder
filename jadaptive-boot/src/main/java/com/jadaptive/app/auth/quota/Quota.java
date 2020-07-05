@@ -9,7 +9,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Quota", resourceKey = Quota.RESOURCE_KEY, 
+@ObjectDefinition(resourceKey = Quota.RESOURCE_KEY, 
 	hidden = true, system = true, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class Quota extends AbstractUUIDEntity {
 

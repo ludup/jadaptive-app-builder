@@ -18,7 +18,7 @@ import com.jadaptive.api.template.Table;
 import com.jadaptive.api.template.UniqueIndex;
 
 
-@ObjectDefinition(name = "Authorized Keys", 
+@ObjectDefinition(
 	resourceKey = AuthorizedKey.RESOURCE_KEY, 
 	 aliases = { "userPrivateKeys" },
      type = ObjectType.COLLECTION, 

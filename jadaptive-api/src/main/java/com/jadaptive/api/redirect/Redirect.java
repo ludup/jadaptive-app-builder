@@ -5,7 +5,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Redirects", resourceKey =  Redirect.RESOURCE_KEY)
+@ObjectDefinition(resourceKey =  Redirect.RESOURCE_KEY)
 public class Redirect extends UUIDEntity {
 
 	private static final long serialVersionUID = 3127030622719884860L;

@@ -8,7 +8,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Scheduler Configuration", resourceKey = SchedulerConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
+@ObjectDefinition(resourceKey = SchedulerConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
 public class SchedulerConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = 3875690639044948654L;

@@ -8,7 +8,7 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "SMTP Configuration", resourceKey = SMTPConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
+@ObjectDefinition(resourceKey = SMTPConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
 public class SMTPConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = -2175601630716215887L;

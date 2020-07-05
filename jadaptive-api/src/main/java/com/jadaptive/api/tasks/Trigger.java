@@ -9,7 +9,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Trigger", resourceKey = Trigger.RESOURCE_KEY, type = ObjectType.OBJECT)
+@ObjectDefinition(resourceKey = Trigger.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class Trigger extends UUIDEntity {
 
 	private static final long serialVersionUID = -8047595311868714763L;

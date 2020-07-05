@@ -9,7 +9,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectUUIDBean;
 
-@ObjectDefinition(name = "Tenant", resourceKey = Tenant.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = Tenant.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 @ObjectUUIDBean(bean = TenantService.class)
 public class Tenant extends AbstractUUIDEntity {
 

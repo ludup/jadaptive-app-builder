@@ -8,7 +8,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Test Field Types Object", resourceKey = TestFieldTypesObject.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = TestFieldTypesObject.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class TestFieldTypesObject extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 5425265865918464536L;

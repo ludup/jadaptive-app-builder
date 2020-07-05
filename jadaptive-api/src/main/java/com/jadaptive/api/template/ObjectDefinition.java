@@ -12,9 +12,6 @@ import com.jadaptive.api.entity.ObjectType;
 @Target(ElementType.TYPE)
 public @interface ObjectDefinition {
 		
-		@Deprecated
-		String name();
-		
 		String resourceKey();
 		
 		ObjectType type() default ObjectType.COLLECTION;

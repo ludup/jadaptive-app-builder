@@ -8,7 +8,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Messages", resourceKey = Message.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = Message.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class Message extends NamedUUIDEntity {
 
 	private static final long serialVersionUID = 2912430699573395419L;

@@ -11,7 +11,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Test Object Collections", resourceKey = TestObjectCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = TestObjectCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class TestObjectCollections extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 6201675368007087525L;

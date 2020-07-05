@@ -6,7 +6,7 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 
-@ObjectDefinition(name = "Session Configuration", resourceKey = SessionConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
+@ObjectDefinition(resourceKey = SessionConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
 public class SessionConfiguration extends SingletonUUIDEntity {
 	
 	private static final long serialVersionUID = 6441953663902277562L;

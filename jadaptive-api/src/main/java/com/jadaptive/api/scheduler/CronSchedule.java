@@ -9,7 +9,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Cron Schedule", resourceKey = CronSchedule.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = CronSchedule.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class CronSchedule extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -3022610943013191464L;

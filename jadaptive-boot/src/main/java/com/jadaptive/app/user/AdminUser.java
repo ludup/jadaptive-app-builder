@@ -10,7 +10,7 @@ import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
 
-@ObjectDefinition(name = "Administration Users", resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 
 	private static final long serialVersionUID = -4995333149629598100L;

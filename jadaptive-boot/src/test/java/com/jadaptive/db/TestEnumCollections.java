@@ -9,7 +9,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Test Enum Collections", resourceKey = TestEnumCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = TestEnumCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class TestEnumCollections extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 2379492937315526686L;

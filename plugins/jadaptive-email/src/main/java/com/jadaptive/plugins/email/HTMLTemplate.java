@@ -6,7 +6,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "HTML Templates", resourceKey = HTMLTemplate.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = HTMLTemplate.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class HTMLTemplate extends NamedUUIDEntity {
 
 	private static final long serialVersionUID = 1070995818848710214L;

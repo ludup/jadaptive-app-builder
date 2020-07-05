@@ -8,7 +8,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
-@ObjectDefinition(name = "Embedded Object", resourceKey = EmbeddedObject.RESOURCE_KEY, type = ObjectType.OBJECT)
+@ObjectDefinition(resourceKey = EmbeddedObject.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class EmbeddedObject extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 1050140978723123850L;

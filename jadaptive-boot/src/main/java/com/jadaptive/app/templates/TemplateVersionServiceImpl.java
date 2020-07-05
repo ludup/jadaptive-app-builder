@@ -425,7 +425,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.setResourceKey(e.resourceKey());
 			template.setHidden(e.hidden());
 			template.setSystem(e.system());
-			template.setName(e.name());
 			template.setType(e.type());
 			template.setScope(e.scope());
 			template.getFields().clear();
