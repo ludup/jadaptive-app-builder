@@ -29,16 +29,16 @@ public class WebbitsConfigurator extends Configurator {
     private WebbitsPostProcessor postProcessor;
 
     @Autowired
-    private SpringViewLocator viewLocator;
+    private WebbitsViewLocator viewLocator;
 
     @Autowired
-    private SpringExtensionLocator extensionLocator;
+    private WebbitsExtensionLocator extensionLocator;
 
     @Autowired
-    private SpringWidgetLocator widgetLocator;
+    private WebbitsWidgetLocator widgetLocator;
 
     @Autowired
-    private SpringObjectCreator springObjectCreator;
+    private WebbitsObjectCreator springObjectCreator;
 
     @Autowired
     private WebbitsBundleResolver webbitsBundleResolver; 

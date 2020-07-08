@@ -53,7 +53,7 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 	}
 
 	
-	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<AbstractObject> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {

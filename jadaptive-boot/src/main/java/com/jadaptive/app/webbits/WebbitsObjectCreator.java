@@ -8,7 +8,7 @@ import com.codesmith.webbits.DefaultObjectCreator;
 import com.jadaptive.api.app.ApplicationService;
 
 @Component
-public class SpringObjectCreator extends DefaultObjectCreator {
+public class WebbitsObjectCreator extends DefaultObjectCreator {
 
 	@Autowired
 	private ApplicationService applicationService;

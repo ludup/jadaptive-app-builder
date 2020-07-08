@@ -21,9 +21,9 @@ import com.codesmith.webbits.util.Annotations;
 import com.jadaptive.api.db.ClassLoaderService;
 
 @Component
-public class SpringViewLocator implements ViewLocator {
+public class WebbitsViewLocator implements ViewLocator {
 
-	static Logger log = LoggerFactory.getLogger(SpringViewLocator.class);
+	static Logger log = LoggerFactory.getLogger(WebbitsViewLocator.class);
 	
 	@Autowired
     private ClassLoaderService classloaderService; 

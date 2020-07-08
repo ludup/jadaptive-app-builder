@@ -15,7 +15,7 @@ import com.codesmith.webbits.ExtensionLocator;
 import com.jadaptive.api.db.ClassLoaderService;
 
 @Component
-public class SpringExtensionLocator implements ExtensionLocator {
+public class WebbitsExtensionLocator implements ExtensionLocator {
 
     private List<Class<?>> objs = new LinkedList<>();
 

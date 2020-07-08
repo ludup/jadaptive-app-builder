@@ -16,9 +16,9 @@ import com.codesmith.webbits.WidgetLocator;
 import com.jadaptive.api.db.ClassLoaderService;
 
 @Component
-public class SpringWidgetLocator implements WidgetLocator {
+public class WebbitsWidgetLocator implements WidgetLocator {
 
-	static Logger log = LoggerFactory.getLogger(SpringViewLocator.class);
+	static Logger log = LoggerFactory.getLogger(WebbitsViewLocator.class);
 	
 	@Autowired
     private ClassLoaderService classloaderService; 

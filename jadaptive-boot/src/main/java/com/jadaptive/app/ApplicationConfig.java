@@ -107,13 +107,5 @@ public class ApplicationConfig {
 	    bean.setLoadOnStartup(1);
 	    return bean;
 	}
-	
-	@Bean
-	public ServletRegistrationBean<?> webbitsServletBean() {
-	    ServletRegistrationBean<?> bean = new ServletRegistrationBean<>(
-	      new WebbitsServlet(), "/app/ui/*");
-	    bean.setLoadOnStartup(1);
-	    bean.setAsyncSupported(true);
-	    return bean;
-	}
+
 }
