@@ -5,47 +5,66 @@ import org.codemonkey.simplejavamail.TransportStrategy;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectView;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
 
 @ObjectDefinition(resourceKey = SMTPConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
+@ObjectViews({@ObjectViewDefinition(SMTPConfiguration.SERVER_VIEW),
+				@ObjectViewDefinition(SMTPConfiguration.CREDENTIALS_VIEW), 
+				@ObjectViewDefinition(SMTPConfiguration.DELIVERY_VIEW)})
 public class SMTPConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = -2175601630716215887L;
 
 	public static final String RESOURCE_KEY = "smtpConfiguration";
+	public static final String SERVER_VIEW = "smtpServer";
+	public static final String CREDENTIALS_VIEW = "smtpCredentials";
+	public static final String DELIVERY_VIEW = "smtpDelivery";
 	
-	@ObjectField(name = "Enabled", defaultValue="false", description = "Enable the SMTP email service", type = FieldType.BOOL)
+	@ObjectField(type = FieldType.BOOL)
 	Boolean enabled;
 	
-	@ObjectField(name = "Protocol", defaultValue= "SMTP_PLAIN", description = "The transport protocol to use to connect to the SMTP server", type = FieldType.ENUM)
+	@ObjectField(type = FieldType.ENUM)
+	@ObjectView(SERVER_VIEW)
 	TransportStrategy protocol;
 	
-	@ObjectField(name = "Hostname", defaultValue="localhost", description = "The hostname of the SMTP server", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(SERVER_VIEW)
 	String hostname;
 	
-	@ObjectField(name = "Port", defaultValue="25", description = "The port to use", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(SERVER_VIEW)
 	int port;
 	
-	@ObjectField(name = "Username", description = "The username for SMTP authentication", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(CREDENTIALS_VIEW)
 	String username;
 	
-	@ObjectField(name = "Password", description = "The password for SMTP authentication", type = FieldType.PASSWORD, manualEncryption = true)
+	@ObjectField(type = FieldType.PASSWORD, manualEncryption = true)
+	@ObjectView(CREDENTIALS_VIEW)
 	String password;
 
-	@ObjectField(name = "From Name", description = "The name of the user to place in the From field", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(DELIVERY_VIEW)
 	String fromName;
 	
-	@ObjectField(name = "From Address", description = "The email address to use in the From field", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(DELIVERY_VIEW)
 	String fromAddress;
 	
-	@ObjectField(name = "Reply-To Name", description = "The name of the user to place in the Reply-To field", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(DELIVERY_VIEW)
 	String replyToName;
 	
-	@ObjectField(name = "Reply-To Address", description = "The email address to use in the Reply-To field", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(DELIVERY_VIEW)
 	String replyToAddress;
 	
-	@ObjectField(name = "Archive Address", description = "An email address that should receive archived emails", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(DELIVERY_VIEW)
 	String archiveAddress;
 	
 	public Boolean getEnabled() {

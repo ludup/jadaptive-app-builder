@@ -17,7 +17,7 @@ public class SearchFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Elements rootElement, String defaultValue) {
+	public void renderInput(Element rootElement, String defaultValue) {
 
 		String url = "";
 		if(field.getFieldType()==FieldType.OBJECT_REFERENCE) {

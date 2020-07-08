@@ -1,20 +1,25 @@
 package com.jadaptive.app.entity.template;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectScope;
@@ -22,6 +27,7 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -29,6 +35,11 @@ import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.ObjectView;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.OrderedField;
+import com.jadaptive.api.template.OrderedView;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
@@ -50,6 +61,9 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 	@Autowired
 	private PermissionService permissionService; 
+	
+	@Autowired
+	private ClassLoaderService classService;
 	
 	Map<String,List<ObjectTemplate>> objectForwardDependencies = new HashMap<>();
 	Map<String,List<String>> objectReverseDependencies = new HashMap<>();
@@ -248,5 +262,57 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			}
 		}
 		
+	}
+
+	@Override
+	public List<OrderedView> getViews(ObjectTemplate template) {
+		
+		if(StringUtils.isNotBlank(template.getTemplateClass())) {
+			return getAnnotatedViews(template);
+		}
+		return getDynamicViews(template);
+	}
+
+	private List<OrderedView> getDynamicViews(ObjectTemplate template) {
+		return null;
+	}
+
+	private List<OrderedView> getAnnotatedViews(ObjectTemplate template) {
+		try {
+			Class<?> clz = classService.findClass(template.getTemplateClass());
+				
+			Map<String, OrderedView> views = new HashMap<>();
+			
+			ObjectViews annonatedViews = clz.getAnnotation(ObjectViews.class);
+			
+			views.put(null, new OrderedView(null));
+			
+			if(Objects.nonNull(annonatedViews)) {
+				for(ObjectViewDefinition def : annonatedViews.value()) {
+					views.put(def.value(), new OrderedView(def));
+				}
+			}
+			
+			for(FieldTemplate field : template.getFields()) {
+				Field f = ReflectionUtils.getField(clz, field.getResourceKey());
+				ObjectView v = f.getAnnotation(ObjectView.class);
+				if(Objects.isNull(v)) {
+					views.get(null).addField(new OrderedField(null, field));
+				} else {
+					views.get(v.value()).addField(new OrderedField(v, field));
+				}
+			}
+			
+			List<OrderedView> results = new ArrayList<>(views.values());
+			Collections.sort(results, new Comparator<OrderedView>() {
+				@Override
+				public int compare(OrderedView o1, OrderedView o2) {
+					return o1.getWeight().compareTo(o2.getWeight());
+				}
+			});
+			return results;
+		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 }

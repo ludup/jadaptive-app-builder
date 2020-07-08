@@ -15,53 +15,36 @@ public class Message extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "messages";
 	
-	@ObjectField(name = "Message Group", description = "The group of messages this belongs to", 
-			required = true, readOnly = true, type = FieldType.TEXT)
+	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
 	String group;
 	
-	@ObjectField(name = "Subject", description = "The subject of this message", 
-				required = true, searchable = true, type = FieldType.TEXT)
+	@ObjectField(required = true, searchable = true, type = FieldType.TEXT)
 	String subject;
 	
-	@ObjectField(name = "Plain Text", description = "The plain text content of this message", 
-			required = true, searchable = true, type = FieldType.TEXT_AREA)
+	@ObjectField(required = true, searchable = true, type = FieldType.TEXT_AREA)
 	String plainText;
 	
-	@ObjectField(name = "HTML Template", 
-			description = "The base HTML template for inserting content", 
-			type = FieldType.OBJECT_REFERENCE)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE)
 	HTMLTemplate htmlTemplate;
 	
-	@ObjectField(name = "HTML Content", 
-			description = "The HTML content of this message.", 
-			type = FieldType.TEXT_AREA)
+	@ObjectField(type = FieldType.TEXT_AREA)
 	String html;
 	
-	@ObjectField(name = "Enabled", 
-			description = "Disabling this message prevents it from being sent", 
-		    defaultValue = "true", 
+	@ObjectField(defaultValue = "true", 
 		    type = FieldType.BOOL)
 	boolean enabled = true;
 	
-	@ObjectField(name = "Reply-To Name", 
-			description = "Override the Reply-To option in this message", 
-			type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String replyToName;
 	
-	@ObjectField(name = "Reply-To Email", 
-			description = "Override the Reply-To option in this message", 
-			type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String replyToEmail;
 	
-	@ObjectField(name = "Archive", 
-			description = "Send a copy of this email to the archive address", 
-		    defaultValue = "true", 
+	@ObjectField(defaultValue = "true", 
 		    type = FieldType.BOOL)
 	boolean archive = true;
 	
-	@ObjectField(name = "Replacement Variables", 
-			description = "You may use these variables in your content",
-			type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	Collection<String> replacementVariables;
 	
 	@Override

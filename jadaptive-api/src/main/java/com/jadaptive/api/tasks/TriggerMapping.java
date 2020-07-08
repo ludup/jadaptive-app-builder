@@ -21,14 +21,10 @@ public class TriggerMapping extends UUIDEntity {
 		this.variableExpression = variableExpression;
 	}
 	
-	@ObjectField(name = "Field Name", 
-			description = "The name of the field that will accept this value", 
-			type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String fieldName;
 	
-	@ObjectField(name = "Expression", 
-			description = "The value of this variable, or expression used to calculate it", 
-			type = FieldType.TEXT_AREA)
+	@ObjectField(type = FieldType.TEXT_AREA)
 	String variableExpression;
 	
 	@Override

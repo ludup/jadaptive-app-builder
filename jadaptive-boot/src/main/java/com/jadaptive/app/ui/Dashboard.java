@@ -8,8 +8,9 @@ import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
+import com.codesmith.webbits.extensions.Bind;
 
-@Page
+@Page(value = Bind.class)
 @View(contentType = "text/html", paths = { "/dashboard"})
 @Resource
 public class Dashboard extends AuthenticatedView {

@@ -1,34 +1,18 @@
+function renderActions(val, obj) {
+	var ret = '<a href="/app/ui/update/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-edit"></i></a>&nbsp;';
+	ret += '<a href="/app/ui/view/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-eye"></i></a>&nbsp;';
+	if(!obj.system) {
+		ret += '<a class="clickDelete" href="#" data-uuid="' + obj.uuid + '"><i class="far fa-trash-alt"></i></a>';
+	}
+	return ret;
+}
+
 $(document).ready(function() {
 
-	$.getJSON('/app/api/template/${view.template.resourceKey}', function(data) {
+	$.getJSON('/app/api/template/' + $('#table').data('resourcekey'), function(data) {
 		if(data.success) {
 			var t = data.resource;
 			
-			var columns = [];
-
-// 			$.each(t.fields, function(idx, obj) {
-				
-// 				if(obj.views.includes("TABLE")) {
-// 					columns.push({
-// 						title: obj.name,
-// 						field: obj.resourceKey,
-// 						visible: true
-// 					});
-// 				}
-				
-// 			});
-			
-// 			columns.push({
-// 				title: 'Actions',
-// 				formatter: function(val, obj) {
-// 					var ret = '<a href="/app/ui/update/${view.template.resourceKey}/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-edit"></i></a>&nbsp;';
-// 					ret += '<a href="/app/ui/view/${view.template.resourceKey}/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-eye"></i></a>&nbsp;';
-// 					if(!obj.system) {
-// 						ret += '<a class="clickDelete" href="#" data-uuid="' + obj.uuid + '"><i class="far fa-trash-alt"></i></a>';
-// 					}
-// 					return ret;
-// 				}
-// 			});
 
 			$('#table').bootstrapTable({
 				sidePagination: 'server',
@@ -36,9 +20,7 @@ $(document).ready(function() {
 				dataField: 'rows',
 				url: '/app/api/' + t.resourceKey + '/table',
 				pagination: true,
-				columns: columns,
 				search: true,
-// 				showColumns: columns.length > 2,
 				showRefresh: true,
 				mobileResponsive: true,
 				queryParams: function(params) {
@@ -69,7 +51,6 @@ $(document).ready(function() {
 					$('#searchDropdown').show();
 					
 					$('.clickSearch').click(function(e) {
-						debugger;
 						e.preventDefault();
 						var value = $(this).data('resourcekey');
 						var text = $(this).text();

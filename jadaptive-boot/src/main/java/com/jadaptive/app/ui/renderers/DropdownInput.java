@@ -1,22 +1,14 @@
 package com.jadaptive.app.ui.renderers;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.repository.NamedUUIDEntity;
-import com.jadaptive.api.template.FieldTemplate;
-import com.jadaptive.api.template.ObjectTemplate;
 
 public class DropdownInput extends InputRender {
-
-	@Autowired
-	private I18nService i18n;
 	
 	Elements inputElements;
 	Element valueElement;

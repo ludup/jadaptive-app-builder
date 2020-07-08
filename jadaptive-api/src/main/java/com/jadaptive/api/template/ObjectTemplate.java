@@ -19,35 +19,28 @@ public class ObjectTemplate extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "objectTemplates";
 	
-	@ObjectField(name = "Type", description = "The type of this object",
-			type = FieldType.ENUM, defaultValue = "COLLECTION")
+	@ObjectField(type = FieldType.ENUM, defaultValue = "COLLECTION")
 	ObjectType type;
 	
-	@ObjectField(name = "Scope", description = "The scope of this object",
-			type = FieldType.ENUM, defaultValue = "GLOBAL")
+	@ObjectField(type = FieldType.ENUM, defaultValue = "GLOBAL")
 	ObjectScope scope;
 	
-	@ObjectField(name = "Resource Key", description = "The identifier for this template",
-			type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT, required = true)
 	String resourceKey;
 	
-	@ObjectField(name = "Default Filter", description = "A filter to apply to default queries",
-			type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String defaultFilter;
 	
-	@ObjectField(name = "Fields", description = "The fields of this template",
-			type = FieldType.OBJECT_EMBEDDED, references = FieldTemplate.RESOURCE_KEY)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = FieldTemplate.RESOURCE_KEY)
 	Collection<FieldTemplate> fields = new ArrayList<>();
 	
 	Map<String,FieldTemplate> fieldsByName;
 	String templateClass; 
 	
-	@ObjectField(name = "Aliases", description = "The aliases of this template",
-			type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	Collection<String> aliases = new ArrayList<>();
 	
-	@ObjectField(name = "Parent", description = "The parent of this template",
-			type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String parentTemplate;
 
 	

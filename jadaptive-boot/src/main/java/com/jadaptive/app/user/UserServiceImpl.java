@@ -15,8 +15,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.repository.UUIDDocument;
-import com.jadaptive.api.repository.UUIDDocumentService;
+import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
@@ -28,7 +27,7 @@ import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.CompoundIterable;
 
 @Service
-public class UserServiceImpl extends AuthenticatedService implements UserService, TenantAware, UUIDDocumentService {
+public class UserServiceImpl extends AuthenticatedService implements UserService, TenantAware, UUIDObjectService<User> {
 	
 	@Autowired
 	private PermissionService permissionService; 
@@ -241,8 +240,15 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	}
 
 	@Override
-	public UUIDDocument getObjectByUUID(String uuid) {
+	public User getObjectByUUID(String uuid) {
 		return getUserByUUID(uuid);
+	}
+
+	@Override
+	public String saveOrUpdate(User user) {
+		UserDatabase db = getDatabase(user);
+		db.updateUser(user);
+		return user.getUuid();
 	}
 
 }

@@ -17,19 +17,19 @@ public class Quota extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "quota";
 	
-	@ObjectField(name = "Group", description = "A group to identify the quote type", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String group;
 	
-	@ObjectField(name = "Key", description = "An individual quote within the group", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String key;
 	
-	@ObjectField(name = "Quota", description = "The maximum available value of this quota", type = FieldType.LONG)
+	@ObjectField(type = FieldType.LONG)
 	long quota;
 	
-	@ObjectField(name = "Period", description = "The period of time in seconds that the quote applies", type = FieldType.LONG)
+	@ObjectField(type = FieldType.LONG)
 	long period;
 	
-	@ObjectField(name = "Value", description = "The current value of this quota", type = FieldType.LONG)
+	@ObjectField(type = FieldType.LONG)
 	long value;
 
 	Date quotaStarted;

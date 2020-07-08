@@ -16,21 +16,19 @@ public class Trigger extends UUIDEntity {
 
 	public static final String RESOURCE_KEY = "trigger";
 	
-	@ObjectField(name = "Trigger Type", description = "When to trigger the tasks", type = FieldType.ENUM)
+	@ObjectField(type = FieldType.ENUM)
 	TriggerType type;
 	
-	@ObjectField(name = "Task Mappings", description = "A set of variables that map parameters from the previous task to the executing task", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	List<TriggerMapping> taskMappings = new ArrayList<>();
 
-	@ObjectField(name = "Global Mappings", description = "Variables that should be stored for future use future tasks", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	List<TriggerMapping> globalMappings = new ArrayList<>();
 	
-	@ObjectField(name = "Task", description = "The task to execute", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	Task task;
 	
-	@ObjectField(name = "Triggers", 
-			description = "Additional tasks to conditionally execute",
-			type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	List<Trigger> triggers = new ArrayList<>();
 	
 	@Override

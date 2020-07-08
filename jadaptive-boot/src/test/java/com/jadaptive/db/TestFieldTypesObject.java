@@ -15,31 +15,31 @@ public class TestFieldTypesObject extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testFieldTypesObject";
 
-	@ObjectField(name = "String", description = "A string", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String string;
 	
-	@ObjectField(name = "Long", description = "A long", type = FieldType.LONG)
+	@ObjectField(type = FieldType.LONG)
 	Long longNumber;
 	
-	@ObjectField(name = "Integer", description = "An int", type = FieldType.INTEGER)
+	@ObjectField(type = FieldType.INTEGER)
 	Integer intNumber;
 	
-	@ObjectField(name = "Float", description = "A float", type = FieldType.DECIMAL)
+	@ObjectField(type = FieldType.DECIMAL)
 	Float floatNumber;
 	
-	@ObjectField(name = "Double", description = "A double", type = FieldType.DECIMAL)
+	@ObjectField(type = FieldType.DECIMAL)
 	Double doubleNumber;
 	
-	@ObjectField(name = "Date", description = "A date", type = FieldType.TIMESTAMP)
+	@ObjectField(type = FieldType.TIMESTAMP)
 	Date date;
 	
-	@ObjectField(name = "Enum", description = "An enum", type = FieldType.ENUM)
+	@ObjectField(type = FieldType.ENUM)
 	TestEnum enumField;
 	
-	@ObjectField(name = "Bool", description = "A boolean", type = FieldType.BOOL)
+	@ObjectField(type = FieldType.BOOL)
 	Boolean bool;
 	
-	@ObjectField(name = "Object", description = "An object", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	EmbeddedObject embedded;
 	
 	public TestFieldTypesObject() {

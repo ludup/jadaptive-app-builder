@@ -15,9 +15,7 @@ public class SchedulerConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "schedulerConfig";
 	
-	@ObjectField(name = "Pool Size", 
-			description = "The number of threads available to the scheduler",
-			defaultValue = "10", 
+	@ObjectField(defaultValue = "10", 
 			type = FieldType.INTEGER)
 	Integer poolSize;
 

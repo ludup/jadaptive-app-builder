@@ -14,10 +14,10 @@ public class Property extends UUIDEntity {
 
 	public static final String RESOURCE_KEY = "properties";
 	
-	@ObjectField(name = "Key", description = "The unique key of this property", type=FieldType.TEXT, unique = true)
+	@ObjectField(type=FieldType.TEXT, unique = true)
 	String key;
 	
-	@ObjectField(name = "Value", description = "The value of this property", type=FieldType.TEXT_AREA)
+	@ObjectField(type=FieldType.TEXT_AREA)
 	String value;
 	
 	@Override

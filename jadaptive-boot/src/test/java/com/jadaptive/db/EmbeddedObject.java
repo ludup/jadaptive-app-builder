@@ -15,28 +15,28 @@ public class EmbeddedObject extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "embeddedObject";
 
-	@ObjectField(name = "Embedded String", description = "An embedded string", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String embeddedString;
 	
-	@ObjectField(name = "Embedded Long", description = "An embedded long", type = FieldType.LONG)
+	@ObjectField(type = FieldType.LONG)
 	Long embeddedLong;
 	
-	@ObjectField(name = "Embedded Int", description = "An embedded int", type = FieldType.INTEGER)
+	@ObjectField(type = FieldType.INTEGER)
 	Integer embeddedInt;
 	
-	@ObjectField(name = "Embedded Float", description = "An embedded float", type = FieldType.DECIMAL)
+	@ObjectField(type = FieldType.DECIMAL)
 	Float embeddedFloat;
 	
-	@ObjectField(name = "Embedded Double", description = "An embedded double", type = FieldType.DECIMAL)
+	@ObjectField(type = FieldType.DECIMAL)
 	Double embeddedDouble;
 	
-	@ObjectField(name = "Embedded Date", description = "An embedded date", type = FieldType.TIMESTAMP)
+	@ObjectField(type = FieldType.TIMESTAMP)
 	Date embeddedDate;
 	
-	@ObjectField(name = "Embedded Enum", description = "An embedded enum", type = FieldType.ENUM)
+	@ObjectField(type = FieldType.ENUM)
 	TestEnum embeddedEnum;
 	
-	@ObjectField(name = "Embedded Boolean", description = "An embedded boolean", type = FieldType.BOOL)
+	@ObjectField(type = FieldType.BOOL)
 	Boolean embeddedBool;
 	
 	public EmbeddedObject() {

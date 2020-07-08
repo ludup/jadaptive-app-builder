@@ -33,12 +33,11 @@ public abstract class AbstractUserAssignmentCommand<T extends AssignableUUIDEnti
 	protected void doRun(String[] args, VirtualConsole console)
 			throws IOException, PermissionDeniedException, UsageException {
 		
-		if(args.length < 4) {
+		if(args.length < 3) {
 			throw new UsageException("Not enough arguments provided");
 		}
 		
-		String name = FileUtils.checkStartsWithSlash(
-				FileUtils.checkEndsWithNoSlash(args[1]));
+		String name = args[1];
 		
 		T obj = loadObject(name);
 	

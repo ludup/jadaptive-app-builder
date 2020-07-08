@@ -2,6 +2,7 @@ package com.jadaptive.api.template;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.jadaptive.api.entity.ObjectException;
@@ -33,5 +34,7 @@ public interface TemplateService {
 	Iterable<ObjectTemplate> getTemplatesWithScope(ObjectScope personal);
 
 	void registerObjectDependency(String resourceKey, ObjectTemplate template);
+
+	List<OrderedView> getViews(ObjectTemplate template);
 
 }

@@ -16,7 +16,7 @@ public class TestEnumCollections extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testEnumCollections";
 	
-	@ObjectField(name = "Values", description = "A collection of enums", type = FieldType.ENUM)
+	@ObjectField(type = FieldType.ENUM)
 	Collection<TestEnum> values;
 	
 	public TestEnumCollections() {

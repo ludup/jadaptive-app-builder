@@ -17,16 +17,12 @@ public class TemplateVersion extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "templateVersion";
 
-	@ObjectField(name = "Version", 
-			description = "The version of this template", 
-			required = true,
+	@ObjectField(required = true,
 			searchable = true,
 			type = FieldType.TEXT)
 	String version; 
 	
-	@ObjectField(name = "Timestamp", 
-			description = "The timestamp this template was installed", 
-			required = true,
+	@ObjectField(required = true,
 			type = FieldType.TIMESTAMP)
 	Date timestamp;
 	

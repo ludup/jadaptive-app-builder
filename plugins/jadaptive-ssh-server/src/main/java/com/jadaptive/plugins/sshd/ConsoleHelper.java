@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -16,7 +15,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jline.reader.Candidate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.support.WebBindingInitializer;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.AbstractObject;

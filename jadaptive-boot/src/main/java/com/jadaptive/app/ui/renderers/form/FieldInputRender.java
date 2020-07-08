@@ -1,6 +1,6 @@
 package com.jadaptive.app.ui.renderers.form;
 
-import org.jsoup.select.Elements;
+import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -15,7 +15,7 @@ public abstract class FieldInputRender {
 		this.field = field;
 	}
 	
-	public abstract void renderInput(Elements rootElement, String value);
+	public abstract void renderInput(Element rootElement, String value);
 	
 	protected String replaceResourceKey(String str) {
 		return str.replace("${i18nName}", 

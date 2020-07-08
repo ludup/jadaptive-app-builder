@@ -16,29 +16,19 @@ public class CronSchedule extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "cronSchedules";
 	
-	@ObjectField(name = "Cron Expression", 
-			description = "The crontab expression for this schedule",
-			type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String expression;
 
-	@ObjectField(name = "Job", 
-			description = "The job to execute",
-			type = FieldType.OBJECT_REFERENCE)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE)
 	Job job;
 	
-	@ObjectField(name = "Disabled", 
-			description = "Set this flag to disable execution of this job",
-			type = FieldType.BOOL)
+	@ObjectField(type = FieldType.BOOL)
 	Boolean disabled;
 	
-	@ObjectField(name = "Last Execution Finished", 
-			description = "The timestamp when the last execution finished",
-			type = FieldType.TIMESTAMP)
+	@ObjectField(type = FieldType.TIMESTAMP)
 	Date lastExecutionFinished;
 	
-	@ObjectField(name = "Last Execution Started", 
-			description = "The timestamp when the last execution started",
-			type = FieldType.TIMESTAMP)
+	@ObjectField(type = FieldType.TIMESTAMP)
 	Date lastExecutionStarted;
 	
 	public String getResourceKey() {

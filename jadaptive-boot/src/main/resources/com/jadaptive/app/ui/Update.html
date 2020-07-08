@@ -13,12 +13,14 @@
 	</ol>
   </div>
    <div class="row my-1">
-   		 <div class="col-md-8 col-sm-12" webbits:id="com.jadaptive.app.ui.Entity"></div>
+   		 <div class="col-12" webbits:id="com.jadaptive.app.ui.Entity"></div>
    </div>
    <div class="row my-1">
-         <div class="col-8">
-         	<a class="btn btn-danger" href="/app/ui/table/${view.template.resourceKey}">
-         	<i class="fas fa-step-backward"></i>&nbsp;Back</a>
+         <div class="col-12">
+         	<a class="btn btn-danger float-left ml-3" href="/app/ui/table/${view.template.resourceKey}">
+         	<i class="fas fa-ban"></i>&nbsp;<span webbits:i18n="i18n/default.cancel.name">[Cancel]</span></a>
+         	<a class="btn btn-success float-right mr-3" href="/app/ui/table/${view.template.resourceKey}">
+         	<i class="fas fa-save"></i>&nbsp;<span webbits:i18n="i18n/default.save.name">[Save]</span></a>
          </div>
    </div>
 </main>

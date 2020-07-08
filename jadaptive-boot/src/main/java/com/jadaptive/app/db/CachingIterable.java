@@ -1,6 +1,5 @@
 package com.jadaptive.app.db;
 
-import java.text.ParseException;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -10,7 +9,6 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 
 public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
@@ -60,38 +58,36 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 
 			@Override
 			public T next() {
-				try {
-					Document doc = iterator.next();
-					String uuid = doc.getString("_id");
-					T obj = cachedObjects.get(uuid);
-					if(Objects.nonNull(obj)) {
-						if(processedUUIDs.size() < maximumCachedUUIDs) {
-							processedUUIDs.add(obj.getUuid());
-						}
-						return obj;
-					}
-					obj = DocumentHelper.convertDocumentToObject(clz, doc);
-					cachedObjects.put(obj.getUuid(), obj);
+
+				Document doc = iterator.next();
+				String uuid = doc.getString("_id");
+				T obj = cachedObjects.get(uuid);
+				if(Objects.nonNull(obj)) {
 					if(processedUUIDs.size() < maximumCachedUUIDs) {
 						processedUUIDs.add(obj.getUuid());
 					}
-					
-					if(!iterator.hasNext()) {
-						if(log.isInfoEnabled()) {
-							log.info("Finished uncached iteration for {} ", clz.getSimpleName());
-						}
-						/**
-						 * We have reached end of the iterator. Should we
-						 * cache the operation?
-						 */
-						if(processedUUIDs.size() <= maximumCachedUUIDs) {
-							cachedUUIDs.put(cacheName, processedUUIDs);
-						}
-					}
 					return obj;
-				} catch (ParseException e) {
-					throw new RepositoryException(e);
 				}
+				obj = DocumentHelper.convertDocumentToObject(clz, doc);
+				cachedObjects.put(obj.getUuid(), obj);
+				if(processedUUIDs.size() < maximumCachedUUIDs) {
+					processedUUIDs.add(obj.getUuid());
+				}
+				
+				if(!iterator.hasNext()) {
+					if(log.isInfoEnabled()) {
+						log.info("Finished uncached iteration for {} ", clz.getSimpleName());
+					}
+					/**
+					 * We have reached end of the iterator. Should we
+					 * cache the operation?
+					 */
+					if(processedUUIDs.size() <= maximumCachedUUIDs) {
+						cachedUUIDs.put(cacheName, processedUUIDs);
+					}
+				}
+				return obj;
+
 			}
 		}
 	}

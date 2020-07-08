@@ -1,13 +1,13 @@
 package com.jadaptive.app.ui;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +28,9 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.OrderedField;
+import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.app.ui.renderers.form.DropdownFormInput;
@@ -51,6 +54,9 @@ public class Entity {
 	
 	@Autowired
 	private ClassLoaderService classLoader;
+	
+	@Autowired
+	private TemplateService templateService; 
 	
 	@PostConstruct
 	private void postConstruct() {
@@ -83,41 +89,32 @@ public class Entity {
 
 	private void renderObject(Elements contents, ObjectTemplate template, AbstractObject obj, Properties properties, FieldView view) {
 		
-		contents.append("<form id=\"entityForm\" class=\"row\"></form>");
-		Elements element = contents.select("#entityForm");
+		contents.append("<form id=\"entity\"><div class=\"row\"><ul class=\"nav nav-tabs pt-4\"></ul><div class=\"tab-content panel col-12 py-4\"></div></div></form>");
 		
-		List<FieldTemplate> objects = new ArrayList<>();
-		List<FieldTemplate> fields = new ArrayList<>();
-		orderFields(objects, fields, template, properties);
-		
-		renderFields(template, fields, obj, element, properties, view);
-		renderObjects(template, objects, obj, element, properties, view);
+		Element element = contents.select(".row").first();
+		orderFields(element, template, obj, properties, view);
 	}
 
-	private void renderObjects(ObjectTemplate template, List<FieldTemplate> objects, AbstractObject obj, Elements element, Properties properties, FieldView view) {
-		
-		for(FieldTemplate object : objects) {
-			renderObject(element, obj, object, view);
-		}
-	}
-
-	private void renderFields(ObjectTemplate template, List<FieldTemplate> fields, AbstractObject obj, Elements element, Properties properties, FieldView view) {
-		
-		for(FieldTemplate field : fields) {
-			renderField(template, element, obj, field, properties, view);
-		}
-	}
-
-	private void renderField(ObjectTemplate template, Elements element, AbstractObject obj, FieldTemplate field, Properties properties, FieldView view) {
+	private void renderField(ObjectTemplate template, Element element, AbstractObject obj, FieldTemplate field, Properties properties, FieldView view) {
 		
 		if(field.getCollection()) {
 //			renderColletion(template, element, obj, field, properties, view); 
 		} else {
-			renderFormField(template, element, obj, field, properties, view);
+			switch(field.getFieldType()) {
+			case OBJECT_EMBEDDED:
+				
+				break;
+			case OBJECT_REFERENCE:
+				
+				break;
+			default:
+				renderFormField(template, element, obj, field, properties, view);
+			}
+			
 		}
 	}
 	
-	private void renderFormField(ObjectTemplate template, Elements element, AbstractObject obj, FieldTemplate field,
+	private void renderFormField(ObjectTemplate template, Element element, AbstractObject obj, FieldTemplate field,
 			Properties properties, FieldView view) {
 		
 		if(!field.getViews().isEmpty()) {
@@ -192,32 +189,74 @@ public class Entity {
 		return defaultValue;
 	}
 
-	private void renderObject(Elements element, AbstractObject obj, FieldTemplate field, FieldView view) {
+	private void orderFields(Element rootElement, ObjectTemplate template, AbstractObject obj, Properties properties, FieldView currentView) {
+		
+		List<OrderedView> views = templateService.getViews(template);
+		
+		boolean first = true;
+		for(OrderedView view : views) {
+			
+			Element viewElement = createViewElement(view, rootElement, template, first && !view.isRoot());
+			
+			if(!view.isRoot()) {
+				first = false;
+			}
+			
+			for(OrderedField orderedField : view.getFields()) {
+				FieldTemplate field = orderedField.getField();
+				if(field.isHidden()) {
+					continue;
+				}
+				switch(field.getFieldType()) {
+				default:
+					renderField(template, viewElement, obj, field, properties, currentView);
+					break;
+				}
+			}
+		}
 		
 		
 	}
 
-	private void orderFields(List<FieldTemplate> objects, List<FieldTemplate> fields, ObjectTemplate template, Properties properties) {
+	private Element createViewElement(OrderedView view, Element rootElement, ObjectTemplate template, boolean first) {
 		
-		for(FieldTemplate field : template.getFields()) {
-			if(field.isHidden()) {
-				continue;
-			}
-			switch(field.getFieldType()) {
-			case OBJECT_REFERENCE:
-				if(field.getCollection()) {
-					fields.add(field);
-				} else {
-					objects.add(field);
-				}
-				break;
-			case OBJECT_EMBEDDED:
-				objects.add(field);
-				break;
-			default:
-				fields.add(field);
-				break;
-			}
+		if(view.isRoot()) {
+			return rootElement.prepend("<div id=\"rootView\" class=\"col-12 py-1\"></div>").select("#rootView").first();
 		}
+		
+		switch(view.getType()) {
+		case ACCORDION:
+			
+			break;
+		default:
+			return createTabElement(view, rootElement, template, first);
+		}
+		return rootElement;
 	}
+
+	private Element createTabElement(OrderedView view, Element rootElement, ObjectTemplate template, boolean first) {
+		
+		Element list = rootElement.select("ul").first();
+		
+		list.append(String.format(
+				"<li class=\"nav-item\"><a class=\"nav-link\" data-toggle=\"tab\" href=\"#%s\" webbits:bundle=\"i18n/%s\" webbits:i18n=\"%s.name\"></a></li>",
+						view.getResourceKey(),
+						template.getResourceKey(),
+						view.getResourceKey()));
+
+		rootElement.select(".tab-content").append(String.format(
+				"<div id=\"%s\" class=\"tab-pane panel-body fade in\"></div>", view.getResourceKey()));
+		
+		Element tabPane = rootElement.select(".tab-pane").last();
+		
+		if(first) {
+			list.select("li").last().addClass("active");
+			list.select(".nav-link").first().addClass("active");
+			tabPane.addClass("active");
+		}
+		
+		return tabPane;
+	}
+	
+	
 }

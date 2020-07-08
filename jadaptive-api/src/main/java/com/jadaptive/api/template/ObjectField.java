@@ -34,11 +34,11 @@ public @interface ObjectField {
 		@Deprecated
 		String references() default "";
 
-		// USER INTERFACE PROPERTIES
-		@Deprecated
-		String name();
-		
-		@Deprecated
-		String description();
+//		// USER INTERFACE PROPERTIES
+//		@Deprecated
+//		String name() default "";
+//		
+//		@Deprecated
+//		String description() default "";
 		
 }

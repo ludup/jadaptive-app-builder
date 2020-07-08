@@ -125,5 +125,18 @@ public class ReflectionUtils {
 		throw new IllegalStateException(String.format("Cannot determine field name from method name %s", m.getName()));
 	}
 
+
+	public static Field getField(Class<?> clz, String resourceKey) throws NoSuchFieldException {
+		do {
+			try {
+				return clz.getDeclaredField(resourceKey);
+			} catch(NoSuchFieldException e) {
+				clz = clz.getSuperclass();
+			}
+		} while(!clz.equals(Object.class));
+		
+		throw new NoSuchFieldException();
+	}
+
 	
 }

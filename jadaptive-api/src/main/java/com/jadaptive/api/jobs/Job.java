@@ -18,19 +18,13 @@ public class Job extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "job";
 	
-	@ObjectField(name = "Task", 
-			description = "The task to execute",
-			type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	Task task;
 	
-	@ObjectField(name = "Triggers", 
-			description = "Additional tasks to conditionally execute",
-			type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	List<Trigger> triggers = new ArrayList<>();
 	
-	@ObjectField(name = "Job ID", 
-			description = "The unique identifier for this job",
-			type = FieldType.OBJECT_EMBEDDED,
+	@ObjectField(type = FieldType.INTEGER,
 			unique = true,
 			searchable = true)
 	Integer shortId;

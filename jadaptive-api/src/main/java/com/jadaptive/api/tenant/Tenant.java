@@ -7,10 +7,10 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.ObjectDefinition;
-import com.jadaptive.api.template.ObjectUUIDBean;
+import com.jadaptive.api.template.ObjectServiceBean;
 
 @ObjectDefinition(resourceKey = Tenant.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
-@ObjectUUIDBean(bean = TenantService.class)
+@ObjectServiceBean(bean = TenantService.class)
 public class Tenant extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 1567817173441528990L;

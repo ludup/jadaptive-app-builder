@@ -5,10 +5,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.jadaptive.api.repository.UUIDObjectService;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ObjectUUIDBean {
+public @interface ObjectServiceBean {
 		
-		Class<?> bean();
+		Class<? extends UUIDObjectService<?>> bean();
 
 }

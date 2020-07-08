@@ -22,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.ObjectTemplate;
 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
@@ -156,5 +158,15 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	@Override
 	public ClassLoader getClassLoader() {
 		return this;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Class<? extends UUIDDocument> getTemplateClass(ObjectTemplate template) {
+		try {
+			return (Class<? extends UUIDDocument>) findClass(template.getTemplateClass());
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 }

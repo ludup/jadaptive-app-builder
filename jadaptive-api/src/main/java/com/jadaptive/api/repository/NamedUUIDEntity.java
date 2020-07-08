@@ -7,8 +7,7 @@ public abstract class NamedUUIDEntity extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 2690511827179922811L;
 
-	@ObjectField(name = "Name", description = "The name of this object", 
-				searchable = true, unique = true, type = FieldType.TEXT)
+	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT)
 	String name;
 
 	public String getName() {

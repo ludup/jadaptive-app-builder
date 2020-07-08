@@ -17,36 +17,28 @@ public class Session extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "sessions";
 	
-	@ObjectField(name = "Remote Address", description = "The remote IP address of the user", 
-			type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT, required = true)
 	String remoteAddress;
 	
-	@ObjectField(name = "Last Updated", description = "The timestamp that this session was last updated", 
-			type = FieldType.TIMESTAMP, required = true)
+	@ObjectField(type = FieldType.TIMESTAMP, required = true)
 	Date lastUpdated;
 	
-	@ObjectField(name = "Signed In", description = "The timestamp when this session was created", 
-			type = FieldType.TIMESTAMP, required = true)
+	@ObjectField(type = FieldType.TIMESTAMP, required = true)
 	Date signedIn;
 	
-	@ObjectField(name = "Signed Out", description = "The timestamp when this session signed out", 
-			type = FieldType.TIMESTAMP)
+	@ObjectField(type = FieldType.TIMESTAMP)
 	Date signedOut;
 	
-	@ObjectField(name = "Tenant", description = "The tenant of this session", 
-			type = FieldType.OBJECT_REFERENCE)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE)
 	Tenant tenant;
 	
-	@ObjectField(name = "User Agent", description = "The user agent used for this session", 
-			type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT, required = true)
 	String userAgent;
 	
-	@ObjectField(name = "Session Timeout", description = "The session timeout applied to this session", 
-			type = FieldType.INTEGER, required = true)
+	@ObjectField(type = FieldType.INTEGER, required = true)
 	Integer sessionTimeout;
 	
-	@ObjectField(name = "User", description = "The user for this session", 
-			type = FieldType.OBJECT_REFERENCE, required = true)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, required = true)
 	User user;
 	
 	String csrfToken; 

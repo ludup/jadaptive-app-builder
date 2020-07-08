@@ -13,10 +13,10 @@ public class HTMLTemplate extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "htmlTemplates";
 	
-	@ObjectField(name = "HTML", description = "The HTML content of this template", required = true, type = FieldType.TEXT)
+	@ObjectField(required = true, type = FieldType.TEXT)
 	String html;
 
-	@ObjectField(name = "Content Selector", description = "The selector that identifies the element to insert message content", required = true, defaultValue = "body", type = FieldType.TEXT)
+	@ObjectField(required = true, defaultValue = "body", type = FieldType.TEXT)
 	String contentSelector;
 	
 	@Override

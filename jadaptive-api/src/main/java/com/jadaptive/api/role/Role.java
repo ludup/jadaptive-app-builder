@@ -17,28 +17,20 @@ public class Role extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "roles";
 	
-	@ObjectField(name = "All Permissions", 
-			description = "Flag to indicate that this role contains all available permissions",
-			defaultValue = "false", 
+	@ObjectField(defaultValue = "false", 
 			type = FieldType.BOOL)
 	boolean allPermissions;
 	
-	@ObjectField(name = "All Users", 
-			description = "Flag to indicate that this role contains all available users",
-			defaultValue = "false", 
+	@ObjectField(defaultValue = "false", 
 			type = FieldType.BOOL)
 	boolean allUsers;
 	
-	@ObjectField(name = "Permissions", 
-			description = "The permissions assigned to this Role",
-			defaultValue = "false", 
+	@ObjectField(defaultValue = "false", 
 			type = FieldType.TEXT,
 			searchable = true)
 	Collection<String> permissions = new HashSet<>();
 	
-	@ObjectField(name = "Users", 
-			description = "The users assigned to this Role",
-			defaultValue = "false", 
+	@ObjectField(defaultValue = "false", 
 			type = FieldType.OBJECT_REFERENCE,
 			searchable = true,
 			references = "users")

@@ -18,7 +18,7 @@ public class TestObjectCollections extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testObjectCollections";
 	
-	@ObjectField(name = "Values", description = "A collection of objects", type = FieldType.OBJECT_EMBEDDED)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	List<TestSimpleObject> values;
 	
 	public TestObjectCollections() {

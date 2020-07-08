@@ -1,9 +1,7 @@
 package com.jadaptive.app.templates;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.net.URI;
@@ -24,12 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.pf4j.PluginClassLoader;
-import org.pf4j.PluginDescriptor;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -423,6 +418,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 //			i18n.setProperty(String.format("%s.name", template.getResourceKey()), e.name());
 			
 			template.setResourceKey(e.resourceKey());
+			template.setName(e.resourceKey());
 			template.setHidden(e.hidden());
 			template.setSystem(e.system());
 			template.setType(e.type());
@@ -432,6 +428,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.getAliases().clear();
 			template.getAliases().addAll(Arrays.asList(e.aliases()));
 			template.setDefaultFilter(e.defaultFilter());
+			template.setName(e.resourceKey());
 			
 			Index[] nonUnique = clz.getAnnotationsByType(Index.class);
 			UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);

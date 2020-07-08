@@ -1,13 +1,11 @@
 package com.jadaptive.app.db;
 
-import java.text.ParseException;
 import java.util.Iterator;
 
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 
 public class NonCachingIterable<T extends UUIDEntity> implements Iterable<T> {
@@ -46,13 +44,11 @@ public class NonCachingIterable<T extends UUIDEntity> implements Iterable<T> {
 
 			@Override
 			public T next() {
-				try {
-					Document doc = iterator.next();
-					T obj = DocumentHelper.convertDocumentToObject(clz, doc);
-					return obj;
-				} catch (ParseException e) {
-					throw new RepositoryException(e);
-				}
+
+				Document doc = iterator.next();
+				T obj = DocumentHelper.convertDocumentToObject(clz, doc);
+				return obj;
+				
 			}
 		}
 	}

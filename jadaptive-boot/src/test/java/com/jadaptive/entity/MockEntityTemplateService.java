@@ -3,6 +3,7 @@ package com.jadaptive.entity;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.bson.Document;
@@ -12,6 +13,7 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.OrderedView;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.app.db.DocumentHelper;
 
@@ -73,6 +75,11 @@ public class MockEntityTemplateService implements TemplateService {
 	public void registerObjectDependency(String resourceKey, ObjectTemplate template) {
 		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public List<OrderedView> getViews(ObjectTemplate template) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

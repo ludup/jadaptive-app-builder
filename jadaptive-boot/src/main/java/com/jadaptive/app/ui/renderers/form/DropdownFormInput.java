@@ -4,9 +4,7 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 
@@ -23,7 +21,7 @@ public class DropdownFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Elements rootElement, String defaultValue) {
+	public void renderInput(Element rootElement, String defaultValue) {
 
 		rootElement.append(replaceResourceKey("<div class=\"form-group col-12\"><label for=\"${resourceKey}\" class=\"col-form-label\" ${i18nName}>" 
 				 + "</label><div id=\"${resourceKey}Dropdown\" style=\"position: relative\" class=\"input-group dropdown\"></div></div>"));

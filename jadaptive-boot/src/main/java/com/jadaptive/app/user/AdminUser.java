@@ -22,24 +22,18 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	PasswordEncryptionType encodingType;
 	boolean passwordChangeRequired;
 	
-	@ObjectField(name = "Username", 
-			description = "The logon name of the user",
-			required = true,
+	@ObjectField(required = true,
 			searchable = true,
 			type = FieldType.TEXT, 
 			unique = true)
 	String username;
 	
-	@ObjectField(name = "Full Name", 
-			description = "The full name of the user",
-			required = true,
+	@ObjectField(required = true,
 			searchable = true,
 			type = FieldType.TEXT)
 	String name;
 	
-	@ObjectField(name = "Email", 
-			description = "The user's email address",
-			required = false,
+	@ObjectField(required = false,
 			searchable = true,
 			type = FieldType.TEXT)
 	String email;

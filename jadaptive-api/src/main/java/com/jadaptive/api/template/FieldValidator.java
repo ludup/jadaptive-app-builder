@@ -11,12 +11,10 @@ public class FieldValidator extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "fieldValidators";
 	
-	@ObjectField(name = "Type", description = "The validator type",
-			type = FieldType.ENUM, required = true)
+	@ObjectField(type = FieldType.ENUM, required = true)
 	ValidationType type;
 	
-	@ObjectField(name = "Value", description = "The validator value",
-			type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT, required = true)
 	String value;
 	
 	public FieldValidator() {

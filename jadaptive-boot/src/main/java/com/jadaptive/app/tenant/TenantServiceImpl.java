@@ -26,7 +26,6 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
-import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
@@ -369,7 +368,13 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 
 	@Override
-	public UUIDDocument getObjectByUUID(String uuid) {
+	public Tenant getObjectByUUID(String uuid) {
 		return getTenantByUUID(uuid);
+	}
+
+	@Override
+	public String saveOrUpdate(Tenant object) {
+		repository.saveTenant(object);
+		return object.getUuid();
 	}
 }

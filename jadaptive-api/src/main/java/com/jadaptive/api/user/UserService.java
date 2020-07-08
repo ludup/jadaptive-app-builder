@@ -3,10 +3,10 @@ package com.jadaptive.api.user;
 import java.util.Collection;
 import java.util.Map;
 
-import com.jadaptive.api.repository.UUIDDocumentService;
+import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.template.ObjectTemplate;
 
-public interface UserService extends UUIDDocumentService {
+public interface UserService extends UUIDObjectService<User> {
 
 	public static final String CHANGE_PASSWORD_PERMISSION = "users.changePassword";
 	public static final String SET_PASSWORD_PERMISSION = "users.setPassword";

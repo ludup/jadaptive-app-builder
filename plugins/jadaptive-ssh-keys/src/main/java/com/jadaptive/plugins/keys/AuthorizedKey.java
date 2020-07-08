@@ -31,29 +31,27 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 
 	public static final String RESOURCE_KEY = "authorizedKeys";
 	
-	@ObjectField(name = "Key ID", 
-			description = "The ID of this key", 
-			searchable = true, 
+	@ObjectField(searchable = true, 
 			hidden = true, type = FieldType.LONG)
-	@ExcludeView(values = { FieldView.CREATE })
+	@ExcludeView(values = { FieldView.CREATE, FieldView.TABLE, FieldView.IMPORT })
 	Long id;
 	
-	@ObjectField(name = "Name", description = "A name to identify this public key", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	String name;
 	
-	@ObjectField(name = "Public Key", description = "The formatted public key", readOnly = true, type = FieldType.TEXT_AREA)
+	@ObjectField(type = FieldType.TEXT_AREA)
 	@ExcludeView(values = { FieldView.TABLE })
 	String publicKey;
 	
-	@ObjectField(name = "Fingerprint", description = "The SHA256 fingerprint of the public key", readOnly = true,  type = FieldType.TEXT, required = false)
+	@ObjectField(readOnly = true,  type = FieldType.TEXT, required = false)
 	@ExcludeView(values = { FieldView.CREATE })
 	String fingerprint;
 	
-	@ObjectField(name = "Tags", description = "Tags determine how and when keys can be used", readOnly = true, type = FieldType.TEXT, searchable = true)
+	@ObjectField(readOnly = true, type = FieldType.TEXT, searchable = true)
 	@IncludeView(values = { FieldView.UPDATE, FieldView.READ })
 	Set<String> tags = new HashSet<>();
 	
-	@ObjectField(name = "Type", description = "The type of key", readOnly = true, type = FieldType.TEXT)
+	@ObjectField(readOnly = true, type = FieldType.TEXT)
 	@ExcludeView(values = { FieldView.CREATE })
 	String type;
 	

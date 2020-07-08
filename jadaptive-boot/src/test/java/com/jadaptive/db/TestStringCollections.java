@@ -16,7 +16,7 @@ public class TestStringCollections extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "testStringCollections";
 	
-	@ObjectField(name = "Strings", description = "A collectionn of strings", type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
 	Collection<String> strings;
 	
 	public TestStringCollections() {

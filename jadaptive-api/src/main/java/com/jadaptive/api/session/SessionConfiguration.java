@@ -13,9 +13,7 @@ public class SessionConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "sessionConfiguration";
 
-	@ObjectField(name = "Timeout", 
-			description = "The number of minutes of idle time before a session times out",
-			type = FieldType.INTEGER, 
+	@ObjectField(type = FieldType.INTEGER, 
 			defaultValue = "15")
 	Integer timeout;
 

@@ -35,13 +35,13 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
-import com.jadaptive.api.repository.UUIDDocumentService;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectUUIDBean;
+import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
@@ -194,12 +194,12 @@ public class DocumentHelper {
 		document.put(name, embedded);
 	}
 
-	public static <T extends UUIDEntity> T convertDocumentToObject(Class<?> baseClass, Document document) throws ParseException {
+	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document) {
 		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends UUIDEntity> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) throws ParseException {
+	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) {
 		
 		try {
 			
@@ -271,9 +271,9 @@ public class DocumentHelper {
 						m.invoke(obj, convertDocumentToObject(UUIDEntity.class, (Document) doc, classLoader));
 					} else {
 						String objectUUID =  document.getString(name);
-						ObjectUUIDBean service = parameter.getType().getAnnotation(ObjectUUIDBean.class);
+						ObjectServiceBean service = parameter.getType().getAnnotation(ObjectServiceBean.class);
 						if(Objects.nonNull(service)) {
-							UUIDDocumentService bean = (UUIDDocumentService) ApplicationServiceImpl.getInstance().getBean(service.bean());
+							UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
 							Object ref = bean.getObjectByUUID(objectUUID);
 							m.invoke(obj, ref);
 						} else {
@@ -366,7 +366,7 @@ public class DocumentHelper {
 			}
 			
 			return obj;
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException | ClassNotFoundException e) {
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException | ClassNotFoundException | ParseException e) {
 			throw new RepositoryException(String.format("Unexpected error loading UUID entity %s", baseClass.getName()), e);			
 		}
 		
