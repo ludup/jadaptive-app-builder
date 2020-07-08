@@ -32,6 +32,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
@@ -282,6 +283,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			Class<?> clz = classService.findClass(template.getTemplateClass());
 				
 			Map<String, OrderedView> views = new HashMap<>();
+			Map<String,String> childViews = new HashMap<>();
 			
 			ObjectViews annonatedViews = clz.getAnnotation(ObjectViews.class);
 			
@@ -293,14 +295,11 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				}
 			}
 			
-			for(FieldTemplate field : template.getFields()) {
-				Field f = ReflectionUtils.getField(clz, field.getResourceKey());
-				ObjectView v = f.getAnnotation(ObjectView.class);
-				if(Objects.isNull(v)) {
-					views.get(null).addField(new OrderedField(null, field));
-				} else {
-					views.get(v.value()).addField(new OrderedField(v, field));
-				}
+			processFields(null,template, clz, views); 
+
+			for(String child : childViews.keySet()) {
+				OrderedView view = views.remove(child);
+				views.get(view.getParent()).addChildView(view);
 			}
 			
 			List<OrderedView> results = new ArrayList<>(views.values());
@@ -313,6 +312,29 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			return results;
 		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException e) {
 			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+
+	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, OrderedView> views) throws NoSuchFieldException, ClassNotFoundException {
+		for(FieldTemplate field : template.getFields()) {
+			
+			Field f = ReflectionUtils.getField(clz, field.getResourceKey());
+			ObjectView v = f.getAnnotation(ObjectView.class);
+			
+			if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
+				Class<?> c = ReflectionUtils.getObjectType(f);
+				String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+				ObjectTemplate ct = get(resourceKey);
+
+				processFields(v, ct, c, views);
+				continue;
+			}
+			
+			if(Objects.isNull(v)) {
+				views.get(Objects.nonNull(currentView) ? currentView.value() : null).addField(new OrderedField(null, field));
+			} else {
+				views.get(v.value()).addField(new OrderedField(v, field));
+			}
 		}
 	}
 }

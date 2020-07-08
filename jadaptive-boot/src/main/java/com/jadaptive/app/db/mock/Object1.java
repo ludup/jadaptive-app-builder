@@ -5,12 +5,12 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 
-@ObjectDefinition(resourceKey = ChildRenderer.RESOURCE_KEY)
-public class ChildRenderer extends AbstractUUIDEntity {
+@ObjectDefinition(resourceKey = Object1.RESOURCE_KEY)
+public class Object1 extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -1022570617998580427L;
 
-	public static final String RESOURCE_KEY = "childRenderer";
+	public static final String RESOURCE_KEY = "object1";
 
 	@Override
 	public String getResourceKey() {
@@ -18,15 +18,15 @@ public class ChildRenderer extends AbstractUUIDEntity {
 	}
 	
 	@ObjectField(type = FieldType.TEXT)
-	String childText;
+	String field1;
 
-	public String getChildText() {
-		return childText;
+	public String getField1() {
+		return field1;
 	}
 
-	public void setChildText(String childText) {
-		this.childText = childText;
+	public void setField1(String field1) {
+		this.field1 = field1;
 	}
-	
+
 	
 }

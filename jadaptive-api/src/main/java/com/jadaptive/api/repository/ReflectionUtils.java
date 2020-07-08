@@ -3,6 +3,8 @@ package com.jadaptive.api.repository;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -50,6 +52,14 @@ public class ReflectionUtils {
 		}
 		
 		return results;
+	}
+	
+	public static Class<?> getObjectType(Field field) {
+		Class<?> clz = field.getType();
+		if(Collection.class.isAssignableFrom(clz)) {
+			clz = (Class<?>)((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+		}
+		return clz;
 	}
 	
 	private static void iterateFields(Class<?> clz, Map<String, Field> results) {

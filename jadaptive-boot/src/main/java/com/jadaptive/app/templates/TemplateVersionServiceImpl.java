@@ -37,6 +37,7 @@ import com.jadaptive.api.app.ResourcePackage;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.template.ExcludeView;
@@ -513,9 +514,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 		
 		switch(field.type()) {
-		case ENUM:
 		case OBJECT_EMBEDDED:
+		{
+			Class<?> clz = ReflectionUtils.getObjectType(f);
+
+			t.getValidators().add(new FieldValidator(
+					ValidationType.RESOURCE_KEY, 
+					clz.getAnnotation(ObjectDefinition.class).resourceKey()));
+			t.getValidators().add(new FieldValidator(
+					ValidationType.OBJECT_TYPE, 
+					f.getType().getName()));
+			break;
+		}
+		case ENUM:
 		case OBJECT_REFERENCE:
+		{
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {
 				Class<?> clz = f.getType();
@@ -542,6 +555,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				templateService.registerObjectDependency(field.references(), template);
 			}
 			break;
+		}
 		default:
 			break;
 		}

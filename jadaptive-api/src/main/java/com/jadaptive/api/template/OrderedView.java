@@ -9,6 +9,7 @@ public class OrderedView {
 		
 	ObjectViewDefinition def;
 	List<OrderedField> fields = new ArrayList<>();
+	List<OrderedView> childViews = new ArrayList<>();
 	
 	public OrderedView(ObjectViewDefinition def) {
 		this.def = def;
@@ -35,6 +36,22 @@ public class OrderedView {
 		});
 		return fields;
 	}
+	
+	public void addChildView(OrderedView child) {
+		childViews.add(child);
+	}
+	
+	public List<OrderedView> getChildViews() {
+		Collections.sort(childViews, new Comparator<OrderedView>() {
+
+			@Override
+			public int compare(OrderedView o1, OrderedView o2) {
+				return o1.getWeight().compareTo(o2.getWeight());
+			}
+			
+		});
+		return childViews;
+	}
 
 	public Integer getWeight() {
 		return new Integer(def==null ? Integer.MIN_VALUE : def.weight());
@@ -42,5 +59,9 @@ public class OrderedView {
 
 	public String getResourceKey() {
 		return def.value();
+	}
+
+	public String getParent() {
+		return def.parent();
 	}
 }

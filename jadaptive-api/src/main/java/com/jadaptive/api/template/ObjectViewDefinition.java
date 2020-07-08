@@ -14,6 +14,8 @@ public @interface ObjectViewDefinition {
 
 	String value();
 	
+	String parent() default "";
+	
 	ViewType type() default ViewType.TAB;
 	
 	int weight() default 0;

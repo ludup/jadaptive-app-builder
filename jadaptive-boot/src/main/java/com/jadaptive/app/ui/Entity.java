@@ -32,6 +32,7 @@ import com.jadaptive.api.template.OrderedField;
 import com.jadaptive.api.template.OrderedView;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.ViewType;
 import com.jadaptive.app.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.app.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.app.ui.renderers.form.FieldInputRender;
@@ -77,22 +78,91 @@ public class Entity {
 			if(page instanceof ObjectPage) {
 				object = ((ObjectPage)page).getObject();
 			}
-			renderObject(contents, page.getTemplate(), object, properties, view);
+			
+			contents.append("<form id=\"entity\"><div class=\"row\"></div></form>");
+			List<OrderedView> views = templateService.getViews(page.getTemplate());
+			
+			createViews(views, contents.select(".row").first(), page.getTemplate(), object, properties, page.getScope());
 			return contents;
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new IOException(e.getMessage(), e);
 		}
-    	
-	
     }
 
-	private void renderObject(Elements contents, ObjectTemplate template, AbstractObject obj, Properties properties, FieldView view) {
+	private void createViews(List<OrderedView> views, Element element, ObjectTemplate template, AbstractObject obj, Properties properties, FieldView currentView) {
 		
-		contents.append("<form id=\"entity\"><div class=\"row\"><ul class=\"nav nav-tabs pt-4\"></ul><div class=\"tab-content panel col-12 py-4\"></div></div></form>");
+		int tabIndex = hasTabbedView(views);
+		int acdIndex = hasAccordionView(views);
 		
-		Element element = contents.select(".row").first();
-		orderFields(element, template, obj, properties, view);
+		if(tabIndex > -1) {
+			createTabOutline(element);
+		}
+		
+		if(acdIndex > -1) {
+			createAccordionOutline(element, template, tabIndex < acdIndex);
+		}
+		
+		boolean first = true;
+		for(OrderedView view : views) {
+			
+			Element viewElement = createViewElement(view, element, template, first && !view.isRoot());
+			
+			if(!view.isRoot()) {
+				first = false;
+			}
+			
+			for(OrderedField orderedField : view.getFields()) {
+				FieldTemplate field = orderedField.getField();
+				if(field.isHidden()) {
+					continue;
+				}
+				switch(field.getFieldType()) {
+				default:
+					renderField(template, viewElement, obj, field, properties, currentView);
+					break;
+				}
+			}
+			
+			if(!view.getChildViews().isEmpty()) {
+				createViews(view.getChildViews(), element, template, obj, properties, currentView);
+			}
+		}
+	}
+	
+	private void createTabOutline(Element element) {
+		element.append("<ul class=\"nav nav-tabs pt-4\"></ul><div class=\"tab-content panel col-12 py-4\"></div>");
+	}
+	
+	private void createAccordionOutline(Element element, ObjectTemplate template, boolean append) {
+		String outline = "<div class=\"accordion col-12\" id=\"" + template.getResourceKey() + "Accordion\"></div>";
+		if(append) {
+			element.append(outline);
+		} else {
+			element.prepend(outline);
+		}
+	}
+	
+	private int hasTabbedView(List<OrderedView> views) {
+		int idx = 0;
+		for(OrderedView v : views) {
+			if(!v.isRoot() && v.getType()==ViewType.TAB) {
+				return idx;
+			}
+			idx++;
+		}
+		return -1;
+	}
+	
+	private int hasAccordionView(List<OrderedView> views) {
+		int idx = 0;
+		for(OrderedView v : views) {
+			if(!v.isRoot() && v.getType()==ViewType.ACCORDION) {
+				return idx;
+			}
+			idx++;
+		}
+		return -1;
 	}
 
 	private void renderField(ObjectTemplate template, Element element, AbstractObject obj, FieldTemplate field, Properties properties, FieldView view) {
@@ -101,12 +171,15 @@ public class Entity {
 //			renderColletion(template, element, obj, field, properties, view); 
 		} else {
 			switch(field.getFieldType()) {
-			case OBJECT_EMBEDDED:
-				
-				break;
 			case OBJECT_REFERENCE:
-				
+				/**
+				 * TODO this should be a form field, ensure no all objects are references, not links,
+				 * as links require different processing.
+				 */
 				break;
+			case OBJECT_EMBEDDED:
+//				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
+				throw new IllegalStateException("Embedded object field should not be processed here");
 			default:
 				renderFormField(template, element, obj, field, properties, view);
 			}
@@ -189,35 +262,6 @@ public class Entity {
 		return defaultValue;
 	}
 
-	private void orderFields(Element rootElement, ObjectTemplate template, AbstractObject obj, Properties properties, FieldView currentView) {
-		
-		List<OrderedView> views = templateService.getViews(template);
-		
-		boolean first = true;
-		for(OrderedView view : views) {
-			
-			Element viewElement = createViewElement(view, rootElement, template, first && !view.isRoot());
-			
-			if(!view.isRoot()) {
-				first = false;
-			}
-			
-			for(OrderedField orderedField : view.getFields()) {
-				FieldTemplate field = orderedField.getField();
-				if(field.isHidden()) {
-					continue;
-				}
-				switch(field.getFieldType()) {
-				default:
-					renderField(template, viewElement, obj, field, properties, currentView);
-					break;
-				}
-			}
-		}
-		
-		
-	}
-
 	private Element createViewElement(OrderedView view, Element rootElement, ObjectTemplate template, boolean first) {
 		
 		if(view.isRoot()) {
@@ -226,17 +270,58 @@ public class Entity {
 		
 		switch(view.getType()) {
 		case ACCORDION:
-			
-			break;
+			return createAccordionElement(view, rootElement, template, first);
 		default:
 			return createTabElement(view, rootElement, template, first);
 		}
-		return rootElement;
+	}
+
+	private Element createAccordionElement(OrderedView view, Element rootElement, ObjectTemplate template, boolean first) {
+		
+		Element accord = rootElement.selectFirst(".accordion");
+		
+		StringBuffer buffer = new StringBuffer();
+		
+		buffer.append("<div class=\"card\">");
+		buffer.append("<div class=\"card-header\" id=\"");
+		buffer.append(view.getResourceKey());
+		buffer.append("\">");
+		buffer.append("<h2 class=\"mb-0\">");
+		buffer.append("<button class=\"btn btn-link");
+		if(!first) {
+			buffer.append(" collapsed");
+		}
+		buffer.append("\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapse");
+		buffer.append(view.getResourceKey());
+		buffer.append("\" aria-expanded=\""); 
+		buffer.append(String.valueOf(first));
+		buffer.append("\" aria-controls=\"collapse");
+		buffer.append(view.getResourceKey());
+		buffer.append("\">");
+		buffer.append("<span webbits:bundle=\"i18n/");
+		buffer.append(template.getResourceKey());
+		buffer.append("\" webbits:i18n=\"");
+		buffer.append(view.getResourceKey());
+		buffer.append("\"></span></button></h2></div>");
+		buffer.append("<div id=\"collapse");
+		buffer.append(view.getResourceKey());
+		buffer.append("\" class=\"collapse");
+		buffer.append("\" aria-labelledby=\"");
+		buffer.append(view.getResourceKey());
+		buffer.append("\" data-parent=\"#");
+		buffer.append(template.getResourceKey());
+		buffer.append("Accordion\">");
+		buffer.append("<div class=\"card-body\"></div></div></div>");
+
+		accord.append(buffer.toString());
+
+		return accord.select(".card-body").last();
+
 	}
 
 	private Element createTabElement(OrderedView view, Element rootElement, ObjectTemplate template, boolean first) {
 		
-		Element list = rootElement.select("ul").first();
+		Element list = rootElement.selectFirst("ul");
 		
 		list.append(String.format(
 				"<li class=\"nav-item\"><a class=\"nav-link\" data-toggle=\"tab\" href=\"#%s\" webbits:bundle=\"i18n/%s\" webbits:i18n=\"%s.name\"></a></li>",
