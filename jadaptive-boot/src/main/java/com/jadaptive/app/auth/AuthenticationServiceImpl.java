@@ -47,6 +47,9 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		try {
 			
+			if(!Boolean.getBoolean("jadaptive.webUI")) {
+				throw new AccessDeniedException("Web UI is currently disabled. Login to manage your account via the SSH CLI");
+			}
 			assertLoginThreshold(username);
 			assertLoginThreshold(remoteAddress);
 			
