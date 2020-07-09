@@ -69,7 +69,7 @@ public class Login extends AbstractPage {
     	
     	} catch(AccessDeniedException | ObjectNotFoundException e) {
     		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-    		content.selectFirst("#feedback").append("<div class=\"alert alert-danger\">Bad username or password</div>");
+    		content.selectFirst("#feedback").append("<div class=\"alert alert-danger\">" + e.getMessage() + "</div>");
     		return content;
     	}
     }
