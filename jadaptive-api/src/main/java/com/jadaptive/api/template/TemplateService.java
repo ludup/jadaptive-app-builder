@@ -37,4 +37,6 @@ public interface TemplateService {
 
 	List<OrderedView> getViews(ObjectTemplate template);
 
+	Iterable<ObjectTemplate> allCollectionTemplates();
+
 }

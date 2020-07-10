@@ -1,8 +1,12 @@
 package com.jadaptive.plugins.sshd.commands;
 
 import java.io.IOException;
+import java.util.List;
 
+import org.jline.reader.Candidate;
 import org.jline.utils.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.tenant.Tenant;
@@ -10,6 +14,7 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.SSHDService;
+import com.sshtools.common.files.AbstractFile;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.ssh.SshConnection;
 import com.sshtools.server.vsession.Environment;
@@ -19,6 +24,8 @@ import com.sshtools.server.vsession.VirtualConsole;
 
 public abstract class AbstractTenantAwareCommand extends ShellCommand {
 
+	static Logger log = LoggerFactory.getLogger(AbstractTenantAwareCommand.class);
+	
 	@Autowired
 	private TenantService tenantService; 
 	
@@ -80,6 +87,17 @@ public abstract class AbstractTenantAwareCommand extends ShellCommand {
 		
 	}
 	
+	protected void fillCurrentDirectoryCandidates(List<Candidate> candidates) {
+		try {
+			for(AbstractFile file : console.getCurrentDirectory().getChildren()) {
+				if(file.isFile()) {
+					candidates.add(new Candidate(file.getName()));
+				}
+			}
+		} catch (IOException | PermissionDeniedException e) {
+			log.error("Failure iterating current directory files during auto-completion", e);
+		}
 
+	}
 
 }

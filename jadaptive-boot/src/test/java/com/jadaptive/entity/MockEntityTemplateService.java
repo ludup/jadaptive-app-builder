@@ -81,5 +81,10 @@ public class MockEntityTemplateService implements TemplateService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@Override
+	public Iterable<ObjectTemplate> allCollectionTemplates() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

@@ -22,6 +22,7 @@ public class ObjectCommandFactory extends AbstractAutowiredCommandFactory implem
 //		tryCommand("import-csv", ImportCsv.class, "tenant.read", "tenant.readWrite");
 		tryCommand("set-config", SetConfig.class, "tenant.read", "tenant.readWrite");
 		tryCommand("show-config", ShowConfig.class, "tenant.read", "tenant.readWrite");
+		tryCommand("create-object", CreateObject.class, "tenant.read", "tenant.readWrite");
 		
 		return this;
 	}

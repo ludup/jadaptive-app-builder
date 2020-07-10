@@ -59,15 +59,7 @@ public class ImportKey extends AbstractTenantAwareCommand {
 	@Override
 	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
 		if(line.wordIndex() == 1) {
-			try {
-				for(AbstractFile file : console.getCurrentDirectory().getChildren()) {
-					if(file.isFile()) {
-						candidates.add(new Candidate(file.getName()));
-					}
-				}
-			} catch (IOException | PermissionDeniedException e) {
-				log.error("Failure iterating current directory files during auto-completion", e);
-			}
+			fillCurrentDirectoryCandidates(candidates);
 		} 
 	}
 	

@@ -1,6 +1,7 @@
 [{
     "uuid": "9a1fe4b0-e0c4-4b9e-a9e2-913b25fb39df",
 	"resourceKey": "messages",
+	"shortName": "userRegistrationConfirmation",
 	"group": "User Registration",
 	"name": "Confirmation Code",
 	"subject": "Your email confirmation code",

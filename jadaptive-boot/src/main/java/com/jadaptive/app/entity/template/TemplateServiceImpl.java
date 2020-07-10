@@ -337,4 +337,9 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			}
 		}
 	}
+
+	@Override
+	public Iterable<ObjectTemplate> allCollectionTemplates() {
+		return repository.list(SearchField.eq("type", ObjectType.COLLECTION.name()));
+	}
 }

@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.user.UserService;
@@ -315,6 +316,21 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 				log.error("Failed to send email", e);
 			}
 		}
+	}
+
+	@Override
+	public Iterable<Message> allMessages() {
+		return repository.list(Message.class);
+	}
+
+	@Override
+	public Message getMessageByShortName(String name) {
+		return repository.get(Message.class, SearchField.eq("shortName", name));
+	}
+
+	@Override
+	public void saveMessage(Message message) {
+		repository.saveOrUpdate(message);
 	}
 
 }

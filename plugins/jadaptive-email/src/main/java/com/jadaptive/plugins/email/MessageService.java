@@ -17,4 +17,10 @@ public interface MessageService {
 			String email,
 			EmailAttachment... attachments);
 
+	Iterable<Message> allMessages();
+
+	Message getMessageByShortName(String name);
+
+	void saveMessage(Message message);
+
 }

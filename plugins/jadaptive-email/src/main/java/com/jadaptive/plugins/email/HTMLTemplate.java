@@ -3,6 +3,8 @@ package com.jadaptive.plugins.email;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
@@ -13,7 +15,11 @@ public class HTMLTemplate extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "htmlTemplates";
 	
-	@ObjectField(required = true, type = FieldType.TEXT)
+	@ObjectField(required = true, readOnly = true, unique = true, type = FieldType.TEXT)
+	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9]+$")
+	String shortName;
+	
+	@ObjectField(required = true, type = FieldType.TEXT_AREA)
 	String html;
 
 	@ObjectField(required = true, defaultValue = "body", type = FieldType.TEXT)
@@ -38,5 +44,13 @@ public class HTMLTemplate extends NamedUUIDEntity {
 
 	public void setContentSelector(String contentSelector) {
 		this.contentSelector = contentSelector;
+	}
+
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
 	}
 }

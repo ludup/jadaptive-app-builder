@@ -3,9 +3,12 @@ package com.jadaptive.api.entity;
 import java.util.Collection;
 
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.template.ObjectTemplate;
 
 public interface ObjectService {
 
+	AbstractObject createNew(ObjectTemplate template);
+	
 	AbstractObject get(String resourceKey, String uuid) throws RepositoryException, ObjectException;
 
 	AbstractObject getSingleton(String resourceKey) throws RepositoryException, ObjectException;

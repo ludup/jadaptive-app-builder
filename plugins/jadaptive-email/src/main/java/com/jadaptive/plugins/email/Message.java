@@ -4,9 +4,9 @@ import java.util.Collection;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
 
 @ObjectDefinition(resourceKey = Message.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class Message extends NamedUUIDEntity {
@@ -14,6 +14,9 @@ public class Message extends NamedUUIDEntity {
 	private static final long serialVersionUID = 2912430699573395419L;
 
 	public static final String RESOURCE_KEY = "messages";
+	
+	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
+	String shortName;
 	
 	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
 	String group;
@@ -50,6 +53,14 @@ public class Message extends NamedUUIDEntity {
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
+	}
+
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
 	}
 
 	public void setGroup(String group) {

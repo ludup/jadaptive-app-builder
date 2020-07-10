@@ -50,6 +50,11 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	private ApplicationService appService; 
 	
 	@Override
+	public AbstractObject createNew(ObjectTemplate template) {
+		return new MongoEntity(template.getResourceKey());
+	}
+	
+	@Override
 	public AbstractObject getSingleton(String resourceKey) throws RepositoryException, ObjectException {
 
 		ObjectTemplate template = templateService.get(resourceKey);
