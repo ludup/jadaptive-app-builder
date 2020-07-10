@@ -26,14 +26,22 @@ public class MessageCommandFactory extends AbstractAutowiredCommandFactory imple
 
 		tryCommand("change-message-subject", ChangeMessageSubject.class, 
 				PermissionUtils.getReadWritePermission(Message.RESOURCE_KEY));
+		
 		tryCommand("change-message-text", ChangeMessageText.class, 
 				PermissionUtils.getReadWritePermission(Message.RESOURCE_KEY));
+		tryCommand("export-message-text", ExportMessageText.class, 
+				PermissionUtils.getReadWritePermission(Message.RESOURCE_KEY));
+		
 		tryCommand("change-message-html", ChangeMessageHtml.class, 
+				PermissionUtils.getReadWritePermission(Message.RESOURCE_KEY));
+		tryCommand("export-message-html", ExportMessageHtml.class, 
 				PermissionUtils.getReadWritePermission(Message.RESOURCE_KEY));
 		
 		tryCommand("create-html-template", CreateHtmlTemplate.class, 
 				PermissionUtils.getReadWritePermission(HTMLTemplate.RESOURCE_KEY));
 		tryCommand("change-template-html", ChangeHtmlTemplate.class, 
+				PermissionUtils.getReadWritePermission(HTMLTemplate.RESOURCE_KEY));
+		tryCommand("export-template-html", ExportHtmlTemplate.class, 
 				PermissionUtils.getReadWritePermission(HTMLTemplate.RESOURCE_KEY));
 		
 		return this;
