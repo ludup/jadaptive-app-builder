@@ -20,12 +20,14 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationUpdateManager;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.StartupAware;
+import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.commands.UserCommandFactory;
 import com.sshtools.common.files.AbstractFileFactory;
+import com.sshtools.common.files.SpaceRestrictedFileFactoryAdapter;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
@@ -76,6 +78,9 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	
 	@Autowired
 	private UserService userService; 
+	
+	@Autowired
+	private SingletonObjectDatabase<SSHDConfiguration> configService;
 	
 	Map<String,SSHInterface> interfaces = new HashMap<>();
 	
@@ -140,6 +145,8 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		
 		permissionService.setupUserContext(user);
 		
+		SSHDConfiguration sshdConfig = configService.getObject(SSHDConfiguration.class);
+		
 		try {
 			List<VirtualMountTemplate> mounts = new ArrayList<>();
 			VirtualMountTemplate home = null;
@@ -159,10 +166,18 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			}
 			
 			if(Objects.isNull(home)) {
-				home = new VirtualMountTemplate("/",
-						"home/" + user.getUsername(), 
-						new VFSFileFactory(), 
-						true);
+				if(sshdConfig.getHomeDirectoryMaxSpace() > 0) {
+					home = new VirtualMountTemplate("/",
+							"home/" + user.getUsername(), 
+							new SpaceRestrictedFileFactoryAdapter(new VFSFileFactory(),
+									sshdConfig.getHomeDirectoryMaxSpace()), 
+							true);
+				} else {
+					home = new VirtualMountTemplate("/",
+							"home/" + user.getUsername(), 
+							new VFSFileFactory(), 
+							true);
+				}
 			}
 
 			return new VirtualFileFactory(home, 
@@ -177,8 +192,14 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
 		
-		sshContext.setIdleConnectionTimeoutSeconds(60*15);
-		sshContext.addCommand("scp", ScpCommand.class);
+		SSHDConfiguration sshdConfig = configService.getObject(SSHDConfiguration.class);
+		
+		sshContext.setIdleConnectionTimeoutSeconds(sshdConfig.getIdleConnectionTimeoutSecs());
+		
+		if(sshdConfig.getEnableSCP()) {
+			sshContext.addCommand("scp", ScpCommand.class);
+		}
+		
 		sshContext.setChannelFactory(new VirtualChannelFactory() {
 
 			@Override
