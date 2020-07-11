@@ -79,8 +79,10 @@ public class SessionFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest)request;
 		HttpServletResponse resp = (HttpServletResponse)response;
 		
-		log.info(req.getMethod() + " " + req.getRequestURI().toString());
-
+		if(log.isDebugEnabled()) {
+			log.debug(req.getMethod() + " " + req.getRequestURI().toString());
+		}
+		
 		tenantService.setCurrentTenant(req);
 		
 		try {

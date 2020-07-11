@@ -17,8 +17,8 @@ public class NonCachingIterable<T extends UUIDEntity> implements Iterable<T> {
 		
 		public NonCachingIterable(Class<T> clz, 
 				Iterable<Document> iterator) {
-			if(log.isInfoEnabled()) {
-				log.info("Started uncached iteration for {} ", clz.getSimpleName());
+			if(log.isDebugEnabled()) {
+				log.debug("Started uncached iteration for {} ", clz.getSimpleName());
 			}
 			this.clz = clz;
 			this.iterator = iterator;

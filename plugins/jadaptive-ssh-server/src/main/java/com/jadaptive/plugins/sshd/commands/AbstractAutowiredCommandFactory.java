@@ -36,7 +36,9 @@ public class AbstractAutowiredCommandFactory extends CommandFactory<ShellCommand
 			}
 			installCommand(name, clz);
 		} catch(AccessDeniedException e) {
-			log.info("{} will not be available to {}", name, permissionService.getCurrentUser().getUsername());
+			if(log.isDebugEnabled()) {
+				log.debug("{} will not be available to {}", name, permissionService.getCurrentUser().getUsername());
+			}
 		}
 	}
 }

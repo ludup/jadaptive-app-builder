@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
@@ -45,6 +46,8 @@ public class AuthorizedKeyProvider extends AbstractPublicKeyAuthenticationProvid
 					return true;
 				}
 			}
+			return false;
+		} catch(ObjectNotFoundException e) { 
 			return false;
 		} finally {
 			tenantService.clearCurrentTenant();

@@ -9,6 +9,7 @@ import com.jadaptive.plugins.sshd.PluginCommandFactory;
 import com.jadaptive.plugins.sshd.commands.AbstractAutowiredCommandFactory;
 import com.sshtools.server.vsession.CommandFactory;
 import com.sshtools.server.vsession.ShellCommand;
+import com.sshtools.server.vsession.commands.Kill;
 import com.sshtools.server.vsession.commands.admin.Connections;
 import com.sshtools.server.vsession.jvm.Mem;
 import com.sshtools.server.vsession.jvm.ThreadDump;
@@ -31,6 +32,9 @@ public class SuperUserCommandFactory extends AbstractAutowiredCommandFactory imp
 		installCommand("mem", Mem.class);
 		installCommand("threads", Threads.class);
 		installCommand("thread-dump", ThreadDump.class);
+		
+		installCommand("kill", Kill.class);
+		
 		return this;
 	}
 

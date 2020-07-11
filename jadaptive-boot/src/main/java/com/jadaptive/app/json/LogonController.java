@@ -6,6 +6,7 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,7 @@ public class LogonController {
 				homePage = properties.getProperty("authentication.homePage");
 			}
 			if(log.isInfoEnabled()) {
-				log.info("Logged user {} on with home {}", username, homePage);
+				log.info("Logged user {} on with home {}", username, StringUtils.defaultIfBlank(homePage, "default"));
 			}
 			return new SessionStatus(session, homePage);
 		} catch (Throwable e) {

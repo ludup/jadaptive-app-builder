@@ -3,12 +3,14 @@ package com.jadaptive.plugins.sshd.commands;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jline.reader.Candidate;
 import org.jline.utils.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
@@ -54,9 +56,12 @@ public abstract class AbstractTenantAwareCommand extends ShellCommand {
 			doRun(args, console);
 		} catch(UsageException e) { 
 			console.println(e.getMessage());
+		} catch(AccessDeniedException e) { 
+			console.println("You do not have the permission to perform the requested action.");
 		} catch(Throwable e) { 
 			Log.error(e);
-			console.println(e.getMessage());
+			console.println(StringUtils.defaultString(e.getMessage(),
+					String.format("Unexpected error %s", e.getClass().getSimpleName())));
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
