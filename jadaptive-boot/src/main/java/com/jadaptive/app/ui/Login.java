@@ -51,6 +51,11 @@ public class Login extends AbstractPage {
     Document service(@In Document content, @Form LoginForm form) {
 	
     	try {
+    		
+			if(!Boolean.getBoolean("jadaptive.webUI")) {
+				throw new AccessDeniedException("Web UI is currently disabled. Login to manage your account via the SSH CLI");
+			}
+			
 	    	Session session = authenticationService.logonUser(form.getUsername(),
 	    			form.getPassword(), tenantService.getCurrentTenant(), 
 	    			Request.get().getRemoteAddr(), 
