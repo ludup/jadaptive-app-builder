@@ -27,11 +27,15 @@ public class Messages extends AbstractTenantAwareCommand {
 		
 		MessageService messageService = applicationService.getBean(MessageService.class);
 		
-		console.println(String.format("%-30s %-20s %s", "Name", "Short Name", "Subject"));
-		console.println(String.format("%-30s %-20s %s", "----", "-----------", "-------"));
+		console.println(String.format("%-2s %-30s %-30s %s", "On", "Name", "Short Name", "Subject"));
+		console.println(String.format("%-2s %-30s %-30s %s", "--", "----", "-----------", "-------"));
 		
 		for(Message message : messageService.allMessages()) {
-			console.println(String.format("%-30s %-20s %s", message.getName(), message.getShortName(), message.getSubject()));
+			console.println(String.format("%-2s %-30s %-30s %s", 
+					message.isEnabled() ? "Y" : "N", 
+							message.getName(), 
+							message.getShortName(), 
+							message.getSubject()));
 		}
 
 	}

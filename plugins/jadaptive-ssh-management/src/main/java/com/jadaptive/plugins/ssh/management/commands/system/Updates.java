@@ -57,7 +57,9 @@ public class Updates extends AbstractTenantAwareCommand {
 				try {
 					updateService.installUpdates();
 
-					console.println("The application is being restarted");
+					console.readLine("Updates installed. Press any key to restart");
+					
+					console.println("The application is being restarted. Goodbye");
 					
 					console.getSessionChannel().close();
 					console.getConnection().disconnect();
