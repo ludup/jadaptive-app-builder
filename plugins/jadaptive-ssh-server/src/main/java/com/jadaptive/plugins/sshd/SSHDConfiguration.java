@@ -1,12 +1,15 @@
 package com.jadaptive.plugins.sshd;
 
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 
 @ObjectDefinition(resourceKey = SSHDConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
-public class SSHDConfiguration {
+public class SSHDConfiguration extends SingletonUUIDEntity {
+
+	private static final long serialVersionUID = -9112641261620391141L;
 
 	public static final String RESOURCE_KEY = "sshdConfiguration";
 
@@ -41,6 +44,11 @@ public class SSHDConfiguration {
 
 	public void setEnableSCP(Boolean enableSCP) {
 		this.enableSCP = enableSCP;
+	}
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
 	}
 	
 	
