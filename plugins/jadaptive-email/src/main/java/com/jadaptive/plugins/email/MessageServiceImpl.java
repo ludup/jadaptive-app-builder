@@ -159,6 +159,9 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 			String emailAddress,
 			EmailAttachment... attachments) {
 		
+		if(log.isInfoEnabled()) {
+			log.info("Sending email template {} to {}", uuid, emailAddress);
+		}
 		RecipientHolder holder = new RecipientHolder(emailAddress);
 		sendMessage(uuid, tokenResolver, 
 				new ArrayList<RecipientHolder>(Arrays.asList(holder)).iterator(), 
@@ -302,6 +305,10 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 //					}
 //				}
 
+				if(log.isInfoEnabled()) {
+					log.info("Sending \"{}\" email to {}", subjectWriter.toString(), recipient.getEmail());
+				}
+				
 				emailService.sendEmail(subjectWriter.toString(), bodyWriter.toString(),
 						htmlWriter.toString(), message.getReplyToName(), message.getReplyToEmail(),
 						new RecipientHolder[] { recipient }, message.isArchive(),
@@ -312,6 +319,7 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 
 			} catch (MailException e) {
 				// Will be logged by mail API
+				log.error("Failed to send email", e);
 			} catch (Throwable e) {
 				log.error("Failed to send email", e);
 			}
