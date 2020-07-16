@@ -517,10 +517,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		case OBJECT_EMBEDDED:
 		{
 			Class<?> clz = ReflectionUtils.getObjectType(f);
-
-			t.getValidators().add(new FieldValidator(
-					ValidationType.RESOURCE_KEY, 
-					clz.getAnnotation(ObjectDefinition.class).resourceKey()));
+			ObjectDefinition objd = clz.getAnnotation(ObjectDefinition.class);
+			if(Objects.nonNull(objd)) {
+				t.getValidators().add(new FieldValidator(
+						ValidationType.RESOURCE_KEY, 
+						objd.resourceKey()));
+			}
 			t.getValidators().add(new FieldValidator(
 					ValidationType.OBJECT_TYPE, 
 					f.getType().getName()));
