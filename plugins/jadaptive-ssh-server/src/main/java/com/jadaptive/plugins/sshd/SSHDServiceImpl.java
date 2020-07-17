@@ -199,7 +199,6 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		if(sshdConfig.getEnableSCP()) {
 			sshContext.addCommand("scp", ScpCommand.class);
 		}
-		
 		sshContext.setChannelFactory(new VirtualChannelFactory() {
 
 			@Override
