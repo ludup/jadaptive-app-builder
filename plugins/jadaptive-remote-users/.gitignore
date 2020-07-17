@@ -1,5 +1,4 @@
 /target/
-/.settings/
 /.classpath
-/.factorypath
+/.settings/
 /plugin.properties

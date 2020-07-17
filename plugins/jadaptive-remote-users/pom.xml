@@ -9,59 +9,24 @@
 		<version>0.0.2-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>jadaptive-web-management-webbits</artifactId>
-	<name>Web Management Webbits</name>
+	<artifactId>jadaptive-remote-users</artifactId>
+	<name>Remote User Databases</name>
 
 	<properties>
-		<plugin.id>jadaptive-web-management-webbits</plugin.id>
-		<plugin.class>com.jadaptive.ui.webbits.WebbitsPlugin</plugin.class>
+		<plugin.id>jadaptive-remote-users</plugin.id>
+		<plugin.class>com.jadaptive.plugins.remote.RemoteUsersPlugin</plugin.class>
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder/plugins</plugin.projectUrl>
-		<plugin.dependencies>jadaptive-web-management</plugin.dependencies>
+		<plugin.dependencies></plugin.dependencies>
 	</properties>
 
-	<dependencies>		
+	<dependencies>
 		<dependency>
 			<groupId>com.jadaptive</groupId>
 			<artifactId>jadaptive-api</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.jadaptive</groupId>
-			<artifactId>jadaptive-web-management</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.codesmith</groupId>
-			<artifactId>webbits-core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>javax.servlet-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.websocket</groupId>
-					<artifactId>javax.websocket-api</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 
@@ -90,4 +55,16 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>ext-releases-local</id>
+			<name>artifactory.javassh.com-ext-releases</name>
+			<url>http://artifactory.javassh.com/ext-releases-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases />
+		</repository>
+	</repositories>
 </project>
