@@ -8,6 +8,7 @@ import com.codesmith.webbits.Created;
 import com.codesmith.webbits.Redirect;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.ui.AbstractPage;
 
 public abstract class AuthenticatedView extends AbstractPage {
 

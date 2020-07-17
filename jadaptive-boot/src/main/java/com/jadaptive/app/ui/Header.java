@@ -11,6 +11,7 @@ import com.codesmith.webbits.View;
 import com.codesmith.webbits.Widget;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.ui.AbstractPage;
 
 @Widget
 @View(contentType = "text/html")

@@ -22,6 +22,7 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.AbstractPage;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.auth.AuthenticationService;

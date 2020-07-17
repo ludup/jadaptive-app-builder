@@ -24,7 +24,7 @@ public abstract class ObjectPage extends TemplatePage {
 	protected String uuid;
 	protected AbstractObject object;
 	
-	protected boolean isModal() {
+	public boolean isModal() {
 		return true;
 	}
 	

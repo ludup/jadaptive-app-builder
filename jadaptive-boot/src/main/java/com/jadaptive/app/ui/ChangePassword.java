@@ -43,7 +43,7 @@ public class ChangePassword extends AuthenticatedView {
     	throw new Redirect(Dashboard.class);
     }
     
-    protected boolean isModal() {
+    public boolean isModal() {
     	return true;
     }
 

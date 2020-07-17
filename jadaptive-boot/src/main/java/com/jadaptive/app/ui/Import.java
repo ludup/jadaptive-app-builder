@@ -36,7 +36,7 @@ public class Import extends TemplatePage {
 		}
 	}
 
-	protected boolean isModal() {
+	public boolean isModal() {
 		return true;
 	}
 	
