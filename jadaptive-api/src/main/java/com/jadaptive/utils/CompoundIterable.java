@@ -7,8 +7,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CompoundIterable<T> implements Iterable<T> {
 
+	static Logger log = LoggerFactory.getLogger(CompoundIterable.class);
+	
 	Collection<Iterable<T>> iterators = new ArrayList<>();
 	
 	public CompoundIterable() {	
@@ -48,11 +53,14 @@ public class CompoundIterable<T> implements Iterable<T> {
 			if(Objects.isNull(current)) {
 				return false;
 			}
-			return current.hasNext();
+			boolean next = current.hasNext();
+			log.info("hasNext {}", next);
+			return next;
 		}
 
 		@Override
 		public T next() {
+			log.info("Loading next");
 			ensureReady();
 			if(Objects.isNull(current)) {
 				throw new IllegalStateException();
@@ -65,6 +73,7 @@ public class CompoundIterable<T> implements Iterable<T> {
 		
 		private void ensureReady() {
 			while((Objects.isNull(current) || !current.hasNext()) && !iterators.isEmpty()) {
+				log.info("Changing iterators");
 				current = iterators.remove(0).iterator();
 			}
 		}
