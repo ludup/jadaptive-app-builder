@@ -5,11 +5,11 @@ import java.io.FileNotFoundException;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.HTTPMethod;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -18,7 +18,7 @@ import com.jadaptive.api.template.FieldView;
 
 @Page(BootstrapTable.class)
 @View(contentType = "text/html", paths = { "/import/{resourceKey}"})
-@Resource
+@ClasspathResource
 public class Import extends TemplatePage {
     
 	@Autowired

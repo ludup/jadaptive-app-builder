@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import org.jsoup.nodes.Document;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.BootBox;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
@@ -18,7 +18,7 @@ import com.jadaptive.api.template.FieldView;
 
 @Page({ BootstrapTable.class, BootBox.class, BootstrapToggle.class, Widgets.class, FreeMarker.class })
 @View(contentType = "text/html", paths = { "/view/{resourceKey}/{uuid}" })
-@Resource
+@ClasspathResource
 public class ReadOnly extends ObjectPage {
 
 

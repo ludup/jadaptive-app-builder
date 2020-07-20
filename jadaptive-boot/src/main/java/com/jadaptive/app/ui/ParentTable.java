@@ -7,10 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.BootBox;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
@@ -25,7 +25,7 @@ import com.jadaptive.app.ui.renderers.DropdownInput;
 
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class })
 @View(contentType = "text/html", paths = { "/tables/{resourceKey}" })
-@Resource
+@ClasspathResource
 public class ParentTable extends TemplatePage {
 
 	@Autowired

@@ -3,10 +3,10 @@ package com.jadaptive.app.ui;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.ParentView;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.Widget;
 import com.jadaptive.api.servlet.Request;
@@ -15,7 +15,7 @@ import com.jadaptive.api.ui.AbstractPage;
 
 @Widget
 @View(contentType = "text/html")
-@Resource
+@ClasspathResource
 public class Header {
 
 	@Autowired

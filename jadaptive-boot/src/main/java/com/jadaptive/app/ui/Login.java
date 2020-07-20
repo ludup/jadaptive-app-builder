@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.Created;
 import com.codesmith.webbits.Form;
 import com.codesmith.webbits.HTTPMethod;
@@ -14,7 +15,6 @@ import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Redirect;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -29,7 +29,7 @@ import com.jadaptive.app.auth.AuthenticationService;
 
 @Page
 @View(contentType = "text/html", paths = { "/login"})
-@Resource
+@ClasspathResource
 public class Login extends AbstractPage {
 	
 	@Autowired

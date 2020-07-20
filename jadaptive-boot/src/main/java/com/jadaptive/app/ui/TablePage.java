@@ -6,10 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.BootBox;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
@@ -22,7 +22,7 @@ import com.jadaptive.api.template.FieldView;
 
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class, I18N.class})
 @View(contentType = "text/html", paths = { "/table/{resourceKey}" })
-@Resource
+@ClasspathResource
 public class TablePage extends TemplatePage {
 
 	@Autowired

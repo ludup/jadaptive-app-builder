@@ -4,11 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.HTTPMethod;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.extensions.Bind;
 import com.jadaptive.api.servlet.Request;
@@ -16,7 +16,7 @@ import com.jadaptive.api.ui.AbstractPage;
 
 @Page(value = Bind.class)
 @View(contentType = "text/html", paths = { "/winlogin/success"})
-@Resource
+@ClasspathResource
 public class WinSuccess extends AbstractPage {
 
 	

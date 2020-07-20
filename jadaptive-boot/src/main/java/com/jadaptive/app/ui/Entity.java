@@ -13,10 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.ParentView;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.Widget;
 import com.codesmith.webbits.extensions.PageResources;
@@ -45,7 +45,7 @@ import com.jadaptive.utils.Utils;
 
 @Widget({ PageResources.class, PageResourcesElement.class })
 @View(contentType = "text/html")
-@Resource
+@ClasspathResource
 public class Entity {
 
 	static Logger log = LoggerFactory.getLogger(Entity.class);

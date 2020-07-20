@@ -5,10 +5,10 @@ import java.io.IOException;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.ParentView;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.Widget;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
@@ -19,7 +19,7 @@ import com.jadaptive.api.template.FieldView;
 
 @Widget({ BootstrapTable.class, PageResources.class, PageResourcesElement.class })
 @View(contentType = "text/html")
-@Resource
+@ClasspathResource
 public class Table {
 
 	 @Out

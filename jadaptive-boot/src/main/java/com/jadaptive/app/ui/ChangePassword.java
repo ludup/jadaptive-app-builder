@@ -5,13 +5,13 @@ import java.io.FileNotFoundException;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.Form;
 import com.codesmith.webbits.HTTPMethod;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Redirect;
-import com.codesmith.webbits.Resource;
 import com.codesmith.webbits.View;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
@@ -21,7 +21,7 @@ import com.jadaptive.api.user.UserService;
 
 @Page
 @View(contentType = "text/html", paths = { "/changePassword"})
-@Resource
+@ClasspathResource
 public class ChangePassword extends AuthenticatedView {
 
 	@Autowired
