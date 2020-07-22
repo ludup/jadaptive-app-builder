@@ -31,6 +31,7 @@ import com.sshtools.common.files.SpaceRestrictedFileFactoryAdapter;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
+import com.sshtools.common.forwarding.ForwardingPolicy;
 import com.sshtools.common.nio.SshEngineContext;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.policy.ClassLoaderPolicy;
@@ -132,6 +133,26 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			}
 			
 		});
+	}
+	
+	@Override
+	protected void configureForwarding(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
+		
+		ForwardingPolicy policy = new ForwardingPolicy() {
+			public boolean checkInterfacePermitted(SshConnection con, String originHost, int originPort) {
+				/**
+				 * We do not allow remote forwarding
+				 */
+				return false;
+			}
+			
+			public boolean checkHostPermitted(SshConnection con, String host, int port) {
+				return con.getUsername().equals("admin");
+			}
+		};
+		policy.allowForwarding();
+
+		sshContext.setPolicy(ForwardingPolicy.class, policy);
 	}
 	
 	@Override
