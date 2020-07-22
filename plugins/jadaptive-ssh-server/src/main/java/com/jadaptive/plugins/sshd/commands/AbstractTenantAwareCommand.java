@@ -94,7 +94,7 @@ public abstract class AbstractTenantAwareCommand extends ShellCommand {
 	
 	protected void fillCurrentDirectoryCandidates(List<Candidate> candidates) {
 		try {
-			for(AbstractFile file : console.getCurrentDirectory().getChildren()) {
+			for(AbstractFile file : VirtualConsole.getCurrentConsole().getCurrentDirectory().getChildren()) {
 				if(file.isFile()) {
 					candidates.add(new Candidate(file.getName()));
 				}

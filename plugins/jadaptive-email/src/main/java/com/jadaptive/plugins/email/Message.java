@@ -21,10 +21,10 @@ public class Message extends NamedUUIDEntity {
 	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
 	String group;
 	
-	@ObjectField(required = true, searchable = true, type = FieldType.TEXT)
+	@ObjectField(required = true, type = FieldType.TEXT)
 	String subject;
 	
-	@ObjectField(required = true, searchable = true, type = FieldType.TEXT_AREA)
+	@ObjectField(required = true, type = FieldType.TEXT_AREA)
 	String plainText;
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE)

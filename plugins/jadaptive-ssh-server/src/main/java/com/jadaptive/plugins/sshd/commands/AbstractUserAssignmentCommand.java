@@ -14,7 +14,6 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.utils.FileUtils;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.server.vsession.UsageException;
 import com.sshtools.server.vsession.VirtualConsole;
