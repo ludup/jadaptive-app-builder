@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.app.SecurityPropertyService;
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
@@ -27,7 +28,6 @@ import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.app.auth.AuthenticationService;
 import com.jadaptive.app.session.SessionFilter;
 
 @Controller

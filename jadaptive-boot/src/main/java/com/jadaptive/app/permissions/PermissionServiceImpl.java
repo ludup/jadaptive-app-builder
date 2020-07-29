@@ -96,6 +96,11 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			return true;
 		}
 
+		@Override
+		public String getSystemName() {
+			return getUsername();
+		}
+
 	};
 
 	@Override

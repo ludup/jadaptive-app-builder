@@ -31,4 +31,6 @@ public interface UserDatabase extends ExtensionPoint {
 	void updateUser(User user);
 
 	void createUser(User user, char[] password, boolean forceChange);
+	
+	Integer weight();
 }

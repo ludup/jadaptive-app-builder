@@ -19,6 +19,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class EncryptionServiceImpl implements EncryptionService {
 	static Logger log = LoggerFactory.getLogger(EncryptionServiceImpl.class);
 	
 	public static final String ENCRYPTION_MARKER = "!!ENC!!";
+	public static final String ENCRYPTION_MARKER_EXTERNAL_KEY = "!!EWK!!";
 	
 	public static EncryptionService instance;
 	
@@ -45,6 +47,31 @@ public class EncryptionServiceImpl implements EncryptionService {
 	@Override
 	public boolean isEncrypted(String value) {
 		return value.startsWith(ENCRYPTION_MARKER);
+	}
+	
+	@Override
+	public boolean isEncryptedWithPassword(String value) {
+		return value.startsWith(ENCRYPTION_MARKER_EXTERNAL_KEY);
+	}
+	
+	@Override
+	public String encryptString(String value, String base64Key, String base64Iv) {
+		
+    	try {
+			byte[] rawkey = Base64.getDecoder().decode(base64Key);
+			byte[] rawiv = Base64.getDecoder().decode(base64Iv);
+			
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			
+			SecretKeySpec kspec = new SecretKeySpec(rawkey, "AES");
+			cipher.init(Cipher.ENCRYPT_MODE, kspec, new IvParameterSpec(rawiv));
+			
+			return Base64.getEncoder().encodeToString(cipher.doFinal(value.getBytes("UTF-8")));
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+				| InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException
+				| UnsupportedEncodingException e) {
+			throw new RepositoryException(e);
+		}
 	}
 	
 	@Override
@@ -72,6 +99,60 @@ public class EncryptionServiceImpl implements EncryptionService {
 			buffer.append(Base64.getEncoder().encodeToString(encryptAES(value, rawkey, iv)));
 			
 			return ENCRYPTION_MARKER.concat(RsaEncryptionProvider.getInstance().encrypt(buffer.toString()));
+		} catch (Exception e) {
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
+	@Override
+	public String encrypt(String value, String keydata) {
+
+		if(isEncryptedWithPassword(value)) {
+			return value;
+		}
+		
+		try {
+			int keyLength = Math.min(Cipher.getMaxAllowedKeyLength("AES"), 256) / 8;
+			
+			byte[] data = DigestUtils.sha3_512(keydata);
+			
+			byte[] rawkey = new byte[keyLength];
+			System.arraycopy(data, 0, rawkey, 0, rawkey.length);
+
+			byte[] iv = new byte[16];
+			System.arraycopy(data, rawkey.length, iv, 0, iv.length);
+
+			StringBuffer buffer = new StringBuffer();
+			buffer.append(Base64.getEncoder().encodeToString(encryptAES(value, rawkey, iv)));
+			
+			return ENCRYPTION_MARKER_EXTERNAL_KEY.concat(RsaEncryptionProvider.getInstance().encrypt(buffer.toString()));
+		} catch (Exception e) {
+			throw new RepositoryException(e.getMessage(), e);
+		}
+	}
+	
+	@Override
+	public String decrypt(String value, String keydata) {
+		
+		if(!isEncryptedWithPassword(value)) {
+			return value;
+		}
+		
+		try {
+			String encodedData = RsaEncryptionProvider.getInstance().decrypt(value.substring(ENCRYPTION_MARKER_EXTERNAL_KEY.length()));
+
+			byte[] encrypted = Base64.getDecoder().decode(encodedData);
+			byte[] data = DigestUtils.sha3_512(keydata);
+			
+			int keyLength = Math.min(Cipher.getMaxAllowedKeyLength("AES"), 256) / 8;
+			byte[] rawkey = new byte[keyLength];
+			System.arraycopy(data, 0, rawkey, 0, rawkey.length);
+
+			byte[] iv = new byte[16];
+			System.arraycopy(data, rawkey.length, iv, 0, iv.length);
+			
+			String tmp = new String(decryptAES(encrypted, rawkey, iv), "UTF-8");
+			return tmp;
 		} catch (Exception e) {
 			throw new RepositoryException(e.getMessage(), e);
 		}

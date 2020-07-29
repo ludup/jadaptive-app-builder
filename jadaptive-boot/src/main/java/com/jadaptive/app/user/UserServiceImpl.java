@@ -2,6 +2,8 @@ package com.jadaptive.app.user;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +67,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		User user = null;
 		
-		for(UserDatabase userDatabase : userDatabases.values()) {
+		for(UserDatabase userDatabase : getOrderedDatabases()) {
 			try {
 				user = userDatabase.getUserByUUID(uuid);
 				if(Objects.nonNull(user)) {
@@ -78,6 +80,19 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 			throw new ObjectNotFoundException(String.format("User with id %s not found", uuid));
 		}
 		return user;
+	}
+
+	private List<UserDatabase> getOrderedDatabases() {
+		loadUserDatabases();
+		List<UserDatabase> tmp = new ArrayList<>(userDatabases.values());
+		Collections.sort(tmp, new Comparator<UserDatabase>() {
+
+			@Override
+			public int compare(UserDatabase o1, UserDatabase o2) {
+				return o1.weight().compareTo(o2.weight());
+			}
+		});
+		return tmp;
 	}
 
 	@Override
@@ -95,7 +110,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 
 		User user = null;
 		
-		for(UserDatabase userDatabase : userDatabases.values()) {
+		for(UserDatabase userDatabase : getOrderedDatabases()) {
 			try {
 				user = userDatabase.getUser(username);
 				if(Objects.nonNull(user)) {
@@ -115,7 +130,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 
 		User user = null;
 		
-		for(UserDatabase userDatabase : userDatabases.values()) {
+		for(UserDatabase userDatabase : getOrderedDatabases()) {
 			try {
 				user = userDatabase.getUser(email);
 				if(Objects.nonNull(user)) {

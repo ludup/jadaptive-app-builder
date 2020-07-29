@@ -15,4 +15,6 @@ public interface User extends Serializable, UUIDDocument {
 	String getName();
 
 	void setName(String value);
+
+	String getSystemName();
 }

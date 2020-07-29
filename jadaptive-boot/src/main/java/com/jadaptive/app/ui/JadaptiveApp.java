@@ -20,7 +20,7 @@ import com.codesmith.webbits.fontawesome.FontAwesomeify;
 	Relativize.class, PageResources.class, 
 	Absolutify.class, 
 	Enablement.class, I18N.class })
-@View(contentType = "text/html", paths = "/")
+@View(contentType = "text/html", paths = "")
 public class JadaptiveApp extends AuthenticatedView {
 
 	@Out()

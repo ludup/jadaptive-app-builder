@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:webbits="http://webbits.org/webbits"
-	webbits:depends="Bootstrap,Bind,Widgets,FontAwesome">
+	webbits:depends="Bootstrap,Bind,Widgets,JadaptiveUtils">
+<head>
+	<script src="https://kit.fontawesome.com/518b4f9948.js" crossorigin="anonymous"></script>
+</head>
 <body>
 <div class="wrapper">
 <header webbits:id="com.jadaptive.app.ui.Header"></header>
@@ -27,9 +30,12 @@
                           </div>
 
                           <div class="col-md-6 offset-md-4">
-                              <button type="submit" class="bg-dark btn btn-primary">
+                              <button id="loginSubmit" class="bg-dark btn btn-primary">
                                   <webbits:i>sign-in-alt</webbits:i>&nbsp;Login
                               </button>
+                          </div>
+                           <div class="col-md-6 offset-md-4 mt-3">
+                           	 <div id="actions"></div>
                           </div>
                         </form>
                   </div>
@@ -40,5 +46,16 @@
 </main>
 </div>
 <footer webbits:id="com.jadaptive.app.ui.Footer"></footer>
+<script type="text/javascript">
+	$(document).ready(function(e) {
+		
+		$('#loginSubmit').click(function(e) {
+			if($('#username').val()!=='' && $('#password').val() !=-'') {
+				JadaptiveUtils.startAwesomeSpin($('#loginSubmit i'), 'fa-sign-in-alt');
+				$('#loginForm').submit();
+			}
+		});
+	});
+</script>
 </body>
 </html>

@@ -30,9 +30,6 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	@Autowired
 	protected EventService eventService; 
 	
-//	@Autowired
-//	private CacheService cacheService; 
-	
 	@Override
 	public Iterable<T> list(Class<T> resourceClass, SearchField... fields) {
 		return listObjects(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);

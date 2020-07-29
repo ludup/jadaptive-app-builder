@@ -42,7 +42,7 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	private ClassLoaderService classService; 
 	
 	private Map<String,Connector<?>> cachedConnectors = new HashMap<>();
-	
+
 	@Override
 	public <T> T executeOnRemoteDatabase(RemoteDatabaseTask<T> task) {
 		
@@ -59,6 +59,32 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	@Override
 	public void setPassword(User user, char[] password, boolean passwordChangeRequired) {
 		
+
+		
+		File identity4jFile = getConnectorConfiguration();
+		
+		if(identity4jFile.exists()) {
+				executeOnRemoteDatabase(new RemoteDatabaseTask<Void>() {
+					@Override
+					public Void executeOnRemote() {
+						
+						if(log.isInfoEnabled()) {
+							log.info("Remote user {} password change", user.getUsername());
+						}
+						
+						Connector<?> con = createConnector(identity4jFile);
+						
+						try {
+							con.setPassword(user.getUsername(), user.getUuid(), password, passwordChangeRequired);
+							return null;
+						} catch(ConnectorException e) {
+							log.error("Failed to change password", e);
+							throw new RepositoryException(e);
+						}
+					}
+					
+				});
+		}
 	}
 
 	@Override
@@ -71,6 +97,11 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 			return executeOnRemoteDatabase(new RemoteDatabaseTask<Boolean>() {
 				@Override
 				public Boolean executeOnRemote() {
+					
+					if(log.isInfoEnabled()) {
+						log.info("Remote user {} verify password", user.getUsername());
+					}
+					
 					Connector<?> con = createConnector(identity4jFile);
 					
 					try {
@@ -100,12 +131,17 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 				@Override
 				public User executeOnRemote() {
 					try {
+						
+						if(log.isInfoEnabled()) {
+							log.info("Looking for remote user {}", username);
+						}
+						
 						Connector<?> con = createConnector(identity4jFile);
 						return new RemoteUser(con.getIdentityByName(username));
 						} catch(PrincipalNotFoundException e) {
 							throw new ObjectNotFoundException("Remote user with username " + username + " not found");
 						} catch(ConnectorException e) {
-							throw new RepositoryException(e);
+							throw new ObjectNotFoundException("Remote user with username " + username + " not found");
 						}
 				}
 			});
@@ -126,12 +162,17 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 				@Override
 				public User executeOnRemote() {
 					try {
+						
+						if(log.isInfoEnabled()) {
+							log.info("Looing for remote user by GUID {}", uuid);
+						}
+						
 						Connector<?> con = createConnector(identity4jFile);
 						return new RemoteUser(con.getIdentityByGuid(uuid));
 						} catch(PrincipalNotFoundException e) {
 							throw new ObjectNotFoundException("Remote user with guid " + uuid + " not found");
 						} catch(ConnectorException e) {
-							throw new RepositoryException(e);
+							throw new ObjectNotFoundException("Remote user with guid " + uuid + " not found");
 						}
 				}
 			});
@@ -146,6 +187,11 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 		File identity4jFile = getConnectorConfiguration();
 		
 		if(identity4jFile.exists()) {
+			
+			if(log.isInfoEnabled()) {
+				log.info("Iterating remote users");
+			}
+			
 			return new ConnectorIterable(createConnector(identity4jFile), this);
 		} else {
 			return Collections.emptyList();
@@ -175,6 +221,12 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 
 			@Override
 			public Connector<?> executeOnRemote() {
+				
+				
+				if(log.isInfoEnabled()) {
+					log.info("Creating a remote user connector for tenant {}", getCurrentTenant().getName());
+				}
+				
 				Properties properties = new Properties();
 				try(InputStream in = new FileInputStream(identity4jFile)) {
 					properties.load(in);
@@ -232,4 +284,9 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 		}
 		return connector;
 	}
+	
+	@Override
+	public Integer weight() {
+		return Integer.MAX_VALUE;
+	};
 }

@@ -110,5 +110,10 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}
+	
+	@Override
+	public String getSystemName() {
+		return getUsername();
+	}
 
 }

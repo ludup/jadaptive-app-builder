@@ -29,7 +29,7 @@ import com.jadaptive.api.session.SessionUtils;
 	PageResources.class, 
 	PageResourcesElement.class, Absolutify.class, 
 	Enablement.class, I18N.class })
-@View(contentType = "text/html", paths = { "/logoff"})
+@View(contentType = "text/html", paths = { "logoff"})
 public class Logoff {
 
 	@Autowired

@@ -146,4 +146,9 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Bui
 		objectDatabase.saveOrUpdate((BuiltinUser) user); 
 		
 	}
+	
+	@Override
+	public Integer weight() {
+		return Integer.MIN_VALUE + 2;
+	};
 }
