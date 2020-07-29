@@ -72,8 +72,6 @@ public class Entity {
 					SecurityScope.TENANT, 
 					page.getTemplate().getResourceKey() + ".properties");
 			
-			FieldView view = page.getScope();
-			
 			AbstractObject object = null;
 			if(page instanceof ObjectPage) {
 				object = ((ObjectPage)page).getObject();

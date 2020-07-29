@@ -25,6 +25,7 @@ import com.identity4j.connector.exception.PrincipalNotFoundException;
 import com.identity4j.util.MultiMap;
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.RepositoryException;
@@ -43,6 +44,9 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	
 	private Map<String,Connector<?>> cachedConnectors = new HashMap<>();
 
+	@Autowired
+	private TenantAwareObjectDatabase<RemoteUser> cachedUsers;
+	
 	@Override
 	public <T> T executeOnRemoteDatabase(RemoteDatabaseTask<T> task) {
 		
