@@ -3,8 +3,8 @@ package com.jadaptive.app.ui;
 import java.io.FileNotFoundException;
 
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
 import com.codesmith.webbits.ClasspathResource;
@@ -16,19 +16,19 @@ import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Redirect;
 import com.codesmith.webbits.View;
+import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AbstractPage;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
-import com.jadaptive.app.auth.AuthenticationService;
+import com.jadaptive.api.user.UserService;
 
 @Page
-@View(contentType = "text/html", paths = { "/login"})
+@View(contentType = "text/html", paths = { "login"})
 @ClasspathResource
 public class Login extends AbstractPage {
 	
@@ -36,20 +36,31 @@ public class Login extends AbstractPage {
 	private AuthenticationService authenticationService; 
 	
 	@Autowired
-	private TenantService tenantService; 
+	private SessionUtils sessionUtils; 
 	
 	@Autowired
-	private SessionUtils sessionUtils; 
+	private UserService userService; 
 	
 	@Created
 	void created() throws FileNotFoundException {
 		if(sessionUtils.hasActiveSession(Request.get())) {
-			throw new Redirect(Dashboard.class);
+			throw new Redirect(JadaptiveApp.class);
 		}
-	}
-	
+		AuthenticationState state = authenticationService.getCurrentState();
+		if(!state.getCurrentPage().equals(this.getClass())) {
+			throw new Redirect(state.getCurrentPage());
+		}
+	}		
+	    		
+	 @Out(methods = HTTPMethod.GET)
+	 Document get(@In Document content) {
+	 
+		 authenticationService.decorateAuthenticationPage(content);
+		 return content;
+	 }
+	 
     @Out(methods = HTTPMethod.POST)
-    Document service(@In Document content, @Form LoginForm form) {
+    Document post(@In Document content, @Form LoginForm form) {
 	
     	try {
     		
@@ -57,27 +68,40 @@ public class Login extends AbstractPage {
 				throw new AccessDeniedException("Web UI is currently disabled. Login to manage your account via the SSH CLI");
 			}
 			
-	    	Session session = authenticationService.logonUser(form.getUsername(),
-	    			form.getPassword(), tenantService.getCurrentTenant(), 
-	    			Request.get().getRemoteAddr(), 
-	    			Request.get().getHeader(HttpHeaders.USER_AGENT));
+			AuthenticationState state = authenticationService.getCurrentState();
+			if(state.hasUser()) {
+				content.selectFirst("#username").val(state.getUser().getUsername());
+				content.selectFirst("#username").attr("readonly", "true");
+			}
+			 
+			User user = userService.getUser(form.getUsername());
 	    	
-	    	sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
-	    	
-	    	User user = session.getUser();
-	    	if(user instanceof PasswordEnabledUser) {
-		    	if(((PasswordEnabledUser)user).getPasswordChangeRequired()) {
-		    		throw new Redirect(ChangePassword.class);
+			if(userService.verifyPassword(user, form.getPassword().toCharArray())) {
+				
+				if(user instanceof PasswordEnabledUser) {
+					
+			    	if(((PasswordEnabledUser)user).getPasswordChangeRequired()) {
+						state.getAuthenticationPages().add(ChangePassword.class);
+			    	}
 		    	}
-	    	}
-	    	
-	    	throw new Redirect(JadaptiveApp.class);
+				
+				state.setAttribute(AuthenticationService.PASSWORD, form.getPassword());
+				throw new Redirect(authenticationService.completeAuthentication(user));
+			}
+			
+			authenticationService.reportAuthenticationFailure(form.getUsername());
     	
-    	} catch(AccessDeniedException | ObjectNotFoundException e) {
+    	} catch(AccessDeniedException e) {
     		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
     		content.selectFirst("#feedback").append("<div class=\"alert alert-danger\">" + e.getMessage() + "</div>");
     		return content;
+    	} catch(ObjectNotFoundException e) {
+    		
     	}
+    	
+    	Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+		content.selectFirst("#feedback").append("<div class=\"alert alert-danger\">Bad username or password</div>");
+		return content;
     }
 
     public interface LoginForm {
