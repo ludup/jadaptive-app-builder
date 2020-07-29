@@ -1,5 +1,6 @@
 package com.jadaptive.plugins.universal;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,7 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AbstractPage;
 import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.User;
+import com.sshtools.universal.UniversalAuthenticatorClient;
 
 @Page
 @View(contentType = "text/html", paths = { "ua"})
@@ -33,9 +35,12 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
 	
 	public static final String AUTHENTICATOR_STATE = "authenticatorState";
 	
+	
 	@Autowired
 	private AuthenticationService authenticationService; 
 
+	@Autowired
+	private UAService uaService;
 	
 	@Out(methods = HTTPMethod.GET)
 	Document get(@In Document content) {
@@ -46,18 +51,33 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
     	}
 		
     	authenticationService.decorateAuthenticationPage(content);
-		showRegistration(content, state.getUser());
+		
+    	if(uaService.hasCredentials(state.getUser())) {
+    		showAuthorization(content, state);
+    	} else {
+    		showRegistration(content, state);
+    	}
+    	
     	
 		return content;
 	}
 	
-	private void showRegistration(Document content, User user) {
+	private void showAuthorization(Document content, AuthenticationState state) {
 		
-		if(!(user instanceof EmailEnabledUser)) {
+		Element el = content.selectFirst("#content");
+		el.append("<p>An authorization request has been sent to your mobile phone. Please authorize your login to continue.</p>");
+		el.append("<script type=\"text/javascript\">$(document).ready(function() { $('#loginForm'}).submit(); });</script>");
+		
+		state.setAttribute(AUTHENTICATOR_STATE, UniversalAuthenticationState.REGISTERED);
+	}
+
+	private void showRegistration(Document content, AuthenticationState state) {
+		
+		if(!(state.getUser() instanceof EmailEnabledUser)) {
 			throw new IllegalStateException("UA authentication requires an email enabled user");
 		}
 		
-		EmailEnabledUser u = (EmailEnabledUser) user;
+		EmailEnabledUser u = (EmailEnabledUser) state.getUser();
 		
 		if(StringUtils.isBlank(u.getEmail())) {
 			throw new IllegalStateException("User requires an email address to register for UA authentication");
@@ -70,7 +90,7 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
 		String email = u.getEmail();
 		String serverHost = Request.get().getServerName();
 		int serverPort = getServerPort();
-		String serverPath = "/app/ui/ua-register";
+		String serverPath = "/ua-register";
 		String keyServerHost = "gateway.jadaptive.com";
 		int keyServerPort = 443;
 		
@@ -103,6 +123,8 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
 		if(allowSkip) {
 			el.append("<p><input type=\"checkbox\" name=\"skip\" value=\"true\">&nbsp;<span>I would rather setup this up at another time.</span></p>");
 		}
+		
+		state.setAttribute(AUTHENTICATOR_STATE, UniversalAuthenticationState.UNREGISTERED);
 	}
 	 
     private int getServerPort() {
@@ -129,7 +151,20 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
     	/**
     	 * Wait for authentication
     	 */
-    	//authenticationService.reportAuthenticationFailure(state.getUser().getUsername());
+    	
+    	UniversalAuthenticatorClient uac = new UniversalAuthenticatorClient(uaService.getCredentials(state.getUser()));
+    	try {
+			uac.authenticate("Authorize your login to " + Request.get().getServerName());
+			throw new Redirect(authenticationService.completeAuthentication(state.getUser()));
+		} catch (IOException e) {
+			authenticationService.reportAuthenticationFailure(state.getUser().getUsername());
+			/**
+			 * TODO feedback
+			 */
+		}
+    	
+    	
+    	authenticationService.reportAuthenticationFailure(state.getUser().getUsername());
    
     	return content;
 

@@ -237,13 +237,19 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		 */
 		if(state.isComplete()) {
 			
-			assertPermission(USER_LOGIN_PERMISSION);
+			setupUserContext(state.getUser());
 			
-			Session session = sessionService.createSession(getCurrentTenant(), 
-					state.getUser(), state.getRemoteAddress(), state.getUserAgent());
-			sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
-			Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, null);
-			return JadaptiveApp.class;
+			try {
+				assertPermission(USER_LOGIN_PERMISSION);
+				
+				Session session = sessionService.createSession(getCurrentTenant(), 
+						state.getUser(), state.getRemoteAddress(), state.getUserAgent());
+				sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
+				Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, null);
+				return JadaptiveApp.class;
+			} finally {
+				clearUserContext();
+			}
 		} else {
 			return state.getCurrentPage();
 		}

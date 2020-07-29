@@ -43,9 +43,6 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	private ClassLoaderService classService; 
 	
 	private Map<String,Connector<?>> cachedConnectors = new HashMap<>();
-
-	@Autowired
-	private TenantAwareObjectDatabase<RemoteUser> cachedUsers;
 	
 	@Override
 	public <T> T executeOnRemoteDatabase(RemoteDatabaseTask<T> task) {
