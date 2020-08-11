@@ -23,7 +23,6 @@ import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AbstractPage;
 import com.jadaptive.api.user.EmailEnabledUser;
-import com.jadaptive.api.user.User;
 import com.sshtools.universal.UniversalAuthenticatorClient;
 
 @Page

@@ -20,7 +20,7 @@ import com.jadaptive.api.template.FieldView;
 @Widget({ BootstrapTable.class, PageResources.class, PageResourcesElement.class })
 @View(contentType = "text/html")
 @ClasspathResource
-public class Table {
+public class TableWidget {
 
 	 @Out
 	    public Elements service(@In Elements contents, @ParentView TemplatePage page) throws IOException {

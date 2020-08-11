@@ -2,9 +2,10 @@ package com.jadaptive.plugins.keys;
 
 import java.util.Collection;
 
+import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.user.User;
 
-public interface AuthorizedKeyService {
+public interface AuthorizedKeyService extends UUIDObjectService<AuthorizedKey> {
 
 	public static final String AUTHORIZED_KEY_ASSIGN = "authorizedKey.assign";
 	

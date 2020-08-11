@@ -46,16 +46,8 @@ public class SessionUtils {
 	@Autowired
 	private PermissionService permissionService; 
 	
-	public void setUser(User user) {
-		threadUsers.set(user);
-	}
-	
-	public void removeUser() {
-		threadUsers.remove();
-	}
-	
-	public User getUser() {
-		return threadUsers.get();
+	public User getCurrentUser() {
+		return permissionService.getCurrentUser();
 	}
 	
 	public Session getActiveSession(HttpServletRequest request) {

@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.tomcat.util.http.fileupload.FileItemIterator;
 import org.apache.tomcat.util.http.fileupload.FileItemStream;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.pf4j.PluginManager;
 import org.slf4j.Logger;
@@ -28,7 +27,6 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionStickyInputStream;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.upload.UploadHandler;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.json.ResponseHelper;
@@ -137,7 +135,7 @@ public class UploadServlet extends HttpServlet {
 		
 			handler.sendSuccessfulResponse(resp, handlerName, uri);
 
-		} catch (FileUploadException | SessionTimeoutException | UnauthorizedException e) {
+		} catch (Throwable e) {
 			log.error("Upload failure", e);
 			handler.sendFailedResponse(resp, handlerName, uri, e);
 		} finally {

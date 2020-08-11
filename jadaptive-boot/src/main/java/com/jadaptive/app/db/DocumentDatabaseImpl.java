@@ -16,6 +16,7 @@ import com.jadaptive.api.db.SearchField.Type;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
@@ -64,6 +65,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public <E extends UUIDDocument> void insertOrUpdate(E obj, Document document, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
+		
+		
 		Date now = new Date();
 		if(obj instanceof AbstractUUIDEntity) {
 			document.put("lastModified", now);
@@ -73,12 +76,32 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		}
 		
 		if(StringUtils.isBlank(obj.getUuid())) {
+			
+			assertUniqueConstraints(collection, document);
+			
+			
 			obj.setUuid(UUID.randomUUID().toString());
 			document.put("_id", obj.getUuid());
 			collection.insertOne(document);			
 		} else {
 			collection.replaceOne(Filters.eq("_id", obj.getUuid()), 
 					document, new ReplaceOptions().upsert(true));
+		}
+	}
+
+	private void assertUniqueConstraints(MongoCollection<Document> collection, Document document) {
+		
+		for(Document index : collection.listIndexes()) {
+			if(index.getBoolean("unique", false)) {
+				Document key = (Document) index.get("key");
+				if(key.size()==1) {
+					String field = key.keySet().iterator().next();
+					if(collection.countDocuments(Filters.eq(field, document.get(field))) > 0L) {
+						throw new RepositoryException(String.format("An object already exists with the same %svalue!", field));
+					}
+				}
+
+			}
 		}
 	}
 

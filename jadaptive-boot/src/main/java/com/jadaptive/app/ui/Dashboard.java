@@ -9,11 +9,12 @@ import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.extensions.Bind;
+import com.jadaptive.api.ui.AuthenticatedPage;
 
 @Page(value = Bind.class)
 @View(contentType = "text/html", paths = { "/dashboard"})
 @ClasspathResource
-public class Dashboard extends AuthenticatedView {
+public class Dashboard extends AuthenticatedPage {
 
 	
     @Out(methods = HTTPMethod.POST)

@@ -5,11 +5,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.jadaptive.api.repository.UUIDObjectService;
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ObjectServiceBean {
+public @interface TableView {
+				
+		String[] defaultColumns() default { };
 		
-	Class<? extends UUIDObjectService<?>> bean();
+		String[] optionalColumns() default { };
+		
+		TableAction[] actions() default { };
 }

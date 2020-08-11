@@ -39,4 +39,8 @@ public interface TemplateService {
 
 	Iterable<ObjectTemplate> allCollectionTemplates();
 
+	Class<?> getTemplateClass(String resourceKey);
+
+	void registerTemplateClass(String resourceKey, Class<?> templateClazz);
+
 }

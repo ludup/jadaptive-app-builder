@@ -8,13 +8,16 @@ import java.util.UUID;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.PersonalUUIDEntity;
+import com.jadaptive.api.template.DisableStandardActions;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.IncludeView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.Table;
+import com.jadaptive.api.template.ObjectServiceBean;
+import com.jadaptive.api.template.TableAction;
+import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.UniqueIndex;
 
 
@@ -24,7 +27,12 @@ import com.jadaptive.api.template.UniqueIndex;
      type = ObjectType.COLLECTION, 
      scope = ObjectScope.PERSONAL)
 @UniqueIndex(columns = { "ownerUUID", "name" })
-@Table(defaultColumns = { "name", "fingerprint", "type" }, optionalColumns = { "id" })
+@ObjectServiceBean(bean = AuthorizedKeyService.class)
+@DisableStandardActions
+@TableView(defaultColumns = { "name", "fingerprint", "type" }, optionalColumns = { "id" },
+			actions = {
+				@TableAction(resourceKey = "generateKey", url = "create/generatePrivatezKey"),
+				@TableAction(resourceKey = "uploadPublicKey", url = "uploadPublicKey")})
 public class AuthorizedKey extends PersonalUUIDEntity {
 
 	private static final long serialVersionUID = 9215617764035887442L;
@@ -39,11 +47,11 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String name;
 	
-	@ObjectField(type = FieldType.TEXT_AREA)
+	@ObjectField(type = FieldType.TEXT_AREA, unique = true)
 	@ExcludeView(values = { FieldView.TABLE })
 	String publicKey;
 	
-	@ObjectField(readOnly = true,  type = FieldType.TEXT, required = false)
+	@ObjectField(readOnly = true,  type = FieldType.TEXT, required = false, unique = true)
 	@ExcludeView(values = { FieldView.CREATE })
 	String fingerprint;
 	

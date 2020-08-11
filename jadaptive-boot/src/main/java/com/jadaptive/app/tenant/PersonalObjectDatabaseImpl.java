@@ -88,4 +88,9 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	public Iterable<T> allObjects(Class<T> resourceClass, SearchField... searchFields) {
 		return objectDatabase.list(resourceClass, searchFields);
 	}
+
+	@Override
+	public T getObjectByUUID(Class<T> resourceClass, String uuid) {
+		return objectDatabase.get(uuid, resourceClass);
+	}
 }

@@ -1,0 +1,7 @@
+.ready {
+	display: none;
+}
+
+.deleteAction {
+	cursor: pointer;
+}

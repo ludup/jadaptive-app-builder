@@ -18,6 +18,11 @@ public enum PublicKeyType {
 		this.bits = bits;
 	}
 
+	@Override
+	public String toString() {
+		return getAlgorithm();
+	}
+	
 	public String getAlgorithm() {
 		return algorithm;
 	}

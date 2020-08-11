@@ -22,6 +22,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.utils.Utils;
+import com.mongodb.MongoWriteException;
 
 public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDatabase {
 
@@ -91,7 +92,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch(Throwable e) {
 			checkException(e);
-			throw new RepositoryException(String.format("%s: ", obj.getClass().getSimpleName(), e.getMessage()), e);
+			throw new RepositoryException(String.format("%s: %s", obj.getClass().getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
@@ -268,6 +269,19 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	private void checkException(Throwable e) throws ObjectException {
 		if(e instanceof ObjectException) {
 			throw (ObjectException)e;
+		}
+		if(e instanceof RepositoryException) {
+			throw (RepositoryException)e;
+		}
+		if(e instanceof MongoWriteException) {
+			MongoWriteException mwe = (MongoWriteException)e;
+			switch(mwe.getCode()) {
+			case 11000:
+				throw new RepositoryException("The object could not be created because of a unique constraint violation");
+			default:
+				throw new RepositoryException(mwe.getError().getMessage().split(":")[0]);
+			}
+			
 		}
 		log.error("Document error", e);
 	}

@@ -68,6 +68,12 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 	Map<String,List<ObjectTemplate>> objectForwardDependencies = new HashMap<>();
 	Map<String,List<String>> objectReverseDependencies = new HashMap<>();
+	Map<String,Class<?>> templateClazzes = new HashMap<>();
+	
+	@Override
+	public void registerTemplateClass(String resourceKey, Class<?> templateClazz) {
+		templateClazzes.put(resourceKey, templateClazz);
+	}
 	
 	@Override
 	public void registerObjectDependency(String resourceKey, ObjectTemplate template) {
@@ -341,5 +347,10 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Override
 	public Iterable<ObjectTemplate> allCollectionTemplates() {
 		return repository.list(SearchField.eq("type", ObjectType.COLLECTION.name()));
+	}
+
+	@Override
+	public Class<?> getTemplateClass(String resourceKey) {
+		return templateClazzes.get(resourceKey);
 	}
 }

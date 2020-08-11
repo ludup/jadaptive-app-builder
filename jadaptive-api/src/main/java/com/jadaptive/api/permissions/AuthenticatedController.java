@@ -39,7 +39,7 @@ public class AuthenticatedController {
 	
 	protected void setupUserContext(HttpServletRequest request) {
 		
-		User user = sessionUtils.getUser();
+		User user = sessionUtils.getCurrentUser();
 		if(Objects.isNull(user)) {
 			user = (User) request.getSession().getAttribute(SESSION_SCOPE_USER);
 			if(Objects.isNull(user)) {

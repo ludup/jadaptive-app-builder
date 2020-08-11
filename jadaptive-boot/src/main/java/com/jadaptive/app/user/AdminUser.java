@@ -3,14 +3,17 @@ package com.jadaptive.app.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectServiceBean(bean = UserService.class)
 public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 
 	private static final long serialVersionUID = -4995333149629598100L;

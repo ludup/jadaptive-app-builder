@@ -27,4 +27,6 @@ public interface PersonalObjectDatabase<T extends PersonalUUIDEntity> {
 	Iterable<T> allObjects(Class<T> resourceClass, SearchField... searchFields);
 
 	void saveOrUpdate(T obj);
+
+	T getObjectByUUID(Class<T> resourceClass, String uuid);
 }

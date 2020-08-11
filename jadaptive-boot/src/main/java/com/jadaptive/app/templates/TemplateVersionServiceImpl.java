@@ -450,7 +450,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 
 			templateRepository.saveOrUpdate(template);
-			
+			templateService.registerTemplateClass(e.resourceKey(), clz);
 //			File i18nFolder = new File("i18n");
 //			
 //			if(clz.getClassLoader() instanceof PluginClassLoader) {

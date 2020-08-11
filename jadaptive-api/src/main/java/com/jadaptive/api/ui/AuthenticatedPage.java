@@ -1,4 +1,4 @@
-package com.jadaptive.app.ui;
+package com.jadaptive.api.ui;
 
 import java.io.FileNotFoundException;
 
@@ -6,14 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.codesmith.webbits.Created;
 import com.codesmith.webbits.Redirect;
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.api.ui.AbstractPage;
+import com.jadaptive.api.user.User;
 
-public abstract class AuthenticatedView extends AbstractPage {
+public abstract class AuthenticatedPage extends AbstractPage {
 
 	@Autowired
 	private SessionUtils sessionUtils;
+	
+	@Autowired
+	private AuthenticationService authenticationService; 
 	
 	@Created
 	void created() throws FileNotFoundException {
@@ -24,9 +28,13 @@ public abstract class AuthenticatedView extends AbstractPage {
 	
 	void verifySession() {
 		if(!sessionUtils.hasActiveSession(Request.get())) {
-			throw new Redirect(Login.class);
+			throw new Redirect(authenticationService.resetAuthentication());
 		}
 	}
 	
-	protected abstract void onCreated() throws FileNotFoundException;
+	protected User getCurrentUser() {
+		return sessionUtils.getCurrentUser();
+	}
+	
+	protected void onCreated() throws FileNotFoundException { };
 }

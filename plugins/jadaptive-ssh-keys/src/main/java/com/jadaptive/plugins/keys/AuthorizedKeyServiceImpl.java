@@ -120,6 +120,17 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 		
 	}
 
+	@Override
+	public AuthorizedKey getObjectByUUID(String uuid) {
+		return objectDatabase.getObjectByUUID(AuthorizedKey.class, uuid);
+	}
+
+	@Override
+	public String saveOrUpdate(AuthorizedKey key) {
+		objectDatabase.saveOrUpdate(key);
+		return key.getUuid();
+	}
+
 
 
 }

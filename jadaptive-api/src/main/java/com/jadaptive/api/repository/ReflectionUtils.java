@@ -148,5 +148,10 @@ public class ReflectionUtils {
 		throw new NoSuchFieldException();
 	}
 
+
+	public static boolean hasAnnotation(Class<?> templateClazz, Class<? extends Annotation> annotationClazz) {
+		return templateClazz.getAnnotation(annotationClazz)!=null;
+	}
+
 	
 }

@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
-import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -68,11 +67,11 @@ public class DocumentHelper {
 
 		try {
 			
-			if(StringUtils.isBlank(obj.getUuid())) {
-				obj.setUuid(UUID.randomUUID().toString());
+			if(StringUtils.isNotBlank(obj.getUuid())) {
+				document.put("_id", obj.getUuid());
 			}
 			
-			document.put("_id", obj.getUuid());
+			
 			document.put("_clz", obj.getClass().getName());
 			
 			Map<String,Field> fields = ReflectionUtils.getFields(obj.getClass());

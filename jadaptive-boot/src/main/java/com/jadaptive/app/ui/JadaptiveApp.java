@@ -14,14 +14,17 @@ import com.codesmith.webbits.extensions.I18N;
 import com.codesmith.webbits.extensions.PageResources;
 import com.codesmith.webbits.extensions.Relativize;
 import com.codesmith.webbits.fontawesome.FontAwesomeify;
+import com.codesmith.webbits.freemarker.FreeMarker;
+import com.jadaptive.api.ui.AuthenticatedPage;
 
 @Page
-@App({ FontAwesomeify.class, 
+@App({ 
 	Relativize.class, PageResources.class, 
 	Absolutify.class, 
-	Enablement.class, I18N.class })
+	Enablement.class, 
+	I18N.class })
 @View(contentType = "text/html", paths = "")
-public class JadaptiveApp extends AuthenticatedView {
+public class JadaptiveApp extends AuthenticatedPage {
 
 	@Out()
     Document service(@In Document template) {

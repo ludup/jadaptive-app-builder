@@ -9,14 +9,12 @@ import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.View;
-import com.codesmith.webbits.ViewConfiguration;
 import com.codesmith.webbits.util.Html;
 
 @Extension(extendsPatterns = ".*", appliesTo = Page.class)
 @View(contentType = "text/html")
 public class JadaptiveUtils {
 	
-	@ViewConfiguration
 	String path = "js/jadaptive-utils.js";
 
 	@Out

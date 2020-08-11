@@ -1,5 +1,8 @@
 package com.jadaptive.app.webbits;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.annotation.MultipartConfig;
+
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +26,8 @@ public class WebbitsSpringConfiguration {
 	      new WebbitsServlet(), "/app/ui/*");
 	    bean.setLoadOnStartup(1);
 	    bean.setAsyncSupported(true);
+	    bean.setMultipartConfig(new MultipartConfigElement(
+	    		WebbitsServlet.class.getAnnotation(MultipartConfig.class)));
 	    return bean;
 	}
 	

@@ -20,6 +20,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.codesmith.webbits.CacheFactory;
+import com.codesmith.webbits.ComponentConfigurationProvider;
 import com.codesmith.webbits.ContentHandler;
 import com.codesmith.webbits.Context;
 import com.codesmith.webbits.DefaultCacheFactory;
@@ -29,7 +30,6 @@ import com.codesmith.webbits.MimeService;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Request;
 import com.codesmith.webbits.Response;
-import com.codesmith.webbits.ViewConfigurationProvider;
 import com.codesmith.webbits.ViewLocator;
 import com.codesmith.webbits.ViewManager;
 import com.codesmith.webbits.Widget;
@@ -158,12 +158,7 @@ public class WebbitsPostProcessor implements BeanFactoryPostProcessor, Applicati
 	    public ViewLocator getViewLocator() {
 		return context.getViewLocator();
 	    }
-
-	    @Override
-	    public ViewConfigurationProvider getViewConfigurationProvider() {
-		return context.getViewConfigurationProvider();
-	    }
-
+	    
 	    @Override
 	    public ScriptEngineManager getScriptEngineManager() {
 		return context.getScriptEngineManager();
@@ -222,6 +217,11 @@ public class WebbitsPostProcessor implements BeanFactoryPostProcessor, Applicati
 		@Override
 		public CacheFactory getCacheFactory() {
 			return new DefaultCacheFactory();
+		}
+
+		@Override
+		public ComponentConfigurationProvider getComponentConfigurationProvider() {
+			return context.getComponentConfigurationProvider();
 		}
 	});
 	if (isRunningInEmbeddedWebServer()) {

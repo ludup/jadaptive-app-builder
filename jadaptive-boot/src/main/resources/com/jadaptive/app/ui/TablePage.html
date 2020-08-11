@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:webbits="http://webbits.org/webbits" webbits:depends="Bootstrap,Bind,Widgets,FontAwesome,FreeMarker,I18N">
+<html lang="en" xmlns:webbits="http://webbits.org/webbits">
 <head>
 <title>${view.template.name}</title>
 </head>
@@ -9,20 +9,18 @@
 <main class="container mt-3">  
   <div class="row">
 	<ol class="breadcrumb col-12">
-	  <li class="breadcrumb-item"><a href="/app/ui/dashboard">Home</a></li>
-	  <li class="breadcrumb-item active"><a href="/app/ui/table/${view.template.resourceKey}">${view.template.name}</a></li>
+	  <li class="breadcrumb-item"><a webbits:i18n="i18n/default.home.name" href="/app/ui/dashboard"></a></li>
+	  <li class="breadcrumb-item active"><a webbits:bundle="i18n/${view.template.resourceKey}" webbits:i18n="${view.template.resourceKey}.name" href="/app/ui/table/${view.template.resourceKey}"></a></li>
 	</ol>
   </div>
   <div class="row">
-     <h1>${view.template.name}</h1>
+     <h1 webbits:bundle="i18n/${view.template.resourceKey}" webbits:i18n="${view.template.resourceKey}.name"></h1>
   </div>
   <div class="row">
-  	  <div id="tableholder" webbits:id="com.jadaptive.app.ui.Table" class="col-12 mb-3">
+  	  <div id="tableholder" webbits:id="com.jadaptive.app.ui.TableWidget" class="col-12 mb-3">
   	  	
 	  </div>
-	  <div class="readWrite col-12 mt-3">
-	  	<a href="/app/ui/create/${view.template.resourceKey}" class="btn btn-dark mr-3">Create</a>
-	  	<a href="/app/ui/import/${view.template.resourceKey}" class="btn btn-primary">Import</a>
+	  <div id="objectActions" class="col-12 mt-3">
 	  </div>
   </div>
   <div id="searchDropdown" style="display: none">

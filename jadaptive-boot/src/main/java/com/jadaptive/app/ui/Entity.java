@@ -19,8 +19,6 @@ import com.codesmith.webbits.Out;
 import com.codesmith.webbits.ParentView;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.Widget;
-import com.codesmith.webbits.extensions.PageResources;
-import com.codesmith.webbits.extensions.PageResourcesElement;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.db.ClassLoaderService;
@@ -43,7 +41,7 @@ import com.jadaptive.app.ui.renderers.form.TextFormInput;
 import com.jadaptive.app.ui.renderers.form.TimestampFormInput;
 import com.jadaptive.utils.Utils;
 
-@Widget({ PageResources.class, PageResourcesElement.class })
+@Widget
 @View(contentType = "text/html")
 @ClasspathResource
 public class Entity {

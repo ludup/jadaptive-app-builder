@@ -22,6 +22,7 @@ import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.servlet.PluginController;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.user.UserService;
 import com.sshtools.universal.UniversalAuthenticatorClient;
 
 @Extension
@@ -32,6 +33,9 @@ public class UAController extends AuthenticatedController implements PluginContr
 	
 	@Autowired
 	private UAService uaService;
+	
+	@Autowired
+	private UserService userService; 
 	
 	@RequestMapping(value = "/ua-register", method = { RequestMethod.GET, RequestMethod.POST})
 	@ResponseBody
@@ -51,7 +55,7 @@ public class UAController extends AuthenticatedController implements PluginContr
 			
 			Properties properties = uac.getProperties();
 			
-			uaService.saveRegistration(principalName, properties);
+			uaService.saveRegistration(userService.getUser(principalName), properties);
 			
 			response.setStatus(200);
 		} catch (NumberFormatException | IOException e) {

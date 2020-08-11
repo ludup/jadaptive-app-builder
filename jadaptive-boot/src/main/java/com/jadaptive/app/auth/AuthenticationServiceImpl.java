@@ -37,7 +37,7 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.app.ui.JadaptiveApp;
+import com.jadaptive.app.ui.Dashboard;
 import com.jadaptive.app.ui.Login;
 import com.jadaptive.app.ui.SetIdentity;
 
@@ -246,7 +246,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 						state.getUser(), state.getRemoteAddress(), state.getUserAgent());
 				sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
 				Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, null);
-				return JadaptiveApp.class;
+				return Dashboard.class;
 			} finally {
 				clearUserContext();
 			}

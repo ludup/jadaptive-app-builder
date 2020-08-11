@@ -26,7 +26,7 @@ public interface UploadHandler extends ExtensionPoint {
 		resp.setStatus(HttpStatus.OK.value());
 	};
 
-	default void sendFailedResponse(HttpServletResponse resp, String handlerName, String uri, Exception e) throws IOException {
+	default void sendFailedResponse(HttpServletResponse resp, String handlerName, String uri, Throwable e) throws IOException {
 		resp.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
 	}
 }

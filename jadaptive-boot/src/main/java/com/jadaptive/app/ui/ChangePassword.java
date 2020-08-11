@@ -16,13 +16,14 @@ import com.codesmith.webbits.View;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
 @Page
 @View(contentType = "text/html", paths = { "/changePassword"})
 @ClasspathResource
-public class ChangePassword extends AuthenticatedView {
+public class ChangePassword extends AuthenticatedPage {
 
 	@Autowired
 	private UserService userService; 

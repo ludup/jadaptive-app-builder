@@ -3,7 +3,6 @@ package com.jadaptive.app.ui;
 import java.io.FileNotFoundException;
 
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
