@@ -33,9 +33,10 @@ public class TableWidget {
 		
 		for(FieldTemplate field : page.getTemplate().getFields()) {
 			if(field.getViews().contains(FieldView.TABLE)) {
-				tr.append(String.format("<th webbits:bundle=\"i18n/%s\" webbits:i18n=\"%s.%s.name\" data-field=\"%s\"></th>", 
+				tr.append(String.format("<th webbits:bundle=\"i18n/%s\" webbits:i18n=\"%s.%s.name\" data-field=\"%s\">[%s]</th>", 
 						page.getTemplate().getResourceKey(),
 						page.getTemplate().getResourceKey(),
+						field.getResourceKey(),
 						field.getResourceKey(),
 						field.getResourceKey()));
 				
@@ -43,9 +44,9 @@ public class TableWidget {
 		}
 		
 		tr.append("<th webbits:bundle=\"i18n\" webbits:i18n=\"default.actions.name\" data-formatter=\"renderActions\"></th>");
-		Element th = tr.selectFirst("th");
-		th.append("<a href=\"/app/ui/update/%s/%s\" data-uuid=\"%s\"><i class=\"far fa-edit\"></i></a>");
-		th.append("<a href=\"/app/ui/view/%s/%s\" data-uuid=\"%s\"><i class=\"far fa-eye\"></i></a>");
+//		Element th = tr.selectFirst("th");
+//		th.append("<a href=\"/app/ui/update/%s/%s\" data-uuid=\"%s\"><i class=\"far fa-edit\"></i></a>");
+//		th.append("<a href=\"/app/ui/view/%s/%s\" data-uuid=\"%s\"><i class=\"far fa-eye\"></i></a>");
 
 		return contents;
 	 }

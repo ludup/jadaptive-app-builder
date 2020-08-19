@@ -12,11 +12,12 @@ import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.BootBox;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
 import com.codesmith.webbits.bootstrap.BootstrapToggle;
+import com.codesmith.webbits.extensions.I18N;
 import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.template.FieldView;
 
-@Page({ BootstrapTable.class, BootBox.class, BootstrapToggle.class, Widgets.class, FreeMarker.class })
+@Page({ BootstrapTable.class, BootBox.class, BootstrapToggle.class, Widgets.class, FreeMarker.class, I18N.class})
 @View(contentType = "text/html", paths = { "/update/{resourceKey}/{uuid}", "/update/{resourceKey}" })
 @ClasspathResource
 public class Update extends ObjectPage {

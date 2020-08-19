@@ -13,13 +13,11 @@ import com.codesmith.webbits.extensions.Enablement;
 import com.codesmith.webbits.extensions.I18N;
 import com.codesmith.webbits.extensions.PageResources;
 import com.codesmith.webbits.extensions.Relativize;
-import com.codesmith.webbits.fontawesome.FontAwesomeify;
-import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.ui.AuthenticatedPage;
 
 @Page
-@App({ 
-	Relativize.class, PageResources.class, 
+@App({ Relativize.class,
+	PageResources.class, 
 	Absolutify.class, 
 	Enablement.class, 
 	I18N.class })

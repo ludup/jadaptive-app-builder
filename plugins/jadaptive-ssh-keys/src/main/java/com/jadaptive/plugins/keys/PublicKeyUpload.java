@@ -14,7 +14,7 @@ import com.codesmith.webbits.View;
 import com.jadaptive.api.ui.AuthenticatedPage;
 
 @Page
-@View(contentType = "text/html", paths = { "uploadPublicKey", "uploadPublicKey/{uuid}" })
+@View(contentType = "text/html", paths = { "import/public-key", "import/public-key/{uuid}" })
 @ClasspathResource
 public class PublicKeyUpload extends AuthenticatedPage {
 	

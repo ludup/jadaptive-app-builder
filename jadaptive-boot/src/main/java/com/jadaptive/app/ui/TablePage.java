@@ -19,6 +19,8 @@ import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.template.TableAction;
+import com.jadaptive.api.template.TableView;
 
 @Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class, I18N.class})
 @View(contentType = "text/html", paths = { "/table/{resourceKey}" })
@@ -45,6 +47,13 @@ public class TablePage extends TemplatePage {
 	@Out
 	Document service(@In Document content) {
 		
+		
+		TableView view = templateClazz.getAnnotation(TableView.class);
+		for(TableAction action : view.actions()) {
+			content.selectFirst("#objectActions").append(String.format(
+					"<a href=\"/app/ui/%s\" class=\"btn btn-%s\" webbits:bundle=\"i18n/%s\" webbits:i18n=\"%s.name\">[%s]</a>",
+					action.url(), action.buttonClass(), template.getResourceKey(), action.resourceKey(), action.resourceKey()));
+		}
 		try {
 			permissionService.assertReadWrite(template.getResourceKey());
 		} catch(AccessDeniedException e) {

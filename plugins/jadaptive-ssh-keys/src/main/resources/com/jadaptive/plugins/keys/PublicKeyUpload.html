@@ -63,6 +63,10 @@
 </div>
 <script type="text/javascript">
 
+    function clearUploads() {
+    	
+    };
+    
 	Object.defineProperty(Number.prototype,'fileSize',{value:function(a,b,c,d){
 		 return (a=a?[1e3,'k','B']:[1024,'K','iB'],b=Math,c=b.log,
 		 d=c(this)/c(a[0])|0,this/b.pow(a[0],d)).toFixed(2)
@@ -125,6 +129,7 @@
 		        		   window.location = '/app/ui/table/authorizedKeys';
 		        	   } else {
 		        		   $('form').prepend('<p class="alert alert-danger">' + data.message + '</p>');
+		        		   clearUploads();
 		        	   }
 		           },
 		           always: function() {

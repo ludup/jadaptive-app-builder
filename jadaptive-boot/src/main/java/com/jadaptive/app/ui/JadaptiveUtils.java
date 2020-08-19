@@ -15,7 +15,7 @@ import com.codesmith.webbits.util.Html;
 @View(contentType = "text/html")
 public class JadaptiveUtils {
 	
-	String path = "js/jadaptive-utils.js";
+	String path = "/app/ui/js/jadaptive-utils.js";
 
 	@Out
 	Document service(@In Document template, HttpServletRequest request) {

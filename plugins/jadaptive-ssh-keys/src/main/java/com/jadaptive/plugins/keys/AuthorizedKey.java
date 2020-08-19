@@ -31,8 +31,8 @@ import com.jadaptive.api.template.UniqueIndex;
 @DisableStandardActions
 @TableView(defaultColumns = { "name", "fingerprint", "type" }, optionalColumns = { "id" },
 			actions = {
-				@TableAction(resourceKey = "generateKey", url = "create/generatePrivatezKey"),
-				@TableAction(resourceKey = "uploadPublicKey", url = "uploadPublicKey")})
+				@TableAction(resourceKey = "generateKey", url = "generate/public-key"),
+				@TableAction(resourceKey = "uploadPublicKey", url = "import/public-key")})
 public class AuthorizedKey extends PersonalUUIDEntity {
 
 	private static final long serialVersionUID = 9215617764035887442L;

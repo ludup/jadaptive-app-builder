@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +98,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				if(key.size()==1) {
 					String field = key.keySet().iterator().next();
 					if(collection.countDocuments(Filters.eq(field, document.get(field))) > 0L) {
-						throw new RepositoryException(String.format("An object already exists with the same %svalue!", field));
+						throw new RepositoryException(String.format("An object already exists with the same %s value!", org.apache.commons.text.WordUtils.capitalize(field)));
 					}
 				}
 
