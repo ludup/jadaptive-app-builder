@@ -16,7 +16,7 @@ import com.codesmith.webbits.util.Html;
 public class JadaptiveUtils {
 	
 	String path = "/app/ui/js/jadaptive-utils.js";
-	String fontawesome = "/css/all.min.css";
+	String fontawesome = "/app/content/css/all.min.css";
 	
 	@Out
 	Document service(@In Document template, HttpServletRequest request) {

@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
 import com.codesmith.webbits.bootstrap.Bootstrap;
-import com.codesmith.webbits.fontawesome.FontAwesome;
 import com.codesmith.webbits.jquery.JQuery;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
@@ -45,8 +44,7 @@ import com.jadaptive.app.webbits.WebbitsComponentScan;
 @WebbitsComponentScan(basePackageClasses = {
 	JadaptiveApp.class,
 	Bootstrap.class,
-	JQuery.class,
-	FontAwesome.class })
+	JQuery.class })
 public class Application {
 
 	static Logger log = LoggerFactory.getLogger(Application.class);

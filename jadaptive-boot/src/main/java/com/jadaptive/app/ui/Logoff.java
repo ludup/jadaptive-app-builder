@@ -18,14 +18,13 @@ import com.codesmith.webbits.extensions.Enablement;
 import com.codesmith.webbits.extensions.I18N;
 import com.codesmith.webbits.extensions.PageResources;
 import com.codesmith.webbits.extensions.PageResourcesElement;
-import com.codesmith.webbits.fontawesome.FontAwesomeify;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionUtils;
 
-@Page({ Bootstrapify.class, FontAwesomeify.class, 
+@Page({ Bootstrapify.class, 
 	PageResources.class, 
 	PageResourcesElement.class, Absolutify.class, 
 	Enablement.class, I18N.class })
