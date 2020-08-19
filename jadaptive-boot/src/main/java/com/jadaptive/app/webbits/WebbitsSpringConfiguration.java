@@ -25,6 +25,7 @@ public class WebbitsSpringConfiguration {
 	    ServletRegistrationBean<?> bean = new ServletRegistrationBean<>(
 	      new WebbitsServlet(), "/app/ui/*");
 	    bean.setLoadOnStartup(1);
+	    bean.setMultipartConfig(new MultipartConfigElement(WebbitsServlet.class.getAnnotation(MultipartConfig.class)));
 	    bean.setAsyncSupported(true);
 	    bean.setMultipartConfig(new MultipartConfigElement(
 	    		WebbitsServlet.class.getAnnotation(MultipartConfig.class)));

@@ -9,6 +9,7 @@ import com.codesmith.webbits.Out;
 import com.codesmith.webbits.ParentView;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.Widget;
+import com.codesmith.webbits.bootswatch.BootSwatchThemeSelector;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.AbstractPage;

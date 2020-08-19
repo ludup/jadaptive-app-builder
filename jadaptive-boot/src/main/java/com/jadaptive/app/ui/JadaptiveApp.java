@@ -13,6 +13,7 @@ import com.codesmith.webbits.extensions.Enablement;
 import com.codesmith.webbits.extensions.I18N;
 import com.codesmith.webbits.extensions.PageResources;
 import com.codesmith.webbits.extensions.Relativize;
+import com.codesmith.webbits.fontawesome.FontAwesomeify;
 import com.jadaptive.api.ui.AuthenticatedPage;
 
 @Page
@@ -20,6 +21,7 @@ import com.jadaptive.api.ui.AuthenticatedPage;
 	PageResources.class, 
 	Absolutify.class, 
 	Enablement.class, 
+	FontAwesomeify.class,
 	I18N.class })
 @View(contentType = "text/html", paths = "")
 public class JadaptiveApp extends AuthenticatedPage {
