@@ -93,7 +93,7 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 		Properties properties = new Properties();
 	    properties.put("mail.smtp.auth", "false");
 	    properties.put("mail.smtp.starttls.enable", config.getProtocol()==TransportStrategy.SMTP_PLAIN ? "false" : "true");
-	    properties.put("mail.smtp.host", config.getHostname());
+	    properties.put("mail.smtp.host", StringUtils.defaultString(config.getHostname()));
 	    properties.put("mail.smtp.port", config.getPort());
 
 	    return Session.getInstance(properties);
@@ -115,9 +115,9 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 		
 		if(!isEnabled()) {
 			if(!config.getEnabled()) {
-				log.warn("This system is not allowed to send email messages.");
-			} else {
 				log.warn("Sending messages is disabled. Enable SMTP settings in System realm to allow sending of emails");
+			} else {
+				log.warn("This system is not allowed to send email messages.");
 			}
 			return;
 		}
@@ -234,7 +234,7 @@ public class EmailNotificationServiceImpl extends AuthenticatedService implement
 
 	
 	public final boolean isEnabled() {
-		return !"false".equals(System.getProperty("jadaptive.mail"));
+		return Boolean.getBoolean("jadaptive.mail");
 	}
 	
 	private void send(Mailer mail,

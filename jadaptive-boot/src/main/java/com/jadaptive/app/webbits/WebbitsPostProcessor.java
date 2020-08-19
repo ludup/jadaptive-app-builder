@@ -24,6 +24,7 @@ import com.codesmith.webbits.ComponentConfigurationProvider;
 import com.codesmith.webbits.ContentHandler;
 import com.codesmith.webbits.Context;
 import com.codesmith.webbits.DefaultCacheFactory;
+import com.codesmith.webbits.DependencyProcessor;
 import com.codesmith.webbits.Extension;
 import com.codesmith.webbits.ExtensionLocator;
 import com.codesmith.webbits.MimeService;
@@ -222,6 +223,11 @@ public class WebbitsPostProcessor implements BeanFactoryPostProcessor, Applicati
 		@Override
 		public ComponentConfigurationProvider getComponentConfigurationProvider() {
 			return context.getComponentConfigurationProvider();
+		}
+
+		@Override
+		public void addDefaultDependencies(DependencyProcessor dp) {
+			context.addDefaultDependencies(dp);
 		}
 	});
 	if (isRunningInEmbeddedWebServer()) {

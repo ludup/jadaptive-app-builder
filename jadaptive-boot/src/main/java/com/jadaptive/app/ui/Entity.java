@@ -78,6 +78,20 @@ public class Entity {
 			contents.append("<form id=\"entity\"><div class=\"row\"></div></form>");
 			List<OrderedView> views = templateService.getViews(page.getTemplate());
 			
+			
+			contents.append("<p>\n" + 
+					"  <a class=\"btn btn-primary\" data-toggle=\"collapse\" href=\"#collapseExample\" role=\"button\" aria-expanded=\"false\" aria-controls=\"collapseExample\">\n" + 
+					"    Link with href\n" + 
+					"  </a>\n" + 
+					"  <button class=\"btn btn-primary\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapseExample\" aria-expanded=\"false\" aria-controls=\"collapseExample\">\n" + 
+					"    Button with data-target\n" + 
+					"  </button>\n" + 
+					"</p>\n" + 
+					"<div class=\"collapse\" id=\"collapseExample\">\n" + 
+					"  <div class=\"card card-body\">\n" + 
+					"    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.\n" + 
+					"  </div>\n" + 
+					"</div>");
 			createViews(views, contents.select(".row").first(), page.getTemplate(), object, properties, page.getScope());
 			return contents;
 		} catch (IOException e) {
@@ -98,7 +112,7 @@ public class Entity {
 		if(acdIndex > -1) {
 			createAccordionOutline(element, template, tabIndex < acdIndex);
 		}
-		
+
 		boolean first = true;
 		for(OrderedView view : views) {
 			
@@ -263,7 +277,7 @@ public class Entity {
 		if(view.isRoot()) {
 			return rootElement.prepend("<div id=\"rootView\" class=\"col-12 py-1\"></div>").select("#rootView").first();
 		}
-		
+
 		switch(view.getType()) {
 		case ACCORDION:
 			return createAccordionElement(view, rootElement, template, first);
@@ -275,41 +289,38 @@ public class Entity {
 	private Element createAccordionElement(OrderedView view, Element rootElement, ObjectTemplate template, boolean first) {
 		
 		Element accord = rootElement.selectFirst(".accordion");
-		
+		first = false;
 		StringBuffer buffer = new StringBuffer();
 		
 		buffer.append("<div class=\"card\">");
-		buffer.append("<div class=\"card-header\" id=\"");
-		buffer.append(view.getResourceKey());
-		buffer.append("\">");
+		buffer.append("<div class=\"card-header\">");
+
 		buffer.append("<h2 class=\"mb-0\">");
-		buffer.append("<button class=\"btn btn-link");
-		if(!first) {
-			buffer.append(" collapsed");
-		}
-		buffer.append("\" type=\"button\" data-toggle=\"collapse\" data-target=\"#collapse");
+
+		buffer.append("<a id=\"");
 		buffer.append(view.getResourceKey());
-		buffer.append("\" aria-expanded=\""); 
+		buffer.append("\" class=\"btn btn-link\" role=\"button\" data-toggle=\"collapse\" aria-expanded=\""); 
 		buffer.append(String.valueOf(first));
 		buffer.append("\" aria-controls=\"collapse");
 		buffer.append(view.getResourceKey());
+		buffer.append("\" href=\"#collapse\""); 
+		buffer.append(view.getResourceKey()); 
 		buffer.append("\">");
 		buffer.append("<span webbits:bundle=\"i18n/");
 		buffer.append(template.getResourceKey());
 		buffer.append("\" webbits:i18n=\"");
 		buffer.append(view.getResourceKey());
-		buffer.append("\"></span></button></h2></div>");
+		buffer.append("\">");
+		buffer.append(view.getResourceKey());
+		buffer.append("</span></a></h2></div>");
 		buffer.append("<div id=\"collapse");
 		buffer.append(view.getResourceKey());
 		buffer.append("\" class=\"collapse");
-		buffer.append("\" aria-labelledby=\"");
-		buffer.append(view.getResourceKey());
-		buffer.append("\" data-parent=\"#");
-		buffer.append(template.getResourceKey());
-		buffer.append("Accordion\">");
+		buffer.append("\">");
 		buffer.append("<div class=\"card-body\"></div></div></div>");
 
 		accord.append(buffer.toString());
+
 
 		return accord.select(".card-body").last();
 

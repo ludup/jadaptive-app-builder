@@ -68,7 +68,7 @@ public class SMTPConfiguration extends SingletonUUIDEntity {
 	String archiveAddress;
 	
 	public Boolean getEnabled() {
-		return enabled;
+		return enabled == null ? Boolean.FALSE : enabled;
 	}
 
 	public void setEnabled(Boolean enabled) {

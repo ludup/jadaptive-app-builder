@@ -16,10 +16,12 @@ import com.codesmith.webbits.util.Html;
 public class JadaptiveUtils {
 	
 	String path = "/app/ui/js/jadaptive-utils.js";
-
+	String fontawesome = "/css/all.min.css";
+	
 	@Out
 	Document service(@In Document template, HttpServletRequest request) {
 		Html.addScript(template, path);
+		Html.addStylesheet(template, fontawesome);
 		return template;
 	}
 }
