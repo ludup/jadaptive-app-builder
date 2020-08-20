@@ -1,7 +1,5 @@
 $(document).ready(function() {
-		debugger;
 		$.getJSON('/app/api/applicationMenu/list', function(data) {
-			debugger;
 			if(data.success) {
 				var menus = [];
 				var top = [];

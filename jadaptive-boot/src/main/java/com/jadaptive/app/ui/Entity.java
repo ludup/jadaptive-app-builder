@@ -17,6 +17,7 @@ import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.ParentView;
+import com.codesmith.webbits.Request;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.Widget;
 import com.jadaptive.api.app.SecurityPropertyService;
@@ -63,7 +64,7 @@ public class Entity {
 	}
 	
     @Out
-    public Elements service(@In Elements contents, @ParentView TemplatePage page) throws IOException {
+    public Element service(@In Element contents, @ParentView TemplatePage page, Request<?> request) throws IOException {
     	
     	try {
 			Properties properties = propertyService.getOverrideProperties(
@@ -289,40 +290,44 @@ public class Entity {
 	private Element createAccordionElement(OrderedView view, Element rootElement, ObjectTemplate template, boolean first) {
 		
 		Element accord = rootElement.selectFirst(".accordion");
-		first = false;
-		StringBuffer buffer = new StringBuffer();
+
+		/* Card */
+		Element card = accord.appendElement("div")
+			.addClass("card");
+
+		/* Header */
+		Element cardHeader = card.appendElement("div")
+			.addClass("card-header")
+			.attr("id", view.getResourceKey());
 		
-		buffer.append("<div class=\"card\">");
-		buffer.append("<div class=\"card-header\">");
+		Element cardHeaderLink = cardHeader.appendElement("h2")
+			.addClass("mb-0")
+			.appendElement("a")
+				.addClass("btn")
+				.addClass("btn-link")
+				.attr("data-toggle", "collapse")
+				.attr("data-target", "#collapse" + view.getResourceKey())
+				.attr("href", "#collapse" + view.getResourceKey())
+				.attr("aria-expanded", String.valueOf(first))
+				.attr("aria-controls", "collapse" + view.getResourceKey())
+				;
 
-		buffer.append("<h2 class=\"mb-0\">");
+		cardHeaderLink.appendElement("span")
+			.attr("webbits:bundle", "i18n/" + template.getResourceKey())
+			.attr("webbits:i18n", view.getResourceKey());
 
-		buffer.append("<a id=\"");
-		buffer.append(view.getResourceKey());
-		buffer.append("\" class=\"btn btn-link\" role=\"button\" data-toggle=\"collapse\" aria-expanded=\""); 
-		buffer.append(String.valueOf(first));
-		buffer.append("\" aria-controls=\"collapse");
-		buffer.append(view.getResourceKey());
-		buffer.append("\" href=\"#collapse\""); 
-		buffer.append(view.getResourceKey()); 
-		buffer.append("\">");
-		buffer.append("<span webbits:bundle=\"i18n/");
-		buffer.append(template.getResourceKey());
-		buffer.append("\" webbits:i18n=\"");
-		buffer.append(view.getResourceKey());
-		buffer.append("\">");
-		buffer.append(view.getResourceKey());
-		buffer.append("</span></a></h2></div>");
-		buffer.append("<div id=\"collapse");
-		buffer.append(view.getResourceKey());
-		buffer.append("\" class=\"collapse");
-		buffer.append("\">");
-		buffer.append("<div class=\"card-body\"></div></div></div>");
-
-		accord.append(buffer.toString());
-
-
-		return accord.select(".card-body").last();
+		/* Collapsible Body Container */
+		Element outer = card.appendElement("div")
+			.attr("id", "collapse" + view.getResourceKey())
+			.attr("aria-labelledby", view.getResourceKey())
+			.attr("data-parent", "#" + template.getResourceKey() + "Accordion")
+			.addClass("collapse");
+		if (first)
+			outer.addClass("show");
+		
+		/* Card Body */
+		return outer.appendElement("div")
+			.addClass("card-body");
 
 	}
 
