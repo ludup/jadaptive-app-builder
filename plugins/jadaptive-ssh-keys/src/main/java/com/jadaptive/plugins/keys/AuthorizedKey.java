@@ -39,7 +39,7 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 
 	public static final String RESOURCE_KEY = "authorizedKeys";
 	
-	@ObjectField(searchable = true, 
+	@ObjectField(searchable = true, alternativeId = true,
 			hidden = true, type = FieldType.LONG)
 	@ExcludeView(values = { FieldView.CREATE, FieldView.TABLE, FieldView.IMPORT })
 	Long id;
