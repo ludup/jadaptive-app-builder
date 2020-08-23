@@ -13,6 +13,7 @@ import com.codesmith.webbits.Page;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.BootBox;
 import com.codesmith.webbits.bootstrap.BootstrapTable;
+import com.codesmith.webbits.extensions.Client;
 import com.codesmith.webbits.extensions.I18N;
 import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
@@ -22,7 +23,7 @@ import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableView;
 
-@Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class, I18N.class})
+@Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class, I18N.class, Client.class})
 @View(contentType = "text/html", paths = { "/table/{resourceKey}" })
 @ClasspathResource
 public class TablePage extends TemplatePage {

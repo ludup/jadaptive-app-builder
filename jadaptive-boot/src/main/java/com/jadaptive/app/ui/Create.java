@@ -10,11 +10,12 @@ import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.View;
 import com.codesmith.webbits.bootstrap.Bootstrap;
+import com.codesmith.webbits.extensions.Client;
 import com.codesmith.webbits.extensions.Widgets;
 import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.template.FieldView;
 
-@Page({ Bootstrap.class, Widgets.class, FreeMarker.class })
+@Page({ Bootstrap.class, Widgets.class, FreeMarker.class, Client.class })
 @View(contentType = "text/html", paths = { "/create/{resourceKey}" })
 @ClasspathResource
 public class Create extends TemplatePage {

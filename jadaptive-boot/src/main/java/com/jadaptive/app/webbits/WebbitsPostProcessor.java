@@ -145,12 +145,6 @@ public class WebbitsPostProcessor implements BeanFactoryPostProcessor, Applicati
 	    }
 
 	    @Override
-	    public void processDependencies(Request<?> request, Response<?> response, Object root, Invoker invoker,
-		    Class<?>... dependencies) {
-		context.processDependencies(request, response, root, invoker, dependencies);
-	    }
-
-	    @Override
 	    public WidgetLocator getWidgetLocator() {
 		return context.getWidgetLocator();
 	    }
