@@ -19,7 +19,7 @@ public class JadaptiveUtils {
 	
 	@Out
 	Document service(@In Document template, HttpServletRequest request) {
-		Html.addScript(template, request, path);
+		Html.addTailScript(template, request, path);
 		return template;
 	}
 }
