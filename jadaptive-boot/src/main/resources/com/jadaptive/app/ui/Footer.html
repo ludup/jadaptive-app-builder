@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:webbits="http://webbits.org/webbits">
+<html lang="en" xmlns:webbits="http://webbits.org/webbits" webbits:depends="Enablement">
 <body>
 	<div id="footer" class="navbar bg-dark">
 		<div class="col-12">
-			<div class="float-right">
+			<div class="float-right" webbits:present="loggedOn">
 				<div id="logoff" class="pl-3">
 					<a href="/app/ui/logoff"><i
 						class="text-light fas fa-sign-out-alt"></i></a>

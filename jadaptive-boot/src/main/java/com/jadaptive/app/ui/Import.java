@@ -17,21 +17,21 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.FieldView;
 
 @Page(BootstrapTable.class)
-@View(contentType = "text/html", paths = { "/import/{resourceKey}"})
+@View(contentType = "text/html", paths = { "/import/{resourceKey}" })
 @ClasspathResource
 public class Import extends TemplatePage {
-    
+
 	@Autowired
-	private PermissionService permissionService; 
-	
+	private PermissionService permissionService;
+
 	@Override
 	protected void onCreated() throws FileNotFoundException {
 
 		super.onCreated();
-		
+
 		try {
 			permissionService.assertReadWrite(getTemplate().getResourceKey());
-		} catch(AccessDeniedException e) {
+		} catch (AccessDeniedException e) {
 			throw new FileNotFoundException(e.getMessage());
 		}
 	}
@@ -39,11 +39,11 @@ public class Import extends TemplatePage {
 	public boolean isModal() {
 		return true;
 	}
-	
+
 	@Out(methods = HTTPMethod.POST)
-    Document service(@In Document content) {
-    	return content;
-    }
+	Document service(@In Document content) {
+		return content;
+	}
 
 	@Override
 	public FieldView getScope() {

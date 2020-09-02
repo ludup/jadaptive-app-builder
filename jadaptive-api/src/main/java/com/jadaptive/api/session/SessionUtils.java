@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.codesmith.webbits.Request;
+import com.codesmith.webbits.Response;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -28,7 +30,7 @@ import com.jadaptive.utils.Utils;
 public class SessionUtils {
 
 	static Logger log = LoggerFactory.getLogger(SessionUtils.class);
-	
+
 	static boolean debugCSRF = "true".equals(System.getProperty("jadaptive.csrfDebugRequests"));
 
 	public static final String AUTHENTICATED_SESSION = "authenticatedSession";
@@ -39,50 +41,97 @@ public class SessionUtils {
 	public static final String LOCALE_COOKIE = "JADAPTIVE_LOCALE";
 
 	static ThreadLocal<User> threadUsers = new ThreadLocal<>();
-	
+
 	@Autowired
-	private SessionService sessionService;; 
-	
+	private SessionService sessionService;;
+
 	@Autowired
-	private PermissionService permissionService; 
-	
+	private PermissionService permissionService;
+
 	public User getCurrentUser() {
 		return permissionService.getCurrentUser();
 	}
-	
-	public Session getActiveSession(HttpServletRequest request) {
-		
+
+	public Session getActiveSession(Request<?> request) {
 		Session session = null;
-		
+
 		permissionService.setupSystemContext();
-		
+
 		try {
-			if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
-				session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
-			} else if(request.getHeader(SESSION_COOKIE) != null) {
-				session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
+			if (request.hasParameter(SESSION_COOKIE)) {
+				session = sessionService.getSession(request.getParameterOrFail(SESSION_COOKIE));
+			} else if (request.hasHeader(SESSION_COOKIE)) {
+				session = sessionService.getSession(request.header(SESSION_COOKIE));
 			}
-			
+
 			if (session != null && sessionService.isLoggedOn(session, true)) {
 				return session;
 			}
-			
+
+			if (request.attr(AUTHENTICATED_SESSION) != null) {
+				session = request.attr(AUTHENTICATED_SESSION);
+				if (sessionService.isLoggedOn(session, true)) {
+					return session;
+				}
+			}
+
+			if (request.session().httpSession().getAttribute(AUTHENTICATED_SESSION) != null) {
+				session = request.session().attr(AUTHENTICATED_SESSION);
+				if (sessionService.isLoggedOn(session, true)) {
+					return session;
+				}
+			}
+
+			String cookieValue = request.cookieValue(SESSION_COOKIE);
+			if(cookieValue != null) {
+				session = sessionService.getSession(cookieValue);
+				if (session != null && sessionService.isLoggedOn(session, false)) {
+					return session;
+				}
+			}
+
+		} catch (ObjectNotFoundException e) {
+
+		} finally {
+			permissionService.clearUserContext();
+		}
+
+		return null;
+	}
+
+	@Deprecated
+	public Session getActiveSession(HttpServletRequest request) {
+
+		Session session = null;
+
+		permissionService.setupSystemContext();
+
+		try {
+			if (request.getParameterMap().containsKey(SESSION_COOKIE)) {
+				session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
+			} else if (request.getHeader(SESSION_COOKIE) != null) {
+				session = sessionService.getSession((String) request.getHeader(SESSION_COOKIE));
+			}
+
+			if (session != null && sessionService.isLoggedOn(session, true)) {
+				return session;
+			}
+
 			if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
 				session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
-				if(sessionService.isLoggedOn(session, true)) {
+				if (sessionService.isLoggedOn(session, true)) {
 					return session;
 				}
 			}
-			
+
 			if (request.getSession().getAttribute(AUTHENTICATED_SESSION) != null) {
-				session = (Session) request.getSession().getAttribute(
-						AUTHENTICATED_SESSION);
-				if(sessionService.isLoggedOn(session, true)) {
+				session = (Session) request.getSession().getAttribute(AUTHENTICATED_SESSION);
+				if (sessionService.isLoggedOn(session, true)) {
 					return session;
 				}
 			}
-			
-			if(Objects.nonNull(request.getCookies())) {
+
+			if (Objects.nonNull(request.getCookies())) {
 				for (Cookie c : request.getCookies()) {
 					if (c.getName().equals(SESSION_COOKIE)) {
 						session = sessionService.getSession(c.getValue());
@@ -92,8 +141,8 @@ public class SessionUtils {
 					}
 				}
 			}
-			
-		} catch(ObjectNotFoundException e) { 
+
+		} catch (ObjectNotFoundException e) {
 
 		} finally {
 			permissionService.clearUserContext();
@@ -102,13 +151,12 @@ public class SessionUtils {
 		return null;
 	}
 
-	public Session touchSession(HttpServletRequest request,
-			HttpServletResponse response) throws UnauthorizedException,
-			SessionTimeoutException {
+	public Session touchSession(Request<?> request, Response<?> response)
+			throws UnauthorizedException, SessionTimeoutException {
 
 		Session session = null;
-		
-		if (request.getSession().getAttribute(AUTHENTICATED_SESSION) == null) {
+
+		if (request.underlyingRequest().getSession().getAttribute(AUTHENTICATED_SESSION) == null) {
 			if (log.isDebugEnabled()) {
 				log.debug("Session object not attached to HTTP session");
 			}
@@ -123,17 +171,15 @@ public class SessionUtils {
 				throw new SessionTimeoutException();
 			}
 		} else {
-			session = (Session) request.getSession().getAttribute(
-					AUTHENTICATED_SESSION);
+			session = request.session().attr(AUTHENTICATED_SESSION);
 			if (!sessionService.isLoggedOn(session, true)) {
 				throw new UnauthorizedException();
 			}
 		}
 
-
 		// Preserve the session for future lookups in this request and session
-		request.setAttribute(AUTHENTICATED_SESSION, session);
-		request.getSession().setAttribute(AUTHENTICATED_SESSION, session);
+		request.attr(AUTHENTICATED_SESSION, session);
+		request.session().attr(AUTHENTICATED_SESSION, session);
 
 		addSessionCookies(request, response, session);
 
@@ -141,40 +187,81 @@ public class SessionUtils {
 
 	}
 
-	public Session getSession(HttpServletRequest request)
-			throws UnauthorizedException, SessionTimeoutException {
+	public Session getSession(Request<?> request) throws UnauthorizedException, SessionTimeoutException {
 
 		/**
 		 * This method SHOULD NOT touch the session.
 		 */
 		Session session = null;
-		
-		if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
-			session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
-		} else if(request.getHeader(SESSION_COOKIE) != null) {
-			session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
+
+		if (request.hasParameter(SESSION_COOKIE)) {
+			session = sessionService.getSession(request.getParameterOrFail(SESSION_COOKIE));
+		} else if (request.header(SESSION_COOKIE) != null) {
+			session = sessionService.getSession(request.header(SESSION_COOKIE));
 		}
-		
+
 		if (session != null && sessionService.isLoggedOn(session, false)) {
 			return session;
 		}
-		
+
+		if (request.hasAttr(AUTHENTICATED_SESSION)) {
+			session = request.attr(AUTHENTICATED_SESSION);
+			if (sessionService.isLoggedOn(session, false)) {
+				return session;
+			}
+		}
+
+		if (request.session().hasHttpSessionAttr(AUTHENTICATED_SESSION)) {
+			session = request.session().attr(AUTHENTICATED_SESSION);
+			if (sessionService.isLoggedOn(session, false)) {
+				return session;
+			}
+		}
+
+		String cookieValue = request.cookieValue(SESSION_COOKIE);
+		if(cookieValue != null) {
+			session = sessionService.getSession(cookieValue);
+			if (session != null && sessionService.isLoggedOn(session, false)) {
+				return session;
+			}
+		}
+
+		throw new UnauthorizedException();
+	}
+
+	@Deprecated
+	public Session getSession(HttpServletRequest request) throws UnauthorizedException, SessionTimeoutException {
+
+		/**
+		 * This method SHOULD NOT touch the session.
+		 */
+		Session session = null;
+
+		if (request.getParameterMap().containsKey(SESSION_COOKIE)) {
+			session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
+		} else if (request.getHeader(SESSION_COOKIE) != null) {
+			session = sessionService.getSession((String) request.getHeader(SESSION_COOKIE));
+		}
+
+		if (session != null && sessionService.isLoggedOn(session, false)) {
+			return session;
+		}
+
 		if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
 			session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
-			if(sessionService.isLoggedOn(session, false)) {
+			if (sessionService.isLoggedOn(session, false)) {
 				return session;
 			}
 		}
-		
+
 		if (request.getSession().getAttribute(AUTHENTICATED_SESSION) != null) {
-			session = (Session) request.getSession().getAttribute(
-					AUTHENTICATED_SESSION);
-			if(sessionService.isLoggedOn(session, false)) {
+			session = (Session) request.getSession().getAttribute(AUTHENTICATED_SESSION);
+			if (sessionService.isLoggedOn(session, false)) {
 				return session;
 			}
 		}
-		
-		if(request.getCookies()!=null) {
+
+		if (request.getCookies() != null) {
 			for (Cookie c : request.getCookies()) {
 				if (c.getName().equals(SESSION_COOKIE)) {
 					session = sessionService.getSession(c.getValue());
@@ -188,20 +275,20 @@ public class SessionUtils {
 		throw new UnauthorizedException();
 	}
 
-	
-	public void verifySameSiteRequest(HttpServletRequest request,HttpServletResponse response, Session session) throws UnauthorizedException {
-				
+	public void verifySameSiteRequest(HttpServletRequest request, HttpServletResponse response, Session session)
+			throws UnauthorizedException {
+
 		String requestToken = request.getHeader("X-Csrf-Token");
-		if(requestToken==null) {
+		if (requestToken == null) {
 			requestToken = request.getParameter("token");
-			if(requestToken==null) {
+			if (requestToken == null) {
 				log.warn(String.format("CSRF token missing from %s", request.getRemoteAddr()));
 				debugRequest(request);
 				throw new UnauthorizedException();
 			}
 		}
-		
-		if(!session.getCsrfToken().equals(requestToken)) {
+
+		if (!session.getCsrfToken().equals(requestToken)) {
 			log.warn(String.format("CSRF token mistmatch from %s", request.getRemoteAddr()));
 			debugRequest(request);
 			throw new UnauthorizedException();
@@ -210,13 +297,14 @@ public class SessionUtils {
 	}
 
 	protected void debugRequest(HttpServletRequest request) {
-		if(debugCSRF) {
-			log.warn(String.format("The request URI was %s, and contained the following parameters :-",request.getRequestURI()));
-			for(Map.Entry<String, String[]> en : request.getParameterMap().entrySet()) {
+		if (debugCSRF) {
+			log.warn(String.format("The request URI was %s, and contained the following parameters :-",
+					request.getRequestURI()));
+			for (Map.Entry<String, String[]> en : request.getParameterMap().entrySet()) {
 				log.warn(String.format("  %s = %s", en.getKey(), String.join(",", en.getValue())));
 			}
 			log.warn("And the following headers :-");
-			for(Enumeration<String> hdrEnum = request.getHeaderNames(); hdrEnum.hasMoreElements(); ) {
+			for (Enumeration<String> hdrEnum = request.getHeaderNames(); hdrEnum.hasMoreElements();) {
 				String hdr = hdrEnum.nextElement();
 				log.warn(String.format("  %s = %s", hdr, request.getHeader(hdr)));
 			}
@@ -224,59 +312,72 @@ public class SessionUtils {
 	}
 
 	public boolean isValidCORSRequest(HttpServletRequest request, HttpServletResponse response, Properties properties) {
-		
+
 		String requestOrigin = request.getHeader("Origin");
-		
-		if(Objects.nonNull(requestOrigin) && log.isInfoEnabled()) {
+
+		if (Objects.nonNull(requestOrigin) && log.isInfoEnabled()) {
 			log.info("CORS request for origin {}", requestOrigin);
-		} else if(Objects.isNull(requestOrigin)) {
+		} else if (Objects.isNull(requestOrigin)) {
 			return false;
 		}
-		
+
 		boolean pathAllowsCORS = Boolean.parseBoolean(properties.getProperty("cors.enabled", "true"));
-		if(!pathAllowsCORS) {
-			if(log.isInfoEnabled()) {
+		if (!pathAllowsCORS) {
+			if (log.isInfoEnabled()) {
 				log.info("Security properties of URI {} explicitly deny CORS", request.getRequestURI());
 			}
 			return false;
 		}
-		
+
 		List<String> origins = new ArrayList<>();
 		origins.addAll(Arrays.asList(properties.getProperty("cors.origins", "").split(",")));
-		
-		if(origins.size() > 0 && log.isInfoEnabled()) {
+
+		if (origins.size() > 0 && log.isInfoEnabled()) {
 			log.info("Security properties allows origins {}", Utils.csv(origins));
 		}
-		
-		if(ApplicationProperties.getValue("cors.enabled", false) && !Objects.isNull(requestOrigin)) {
-			
-			List<String> tmp =  new ArrayList<>();
+
+		if (ApplicationProperties.getValue("cors.enabled", false) && !Objects.isNull(requestOrigin)) {
+
+			List<String> tmp = new ArrayList<>();
 			tmp.addAll(Arrays.asList(ApplicationProperties.getValue("cors.origins", "").split(",")));
-			
-			if(tmp.size() > 0 && log.isInfoEnabled()) {
+
+			if (tmp.size() > 0 && log.isInfoEnabled()) {
 				log.info("Global configuration allows origins {}", Utils.csv(tmp));
-			}	
-			
+			}
+
 			origins.addAll(tmp);
 		}
 
-		if(origins.contains(requestOrigin)) {
-			if(log.isInfoEnabled()) {
+		if (origins.contains(requestOrigin)) {
+			if (log.isInfoEnabled()) {
 				log.info("Origin {} allowed for URI {}", requestOrigin, request.getRequestURI());
 			}
 			/**
-			 * Allow CORS to this realm. We must allow credentials as the
-			 * API will be useless without them.
+			 * Allow CORS to this realm. We must allow credentials as the API will be
+			 * useless without them.
 			 */
 			response.addHeader("Access-Control-Allow-Credentials", "true");
 			response.addHeader("Access-Control-Allow-Origin", requestOrigin);
-			
+
 			return true;
 		}
-		
+
 		return false;
 	}
 
+	public void addSessionCookies(Request<?> request, Response<?> response, Session session) {
+
+		Cookie cookie = response.cookie(SESSION_COOKIE, session.getUuid(),
+				(session.getSessionTimeout() > 0 ? 60 * session.getSessionTimeout() : Integer.MAX_VALUE));
+		cookie.setHttpOnly(true);
+		cookie.setPath("/");
+
+		cookie = response.cookie(CSRF_TOKEN, session.getCsrfToken(),
+				(session.getSessionTimeout() > 0 ? 60 * session.getSessionTimeout() : Integer.MAX_VALUE));
+		cookie.setPath("/");
+
+	}
+	
 	public void addSessionCookies(HttpServletRequest request,
 			HttpServletResponse response, Session session) {
 
@@ -311,21 +412,19 @@ public class SessionUtils {
 			}
 			return Locale.getDefault();
 		} else {
-			return new Locale((String) request.getSession().getAttribute(
-					USER_LOCALE));
+			return new Locale((String) request.getSession().getAttribute(USER_LOCALE));
 		}
 
 	}
 
-	public void setLocale(HttpServletRequest request,
-			HttpServletResponse response, String locale) {
+	public void setLocale(HttpServletRequest request, HttpServletResponse response, String locale) {
 
 		request.getSession().setAttribute(USER_LOCALE, locale);
 
 		Cookie cookie = new Cookie(LOCALE_COOKIE, locale);
 		cookie.setMaxAge(Integer.MAX_VALUE);
 		cookie.setPath("/");
-		if(request.getProtocol().equalsIgnoreCase("https")) {
+		if (request.getProtocol().equalsIgnoreCase("https")) {
 			cookie.setSecure(true);
 		} else {
 			cookie.setSecure(false);
@@ -343,9 +442,9 @@ public class SessionUtils {
 		}
 	}
 
-	public boolean hasActiveSession(HttpServletRequest request) {
+	public boolean hasActiveSession(Request<?> request) {
 		try {
-			return getSession(request)!=null;
+			return getSession(request) != null;
 		} catch (ObjectNotFoundException | UnauthorizedException | SessionTimeoutException e) {
 			return false;
 		}

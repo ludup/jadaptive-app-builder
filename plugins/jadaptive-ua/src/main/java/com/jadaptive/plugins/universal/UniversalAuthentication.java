@@ -17,10 +17,10 @@ import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Redirect;
+import com.codesmith.webbits.Request;
 import com.codesmith.webbits.View;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AbstractPage;
 import com.jadaptive.api.user.EmailEnabledUser;
 import com.sshtools.universal.UniversalAuthenticatorClient;
@@ -42,7 +42,7 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
 	private UAService uaService;
 	
 	@Out(methods = HTTPMethod.GET)
-	Document get(@In Document content) {
+	Document get(@In Document content, Request<?> request) {
 		
 		AuthenticationState state = authenticationService.getCurrentState();
     	if(Objects.isNull(state.getUser())) {
@@ -52,16 +52,16 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
     	authenticationService.decorateAuthenticationPage(content);
 		
     	if(uaService.hasCredentials(state.getUser())) {
-    		showAuthorization(content, state);
+    		showAuthorization(request, content, state);
     	} else {
-    		showRegistration(content, state);
+    		showRegistration(request, content, state);
     	}
     	
     	
 		return content;
 	}
 	
-	private void showAuthorization(Document content, AuthenticationState state) {
+	private void showAuthorization(Request<?> request, Document content, AuthenticationState state) {
 		
 		Element el = content.selectFirst("#content");
 		el.append("<p>An authorization request has been sent to your mobile phone. Please authorize your login to continue.</p>");
@@ -70,7 +70,7 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
 		state.setAttribute(AUTHENTICATOR_STATE, UniversalAuthenticationState.REGISTERED);
 	}
 
-	private void showRegistration(Document content, AuthenticationState state) {
+	private void showRegistration(Request<?> request, Document content, AuthenticationState state) {
 		
 		if(!(state.getUser() instanceof EmailEnabledUser)) {
 			throw new IllegalStateException("UA authentication requires an email enabled user");
@@ -87,8 +87,8 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
 		boolean allowSkip = true;
 		String username = u.getUsername();
 		String email = u.getEmail();
-		String serverHost = Request.get().getServerName();
-		int serverPort = getServerPort();
+		String serverHost = request.underlyingRequest().getServerName();
+		int serverPort = request.serverPort();
 		String serverPath = "/ua-register";
 		String keyServerHost = "gateway.jadaptive.com";
 		int keyServerPort = 443;
@@ -126,17 +126,8 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
 		state.setAttribute(AUTHENTICATOR_STATE, UniversalAuthenticationState.UNREGISTERED);
 	}
 	 
-    private int getServerPort() {
-		
-    	String header = Request.get().getHeader("X-Forwarded-Port");
-    	if(Objects.nonNull(header)) {
-    		return Integer.parseInt(header);
-    	}
-    	return Request.get().getServerPort();
-	}
-
 	@Out(methods = HTTPMethod.POST)
-    Document post(@In Document content, @Form RegistrationForm form) {
+    Document post(@In Document content, Request<?> request, @Form RegistrationForm form) {
 
     	AuthenticationState state = authenticationService.getCurrentState();
     	if(Objects.isNull(state.getUser())) {
@@ -153,7 +144,7 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
     	
     	UniversalAuthenticatorClient uac = new UniversalAuthenticatorClient(uaService.getCredentials(state.getUser()));
     	try {
-			uac.authenticate("Authorize your login to " + Request.get().getServerName());
+			uac.authenticate("Authorize your login to " + request.serverName());
 			throw new Redirect(authenticationService.completeAuthentication(state.getUser()));
 		} catch (IOException e) {
 			authenticationService.reportAuthenticationFailure(state.getUser().getUsername());

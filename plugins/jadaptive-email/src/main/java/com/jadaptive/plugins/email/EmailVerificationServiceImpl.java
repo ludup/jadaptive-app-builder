@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.codesmith.webbits.Request;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.StaticResolver;
 import com.jadaptive.utils.Utils;
@@ -51,7 +51,7 @@ public class EmailVerificationServiceImpl extends AuthenticatedService implement
 
 		StaticResolver data = new StaticResolver();
 		data.addToken("code", code);
-		data.addToken("hostname", Request.get().getServerName());
+		data.addToken("hostname", Request.get().underlyingRequest().getServerName());
 		
 		messageService.sendMessage(USER_REGISTRATION_CONFIRMATION_CODE, data, email);
 		

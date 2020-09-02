@@ -96,6 +96,9 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 	@Override
 	public ObjectTemplate get(String resourceKey) throws RepositoryException, ObjectException {
+		for(ObjectTemplate t : repository.list()) {
+			System.out.println(t.getResourceKey() +  " : " + String.join(",", t.getAliases()));
+		}
 		
 		ObjectTemplate e = repository.get(SearchField.or(
 				SearchField.eq("resourceKey", resourceKey),

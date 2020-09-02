@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:webbits="http://webbits.org/webbits"
+	webbits:depends="Bootstrap,Widgets,FreeMarker,JadaptiveUtils,Client,Bind,Drop,Bootstrapify,FontAwesomeify,Spinner">
+<body>
+	<div class="wrapper">
+		<header webbits:id="com.jadaptive.app.ui.Header"></header>
+		<main class="container my-auto">
+			<div class="row justify-content-center">
+				<div class="col-10">
+					<div class="card">
+						<div class="card-header"><a href="table/authorizedKeys" class="btn close"><webbits:i>window-close</webbits:i></a><h3>Generate Key</h3></div>
+						<div class="card-body">
+						
+							<form name="generateForm" id="generateForm"
+								enctype="multipart/form-data" action="" method="POST"
+								webbits:feedback="true" webbits:bind="value,submit,progress"
+								webbits:reset-button="false" webbits:submit-text="Generate"
+								webbits:spin="submit" webbits:spin="submit" webbits:spin-element="generateFormSubmit">
+
+								<div id="nameGroup" class="form-group col-12">
+									<label for="name" class="col-form-label">Name</label> 
+									<input type="text" id="name" name="name" class="form-control" value=""> 
+									<small class="form-text text-muted">A name to identify this key</small>
+									
+									<label for="passphrase" class="col-form-label">Passphrase</label> 
+									<input type="password" id="passphrase" name="passphrase" class="form-control" value=""> 
+									<small class="form-text text-muted">The passphrase if this key is to be encrypted</small>
+									
+									<label for="passphrase" class="col-form-label">Type</label>
+									<select id="type" name="type" class="form-control" webbits:bind="value">
+										<option webbits:target="types" webbits:bind="value" />
+									</select> 
+									<small class="form-text text-muted">The type of key</small>
+								</div>
+
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+	<footer webbits:id="com.jadaptive.app.ui.Footer"></footer>
+</body>
+</html>

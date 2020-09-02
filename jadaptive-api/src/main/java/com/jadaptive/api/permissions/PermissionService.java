@@ -27,6 +27,8 @@ public interface PermissionService {
 
 	void setupUserContext(User user);
 
+	void runAs(User user, Runnable runnable);
+
 	User getCurrentUser();
 
 	void setupSystemContext();

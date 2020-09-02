@@ -11,6 +11,7 @@ import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.codesmith.webbits.ApiLocator;
 import com.codesmith.webbits.ClasspathLocator;
 import com.codesmith.webbits.Configurator;
 import com.codesmith.webbits.Context;
@@ -25,80 +26,85 @@ import com.jadaptive.utils.FileUtils;
 @Component
 public class WebbitsConfigurator extends Configurator {
 
-    @Autowired
-    private WebbitsPostProcessor postProcessor;
+	@Autowired
+	private WebbitsPostProcessor postProcessor;
 
-    @Autowired
-    private WebbitsViewLocator viewLocator;
+	@Autowired
+	private WebbitsViewLocator viewLocator;
+	@Autowired
+	private WebbitsApiLocator apiLocator;
 
-    @Autowired
-    private WebbitsExtensionLocator extensionLocator;
+	@Autowired
+	private WebbitsExtensionLocator extensionLocator;
 
-    @Autowired
-    private WebbitsWidgetLocator widgetLocator;
+	@Autowired
+	private WebbitsWidgetLocator widgetLocator;
 
-    @Autowired
-    private WebbitsObjectCreator springObjectCreator;
+	@Autowired
+	private WebbitsObjectCreator springObjectCreator;
 
-    @Autowired
-    private WebbitsBundleResolver webbitsBundleResolver; 
-    
-    @Autowired
-    private PluginManager pluginManager; 
-    
-    @Override
-    public ViewLocator createViewLocator() {
-	return viewLocator;
-    }
+	@Autowired
+	private WebbitsBundleResolver webbitsBundleResolver;
 
-    @Override
-    public ExtensionLocator createExtensionLocator() {
-	return extensionLocator;
-    }
+	@Autowired
+	private PluginManager pluginManager;
 
-    @Override
-    public ObjectCreator createObjectCreator() {
-	return springObjectCreator;
-    }
+	@Override
+	public ViewLocator createViewLocator() {
+		return viewLocator;
+	}
 
-    @Override
-    public WidgetLocator createWidgetLocator() {
-	return widgetLocator;
-    }
+	@Override
+	public ApiLocator createApiLocator() {
+		return apiLocator;
+	}
 
-    
-    @Override
+	@Override
+	public ExtensionLocator createExtensionLocator() {
+		return extensionLocator;
+	}
+
+	@Override
+	public ObjectCreator createObjectCreator() {
+		return springObjectCreator;
+	}
+
+	@Override
+	public WidgetLocator createWidgetLocator() {
+		return widgetLocator;
+	}
+
+	@Override
 	public BundleResolver createBundleResolver() {
 		return webbitsBundleResolver;
 	}
 
 	@Override
-    protected void onInit(Context context) {
-	postProcessor.setContext(context);
-    }
-    
-    @Override
-    public ClasspathLocator createClasspathLocator() {
-    	return new DefaultClasspathLocator() {
+	protected void onInit(Context context) {
+		postProcessor.setContext(context);
+	}
 
-    		Map<String,ClassLoader> cachedLoaders = new HashMap<>();
-    		
+	@Override
+	public ClasspathLocator createClasspathLocator() {
+		return new DefaultClasspathLocator() {
+
+			Map<String, ClassLoader> cachedLoaders = new HashMap<>();
+
 			@Override
 			public URL getResource(String path) {
-				
-				String packageName = FileUtils.checkStartsWithNoSlash(
-						FileUtils.checkEndsWithNoSlash(
-								FileUtils.stripLastPathElement(path)));
+
+				String packageName = FileUtils
+						.checkStartsWithNoSlash(FileUtils.checkEndsWithNoSlash(FileUtils.stripLastPathElement(path)));
 				packageName = packageName.replace('/', '.');
 				ClassLoader classLoader = cachedLoaders.get(packageName);
 				URL url = null;
-				if(Objects.isNull(classLoader)) {
-					if(packageName.startsWith("com.jadaptive.plugins")) {
-						for(PluginWrapper w : pluginManager.getPlugins()) {
+				if (Objects.isNull(classLoader)) {
+					if (packageName.startsWith("com.jadaptive.plugins")) {
+						for (PluginWrapper w : pluginManager.getPlugins()) {
 							Plugin plugin = w.getPlugin();
-							if(plugin!=null && packageName.startsWith(plugin.getClass().getPackage().getName())) {
+							if (plugin != null && packageName.startsWith(plugin.getClass().getPackage().getName())) {
 								cachedLoaders.put(packageName, w.getPluginClassLoader());
-								url=  w.getPluginClassLoader().getResource(path);
+								url = w.getPluginClassLoader().getResource(path);
 								break;
 							}
 						}
@@ -106,13 +112,13 @@ public class WebbitsConfigurator extends Configurator {
 				} else {
 					url = classLoader.getResource(path);
 				}
-				
-				if(Objects.isNull(url)) {
+
+				if (Objects.isNull(url)) {
 					url = super.getResource(path);
 				}
 				return url;
 			}
-    	};
-    }
+		};
+	}
 
 }

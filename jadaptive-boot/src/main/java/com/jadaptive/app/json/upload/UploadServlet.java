@@ -22,17 +22,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import com.codesmith.webbits.Context;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionStickyInputStream;
-import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.upload.UploadHandler;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.json.ResponseHelper;
 import com.jadaptive.utils.FileUtils;
 
+/**
+ * BPS - Replaced in PublicKeyUpload and Upload (virtual sftp) with webbits native
+ * file uploads. The one place that still uses this is EntityUploadHandler, 
+ * but once ive found where this is used i'll convert that too.
+ *
+ */
 @WebServlet(name="uploadServlet", description="Servlet for handing file uploads", urlPatterns = { "/upload/*" })
+@Deprecated
 public class UploadServlet extends HttpServlet {
 
 	static Logger log = LoggerFactory.getLogger(UploadServlet.class);
@@ -47,7 +54,10 @@ public class UploadServlet extends HttpServlet {
 	UserService userService; 
 	
 	@Autowired
-	PluginManager pluginManager;
+	PluginManager pluginManager; 
+	
+	@Autowired
+	Context context;
 	
 	Map<String,UploadHandler> uploadHandlers = new HashMap<>();
 	
@@ -109,19 +119,7 @@ public class UploadServlet extends HttpServlet {
 				    InputStream stream = item.openStream();
 				    
 				    if(Objects.nonNull(session)) {
-					    stream = new SessionStickyInputStream(
-					    		stream, 
-					    		session) {
-					    	protected void touchSession() {
-								if((System.currentTimeMillis() - lastTouch) >  30000) {
-									try {
-										sessionUtils.touchSession(session);
-									} catch (SessionTimeoutException e) {
-									}
-									lastTouch = System.currentTimeMillis();
-								}
-							}
-					    };
+						stream = new SessionStickyInputStream(stream, session, sessionUtils);
 				    }
 		
 				    try {

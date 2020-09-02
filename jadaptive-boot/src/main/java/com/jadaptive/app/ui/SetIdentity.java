@@ -13,68 +13,69 @@ import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Redirect;
+import com.codesmith.webbits.Request;
 import com.codesmith.webbits.View;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.AbstractPage;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
 @Page
-@View(contentType = "text/html", paths = { "set-identity"})
+@View(contentType = "text/html", paths = { "set-identity" })
 @ClasspathResource
 public class SetIdentity extends AbstractPage {
-	
+
 	@Autowired
-	private AuthenticationService authenticationService; 
-	
+	private AuthenticationService authenticationService;
+
 	@Autowired
-	private SessionUtils sessionUtils; 
-	
+	private SessionUtils sessionUtils;
+
 	@Autowired
-	private UserService userService; 
-	
+	private UserService userService;
+
 	@Created
-	void created() throws FileNotFoundException {
-		if(sessionUtils.hasActiveSession(Request.get())) {
+	void created(Request<?> request) throws FileNotFoundException {
+		if (sessionUtils.hasActiveSession(request)) {
 			throw new Redirect(JadaptiveApp.class);
 		}
 		AuthenticationState state = authenticationService.getCurrentState();
-		if(!state.getCurrentPage().equals(this.getClass())) {
+		if (!state.getCurrentPage().equals(this.getClass())) {
 			throw new Redirect(state.getCurrentPage());
 		}
-	}	
-	
-	 @Out(methods = HTTPMethod.GET)
-	 Document get(@In Document content) {
-	 
-		 authenticationService.decorateAuthenticationPage(content);
-		 return content;
-	 }
-	    		
-    @Out(methods = HTTPMethod.POST)
-    Document post(@In Document content, @Form LoginForm form) {
-	
-    	try {
-    		
-			if(!Boolean.getBoolean("jadaptive.webUI")) {
-				throw new AccessDeniedException("Web UI is currently disabled. Login to manage your account via the SSH CLI");
+	}
+
+	@Out(methods = HTTPMethod.GET)
+	Document get(@In Document content) {
+
+		authenticationService.decorateAuthenticationPage(content);
+		return content;
+	}
+
+	@Out(methods = HTTPMethod.POST)
+	Document post(@In Document content, @Form LoginForm form) {
+
+		try {
+
+			if (!Boolean.getBoolean("jadaptive.webUI")) {
+				throw new AccessDeniedException(
+						"Web UI is currently disabled. Login to manage your account via the SSH CLI");
 			}
-			
+
 			User user = userService.getUser(form.getUsername());
 			throw new Redirect(authenticationService.completeAuthentication(user));
-    	
-    	} catch(ObjectNotFoundException e) {
-    		throw new Redirect(authenticationService.completeAuthentication(new FakeUser(form.getUsername())));
-    	}
 
-    }
+		} catch (ObjectNotFoundException e) {
+			throw new Redirect(authenticationService.completeAuthentication(new FakeUser(form.getUsername())));
+		}
 
-    public interface LoginForm {
+	}
+
+	public interface LoginForm {
 		String getUsername();
-    }
+	}
 }

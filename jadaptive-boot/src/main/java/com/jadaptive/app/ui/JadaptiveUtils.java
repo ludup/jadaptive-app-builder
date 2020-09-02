@@ -14,9 +14,9 @@ import com.codesmith.webbits.util.Html;
 @Extension(extendsPatterns = ".*", appliesTo = Page.class)
 @View(contentType = "text/html")
 public class JadaptiveUtils {
-	
+
 	String path = "/app/ui/js/jadaptive-utils.js";
-	
+
 	@Out
 	Document service(@In Document template, HttpServletRequest request) {
 		Html.addTailScript(template, request, path);

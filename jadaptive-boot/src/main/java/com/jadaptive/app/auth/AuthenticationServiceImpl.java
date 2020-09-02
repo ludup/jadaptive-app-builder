@@ -21,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
+import com.codesmith.webbits.AppSession;
+import com.codesmith.webbits.Request;
+import com.codesmith.webbits.Response;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.auth.AuthenticationService;
@@ -30,7 +33,6 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.permissions.Permissions;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionUtils;
@@ -125,7 +127,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			state.incrementFailedAttempts();
 			
 			assertLoginThreshold(username);
-			assertLoginThreshold(Request.get().getRemoteAddr());
+			assertLoginThreshold(Request.get().underlyingRequest().getRemoteAddr());
 		
 		} finally {
 			permissionService.clearUserContext();
@@ -208,7 +210,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		String cacheKey = getCacheKey(username);
 		Integer count = cache.get(cacheKey);
 		if(Objects.isNull(count)) {
-			count = new Integer(0);
+			count = 0;
 		}
 		cache.put(cacheKey, ++count);
 	}
@@ -244,8 +246,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				
 				Session session = sessionService.createSession(getCurrentTenant(), 
 						state.getUser(), state.getRemoteAddress(), state.getUserAgent());
-				sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
-				Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, null);
+				sessionUtils.addSessionCookies(Request.get(), Response.get(), session);
+				AppSession.get().httpSession().setAttribute(AUTHENTICATION_STATE_ATTR, null);
 				return Dashboard.class;
 			} finally {
 				clearUserContext();
@@ -258,15 +260,15 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public AuthenticationState getCurrentState() {
 		
-		AuthenticationState state = (AuthenticationState) Request.get().getSession().getAttribute(AUTHENTICATION_STATE_ATTR);
+		AuthenticationState state = (AuthenticationState) AppSession.get().httpSession().getAttribute(AUTHENTICATION_STATE_ATTR);
 		if(Objects.isNull(state)) {
 			state = new AuthenticationState();
-			state.setRemoteAddress(Request.get().getRemoteAddr());
-			state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
+			state.setRemoteAddress(Request.get().underlyingRequest().getRemoteAddr());
+			state.setUserAgent(Request.get().underlyingRequest().getHeader(HttpHeaders.USER_AGENT));
 			
 			processRequiredAuthentication(state, DEFAULT_AUTHENTICATION_FLOW);
 			
-			Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
+			AppSession.get().httpSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
 		}
 		
 		return state;
@@ -302,7 +304,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public Class<?> resetAuthentication(String authenticationFlow, Class<?>... additionalClasses) {
 		
-		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
+		AppSession.get().httpSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
 		AuthenticationState state = getCurrentState();
 		processRequiredAuthentication(state, authenticationFlow);
 		state.getAuthenticationPages().addAll(Arrays.asList(additionalClasses));
@@ -311,6 +313,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Override
 	public void clearAuthenticationState() {
-		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
+		AppSession.get().httpSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
 	}
 }

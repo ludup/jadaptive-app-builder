@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:webbits="http://webbits.org/webbits"
+	webbits:depends="Bootstrapify,FontAwesomeify">
+<body class="container">
+	<div class="jumbotron">
+		<h1>Oops</h1>
+		<div class="align-center">
+			<webbits:i class="text-danger" size="7x">bomb</webbits:i>
+		</div>
+		<p class="lead">An Error Has Occurred.</p>
+		<h2>${code}</h2>
+		<hr />
+		<p>${error}</p>
+		<small><a href="/">Home</a></small>
+		<pre>
+			<code>${trace}</code>
+		</pre>
+	</div>
+</body>
+</html>

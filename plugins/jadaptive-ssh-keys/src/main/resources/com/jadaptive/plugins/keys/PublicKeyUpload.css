@@ -5,3 +5,12 @@
 .deleteAction {
 	cursor: pointer;
 }
+
+.webbits-drop-zone {
+    border: 2px dotted grey ;
+    text-align: center;
+}
+
+.webbits-drop-zone.active {
+    border: 2px dashed grey;
+}

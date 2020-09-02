@@ -425,4 +425,15 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 					getCurrentUser().getName()));
 		}
 	}
+
+	@Override
+	public void runAs(User user, Runnable runnable) {
+		setupUserContext(user);
+		try {
+			runnable.run();
+		}
+		finally {
+			clearUserContext();
+		}
+	}
 }

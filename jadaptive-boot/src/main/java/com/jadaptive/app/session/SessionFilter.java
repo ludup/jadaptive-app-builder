@@ -34,7 +34,6 @@ import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.redirect.Redirect;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
@@ -116,8 +115,6 @@ public class SessionFilter implements Filter {
 				permissionService.clearUserContext();
 			}
 			
-			Request.tearDown();
-		
 		} catch(Throwable e) {
 			throw new ServletException(e);
 		}
@@ -127,7 +124,6 @@ public class SessionFilter implements Filter {
 	private boolean preHandle(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		
 		try {
-			Request.setUp(request, response);
 			
 			Session session = sessionUtils.getActiveSession(request);
 			

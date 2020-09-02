@@ -50,10 +50,12 @@ public class TablePage extends TemplatePage {
 		
 		
 		TableView view = templateClazz.getAnnotation(TableView.class);
-		for(TableAction action : view.actions()) {
-			content.selectFirst("#objectActions").append(String.format(
-					"<a href=\"/app/ui/%s\" class=\"btn btn-%s\" webbits:bundle=\"i18n/%s\" webbits:i18n=\"%s.name\">[%s]</a>",
-					action.url(), action.buttonClass(), template.getResourceKey(), action.resourceKey(), action.resourceKey()));
+		if(view != null) {
+			for(TableAction action : view.actions()) {
+				content.selectFirst("#objectActions").append(String.format(
+						"<a href=\"/app/ui/%s\" class=\"btn btn-%s\" webbits:bundle=\"i18n/%s\" webbits:i18n=\"%s.name\">[%s]</a>",
+						action.url(), action.buttonClass(), template.getResourceKey(), action.resourceKey(), action.resourceKey()));
+			}
 		}
 		try {
 			permissionService.assertReadWrite(template.getResourceKey());

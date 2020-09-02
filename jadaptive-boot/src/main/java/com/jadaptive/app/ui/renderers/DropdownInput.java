@@ -61,8 +61,9 @@ public class DropdownInput extends InputRender {
 	}
 	
 	private void addInputValue(String key, String value) {
-		inputElements.append("<a data-resourcekey=\"" + key + "\" class=\"" 
-				+ "dropdown-item\" href=\"#\">" + value + "</a>");
+		if(inputElements != null)
+			inputElements.append("<a data-resourcekey=\"" + key + "\" class=\"" 
+					+ "dropdown-item\" href=\"#\">" + value + "</a>");
 	}
 
 	public void renderValues(Iterable<? extends NamedUUIDEntity> fields) {

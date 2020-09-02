@@ -15,10 +15,10 @@ import com.codesmith.webbits.In;
 import com.codesmith.webbits.Out;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.Redirect;
+import com.codesmith.webbits.Response;
 import com.codesmith.webbits.View;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AbstractPage;
 import com.jadaptive.utils.PasswordEncryptionType;
 
@@ -109,7 +109,7 @@ public class IconPassword extends AbstractPage {
 			
 			authenticationService.reportAuthenticationFailure(state.getUser().getUsername());
 			
-			Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+			Response.get().statusCode(HttpStatus.FORBIDDEN.value());
 			content.selectFirst("#feedback").append("<div class=\"alert alert-danger\">Bad password</div>");
 			return content;
 		}
