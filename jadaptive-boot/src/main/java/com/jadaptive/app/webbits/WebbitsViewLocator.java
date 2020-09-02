@@ -11,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.codesmith.webbits.App;
+import com.codesmith.webbits.ClassMatch;
 import com.codesmith.webbits.Context;
 import com.codesmith.webbits.ExceptionHandler;
 import com.codesmith.webbits.Page;
 import com.codesmith.webbits.ViewLocator;
-import com.codesmith.webbits.ViewMatch;
 import com.codesmith.webbits.ViewPaths;
 import com.codesmith.webbits.util.Annotations;
 import com.jadaptive.api.db.ClassLoaderService;
@@ -61,7 +61,7 @@ public class WebbitsViewLocator implements ViewLocator {
     }
 
     @Override
-    public ViewMatch locate(String path) {
+    public ClassMatch locate(String path) {
     	buildViewLists();
     	return vp.locate(path);
     }

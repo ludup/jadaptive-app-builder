@@ -19,6 +19,7 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.codesmith.webbits.ApiLocator;
 import com.codesmith.webbits.CacheFactory;
 import com.codesmith.webbits.ComponentConfigurationProvider;
 import com.codesmith.webbits.ContentHandler;
@@ -222,6 +223,11 @@ public class WebbitsPostProcessor implements BeanFactoryPostProcessor, Applicati
 		@Override
 		public void addDefaultDependencies(DependencyProcessor dp) {
 			context.addDefaultDependencies(dp);
+		}
+
+		@Override
+		public ApiLocator getApiLocator() {
+			return context.getApiLocator();
 		}
 	});
 	if (isRunningInEmbeddedWebServer()) {
