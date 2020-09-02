@@ -1,6 +1,6 @@
 package com.jadaptive.app.ui;
 
-import org.jsoup.select.Elements;
+import org.jsoup.nodes.Element;
 
 import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.In;
@@ -14,7 +14,7 @@ import com.codesmith.webbits.Widget;
 public class Footer {
 
     @Out
-    public Elements service(@In Elements contents) {
+    public Element service(@In Element contents) {
 	return contents;
     }
 }

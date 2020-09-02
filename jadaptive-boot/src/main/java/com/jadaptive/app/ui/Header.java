@@ -1,6 +1,6 @@
 package com.jadaptive.app.ui;
 
-import org.jsoup.select.Elements;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.codesmith.webbits.ClasspathResource;
@@ -28,7 +28,7 @@ public class Header {
 	}
 
 	@Out
-    public Elements service(@In Elements contents, @ParentView Object page) {
+    public Element service(@In Element contents, @ParentView Object page) {
     	
 		if(!isLoggedOn()) {
 			contents.select("script").remove();

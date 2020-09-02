@@ -3,7 +3,6 @@ package com.jadaptive.app.ui;
 import java.io.IOException;
 
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import com.codesmith.webbits.ClasspathResource;
 import com.codesmith.webbits.In;
@@ -23,7 +22,7 @@ import com.jadaptive.api.template.FieldView;
 public class TableWidget {
 
 	 @Out
-	    public Elements service(@In Elements contents, @ParentView TemplatePage page) throws IOException {
+	    public Element service(@In Element contents, @ParentView TemplatePage page) throws IOException {
 		
 		
 		Element table = contents.select("#table").first();
