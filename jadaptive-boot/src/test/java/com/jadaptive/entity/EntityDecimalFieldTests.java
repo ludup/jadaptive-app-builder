@@ -83,7 +83,7 @@ public class EntityDecimalFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		MongoEntity e = getDecimalField(true, new FieldValidator(ValidationType.RANGE, "0,9999999")).readValue(json, MongoEntity.class);
+		MongoEntity e = getDecimalField(true, new FieldValidator(ValidationType.RANGE, "0-9999999")).readValue(json, MongoEntity.class);
 
 		Assert.assertEquals(1.92D, e.getValue("revenue"));
 
@@ -99,7 +99,7 @@ public class EntityDecimalFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		getDecimalField(true, new FieldValidator(ValidationType.RANGE, "0,9999999")).readValue(json, MongoEntity.class);
+		getDecimalField(true, new FieldValidator(ValidationType.RANGE, "0-9999999")).readValue(json, MongoEntity.class);
 
 	}
 	

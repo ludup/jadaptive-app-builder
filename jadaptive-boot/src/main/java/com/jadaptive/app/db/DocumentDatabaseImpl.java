@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.lang.WordUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +98,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				if(key.size()==1) {
 					String field = key.keySet().iterator().next();
 					if(collection.countDocuments(Filters.eq(field, document.get(field))) > 0L) {
-						throw new RepositoryException(String.format("An object already exists with the same %s value!", org.apache.commons.text.WordUtils.capitalize(field)));
+						throw new RepositoryException(String.format("An object already exists with the same %s value!", 
+								WordUtils.capitalize(field)));
 					}
 				}
 
@@ -112,7 +113,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		FindIterable<Document> result = collection.find(Filters.eq("_id", uuid));
 		if(!result.cursor().hasNext()) {
-			throw new ObjectNotFoundException(String.format("Id %s entity %s was not found", uuid, table));
+			throw new ObjectNotFoundException(String.format("Collection %s does not contain an object with id %s", table, uuid));
 		}
 		return result.first();
 	}
@@ -123,11 +124,11 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		FindIterable<Document> result = collection.find(buildFilter(fields));
 		if(!result.cursor().hasNext()) {
-			throw new ObjectNotFoundException(String.format("No entity %s was not found for search", table));
+			throw new ObjectNotFoundException(String.format("Collection %s does not contain an object for search %s", table, buildSearchString(fields)));
 		}
 		return result.first();
 	}
-	
+
 	@Override
 	public Document max(String table, String database, String field) {
 		
@@ -282,6 +283,11 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Override
 	public void dropDatabase(String database) {
 		mongo.getClient().getDatabase(database).drop();
+	}
+	
+	
+	private String buildSearchString(SearchField[] fields) {
+		return "";
 	}
 	
 	public Bson buildFilter(SearchField...fields) {

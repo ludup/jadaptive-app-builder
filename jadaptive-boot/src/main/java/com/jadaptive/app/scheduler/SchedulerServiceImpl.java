@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,11 +38,6 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	
 	Map<String,ScheduleJobRunner> scheduledJobs = new HashMap<>();
 	
-	@PostConstruct
-	private void postConstruct() {
-		configureScheduler();
-	}
-
 	private void configureScheduler() {
 		SchedulerConfiguration config = schedulerConfig.getObject(SchedulerConfiguration.class);
 		scheduler.setPoolSize(config.getPoolSize());
@@ -53,6 +46,7 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	@Override
 	public void initializeSystem(boolean newSchema) {
 		initializeTenant(getCurrentTenant(), newSchema);
+		configureScheduler();
 	}
 
 	@Override

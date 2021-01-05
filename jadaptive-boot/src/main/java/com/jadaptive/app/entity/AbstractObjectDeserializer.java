@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
@@ -225,8 +226,16 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		case TIMESTAMP:
 			validateDate(node, field);
 			return Utils.parseDate(node.asText(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		case DATE:
+			validateDate(node, field);
+			return Utils.parseDate(node.asText(), "yyyy-MM-dd");
 		case ENUM:
 			validateEnum(node, field);
+			return node.asText();
+		case HIDDEN:
+			return node.asText();
+		case PERMISSION:
+			validatePermission(node, field);
 			return node.asText();
 		case TEXT:
 		case TEXT_AREA:
@@ -251,6 +260,14 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 //		return new ObjectReference2(node.get("uuid").asText(), node.get("name").asText());
 //		
 //	}
+
+	private void validatePermission(JsonNode node, FieldTemplate field) throws ValidationException {
+		
+		PermissionService service = ApplicationServiceImpl.getInstance().getBean(PermissionService.class);
+		if(!service.isValidPermission(node.asText())) {
+			throw new ValidationException(String.format("%s is not a valid permission", node.asText()));
+		}
+	}
 
 	private void validateDate(JsonNode node, FieldTemplate field) {
 		

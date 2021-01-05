@@ -31,6 +31,8 @@ public @interface ObjectField {
 		
 		boolean alternativeId() default false;
 		
+		boolean nameField() default false;
+		
 		@Deprecated
 		String references() default "";
 

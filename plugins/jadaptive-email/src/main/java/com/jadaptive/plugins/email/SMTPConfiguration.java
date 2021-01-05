@@ -12,9 +12,9 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
 @ObjectDefinition(resourceKey = SMTPConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
-@ObjectViews({@ObjectViewDefinition(SMTPConfiguration.SERVER_VIEW),
-				@ObjectViewDefinition(SMTPConfiguration.CREDENTIALS_VIEW), 
-				@ObjectViewDefinition(SMTPConfiguration.DELIVERY_VIEW)})
+@ObjectViews({@ObjectViewDefinition(value = SMTPConfiguration.SERVER_VIEW, bundle = SMTPConfiguration.RESOURCE_KEY),
+				@ObjectViewDefinition(value = SMTPConfiguration.CREDENTIALS_VIEW, bundle = SMTPConfiguration.RESOURCE_KEY), 
+				@ObjectViewDefinition(value = SMTPConfiguration.DELIVERY_VIEW, bundle = SMTPConfiguration.RESOURCE_KEY)})
 public class SMTPConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = -2175601630716215887L;

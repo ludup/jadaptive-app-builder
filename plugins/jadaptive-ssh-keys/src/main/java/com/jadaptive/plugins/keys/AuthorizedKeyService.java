@@ -1,26 +1,23 @@
 package com.jadaptive.plugins.keys;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.user.User;
+import com.sshtools.common.ssh.SshException;
+import com.sshtools.common.ssh.components.SshKeyPair;
 
 public interface AuthorizedKeyService extends UUIDObjectService<AuthorizedKey> {
 
 	public static final String AUTHORIZED_KEY_ASSIGN = "authorizedKey.assign";
+	public static final String RESOURCE_BUNDLE = "authorizedKeys";
 	
-	public static final String SSH_TAG = "SSH";
-	public static final String SYSTEM_TAG = "SYSTEM";
-	public static final String DEVICE_TAG = "DEVICE";
-	public static final String WEBAUTHN_TAG = "WEBAUTHN";
 	
 	Collection<AuthorizedKey> getAuthorizedKeys(User user);
 
 	Collection<AuthorizedKey> getAuthorizedKeys();
-	
-	Collection<AuthorizedKey> getAuthorizedKeys(User user, String... tags);
-	
-	Collection<AuthorizedKey> getAuthorizedKeys(String... tags);
 
 	void saveOrUpdate(AuthorizedKey key, User user);
 
@@ -33,6 +30,9 @@ public interface AuthorizedKeyService extends UUIDObjectService<AuthorizedKey> {
 	AuthorizedKey getAuthorizedKeyByUUID(User user, String uuid);
 
 	AuthorizedKey importPublicKey(String name, String key, String type, 
-			String fingerprint, User user,
-			String... tag);
+			String fingerprint, User user, boolean deviceKey);
+
+	SshKeyPair createAuthorizedKey(PublicKeyType type, String comment, User user) throws IOException, SshException;
+
+	File createKeyFile(String name, SshKeyPair pair, String passphrase) throws IOException;
 }

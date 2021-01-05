@@ -21,6 +21,8 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.utils.Utils;
 import com.mongodb.MongoWriteException;
 
@@ -35,6 +37,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	@Autowired
 	private CacheService cacheService; 
 	
+	@Autowired
+	private ObjectTemplateRepository templateRepository;
+	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
 	}
@@ -46,9 +51,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			template = clz.getAnnotation(ObjectDefinition.class);
 		} 
 		if(Objects.nonNull(template)) {
-			return template.resourceKey();
+			ObjectTemplate t = templateRepository.get(template.resourceKey());
+			return t.getCollectionKey();
 		}
-		return clz.getSimpleName();
+		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
 	}
 	
 	protected  <T extends UUIDEntity> Cache<String, T> getCache(Class<T> clz) {
@@ -73,8 +79,8 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		try {
 
 			Document document = new Document();
+			document.put("resourceKey", obj.getResourceKey());
 			DocumentHelper.convertObjectToDocument(obj, document);
-			
 			db.insertOrUpdate(obj, document, getCollectionName(obj.getClass()), database);
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {

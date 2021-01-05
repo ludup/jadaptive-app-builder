@@ -7,34 +7,43 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
+import com.jadaptive.api.template.ObjectView;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.ViewType;
 import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
-import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.PasswordEncryptionType;
 
-@ObjectDefinition(resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
-@ObjectServiceBean(bean = UserService.class)
+@ObjectDefinition(resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, creatable = false)
+@ObjectServiceBean(bean = AdminUserDatabase.class)
+@ObjectViews({ 
+	@ObjectViewDefinition(type = ViewType.ACCORDION, bundle = "users", value = "passwordOptions")})
 public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 
 	private static final long serialVersionUID = -4995333149629598100L;
 
 	public static final String RESOURCE_KEY = "adminUser";
 	
+	@ObjectField(required = false,
+			type = FieldType.HIDDEN)
 	String encodedPassword;
+	
+	@ObjectField(required = false,
+			type = FieldType.HIDDEN)
 	String salt;
+	
+	@ObjectField(required = false,
+			defaultValue = "PBKDF2_SHA512_50000",
+			type = FieldType.ENUM)
+	@ObjectView(value = "passwordOptions")
 	PasswordEncryptionType encodingType;
+	
+	@ObjectField(required = false,
+			defaultValue = "true",
+			type = FieldType.BOOL)
+	@ObjectView(value = "passwordOptions")
 	boolean passwordChangeRequired;
-	
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT, 
-			unique = true)
-	String username;
-	
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT)
-	String name;
 	
 	@ObjectField(required = false,
 			searchable = true,
@@ -69,11 +78,6 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	@Override
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	@Override
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	@Override

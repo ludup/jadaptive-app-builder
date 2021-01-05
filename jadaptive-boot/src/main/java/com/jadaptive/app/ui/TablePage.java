@@ -1,71 +1,141 @@
 package com.jadaptive.app.ui;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.codesmith.webbits.ClasspathResource;
-import com.codesmith.webbits.In;
-import com.codesmith.webbits.Out;
-import com.codesmith.webbits.Page;
-import com.codesmith.webbits.View;
-import com.codesmith.webbits.bootstrap.BootBox;
-import com.codesmith.webbits.bootstrap.BootstrapTable;
-import com.codesmith.webbits.extensions.Client;
-import com.codesmith.webbits.extensions.I18N;
-import com.codesmith.webbits.extensions.Widgets;
-import com.codesmith.webbits.freemarker.FreeMarker;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableView;
+import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.PageProcessors;
+import com.jadaptive.api.ui.RequestPage;
+import com.jadaptive.api.ui.UriRedirect;
 
-@Page({ BootstrapTable.class, BootBox.class, Widgets.class, FreeMarker.class, I18N.class, Client.class})
-@View(contentType = "text/html", paths = { "/table/{resourceKey}" })
-@ClasspathResource
+@Extension
+@RequestPage(path="table/{resourceKey}")
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "freemarker", "i18n"} )
+@PageProcessors(extensions = { "freemarker", "i18n"} )
 public class TablePage extends TemplatePage {
 
 	@Autowired
-	private PermissionService permissionService;
+	private PermissionService permissionService; 
 	
-	protected void onCreated() throws FileNotFoundException {
+	@Autowired
+	private ObjectTemplateRepository templateRepository; 
+	@Override
+	public String getUri() {
+		return "table";
+	}
+
+	@Override
+	public void created() throws FileNotFoundException {
+		super.created();
 		
-		super.onCreated();
-		try {
-			permissionService.assertRead(template.getResourceKey());
-		} catch(AccessDeniedException e) {
-			throw new FileNotFoundException();
+		if(!template.getCollectionKey().equals(resourceKey)) {
+			throw new UriRedirect(String.format("/app/ui/table/%s", template.getCollectionKey()));
 		}
-	}
-	
-	public boolean isParentTemplate() {
-		return StringUtils.isNotBlank(template.getParentTemplate());
-	}
-	
-	@Out
-	Document service(@In Document content) {
+	}	
+
+	@Override
+	protected void generateAuthenticatedContent(Document document) {
 		
+		List<ObjectTemplate> creatableTemplates = new ArrayList<>();
+		
+		if(!template.getChildTemplates().isEmpty()) {
+			ObjectTemplate collectionTemplate = templateRepository.get(template.getCollectionKey());
+			
+			for(String template : collectionTemplate.getChildTemplates()) {
+				ObjectTemplate childTemplate = templateRepository.get(template);
+				if(childTemplate.isCreatable()) {
+					creatableTemplates.add(childTemplate);
+				}
+			}
+		} else if(template.isCreatable()) {
+			creatableTemplates.add(template);
+		}
+		
+		if(creatableTemplates.size() > 1) {
+			createMultipleOptionAction(document, "create", creatableTemplates, template.getCollectionKey());
+		} else if(creatableTemplates.size() == 1) {
+			ObjectTemplate singleTemplate = creatableTemplates.get(0);
+			createTableAction(document, String.format("create/%s", singleTemplate.getResourceKey()), 
+					template.getCollectionKey(),
+					"primary", "create");
+		}
 		
 		TableView view = templateClazz.getAnnotation(TableView.class);
-		for(TableAction action : view.actions()) {
-			content.selectFirst("#objectActions").append(String.format(
-					"<a href=\"/app/ui/%s\" class=\"btn btn-%s\" webbits:bundle=\"i18n/%s\" webbits:i18n=\"%s.name\">[%s]</a>",
-					action.url(), action.buttonClass(), template.getResourceKey(), action.resourceKey(), action.resourceKey()));
+		
+		if(view != null) {
+			for(TableAction action : view.actions()) {
+				createTableAction(document, action.url(), action.bundle(), action.buttonClass(), action.resourceKey());
+			}
 		}
+		
 		try {
 			permissionService.assertReadWrite(template.getResourceKey());
 		} catch(AccessDeniedException e) {
-			content.select(".readWrite").remove();
+			document.select(".readWrite").remove();
 		}
+	}
 
-		return content;
+	private void createMultipleOptionAction(Document document, String id, Collection<ObjectTemplate> actions,
+			String bundle) {
+		
+		Element menu;
+		document.selectFirst("#objectActions").appendChild(
+				new Element("div")
+				    .addClass("dropdown")
+					.appendChild(new Element("button")
+							.addClass("btn btn-secondary dropdown-toggle")
+							.attr("type", "button")
+							.attr("data-toggle", "dropdown")
+							.attr("aria-haspopup", "true")
+							.attr("aria-expanded", "false")
+							.attr("id", id)
+							.attr("jad:bundle", bundle)
+							.attr("jad:i18n", String.format("%s.name", id)))
+					.appendChild(menu = new Element("div")
+							.addClass("dropdown-menu")
+							.attr("aria-labelledby", id)));
+		
+		for(ObjectTemplate action : actions) {
+			menu.appendChild(new Element("a")
+					.addClass("dropdown-item")
+					.attr("href",String.format("/app/ui/%s/%s", id, action.getResourceKey()))
+					.attr("jad:bundle", action.getBundle())
+					.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
+		}
+				 
+	}
+	
+	private void createTableAction(Document document, String url, String bundle, String buttonClass, String resourceKey) {
+		document.selectFirst("#objectActions").appendChild(
+				new Element("a").attr("href", String.format("/app/ui/%s", replaceParameters(url)))
+				.attr("class", String.format("btn btn-%s", buttonClass))
+				.attr("jad:bundle", bundle)
+				.attr("jad:i18n", String.format("%s.name", resourceKey)));
+	}
+	
+	private Object replaceParameters(String str) {
+		return str.replace("${resourceKey}", template.getResourceKey());
 	}
 
 	@Override
 	public FieldView getScope() {
 		return FieldView.TABLE;
 	}
+	
+	
+
 }

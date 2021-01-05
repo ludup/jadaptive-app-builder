@@ -14,6 +14,8 @@ public @interface ObjectDefinition {
 		
 		String resourceKey();
 		
+		String bundle() default "";
+		
 		ObjectType type() default ObjectType.COLLECTION;
 		
 		ObjectScope scope() default ObjectScope.GLOBAL;
@@ -24,7 +26,13 @@ public @interface ObjectDefinition {
 		
 		boolean recurse() default true;
 		
+		boolean creatable() default true;
+		
+		boolean updatable() default true;
+		
 		String[] aliases() default { };
 		
 		String defaultFilter() default "";
+
+		boolean requiresPermission() default true;
 }

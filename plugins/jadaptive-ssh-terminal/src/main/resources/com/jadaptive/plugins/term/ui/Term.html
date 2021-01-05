@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+
+
+<title>jQuery Client-Side Web Terminal using WebSockets</title>
+
+</head>
+<body>
+	<!-- Mobile browser virtual keyboard. Is hidden on desktop
+		browsers by default  -->
+	<ul id="mobile-keyboard">
+		<li><input type="button" value="<"/></li>
+		<li><input type="button" value=">"/></li>
+		<li><input type="button" value="^"/></li>
+		<li><input type="button" value="V"/></li>
+		<li><input id="mobile-backspace" type="button" value="BkSpc"/></li>
+		<li><input type="button" value="Esc"/></li>
+		<li><input type="button" value="Tab"/></li>
+		<li><input type="button" value="Ctrl"/></li>
+		<li><input type="button" value="Shift"/></li>
+		<li><input type="button" value="Alt"/></li>
+		<li><input id="mobile-input" type="text" value="" size="15"/>
+		<li><input id="mobile-return" type="button" title="Send (with/just return)" value="Return"/></li>
+		<li><input id="mobile-send" type="button" title="Send (with no return)" value="Send"/></li>
+		<li><input id="mobile-close" type="button" title="X" value="Close"/></li>
+	</ul>
+	
+	<div>
+		
+		<!-- The terminal and the scrollbar. The tab index makes it focusable -->
+		<div id="term"></div>
+		<div id="scrollbar"></div>
+		
+		<!-- Supporting Javascript -->
+		
+		<script type="text/javascript">
+			var te;
+		
+		
+			/* This is enough for a basic fixed size terminal (expands to width of container)
+			   with no scrollback buffer */
+			te = new ClientTerminalEmulation(new ClientWebDisplay('term', {
+				cursorBlink : false,
+				resizeStrategy : RESIZE_SCREEN
+			}), ClientTerminalEmulation.XTERM, new ClientWebSocketTransport('/socket/term?session=${page.sessionId}'));
+		
+			/* If on a mobile browser, show the virtual keyboard bar */
+			if(window.mobilecheck()) {
+				te.addEventListener('action',function(e) {
+					$('#mobile-keyboard').toggle('fast');
+				});
+				
+				$('#term').addClass('mobile-term');
+				$('#mobile-backspace').click(function(e) {
+					te.keyPressed(VDUKeyEvent.VK_BACK_SPACE,'\b',0);
+				});
+				$('#mobile-return').click(function(e) {
+					te.put($('#mobile-input').val());
+					$('#mobile-input').val('');
+					te.keyPressed(VDUKeyEvent.VK_RETURN,'\r',0);
+				});
+				$('#mobile-send').click(function(e) {
+					te.put($('#mobile-input').val());
+					$('#mobile-input').val('');
+				});
+				$('#mobile-close').click(function(e) {
+					$('#mobile-keyboard').hide('fast');
+				});
+				$('#mobile-input').keypress(function (e) {
+					var key = e.which;
+					if(key == 13) {
+						te.put($(this).val());
+						$(this).val('');
+						te.keyPressed(VDUKeyEvent.VK_RETURN,'\r',0);
+						return false;  
+					}
+				}); 
+			}
+			else {
+				$('#mobile-keyboard').hide();
+			}
+			
+			/* Before the window closes, popup a confirmation */
+			$(window).bind("beforeunload", function() {
+				if(te.io.isOpen()) 
+			    	return 'Are you sure you wish to close this terminal?'; 
+			});
+
+			/* When the window closes, close the websocket for tidyness */
+			$(window).bind("unload", function() {
+				if(te.io.isOpen())
+					te.io.close(); 
+			});
+			
+			/* Now use jQuery to add support for resizing and scrollbars */
+			te.setBufferSize(100);
+			var scrollbar = $("#scrollbar").scroller({
+				orientation : "vertical",
+				reverse : false,
+				scrolled : function(evt, ui) {
+					te.setWindowBase(ui.value());
+				}
+			});
+	
+			/* Watch for window size changes and assume the terminal is going to get resized too.
+			The event handling is deferred slightly to prevent flooding */
+			_windowResizeTimeout = false;
+			$(window).resize(
+				function(event) {
+					/* Resize scrollbar now so we dont get the HTML outer scrollbars appearing momentarily  */
+					scrollbar.scroller("containIn", $('#term').height());
+					TermUtil.log(LVL_INFO, 'Adjusting scroll to max: '
+							+ (te.currentVDURows - te.height) + ' val: '
+							+ te.windowBase + ' ext: ' + te.height
+							+ ' contain in: ' + $('#term').height());
+					scrollbar.scroller("init", 0,
+							te.currentVDURows - te.height, te.windowBase,
+							te.height);
+	
+					if (te.display.resizeStrategy == RESIZE_SCREEN) {
+						if (_windowResizeTimeout)
+							window.clearTimeout(_windowResizeTimeout);
+						_windowResizeTimeout = setTimeout(function() {
+							/* The display will adjust according and call the sendScreenSize() function
+							 * on the transport */
+							te.display.resized();
+						}, 250);
+					} else
+						te.display.resized();
+				});
+	
+			/* Watch for errors (from the transport currently).
+			 */
+			te.addEventListener('error', function(e) {
+				te.clearScreen();
+				te.display.writeText('ERROR', Color.RED);
+				te.display.writeText(':' + e + '\r\n');
+			}, false);
+	
+			/* Watch for changes in the current window base (something external caused
+			 * a scroll) and update the scroll bar.
+			 */
+			te.addEventListener('windowBaseChanged', function(te) {
+				TermUtil.log(LVL_INFO, 'Adjusting scroll to max: '
+						+ (te.currentVDURows - te.height) + ' val: '
+						+ te.windowBase + ' ext: ' + te.height + ' contain in: '
+						+ $('#term').height());
+				scrollbar.scroller("init", 0, te.currentVDURows - te.height,
+						te.windowBase, te.height);
+			}, false);
+	
+			/* Set initial height and extents of scrollbar */
+			scrollbar.scroller("containIn", $('#term').height());
+			scrollbar.scroller("init", 0, te.currentVDURows - te.height,
+					te.windowBase, te.height);
+			TermUtil.log(LVL_INFO, 'Adjusting scroll to max: ' + te.currentVDURows
+					+ ' val: ' + te.windowBase + ' ext: ' + te.height
+					+ ' contain in: ' + $('#term').height());
+	
+			/* Allow mouse wheel events to scroll the terminal */
+			/* $('#term').mousewheel(function(event, delta, deltaX, deltaY) {
+				TermUtil.log(LVL_INFO, 'Scroll mods ' + te.display.getModifiers());
+				if (te.display.getModifiers() & VDUInput.KEY_CONTROL)
+					te.display.setZoom(te.display.zoom + ( delta / 25 ) );
+				else
+					scrollbar.scroller("scroll", delta * -1);
+				return false;
+			}); */
+		</script>
+	</div>
+</body>
+</html>

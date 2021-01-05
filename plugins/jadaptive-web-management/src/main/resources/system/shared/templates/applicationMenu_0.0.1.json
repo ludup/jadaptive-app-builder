@@ -1,8 +1,13 @@
 [{
+ "uuid": "applicationMenu",
  "type": "COLLECTION",
  "scope": "GLOBAL",
  "resourceKey": "applicationMenu",
  "system": true,
+ "hidden": true,
+ "updatable": false,
+ "creatable": false,
+ "permissionProtected": false,
  "fields": [{
               "resourceKey": "title",
               "defaultValue": "",

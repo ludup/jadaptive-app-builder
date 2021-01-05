@@ -170,11 +170,6 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	}
 
 	@Override
-	public ObjectTemplate createEntity() {
-		return new ObjectTemplate();
-	}
-
-	@Override
 	public String getName() {
 		return "EntityTemplate";
 	}
@@ -182,22 +177,26 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Override
 	public void saveTemplateObjects(List<ObjectTemplate> objects, @SuppressWarnings("unchecked") TransactionAdapter<ObjectTemplate>... ops) throws RepositoryException, ObjectException {
 		for(ObjectTemplate obj : objects) {
-			saveOrUpdate(validateTemplate(obj));
-			switch(obj.getType()) {
-			case COLLECTION:
-			case SINGLETON:
-				permissionService.registerStandardPermissions(obj.getResourceKey());
-				break;
-			default:
-				// Embedded objects do not have direct permissions
-			}
-			for(TransactionAdapter<ObjectTemplate> op : ops) {
-				op.afterSave(obj);
+			if(validateTemplate(obj)) {
+				saveOrUpdate(obj);
+				switch(obj.getType()) {
+				case COLLECTION:
+				case SINGLETON:
+					if(obj.getPermissionProtected()) {
+						permissionService.registerStandardPermissions(obj.getResourceKey());
+					}
+					break;
+				default:
+					// Embedded objects do not have direct permissions
+				}
+				for(TransactionAdapter<ObjectTemplate> op : ops) {
+					op.afterSave(obj);
+				}
 			}
 		}
 	}
 
-	private ObjectTemplate validateTemplate(ObjectTemplate obj) {
+	private boolean validateTemplate(ObjectTemplate obj) {
 		
 		if(!Objects.isNull(obj.getFields())) {
 			for(FieldTemplate t : obj.getFields()) {
@@ -205,7 +204,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				case OBJECT_EMBEDDED:
 				case OBJECT_REFERENCE:
 					if(!validatorPresent(t, ValidationType.OBJECT_TYPE)) {
-						throw new ObjectException(String.format("Missing OBJECT_TYPE validator on field %s", t.getResourceKey()));
+						log.error(String.format("Missing OBJECT_TYPE validator on field %s", t.getResourceKey()));
+						return false;
 					}
 					break;
 				default:
@@ -214,7 +214,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			}
 		}
 		
-		return obj;
+		return true;
 	}
 
 	private boolean validatorPresent(FieldTemplate field, ValidationType validator) {
@@ -290,16 +290,22 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				
 			Map<String, OrderedView> views = new HashMap<>();
 			Map<String,String> childViews = new HashMap<>();
+			views.put(null, new OrderedView(template.getBundle()));
+		
+			Class<?> tmp = clz;
 			
-			ObjectViews annonatedViews = clz.getAnnotation(ObjectViews.class);
-			
-			views.put(null, new OrderedView(null));
-			
-			if(Objects.nonNull(annonatedViews)) {
-				for(ObjectViewDefinition def : annonatedViews.value()) {
-					views.put(def.value(), new OrderedView(def));
+			do {
+				ObjectViews annonatedViews = tmp.getAnnotation(ObjectViews.class);
+
+				if(Objects.nonNull(annonatedViews)) {
+					for(ObjectViewDefinition def : annonatedViews.value()) {
+						views.put(def.value(), new OrderedView(def));
+					}
 				}
-			}
+				
+				tmp = tmp.getSuperclass();
+			
+			} while(Objects.nonNull(tmp));
 			
 			processFields(null,template, clz, views); 
 
@@ -336,10 +342,20 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				continue;
 			}
 			
-			if(Objects.isNull(v)) {
-				views.get(Objects.nonNull(currentView) ? currentView.value() : null).addField(new OrderedField(null, field));
+			if(Objects.isNull(v) || StringUtils.isBlank(v.value())) {
+				OrderedView o = views.get(Objects.nonNull(currentView) ? currentView.value() : null);
+				if(Objects.isNull(o)) {
+					throw new IllegalStateException(
+							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
+				}
+				o.addField(new OrderedField(null, o, field));
 			} else {
-				views.get(v.value()).addField(new OrderedField(v, field));
+				OrderedView o = views.get(v.value());
+				if(Objects.isNull(o)) {
+					throw new IllegalStateException(
+							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
+				}
+				o.addField(new OrderedField(v, o, field));
 			}
 		}
 	}

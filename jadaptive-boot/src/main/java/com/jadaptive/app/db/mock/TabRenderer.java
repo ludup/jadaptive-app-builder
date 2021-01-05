@@ -7,10 +7,12 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.TableView;
 
 @ObjectDefinition(resourceKey = TabRenderer.RESOURCE_KEY)
-@ObjectViews({ @ObjectViewDefinition(TabRenderer.VIEW_OBJECT1_TAB),
-	@ObjectViewDefinition(value = TabRenderer.VIEW_OBJECT2_TAB, weight = 100)})
+@ObjectViews({ @ObjectViewDefinition(value = TabRenderer.VIEW_OBJECT1_TAB, bundle = TabRenderer.RESOURCE_KEY),
+	@ObjectViewDefinition(value = TabRenderer.VIEW_OBJECT2_TAB, bundle = TabRenderer.RESOURCE_KEY, weight = 100)})
+@TableView(defaultColumns = { "name", "field1", "field2" }, optionalColumns = { "id" })
 public class TabRenderer extends NamedUUIDEntity {
 
 	private static final long serialVersionUID = -4142337313881674158L;

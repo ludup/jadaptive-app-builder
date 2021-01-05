@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:webbits="http://webbits.org/webbits"
-	webbits:depends="Bootstrap,Widgets,FreeMarker,JadaptiveUtils">
+<html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
 <body>
 <div class="wrapper">
-<header webbits:id="com.jadaptive.app.ui.Header"></header>
+<header jad:id="header"></header>
 <main class="container my-auto">
    <div class="row justify-content-center">
          <div class="col-10">
             <div class="card">
-         	   	<div class="card-header">Authorized Key Upload</div>
+         	   	<div class="card-header"><span>Authorized Key Upload</span><div class="float-right"><a href="/app/ui/table/authorizedKeys"><i class="fa fa-times"></i></a></div></div>
        			<div class="card-body">		
          	<form id="uploadForm" enctype="multipart/form-data" action="/upload/public-key" method="POST">
       		
@@ -52,7 +51,7 @@
 		    	</div>
 		    </div> 
     		<div class="form-group text-right">
-    			<button id="uploadButton" class="btn btn-primary"><i class="far fa-upload"></i>&nbsp;<span webbits:i18n="i18n/default.upload.name">Upload</span></button>
+    			<button id="uploadButton" class="btn btn-primary"><i class="far fa-upload"></i>&nbsp;<span jad:bundle="default" jad:i18n="upload.name">Upload</span></button>
     		</div>
 		</form>
 		</div>
@@ -142,6 +141,6 @@
 
 
 </script>
-<footer webbits:id="com.jadaptive.app.ui.Footer"></footer>
+<footer jad:id="footer"></footer>
 </body>
 </html>

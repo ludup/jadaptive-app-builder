@@ -1,6 +1,6 @@
 package com.jadaptive.plugins.sshd;
 
-import com.sshtools.common.nio.ProtocolContextFactory;
+import com.sshtools.synergy.nio.ProtocolContextFactory;
 
 public interface SSHInterface {
 

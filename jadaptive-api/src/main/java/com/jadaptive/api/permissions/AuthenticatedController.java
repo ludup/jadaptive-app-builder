@@ -8,13 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.servlet.PluginController;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 
-public class AuthenticatedController {
+public class AuthenticatedController implements PluginController {
 
 	public static final String SESSION_SCOPE_USER = "com.jadaptive.sessionScopeUser";
 	

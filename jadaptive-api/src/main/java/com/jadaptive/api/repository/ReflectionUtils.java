@@ -75,6 +75,18 @@ public class ReflectionUtils {
 		
 	}
 
+	public static Method getMethod(Class<?> clz, String name, Class<?>... args) throws NoSuchMethodException, SecurityException {
+		
+		try {
+			return clz.getMethod(name, args);
+		} catch (NoSuchMethodException | SecurityException e) {
+			clz = clz.getSuperclass();
+			if(Objects.nonNull(clz)) {
+				return getMethod(clz, name, args);
+			}
+			throw e;
+		}
+	}
 
 	public static Set<Method> getSetters(Class<?> clz) {
 		
@@ -151,6 +163,20 @@ public class ReflectionUtils {
 
 	public static boolean hasAnnotation(Class<?> templateClazz, Class<? extends Annotation> annotationClazz) {
 		return templateClazz.getAnnotation(annotationClazz)!=null;
+	}
+
+
+	public static <T extends Annotation> T getAnnotation(Class<?> clz, Class<T> annotation) {
+		
+		do {
+			T res = clz.getAnnotation(annotation);
+			if(Objects.nonNull(res)) {
+				return res;
+			}
+			clz = clz.getSuperclass();
+		} while(!clz.equals(Object.class));
+		
+		return null;
 	}
 
 	

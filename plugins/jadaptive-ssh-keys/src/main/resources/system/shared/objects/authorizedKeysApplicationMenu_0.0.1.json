@@ -8,6 +8,6 @@
   "description": "",
   "system" : true,
   "hidden" : false,
-  "icon": "fas fa-key",
+  "icon": "fas fa-user-shield",
   "parent": "9ed7829b-3de3-4797-a41b-08dd198bb49e"
 }]

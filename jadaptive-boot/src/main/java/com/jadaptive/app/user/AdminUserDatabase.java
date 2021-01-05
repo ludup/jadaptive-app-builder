@@ -1,10 +1,9 @@
 package com.jadaptive.app.user;
 
 import com.jadaptive.api.user.PasswordEnabledUserDatabase;
-import com.jadaptive.api.user.User;
 
-public interface AdminUserDatabase extends PasswordEnabledUserDatabase<AdminUser> {
+public interface AdminUserDatabase extends PasswordEnabledUserDatabase {
 
-	User createAdmin(char[] password, boolean forceChange);
+	AdminUser createAdmin(char[] password, boolean forceChange);
 
 }

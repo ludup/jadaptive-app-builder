@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.events.CustomEvent;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.EventType;
@@ -38,6 +39,11 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public <T extends CustomEvent> void publishCustomEvent(T evt) {
 		
+		
+	}
+
+	@Override
+	public void publishDocumentEvent(EventType type, AbstractObject e) {
 		
 	}
 }

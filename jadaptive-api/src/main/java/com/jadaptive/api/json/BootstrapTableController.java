@@ -25,16 +25,12 @@ public class BootstrapTableController<T> extends AuthenticatedController {
 			AccessDeniedException {
 
 		Integer start = 0;
-		if(request.getParameter("iDisplayStart") != null) {
-				start = Integer.parseInt(request.getParameter("iDisplayStart"));
-		} else if(request.getParameter("offset") != null) {
+		if(request.getParameter("offset") != null) {
 			start = Integer.parseInt(request.getParameter("offset"));
 		}
 		
 		Integer length = 0;
-		if(request.getParameter("iDisplayLength") != null) {
-			length = Integer.parseInt(request.getParameter("iDisplayLength"));
-		} else if(request.getParameter("limit") != null) {
+		if(request.getParameter("limit") != null) {
 			length = Integer.parseInt(request.getParameter("limit"));
 		}
 
@@ -43,16 +39,14 @@ public class BootstrapTableController<T> extends AuthenticatedController {
 		 */
 
 		String searchPattern = "";
-		String searchColumn = "";
+		String searchColumn = template.getNameField();
 		
-		if(request.getParameter("sSearch") != null) {
-			searchPattern = request.getParameter("sSearch");
-		} else if(request.getParameter("search") != null) {
+		if(request.getParameter("search") != null) {
 			searchPattern = request.getParameter("search");
-		}
+		} 
 		
-		if(request.getParameter("searchColumn") != null) {
-			searchColumn = request.getParameter("searchColumn");
+		if(request.getParameter("searchField") != null) {
+			searchColumn = request.getParameter("searchField");
 		}
 
 		BootstrapTableResult<T> result = new BootstrapTableResult<T>(processor.getPage(

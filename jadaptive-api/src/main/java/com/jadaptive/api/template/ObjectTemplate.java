@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
@@ -27,6 +29,9 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	
 	@ObjectField(type = FieldType.TEXT, required = true)
 	String resourceKey;
+
+	@ObjectField(type = FieldType.TEXT, required = true)
+	String bundle;
 	
 	@ObjectField(type = FieldType.TEXT)
 	String defaultFilter;
@@ -43,11 +48,33 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String parentTemplate;
 
+	@ObjectField(type = FieldType.TEXT)
+	Collection<String> childTemplates = new ArrayList<>();
+	
+	@ObjectField(type = FieldType.HIDDEN)
+	Boolean creatable;
+	
+	@ObjectField(type = FieldType.HIDDEN)
+	Boolean updatable;
+	
+	@ObjectField(type = FieldType.HIDDEN)
+	Boolean permissionProtected;
+	
+	@ObjectField(type = FieldType.HIDDEN)
+	String nameField;
 	
 	public ObjectTemplate() {
 		
 	}
+
+	public String getBundle() {
+		return bundle;
+	}
 	
+	public void setBundle(String bundle) {
+		this.bundle = bundle;
+	}
+
 	public ObjectScope getScope() {
 		return scope;
 	}
@@ -78,6 +105,14 @@ public class ObjectTemplate extends NamedUUIDEntity {
 
 	public String getResourceKey() {
 		return resourceKey;
+	}
+	
+	public String getCollectionKey() {
+		String parentKey = getParentTemplate();
+		if(StringUtils.isNotBlank(parentKey)) {
+			return parentKey;
+		}
+		return getResourceKey();
 	}
 
 	public void setResourceKey(String resourceKey) {
@@ -129,4 +164,51 @@ public class ObjectTemplate extends NamedUUIDEntity {
 		this.parentTemplate = parentTemplate;
 	}
 	
+	public void addChildTemplate(String childTemplate) {
+		childTemplates.add(childTemplate);
+	}
+	
+	public void setChildTemplates(Collection<String> childTemplates) {
+		this.childTemplates = childTemplates;
+	}
+	
+	public Collection<String> getChildTemplates() {
+		return childTemplates;
+	}
+
+	public boolean hasParent() {
+		return StringUtils.isNotBlank(getParentTemplate());
+	}
+
+	public Boolean isCreatable() {
+		return creatable;
+	}
+
+	public void setCreatable(Boolean creatable) {
+		this.creatable = creatable;
+	}
+
+	public Boolean isUpdatable() {
+		return updatable;
+	}
+
+	public void setUpdatable(Boolean updatable) {
+		this.updatable = updatable;
+	}
+
+	public String getNameField() {
+		return nameField;
+	}
+
+	public void setNameField(String nameField) {
+		this.nameField = nameField;
+	}
+
+	public Boolean getPermissionProtected() {
+		return permissionProtected;
+	}
+
+	public void setPermissionProtected(Boolean permissionProtected) {
+		this.permissionProtected = permissionProtected;
+	}
 }

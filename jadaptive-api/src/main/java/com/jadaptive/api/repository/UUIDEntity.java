@@ -33,4 +33,6 @@ public abstract class UUIDEntity implements UUIDDocument {
 	public void setHidden(Boolean hidden) {
 		this.hidden = hidden;
 	}
+	
+	
 }

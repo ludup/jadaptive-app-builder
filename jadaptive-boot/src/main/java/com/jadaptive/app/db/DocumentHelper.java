@@ -21,6 +21,8 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bson.Document;
@@ -41,9 +43,11 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
+import com.jadaptive.app.entity.MongoEntity;
 import com.jadaptive.utils.Utils;
 
 public class DocumentHelper {
@@ -106,7 +110,8 @@ public class DocumentHelper {
 			}
 			
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | RepositoryException | ParseException e) {
-			throw new RepositoryException(String.format("Unexpected error storing UUID entity %s", obj.getClass().getName()), e);		
+			log.error("Error converting document", e);
+			throw new RepositoryException(String.format("Unexpected error storing U%s", obj.getClass().getName()), e);		
 		}
 		
 	}
@@ -197,6 +202,90 @@ public class DocumentHelper {
 		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
 	}
 
+	public static AbstractObject buildObject(HttpServletRequest request, ObjectTemplate template) {
+		return buildObject(request, template, "");
+	}
+	
+	public static AbstractObject buildObject(HttpServletRequest request, ObjectTemplate template, String objectPath) {
+
+		MongoEntity obj = new MongoEntity(template.getResourceKey());
+		String uuid = request.getParameter("uuid");
+		if(Objects.nonNull(uuid)) {
+			obj.setUuid(uuid);
+		}
+		String system = request.getParameter("system");
+		if(Objects.nonNull(system)) {
+			obj.setSystem(Boolean.valueOf(system));
+		}
+		String hidden = request.getParameter("hidden");
+		if(Objects.nonNull(hidden)) {
+			obj.setHidden(Boolean.valueOf(hidden));
+		}
+		for(FieldTemplate field : template.getFields()) {
+			if(field.getCollection()) {
+				obj.setValue(field, convertValues(field, objectPath, request));
+			} else {
+				obj.setValue(field, convertValue(field, objectPath, request));
+			}
+		}
+		
+		return obj;
+	}
+	
+	private static Object convertValue(FieldTemplate field, String objectPath, HttpServletRequest request) {
+		
+		String fieldName = field.getResourceKey();
+		if(StringUtils.isNotBlank(objectPath)) {
+			fieldName = String.format("%s.%s", objectPath, fieldName);
+		}
+		
+		String value = request.getParameter(fieldName);
+		if(Objects.isNull(value)) {
+			return null;
+		}
+		
+		switch(field.getFieldType()) {
+		case OBJECT_EMBEDDED:
+			// TODO convert to object
+			return null;
+		case OBJECT_REFERENCE:
+			return value;
+		default:
+			return fromString(field, value);
+		}
+	}
+	
+	private static List<Object> convertValues(FieldTemplate field, String objectPath, HttpServletRequest request) {
+		
+		String fieldName = field.getResourceKey();
+		if(StringUtils.isNotBlank(objectPath)) {
+			fieldName = String.format("%s.%s", objectPath, fieldName);
+		}
+		
+		List<Object> result = new ArrayList<>();
+		
+		String[] values = request.getParameterValues(fieldName);
+		if(Objects.isNull(values) || values.length == 0) {
+			return result;
+		}
+		
+		for(String value : values) {
+			switch(field.getFieldType()) {
+			case OBJECT_EMBEDDED:
+				// TODO collection of objects
+				return null;
+			case OBJECT_REFERENCE:
+				result.add(value);
+				break;
+			default:
+				result.add(fromString(field, value));
+			}
+		}
+		
+		return result;
+	}
+
+
 	@SuppressWarnings("unchecked")
 	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) {
 		
@@ -215,8 +304,8 @@ public class DocumentHelper {
 			
 			try {
 				clz = processClassNameChanges(clz, classLoader);
-				obj = (T) classLoader.loadClass(clz).newInstance();
-			} catch(ClassNotFoundException e) {
+				obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
+			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
 				obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).newInstance();
 			}
 
@@ -242,7 +331,7 @@ public class DocumentHelper {
 				Parameter parameter = m.getParameters()[0];
 				Object value = document.get(name);
 				if(Objects.isNull(value) && Objects.nonNull(columnDefinition)) {
-					value = fromString(parameter.getType(), columnDefinition.defaultValue());
+					value = fromString(parameter.getType(), columnDefinition.type(), columnDefinition.defaultValue());
 				}
 				if(Objects.isNull(value) && parameter.getType().isPrimitive()) {
 					continue;
@@ -251,7 +340,7 @@ public class DocumentHelper {
 					m.invoke(obj, checkForAndPerformDecryption(columnDefinition, (String) value));
 				} else if(isSupportedPrimative(parameter.getType())) {
 					if(!parameter.getType().equals(String.class) && value instanceof String) {
-						m.invoke(obj, fromString(parameter.getType(), (String) value));
+						m.invoke(obj, fromString(parameter.getType(), columnDefinition.type(), (String) value));
 					} else {
 						m.invoke(obj, value);
 					}
@@ -331,29 +420,33 @@ public class DocumentHelper {
 						
 					} else {
 						
-						if(type.equals(String.class)) {
-							m.invoke(obj, buildStringCollection(columnDefinition, list));
-						} else if(type.equals(Boolean.class)) {
-							m.invoke(obj, buildBooleanCollection(columnDefinition, list));
-						} else if(type.equals(Integer.class)) {
-							m.invoke(obj, buildIntegerCollection(columnDefinition, list));
-						} else if(type.equals(Long.class)) {
-							m.invoke(obj, buildLongCollection(columnDefinition, list));
-						} else if(type.equals(Float.class)) {
-							m.invoke(obj, buildFloatCollection(columnDefinition, list));
-						} else if(type.equals(Double.class)) {
-							m.invoke(obj, buildDoubleCollection(columnDefinition, list));
-						} else if(type.equals(Date.class)) {
-							m.invoke(obj, buildDateCollection(columnDefinition, list));
-						} else if(type.isEnum()) {  
-							m.invoke(obj, buildEnumCollection(list, type));
-//						} else if(type.equals(ObjectReference2.class)) {  
-//							m.invoke(obj, buildReferenceCollection(list, type));
+						if(list.isEmpty()) {
+							m.invoke(obj, new HashSet<>());
 						} else {
-							throw new IllegalStateException(
-									String.format("Unexpected collection type %s in object setter %s",
-									type.getName(),
-									name));
+							if(type.equals(String.class)) {
+								m.invoke(obj, buildStringCollection(columnDefinition, list));
+							} else if(type.equals(Boolean.class)) {
+								m.invoke(obj, buildBooleanCollection(columnDefinition, list));
+							} else if(type.equals(Integer.class)) {
+								m.invoke(obj, buildIntegerCollection(columnDefinition, list));
+							} else if(type.equals(Long.class)) {
+								m.invoke(obj, buildLongCollection(columnDefinition, list));
+							} else if(type.equals(Float.class)) {
+								m.invoke(obj, buildFloatCollection(columnDefinition, list));
+							} else if(type.equals(Double.class)) {
+								m.invoke(obj, buildDoubleCollection(columnDefinition, list));
+							} else if(type.equals(Date.class)) {
+								m.invoke(obj, buildDateCollection(columnDefinition, list));
+							} else if(type.isEnum()) {  
+								m.invoke(obj, buildEnumCollection(list, type));
+	//						} else if(type.equals(ObjectReference2.class)) {  
+	//							m.invoke(obj, buildReferenceCollection(list, type));
+							} else {
+								throw new IllegalStateException(
+										String.format("Unexpected collection type %s in object setter %s",
+										type.getName(),
+										name));
+							}
 						}
 					}  
 				} else {
@@ -366,6 +459,7 @@ public class DocumentHelper {
 			
 			return obj;
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException | ClassNotFoundException | ParseException e) {
+			log.error("Error converting document", e);
 			throw new RepositoryException(String.format("Unexpected error loading UUID entity %s", baseClass.getName()), e);			
 		}
 		
@@ -400,38 +494,66 @@ public class DocumentHelper {
 	}
 
 
-	public static Object fromString(Class<?> type, String value) {
+	public static Object fromString(Class<?> type, FieldType t, String value) {
 		if(type.equals(boolean.class)) {
+			assertType(t, FieldType.BOOL, FieldType.HIDDEN);
 			return Boolean.parseBoolean(StringUtils.defaultIfEmpty(value, "false"));
 		} else if(type.equals(Boolean.class)) {
+			assertType(t, FieldType.BOOL, FieldType.HIDDEN);
 			return new Boolean(Boolean.parseBoolean(StringUtils.defaultIfEmpty(value, "false")));
 		} else if(type.equals(int.class)) {
+			assertType(t, FieldType.INTEGER, FieldType.HIDDEN);
 			return Integer.parseInt(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Integer.class)) {
+			assertType(t, FieldType.INTEGER, FieldType.HIDDEN);
 			return new Integer(Integer.parseInt(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(long.class)) {
+			assertType(t, FieldType.LONG, FieldType.HIDDEN);
 			return Long.parseLong(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Long.class)) {
+			assertType(t, FieldType.LONG, FieldType.HIDDEN);
 			return new Long(Long.parseLong(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(float.class)) {
+			assertType(t, FieldType.DECIMAL, FieldType.HIDDEN);
 			return Float.parseFloat(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Float.class)) {
+			assertType(t, FieldType.DECIMAL, FieldType.HIDDEN);
 			return new Float(Float.parseFloat(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(double.class)) {
+			assertType(t, FieldType.DECIMAL, FieldType.HIDDEN);
 			return Double.parseDouble(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Double.class)) {
+			assertType(t, FieldType.DECIMAL, FieldType.HIDDEN);
 			return new Double(Double.parseDouble(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(Date.class)) {
-			if(StringUtils.isNotBlank(value)) {
-				return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			if(t==FieldType.TIMESTAMP) {
+				if(StringUtils.isNotBlank(value)) {
+					return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+				} else {
+					return null;
+				}
 			} else {
-				return null;
+				if(StringUtils.isNotBlank(value)) {
+					return Utils.parseDate(value, "yyyy-MM-dd");
+				} else {
+					return null;
+				}
 			}
 		} else {
 			return value;
 		}
 	}
 	
+	private static void assertType(FieldType type, FieldType... types) {
+		for(FieldType t : types) {
+			if(type == t) {
+				return;
+			}
+		}
+		throw new IllegalStateException(String.format("Invalid object for field %s", type));
+	}
+
+
 	public static Object fromString(FieldTemplate def, String value) {
 		switch(def.getFieldType()) {
 		case BOOL:
@@ -461,11 +583,19 @@ public class DocumentHelper {
 		case PASSWORD:
 		case TEXT:
 		case TEXT_AREA:
+		case PERMISSION:
+		case HIDDEN:
 		case ENUM:
 			return value;
 		case TIMESTAMP:
 			if(StringUtils.isNotBlank(value)) {
 				return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+			} else {
+				return null;
+			}
+		case DATE:
+			if(StringUtils.isNotBlank(value)) {
+				return Utils.parseDate(value, "yyyy-MM-dd");
 			} else {
 				return null;
 			}

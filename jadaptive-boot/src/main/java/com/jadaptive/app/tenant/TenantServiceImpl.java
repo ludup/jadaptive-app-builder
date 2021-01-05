@@ -70,17 +70,19 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			boolean newSchema = repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh");
 			if(newSchema) {
 				repository.newSchema();
-				createTenant(SYSTEM_UUID, "System", "localhost", true);
+				systemTenant = createTenant(SYSTEM_UUID, "System", "localhost", true);
 			} else {
-				
-				initialiseTenant(getSystemTenant(), false);
-				
-				for(Tenant tenant : listTenants()) {
-					if(!tenant.isSystem()) {
-						initialiseTenant(tenant, false);
-					}
-				}	
+				systemTenant = repository.getSystemTenant();
 			}
+				
+			initialiseTenant(systemTenant, newSchema);
+			
+			for(Tenant tenant : listTenants()) {
+				if(!tenant.isSystem()) {
+					initialiseTenant(tenant, false);
+				}
+			}	
+			
 			
             List<StartupAware> startups = new ArrayList<>(applicationService.getBeans(StartupAware.class));
             Collections.<StartupAware>sort(startups, new Comparator<StartupAware>() {
@@ -177,7 +179,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 	
 	public Tenant getSystemTenant() throws RepositoryException, ObjectException {
-		return repository.getSystemTenant();
+		return systemTenant;
 	}
 	
 	@Override
@@ -209,12 +211,6 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		try {
 			repository.saveTenant(tenant);
-			setCurrentTenant(tenant);
-			try {
-				initialiseTenant(tenant, true);
-			} finally {
-				clearCurrentTenant();
-			}
 			return tenant;
 		} catch (RepositoryException | ObjectException e) {
 			throw e;
@@ -244,11 +240,6 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Override
 	public Integer getTemplateOrder() {
 		return Integer.MIN_VALUE;
-	}
-
-	@Override
-	public Tenant createEntity() {
-		return new Tenant();
 	}
 
 	@Override
@@ -376,5 +367,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public String saveOrUpdate(Tenant object) {
 		repository.saveTenant(object);
 		return object.getUuid();
+	}
+
+	@Override
+	public void deleteObject(Tenant object) {
+		assertManageTenant();
+		repository.deleteTenant(object);
 	}
 }

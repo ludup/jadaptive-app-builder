@@ -9,6 +9,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface TableAction {
 	
+	String bundle(); 
+	
 	String resourceKey();
 	
 	String url();

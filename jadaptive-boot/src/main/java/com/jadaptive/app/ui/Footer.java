@@ -1,20 +1,15 @@
 package com.jadaptive.app.ui;
 
-import org.jsoup.select.Elements;
+import org.pf4j.Extension;
 
-import com.codesmith.webbits.ClasspathResource;
-import com.codesmith.webbits.In;
-import com.codesmith.webbits.Out;
-import com.codesmith.webbits.View;
-import com.codesmith.webbits.Widget;
+import com.jadaptive.api.ui.AbstractPageExtension;
 
-@Widget
-@View(contentType = "text/html")
-@ClasspathResource
-public class Footer {
+@Extension
+public class Footer extends AbstractPageExtension {
+	
+	@Override
+	public String getName() {
+		return "footer";
+	}
 
-    @Out
-    public Elements service(@In Elements contents) {
-	return contents;
-    }
 }

@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -25,6 +27,7 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
 import com.jadaptive.api.user.UserDatabase;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
+import com.jadaptive.api.user.UserImpl;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.CompoundIterable;
 
@@ -38,6 +41,9 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	private ApplicationService applicationService; 
 	
 	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
+	
+	@Autowired
+	private TenantAwareObjectDatabase<UserImpl> userRepository;
 	
 	@Override
 	public Integer getOrder() {
@@ -65,16 +71,16 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public User getUserByUUID(String uuid) {
 		
-		User user = null;
+		User user = userRepository.get(uuid, UserImpl.class);
 		
-		for(UserDatabase userDatabase : getOrderedDatabases()) {
-			try {
-				user = userDatabase.getUserByUUID(uuid);
-				if(Objects.nonNull(user)) {
-					break;
-				}
-			} catch(ObjectNotFoundException e) { }
-		}
+//		for(UserDatabase userDatabase : getOrderedDatabases()) {
+//			try {
+//				user = userDatabase.getUserByUUID(uuid);
+//				if(Objects.nonNull(user)) {
+//					break;
+//				}
+//			} catch(ObjectNotFoundException e) { }
+//		}
 		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("User with id %s not found", uuid));
@@ -108,16 +114,16 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public User getUser(String username) {
 
-		User user = null;
+		User user = userRepository.get(UserImpl.class, SearchField.eq("username", username));
 		
-		for(UserDatabase userDatabase : getOrderedDatabases()) {
-			try {
-				user = userDatabase.getUser(username);
-				if(Objects.nonNull(user)) {
-					break;
-				}
-			} catch(ObjectNotFoundException e) { }
-		}
+//		for(UserDatabase userDatabase : getOrderedDatabases()) {
+//			try {
+//				user = userDatabase.getUser(username);
+//				if(Objects.nonNull(user)) {
+//					break;
+//				}
+//			} catch(ObjectNotFoundException e) { }
+//		}
 		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("%s not found", username));
@@ -264,6 +270,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		UserDatabase db = getDatabase(user);
 		db.updateUser(user);
 		return user.getUuid();
+	}
+	
+	@Override
+	public void deleteObject(User user) {
+		deleteUser(user);
 	}
 
 }

@@ -1,10 +1,15 @@
 package com.jadaptive.plugins.keys;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.Files;
 import java.util.Collection;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-import javax.annotation.PostConstruct;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +20,10 @@ import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
+import com.sshtools.common.publickey.SshKeyPairGenerator;
+import com.sshtools.common.publickey.SshKeyUtils;
+import com.sshtools.common.ssh.SshException;
+import com.sshtools.common.ssh.components.SshKeyPair;
 
 
 @Service
@@ -27,14 +36,9 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 	@Autowired
 	private UserService userService; 
 	
-	@PostConstruct
-	private void postConstruct() {
-		System.out.println();
-	}
-	
 	@Override
 	public Collection<AuthorizedKey> getAuthorizedKeys(User user) {
-		return objectDatabase.getPersonalObjects(AuthorizedKey.class, user, SearchField.in("tags", SSH_TAG));
+		return objectDatabase.getPersonalObjects(AuthorizedKey.class, user);
 	}
 	
 	@Override
@@ -62,7 +66,43 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 	private void checkDuplicateName(String name, User user) {
 
 	}
+	
+	@Override
+	public File createKeyFile(String name, SshKeyPair pair, String passphrase) throws IOException {
+		
+		File parent = Files.createTempDirectory("jadaptive").toFile();
+		parent.mkdirs();
+		File zip =	new File(parent, String.format("%s.zip", name));
+		
+		try(FileOutputStream fos = new FileOutputStream(zip)) {
+			try(ZipOutputStream zipOut = new ZipOutputStream(fos)) {
+				ZipEntry zipEntry = new ZipEntry(name);
+				zipOut.putNextEntry(zipEntry);
+				IOUtils.copy(new StringReader(SshKeyUtils.getFormattedKey(pair, passphrase)), zipOut, "UTF-8");
+				zipEntry = new ZipEntry(name + ".pub");
+				zipOut.putNextEntry(zipEntry);
+				IOUtils.copy(new StringReader(SshKeyUtils.getFormattedKey(pair, passphrase)), zipOut, "UTF-8");
+			}
+		}
+	    
+		return zip;
+	}
 
+	@Override
+	public SshKeyPair createAuthorizedKey(PublicKeyType type, String comment, User user) throws IOException, SshException {
+		
+		SshKeyPair pair = SshKeyPairGenerator.generateKeyPair(type.getAlgorithm(), type.getBits());
+		
+		AuthorizedKey key = new AuthorizedKey();
+		key.setPublicKey(SshKeyUtils.getFormattedKey(pair.getPublicKey(), comment));
+		key.setFingerprint(SshKeyUtils.getFingerprint(pair.getPublicKey()));
+		key.setType(pair.getPublicKey().getAlgorithm());
+		key.setName(comment);
+		key.setDeviceKey(false);
+		saveOrUpdate(key, user);
+		return pair;
+	}
+	
 	@Override
 	public AuthorizedKey getAuthorizedKey(User user, String name) {
 		return objectDatabase.getPersonalObject(AuthorizedKey.class, user, SearchField.eq("name", name));
@@ -87,28 +127,16 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 	}
 
 	@Override
-	public Collection<AuthorizedKey> getAuthorizedKeys(User user, String... tags) {
-		return objectDatabase.getPersonalObjects(AuthorizedKey.class, user, 
-				SearchField.in("tags", Arrays.asList(tags)));
-	}
-
-	@Override
-	public Collection<AuthorizedKey> getAuthorizedKeys(String... tags) {
-		return getAuthorizedKeys(getCurrentUser(), tags);
-	}
-
-	@Override
 	public AuthorizedKey importPublicKey(String name, String key, 
 			String type, String fingerprint, 
-			User user, String... tags) {
+			User user, boolean deviceKey) {
 		
 		AuthorizedKey authorizedKey = new AuthorizedKey();
 		authorizedKey.setPublicKey(key);
 		authorizedKey.setType(type);
 		authorizedKey.setFingerprint(fingerprint);
 		authorizedKey.setName(name);
-
-		authorizedKey.getTags().addAll(Arrays.asList(tags));
+		authorizedKey.setDeviceKey(deviceKey);
 		
 		saveOrUpdate(authorizedKey, user);
 		return authorizedKey;
@@ -131,6 +159,9 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 		return key.getUuid();
 	}
 
-
+	@Override
+	public void deleteObject(AuthorizedKey key) {
+		deleteKey(key);
+	}
 
 }

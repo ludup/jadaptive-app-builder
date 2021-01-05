@@ -115,7 +115,6 @@ public class ImportKey extends AbstractTenantAwareCommand {
 		key.setFingerprint(SshKeyUtils.getFingerprint(pub));
 		key.setType(pub.getAlgorithm());
 		key.setName(comment);
-		key.getTags().add(AuthorizedKeyServiceImpl.SSH_TAG);
 		
 		authorizedKeyService.saveOrUpdate(key, forUser);
 

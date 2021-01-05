@@ -1,8 +1,5 @@
 package com.jadaptive.plugins.keys;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import com.jadaptive.api.entity.ObjectScope;
@@ -12,7 +9,6 @@ import com.jadaptive.api.template.DisableStandardActions;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
-import com.jadaptive.api.template.IncludeView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
@@ -22,8 +18,9 @@ import com.jadaptive.api.template.UniqueIndex;
 
 
 @ObjectDefinition(
-	resourceKey = AuthorizedKey.RESOURCE_KEY, 
+	 resourceKey = AuthorizedKey.RESOURCE_KEY, 
 	 aliases = { "userPrivateKeys" },
+	 creatable = false,
      type = ObjectType.COLLECTION, 
      scope = ObjectScope.PERSONAL)
 @UniqueIndex(columns = { "ownerUUID", "name" })
@@ -31,8 +28,8 @@ import com.jadaptive.api.template.UniqueIndex;
 @DisableStandardActions
 @TableView(defaultColumns = { "name", "fingerprint", "type" }, optionalColumns = { "id" },
 			actions = {
-				@TableAction(resourceKey = "generateKey", url = "generate/public-key"),
-				@TableAction(resourceKey = "uploadPublicKey", url = "import/public-key")})
+				@TableAction(resourceKey = "generateKey", bundle = AuthorizedKey.RESOURCE_KEY, url = "generate-key"),
+				@TableAction(resourceKey = "uploadPublicKey",  bundle = AuthorizedKey.RESOURCE_KEY, url = "upload-key")})
 public class AuthorizedKey extends PersonalUUIDEntity {
 
 	private static final long serialVersionUID = 9215617764035887442L;
@@ -47,7 +44,7 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String name;
 	
-	@ObjectField(type = FieldType.TEXT_AREA, unique = true)
+	@ObjectField(readOnly = true, type = FieldType.TEXT_AREA, unique = true)
 	@ExcludeView(values = { FieldView.TABLE })
 	String publicKey;
 	
@@ -55,13 +52,13 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 	@ExcludeView(values = { FieldView.CREATE })
 	String fingerprint;
 	
-	@ObjectField(readOnly = true, type = FieldType.TEXT, searchable = true)
-	@IncludeView(values = { FieldView.UPDATE, FieldView.READ })
-	Set<String> tags = new HashSet<>();
-	
 	@ObjectField(readOnly = true, type = FieldType.TEXT)
 	@ExcludeView(values = { FieldView.CREATE })
 	String type;
+	
+	@ObjectField(readOnly = true, type = FieldType.BOOL)
+	@ExcludeView(values = { FieldView.CREATE })
+	Boolean deviceKey;
 	
 	public Long getId() {
 		return id;
@@ -100,14 +97,6 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 		this.fingerprint = fingerprint;
 	}
 
-	public Set<String> getTags() {
-		return tags;
-	}
-
-	public void setTags(Collection<String> tags) {
-		this.tags = new HashSet<>(tags);
-	}
-
 	public String getType() {
 		return type;
 	}
@@ -120,19 +109,13 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}
-	
-	public String getKeyType() {
-		
-		/**
-		 * TODO change this to store
-		 */
-		if(tags.contains(AuthorizedKeyService.SYSTEM_TAG)) {
-			return AuthorizedKeyService.SYSTEM_TAG;
-		}
-		if(tags.contains(AuthorizedKeyService.WEBAUTHN_TAG)) {
-			return AuthorizedKeyService.WEBAUTHN_TAG;
-		}
-		return AuthorizedKeyService.SSH_TAG;
- 	}
+
+	public void setDeviceKey(boolean deviceKey) {
+		this.deviceKey = deviceKey;
+	}
+
+	public boolean getDeviceKey() {
+		return deviceKey;
+	}
 	
 }

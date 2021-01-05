@@ -2,23 +2,39 @@ package com.jadaptive.app.ui.renderers.form;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.OrderedField;
+import com.jadaptive.api.template.OrderedView;
 
 public class TextAreaFormInput extends FieldInputRender {
 
-	public TextAreaFormInput(ObjectTemplate template, FieldTemplate field) {
+	public TextAreaFormInput(ObjectTemplate template, OrderedField field) {
 		super(template, field);
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String value) {
+	public void renderInput(OrderedView panel, Element rootElement, String value) {
 
-		rootElement.append(replaceResourceKey("<div id=\"${resourceKey}Group\" class=\"form-group col-12\"></div>")); 
-		Element div = rootElement.select(replaceResourceKey("#${resourceKey}Group")).first();
-		div.append(replaceResourceKey("<label for=\"${resourceKey}\" class=\"col-form-label\"  ${i18nName}></label>"));
-		div.append(replaceResourceKey("<textarea id=\"${resourceKey}\" name=\"${resourceKey}\" class=\"form-control\">" + value + "</textarea>"));
-		div.append(replaceResourceKey("<small class=\"form-text text-muted\" ${i18nDesc}></small>"));
+		
+		rootElement.appendChild(new Element("div")
+				.addClass("form-group")
+				.addClass("w-100")
+				.appendChild(new Element("label")
+						.attr("for", field.getResourceKey())
+						.addClass("col-form-label")
+						.attr("jad:bundle", field.getBundle())
+						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
+				.appendChild(new Element("textarea")
+						.attr("id", field.getResourceKey())
+						.attr("name", field.getResourceKey())
+						.addClass("form-control")
+						.val(value))
+				.appendChild(new Element("small")
+						.addClass("form-text")
+						.addClass("text-muted")
+						.attr("jad:bundle", field.getBundle())
+						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))));
+
 
 	}
 

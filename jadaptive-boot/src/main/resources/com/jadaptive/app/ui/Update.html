@@ -1,30 +1,29 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:webbits="http://webbits.org/webbits"
-	webbits:depends="Bootstrap,Bind,Widgets,FreeMarker,I18N">
+<html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
 <body>
 <div class="wrapper">
-<header webbits:id="com.jadaptive.app.ui.Header"></header>
+<header jad:id="header"></header>
 <main class="container mt-3">
  <div class="row">
 	<ol class="breadcrumb col-12">
-	  <li class="breadcrumb-item"><a href="/app/ui/dashboard">Home</a></li>
-	  <li class="breadcrumb-item active"><a href="/app/ui/table/${view.template.resourceKey}">${view.template.name}</a></li>
-	  <li class="breadcrumb-item active"><a href="/app/ui/update/${view.template.resourceKey}/${view.uuid}">Update</a></li>
+	  <li class="breadcrumb-item"><a href="/app/ui/dashboard" class="checkExit" jad:bundle="default" jad:i18n="home.name">[Home]</a></li>
+	  <li class="breadcrumb-item active"><a href="/app/ui/table/${page.template.collectionKey}" class="checkExit" jad:bundle="${page.template.bundle}" jad:i18n="${page.template.collectionKey}.name">[${page.template.name}]</a></li>
+	  <li class="breadcrumb-item active"><span jad:bundle="default" jad:i18n="update.name">[Update]]</span></li>
 	</ol>
   </div>
-   <div class="row my-1">
-   		 <div class="col-12" webbits:id="com.jadaptive.app.ui.Entity"></div>
+   <div id="content" class="row my-1">
+   		 <div class="col-12" jad:id="objectRenderer"></div>
    </div>
-   <div class="row my-1">
+   <div class="row my-3">
          <div class="col-12">
-         	<a class="btn btn-danger float-left ml-3" href="/app/ui/table/${view.template.resourceKey}">
-         	<i class="fas fa-ban"></i>&nbsp;<span webbits:i18n="i18n/default.cancel.name">[Cancel]</span></a>
-         	<a class="btn btn-success float-right mr-3" href="/app/ui/table/${view.template.resourceKey}">
-         	<i class="fas fa-save"></i>&nbsp;<span webbits:i18n="i18n/default.save.name">[Save]</span></a>
+         	<a class="btn btn-danger float-left ml-3 checkExit" href="/app/ui/table/${page.template.collectionKey}">
+         	<i class="fas fa-ban"></i>&nbsp;<span jad:bundle="default" jad:i18n="cancel.name">[Cancel]</span></a>
+         	<a id="saveButton" class="btn btn-success float-right mr-3" href="#">
+         	<i class="fas fa-save"></i>&nbsp;<span jad:bundle="default" jad:i18n="save.name">[Save]</span></a>
          </div>
    </div>
 </main>
 </div>
-<footer webbits:id="com.jadaptive.app.ui.Footer"></footer>
+<footer jad:id="footer"></footer>
 </body>
 </html>

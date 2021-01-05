@@ -144,6 +144,8 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		case TEXT_AREA:
 		case PASSWORD:
 		case OBJECT_REFERENCE:
+		case PERMISSION:
+		case HIDDEN:
 		case ENUM:
 			gen.writeStringField(t.getResourceKey(), checkNull(value));
 			break;
@@ -183,6 +185,8 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		case TEXT_AREA:
 		case PASSWORD:
 		case OBJECT_REFERENCE:
+		case PERMISSION:
+		case HIDDEN:
 		case ENUM:
 			gen.writeString(value.toString());
 			break;

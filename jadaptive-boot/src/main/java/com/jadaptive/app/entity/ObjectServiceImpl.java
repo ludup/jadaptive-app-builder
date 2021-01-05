@@ -20,6 +20,7 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
@@ -49,6 +50,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Autowired
 	private ApplicationService appService; 
 	
+	@Autowired
+	private PermissionService permissionService; 
+	
 	@Override
 	public AbstractObject createNew(ObjectTemplate template) {
 		return new MongoEntity(template.getResourceKey());
@@ -57,6 +61,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public AbstractObject getSingleton(String resourceKey) throws RepositoryException, ObjectException {
 
+		permissionService.assertRead(resourceKey);
+		
 		ObjectTemplate template = templateService.get(resourceKey);
 		if(template.getType()!=ObjectType.SINGLETON) {
 			throw new ObjectException(String.format("%s is not a singleton entity", resourceKey));
@@ -70,24 +76,26 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			}
 			return e;
 		} catch(ObjectNotFoundException ex) {
-			e = new MongoEntity();
-			e.setResourceKey(resourceKey);
+			e = new MongoEntity(resourceKey);
 			e.setUuid(resourceKey);
 			return e;
 		}
  	}
 	
 	@Override
-	public AbstractObject get(String resourceKey, String value) throws RepositoryException, ObjectException {
+	public AbstractObject get(String resourceKey, String uuid) throws RepositoryException, ObjectException {
 
+		permissionService.assertRead(resourceKey);
+		
 		ObjectTemplate template = templateService.get(resourceKey);
 		if(template.getType()!=ObjectType.COLLECTION) {
 			throw new ObjectException(String.format("%s is not a collection entity", resourceKey));
 		}
+
 		
-		AbstractObject e = entityRepository.getById(template, value);
-		if(!resourceKey.equals(e.getResourceKey())) {
-			throw new IllegalStateException();
+		AbstractObject e = entityRepository.getById(template, uuid);
+		if(!resourceKey.equals(e.getResourceKey()) && !template.getChildTemplates().contains(e.getResourceKey())) {
+			throw new IllegalStateException(String.format("Unexpected template %s", e.getResourceKey()));
 		}
 		return e;
  	}
@@ -100,6 +108,11 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		if(template.getScope()==ObjectScope.PERSONAL) {
 			throw new ObjectException(String.format("%s is a personal scoped object. Use personal API", resourceKey));
 		}
+		
+		if(template.getPermissionProtected()) {
+			permissionService.assertRead(resourceKey);
+		}
+
 		return entityRepository.list(template);
 	}
 	
@@ -115,6 +128,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 	@Override
 	public String saveOrUpdate(AbstractObject entity) throws RepositoryException, ObjectException {
+		
+		permissionService.assertReadWrite(entity.getResourceKey());
+		
 		ObjectTemplate template = templateService.get(entity.getResourceKey());
 		if(template.getType()==ObjectType.SINGLETON && !entity.getUuid().equals(entity.getResourceKey())) {	
 			throw new ObjectException("You cannot save a Singleton Entity with a new UUID");
@@ -127,6 +143,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 
 	private String saveViaObjectBean(AbstractObject entity, ObjectTemplate template) {
+		
+		permissionService.assertReadWrite(entity.getResourceKey());
+		
 		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
 		ObjectServiceBean annotation = clz.getAnnotation(ObjectServiceBean.class);
 		if(Objects.nonNull(annotation)) {
@@ -141,6 +160,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException {
 		
+		permissionService.assertReadWrite(resourceKey);
+		
 		ObjectTemplate template = templateService.get(resourceKey);
 		if(template.getType()==ObjectType.SINGLETON) {	
 			throw new ObjectException("You cannot delete a Singleton Entity");
@@ -153,16 +174,25 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		try {
 			
-			Class<?> clz = classService.findClass(DocumentHelper.processClassNameChanges(
-					(String)e.getValue("_clz"), classService.getClassLoader()));
-			
-			DocumentHelper.convertDocumentToObject(clz, new Document(e.getDocument()));
+			if(classService.hasTemplateClass(template)) {
+				Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
+				ObjectServiceBean annotation = clz.getAnnotation(ObjectServiceBean.class);
+				if(Objects.nonNull(annotation)) {
+					UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+					bean.deleteObject(DocumentHelper.convertDocumentToObject(clz, 
+							new Document(e.getDocument())));
+					
+					eventService.publishStandardEvent(EventType.DELETE, 
+							DocumentHelper.convertDocumentToObject(clz, 
+									new Document(e.getDocument())));
+					return;
+				}
+			} 
 			
 			entityRepository.deleteByUUIDOrAltId(template, uuid);
 			
-			eventService.publishStandardEvent(EventType.DELETE, 
-					DocumentHelper.convertDocumentToObject(clz, 
-							new Document(e.getDocument())));
+			eventService.publishDocumentEvent(EventType.DELETE, e);
+			
 			
 		} catch(RepositoryException | ObjectException ex) {
 			throw ex;
@@ -174,6 +204,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 	@Override
 	public void deleteAll(String resourceKey) throws ObjectException {
+		
+		permissionService.assertReadWrite(resourceKey);
 		
 		ObjectTemplate template = templateService.get(resourceKey);
 		if(template.getType()==ObjectType.SINGLETON) {	
@@ -196,11 +228,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public String getName() {
 		return "Entity";
-	}
-
-	@Override
-	public MongoEntity createEntity() {
-		return new MongoEntity();
 	}
 
 	@Override

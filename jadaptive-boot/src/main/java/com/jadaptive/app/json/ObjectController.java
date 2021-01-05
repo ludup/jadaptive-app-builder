@@ -7,7 +7,6 @@ import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +30,9 @@ import com.jadaptive.api.json.BootstrapTableResult;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.entity.MongoEntity;
 
 @Controller
@@ -94,10 +95,11 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 		return new EntityStatus<AbstractObject>(false, e.getMessage());
 	}
 	
-	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"})
+	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+			consumes = { "application/json" })
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus saveEntity(HttpServletRequest request, @PathVariable String resourceKey, @RequestBody MongoEntity entity)  {
+	public RequestStatus saveObjectFromJSON(HttpServletRequest request, @PathVariable String resourceKey, @RequestBody MongoEntity entity)  {
 
 		try {
 			entityService.saveOrUpdate(entity);
@@ -107,6 +109,22 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 		}
 	}
 	
+	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+			consumes = { "application/x-www-form-urlencoded" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus saveObjectFromForm(HttpServletRequest request, @PathVariable String resourceKey)  {
+
+		try {
+			ObjectTemplate template = templateService.get(resourceKey);
+			entityService.saveOrUpdate(DocumentHelper.buildObject(request, template));
+			return new RequestStatus();
+		} catch (Throwable e) {
+			return handleException(e, "POST", resourceKey);
+		}
+	}
+
+
 	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
@@ -168,23 +186,18 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 	@RequestMapping(value="/app/api/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public BootstrapTableResult<AbstractObject> tablObjects(HttpServletRequest request, 
+	public BootstrapTableResult<AbstractObject> tableObjects(HttpServletRequest request, 
 			@PathVariable String resourceKey,
-			@RequestParam(required=false, defaultValue="uuid") String searchField,
-			@RequestParam(required=false, name="search") String searchValue,
-			@RequestParam(required=false, defaultValue = "") String orderColumn,
 			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam(required=false, defaultValue = "0") int offset,
 			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, ObjectException {
 		
 		try {
 			
-			if(StringUtils.isBlank(orderColumn)) {
-				orderColumn = searchField;
-			}
+			ObjectTemplate template = templateService.get(resourceKey);
 			
 			return processDataTablesRequest(request, 
-					templateService.get(resourceKey),
+					template,
 				new BootstrapTablePageProcessor() {
 
 					@Override
@@ -192,14 +205,14 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 							int length, String sortBy)
 							throws UnauthorizedException,
 							AccessDeniedException {
-						return entityService.table(resourceKey, searchField, searchValue, offset, limit);
+						return entityService.table(resourceKey, searchColumn, searchPattern, offset, limit);
 					}
 
 					@Override
 					public Long getTotalCount(String searchColumn, String searchPattern)
 							throws UnauthorizedException,
 							AccessDeniedException {
-						return entityService.count(resourceKey, searchField, searchValue);
+						return entityService.count(resourceKey, searchColumn, searchPattern);
 					}
 				});
 

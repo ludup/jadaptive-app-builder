@@ -20,9 +20,10 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
+import com.jadaptive.api.user.UserImpl;
 
 @Extension
-public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<AdminUser> implements AdminUserDatabase, TenantAware {
+public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl implements AdminUserDatabase, TenantAware {
 
 	public static final String ADMIN_USER_UUID = "ac94a50d-c8db-4297-bbf8-dd0adab5c2e6";
 	
@@ -48,17 +49,18 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 	}
 
 	@Override
-	public User createAdmin(char[] password, boolean forceChange) {
+	public AdminUser createAdmin(char[] password, boolean forceChange) {
 		
 		AdminUser user = new AdminUser();
 		user.setUuid(ADMIN_USER_UUID);
+		user.setSystem(true);
 		setPassword(user, password, forceChange);
 		objectDatabase.saveOrUpdate(user);
 		return user;
 	}
 	
 	@Override
-	public User getUserByUUID(String uuid) {
+	public AdminUser getUserByUUID(String uuid) {
 		return objectDatabase.get(AdminUser.class, SearchField.eq("uuid", uuid));
 	}
 
@@ -78,12 +80,7 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 	public boolean isDatabaseUser(User user) {
 		return user instanceof AdminUser;
 	}
-
-	@Override
-	public Class<? extends User> getUserClass() {
-		return AdminUser.class;
-	}
-
+	
 	@Override
 	public Set<UserDatabaseCapabilities> getCapabilities() {
 		return Collections.unmodifiableSet(capabilities);
@@ -96,7 +93,8 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 
 	@Override
 	public void updateUser(User user) {
-		throw new UnsupportedOperationException();
+		assertWrite(AdminUser.RESOURCE_KEY);
+		objectDatabase.saveOrUpdate((AdminUser)user);
 	}
 
 	@Override
@@ -122,6 +120,18 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Admin
 	@Override
 	public Integer weight() {
 		return Integer.MIN_VALUE;
-	};
+	}
+
+	@Override
+	public Class<? extends User> getUserClass() {
+		return AdminUser.class;
+	}
+
+	@Override
+	public void deleteObject(UserImpl object) {
+		// TODO
+		
+	}
+
 
 }

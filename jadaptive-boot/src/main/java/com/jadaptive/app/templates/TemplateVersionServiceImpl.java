@@ -90,6 +90,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	@Autowired
 	private TemplateService templateService; 
 	
+	private Map<String,ObjectTemplate> loadedTemplates = new HashMap<>();
+	
 	@Override
 	public Iterable<TemplateVersion> list() throws RepositoryException, ObjectException {
 		return versionRepository.list();
@@ -397,9 +399,32 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				log.info("Registering template from annotations on class {}", clz.getSimpleName());
 			}
 			
+			List<Class<?>> parents = new ArrayList<>();
+			Class<?> c = clz.getSuperclass();
+			while(Objects.nonNull(c)) {
+				
+				ObjectDefinition e = c.getAnnotation(ObjectDefinition.class);
+				
+				if(Objects.nonNull(e)) {
+					parents.add(c);
+				}
+				c = c.getSuperclass();
+			}
+			
+			if(!parents.isEmpty()) {
+				Collections.reverse(parents);
+				for(Class<?> parent : parents) {
+					registerAnnotatedTemplate(parent);
+				}
+			}
+			
 			ObjectDefinition e = clz.getAnnotation(ObjectDefinition.class);
 			
-			ObjectTemplate template;
+			ObjectTemplate template = loadedTemplates.get(e.resourceKey());
+			if(Objects.nonNull(template)) {
+				return;
+			}
+			
 			try {
 				template = templateRepository.get(e.resourceKey());
 			} catch (ObjectException ee) {
@@ -413,12 +438,16 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					log.info("{} template has {} as parent", e.resourceKey(), parent.resourceKey());
 				}
 				template.setParentTemplate(parent.resourceKey());
+				ObjectTemplate parentTemplate = templateRepository.get(parent.resourceKey());
+				parentTemplate.addChildTemplate(e.resourceKey());
+				templateRepository.saveOrUpdate(parentTemplate);
 			}
 			
 //			Properties i18n = new Properties();
 //			i18n.setProperty(String.format("%s.name", template.getResourceKey()), e.name());
 			
 			template.setResourceKey(e.resourceKey());
+			template.setBundle(StringUtils.isBlank(e.bundle()) ? e.resourceKey() : e.bundle());
 			template.setName(e.resourceKey());
 			template.setHidden(e.hidden());
 			template.setSystem(e.system());
@@ -430,6 +459,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.getAliases().addAll(Arrays.asList(e.aliases()));
 			template.setDefaultFilter(e.defaultFilter());
 			template.setName(e.resourceKey());
+			template.setCreatable(e.creatable());
+			template.setUpdatable(e.updatable());
+			template.setPermissionProtected(e.requiresPermission());
+			
+			String nameField = "uuid";
 			
 			Index[] nonUnique = clz.getAnnotationsByType(Index.class);
 			UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);
@@ -443,13 +477,17 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				ObjectField objectAnnotation = field.getAnnotation(ObjectField.class);
 				
 				if(Objects.nonNull(objectAnnotation)) {
-					
 					FieldTemplate t = processFieldAnnotations(objectAnnotation, field, /*i18n,*/ template);
+					if(objectAnnotation.nameField()) {
+						nameField =t.getResourceKey();
+					}
 					template.getFields().add(t);
 				}
 			}
 
+			template.setNameField(nameField);
 			templateRepository.saveOrUpdate(template);
+			loadedTemplates.put(e.resourceKey(), template);
 			templateService.registerTemplateClass(e.resourceKey(), clz);
 //			File i18nFolder = new File("i18n");
 //			
@@ -479,8 +517,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			switch(template.getType()) {
 			case COLLECTION:
 			case SINGLETON:
-				templateRepository.createIndexes(template, nonUnique, unique);
-				permissionService.registerStandardPermissions(template.getResourceKey());
+				if(!template.hasParent()) {
+					templateRepository.createIndexes(template, nonUnique, unique);
+				}
+				if(template.getPermissionProtected()) {
+					permissionService.registerStandardPermissions(template.getResourceKey());
+				}
 				break;
 			default:
 				// Embedded objects do not have direct permissions
@@ -590,6 +632,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return t;
 	}
 
+	@SuppressWarnings("unused")
 	private Collection<String> verifyColumnNames(ObjectTemplate template, Collection<String> columns) {
 		Map<String,FieldTemplate> definedColumns = template.toMap();
 		for(String column : columns) {
@@ -618,13 +661,14 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 
 	private void resolveFields(Class<?> clz, List<Field> fields, boolean recurse) {
 		
-		for(Field field : clz.getDeclaredFields()) {
-			fields.add(field);
-		}
 		if(recurse) {
 			if(!clz.getSuperclass().equals(Object.class)) {
 				resolveFields(clz.getSuperclass(), fields, true);
 			}
+		}
+		
+		for(Field field : clz.getDeclaredFields()) {
+			fields.add(field);
 		}
 	}
 

@@ -12,7 +12,10 @@ public enum FieldType {
 	OBJECT_EMBEDDED(ValidationType.OBJECT_TYPE, ValidationType.RESOURCE_KEY), 
 	ENUM(ValidationType.OBJECT_TYPE), 
 	TIMESTAMP,
-	INTEGER(ValidationType.RANGE);
+	INTEGER(ValidationType.RANGE),
+	DATE,
+	PERMISSION, 
+	HIDDEN;
 	
 	ValidationType[] options;
 	

@@ -10,21 +10,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.utils.PasswordEncryptionType;
 import com.jadaptive.utils.PasswordUtils;
 
-public abstract class PasswordEnabledUserDatabaseImpl<T extends PasswordEnabledUser> 
-	extends AuthenticatedService implements PasswordEnabledUserDatabase<T> {
+public abstract class PasswordEnabledUserDatabaseImpl 
+	extends AuthenticatedService implements PasswordEnabledUserDatabase, UUIDObjectService<UserImpl> {
 
 	@Autowired
-	private TenantAwareObjectDatabase<T> objectDatabase;
+	private TenantAwareObjectDatabase<UserImpl> objectDatabase;
 	
 	@Override
 	public void setPassword(User u, char[] password, boolean passwordChangeRequired) {
 		
 		try {
-			@SuppressWarnings("unchecked")
-			T user = (T)u;
+			PasswordEnabledUser user = (PasswordEnabledUser)u;
 			byte[] salt = PasswordUtils.generateSalt();
 			byte[] encodedPassword = PasswordUtils.getEncryptedPassword(
 					password, 
@@ -47,8 +47,7 @@ public abstract class PasswordEnabledUserDatabaseImpl<T extends PasswordEnabledU
 	public boolean verifyPassword(User u, char[] password) {
 		
 		try {
-			@SuppressWarnings("unchecked")
-			T user = (T)u;
+			PasswordEnabledUser user = (PasswordEnabledUser)u;
 			byte[] salt = Base64.getDecoder().decode(user.getSalt());
 			byte[] encodedPassword = PasswordUtils.getEncryptedPassword(
 					password, 
@@ -61,5 +60,15 @@ public abstract class PasswordEnabledUserDatabaseImpl<T extends PasswordEnabledU
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new ObjectException(e);
 		}
+	}
+	
+	public UserImpl getObjectByUUID(String uuid) {
+		return objectDatabase.get(uuid, UserImpl.class);
+	}
+
+	public String saveOrUpdate(UserImpl u) {
+		PasswordEnabledUser user = (PasswordEnabledUser)u;
+		setPassword(user, user.getEncodedPassword().toCharArray(), user.getPasswordChangeRequired());
+		return user.getUuid();
 	}
 }

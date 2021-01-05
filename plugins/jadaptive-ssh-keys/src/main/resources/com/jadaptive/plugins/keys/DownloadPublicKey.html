@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
+<body>
+<div class="wrapper">
+<header jad:id="header"></header>
+<main class="container my-auto">
+   <div class="row justify-content-center">
+         <div class="col-10">
+            <div class="card">
+         	   	<div class="card-header"><span>Download Key</span><div class="float-right"><a href="/app/ui/table/authorizedKeys"><i class="fa fa-times"></i></a></div></div>
+       			<div class="card-body text-center">	
+       		<p><i class="fad fa-file-archive fa-5x"></i></p>
+         	<p jad:bundle="authorizedKeys" jad:i18n="download.instructions"></p>
+         	<p><button id="downloadKey" class="btn btn-primary"><i class="far fa-download"></i> <span jad:bundle="default" jad:i18n="download.name"></span></button>
+		</div>
+         </div>
+         </div>
+   </div>
+</main>
+</div>
+<script type="text/javascript">
+
+$(document).ready(function() {
+	
+	$('#downloadKey').click(function(e) {
+		window.location = "/generate/download";
+	});
+	
+	setTimeout(function() {
+		$('#downloadKey').trigger('click');
+	}, 2000);
+});
+    
+</script>
+<footer jad:id="footer"></footer>
+</body>
+</html>

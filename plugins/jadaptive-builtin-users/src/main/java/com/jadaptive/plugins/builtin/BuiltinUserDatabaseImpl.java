@@ -11,15 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
+import com.jadaptive.api.user.UserImpl;
 import com.jadaptive.api.user.UserService;
 
 @Extension
-public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<BuiltinUser> implements BuiltinUserDatabase {
+public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl implements BuiltinUserDatabase {
 
 	@Autowired
 	private TenantAwareObjectDatabase<BuiltinUser> objectDatabase;
@@ -40,19 +42,17 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Bui
 				SearchField.or(SearchField.eq("username", username), SearchField.eq("email", username)));
 	}
 	
-	@Override
 	public BuiltinUser getUserByEmail(String email) {
 		return objectDatabase.get(BuiltinUser.class, 
 				SearchField.eq("email", email));
 	}
 	
 	@Override
-	public User getUserByUUID(String uuid) {
+	public BuiltinUser getUserByUUID(String uuid) {
 		return objectDatabase.get(uuid, BuiltinUser.class);
 	}
 	
-	@Override
-	public User createUser(String username, String name, String email, char[] password, boolean passwordChangeRequired) {
+	public BuiltinUser createUser(String username, String name, String email, char[] password, boolean passwordChangeRequired) {
 		
 		assertWrite(UserService.USER_RESOURCE_KEY);
 		
@@ -96,16 +96,10 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Bui
 			}
 
 			@Override
-			public User next() {
+			public BuiltinUser next() {
 				return iterator.next();
 			}
 		}
-	}
-
-	@Override
-	public void saveOrUpdate(User user) {
-		assertWrite(UserService.USER_RESOURCE_KEY);
-		objectDatabase.saveOrUpdate((BuiltinUser) user); 
 	}
 
 	@Override
@@ -125,7 +119,7 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Bui
 	}
 
 	@Override
-	public Class<? extends User> getUserClass() {
+	public Class<BuiltinUser> getUserClass() {
 		return BuiltinUser.class;
 	}
 
@@ -150,5 +144,32 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl<Bui
 	@Override
 	public Integer weight() {
 		return Integer.MIN_VALUE + 2;
-	};
+	}
+
+	@Override
+	public void deleteUser(BuiltinUser user) {
+		
+		assertWrite(UserService.USER_RESOURCE_KEY);
+		
+		if(user.isSystem()) {
+			throw new ObjectException(String.format("%s cannot be deleted", user.getUsername()));
+		}
+		
+		objectDatabase.delete(user);
+		
+	}
+	
+	@Override
+	public void deleteObject(UserImpl user) {
+		
+		assertWrite(UserService.USER_RESOURCE_KEY);
+		
+		if(user.isSystem()) {
+			throw new ObjectException(String.format("%s cannot be deleted", user.getUsername()));
+		}
+		
+		objectDatabase.delete((BuiltinUser)user);
+		
+	}
+
 }

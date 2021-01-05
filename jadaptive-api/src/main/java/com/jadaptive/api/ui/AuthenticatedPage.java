@@ -2,16 +2,17 @@ package com.jadaptive.api.ui;
 
 import java.io.FileNotFoundException;
 
+import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.codesmith.webbits.Created;
-import com.codesmith.webbits.Redirect;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.user.User;
 
-public abstract class AuthenticatedPage extends AbstractPage {
+public abstract class AuthenticatedPage extends HtmlPage {
 
 	@Autowired
 	private SessionUtils sessionUtils;
@@ -19,22 +20,37 @@ public abstract class AuthenticatedPage extends AbstractPage {
 	@Autowired
 	private AuthenticationService authenticationService; 
 	
-	@Created
-	void created() throws FileNotFoundException {
-
-		verifySession();
-		onCreated();
-	}
+	@Autowired
+	private PageCache pageCache;
 	
-	void verifySession() {
+	ThreadLocal<Session> currentSession = new ThreadLocal<>();
+	
+	@Override
+	public final void generateContent(Document document) throws FileNotFoundException {
+		
 		if(!sessionUtils.hasActiveSession(Request.get())) {
-			throw new Redirect(authenticationService.resetAuthentication());
+			AuthenticationState state = authenticationService.getCurrentState();
+			state.setHomePage(Request.get().getRequestURI());
+			throw new PageRedirect(pageCache.resolvePage("login"));
 		}
+		
+		try {
+			currentSession.set(sessionUtils.getActiveSession(Request.get()));
+			generateAuthenticatedContent(document);
+		} finally {
+			currentSession.remove();
+		}
+	}
+
+	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException {
+		
 	}
 	
 	protected User getCurrentUser() {
-		return sessionUtils.getCurrentUser();
+		return getCurrentSession().getUser();
 	}
 	
-	protected void onCreated() throws FileNotFoundException { };
+	protected Session getCurrentSession() {
+		return currentSession.get();
+	}
 }

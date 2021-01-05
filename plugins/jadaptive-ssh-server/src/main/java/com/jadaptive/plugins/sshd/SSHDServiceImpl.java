@@ -32,13 +32,11 @@ import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
 import com.sshtools.common.forwarding.ForwardingPolicy;
-import com.sshtools.common.nio.SshEngineContext;
 import com.sshtools.common.permissions.PermissionDeniedException;
 import com.sshtools.common.policy.ClassLoaderPolicy;
 import com.sshtools.common.policy.FileFactory;
 import com.sshtools.common.policy.FileSystemPolicy;
 import com.sshtools.common.scp.ScpCommand;
-import com.sshtools.common.ssh.ChannelNG;
 import com.sshtools.common.ssh.SshConnection;
 import com.sshtools.common.ssh.SshException;
 import com.sshtools.common.ssh.UnsupportedChannelException;
@@ -48,6 +46,8 @@ import com.sshtools.server.vsession.ShellCommandFactory;
 import com.sshtools.server.vsession.VirtualChannelFactory;
 import com.sshtools.server.vsession.VirtualSessionPolicy;
 import com.sshtools.server.vsession.commands.fs.FileSystemCommandFactory;
+import com.sshtools.synergy.nio.SshEngineContext;
+import com.sshtools.synergy.ssh.ChannelNG;
 import com.sshtools.vsession.commands.ssh.SshClientsCommandFactory;
 
 
@@ -297,5 +297,11 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	@Override
 	public SSHInterface getInterface(String intf) {
 		return interfaces.get(intf);
+	}
+
+	@Override
+	public void removeInterface(SSHInterface sshInterface) throws UnknownHostException {
+		removeInterface(sshInterface.getAddressToBind(), sshInterface.getPort());
+		interfaces.remove(sshInterface.getInterface());
 	}
 }

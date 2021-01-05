@@ -148,7 +148,6 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 				key.setFingerprint(SshKeyUtils.getFingerprint(pair.getPublicKey()));
 				key.setType(pair.getPublicKey().getAlgorithm());
 				key.setName(comment);
-				key.getTags().add(AuthorizedKeyServiceImpl.SSH_TAG);
 				
 				authorizedKeyService.saveOrUpdate(key, forUser);
 				

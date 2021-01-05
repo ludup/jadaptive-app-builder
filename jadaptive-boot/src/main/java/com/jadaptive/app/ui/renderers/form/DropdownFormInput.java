@@ -1,118 +1,123 @@
 package com.jadaptive.app.ui.renderers.form;
 
+import java.util.Collection;
 import java.util.Objects;
 
+import org.apache.commons.lang.WordUtils;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
-import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.OrderedField;
+import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.ui.PageHelper;
 
 public class DropdownFormInput extends FieldInputRender {
 	
-	Elements inputElements;
-	Element valueElement;
+	Element dropdownMenu;
+	Element dropdownInput;
 	Element nameElement;
-	Enum<?>[] values;
+	Element valueElement;
 	
-	public DropdownFormInput(ObjectTemplate template, FieldTemplate field,  Enum<?>[] values) {
+	public DropdownFormInput(ObjectTemplate template, OrderedField field) {
 		super(template, field);
-		this.values = values;
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String defaultValue) {
+	public void renderInput(OrderedView panel, Element rootElement, String defaultValue) {
 
-		rootElement.append(replaceResourceKey("<div class=\"form-group col-12\"><label for=\"${resourceKey}\" class=\"col-form-label\" ${i18nName}>" 
-				 + "</label><div id=\"${resourceKey}Dropdown\" style=\"position: relative\" class=\"input-group dropdown\"></div></div>"));
-		Elements dropdown = rootElement.select(replaceResourceKey("#${resourceKey}Dropdown"));
-		dropdown.append(replaceResourceKey("<input id=\"${resourceKey}\" name=\"${resourceKey}\" type=\"hidden\">"));
-		dropdown.append(replaceResourceKey("<input id=\"${resourceKey}Text\" data-display=\"static\" class=\"dropdown-toggle form-control\" readonly=\"readonly\" type=\"text\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">"));
-		dropdown.append(replaceResourceKey("<div class=\"input-group-append\"><span class=\"jdropdown input-group-text\"><i class=\"fas fa-chevron-down\"></i></span></div>"));
-		dropdown.append(replaceResourceKey("<div class=\"dropdown-menu\" aria-labelledby=\"${resourceKey}Dropdown\"></div>"));
-		dropdown.parents().first().append(replaceResourceKey("<small class=\"form-text text-muted\" ${i18nDesc}></small>"));
+		rootElement.appendChild(new Element("div").addClass("form-group w-100")
+				.appendChild(new Element("label")
+						.attr("for", field.getResourceKey())
+						.addClass("col-form-label")
+						.attr("jad:bundle", field.getBundle())
+						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
+				.appendChild(dropdownInput = new Element("div")
+						.attr("id", String.format("%sDropdown", field.getResourceKey()))
+						.attr("style", "position: relative")
+						.addClass("input-group")
+						.addClass("dropdown")
+					.appendChild(valueElement = new Element("input")
+							.attr("id", field.getResourceKey())
+							.attr("name", field.getResourceKey())
+							.attr("type", "hidden"))
+					.appendChild(nameElement = new Element("input")
+							.attr("id", String.format("%sText", field.getResourceKey()))
+							.attr("data-display", "static")
+							.addClass("form-control")
+							.addClass("dropdown-toggle")
+							.attr("type", "text")
+							.attr("data-toggle", "dropdown")
+							.attr("aria-haspopup", "true")
+							.attr("aria-expanded", "false"))
+					.appendChild(new Element("div")
+							.attr("class", "input-group-append")
+								.appendChild(new Element("span")
+										.attr("class", ".jdropdown input-group-text")
+									.appendChild(new Element("i")
+											.attr("class", "fas fa-chevron-down")))))
+				.appendChild(new Element("small")
+							.addClass("form-text")
+							.addClass("text-muted")
+							.attr("jad:bundle", field.getBundle())
+							.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))));
 
-		inputElements = dropdown.select(".dropdown-menu");
-		nameElement = dropdown.select(replaceResourceKey("#${resourceKey}Text")).first();
-		valueElement = dropdown.select(replaceResourceKey("#${resourceKey}")).first();
-		
-		renderValues(values, defaultValue);
 	}
 
-	public void renderValues(Enum<?>[] values, String defaultValue) {
+	public void renderValues(Enum<?>[] values, String defaultValue, boolean readOnly) {
+		
+		if(!readOnly) {
+			dropdownInput.appendChild(dropdownMenu = new Element("div")
+					.addClass("dropdown-menu")
+					.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey())));
+			
+		}
 		
 		Enum<?> selected = null;
 		for(Enum<?> value : values) {
 			if(Objects.isNull(selected)) {
 				selected = value;
 			}
-			addInputValue(String.valueOf(value.ordinal()), processEnumName(value.name()));
+			if(!readOnly) {
+				addInputValue(String.valueOf(value.ordinal()), processEnumName(value.name()));
+			}
 			if(value.name().equals(defaultValue)) {
 				selected = value;
 			}
-
 		}
 		
+		if(readOnly) {
+			nameElement.attr("disabled", "disabled");
+		}
 		nameElement.val(processEnumName(selected.name()));
 		valueElement.val(String.valueOf(selected.ordinal()));
 	}
 	
-	private String processEnumName(String name) {
-		return name.replace('_', ' ');
+	public void renderValues(Collection<String> values, String defaultValue) {
+		
+		String selected = null;
+		for(String value : values) {
+			if(Objects.isNull(selected)) {
+				selected = value;
+			}
+			addInputValue(value, value);
+			if(value.equals(defaultValue)) {
+				selected = value;
+			}
+		}
+		
+		nameElement.val(processEnumName(selected));
+		valueElement.val(String.valueOf(selected));
 	}
 	
-//	public void renderValues(Map<String,String> values) {
-//		
-//		for(Map.Entry<String,String> entry : values.entrySet()) {
-//			addInputValue(entry.getKey(), entry.getValue());
-//		}
-//	}
-//	
-	private void addInputValue(String key, String value) {
-		inputElements.append("<a data-resourcekey=\"" + key + "\" class=\"" 
-				+ "dropdown-item\" href=\"#\">" + value + "</a>");
+	private String processEnumName(String name) {
+		return WordUtils.capitalizeFully(name.replace('_', ' '));
 	}
-//
-//	public void renderValues(Collection<? extends NamedUUIDEntity> fields, String defaultValue) {
-//		NamedUUIDEntity selected = null;
-//		for(NamedUUIDEntity field : fields) {
-//			if(Objects.isNull(field)) {
-//				selected = field;
-//			}
-//
-//			addInputValue(field.getResourceKey(), field.getName());
-//			if(field.getResourceKey().equals(defaultValue)) {
-//				selected = field;
-//			}
-//			
-//		}
-//		
-//		if(Objects.nonNull(selected)) {
-//			nameElement.val(selected.getName());
-//			valueElement.val(selected.getResourceKey());
-//		}
-//	}
-//	
-//	public void renderTemplateFields(Collection<FieldTemplate> fields, String defaultValue) {
-//		
-//		FieldTemplate selected = null;
-//		for(FieldTemplate field : fields) {
-//			if(Objects.isNull(field)) {
-//				selected = field;
-//			}
-//			if(field.isSearchable()) {
-//				addInputValue(field.getResourceKey(), i18n.getFieldName(template, field));
-//				if(field.getResourceKey().equals(defaultValue)) {
-//					selected = field;
-//				}
-//			}
-//		}
-//		
-//		if(Objects.nonNull(selected)) {
-//			nameElement.val(i18n.getFieldName(template, selected));
-//			valueElement.val(selected.getResourceKey());
-//		}
-//	}
+	
+	private void addInputValue(String key, String value) {
+		dropdownMenu.appendChild(PageHelper.createAnchor("#", value)
+				.attr("data-resourcekey", key)
+				.addClass("jdropdown-item dropdown-item"));
+	}
 
 	
 }

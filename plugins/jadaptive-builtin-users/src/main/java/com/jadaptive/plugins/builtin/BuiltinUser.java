@@ -2,55 +2,56 @@ package com.jadaptive.plugins.builtin;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.template.IncludeView;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectServiceBean;
+import com.jadaptive.api.template.ObjectView;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.ViewType;
 import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(resourceKey = BuiltinUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectServiceBean(bean = BuiltinUserDatabase.class)
+@ObjectViews({ 
+	@ObjectViewDefinition(type = ViewType.ACCORDION, bundle = "users", value = "passwordOptions")})
 public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser {
 
 	private static final long serialVersionUID = -4186606233520076592L;
 
 	public static final String RESOURCE_KEY = "builtinUsers";
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT, 
-			unique = true)
-	String username;
 	
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT)
-	String name;
-	
+	@ObjectField(required = false,
+			type = FieldType.PASSWORD)
+	@IncludeView(values = FieldView.CREATE)
+	@ObjectView(value = "passwordOptions")
 	String encodedPassword;
+	
+	@ObjectField(required = false,
+			type = FieldType.HIDDEN)
 	String salt;
+	
+	@ObjectField(required = false,
+			defaultValue = "PBKDF2_SHA512_50000",
+			type = FieldType.ENUM)
+	@ObjectView(value = "passwordOptions")
 	PasswordEncryptionType encodingType;
+	
+	@ObjectField(required = false,
+			defaultValue = "true",
+			type = FieldType.BOOL)
+	@ObjectView(value = "passwordOptions")
 	boolean passwordChangeRequired;
 	
 	@ObjectField(required = false,
 			searchable = true,
 			type = FieldType.TEXT)
 	String email;
-	
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	@Override
 	public String getEncodedPassword() {

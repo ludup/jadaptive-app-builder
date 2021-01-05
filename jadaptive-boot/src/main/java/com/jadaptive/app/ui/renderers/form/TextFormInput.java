@@ -1,11 +1,11 @@
 package com.jadaptive.app.ui.renderers.form;
 
-import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.OrderedField;
 
 public class TextFormInput extends FormInputRender {
 
-	public TextFormInput(ObjectTemplate template, FieldTemplate field) {
+	public TextFormInput(ObjectTemplate template, OrderedField field) {
 		super(template, field);
 	}
 

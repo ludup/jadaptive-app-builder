@@ -18,8 +18,6 @@ import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.upload.UploadHandler;
-import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserService;
 import com.sshtools.common.publickey.SshKeyUtils;
 import com.sshtools.common.publickey.SshPrivateKeyFile;
 import com.sshtools.common.publickey.SshPrivateKeyFileFactory;
@@ -34,20 +32,13 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 	static Logger log = LoggerFactory.getLogger(PublicKeyUploadHandler.class);
 	
 	@Autowired
-	private AuthorizedKeyService keyService; 
-	
-	@Autowired
-	private UserService userService; 
+	private AuthorizedKeyService keyService;  
 	
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
 	@Override
 	public void handleUpload(String handlerName, String uri, Map<String, String> parameters, String filename,
 			InputStream in) throws IOException, SessionTimeoutException, UnauthorizedException {
-		
-		User user = userService.getUserByUUID(parameters.get("uuid"));
-		
-		setupUserContext(user);
 		
 		try { 
 
@@ -84,14 +75,12 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 					SshKeyUtils.getOpenSSHFormattedKey(key), 
 					key.getAlgorithm(), 
 					SshKeyUtils.getFingerprint(key), 
-					getCurrentUser(), 
-					AuthorizedKeyService.SSH_TAG);
+					getCurrentUser(),
+					false);
 
 		} catch(Throwable e) {
 			log.error("Failed to upload public key", e);
 			throw new IOException(e.getMessage(), e);
-		} finally {
-			clearUserContext();
 		}
 	}
 

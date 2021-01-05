@@ -45,10 +45,9 @@
 		<module>jadaptive-http</module>
 		<module>jadaptive-builtin-users</module>
 		<module>jadaptive-remote-users</module>
-		<module>jadaptive-icon-password</module>
-		<module>jadaptive-ua</module>
 		<module>jadaptive-ssh-keys</module>
 		<module>jadaptive-ssh-server</module>
+		<module>jadaptive-ssh-terminal</module>
 		<module>jadaptive-ssh-management</module>
 		<module>jadaptive-web-management</module>
 	</modules>

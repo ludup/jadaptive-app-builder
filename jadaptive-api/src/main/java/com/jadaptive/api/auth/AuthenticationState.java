@@ -6,12 +6,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.Redirect;
+import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.User;
 
 public class AuthenticationState {
 
 	User user;
-	List<Class<?>> authenticationPages = new ArrayList<>();
+	List<Class<? extends Page>> authenticationPages = new ArrayList<>();
+	List<Class<? extends Page>> postAuthenticationPages = new ArrayList<>();
 	int currentPageIndex = 0;
 	String remoteAddress;
 	String userAgent;
@@ -20,12 +26,26 @@ public class AuthenticationState {
 	String resetURL = "/app/ui/login-reset";
 	String resetText = "Restart Authentication";
 	int failedAttempts = 0;
+	int currentPostAuthenticationIndex = 0;
+	Redirect homePage = new UriRedirect("/app/ui/dashboard");
+	String attemptedUsername;
 	
-	public Class<?> getCurrentPage() {
-		return authenticationPages.get(currentPageIndex);
+	public Class<? extends Page> getCurrentPage() {
+		if(!isAuthenticationComplete()) {
+			return authenticationPages.get(currentPageIndex);
+		} else {
+			if(currentPostAuthenticationIndex >= postAuthenticationPages.size()) {
+				Request.get().getSession().setAttribute(AuthenticationService.AUTHENTICATION_STATE_ATTR, null);
+				if(Objects.nonNull(homePage)) {
+					throw homePage;
+				}
+				throw new IllegalStateException("No home page set in authentication state");
+			}
+			return postAuthenticationPages.get(currentPostAuthenticationIndex);
+		}
 	}
 	
-	public boolean isComplete() {
+	public boolean isAuthenticationComplete() {
 		return currentPageIndex == authenticationPages.size();
 	}
 	
@@ -33,8 +53,16 @@ public class AuthenticationState {
 		return currentPageIndex < authenticationPages.size() - 1;
 	}
 	
-	public void completePage() {
-		currentPageIndex++;
+	public boolean completePage() {
+		if(isAuthenticationComplete()) {
+			currentPostAuthenticationIndex++;
+		} else {
+			currentPageIndex++;
+			if(isAuthenticationComplete()) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public User getUser() {
@@ -45,14 +73,22 @@ public class AuthenticationState {
 		this.user = user;
 	}
 	
-	public List<Class<?>> getAuthenticationPages() {
+	public List<Class<? extends Page>> getAuthenticationPages() {
 		return authenticationPages;
 	}
 	
-	public void setAuthenticationPages(List<Class<?>> authenticationPages) {
+	public void setAuthenticationPages(List<Class<? extends Page>> authenticationPages) {
 		this.authenticationPages = authenticationPages;
 	}
 	
+	public List<Class<? extends Page>> getPostAuthenticationPages() {
+		return postAuthenticationPages;
+	}
+
+	public void setPostAuthenticationPages(List<Class<? extends Page>> postAuthenticationPages) {
+		this.postAuthenticationPages = postAuthenticationPages;
+	}
+
 	public String getRemoteAddress() {
 		return remoteAddress;
 	}
@@ -121,5 +157,25 @@ public class AuthenticationState {
 
 	public void incrementFailedAttempts() {
 		failedAttempts++;
+	}
+
+	public Redirect getHomePage() {
+		return homePage;
+	}
+
+	public void setHomePage(Page homePage) {
+		this.homePage = new PageRedirect(homePage);
+	}
+	
+	public void setHomePage(String uri) {
+		this.homePage = new UriRedirect(uri);
+	}
+
+	public String getAttemptedUsername() {
+		return attemptedUsername;
+	}
+
+	public void setAttemptedUsername(String username) {
+		this.attemptedUsername = username;
 	}
 }

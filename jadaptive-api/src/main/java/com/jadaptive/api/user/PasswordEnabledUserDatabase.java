@@ -1,6 +1,8 @@
 package com.jadaptive.api.user;
 
-public interface PasswordEnabledUserDatabase<T extends PasswordEnabledUser> extends UserDatabase {
+import com.jadaptive.api.repository.UUIDObjectService;
+
+public interface PasswordEnabledUserDatabase extends UserDatabase, UUIDObjectService<UserImpl> {
 
 	void setPassword(User user, char[] password, boolean passwordChangeRequired);
 

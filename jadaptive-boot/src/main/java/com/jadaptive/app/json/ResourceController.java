@@ -19,6 +19,7 @@ import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.server.MimeMappings;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,6 +31,7 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.ResponseHelper;
 import com.jadaptive.utils.FileUtils;
 
 @Controller
@@ -42,6 +44,8 @@ public class ResourceController {
 	
 	@Autowired
 	private PluginManager pluginManager; 
+	
+	private MimeMappings mimeTypes = new MimeMappings(MimeMappings.DEFAULT);
 	
 	@RequestMapping(value="/ping", method = RequestMethod.GET, produces = "text/plain")
 	@ResponseBody
@@ -85,7 +89,7 @@ public class ResourceController {
 				}
 			} 
 			
-			ResponseHelper.sendContent(resource, uri, request, response);
+			ResponseHelper.sendContent(resource, getContentType(resource), request, response);
 		
 		} catch(FileNotFoundException e) { 
 			ResponseHelper.send404NotFound(uri, request, response);
@@ -93,6 +97,23 @@ public class ResourceController {
 			tenantService.clearCurrentTenant();
 		}
 
+	}
+
+	private String getContentType(Path resource) {
+		String type = mimeTypes.get(getExtension(resource));
+		if(Objects.isNull(type)) {
+			return "application/octet-stream";
+		}
+		return type;
+	}
+
+	private String getExtension(Path resource) {
+		String filename = resource.getFileName().toString();
+		int idx = filename.toString().lastIndexOf(".");
+		if(idx > -1) {
+			return filename.substring(idx+1);
+		}
+		return filename;
 	}
 
 	private Path resolveResource(HttpServletRequest request, String resourceUri) throws FileNotFoundException {

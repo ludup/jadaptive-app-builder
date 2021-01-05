@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
+<body>
+<div class="wrapper">
+<header jad:id="header"></header>
+<main class="container mt-3">
+  <div class="row">
+	<ol class="breadcrumb col-12">
+	  <li class="breadcrumb-item"><a href="/app/ui/dashboard">Home</a></li>
+	</ol>
+  </div>
+    <div class="row w-100 h-100">
+     	<div class="col-12">
+     		<h2>Virtual File System</h2>
+     	</div>
+     	<div class="col-12">
+     		<nav aria-label="breadcrumb">
+			  <ol id="breadcrumb" class="breadcrumb">
+			    <li class="breadcrumb-item active"><a class="clickPath" href="/"><i class="far fa-hdd"></i></a></li>
+			  </ol>
+			</nav>
+     	</div>
+     	<div id="feedback" class="col-12">
+     	
+     	</div>
+     	<div class="col-4">
+     		<div class="input-group mb-3">
+			  <input id="filter" type="text" class="form-control filter" placeholder="Filter" aria-label="Current Directory Filter" aria-describedby="basic-addon2">
+			  <span class="input-group-text" id="basic-addon2"><i class="far fa-search"></i></span>
+			</div>
+		</div>
+		<div class="col-4">
+			<div class="input-group mb-3">
+			  <input id="maximumFiles" type="number" step="50" class="form-control filter" value="" placeholder="Maximum Results (default 1000)" aria-label="The maximum number of files returned" aria-describedby="basic-addon3">
+			  <span class="input-group-text" id="basic-addon3"><i class="far fa-battery-full"></i></span>
+			</div>
+     	</div>
+     	<div class="col-4">
+			<div id="searchDepthDropdown"></div>
+     	</div>
+     	<div class="col-12">
+			<input type="checkbox" class="filter" id="files" name="files" value="true" checked> <label class="mr-3" for="files">Files</label>
+			<input type="checkbox" class="filter" id="folders" name="folders" value="true" checked> <label class="mr-3" for="folders">Folders</label>
+			<input type="checkbox" class="filter" id="hidden" name="hidden" value="true" checked> <label class="mr-3" for="hidden">Hidden</label>
+     	</div>
+     	<div class="col-md-3 h-100 my-3">
+     		<div id="tree" class="h-100"></div>
+     	</div>
+     	<div id="content" class="col-md-9 my-3">
+     		<table id="table" style="display: none;">
+     			<thead>
+     			<tr>
+     				<th data-field="name" data-formatter="renderName">Name</th>
+     				<th data-field="length" data-formatter="renderLength">Length</th>
+     				<th data-formatter="renderPerms">Perms</th>
+     				<th data-formatter="renderActions">Actions</th>
+     			</tr>
+     			</thead>
+     		</table>
+     	</div>
+  </div>
+</main>
+</div>
+<footer jad:id="footer"></footer>
+<script type="text/javascript">
+	function renderPerms(val, obj) {
+		var perms = obj.readable ? 'r' : '-';
+		perms += obj.writable ? 'w': '-';
+		return perms;
+	}
+	
+	function renderName(val, obj) {
+		var icon = (obj.directory ? '<i class="far fa-folder"></i>' : '<i class="far fa-file"></i>');
+		if(obj.directory) {
+			return '<a class="clickPath" href="' + obj.path + '">' +  icon + ' ' + obj.name + '</a><br><small>' + obj.path + '</small>';
+		} else {
+			return icon + ' ' + obj.name + '<br><small>' + obj.path + '</small>';
+		}
+	}
+	
+	function renderLength(val) {
+		if(val > 0) {
+			var i = Math.floor( Math.log(val) / Math.log(1024) );
+		    return ( val / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+		}
+		
+		return '';
+	}
+	
+	function renderActions(val, obj) {
+		if(!obj.directory) {
+			return '<a class="downloadFile" target="_blank" href="/app/vfs/downloadFile' + obj.path + '"><i class="far fa-download"></i></a>';
+		}
+		return '';
+	}
+	
+	function getMaximumFiles() {
+		var results = $('#maximumFiles').val();
+		if(results.trim()==='') {
+			return 1000;
+		}
+		return results;
+	}
+	
+	function getBoolean(val) {
+		if(val === 'true') {
+			return true;
+		}
+		return false;
+	}
+	
+	function getPath() {
+		var path = $(document).data('path');
+		if(!path) {
+			return '/';
+		}
+		return path;
+	}
+	
+	function ajaxRequest(params) {
+		
+		$('#feedback').empty();
+		
+	    var url = '/app/vfs/listDirectory' + getPath();
+	    params.data.filter = $('#filter').val();
+	    params.data.files = $('#files').is(":checked");
+	    params.data.folders = $('#folders').is(":checked");
+	    params.data.hidden =$('#hidden').is(":checked");
+	    params.data.maximumResults = getMaximumFiles();
+	    params.data.searchDepth = $('#searchDepth').val();
+	    
+	    $.get(url + '?' + $.param(params.data)).then(function (res) {
+	    	  
+	    	$('table').show();
+		      
+	    	  if(res.success) {
+		    	  params.success(res);
+		      } else {
+		    	  $('#feedback').append('<p class="alert alert-danger"><i class="far fa-exclamation-square"></i> ' + res.error + '</p>');
+		    	  params.success({
+		    		 rows: [],
+		    		 total: 0
+		    	  });
+		      }
+	    });
+	  }
+	
+	function changePath(path) {
+
+		$(document).data('path', path);
+		$('table').bootstrapTable('refresh');
+		
+		$('#breadcrumb').empty();
+		$('#breadcrumb').append('<li class="breadcrumb-item"><a class="clickPath" href="/"><i class="far fa-hdd"></i></a></li>');
+		var lastIdx = path.indexOf('/');
+		
+		while(lastIdx < path.length-1) {
+		
+			var idx = path.indexOf('/', lastIdx+1);
+			if(idx==-1) {
+				idx = path.length;
+			}
+			$('#breadcrumb').append('<li class="breadcrumb-item"><a class="clickPath" href="' 
+					+ path.substring(0,idx) + '">' + path.substring(lastIdx+1, idx) + '</a></li>');
+			lastIdx = idx;
+		}
+		$('.breadcrumb-item').last().addClass('active');
+		
+	}
+	
+	function refresh() {
+		var path = $(document).data('path');
+		if(!path) {
+			path = '/';
+		}
+		changePath(path);
+	}
+
+	$(document).ready(function() {
+		
+		$(document).on('click', '.clickPath', function(e) {
+			e.preventDefault();
+			changePath($(this).attr('href'));
+		});
+		
+		$('#table').bootstrapTable({
+			sidePagination: 'server',
+			pagination: true,
+			pageList: "[10, 25, 50, 100, 200, All]",
+			pageSize: 10,
+			pageNumber: 1,
+			mobileResponsive: true,
+			ajax: 'ajaxRequest',
+			loadingTemplate: '<i class="fa fa-spinner fa-spin fa-fw fa-2x"></i>'
+		});
+		
+		$('#spinner').hide();
+		$('table').show();
+		
+		$.getJSON('/app/vfs/mounts', function(data) {
+			if(data.success) {
+				$('#tree').bstreeview({
+					data: data.resources,
+					clicked: function(node) {
+						changePath(node.path);
+					}
+				});
+			}
+		});
+		
+		$('.filter').change(function(e) {
+			refresh();
+		});
+		
+		$('#refresh').click(function(e){ 
+			refresh();
+		});
+	});
+</script>
+</body>
+</html>

@@ -2,25 +2,40 @@ package com.jadaptive.app.ui.renderers.form;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.OrderedField;
+import com.jadaptive.api.template.OrderedView;
 
 public class BooleanFormInput extends FieldInputRender {
 
-	public BooleanFormInput(ObjectTemplate template, FieldTemplate field) {
+	public BooleanFormInput(ObjectTemplate template, OrderedField field) {
 		super(template, field);
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String value) {
-		rootElement.append(replaceResourceKey("<div id=\"${resourceKey}Group\" class=\"form-check col-12\"></div>")); 
-		Element div = rootElement.select(replaceResourceKey("#${resourceKey}Group")).first();
-		div.append(replaceResourceKey("<div><label for=\"${resourceKey}\" class=\"col-form-label\" ${i18nName}></label></div>"));
-		div.append(replaceResourceKey("<input type=\"checkbox\" data-toggle=\"toggle\" id=\"${resourceKey}\" name=\"${resourceKey}\" class=\"form-check-input\" value=\"" + value + "\">"));
-		div.append(replaceResourceKey("<small class=\"form-text text-muted\" ${i18nDesc}></small>"));
+	public void renderInput(OrderedView panel, Element rootElement, String value) {
+		
+		Element input;
+		rootElement.appendChild(new Element("div")
+						.addClass("form-group w-100")
+				.appendChild(input = new Element("input")
+						.attr("id", field.getResourceKey())
+						.attr("name", field.getResourceKey())
+						.attr("type", "checkbox")
+						.val("true"))
+				.appendChild(new Element("label")
+						.attr("for", field.getResourceKey())
+						.addClass("col-form-label")
+						.attr("jad:bundle", field.getBundle())
+						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
+				.appendChild(new Element("small")
+						.addClass("form-text")
+						.addClass("text-muted")
+						.attr("jad:bundle", field.getBundle())
+						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))));
 
 		if("true".equalsIgnoreCase(value)) {
-			div.select(replaceResourceKey("#${resourceKey}Bool")).attr("checked", "checked");
+			input.attr("checked", "checked");
 		}
 	}
 

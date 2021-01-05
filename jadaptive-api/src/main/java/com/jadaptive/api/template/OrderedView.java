@@ -4,15 +4,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class OrderedView {
 		
-	ObjectViewDefinition def;
+	ObjectViewDefinition def = null;
+	String defaultBundle = null;
 	List<OrderedField> fields = new ArrayList<>();
 	List<OrderedView> childViews = new ArrayList<>();
+
 	
 	public OrderedView(ObjectViewDefinition def) {
 		this.def = def;
+	}
+	
+	public OrderedView(String defaultBundle) {
+		this.defaultBundle = defaultBundle;
 	}
 	
 	public boolean isRoot() {
@@ -57,6 +64,10 @@ public class OrderedView {
 		return new Integer(def==null ? Integer.MIN_VALUE : def.weight());
 	}
 
+	public String getBundle() {
+		return Objects.nonNull(def) ? def.bundle() : defaultBundle;
+	}
+	
 	public String getResourceKey() {
 		return def.value();
 	}

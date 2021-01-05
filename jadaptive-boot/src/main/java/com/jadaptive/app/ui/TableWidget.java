@@ -2,52 +2,62 @@ package com.jadaptive.app.ui;
 
 import java.io.IOException;
 
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.pf4j.Extension;
 
-import com.codesmith.webbits.ClasspathResource;
-import com.codesmith.webbits.In;
-import com.codesmith.webbits.Out;
-import com.codesmith.webbits.ParentView;
-import com.codesmith.webbits.View;
-import com.codesmith.webbits.Widget;
-import com.codesmith.webbits.bootstrap.BootstrapTable;
-import com.codesmith.webbits.extensions.PageResources;
-import com.codesmith.webbits.extensions.PageResourcesElement;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.ui.AbstractPageExtension;
+import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.PageDependencies;
 
-@Widget({ BootstrapTable.class, PageResources.class, PageResourcesElement.class })
-@View(contentType = "text/html")
-@ClasspathResource
-public class TableWidget {
+@Extension
+@PageDependencies(extensions = { "bootstrapTable"})
+public class TableWidget extends AbstractPageExtension {
 
-	 @Out
-	    public Elements service(@In Elements contents, @ParentView TemplatePage page) throws IOException {
+	@Override
+	public void process(Document document, Page page) throws IOException {
 		
+		if(!(page instanceof TemplatePage)) {
+			throw new IllegalStateException();
+		}
 		
-		Element table = contents.select("#table").first();
-		table.attr("data-resourcekey", page.getTemplate().getResourceKey());
-		table.append("<thead><tr></tr></thead>");
-		Element tr = table.selectFirst("tr");
+		TemplatePage templatePage = (TemplatePage) page;
+		Element table = document.select("#table").first();
+		table.attr("data-resourcekey", templatePage.getTemplate().getResourceKey());
 		
-		for(FieldTemplate field : page.getTemplate().getFields()) {
+		Element tr;
+		table.appendChild(new Element("thead").appendChild(tr = new Element("tr")));
+//		tr.appendChild(new Element("th").attr("data-field", "state").attr("data-checkbox","true"));
+		
+		for(FieldTemplate field : templatePage.getTemplate().getFields()) {
 			if(field.getViews().contains(FieldView.TABLE)) {
-				tr.append(String.format("<th webbits:bundle=\"i18n/%s\" webbits:i18n=\"%s.%s.name\" data-field=\"%s\">[%s]</th>", 
-						page.getTemplate().getResourceKey(),
-						page.getTemplate().getResourceKey(),
-						field.getResourceKey(),
-						field.getResourceKey(),
-						field.getResourceKey()));
+				Element el;
+				tr.appendChild(el = new Element("th")
+						.attr("jad:bundle", templatePage.getTemplate().getBundle())
+						.attr("jad:i18n", String.format("%s.name", 
+								field.getResourceKey()))
+						.attr("data-field", field.getResourceKey()));
 				
+				switch(field.getFieldType()) {
+				case BOOL:
+					el.attr("data-formatter", "renderBool");
+				default:
+				}
 			}
 		}
 		
-		tr.append("<th webbits:bundle=\"i18n\" webbits:i18n=\"default.actions.name\" data-formatter=\"renderActions\"></th>");
-//		Element th = tr.selectFirst("th");
-//		th.append("<a href=\"/app/ui/update/%s/%s\" data-uuid=\"%s\"><i class=\"far fa-edit\"></i></a>");
-//		th.append("<a href=\"/app/ui/view/%s/%s\" data-uuid=\"%s\"><i class=\"far fa-eye\"></i></a>");
+		tr.appendChild(new Element("th")
+				.attr("jad:bundle", "default")
+				.attr("jad:i18n", "actions.name")
+				.attr("data-formatter", "renderActions"));
 
-		return contents;
-	 }
+	}
+
+	@Override
+	public String getName() {
+		return "tableWidget";
+	}
+
 }

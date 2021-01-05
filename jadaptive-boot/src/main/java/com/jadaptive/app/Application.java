@@ -29,22 +29,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
-import com.codesmith.webbits.bootstrap.Bootstrap;
-import com.codesmith.webbits.jquery.JQuery;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.x509.FileFormatException;
 import com.jadaptive.api.x509.InvalidPassphraseException;
 import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
-import com.jadaptive.app.ui.JadaptiveApp;
-import com.jadaptive.app.webbits.WebbitsComponentScan;
 
 @SpringBootApplication
-@WebbitsComponentScan(basePackageClasses = {
-	JadaptiveApp.class,
-	Bootstrap.class,
-	JQuery.class })
 public class Application {
 
 	static Logger log = LoggerFactory.getLogger(Application.class);

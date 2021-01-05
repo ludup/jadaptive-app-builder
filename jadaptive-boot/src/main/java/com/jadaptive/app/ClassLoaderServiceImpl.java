@@ -169,4 +169,14 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
+
+	@Override
+	public boolean hasTemplateClass(ObjectTemplate template) {
+		try {
+			findClass(template.getTemplateClass());
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
 }

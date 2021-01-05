@@ -2,6 +2,7 @@ package com.jadaptive.app.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +24,10 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	
 	AbstractObject parent;
 	Map<String,AbstractObject> children = new HashMap<>();
-	String resourceKey;
 	Document document;
 	
-	public MongoEntity() {	
-		this.document = new Document();
+	public MongoEntity(Map<String,Object> document) {	
+		this(null, (String)document.get("resourceKey"), document);
 	}
 	
 	public MongoEntity(String resourceKey) {
@@ -46,9 +46,8 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	
 	public MongoEntity(AbstractObject parent, String resourceKey, Map<String,Object> document) {
 		this.parent = parent;
-		this.resourceKey = resourceKey;
 		this.document = new Document(document);
-		
+		this.document.put("resourceKey", resourceKey);
 		if(!Objects.isNull(parent)) {
 			parent.addChild(this);
 		}
@@ -67,12 +66,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 
 	@Override
 	public String getResourceKey() {
-		return resourceKey;
-	}
-
-	@Override
-	public void setResourceKey(String resourceKey) {
-		this.resourceKey = resourceKey;
+		return document.getString("resourceKey");
 	}
 
 	public Map<String,Object> getDocument() {
@@ -121,7 +115,8 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	}
 	
 	public Collection<String> getCollection(String fieldName) {
-		return document.getList(fieldName, String.class);
+		Collection<String> results = document.getList(fieldName, String.class);
+		return Objects.nonNull(results) ? results : Collections.emptyList();
 	}
 	
 //	public Collection<?> getReferenceCollection(String fieldName) {

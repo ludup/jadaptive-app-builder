@@ -1,61 +1,44 @@
 package com.jadaptive.app.ui;
 
-import java.io.FileNotFoundException;
-
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.pf4j.Extension;
 
-import com.codesmith.webbits.ClasspathResource;
-import com.codesmith.webbits.Form;
-import com.codesmith.webbits.HTTPMethod;
-import com.codesmith.webbits.In;
-import com.codesmith.webbits.Out;
-import com.codesmith.webbits.Page;
-import com.codesmith.webbits.Redirect;
-import com.codesmith.webbits.View;
+import com.jadaptive.api.auth.AuthenticationState;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.api.ui.AuthenticatedPage;
+import com.jadaptive.api.ui.AuthenticationPage;
+import com.jadaptive.api.ui.ModalPage;
+import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserService;
+import com.jadaptive.app.ui.ChangePassword.PasswordForm;
 
-@Page
-@View(contentType = "text/html", paths = { "/changePassword"})
-@ClasspathResource
-public class ChangePassword extends AuthenticatedPage {
+@Extension
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
+@ModalPage
+public class ChangePassword extends AuthenticationPage<PasswordForm> {
 
-	@Autowired
-	private UserService userService; 
-
-	@Autowired
-	private SessionUtils sessionUtils; 
-	
-    @Out(methods = HTTPMethod.POST)
-    Document service(@In Document content, @Form PasswordForm form) {
-    	
-    	Session session = sessionUtils.getActiveSession(Request.get());
-    	User user = session.getUser();
-    	userService.changePassword(user, form.getPassword().toCharArray(), false);
-    	
-    	/**
-    	 * Show feedback instead of redirect
-    	 */
-    	throw new Redirect(Dashboard.class);
-    }
-    
-    public boolean isModal() {
-    	return true;
-    }
-
-    public interface PasswordForm {
-
-	String getPassword();
-	String getConfirmPasssord();
-    }
+	public ChangePassword() {
+		super(PasswordForm.class);
+	}
 
 	@Override
-	protected void onCreated() throws FileNotFoundException {
-		
+	public String getUri() {
+		return "change-password";
 	}
+
+	public boolean doForm(Document document, AuthenticationState state, PasswordForm form) throws AccessDeniedException {
+
+		Session session = sessionUtils.getActiveSession(Request.get());
+		User user = session.getUser();
+		userService.changePassword(user, form.getPassword().toCharArray(), false);
+		return true;
+	}
+
+	public interface PasswordForm {
+
+		String getPassword();
+		String getConfirmPasssord();
+	}
+
 }

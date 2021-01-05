@@ -6,34 +6,55 @@ import java.util.HashSet;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
-import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectView;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.TableView;
 
 @ObjectDefinition(resourceKey = Role.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectViews({ 
+	@ObjectViewDefinition(value = Role.USERS_VIEW, bundle = "users"),
+	@ObjectViewDefinition(value = Role.PERMISSIONS_VIEW, bundle = "permissions", weight = 50),
+	@ObjectViewDefinition(value = Role.OPTIONS_VIEW, bundle = Role.RESOURCE_KEY, weight = 100)})
+@TableView(defaultColumns = { "name", "allPermissions", "allUsers" })
 public class Role extends NamedUUIDEntity {
 	
 	private static final long serialVersionUID = -5211370653998523985L;
 
 	public static final String RESOURCE_KEY = "roles";
 	
+	public static final String USERS_VIEW = "users";
+	public static final String PERMISSIONS_VIEW = "permissions";
+	public static final String OPTIONS_VIEW = "options";
+	
 	@ObjectField(defaultValue = "false", 
 			type = FieldType.BOOL)
+	@ObjectView(OPTIONS_VIEW)
 	boolean allPermissions;
 	
 	@ObjectField(defaultValue = "false", 
 			type = FieldType.BOOL)
+	@ObjectView(OPTIONS_VIEW)
 	boolean allUsers;
 	
 	@ObjectField(defaultValue = "false", 
-			type = FieldType.TEXT,
+			type = FieldType.PERMISSION,
 			searchable = true)
+	@ObjectView(PERMISSIONS_VIEW)
+	@ExcludeView(values = FieldView.TABLE)
 	Collection<String> permissions = new HashSet<>();
 	
 	@ObjectField(defaultValue = "false", 
 			type = FieldType.OBJECT_REFERENCE,
 			searchable = true,
 			references = "users")
+	@ObjectView(USERS_VIEW)
+	@ExcludeView(values = FieldView.TABLE)
 	Collection<String> users = new HashSet<>();
 	
 	public String getResourceKey() {

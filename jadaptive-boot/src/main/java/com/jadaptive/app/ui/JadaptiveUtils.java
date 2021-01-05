@@ -1,25 +1,22 @@
 package com.jadaptive.app.ui;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.jsoup.nodes.Document;
+import org.pf4j.Extension;
 
-import com.codesmith.webbits.Extension;
-import com.codesmith.webbits.In;
-import com.codesmith.webbits.Out;
-import com.codesmith.webbits.Page;
-import com.codesmith.webbits.View;
-import com.codesmith.webbits.util.Html;
+import com.jadaptive.api.ui.AbstractPageExtension;
+import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.PageHelper;
 
-@Extension(extendsPatterns = ".*", appliesTo = Page.class)
-@View(contentType = "text/html")
-public class JadaptiveUtils {
-	
-	String path = "/app/ui/js/jadaptive-utils.js";
-	
-	@Out
-	Document service(@In Document template, HttpServletRequest request) {
-		Html.addTailScript(template, request, path);
-		return template;
+@Extension
+public class JadaptiveUtils extends AbstractPageExtension {
+
+	@Override
+	public void process(Document document, Page page) {
+		PageHelper.appendScript(document, "/app/content/jadaptive-utils.js");
+	}
+
+	@Override
+	public String getName() {
+		return "jadaptive-utils";
 	}
 }

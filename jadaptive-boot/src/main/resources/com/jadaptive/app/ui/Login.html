@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:webbits="http://webbits.org/webbits"
-	webbits:depends="Bootstrap,Bind,Widgets,JadaptiveUtils,FontAwesomeify">
+<html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
 <body>
 <div class="wrapper">
-<header webbits:id="com.jadaptive.app.ui.Header"></header>
+<header jad:id="header"></header>
 <main class="container my-auto">
       <div class="row justify-content-center">
           <div id="login-container" class="col-8 align-self-center">
@@ -28,7 +27,7 @@
 
                           <div class="col-md-6 offset-md-4">
                               <button id="loginSubmit" class="bg-dark btn btn-primary">
-                                  <webbits:i>sign-in-alt</webbits:i>&nbsp;Login
+                                  <i class="fa fa-sign-in-alt"></i>&nbsp;Login
                               </button>
                           </div>
                            <div class="col-md-6 offset-md-4 mt-3">
@@ -42,7 +41,7 @@
       </div>
 </main>
 </div>
-<footer webbits:id="com.jadaptive.app.ui.Footer"></footer>
+<footer jad:id="footer"></footer>
 <script type="text/javascript">
 	$(document).ready(function(e) {
 		$('#loginSubmit').click(function(e) {

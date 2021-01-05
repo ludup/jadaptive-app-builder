@@ -27,12 +27,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.jadaptive.app.json.upload.UploadServlet;
 import com.jadaptive.app.scheduler.LockableTaskScheduler;
-import com.jadaptive.app.ui.JadaptiveApp;
 import com.jadaptive.utils.Utils;
 
 @Configuration
 @ComponentScan({"com.jadaptive.app.**", "com.jadaptive.api.**"})
-@ComponentScan(basePackageClasses = JadaptiveApp.class)
 @ServletComponentScan("com.jadaptive.app.**")
 @EnableAsync
 @EnableScheduling

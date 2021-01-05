@@ -1,16 +1,13 @@
 package com.jadaptive.plugins.builtin;
 
-import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserDatabase;
+import com.jadaptive.api.user.PasswordEnabledUserDatabase;
 
-public interface BuiltinUserDatabase extends UserDatabase {
+public interface BuiltinUserDatabase extends PasswordEnabledUserDatabase {
 
-	User createUser(String username, String name, String email, char[] password, boolean passwordChangeRequired);
+	BuiltinUser createUser(String username, String name, String email, char[] password, boolean passwordChangeRequired);
 
-	void saveOrUpdate(User user);
+	void deleteUser(BuiltinUser user);
 
-	void deleteUser(User user);
-
-	User getUserByEmail(String email);
+	BuiltinUser getUserByEmail(String email);
 
 }

@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 
@@ -41,7 +40,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.jadaptive.api.db.ClassLoaderService;
 //import com.hazelcast.hibernate.HazelcastCacheRegionFactory;
 
-@Configuration
+//@Configuration
 public class HazelcastSpringConfiguration {
 
 	static Logger log = LoggerFactory.getLogger(HazelcastSpringConfiguration.class);

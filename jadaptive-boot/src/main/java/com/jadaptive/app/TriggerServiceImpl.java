@@ -14,6 +14,6 @@ public class TriggerServiceImpl extends AuthenticatedService implements TriggerS
 	@Override
 	public void onAuditEvent(SystemEvent<?> evt) {
 		
-		System.out.println("Processing audit event " + evt.getResourceKey());
+		//System.out.println("Processing audit event " + evt.getResourceKey());
 	}
 }

@@ -35,13 +35,8 @@ public class AuthorizedKeys extends AbstractTenantAwareCommand {
 			user = userService.getUser(CliHelper.getValue(args, 'u', "user"));
 		}
 		
-		Collection<AuthorizedKey> keys;
-		if(CliHelper.hasOption(args, 't', "tag")) {
-			keys =  authorizedKeyService.getAuthorizedKeys(user, 
-					CliHelper.getValue(args, 't', "tag"));
-		} else {
-			keys  = authorizedKeyService.getAuthorizedKeys(user);
-		}
+		Collection<AuthorizedKey> keys  = authorizedKeyService.getAuthorizedKeys(user);
+		
 		for(AuthorizedKey key :keys) {
 			console.println(key.getPublicKey());
 		}

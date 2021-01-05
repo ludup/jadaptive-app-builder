@@ -17,11 +17,11 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.app.db.DocumentDatabase;
-import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
+import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.utils.Utils;
 
 @Repository
-public class ObjectTemplateRepositoryImpl extends AbstractTenantAwareObjectDatabaseImpl<ObjectTemplate>
+public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseImpl<ObjectTemplate>
 		implements ObjectTemplateRepository {
 
 	static Logger log = LoggerFactory.getLogger(ObjectTemplateRepositoryImpl.class);

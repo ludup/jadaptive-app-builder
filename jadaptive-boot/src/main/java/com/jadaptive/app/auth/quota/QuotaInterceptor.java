@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.session.PluginInterceptor;
-import com.jadaptive.app.json.ResponseHelper;
+import com.jadaptive.api.ui.ResponseHelper;
 
 @Extension
 public class QuotaInterceptor implements PluginInterceptor {

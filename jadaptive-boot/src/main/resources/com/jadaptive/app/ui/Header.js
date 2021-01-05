@@ -1,9 +1,10 @@
 $(document).ready(function() {
+	if($('nav')) {
 		$.getJSON('/app/api/applicationMenu/list', function(data) {
 			if(data.success) {
 				var menus = [];
 				var top = [];
-				$.each(data.resources, function(idx, obj) {
+				$.each(data.resource, function(idx, obj) {
 					if(obj.parent != '') {
 						if(!menus[obj.parent]) {
 							menus[obj.parent] = [];
@@ -16,6 +17,7 @@ $(document).ready(function() {
 						top.push(obj);
 					}
 				});
+				$('#topMenu').empty();
 				
 				$.each(top, function(idx, obj) {
 				
@@ -26,13 +28,12 @@ $(document).ready(function() {
 						
 						$.each(menus[obj.uuid], function(idx, child) {
 							$('#' + child.parent).append('<a class="dropdown-item mr-3" href="' 
-									+ child.path + '"><i class="' + child.icon + ' w-25"></i>&nbsp;' + child.title + '</a>');
+									+ child.path + '"><i class="' + child.icon + ' nav-icon"></i>&nbsp;' + child.title + '</a>');
 					
 						});
 					}
 				});
-				
-				
 			}
 		});
-	});
+	}
+});

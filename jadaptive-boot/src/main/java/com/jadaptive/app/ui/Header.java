@@ -1,46 +1,41 @@
 package com.jadaptive.app.ui;
 
-import org.jsoup.select.Elements;
+import java.util.Objects;
+
+import org.jsoup.nodes.Document;
+import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.codesmith.webbits.ClasspathResource;
-import com.codesmith.webbits.In;
-import com.codesmith.webbits.Out;
-import com.codesmith.webbits.ParentView;
-import com.codesmith.webbits.View;
-import com.codesmith.webbits.Widget;
-import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.api.ui.AbstractPage;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.ui.AbstractPageExtension;
+import com.jadaptive.api.ui.ModalPage;
+import com.jadaptive.api.ui.Page;
 
-@Widget
-@View(contentType = "text/html")
-@ClasspathResource
-public class Header {
+@Extension
+public class Header extends AbstractPageExtension {
 
 	@Autowired
-	private SessionUtils sessionUtils;
+	private PermissionService permissionService;
 	
-	boolean loggedOn;
-
-    public boolean isLoggedOn() {
-		return sessionUtils.hasActiveSession(Request.get());
-	}
-
-	@Out
-    public Elements service(@In Elements contents, @ParentView Object page) {
-    	
-		if(!isLoggedOn()) {
-			contents.select("script").remove();
-			contents.select("#searchForm").remove();
-			contents.select("#logoff").remove();
-		} else if(page instanceof AbstractPage) {
-			if(((AbstractPage)page).isModal()) {
-				contents.select("script").remove();
-				contents.select("#searchForm").remove();
-			}
+	@Override
+	public void process(Document document, Page page) {
+		if(Objects.nonNull(page.getClass().getAnnotation(ModalPage.class))) {
+			document.select("script").remove();
+			document.select("#searchForm").remove();
+			document.select("#topMenu").remove();
 		}
 		
-		return contents;
-    }
+		if(!permissionService.hasUserContext()) {
+			document.select("script").remove();
+			document.select("#searchForm").remove();
+			document.select("#topMenu").remove();
+			document.select("#logoff").remove();
+		} 
+	}
+
+	@Override
+	public String getName() {
+		return "header";
+	}
+
 }

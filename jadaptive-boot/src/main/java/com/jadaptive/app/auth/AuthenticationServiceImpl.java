@@ -35,18 +35,15 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.app.ui.Dashboard;
 import com.jadaptive.app.ui.Login;
-import com.jadaptive.app.ui.SetIdentity;
 
 @Service
 @Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION }, defaultPermissions = { AuthenticationService.USER_LOGIN_PERMISSION } )
 public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService {
 
-	private static final String AUTHENTICATION_STATE_ATTR = "authenticationState";
-	
 	public static final String PASSWORD_RESOURCE_KEY = "password";
 	public static final String USERNAME_RESOURCE_KEY = "username";
 
@@ -69,17 +66,17 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Autowired
 	private SessionUtils sessionUtils; 
 	
-	Map<String,Class<?>> registeredAuthenticationPages = new HashMap<>();
+	Map<String,Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
 	
 	
 	@PostConstruct
 	private void postConstruct() {
 		registerAuthenticationPage(PASSWORD_RESOURCE_KEY, Login.class);
-		registerAuthenticationPage(USERNAME_RESOURCE_KEY, SetIdentity.class);
+//		registerAuthenticationPage(USERNAME_RESOURCE_KEY, SetIdentity.class);
 	}
 	
 	@Override
-	public void registerAuthenticationPage(String resourceKey, Class<?> page) {
+	public void registerAuthenticationPage(String resourceKey, Class<? extends Page> page) {
 		registeredAuthenticationPages.put(resourceKey, page);
 	}
 	
@@ -116,15 +113,14 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 	
 	@Override
-	public void reportAuthenticationFailure(String username) {
+	public void reportAuthenticationFailure(AuthenticationState state) {
 		permissionService.setupSystemContext();
 		
 		try {
-			
-			AuthenticationState state = getCurrentState();
+
 			state.incrementFailedAttempts();
 			
-			assertLoginThreshold(username);
+			assertLoginThreshold(state.getAttemptedUsername());
 			assertLoginThreshold(Request.get().getRemoteAddr());
 		
 		} finally {
@@ -214,28 +210,13 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public Class<?> completeAuthentication(User user) {
+	public Class<? extends Page> completeAuthentication(AuthenticationState state) {
 		
-		if(Objects.isNull(user) || !userService.supportsLogin(user)) {
-			throw new AccessDeniedException("Bad username or password");
+		if(Objects.isNull(state.getUser()) || !userService.supportsLogin(state.getUser())) {
+			throw new AccessDeniedException("Invalid credentials");
 		}
 		
-		AuthenticationState state = getCurrentState();	
-		if(Objects.nonNull(user)) {
-			if(!state.hasUser()) {
-				state.setUser(user);
-			} else {
-				state.verifyUser(user);
-			}
-		}
-		
-		state.completePage();
-		
-		/**
-		 * Check for outstanding authentication requirements and
-		 * throw a redirect
-		 */
-		if(state.isComplete()) {
+		if(state.completePage()) {
 			
 			setupUserContext(state.getUser());
 			
@@ -245,14 +226,14 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				Session session = sessionService.createSession(getCurrentTenant(), 
 						state.getUser(), state.getRemoteAddress(), state.getUserAgent());
 				sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
-				Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, null);
-				return Dashboard.class;
+				
 			} finally {
 				clearUserContext();
 			}
-		} else {
-			return state.getCurrentPage();
 		}
+		
+		return state.getCurrentPage();
+		
 	}
 
 	@Override
@@ -263,7 +244,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			state = new AuthenticationState();
 			state.setRemoteAddress(Request.get().getRemoteAddr());
 			state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
-			
 			processRequiredAuthentication(state, DEFAULT_AUTHENTICATION_FLOW);
 			
 			Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
@@ -296,11 +276,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 	
 	@Override
-	public Class<?> resetAuthentication(Class<?>... additionalPages) {
+	public Class<? extends Page> resetAuthentication(@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages) {
 		return resetAuthentication(DEFAULT_AUTHENTICATION_FLOW, additionalPages);
 	}
 	@Override
-	public Class<?> resetAuthentication(String authenticationFlow, Class<?>... additionalClasses) {
+	public Class<? extends Page> resetAuthentication(String authenticationFlow, @SuppressWarnings("unchecked") Class<? extends Page>... additionalClasses) {
 		
 		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
 		AuthenticationState state = getCurrentState();

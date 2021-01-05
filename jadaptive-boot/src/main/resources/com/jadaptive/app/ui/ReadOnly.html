@@ -1,32 +1,31 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:webbits="http://webbits.org/webbits"
-	webbits:depends="Bootstrap,Bind,Widgets,FreeMarker">
+<html lang="en"  xmlns:jad="http://jadaptive.com/jadaptive">
 <head>
-	<title>View ${view.template.resourceKey}</title>
+	<title>View ${page.template.resourceKey}</title>
 	<meta charset="UTF-8">
 </head>
 <body>
 <div class="wrapper">
-<header webbits:id="com.jadaptive.app.ui.Header"></header>
+<header jad:id="header"></header>
 <main class="container mt-3">
  <div class="row">
 	<ol class="breadcrumb col-12">
 	  <li class="breadcrumb-item"><a href="/app/ui/dashboard">Home</a></li>
-	  <li class="breadcrumb-item active"><a href="/app/ui/table/${view.template.resourceKey}">${view.template.name}</a></li>
-	  <li class="breadcrumb-item active"><a href="/app/ui/view/${view.template.resourceKey}/${view.uuid}">View</a></li>
+	  <li class="breadcrumb-item active"><a href="/app/ui/table/${page.template.collectionKey}" jad:bundle="${page.template.name}" jad:i18n="${page.template.name}.name">[${page.template.name}]</a></li>
+	  <li class="breadcrumb-item active"><a href="/app/ui/view/${page.template.resourceKey}/${page.uuid}" jad:bundle="default" jad:i18n="view.name">[View]]</a></li>
 	</ol>
   </div>
    <div class="row my-1">
-   		 <div class="col-12" webbits:id="com.jadaptive.app.ui.Entity"></div>
+   		 <div class="col-12" jad:id="objectRenderer"></div>
    </div>
    <div class="row my-1">
          <div class="col-12">
-         	<a class="btn btn-danger float-left ml-3" href="/app/ui/table/${view.template.resourceKey}">
-         	<i class="fas fa-step-backward"></i>&nbsp;<span webbits:i18n="i18n/default.back.name">[Back]</span></a>
+         	<a class="btn btn-danger float-left ml-3" href="/app/ui/table/${page.template.collectionKey}">
+         	<i class="fas fa-step-backward"></i>&nbsp;<span jad:bundle="default" jad:i18n="back.name">[Back]</span></a>
          </div>
    </div>
 </main>
 </div>
-<footer webbits:id="com.jadaptive.app.ui.Footer"></footer>
+<footer jad:id="footer"></footer>
 </body>
 </html>

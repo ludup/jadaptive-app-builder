@@ -59,8 +59,6 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	@Override
 	public void setPassword(User user, char[] password, boolean passwordChangeRequired) {
 		
-
-		
 		File identity4jFile = getConnectorConfiguration();
 		
 		if(identity4jFile.exists()) {
@@ -251,7 +249,7 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	}
 
 	@Override
-	public Class<? extends User> getUserClass() {
+	public Class<RemoteUser> getUserClass() {
 		return RemoteUser.class;
 	}
 

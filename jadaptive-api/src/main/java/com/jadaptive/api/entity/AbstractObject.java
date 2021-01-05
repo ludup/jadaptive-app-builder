@@ -12,8 +12,6 @@ public interface AbstractObject extends UUIDDocument {
 
 	String getResourceKey();
 
-	void setResourceKey(String resourceKey);
-
 	Object getValue(String fieldName);
 
 	Object getValue(FieldTemplate t);

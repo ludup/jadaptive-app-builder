@@ -11,8 +11,6 @@ public interface JsonTemplateEnabledService<T extends AbstractUUIDEntity> {
 
 	Integer getTemplateOrder();
 
-	T createEntity();
-
 	String getName();
 
 	String getResourceKey();
