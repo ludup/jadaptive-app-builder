@@ -9,9 +9,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,21 +29,13 @@ public abstract class TerminalConnection implements TerminalWebSocketChannel, We
 	protected Terminal terminal;
 
 	private WebSocketClient websocket;
-	private ScheduledExecutorService dispatcher;
-	private ScheduledFuture<?> lastTask;
-	private Object wait = new Object();
-	private int bufferSize = 4096;
-	private int sendDelay = 5;
-	private int sendWait = 5;
 	private OutputStream out;
 	private Exception error;
 	private PipedOutputStream pipeOut;
 	private boolean inited;
 	
 	public TerminalConnection(WebSocketClient websocket) {
-		this.dispatcher = Executors.newScheduledThreadPool(1);
 		this.websocket = websocket;
-		buffer = ByteBuffer.allocate(bufferSize);
 		try {
 			terminal = new ClientSideWebSocketTerminal(this);
 			onOpen();
@@ -113,37 +102,6 @@ public abstract class TerminalConnection implements TerminalWebSocketChannel, We
 		return out;
 	}
 
-	public int getSendDelay() {
-		return sendDelay;
-	}
-
-	public void setSendDelay(int sendDelay) {
-		this.sendDelay = sendDelay;
-	}
-
-	public int getSendWait() {
-		return sendWait;
-	}
-
-	public void setSendWait(int sendWait) {
-		this.sendWait = sendWait;
-	}
-
-	public int getBufferSize() {
-		return bufferSize;
-	}
-
-	public void setBufferSize(int bufferSize) {
-		this.bufferSize = bufferSize;
-		if (buffer != null) {
-			synchronized (buffer) {
-				ByteBuffer b = ByteBuffer.allocate(bufferSize);
-				b.put(buffer);
-				buffer = b;
-			}
-		}
-	}
-	
 	@Override
 	public void receive(byte[] array) {
 		try {

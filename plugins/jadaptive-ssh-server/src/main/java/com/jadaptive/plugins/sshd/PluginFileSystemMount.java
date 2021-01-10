@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import org.pf4j.ExtensionPoint;
 
+import com.jadaptive.api.user.User;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
 
 public interface PluginFileSystemMount extends ExtensionPoint {
@@ -13,6 +14,6 @@ public interface PluginFileSystemMount extends ExtensionPoint {
 
 	boolean hasHome();
 
-	VirtualMountTemplate getHomeMount() throws IOException;
+	VirtualMountTemplate getHomeMount(User user) throws IOException;
 
 }

@@ -19,6 +19,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -127,6 +128,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			throw new ObjectNotFoundException(String.format("Collection %s does not contain an object for search %s", table, buildSearchString(fields)));
 		}
 		return result.first();
+	}
+
+	private String buildSearchString(SearchField[] fields) {
+		StringBuilder builder = new StringBuilder();
+		buildSearchString(Type.AND, builder, fields);
+		return builder.toString();
 	}
 
 	@Override
@@ -286,8 +293,65 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	
-	private String buildSearchString(SearchField[] fields) {
-		return "";
+	private void buildSearchString(SearchField.Type queryType, StringBuilder builder, SearchField[] fields) {
+
+		boolean close = false;
+		if(builder.length() > 0) {
+			switch(queryType) {
+			case OR:
+				builder.append(" OR (");
+				close = true;
+				break;
+			case AND:
+				builder.append(" AND (");
+				close = true;
+				break;
+			default:
+				break;
+			}
+		}
+		
+		int idx = 0;
+		for(SearchField field : fields) {
+			if(idx++ > 0) {
+				builder.append(" ");
+				builder.append(queryType.name());
+				builder.append(" ");
+			}
+			switch(field.getSearchType()) {
+			case EQUALS:
+				builder.append(field.getColumn());
+				builder.append(" = ");
+				builder.append(field.getValue()[0]);
+				break;
+			case IN:
+				builder.append(field.getColumn());
+				builder.append(" IN( ");
+				builder.append(Utils.csv(field.getValue()));
+				builder.append(" ) ");
+				break;
+			case NOT:
+				builder.append(field.getColumn());
+				builder.append(" != ");
+				builder.append(field.getValue()[0]);
+				break;
+			case LIKE:
+				builder.append(field.getColumn());
+				builder.append(" MATCHES ");
+				builder.append(Utils.csv(field.getValue()));
+				break;
+			case OR:
+				buildSearchString(SearchField.Type.OR, builder, field.getFields());
+				break;
+			case AND:
+				buildSearchString(SearchField.Type.AND, builder, field.getFields());
+				break;
+			}
+		}
+		
+		if(close) {
+			builder.append(") ");
+		}
 	}
 	
 	public Bson buildFilter(SearchField...fields) {

@@ -20,8 +20,7 @@ public class TerminalConnectionServiceImpl implements TerminalConnectionService 
 
 		SshClientConnector connector = connectors.get(sessionId);
 		if(Objects.isNull(connector)) {
-			connector = new DebugSshClientConnector();
-			//throw new IOException(String.format("%s is not a valid session ID", sessionId));
+			throw new IOException(String.format("%s is not a valid session identifier", sessionId));
 		}
 	
 		return new SshTerminalConnection(websocket, connector, sessionId);

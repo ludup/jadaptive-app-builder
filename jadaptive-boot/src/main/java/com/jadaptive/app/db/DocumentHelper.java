@@ -44,6 +44,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
@@ -240,17 +242,22 @@ public class DocumentHelper {
 		}
 		
 		String value = request.getParameter(fieldName);
-		if(Objects.isNull(value)) {
-			return null;
-		}
-		
+
 		switch(field.getFieldType()) {
 		case OBJECT_EMBEDDED:
-			// TODO convert to object
-			return null;
+			if(StringUtils.isNotBlank(objectPath)) {
+				objectPath += "/";
+			}
+			objectPath += field.getResourceKey();
+			return buildObject(request, 
+					ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
+						.get(field.getValidationValue(ValidationType.RESOURCE_KEY)), objectPath);
 		case OBJECT_REFERENCE:
 			return value;
 		default:
+			if(Objects.isNull(value)) {
+				return null;
+			}
 			return fromString(field, value);
 		}
 	}

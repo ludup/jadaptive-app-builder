@@ -95,8 +95,9 @@ public class Entity extends AbstractPageExtension {
 			}
 			
 			Element row;
+			Element form;
 			contents.selectFirst("body").appendChild(
-					new Element("form")
+					form = new Element("form")
 						.attr("id", "entity")
 						.attr("method", "POST")
 						.attr("data-resourcekey", templatePage.getResourceKey())
@@ -112,9 +113,30 @@ public class Entity extends AbstractPageExtension {
 								.val(Objects.nonNull(object) ? String.valueOf(object.isSystem()) : "false"))
 						.appendChild(new Element("input")
 								.attr("type", "hidden")
+								.attr("name", "resourceKey")
+								.val(Objects.nonNull(object) ? object.getResourceKey() : templatePage.getResourceKey())
+						.appendChild(new Element("input")
+								.attr("type", "hidden")
 								.attr("name", "hidden")
-								.val(Objects.nonNull(object) ?  String.valueOf(object.isHidden()) : "false"))
-						.appendChild(row = new Element("div").addClass("row")));
+								.val(Objects.nonNull(object) ?  String.valueOf(object.isHidden()) : "false"))));
+						
+//			
+//			if(Objects.nonNull(object)) {
+//				String clz = (String) object.getValue("_clz");
+//				if(Objects.nonNull(clz)) {
+//					form.appendChild(new Element("input")
+//							.attr("type", "hidden")
+//							.attr("name", "_clz")
+//							.val(clz));
+//				}
+//			} else {
+//				form.appendChild(new Element("input")
+//						.attr("type", "hidden")
+//						.attr("name", "_clz")
+//						.val(templatePage.getTemplate().getTemplateClass()));
+//			}
+			
+			form.appendChild(row = new Element("div").addClass("row"));
 			
 			List<OrderedView> views = templateService.getViews(templatePage.getTemplate());
 

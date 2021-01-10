@@ -181,7 +181,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 						continue;
 					}
 					if(mount.hasHome()) {
-						home = mount.getHomeMount();
+						home = mount.getHomeMount(user);
 					}
 				}
 			}

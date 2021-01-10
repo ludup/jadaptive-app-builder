@@ -61,6 +61,10 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 
 	private void writeEmbeddedObject(AbstractObject value, ObjectTemplate template, JsonGenerator gen, boolean collection) throws IOException {
 
+		if(Objects.isNull(value)) {
+			gen.writeNullField(template.getResourceKey());
+			return;
+		}
 		if(collection) {
 			gen.writeStartObject();
 		} else {
@@ -84,7 +88,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 
 				switch(t.getFieldType()) {
 				case OBJECT_EMBEDDED:
-					String type = t.getValidationValue(ValidationType.OBJECT_TYPE);
+					String type = t.getValidationValue(ValidationType.RESOURCE_KEY);
 					ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(type);
 					if(t.getCollection()) {
 						gen.writeArrayFieldStart(t.getResourceKey());
