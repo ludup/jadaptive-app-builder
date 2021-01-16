@@ -33,6 +33,8 @@ public @interface ObjectField {
 		
 		boolean nameField() default false;
 		
+		String formVariable() default "";
+		
 		@Deprecated
 		String references() default "";
 

@@ -15,8 +15,8 @@ public class HiddenFormInput extends FieldInputRender {
 	public final void renderInput(OrderedView panel, Element rootElement, String value) {
 	
 		rootElement.appendChild(new Element("input")
-						.attr("id", field.getResourceKey())
-						.attr("name", field.getResourceKey())
+						.attr("id", field.getFormVariable())
+						.attr("name", field.getFormVariable())
 						.addClass("form-control")
 						.attr("value", value)
 						.attr("type", "hidden"));

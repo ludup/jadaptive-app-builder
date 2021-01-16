@@ -263,6 +263,7 @@ public class Entity extends AbstractPageExtension {
 //				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
 				throw new IllegalStateException("Embedded object field should not be processed here");
 			default:
+				
 				renderFormField(template, element, obj, orderedField, properties, view, panel);
 			}
 			
@@ -288,6 +289,7 @@ public class Entity extends AbstractPageExtension {
 		case LONG:
 			break;
 		case OBJECT_EMBEDDED:
+			
 			break;
 		case OBJECT_REFERENCE:
 		{
@@ -338,13 +340,13 @@ public class Entity extends AbstractPageExtension {
 		case HIDDEN:
 		{
 			HiddenFormInput render = new HiddenFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(field, obj));
+			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
 			break;
 		}
 		case TEXT:
 		{
 			TextFormInput render = new TextFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(field, obj));
+			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
 			break;
 		}
 		case TEXT_AREA:
@@ -353,13 +355,13 @@ public class Entity extends AbstractPageExtension {
 			case HTML_EDITOR:
 			{
 				HtmlEditorFormInput render = new HtmlEditorFormInput(template, orderedField, currentDocument.get());
-				render.renderInput(panel, element, getDefaultValue(field, obj));
+				render.renderInput(panel, element, getDefaultValue(orderedField, obj));
 				break;
 			}
 			default:
 			{
 				TextAreaFormInput render = new TextAreaFormInput(template, orderedField);
-				render.renderInput(panel, element, getDefaultValue(field, obj));
+				render.renderInput(panel, element, getDefaultValue(orderedField, obj));
 				break;
 			}
 			}
@@ -368,32 +370,32 @@ public class Entity extends AbstractPageExtension {
 		case PASSWORD:
 		{
 			PasswordFormInput render = new PasswordFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(field, obj));
+			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
 			break;
 		}
 		case TIMESTAMP:
 		{
 			TimestampFormInput render = new TimestampFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(field, obj));
+			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
 			break;
 		}
 		case DATE:
 		{
 			DateFormInput render = new DateFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(field, obj));
+			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
 			break;
 		}
 		case BOOL:
 		{
 			BooleanFormInput render = new BooleanFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(field, obj));
+			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
 			break;
 		}
 		case PERMISSION:
 		{
 			DropdownFormInput render = new DropdownFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(field, obj));
-			render.renderValues(permissionService.getAllPermissions(), getDefaultValue(field, obj));
+			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+			render.renderValues(permissionService.getAllPermissions(), getDefaultValue(orderedField, obj));
 		
 			break;
 		}
@@ -403,8 +405,8 @@ public class Entity extends AbstractPageExtension {
 			try {
 				values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
 				DropdownFormInput render = new DropdownFormInput(template, orderedField);
-				render.renderInput(panel, element, getDefaultValue(field, obj));
-				render.renderValues((Enum<?>[])values.getEnumConstants(), getDefaultValue(field, obj), view == FieldView.READ);
+				render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+				render.renderValues((Enum<?>[])values.getEnumConstants(), getDefaultValue(orderedField, obj), view == FieldView.READ);
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
@@ -416,7 +418,7 @@ public class Entity extends AbstractPageExtension {
 		case LONG:
 		{
 			NumberFormInput render = new NumberFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(field, obj));
+			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
 			break;
 		}
 		case OBJECT_EMBEDDED:
@@ -436,12 +438,8 @@ public class Entity extends AbstractPageExtension {
 		}
 	}
 
-	private String getDefaultValue(FieldTemplate field, AbstractObject obj) {
-		String defaultValue = field.getDefaultValue();
-		if(Objects.nonNull(obj)) {
-			defaultValue = String.valueOf(obj.getValue(field));
-		}
-		return defaultValue;
+	private String getDefaultValue(OrderedField field, AbstractObject obj) {
+		return field.getFieldValue(obj);
 	}
 
 	private Element createViewElement(OrderedView view, Element rootElement, ObjectTemplate template, boolean first) {

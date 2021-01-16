@@ -16,6 +16,7 @@ import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.TableAction;
+import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
@@ -75,10 +76,20 @@ public class TablePage extends TemplatePage {
 		}
 		
 		TableView view = templateClazz.getAnnotation(TableView.class);
+		Element rowActions = document.selectFirst("#rowActions");
 		
 		if(view != null) {
 			for(TableAction action : view.actions()) {
-				createTableAction(document, action.url(), action.bundle(), action.buttonClass(), action.resourceKey());
+				if(action.target()==Target.TABLE) {
+					createTableAction(document, action.url(), action.bundle(), action.buttonClass(), action.resourceKey());
+				} else {
+					rowActions.appendChild( new Element("div")
+						.addClass("tableAction")
+						.attr("data-url", action.url())
+						.attr("data-bundle", action.bundle())
+						.attr("data-icon", action.buttonClass())
+						.attr("data-resourcekey", action.resourceKey()));
+				}
 			}
 		}
 		

@@ -5,6 +5,11 @@ function renderActions(val, obj, idx, total) {
 	if(!obj.system) {
 		ret += '<a class="clickDelete" href="#" data-uuid="' + obj.uuid + '"><i class="far fa-trash-alt"></i></a>';
 	}
+	$('.tableAction').each(function(idx, row) {
+	    var url = $(this).data('url');
+		ret += '&nbsp;<a href="' + url.replace('{uuid}', obj.uuid) + '"><i class="' + $(this).data('icon') + '"></i></a>';
+	
+	});
 	return ret;
 }
 
@@ -26,6 +31,7 @@ $(document).ready(function() {
 				pagination: true,
 				search: true,
 				showRefresh: true,
+				minWidth: 767,
 				mobileResponsive: true,
 				queryParams: function(params) {
 					params['searchField'] = $('#searchValue').val();

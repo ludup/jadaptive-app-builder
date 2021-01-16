@@ -539,6 +539,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 		FieldTemplate t = new FieldTemplate();
 		t.setResourceKey(f.getName());
+		t.setFormVariable(StringUtils.isNotBlank(field.formVariable()) ? field.formVariable() : f.getName());
 		t.setDefaultValue(field.defaultValue());
 		t.setFieldType(selectFieldType(f.getType(), field.type()));
 		t.setHidden(field.hidden());

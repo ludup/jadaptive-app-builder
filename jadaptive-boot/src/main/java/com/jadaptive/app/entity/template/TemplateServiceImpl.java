@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -307,7 +308,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			
 			} while(Objects.nonNull(tmp));
 			
-			processFields(null,template, clz, views); 
+			processFields(null,template, clz, views, new LinkedList<>()); 
 
 			for(String child : childViews.keySet()) {
 				OrderedView view = views.remove(child);
@@ -327,7 +328,14 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		}
 	}
 
-	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, OrderedView> views) throws NoSuchFieldException, ClassNotFoundException {
+	@SuppressWarnings("unchecked")
+	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, OrderedView> views, LinkedList<FieldTemplate> objectPath) throws NoSuchFieldException, ClassNotFoundException {
+		
+		LinkedList<FieldTemplate> currentPath = null;
+		if(!objectPath.isEmpty()) {
+			currentPath = (LinkedList<FieldTemplate>) objectPath.clone();
+		}
+		
 		for(FieldTemplate field : template.getFields()) {
 			
 			Field f = ReflectionUtils.getField(clz, field.getResourceKey());
@@ -337,8 +345,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				Class<?> c = ReflectionUtils.getObjectType(f);
 				String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
 				ObjectTemplate ct = get(resourceKey);
-
-				processFields(v, ct, c, views);
+				objectPath.add(field);
+				processFields(v, ct, c, views, objectPath);
 				continue;
 			}
 			
@@ -348,14 +356,14 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 					throw new IllegalStateException(
 							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
 				}
-				o.addField(new OrderedField(null, o, field));
+				o.addField(new OrderedField(null, o, field, currentPath));
 			} else {
 				OrderedView o = views.get(v.value());
 				if(Objects.isNull(o)) {
 					throw new IllegalStateException(
 							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
 				}
-				o.addField(new OrderedField(v, o, field));
+				o.addField(new OrderedField(v, o, field, currentPath));
 			}
 		}
 	}

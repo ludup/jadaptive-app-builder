@@ -21,6 +21,9 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	@ObjectField(type = FieldType.TEXT, required = true)
 	String resourceKey;
 	
+	@ObjectField(type = FieldType.TEXT, required = true)
+	String formVariable;
+	
 	@ObjectField(type = FieldType.TEXT)
 	String defaultValue;
 	
@@ -75,6 +78,14 @@ public class FieldTemplate extends AbstractUUIDEntity {
 
 	public void setResourceKey(String resourceKey) {
 		this.resourceKey = resourceKey;
+	}
+
+	public String getFormVariable() {
+		return formVariable;
+	}
+
+	public void setFormVariable(String formVariable) {
+		this.formVariable = formVariable;
 	}
 
 	public String getDefaultValue() {

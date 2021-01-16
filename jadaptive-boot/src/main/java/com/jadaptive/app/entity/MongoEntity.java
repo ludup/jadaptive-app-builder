@@ -27,7 +27,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	Document document;
 	
 	public MongoEntity(Map<String,Object> document) {	
-		this(null, (String)document.get("resourceKey"), document);
+		this((String)document.get("resourceKey"), document);
 	}
 	
 	public MongoEntity(String resourceKey) {
@@ -139,5 +139,9 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 			tmp.add(new MongoEntity(fieldName, child));
 		}
 		return tmp;
+	}
+
+	public void setValue(String key, String value) {
+		document.put(key, value);
 	}
 }

@@ -76,8 +76,7 @@ public class DocumentHelper {
 			if(StringUtils.isNotBlank(obj.getUuid())) {
 				document.put("_id", obj.getUuid());
 			}
-			
-			
+
 			document.put("_clz", obj.getClass().getName());
 			
 			Map<String,Field> fields = ReflectionUtils.getFields(obj.getClass());
@@ -205,10 +204,6 @@ public class DocumentHelper {
 	}
 
 	public static AbstractObject buildObject(HttpServletRequest request, ObjectTemplate template) {
-		return buildObject(request, template, "");
-	}
-	
-	public static AbstractObject buildObject(HttpServletRequest request, ObjectTemplate template, String objectPath) {
 
 		MongoEntity obj = new MongoEntity(template.getResourceKey());
 		String uuid = request.getParameter("uuid");
@@ -223,35 +218,32 @@ public class DocumentHelper {
 		if(Objects.nonNull(hidden)) {
 			obj.setHidden(Boolean.valueOf(hidden));
 		}
+
+		if(StringUtils.isNotBlank(template.getTemplateClass())) {
+			obj.setValue("_clz", template.getTemplateClass());
+		}
 		for(FieldTemplate field : template.getFields()) {
 			if(field.getCollection()) {
-				obj.setValue(field, convertValues(field, objectPath, request));
+				obj.setValue(field, convertValues(field, request));
 			} else {
-				obj.setValue(field, convertValue(field, objectPath, request));
+				obj.setValue(field, convertValue(field, request));
 			}
 		}
 		
 		return obj;
 	}
 	
-	private static Object convertValue(FieldTemplate field, String objectPath, HttpServletRequest request) {
+	private static Object convertValue(FieldTemplate field, HttpServletRequest request) {
 		
-		String fieldName = field.getResourceKey();
-		if(StringUtils.isNotBlank(objectPath)) {
-			fieldName = String.format("%s.%s", objectPath, fieldName);
-		}
+		String fieldName = field.getFormVariable();
 		
 		String value = request.getParameter(fieldName);
 
 		switch(field.getFieldType()) {
 		case OBJECT_EMBEDDED:
-			if(StringUtils.isNotBlank(objectPath)) {
-				objectPath += "/";
-			}
-			objectPath += field.getResourceKey();
 			return buildObject(request, 
 					ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
-						.get(field.getValidationValue(ValidationType.RESOURCE_KEY)), objectPath);
+						.get(field.getValidationValue(ValidationType.RESOURCE_KEY))).getDocument();
 		case OBJECT_REFERENCE:
 			return value;
 		default:
@@ -262,12 +254,9 @@ public class DocumentHelper {
 		}
 	}
 	
-	private static List<Object> convertValues(FieldTemplate field, String objectPath, HttpServletRequest request) {
+	private static List<Object> convertValues(FieldTemplate field, HttpServletRequest request) {
 		
-		String fieldName = field.getResourceKey();
-		if(StringUtils.isNotBlank(objectPath)) {
-			fieldName = String.format("%s.%s", objectPath, fieldName);
-		}
+		String fieldName = field.getFormVariable();
 		
 		List<Object> result = new ArrayList<>();
 		
@@ -276,18 +265,25 @@ public class DocumentHelper {
 			return result;
 		}
 		
-		for(String value : values) {
-			switch(field.getFieldType()) {
-			case OBJECT_EMBEDDED:
-				// TODO collection of objects
-				return null;
-			case OBJECT_REFERENCE:
+		switch(field.getFieldType()) {
+		case OBJECT_EMBEDDED:
+//			TODO build a collection of objects
+//			result.add(buildObject(request, 
+//				ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
+//					.get(field.getValidationValue(ValidationType.RESOURCE_KEY))));
+		case OBJECT_REFERENCE:
+			for(String value : values) {
 				result.add(value);
-				break;
-			default:
+			}
+			break;
+		default:
+			for(String value : values) {
 				result.add(fromString(field, value));
 			}
+			break;
 		}
+		
+		
 		
 		return result;
 	}
