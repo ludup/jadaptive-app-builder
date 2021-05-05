@@ -34,7 +34,6 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedView;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.app.db.DocumentHelper;

@@ -13,7 +13,6 @@ import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.app.db.DocumentDatabase;
 
 public class MockDocumentDatabaseImpl implements DocumentDatabase {

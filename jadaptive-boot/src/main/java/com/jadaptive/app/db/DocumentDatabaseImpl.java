@@ -3,7 +3,6 @@ package com.jadaptive.app.db;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -20,7 +19,6 @@ import com.jadaptive.api.db.SearchField.Type;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;

@@ -17,7 +17,6 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
-import com.jadaptive.api.user.UserImpl;
 import com.jadaptive.api.user.UserService;
 
 @Extension

@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.OrderedField;
 import com.jadaptive.api.template.OrderedView;
-import com.jadaptive.api.ui.NamePairValue;
 
 public class MultipleTextFormInput {
 

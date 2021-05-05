@@ -3,8 +3,6 @@ package com.jadaptive.app.db;
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.entity.AbstractObject;
-import com.jadaptive.api.template.ObjectTemplate;
 
 public interface DocumentDatabase {
 

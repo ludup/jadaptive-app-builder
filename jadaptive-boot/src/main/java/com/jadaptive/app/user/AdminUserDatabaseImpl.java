@@ -20,7 +20,6 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
-import com.jadaptive.api.user.UserImpl;
 
 @Extension
 public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl implements AdminUserDatabase, TenantAware {

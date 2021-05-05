@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationUpdateManager;
 import com.jadaptive.api.app.ApplicationVersion;
@@ -46,7 +45,6 @@ import com.sshtools.server.vsession.ShellCommandFactory;
 import com.sshtools.server.vsession.VirtualChannelFactory;
 import com.sshtools.server.vsession.VirtualSessionPolicy;
 import com.sshtools.server.vsession.commands.fs.FileSystemCommandFactory;
-import com.sshtools.synergy.nio.ProtocolContextFactory;
 import com.sshtools.synergy.nio.SshEngineContext;
 import com.sshtools.synergy.ssh.ChannelNG;
 import com.sshtools.vsession.commands.ssh.SshClientsCommandFactory;
@@ -59,12 +57,6 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 
 	@Autowired
 	private ApplicationService appContext; 
-	
-	@Autowired
-	private PasswordAuthenticatorImpl passwordAuthenticator; 
-	
-	@Autowired
-	private AuthorizedKeyProvider authorizedKeysAuthenticator;
 	
 	@Autowired
 	private UserCommandFactory userCommands; 
@@ -97,20 +89,14 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	public void onApplicationStartup() {
 
 		try {
-
-			int port = ApplicationProperties.getValue("sshd.port", 2222);
-			boolean extenalAccess = ApplicationProperties.getValue("sshd.externalAccess", true);
-
-			if(ApplicationProperties.getValue("sshd.permitPassword", true)) {
-				addAuthenticator(passwordAuthenticator);
-			}
 			
-			addAuthenticator(authorizedKeysAuthenticator);
+			Iterable<SSHInterface> interfaces = interfaceService.allObjects();
 			
-			for(SSHInterface iface : interfaceService.allObjects()) {
+			for(SSHInterface iface : interfaces) {
 				
 				SSHInterfaceFactory factory = appContext.getBean(iface.getInterfaceFactory());
-				addInterface(iface.getAddressToBind(),  iface.getPortToBind(), new SSHDInterface(factory, iface));
+				addInterface(iface.getAddressToBind(),  iface.getPortToBind(), 
+						new SSHDInterface(factory, iface));
 			}
 			
 			

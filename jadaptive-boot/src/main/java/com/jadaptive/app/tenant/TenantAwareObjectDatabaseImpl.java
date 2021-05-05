@@ -1,12 +1,10 @@
 package com.jadaptive.app.tenant;
 
 import java.util.Collection;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.api.db.ObjectClass;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;

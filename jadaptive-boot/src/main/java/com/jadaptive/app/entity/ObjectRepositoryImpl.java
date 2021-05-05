@@ -1,6 +1,5 @@
 package com.jadaptive.app.entity;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -9,8 +8,6 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.bouncycastle.crypto.digests.SHA256Digest;
-import org.bouncycastle.util.encoders.Hex;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
