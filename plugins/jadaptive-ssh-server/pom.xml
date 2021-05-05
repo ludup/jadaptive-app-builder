@@ -39,15 +39,13 @@
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-synergy</artifactId>
-			<version>3.0.0-RC1</version>
-			<exclusions>
-
-			</exclusions>
+			<version>3.0.0-RC5</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-bc</artifactId>
-			<version>3.0.0-RC1</version>
+			<version>3.0.0-RC5</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.bouncycastle</groupId>
@@ -73,7 +71,7 @@
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-sshagent</artifactId>
-			<version>3.0.0-RC1</version>
+			<version>3.0.0-RC5</version>
 		</dependency>
 
 		<dependency>

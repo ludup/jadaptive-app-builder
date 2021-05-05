@@ -57,6 +57,19 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
 	}
 	
+	protected ObjectTemplate getObjectTemplate(Class<?> clz) {
+		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
+		while(template!=null && template.type() == ObjectType.OBJECT) {
+			clz = clz.getSuperclass();
+			template = clz.getAnnotation(ObjectDefinition.class);
+		} 
+		if(Objects.nonNull(template)) {
+			ObjectTemplate t = templateRepository.get(template.resourceKey());
+			return t;
+		}
+		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
+	}
+	
 	protected  <T extends UUIDEntity> Cache<String, T> getCache(Class<T> clz) {
 		return cacheService.getCacheOrCreate(String.format("%s.uuidCache", clz.getName()), String.class, clz);
 	}
@@ -78,10 +91,31 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
 		try {
 
+//			Document previous = null;
+//			
+//			if(StringUtils.isNotBlank(obj.getUuid())) {
+//				try {
+//					previous = db.getByUUID(obj.getUuid(), getCollectionName(obj.getClass()), database);
+//				} catch(ObjectNotFoundException ex) {
+//				}
+//			}
+			
 			Document document = new Document();
 			document.put("resourceKey", obj.getResourceKey());
 			DocumentHelper.convertObjectToDocument(obj, document);
-			db.insertOrUpdate(obj, document, getCollectionName(obj.getClass()), database);
+			
+//			String contentHash = DocumentHelper.generateContentHash(templateRepository.get(obj.getResourceKey()), document);
+//			document.put("contentHash", contentHash);
+//			
+//			if(Objects.nonNull(previous) && previous.getString("contentHash").equals(contentHash)) {
+//				if(log.isDebugEnabled()) {
+//					log.debug("Object {} with uuid {} has not been updated because it's new content hash is the same as the previous");
+//				}
+//				return;
+//			}
+			
+			db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
+			obj.setUuid(document.getString("_id"));
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				/**

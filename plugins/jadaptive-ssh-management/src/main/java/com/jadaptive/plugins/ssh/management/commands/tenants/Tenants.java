@@ -59,7 +59,7 @@ public class Tenants extends AbstractTenantAwareCommand {
 
 	private void printTenants(boolean friendly) {
 		
-		for(Tenant tenant : tenantService.listTenants()) {
+		for(Tenant tenant : tenantService.allObjects()) {
 			if(friendly) {
 				console.println(String.format("%s (%s)", tenant.getName(), tenant.getDomain()));
 			} else {

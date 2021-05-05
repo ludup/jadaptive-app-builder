@@ -65,7 +65,7 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	}
 
 	@Override
-	public Iterable<User> iterateUsers() {
+	public Iterable<User> allObjects() {
 		return new ArrayList<User>(Arrays.asList(
 				objectDatabase.get(AdminUser.class, 
 						SearchField.eq("uuid", ADMIN_USER_UUID))));
@@ -128,7 +128,7 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	}
 
 	@Override
-	public void deleteObject(UserImpl object) {
+	public void deleteObject(User object) {
 		// TODO
 		
 	}

@@ -1,5 +1,6 @@
 package com.jadaptive.app.entity;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -8,7 +9,11 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.util.encoders.Hex;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -30,6 +35,8 @@ import com.jadaptive.app.db.DocumentHelper;
 @Repository
 public class ObjectRepositoryImpl implements ObjectRepository {
 
+	static Logger log = LoggerFactory.getLogger(ObjectRepositoryImpl.class);
+	
 	@Autowired
 	DocumentDatabase db;
 	
@@ -112,11 +119,13 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		ObjectTemplate template = templateRepository.get(SearchField.eq("resourceKey", entity.getResourceKey()));
 		
 		validateReferences(template, entity);
-		
-		Document doc = new Document(entity.getDocument());
-		db.insertOrUpdate(entity, doc, template.getCollectionKey(), tenantService.getCurrentTenant().getUuid());
-		return doc.getString("_id");
+
+		Document document = new Document(entity.getDocument());
+		db.insertOrUpdate(document, template.getCollectionKey(), tenantService.getCurrentTenant().getUuid());
+		return document.getString("_id");
 	}
+
+
 
 	private void validateReferences(ObjectTemplate template, AbstractObject entity) {
 		validateReferences(template.getFields(), entity);

@@ -10,44 +10,44 @@
  "permissionProtected": false,
  "fields": [{
               "resourceKey": "title",
+              "parentKey": "applicationMenu",
               "defaultValue": "",
-              "description": "The title visible to users",
               "fieldType": "TEXT",
               "searchable": true
        }, {
               "resourceKey": "path",
+              "parentKey": "applicationMenu",
               "defaultValue": "",
-              "description": "The URL path of this resource",
               "fieldType": "TEXT",
               "searchable": true
        },{
               "resourceKey": "permissions",
+              "parentKey": "applicationMenu",
               "collection": true,
               "defaultValue": "",
-              "description": "The permission(s) required to access this menu",
               "fieldType": "TEXT",
               "searchable": true
        }, {
               "resourceKey": "icon",
+              "parentKey": "applicationMenu",
               "defaultValue": "",
-              "description": "The Font Awesome icon name",
               "fieldType": "TEXT"
        },{
               "resourceKey": "keywords",
+              "parentKey": "applicationMenu",
               "defaultValue": "",
-              "description": "Keywords that users might use to search for this page",
               "fieldType": "TEXT",
               "searchable": true
        },{
               "resourceKey": "description",
+              "parentKey": "applicationMenu",
               "defaultValue": "",
-              "description": "Description of the page used when searching the menu",
               "fieldType": "TEXT_AREA",
               "searchable": true
        }, {
               "resourceKey": "parent",
+              "parentKey": "applicationMenu",
               "defaultValue": "",
-              "description": "This menu item's parent, if any'",
               "fieldType": "OBJECT_REFERENCE",
               "validators": [{
               	"type": "OBJECT_TYPE",

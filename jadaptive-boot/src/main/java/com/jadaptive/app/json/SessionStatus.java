@@ -1,8 +1,9 @@
 package com.jadaptive.app.json;
 
+import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.session.Session;
 
-public class SessionStatus extends RequestStatus {
+public class SessionStatus extends RequestStatusImpl {
 
 	Session session;
 	String homePage;

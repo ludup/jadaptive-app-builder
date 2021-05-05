@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.json.RequestStatus;
+import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -68,12 +70,12 @@ public class TemplateController {
 
 		try {
 			templateService.saveOrUpdate(template);
-			return new RequestStatus();
+			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("POST api/template", e);
 			}
-			return new RequestStatus(false, e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		}
 	}
 	
@@ -84,12 +86,12 @@ public class TemplateController {
 
 		try {
 			templateService.delete(uuid);
-			return new RequestStatus();
+			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("DELETE api/template", e);
 			}
-			return new RequestStatus(false, e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		}
 	}
 	

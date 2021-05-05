@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.json.RequestStatus;
+import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.session.UnauthorizedException;
@@ -49,9 +50,9 @@ public class AuthorizedKeyController extends AuthenticatedController{
 			request.getSession().setAttribute(KEY_DOWNLOAD, 
 					authorizedKeyService.createKeyFile(name, authorizedKeyService.createAuthorizedKey(
 							PublicKeyType.values()[type], name, getCurrentUser()), passphrase));
-			return new RequestStatus(true);
+			return new RequestStatusImpl(true);
 		} catch (Throwable e) {
-			return new RequestStatus(false, e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		}
 		
 	}
@@ -69,9 +70,9 @@ public class AuthorizedKeyController extends AuthenticatedController{
 			request.getSession().setAttribute(KEY_DOWNLOAD, 
 					authorizedKeyService.createKeyFile(name, authorizedKeyService.createAuthorizedKey(
 							PublicKeyType.values()[type], name, userService.getUserByUUID(uuid)), passphrase));
-			return new RequestStatus(true);
+			return new RequestStatusImpl(true);
 		} catch (Throwable e) {
-			return new RequestStatus(false, e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		}
 		
 	}

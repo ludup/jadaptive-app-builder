@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 import com.jadaptive.api.user.User;
 import com.sshtools.common.files.AbstractFileFactory;
+import com.sshtools.synergy.nio.SshEngine;
 
 public interface SSHDService {
 
@@ -20,5 +21,7 @@ public interface SSHDService {
 	SSHInterface getInterface(String intf);
 
 	void removeInterface(SSHInterface sshInterface) throws UnknownHostException;
+
+	SshEngine getEngine();
 
 }

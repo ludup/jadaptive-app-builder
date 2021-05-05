@@ -30,10 +30,11 @@ public interface AbstractObject extends UUIDDocument {
 
 	Collection<String> getCollection(String resourceKey);
 
-	void addChild(AbstractObject e);
-
 	void setSystem(Boolean val);
 
 	void setHidden(Boolean val);
 
+	Map<String, AbstractObject> getChildren();
+
+	void addChild(String resourceKey, AbstractObject e);
 }

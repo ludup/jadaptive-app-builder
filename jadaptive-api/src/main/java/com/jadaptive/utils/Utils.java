@@ -354,7 +354,7 @@ public class Utils {
 			if(b.length() > 0) {
 				b.append(",");
 			}
-			b.append(i);
+			b.append(i.toString());
 		}
 		return b.toString();
 	}

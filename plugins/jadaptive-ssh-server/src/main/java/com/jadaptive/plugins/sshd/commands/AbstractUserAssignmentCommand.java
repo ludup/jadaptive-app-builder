@@ -70,7 +70,7 @@ public abstract class AbstractUserAssignmentCommand<T extends AssignableUUIDEnti
 		if(line.wordIndex() == 1) {
 			loadCandidates(candidates);
 		} else if(line.wordIndex() > 1) {
-			for(User user : userService.allUsers()) {
+			for(User user : userService.allObjects()) {
 				candidates.add(new Candidate(user.getUsername()));
 			}
 		}

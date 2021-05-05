@@ -18,7 +18,7 @@
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder/plugins</plugin.projectUrl>
-		<plugin.dependencies></plugin.dependencies>
+		<plugin.dependencies>jadaptive-ssh-server</plugin.dependencies>
 	</properties>
 
 	<dependencies>		
@@ -30,18 +30,17 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>com.sshtools</groupId>
-			<artifactId>terminal-web</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<groupId>com.jadaptive</groupId>
+			<artifactId>jadaptive-ssh-server</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.sshtools</groupId>
-			<artifactId>maverick-synergy-client</artifactId>
-			<version>3.0.0-RC1</version>
+			<artifactId>terminal-web</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
 		</dependency>
-		
-		
 	</dependencies>
 
 	<build>

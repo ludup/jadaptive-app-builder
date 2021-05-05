@@ -46,6 +46,7 @@ import com.sshtools.server.vsession.ShellCommandFactory;
 import com.sshtools.server.vsession.VirtualChannelFactory;
 import com.sshtools.server.vsession.VirtualSessionPolicy;
 import com.sshtools.server.vsession.commands.fs.FileSystemCommandFactory;
+import com.sshtools.synergy.nio.ProtocolContextFactory;
 import com.sshtools.synergy.nio.SshEngineContext;
 import com.sshtools.synergy.ssh.ChannelNG;
 import com.sshtools.vsession.commands.ssh.SshClientsCommandFactory;
@@ -83,6 +84,9 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	@Autowired
 	private SingletonObjectDatabase<SSHDConfiguration> configService;
 	
+	@Autowired
+	private SSHInterfaceService interfaceService; 
+	
 	Map<String,SSHInterface> interfaces = new HashMap<>();
 	
 	public SSHDServiceImpl() throws UnknownHostException {
@@ -103,13 +107,12 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			
 			addAuthenticator(authorizedKeysAuthenticator);
 			
-			addInterface(extenalAccess ? "::" : "::1", port);
-
-			for(SSHInterfaceFactory factory : appContext.getBeans(SSHInterfaceFactory.class)) {
-				for(SSHInterface iface : factory.getInterfaces()) {
-					addInterface(iface.getAddressToBind(),  iface.getPort(), iface.getContextFactory());
-				}
+			for(SSHInterface iface : interfaceService.allObjects()) {
+				
+				SSHInterfaceFactory factory = appContext.getBean(iface.getInterfaceFactory());
+				addInterface(iface.getAddressToBind(),  iface.getPortToBind(), new SSHDInterface(factory, iface));
 			}
+			
 			
 			start(true);
 		} catch (IOException e) {
@@ -285,8 +288,11 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 
 	@Override
 	public void addInterface(SSHInterface sshInterface) throws IOException {
-		addInterface(sshInterface.getAddressToBind(), sshInterface.getPort(), sshInterface.getContextFactory());
-		interfaces.put(sshInterface.getInterface(), sshInterface);
+		addInterface(sshInterface.getAddressToBind(), 
+				sshInterface.getPortToBind(), 
+				getDefaultContextFactory());
+		interfaces.put(sshInterface.getInterface(), 
+				sshInterface);
 	}
 
 	@Override
@@ -301,7 +307,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 
 	@Override
 	public void removeInterface(SSHInterface sshInterface) throws UnknownHostException {
-		removeInterface(sshInterface.getAddressToBind(), sshInterface.getPort());
+		removeInterface(sshInterface.getAddressToBind(), sshInterface.getPortToBind());
 		interfaces.remove(sshInterface.getInterface());
 	}
 }

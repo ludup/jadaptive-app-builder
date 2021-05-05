@@ -88,7 +88,8 @@ public class TablePage extends TemplatePage {
 						.attr("data-url", action.url())
 						.attr("data-bundle", action.bundle())
 						.attr("data-icon", action.buttonClass())
-						.attr("data-resourcekey", action.resourceKey()));
+						.attr("data-resourcekey", action.resourceKey())
+						.attr("data-window", action.window().name()));
 				}
 			}
 		}

@@ -19,7 +19,9 @@ $(document).ready(function() {
            data: form.serialize(),
            success: function(data)
            {
-               if(data.success) {
+               if(data.redirect) {
+                	window.location = data.location;
+               } else if(data.success) {
                    window.location = '/app/ui/table/' + form.data('resourcekey');
                } else {
                	   $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="far fa-exclamation-square"></i> <span id="feedbackText"></span></p>');

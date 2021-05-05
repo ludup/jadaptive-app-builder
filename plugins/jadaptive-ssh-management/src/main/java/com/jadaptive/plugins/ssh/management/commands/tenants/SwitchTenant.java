@@ -54,7 +54,7 @@ public class SwitchTenant extends AbstractTenantAwareCommand {
 	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
 		if(line.wordIndex() == 1) {
 			// Users
-			for(Tenant tenant : tenantService.listTenants()) {
+			for(Tenant tenant : tenantService.allObjects()) {
 				candidates.add(new Candidate(tenant.getDomain()));
 			}
 		} 

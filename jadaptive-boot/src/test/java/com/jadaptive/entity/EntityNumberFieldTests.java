@@ -33,7 +33,6 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 		t1.setResourceKey("employees");
 		t1.setDefaultValue("1");
 		t1.setRequired(required);
-		t1.setDescription("The number of employees");
 		t1.setFieldType(FieldType.LONG);
 		t1.getValidators().addAll(Arrays.asList(validators));
 

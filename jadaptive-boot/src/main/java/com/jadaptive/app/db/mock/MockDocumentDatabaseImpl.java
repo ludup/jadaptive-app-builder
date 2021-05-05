@@ -13,7 +13,7 @@ import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
-import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.app.db.DocumentDatabase;
 
 public class MockDocumentDatabaseImpl implements DocumentDatabase {
@@ -31,12 +31,12 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public <E extends UUIDDocument> void insertOrUpdate(E obj, Document document, String table, String database) {
+	public void insertOrUpdate(Document document, String table, String database) {
 		
-		if(StringUtils.isBlank(obj.getUuid())) {
-			obj.setUuid(UUID.randomUUID().toString());
+		if(StringUtils.isBlank(document.getString("_id"))) {
+			document.put("_id", UUID.randomUUID().toString());
 		}
-		getCollection(table, database).put(obj.getUuid(), document);
+		getCollection(table, database).put(document.getString("_id"), document);
 
 	}
 

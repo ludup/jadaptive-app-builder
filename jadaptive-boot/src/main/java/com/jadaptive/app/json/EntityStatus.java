@@ -1,6 +1,8 @@
 package com.jadaptive.app.json;
 
-public class EntityStatus<T> extends RequestStatus {
+import com.jadaptive.api.json.RequestStatusImpl;
+
+public class EntityStatus<T> extends RequestStatusImpl {
 
 	T resource;
 	

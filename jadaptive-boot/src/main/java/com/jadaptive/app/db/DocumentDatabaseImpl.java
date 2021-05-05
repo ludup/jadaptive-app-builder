@@ -3,12 +3,15 @@ package com.jadaptive.app.db;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -16,9 +19,8 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
@@ -33,6 +35,8 @@ import com.mongodb.client.result.DeleteResult;
 @Repository
 public class DocumentDatabaseImpl implements DocumentDatabase {
 
+	static Logger log = LoggerFactory.getLogger(DocumentDatabaseImpl.class);
+	
 	@Autowired
 	protected MongoDatabaseService mongo;
 	
@@ -64,30 +68,52 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public <E extends UUIDDocument> void insertOrUpdate(E obj, Document document, String table, String database) {
+	public void insertOrUpdate(Document document, /*ObjectTemplate template,*/ String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		
-		
+
 		Date now = new Date();
-		if(obj instanceof AbstractUUIDEntity) {
-			document.put("lastModified", now);
-			if(!document.containsValue("created")) {
-				document.put("created", now);
-			}
-		}
+		document.put("lastModified", now);
 		
-		if(StringUtils.isBlank(obj.getUuid())) {
+		if(StringUtils.isBlank(document.getString("_id"))) {
+			
+			document.put("created", now);
+			document.put("_id", UUID.randomUUID().toString());
 			
 			assertUniqueConstraints(collection, document);
 			
+//			String contentHash = DocumentHelper.generateContentHash(document);
+//			document.put("contentHash", contentHash);
+			collection.insertOne(document);		
 			
-			obj.setUuid(UUID.randomUUID().toString());
-			document.put("_id", obj.getUuid());
-			collection.insertOne(document);			
+			// Created Event
 		} else {
-			collection.replaceOne(Filters.eq("_id", obj.getUuid()), 
+			
+//			Document previous = null;
+//			try {
+//				previous = getByUUID(document.getString("_id"), table, database);
+//			} catch(ObjectNotFoundException ex) {
+//			}
+			
+//			String contentHash = DocumentHelper.generateContentHash(document);
+//			document.put("contentHash", contentHash);
+			
+//			if(Objects.nonNull(previous) && previous.getString("contentHash").equals(contentHash)) {
+//				if(log.isDebugEnabled()) {
+//					log.debug("Object on {} with uuid {} has not been updated because it's new content hash is the same as the previous",
+//							table, previous.get("_id"));
+//				}
+//				return;
+//			}
+			
+//			if(log.isDebugEnabled()) {
+//				log.debug("Saving {} object with content hash {}", table, contentHash);
+//			}
+			
+			collection.replaceOne(Filters.eq("_id", document.getString("_id")), 
 					document, new ReplaceOptions().upsert(true));
+			
+			// Updated Event
 		}
 	}
 

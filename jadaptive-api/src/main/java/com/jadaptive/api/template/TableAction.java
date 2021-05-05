@@ -11,7 +11,11 @@ public @interface TableAction {
 	
 	enum Target { TABLE, ROW };
 	
+	enum Window { SELF, BLANK }
+	
 	Target target() default Target.TABLE;
+	
+	Window window() default Window.SELF;
 	
 	String bundle(); 
 	

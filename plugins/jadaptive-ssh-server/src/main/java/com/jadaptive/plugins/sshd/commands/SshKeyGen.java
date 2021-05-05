@@ -69,7 +69,7 @@ public class SshKeyGen extends AbstractTenantAwareCommand {
 				candidates.add(new Candidate("ecdsa"));
 				candidates.add(new Candidate("ed25519"));
 			} else if(prev.equals("-a") || prev.equals("--assign")) {
-				for(User user : userService.allUsers()) {
+				for(User user : userService.allObjects()) {
 					candidates.add(new Candidate(user.getUsername()));
 				}
 			}

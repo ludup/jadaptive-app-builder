@@ -31,7 +31,7 @@ public class TenantController {
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityResultsStatus<Tenant> getEntityTemplates(HttpServletRequest request) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-		   return new EntityResultsStatus<Tenant>(tenantService.listTenants());
+		   return new EntityResultsStatus<Tenant>(tenantService.allObjects());
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/tenant/list", e);

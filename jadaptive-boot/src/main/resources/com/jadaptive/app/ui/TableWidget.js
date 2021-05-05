@@ -7,7 +7,7 @@ function renderActions(val, obj, idx, total) {
 	}
 	$('.tableAction').each(function(idx, row) {
 	    var url = $(this).data('url');
-		ret += '&nbsp;<a href="' + url.replace('{uuid}', obj.uuid) + '"><i class="' + $(this).data('icon') + '"></i></a>';
+		ret += '&nbsp;<a href="' + url.replace('{uuid}', obj.uuid) + '" ' + ($(this).data('window') === 'BLANK' ? 'target="_blank"' : '') + '><i class="' + $(this).data('icon') + '"></i></a>';
 	
 	});
 	return ret;

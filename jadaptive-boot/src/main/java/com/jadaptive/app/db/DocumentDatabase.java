@@ -3,11 +3,12 @@ package com.jadaptive.app.db;
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.template.ObjectTemplate;
 
 public interface DocumentDatabase {
 
-	<E extends UUIDDocument> void insertOrUpdate(E obj, Document document, String table, String database);
+	void insertOrUpdate(Document document, String table, String database);
 
 	Document getByUUID(String uuid, String table, String database);
 	
@@ -48,6 +49,10 @@ public interface DocumentDatabase {
 	Document max(String table, String database, String field);
 	
 	Document min(String table, String database, String field);
+
+	
+
+	
 	
 
 }

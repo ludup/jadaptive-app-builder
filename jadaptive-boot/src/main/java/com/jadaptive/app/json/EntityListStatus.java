@@ -2,7 +2,9 @@ package com.jadaptive.app.json;
 
 import java.util.Collection;
 
-public class EntityListStatus<T> extends RequestStatus {
+import com.jadaptive.api.json.RequestStatusImpl;
+
+public class EntityListStatus<T> extends RequestStatusImpl {
 
 	Collection<T> resources;
 	

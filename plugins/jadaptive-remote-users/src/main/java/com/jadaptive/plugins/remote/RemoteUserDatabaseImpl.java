@@ -180,7 +180,7 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	}
 
 	@Override
-	public Iterable<User> iterateUsers() {
+	public Iterable<User> allObjects() {
 
 		File identity4jFile = getConnectorConfiguration();
 		

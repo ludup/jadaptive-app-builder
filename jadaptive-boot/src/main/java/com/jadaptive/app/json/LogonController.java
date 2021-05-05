@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.json.RequestStatus;
+import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
@@ -101,14 +103,14 @@ public class LogonController {
 		try {
 			Session session = sessionUtils.getSession(request);
 			if(session.isClosed()) {
-				return new RequestStatus(false, "Session already closed");
+				return new RequestStatusImpl(false, "Session already closed");
 			}
 			
 			sessionService.closeSession(session);
 			
-			return new RequestStatus(true, "Session closed");
+			return new RequestStatusImpl(true, "Session closed");
 		} catch(UnauthorizedException | SessionTimeoutException e) {
-			return new RequestStatus(false, e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		}
 	}
 	
@@ -120,12 +122,12 @@ public class LogonController {
 		try {
 			Session session = sessionUtils.getSession(request);
 			if(!sessionService.isLoggedOn(session, true)) {
-				return new RequestStatus(false, "Session closed");
+				return new RequestStatusImpl(false, "Session closed");
 			}
 			
-			return new RequestStatus(true, "");
+			return new RequestStatusImpl(true, "");
 		} catch(UnauthorizedException | SessionTimeoutException e) {
-			return new RequestStatus(false, e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		}
 	}
 }

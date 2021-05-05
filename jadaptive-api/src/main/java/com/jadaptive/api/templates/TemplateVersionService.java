@@ -13,4 +13,6 @@ public interface TemplateVersionService {
 
 	void registerAnnotatedTemplates();
 
+	void registerAnnotatedTemplate(Class<?> clz);
+
 }

@@ -28,7 +28,7 @@ public interface UserService extends UUIDObjectService<User> {
 
 	void changePassword(User user, char[] newPassword, boolean passwordChangeRequired);
 
-	Iterable<? extends User> allUsers();
+	Iterable<User> allObjects();
 
 	User getUserByEmail(String email);
 

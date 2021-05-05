@@ -16,7 +16,7 @@ public interface UserDatabase extends ExtensionPoint {
 
 	User getUserByUUID(String uuid);
 	
-	Iterable<User> iterateUsers();
+	Iterable<User> allObjects();
 
 	ObjectTemplate getUserTemplate();
 

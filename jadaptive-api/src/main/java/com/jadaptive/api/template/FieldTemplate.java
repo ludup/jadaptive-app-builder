@@ -22,13 +22,13 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	String resourceKey;
 	
 	@ObjectField(type = FieldType.TEXT, required = true)
+	String parentKey;
+	
+	@ObjectField(type = FieldType.TEXT, required = true)
 	String formVariable;
 	
 	@ObjectField(type = FieldType.TEXT)
 	String defaultValue;
-	
-	@ObjectField(type = FieldType.TEXT)
-	String description;
 	
 	@ObjectField(type = FieldType.ENUM, required = true)
 	FieldType fieldType; 
@@ -40,7 +40,10 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	boolean required;
 	
 	@ObjectField(type = FieldType.BOOL)
-	boolean encrypted;
+	boolean manuallyEncrypted;
+	
+	@ObjectField(type = FieldType.BOOL)
+	boolean automaticallyEncrypted;
 	
 	@ObjectField(type = FieldType.BOOL)
 	boolean searchable;
@@ -96,14 +99,6 @@ public class FieldTemplate extends AbstractUUIDEntity {
 		this.defaultValue = defaultValue;
 	}
 
-	public String getDescription() {
-		return StringUtils.defaultString(description);
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public FieldType getFieldType() {
 		return fieldType;
 	}
@@ -145,12 +140,20 @@ public class FieldTemplate extends AbstractUUIDEntity {
 		return required;
 	}
 
-	public boolean getEncrypted() {
-		return encrypted;
+	public boolean isManuallyEncrypted() {
+		return manuallyEncrypted;
 	}
 
-	public void setEncrypted(boolean encrypted) {
-		this.encrypted = encrypted;
+	public void setManuallyEncrypted(boolean manuallyEncrypted) {
+		this.manuallyEncrypted = manuallyEncrypted;
+	}
+
+	public boolean isAutomaticallyEncrypted() {
+		return automaticallyEncrypted;
+	}
+
+	public void setAutomaticallyEncrypted(boolean automaticallyEncrypted) {
+		this.automaticallyEncrypted = automaticallyEncrypted;
 	}
 
 	public boolean getCollection() {
@@ -233,4 +236,14 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	public void setRequireAllPermissions(boolean requireAllPermissions) {
 		this.requireAllPermissions = requireAllPermissions;
 	}
+
+	public String getParentKey() {
+		return parentKey;
+	}
+
+	public void setParentKey(String parentKey) {
+		this.parentKey = parentKey;
+	}
+	
+	
 }

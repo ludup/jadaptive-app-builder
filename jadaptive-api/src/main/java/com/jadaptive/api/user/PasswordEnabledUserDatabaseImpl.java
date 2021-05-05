@@ -15,7 +15,7 @@ import com.jadaptive.utils.PasswordEncryptionType;
 import com.jadaptive.utils.PasswordUtils;
 
 public abstract class PasswordEnabledUserDatabaseImpl 
-	extends AuthenticatedService implements PasswordEnabledUserDatabase, UUIDObjectService<UserImpl> {
+	extends AuthenticatedService implements PasswordEnabledUserDatabase, UUIDObjectService<User> {
 
 	@Autowired
 	private TenantAwareObjectDatabase<UserImpl> objectDatabase;
@@ -66,7 +66,7 @@ public abstract class PasswordEnabledUserDatabaseImpl
 		return objectDatabase.get(uuid, UserImpl.class);
 	}
 
-	public String saveOrUpdate(UserImpl u) {
+	public String saveOrUpdate(User u) {
 		PasswordEnabledUser user = (PasswordEnabledUser)u;
 		setPassword(user, user.getEncodedPassword().toCharArray(), user.getPasswordChangeRequired());
 		return user.getUuid();

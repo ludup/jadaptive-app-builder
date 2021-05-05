@@ -2,6 +2,7 @@ package com.jadaptive.app.db;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,12 +20,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.util.encoders.Hex;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,11 +207,15 @@ public class DocumentHelper {
 		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
 	}
 
-	public static AbstractObject buildObject(HttpServletRequest request, ObjectTemplate template) {
+	public static AbstractObject buildObject(HttpServletRequest request, String fieldName, ObjectTemplate template) {
 
-		MongoEntity obj = new MongoEntity(template.getResourceKey());
+		if(log.isDebugEnabled()) {
+			log.debug("Building object {} using template {}", fieldName, template.getResourceKey());
+		}
+		
+		MongoEntity obj = new MongoEntity(fieldName);
 		String uuid = request.getParameter("uuid");
-		if(Objects.nonNull(uuid)) {
+		if(StringUtils.isNotBlank(uuid)) {
 			obj.setUuid(uuid);
 		}
 		String system = request.getParameter("system");
@@ -223,11 +231,17 @@ public class DocumentHelper {
 			obj.setValue("_clz", template.getTemplateClass());
 		}
 		for(FieldTemplate field : template.getFields()) {
+			
+			if(log.isDebugEnabled()) {
+				log.debug("Processing field {} using form variable {}", field.getResourceKey(), field.getFormVariable());
+			}
+			
 			if(field.getCollection()) {
 				obj.setValue(field, convertValues(field, request));
 			} else {
 				obj.setValue(field, convertValue(field, request));
 			}
+
 		}
 		
 		return obj;
@@ -241,14 +255,26 @@ public class DocumentHelper {
 
 		switch(field.getFieldType()) {
 		case OBJECT_EMBEDDED:
+			ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
+					.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
 			return buildObject(request, 
-					ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
-						.get(field.getValidationValue(ValidationType.RESOURCE_KEY))).getDocument();
+					template.getResourceKey(),
+					template).getDocument();
 		case OBJECT_REFERENCE:
+			if(log.isDebugEnabled()) {
+				log.debug("Returning {} as reference {}", field.getResourceKey(), value);
+			}
 			return value;
 		default:
 			if(Objects.isNull(value)) {
+				
+				if(log.isDebugEnabled()) {
+					log.debug("Returning {} value NULL", field.getResourceKey());
+				}
 				return null;
+			}
+			if(log.isDebugEnabled()) {
+				log.debug("Returning {} value {}", field.getResourceKey(), value);
 			}
 			return fromString(field, value);
 		}
@@ -283,7 +309,9 @@ public class DocumentHelper {
 			break;
 		}
 		
-		
+		if(log.isDebugEnabled()) {
+			log.debug("Extracted {} values", field.getResourceKey(), Utils.csv(values));
+		}
 		
 		return result;
 	}
@@ -410,11 +438,9 @@ public class DocumentHelper {
 								Document embeddedDocument = (Document) embedded;
 								elements.add(convertDocumentToObject(UUIDEntity.class, embeddedDocument, classLoader));
 							} else {
-								String resourceKey = getTemplateResourceKey(parameter.getType());
-								String objectUUID =  document.getString(name);
-								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, objectUUID);
+								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(columnDefinition.references(), (String)embedded);
 								
-								AbstractUUIDEntity ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+								AbstractUUIDEntity ref = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
 								elements.add(ref);
 							}
 						}
@@ -691,6 +717,28 @@ public class DocumentHelper {
 			v.add(Boolean.parseBoolean(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
 		return v;
+	}
+	
+	public static String generateContentHash(Document entity) {
+		
+		try {
+			SHA256Digest sha2 = new SHA256Digest();
+			generateObjectHash(entity, sha2);
+			byte[] tmp = new byte[16];
+			new Random().nextBytes(tmp);
+			sha2.update(tmp, 0, tmp.length);
+			sha2.finish();
+			return new String(Hex.encode(sha2.getEncodedState()), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+
+	public static void generateObjectHash(Document entity, SHA256Digest sha2) throws UnsupportedEncodingException {
+
+//		for(Map.Entry<String, Object> entry : entity.entrySet()) {
+//			
+//		}
 	}
 
 }

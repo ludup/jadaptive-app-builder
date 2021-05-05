@@ -17,7 +17,7 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	void clearCurrentTenant();
 
-	Iterable<Tenant> listTenants();
+	Iterable<Tenant> allObjects();
 
 	Tenant getSystemTenant() throws RepositoryException, ObjectException;
 

@@ -26,6 +26,10 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
@@ -66,7 +70,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		permissionService.setupSystemContext();
 		
-		try {
+		try {			
 			boolean newSchema = repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh");
 			if(newSchema) {
 				repository.newSchema();
@@ -77,7 +81,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				
 			initialiseTenant(systemTenant, newSchema);
 			
-			for(Tenant tenant : listTenants()) {
+			for(Tenant tenant : allObjects()) {
 				if(!tenant.isSystem()) {
 					initialiseTenant(tenant, false);
 				}
@@ -108,7 +112,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 	
 	@Override
-	public Iterable<Tenant> listTenants()  {
+	public Iterable<Tenant> allObjects()  {
 		try {
 			return repository.listTenants();
 		} catch (RepositoryException | ObjectException e) {

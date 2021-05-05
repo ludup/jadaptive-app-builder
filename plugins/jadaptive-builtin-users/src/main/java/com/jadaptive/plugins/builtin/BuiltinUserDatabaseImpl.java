@@ -66,7 +66,7 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 	}
 
 	@Override
-	public Iterable<User> iterateUsers() {
+	public Iterable<User> allObjects() {
 		return new UserIterable(objectDatabase.list(BuiltinUser.class));
 	}
 	
@@ -160,7 +160,7 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 	}
 	
 	@Override
-	public void deleteObject(UserImpl user) {
+	public void deleteObject(User user) {
 		
 		assertWrite(UserService.USER_RESOURCE_KEY);
 		

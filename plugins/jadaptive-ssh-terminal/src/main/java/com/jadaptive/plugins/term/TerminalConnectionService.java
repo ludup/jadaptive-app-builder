@@ -8,4 +8,6 @@ public interface TerminalConnectionService {
 
 	TerminalConnection createConnection(String sessionId, WebSocketClient websocket) throws IOException;
 
+	String registerConnection(SshClientConnector connector);
+
 }

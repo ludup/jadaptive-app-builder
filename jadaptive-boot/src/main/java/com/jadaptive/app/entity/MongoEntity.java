@@ -25,6 +25,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	AbstractObject parent;
 	Map<String,AbstractObject> children = new HashMap<>();
 	Document document;
+	String contentHash;
 	
 	public MongoEntity(Map<String,Object> document) {	
 		this((String)document.get("resourceKey"), document);
@@ -47,16 +48,18 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	public MongoEntity(AbstractObject parent, String resourceKey, Map<String,Object> document) {
 		this.parent = parent;
 		this.document = new Document(document);
-		this.document.put("resourceKey", resourceKey);
+		if(!this.document.containsKey("resourceKey")) {
+			this.document.put("resourceKey", resourceKey);
+		}
 		if(!Objects.isNull(parent)) {
-			parent.addChild(this);
+			parent.addChild(resourceKey, this);
 		}
 	}
 	
 	@Override
-	public void addChild(AbstractObject e) {
-		children.put(e.getResourceKey(), e);
-		document.put(e.getResourceKey(), e.getDocument());
+	public void addChild(String resourceKey, AbstractObject e) {
+		children.put(resourceKey, e);
+		document.put(resourceKey, e.getDocument());
 	}
 
 	@Override
@@ -118,14 +121,15 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 		Collection<String> results = document.getList(fieldName, String.class);
 		return Objects.nonNull(results) ? results : Collections.emptyList();
 	}
-	
-//	public Collection<?> getReferenceCollection(String fieldName) {
-//		return document.getList(fieldName, Map.class);
-//	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void setValue(FieldTemplate t, Object value) {
-		document.put(t.getResourceKey(), value);
+		if(value instanceof Map) {
+			new MongoEntity(this, t.getResourceKey(), (Map)value);
+		} else {
+			document.put(t.getResourceKey(), value);
+		}
 	}
 
 	public void setValue(FieldTemplate t, List<Object> values) {
@@ -143,5 +147,10 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 
 	public void setValue(String key, String value) {
 		document.put(key, value);
+	}
+
+	@Override
+	public Map<String,AbstractObject> getChildren() {
+		return Collections.unmodifiableMap(children);
 	}
 }

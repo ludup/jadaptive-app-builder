@@ -76,6 +76,10 @@ public class SshTerminalConnection extends TerminalConnection {
 						log.error("I/O error received from SSH session", e);
 					} finally {
 						close();
+						try {
+							output.printStringNewline("Disconnected");
+						} catch (IOException e) {
+						}
 					}
 				}
 				
@@ -84,7 +88,6 @@ public class SshTerminalConnection extends TerminalConnection {
 		} catch(IOException | SshException e) {
 			output.printStringNewline("Connection failed");
 			output.printStringNewline(e.getMessage());
-			//close();
 		}
 	}
 

@@ -7,4 +7,6 @@ public interface UUIDObjectService<T extends UUIDDocument> {
 	String saveOrUpdate(T object);
 
 	void deleteObject(T object);
+	
+	Iterable<T> allObjects();
 }

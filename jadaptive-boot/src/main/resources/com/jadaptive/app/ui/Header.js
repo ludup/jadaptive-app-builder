@@ -20,7 +20,7 @@ $(document).ready(function() {
 				$('#topMenu').empty();
 				
 				$.each(top, function(idx, obj) {
-				
+
 					if(menus[obj.uuid].length > 0) {
 						$('#topMenu').append('<li class="nav-item dropdown mr-3">'
 								+ '<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'

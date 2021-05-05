@@ -33,7 +33,6 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 		t1.setResourceKey("name");
 		t1.setDefaultValue("Default");
 		t1.setRequired(required);
-		t1.setDescription("The company name");
 		t1.setFieldType(FieldType.TEXT);
 		t1.getValidators().addAll(Arrays.asList(validators));
 

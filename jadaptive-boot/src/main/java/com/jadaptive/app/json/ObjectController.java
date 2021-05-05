@@ -27,11 +27,16 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.json.BootstrapTableController;
 import com.jadaptive.api.json.BootstrapTablePageProcessor;
 import com.jadaptive.api.json.BootstrapTableResult;
+import com.jadaptive.api.json.RedirectStatus;
+import com.jadaptive.api.json.RequestStatus;
+import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.OrderedView;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.entity.MongoEntity;
 
@@ -103,7 +108,7 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 
 		try {
 			entityService.saveOrUpdate(entity);
-			return new RequestStatus();
+			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			return handleException(e, "POST", resourceKey);
 		}
@@ -117,8 +122,10 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 
 		try {
 			ObjectTemplate template = templateService.get(resourceKey);
-			entityService.saveOrUpdate(DocumentHelper.buildObject(request, template));
-			return new RequestStatus();
+			entityService.saveOrUpdate(DocumentHelper.buildObject(request, template.getResourceKey(), template));
+			return new RequestStatusImpl();
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
 		} catch (Throwable e) {
 			return handleException(e, "POST", resourceKey);
 		}
@@ -134,7 +141,7 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 		
 		try {
 			entityService.delete(resourceKey, uuid);
-			return new RequestStatus();
+			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			return handleException(e, "DELETE", resourceKey);
 		}
@@ -149,7 +156,7 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 		
 		try {
 			entityService.delete(resourceKey, uuid);
-			return new RequestStatus();
+			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			return handleException(e, "DELETE", resourceKey);
 		}

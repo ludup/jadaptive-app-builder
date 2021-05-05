@@ -54,7 +54,7 @@ public abstract class UserCommand extends AbstractTenantAwareCommand {
 	public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
 		if(line.wordIndex() == 1) {
 			// Users
-			for(User user : userService.allUsers()) {
+			for(User user : userService.allObjects()) {
 				candidates.add(new Candidate(user.getUsername()));
 			}
 		} 

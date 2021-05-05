@@ -1,6 +1,8 @@
 package com.jadaptive.app.json;
 
-public class EntityResultsStatus<T> extends RequestStatus {
+import com.jadaptive.api.json.RequestStatusImpl;
+
+public class EntityResultsStatus<T> extends RequestStatusImpl {
 
 	Iterable<T> resource;
 	

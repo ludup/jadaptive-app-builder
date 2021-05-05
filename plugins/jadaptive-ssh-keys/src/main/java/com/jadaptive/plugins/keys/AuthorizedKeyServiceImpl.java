@@ -164,4 +164,9 @@ public class AuthorizedKeyServiceImpl extends AuthenticatedService implements Au
 		deleteKey(key);
 	}
 
+	@Override
+	public Iterable<AuthorizedKey> allObjects() {
+		return objectDatabase.allObjects(AuthorizedKey.class);
+	}
+
 }

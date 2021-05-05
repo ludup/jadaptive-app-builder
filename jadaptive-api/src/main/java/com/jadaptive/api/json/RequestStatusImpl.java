@@ -1,15 +1,21 @@
-package com.jadaptive.app.json;
+package com.jadaptive.api.json;
 
-public class RequestStatus {
+public class RequestStatusImpl implements RequestStatus {
 
 	boolean success;
 	String message;
 	
-	public RequestStatus() {
+	public RequestStatusImpl() {
 		this.success = true;
+		this.message = "";
 	}
 	
-	public RequestStatus(boolean success, String message) {
+	public RequestStatusImpl(boolean success) {
+		this(success, "");
+	}
+	
+	public RequestStatusImpl(boolean success, String message) {
+		super();
 		this.success = success;
 		this.message = message;
 	}

@@ -3,10 +3,13 @@ package com.jadaptive.app.ui;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -35,10 +38,12 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.app.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.app.ui.renderers.form.DateFormInput;
 import com.jadaptive.app.ui.renderers.form.DropdownFormInput;
+import com.jadaptive.app.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.app.ui.renderers.form.HiddenFormInput;
 import com.jadaptive.app.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.app.ui.renderers.form.MultipleSearchFormInput;
 import com.jadaptive.app.ui.renderers.form.MultipleSelectionFormInput;
+import com.jadaptive.app.ui.renderers.form.MultipleTextFormInput;
 import com.jadaptive.app.ui.renderers.form.NumberFormInput;
 import com.jadaptive.app.ui.renderers.form.PasswordFormInput;
 import com.jadaptive.app.ui.renderers.form.TextAreaFormInput;
@@ -67,6 +72,8 @@ public class Entity extends AbstractPageExtension {
 	private ObjectService objectService; 
 	
 	private ThreadLocal<Document> currentDocument = new ThreadLocal<>();
+	private ThreadLocal<Properties> securityProperties = new ThreadLocal<>();
+	private ThreadLocal<Map<String,AbstractObject>> childObjects = new ThreadLocal<>();
 	
 	@Override
 	public String getName() {
@@ -85,13 +92,20 @@ public class Entity extends AbstractPageExtension {
 		TemplatePage templatePage = (TemplatePage) page;
 		
     	try {
-			Properties properties = propertyService.getOverrideProperties(
+    		securityProperties.set(propertyService.getOverrideProperties(
 					SecurityScope.TENANT, 
-					templatePage.getTemplate().getResourceKey() + ".properties");
+					templatePage.getTemplate().getResourceKey() + ".properties"));
 			
 			AbstractObject object = null;
 			if(page instanceof ObjectPage) {
 				object = ((ObjectPage)page).getObject();
+				
+				if(Objects.nonNull(object)) {
+					Map<String,AbstractObject> children = new HashMap<>();
+					children.put(((ObjectPage) page).getTemplate().getResourceKey(), object);
+					extractChildObjects(object, children);
+					childObjects.set(children);
+				}
 			}
 			
 			Element row;
@@ -120,37 +134,31 @@ public class Entity extends AbstractPageExtension {
 								.attr("name", "hidden")
 								.val(Objects.nonNull(object) ?  String.valueOf(object.isHidden()) : "false"))));
 						
-//			
-//			if(Objects.nonNull(object)) {
-//				String clz = (String) object.getValue("_clz");
-//				if(Objects.nonNull(clz)) {
-//					form.appendChild(new Element("input")
-//							.attr("type", "hidden")
-//							.attr("name", "_clz")
-//							.val(clz));
-//				}
-//			} else {
-//				form.appendChild(new Element("input")
-//						.attr("type", "hidden")
-//						.attr("name", "_clz")
-//						.val(templatePage.getTemplate().getTemplateClass()));
-//			}
-			
 			form.appendChild(row = new Element("div").addClass("row"));
 			
 			List<OrderedView> views = templateService.getViews(templatePage.getTemplate());
 
-			createViews(views, row, templatePage.getTemplate(), object, properties, templatePage.getScope());
+			createViews(views, row, templatePage.getTemplate(), object, templatePage.getScope());
 
 		} catch (IOException e) {
 			log.error("Error processing entity", e);
 			throw new IOException(e.getMessage(), e);
 		} finally {
 			currentDocument.remove();
+			securityProperties.remove();
+			childObjects.remove();
 		}
     }
 
-	private void createViews(List<OrderedView> views, Element element, ObjectTemplate template, AbstractObject obj, Properties properties, FieldView currentView) {
+	private void extractChildObjects(AbstractObject object, Map<String,AbstractObject> children) {
+
+		for(AbstractObject child : object.getChildren().values()) {
+			children.put(child.getResourceKey(), child);
+			extractChildObjects(child, children);
+		}
+	}
+
+	private void createViews(List<OrderedView> views, Element element, ObjectTemplate template, AbstractObject obj, FieldView currentView) {
 		
 		int tabIndex = hasTabbedView(views);
 		int acdIndex = hasAccordionView(views);
@@ -171,13 +179,13 @@ public class Entity extends AbstractPageExtension {
 				}
 				switch(field.getFieldType()) {
 				default:
-					renderField(template, viewElement, obj, orderedField, properties, currentView, view);
+					renderField(template, viewElement, obj, orderedField, currentView, view);
 					break;
 				}
 			}
 			
 			if(!view.getChildViews().isEmpty()) {
-				createViews(view.getChildViews(), viewElement, template, obj, properties, currentView);
+				createViews(view.getChildViews(), viewElement, template, obj, currentView);
 			}
 
 			if(!view.isRoot()) {
@@ -234,7 +242,7 @@ public class Entity extends AbstractPageExtension {
 		return -1;
 	}
 
-	private void renderField(ObjectTemplate template, Element element, AbstractObject obj, OrderedField orderedField, Properties properties, FieldView view, OrderedView panel) {
+	private void renderField(ObjectTemplate template, Element element, AbstractObject obj, OrderedField orderedField,  FieldView view, OrderedView panel) {
 		
 		FieldTemplate field = orderedField.getField();
 		if(!field.getViews().isEmpty()) {
@@ -250,28 +258,41 @@ public class Entity extends AbstractPageExtension {
 		}
 		
 		if(field.getCollection()) {
-			renderColletion(template, element, obj, orderedField, properties, view, panel); 
+			renderColletion(template, element, obj, orderedField, view, panel); 
 		} else {
 			switch(field.getFieldType()) {
 			case OBJECT_REFERENCE:
-				/**
-				 * TODO this should be a form field, ensure no all objects are references, not links,
-				 * as links require different processing.
-				 */
+				String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
+				ObjectTemplate objectTemplate = templateService.get(objectType);
+				String uuid = null;
+				String name = null;
+				AbstractObject ref = null;
+				if(Objects.nonNull(obj)) {
+					uuid = String.valueOf(obj.getValue(field));
+					if(StringUtils.isNotBlank(uuid)) {
+						ref = objectService.get(objectType, uuid);
+						name = String.valueOf(ref.getValue(objectTemplate.getNameField()));
+					}
+				}
+
+				FieldSearchFormInput input = new FieldSearchFormInput(template, orderedField, 
+						String.format("/app/api/%s/table", objectType),
+						objectTemplate.getNameField(), "uuid");
+				input.renderInput(panel, element, uuid, name, false);
 				break;
 			case OBJECT_EMBEDDED:
 //				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
 				throw new IllegalStateException("Embedded object field should not be processed here");
 			default:
 				
-				renderFormField(template, element, obj, orderedField, properties, view, panel);
+				renderFormField(template, element, obj, orderedField, view, panel);
 			}
 			
 		}
 	}
 	
 	private void renderColletion(ObjectTemplate template, Element element, AbstractObject obj, OrderedField orderedField,
-			Properties properties, FieldView view, OrderedView panel) {
+			FieldView view, OrderedView panel) {
 		
 		FieldTemplate field = orderedField.getField();
 		
@@ -297,7 +318,7 @@ public class Entity extends AbstractPageExtension {
 			ObjectTemplate objectTemplate = templateService.get(objectType);
 			List<NamePairValue> values = new ArrayList<>();
 			if(Objects.nonNull(obj)) {
-				for(String uuid : obj.getCollection(objectType)) {
+				for(String uuid : obj.getCollection(field.getResourceKey())) {
 					AbstractObject referencedObject = objectService.get(objectType, uuid);
 					values.add(new NamePairValue(referencedObject.getValue(objectTemplate.getNameField()).toString(), uuid));
 				}
@@ -311,7 +332,14 @@ public class Entity extends AbstractPageExtension {
 		case PASSWORD:
 			break;
 		case TEXT:
+		{
+			MultipleTextFormInput render = new MultipleTextFormInput(template, orderedField);
+			render.renderInput(panel, element, 
+					Objects.nonNull(obj) ? 
+							obj.getCollection(field.getResourceKey()) 
+							: Collections.emptyList());
 			break;
+		}
 		case TEXT_AREA:
 			break;
 		case HIDDEN:
@@ -332,7 +360,7 @@ public class Entity extends AbstractPageExtension {
 	}
 	
 	private void renderFormField(ObjectTemplate template, Element element, AbstractObject obj, OrderedField orderedField,
-			Properties properties, FieldView view, OrderedView panel) {
+			FieldView view, OrderedView panel) {
 		
 		FieldTemplate field = orderedField.getField();
 
@@ -340,13 +368,13 @@ public class Entity extends AbstractPageExtension {
 		case HIDDEN:
 		{
 			HiddenFormInput render = new HiddenFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
 			break;
 		}
 		case TEXT:
 		{
 			TextFormInput render = new TextFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
 			break;
 		}
 		case TEXT_AREA:
@@ -355,13 +383,13 @@ public class Entity extends AbstractPageExtension {
 			case HTML_EDITOR:
 			{
 				HtmlEditorFormInput render = new HtmlEditorFormInput(template, orderedField, currentDocument.get());
-				render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+				render.renderInput(panel, element, getFieldValue(orderedField, obj));
 				break;
 			}
 			default:
 			{
 				TextAreaFormInput render = new TextAreaFormInput(template, orderedField);
-				render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+				render.renderInput(panel, element, getFieldValue(orderedField, obj));
 				break;
 			}
 			}
@@ -370,32 +398,32 @@ public class Entity extends AbstractPageExtension {
 		case PASSWORD:
 		{
 			PasswordFormInput render = new PasswordFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
 			break;
 		}
 		case TIMESTAMP:
 		{
 			TimestampFormInput render = new TimestampFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
 			break;
 		}
 		case DATE:
 		{
 			DateFormInput render = new DateFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
 			break;
 		}
 		case BOOL:
 		{
 			BooleanFormInput render = new BooleanFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
 			break;
 		}
 		case PERMISSION:
 		{
 			DropdownFormInput render = new DropdownFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
-			render.renderValues(permissionService.getAllPermissions(), getDefaultValue(orderedField, obj));
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
+			render.renderValues(permissionService.getAllPermissions(), getFieldValue(orderedField, obj));
 		
 			break;
 		}
@@ -405,8 +433,8 @@ public class Entity extends AbstractPageExtension {
 			try {
 				values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
 				DropdownFormInput render = new DropdownFormInput(template, orderedField);
-				render.renderInput(panel, element, getDefaultValue(orderedField, obj));
-				render.renderValues((Enum<?>[])values.getEnumConstants(), getDefaultValue(orderedField, obj), view == FieldView.READ);
+				render.renderInput(panel, element, getFieldValue(orderedField, obj));
+				render.renderValues((Enum<?>[])values.getEnumConstants(), getFieldValue(orderedField, obj), view == FieldView.READ);
 			} catch (ClassNotFoundException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
@@ -418,7 +446,7 @@ public class Entity extends AbstractPageExtension {
 		case LONG:
 		{
 			NumberFormInput render = new NumberFormInput(template, orderedField);
-			render.renderInput(panel, element, getDefaultValue(orderedField, obj));
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
 			break;
 		}
 		case OBJECT_EMBEDDED:
@@ -438,8 +466,21 @@ public class Entity extends AbstractPageExtension {
 		}
 	}
 
-	private String getDefaultValue(OrderedField field, AbstractObject obj) {
-		return field.getFieldValue(obj);
+	private String getFieldValue(OrderedField field, AbstractObject obj) {
+		if(Objects.isNull(obj)) {
+			return field.getField().getDefaultValue();
+		}
+	
+		Map<String,AbstractObject> children = childObjects.get();
+		obj = children.get(field.getField().getParentKey());
+		if(Objects.isNull(obj)) {
+			return field.getField().getDefaultValue();
+		}
+		Object val = obj.getValue(field.getField());
+		if(Objects.isNull(val)) {
+			return field.getField().getDefaultValue();
+		}
+		return val.toString(); 
 	}
 
 	private Element createViewElement(OrderedView view, Element rootElement, ObjectTemplate template, boolean first) {
@@ -450,7 +491,6 @@ public class Entity extends AbstractPageExtension {
 					.attr("id", "rootView")
 					.attr("class", "col-12 py-1"));
 			return root;
-//			return rootElement.prepend("<div id=\"rootView\" class=\"col-12 py-1\"></div>").select("#rootView").first();
 		}
 
 		switch(view.getType()) {

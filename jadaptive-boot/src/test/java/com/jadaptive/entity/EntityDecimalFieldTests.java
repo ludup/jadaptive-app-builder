@@ -33,7 +33,6 @@ public class EntityDecimalFieldTests extends AbstractDeserializerTest {
 		t1.setResourceKey("revenue");
 		t1.setDefaultValue("1.25");
 		t1.setRequired(required);
-		t1.setDescription("Company revenue in millions");
 		t1.setFieldType(FieldType.DECIMAL);
 		t1.getValidators().addAll(Arrays.asList(validators));
 

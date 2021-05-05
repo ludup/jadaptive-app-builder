@@ -195,11 +195,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	}
 
 	@Override
-	public Iterable<User> allUsers() {
+	public Iterable<User> allObjects() {
 		
 		CompoundIterable<User> iterator = new CompoundIterable<>();
 		userDatabases.forEach((k,v)->{
-			iterator.add(v.iterateUsers());
+			iterator.add(v.allObjects());
 		});
 		return iterator;
 	}

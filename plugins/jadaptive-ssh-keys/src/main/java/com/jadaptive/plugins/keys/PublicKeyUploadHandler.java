@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.json.RequestStatus;
+import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
@@ -86,7 +87,7 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 
 	@Override
 	public void sendSuccessfulResponse(HttpServletResponse resp, String handlerName, String uri) throws IOException {
-		RequestStatus status = new RequestStatus(true);
+		RequestStatus status = new RequestStatusImpl(true);
 		byte[] data = objectMapper.writeValueAsBytes(status);
 		resp.setStatus(200);
 		resp.getOutputStream().write(data);
@@ -96,7 +97,7 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 	
 	@Override
 	public void sendFailedResponse(HttpServletResponse resp, String handlerName, String uri, Throwable e) throws IOException {
-		RequestStatus status = new RequestStatus(false, e.getMessage());
+		RequestStatus status = new RequestStatusImpl(false, e.getMessage());
 		byte[] data = objectMapper.writeValueAsBytes(status);
 		resp.setStatus(200);
 		resp.getOutputStream().write(data);

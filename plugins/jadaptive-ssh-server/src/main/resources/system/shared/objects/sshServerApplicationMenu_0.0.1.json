@@ -1,0 +1,13 @@
+[{
+  "resourceKey" : "applicationMenu",
+  "uuid": "6b2daf58-cb09-41be-8684-2f98b45ed606",
+  "title": "SSH Interfaces",
+  "path": "/app/ui/table/sshInterfaces",
+  "permissions": [  "sshInterfaces.read" ],
+  "keywords": "",
+  "description": "",
+  "system" : true,
+  "hidden" : false,
+  "icon": "fas fa-server",
+  "parent": "e2361a2c-4f3e-4b9b-adc0-56d5d700863a"
+}]

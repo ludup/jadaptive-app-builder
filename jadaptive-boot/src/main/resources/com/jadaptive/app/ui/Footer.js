@@ -65,7 +65,7 @@ $(document).ready(function(e) {
 	}
 	
 	var createDropdown = function(text, url, field, id, menu, toggle, selectionClass) {
-		debugger;
+
 		$.getJSON(url + '?searchField=' + field + '&searchValue=' + text, function(data) {
 			
 			menu.empty();
