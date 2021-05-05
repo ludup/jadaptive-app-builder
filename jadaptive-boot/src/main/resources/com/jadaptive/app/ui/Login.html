@@ -46,7 +46,7 @@
 <script type="text/javascript">
 	$(document).ready(function(e) {
 		$('#loginSubmit').click(function(e) {
-			if($('#username').val()!=='' && $('#password').val() !=-'') {
+			if($('#username').val()!=='' && $('#password').val() !=='') {
 				JadaptiveUtils.startAwesomeSpin($('#loginSubmit i'), 'fa-sign-in-alt');
 				$('#loginForm').submit();
 			}

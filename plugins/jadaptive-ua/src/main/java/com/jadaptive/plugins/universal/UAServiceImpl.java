@@ -30,7 +30,7 @@ public class UAServiceImpl implements UAService {
 	@Override
 	public boolean hasCredentials(User user) {
 		try {
-			credentialsStore.getPersonalObjects(UACredentials.class, user);
+			credentialsStore.getPersonalObject(UACredentials.class, user);
 			return true;
 		} catch(ObjectNotFoundException e) {
 			return false;

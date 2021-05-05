@@ -64,6 +64,7 @@ static Logger log = LoggerFactory.getLogger(UniversalAuthentication.class);
 	private void showAuthorization(Document content, AuthenticationState state) {
 		
 		Element el = content.selectFirst("#content");
+		el.append("<p><i id=\"autoSubmit\" class=\"fad fa-mobile-android fa-3x\"></i></p>");
 		el.append("<p>An authorization request has been sent to your mobile phone. Please authorize your login to continue.</p>");
 		el.append("<script type=\"text/javascript\">$(document).ready(function() { $('#loginForm'}).submit(); });</script>");
 		
