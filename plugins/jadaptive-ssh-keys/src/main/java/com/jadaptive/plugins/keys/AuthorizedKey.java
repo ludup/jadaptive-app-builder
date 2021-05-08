@@ -28,8 +28,8 @@ import com.jadaptive.api.template.UniqueIndex;
 @DisableStandardActions
 @TableView(defaultColumns = { "name", "fingerprint", "type" }, optionalColumns = { "id" },
 			actions = {
-				@TableAction(resourceKey = "generateKey", bundle = AuthorizedKey.RESOURCE_KEY, url = "generate-key"),
-				@TableAction(resourceKey = "uploadPublicKey",  bundle = AuthorizedKey.RESOURCE_KEY, url = "upload-key")})
+				@TableAction(resourceKey = "generateKey", bundle = AuthorizedKey.RESOURCE_KEY, url = "generate-key", icon = "far fa-wrench"),
+				@TableAction(resourceKey = "uploadPublicKey",  bundle = AuthorizedKey.RESOURCE_KEY, url = "upload-key", icon = "far fa-upload")})
 public class AuthorizedKey extends PersonalUUIDEntity {
 
 	private static final long serialVersionUID = 9215617764035887442L;

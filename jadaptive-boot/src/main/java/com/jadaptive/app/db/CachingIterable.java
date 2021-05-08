@@ -29,7 +29,7 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 				Cache<String,UUIDList> cachedUUIDs,
 				String cacheName) {
 			if(log.isInfoEnabled()) {
-				log.info("Started uncached iteration for {} ", clz.getSimpleName());
+				log.info("Started cached iteration for {} ", clz.getSimpleName());
 			}
 			this.clz = clz;
 			this.iterator = iterator;

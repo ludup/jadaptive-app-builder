@@ -43,7 +43,7 @@
   "keywords": "",
   "description": "",
   "system" : true,
-  "hidden" : false,
+  "hidden" : true,
   "icon": "far fa-chart-bar",
   "parent": ""
 },{ 

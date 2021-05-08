@@ -22,11 +22,18 @@ $(document).ready(function() {
 				$.each(top, function(idx, obj) {
 
 					if(menus[obj.uuid].length > 0) {
+						if(obj.hidden) {
+							return;
+						}
 						$('#topMenu').append('<li class="nav-item dropdown mr-3">'
 								+ '<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'
 								+ obj.title + '</a><div id="' + obj.uuid + '" class="dropdown-menu" aria-labelledby="navbarDropdown"></div></li>');
 						
 						$.each(menus[obj.uuid], function(idx, child) {
+							
+							if(child.hidden) {
+								return;
+							}
 							$('#' + child.parent).append('<a class="dropdown-item mr-3" href="' 
 									+ child.path + '"><i class="' + child.icon + ' nav-icon"></i>&nbsp;' + child.title + '</a>');
 					

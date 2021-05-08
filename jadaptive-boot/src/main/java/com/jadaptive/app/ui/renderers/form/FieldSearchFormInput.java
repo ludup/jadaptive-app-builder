@@ -27,7 +27,7 @@ public class FieldSearchFormInput {
 			String value, String name,
 			boolean nameIsResourceKey) {
 		
-		rootElement.appendChild(new Element("div").addClass("form-group w-100 fieldSearchInput")
+		rootElement.appendChild(new Element("div").addClass("form-group col-12 fieldSearchInput")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("col-form-label")

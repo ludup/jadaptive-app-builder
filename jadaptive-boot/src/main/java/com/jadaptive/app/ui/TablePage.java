@@ -71,7 +71,7 @@ public class TablePage extends TemplatePage {
 		} else if(creatableTemplates.size() == 1) {
 			ObjectTemplate singleTemplate = creatableTemplates.get(0);
 			createTableAction(document, String.format("create/%s", singleTemplate.getResourceKey()), 
-					template.getCollectionKey(),
+					template.getCollectionKey(), "far fa-plus",
 					"primary", "create");
 		}
 		
@@ -81,13 +81,13 @@ public class TablePage extends TemplatePage {
 		if(view != null) {
 			for(TableAction action : view.actions()) {
 				if(action.target()==Target.TABLE) {
-					createTableAction(document, action.url(), action.bundle(), action.buttonClass(), action.resourceKey());
+					createTableAction(document, action.url(), action.bundle(), action.icon(), action.buttonClass(), action.resourceKey());
 				} else {
 					rowActions.appendChild( new Element("div")
 						.addClass("tableAction")
 						.attr("data-url", action.url())
 						.attr("data-bundle", action.bundle())
-						.attr("data-icon", action.buttonClass())
+						.attr("data-icon", action.icon())
 						.attr("data-resourcekey", action.resourceKey())
 						.attr("data-window", action.window().name()));
 				}
@@ -109,14 +109,17 @@ public class TablePage extends TemplatePage {
 				new Element("div")
 				    .addClass("dropdown")
 					.appendChild(new Element("button")
-							.addClass("btn btn-secondary dropdown-toggle")
+							.addClass("btn btn-primary dropdown-toggle")
 							.attr("type", "button")
 							.attr("data-toggle", "dropdown")
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false")
 							.attr("id", id)
-							.attr("jad:bundle", bundle)
-							.attr("jad:i18n", String.format("%s.name", id)))
+							.appendChild(new Element("i")
+								.addClass("far fa-plus mr-1"))
+							.appendChild(new Element("span")
+								.attr("jad:bundle", bundle)
+								.attr("jad:i18n", String.format("%s.name", id))))
 					.appendChild(menu = new Element("div")
 							.addClass("dropdown-menu")
 							.attr("aria-labelledby", id)));
@@ -131,12 +134,15 @@ public class TablePage extends TemplatePage {
 				 
 	}
 	
-	private void createTableAction(Document document, String url, String bundle, String buttonClass, String resourceKey) {
+	private void createTableAction(Document document, String url, String bundle, String icon, String buttonClass, String resourceKey) {
 		document.selectFirst("#objectActions").appendChild(
 				new Element("a").attr("href", String.format("/app/ui/%s", replaceParameters(url)))
 				.attr("class", String.format("btn btn-%s", buttonClass))
-				.attr("jad:bundle", bundle)
-				.attr("jad:i18n", String.format("%s.name", resourceKey)));
+				.appendChild(new Element("i")
+						.attr("class", icon + " mr-1"))
+				.appendChild(new Element("span")
+						.attr("jad:bundle", bundle)
+						.attr("jad:i18n", String.format("%s.name", resourceKey))));
 	}
 	
 	private Object replaceParameters(String str) {

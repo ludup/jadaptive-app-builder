@@ -17,7 +17,7 @@ public class BooleanFormInput extends FieldInputRender {
 		
 		Element input;
 		rootElement.appendChild(new Element("div")
-						.addClass("form-group w-100")
+						.addClass("form-group col-12")
 				.appendChild(input = new Element("input")
 						.attr("id", field.getFormVariable())
 						.attr("name", field.getFormVariable())
