@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
 @ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
@@ -210,5 +211,10 @@ public class ObjectTemplate extends NamedUUIDEntity {
 
 	public void setPermissionProtected(Boolean permissionProtected) {
 		this.permissionProtected = permissionProtected;
+	}
+
+	@JadaptiveIgnore
+	public String getCanonicalName() {
+		return "com.jadaptive.dynamic." + StringUtils.capitalize(resourceKey);
 	}
 }

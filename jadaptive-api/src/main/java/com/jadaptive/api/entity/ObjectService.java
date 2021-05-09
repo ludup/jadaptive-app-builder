@@ -15,7 +15,7 @@ public interface ObjectService {
 
 	Iterable<AbstractObject> list(String resourceKey) throws RepositoryException, ObjectException;
 
-	String saveOrUpdate(AbstractObject entity) throws RepositoryException, ObjectException;
+	void saveOrUpdate(AbstractObject entity) throws RepositoryException, ObjectException;
 
 	void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException;
 
