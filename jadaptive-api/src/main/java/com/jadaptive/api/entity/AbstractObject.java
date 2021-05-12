@@ -3,6 +3,7 @@ package com.jadaptive.api.entity;
 import java.util.Collection;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.FieldTemplate;
 
@@ -37,4 +38,6 @@ public interface AbstractObject extends UUIDDocument {
 	Map<String, AbstractObject> getChildren();
 
 	void addChild(String resourceKey, AbstractObject e);
+
+	void setClass(String clz);
 }

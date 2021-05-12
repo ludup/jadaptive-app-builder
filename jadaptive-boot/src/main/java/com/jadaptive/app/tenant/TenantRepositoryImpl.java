@@ -57,13 +57,7 @@ public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenan
 	
 	@Override
 	public void dropSchema() throws RepositoryException, ObjectException {
-		
-		for(Tenant tenant : listTenants()) {
-			db.dropDatabase(tenant.getUuid());
-		}
-		
-		db.dropDatabase(TENANT_DATABASE);
-		
+		db.dropSchema();
 	}
 	
 	@Override
@@ -91,10 +85,10 @@ public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenan
 		return getObject(TENANT_DATABASE, Tenant.class, SearchField.eq("name", name));
 	}
 	
-	@Override
-	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
-		return cacheService.getCacheOrCreate("tenants.uuidCache", String.class, obj);
-	}
+//	@Override
+//	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
+//		return cacheService.getCacheOrCreate("tenants.uuidCache", String.class, obj);
+//	}
 
 	@Override
 	public Class<Tenant> getResourceClass() {

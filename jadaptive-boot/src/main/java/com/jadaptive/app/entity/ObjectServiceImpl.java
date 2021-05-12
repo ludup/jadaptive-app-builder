@@ -1,5 +1,6 @@
 package com.jadaptive.app.entity;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,7 +72,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Autowired
 	private TenantAwareObjectDatabase<?> objectDatabase;
 	
-	Map<String,Class<?>> templateClasses = new HashMap<>();
+	Map<String,Class<?>> templateClassesByResourceKey = new HashMap<>();
+	Map<String,Class<?>> templateClassesByFQN = new HashMap<>();
 	
 	@Override
 	public AbstractObject createNew(ObjectTemplate template) {
@@ -161,14 +163,15 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			saveViaObjectBean(entity, template);
 		} else {
 			// Build the class file
-			if(!templateClasses.containsKey(template.getResourceKey())) {
+			if(!templateClassesByResourceKey.containsKey(template.getResourceKey())) {
 				Class<?> generatedClass = generateClassFromTemplate(template);
 				template.setTemplateClass(generatedClass.getCanonicalName());
-				templateClasses.put(template.getResourceKey(), generatedClass);
+				templateClassesByFQN.put(generatedClass.getCanonicalName(), generatedClass);
+				templateClassesByResourceKey.put(template.getResourceKey(), generatedClass);
 			}
 			
 			objectDatabase.saveOrUpdate(DocumentHelper.convertDocumentToObject(
-					templateClasses.get(template.getResourceKey()), new Document(entity.getDocument())));
+					templateClassesByResourceKey.get(template.getResourceKey()), new Document(entity.getDocument())));
 		
 		}
 	}
@@ -179,8 +182,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		
 		Builder<AbstractUUIDEntity> builder = new ByteBuddy()
-				  .subclass(AbstractUUIDEntity.class)
-				  .name(template.getCanonicalName());
+				.subclass(AbstractUUIDEntity.class)
+				.name(template.getCanonicalName());
 
 		builder = builder.defineMethod("getResourceKey", String.class).intercept(FixedValue.value(template.getResourceKey()));
 		
@@ -220,7 +223,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				throw new IllegalStateException(String.format("Cannot find enum type %s in class loader", enumType));
 			}
 		case OBJECT_EMBEDDED:
-			return generateBeanField(builder, field, templateClasses.get(field.getValidationValue(ValidationType.RESOURCE_KEY)));
+			return generateBeanField(builder, field, templateClassesByFQN.get(field.getValidationValue(ValidationType.RESOURCE_KEY)));
 		default:
 			throw new IllegalStateException(String.format("Unexpected field type %s in generateField", field.getFieldType().name()));
 		
@@ -373,5 +376,10 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public long count(String resourceKey, String searchField, String searchValue) {
 		return entityRepository.count(templateService.get(resourceKey), searchField, searchValue);
+	}
+
+	@Override
+	public Class<?> getTemplateClass(String name) {
+		return templateClassesByFQN.get(name);
 	}
 }

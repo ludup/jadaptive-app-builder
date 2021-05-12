@@ -33,6 +33,11 @@
 			</exclusions>
 		</dependency>
 
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+
 		<!-- This dependency is to have an embedded mongodb -->
 		<dependency>
 			<groupId>de.flapdoodle.embed</groupId>
@@ -121,25 +126,25 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.64</version>
+			<version>1.68</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcmail-jdk15on</artifactId>
-			<version>1.64</version>
+			<version>1.68</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>1.64</version>
+			<version>1.68</version>
 		</dependency>
 
-		<dependency>
-			<groupId>javax.cache</groupId>
-			<artifactId>cache-api</artifactId>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>javax.cache</groupId> -->
+<!-- 			<artifactId>cache-api</artifactId> -->
+<!-- 		</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast -->
 		<dependency>

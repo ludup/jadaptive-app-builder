@@ -18,4 +18,6 @@ public interface ClassLoaderService {
 
 	boolean hasTemplateClass(ObjectTemplate template);
 
+	Class<?> resolveClass(String name);
+
 }

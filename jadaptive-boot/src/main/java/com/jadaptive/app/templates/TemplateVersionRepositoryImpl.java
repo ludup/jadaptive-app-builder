@@ -67,10 +67,10 @@ public class TemplateVersionRepositoryImpl extends AbstractSystemObjectDatabaseI
 		return listObjects(tenantService.getCurrentTenant().getUuid(), TemplateVersion.class);
 	}
 
-	@Override
-	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
-		return cacheService.getCacheOrCreate("templateVersions.uuidCache", String.class, obj);
-	}
+//	@Override
+//	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
+//		return cacheService.getCacheOrCreate("templateVersions.uuidCache", String.class, obj);
+//	}
 
 	@Override
 	public Class<TemplateVersion> getResourceClass() {

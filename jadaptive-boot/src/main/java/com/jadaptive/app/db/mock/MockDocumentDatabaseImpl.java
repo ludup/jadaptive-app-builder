@@ -169,4 +169,10 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		
 	}
 
+	@Override
+	public void dropSchema() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

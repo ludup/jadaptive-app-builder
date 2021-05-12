@@ -153,4 +153,9 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	public Map<String,AbstractObject> getChildren() {
 		return Collections.unmodifiableMap(children);
 	}
+
+	@Override
+	public void setClass(String clz) {
+		document.put("_clz", clz);
+	}
 }

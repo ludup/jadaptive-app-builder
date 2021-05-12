@@ -312,6 +312,23 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
+	public void dropSchema() {
+		
+		for(String database : mongo.getClient().listDatabaseNames()) {
+			MongoDatabase db = mongo.getClient().getDatabase(database);
+			switch(db.getName()) {
+			case "admin":
+			case "local":
+			case "config":
+				continue;
+			default:
+				db.drop();
+			}
+		}
+		
+	}
+	
+	@Override
 	public void dropDatabase(String database) {
 		mongo.getClient().getDatabase(database).drop();
 	}

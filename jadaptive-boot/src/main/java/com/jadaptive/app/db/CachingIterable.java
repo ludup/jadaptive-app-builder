@@ -9,29 +9,26 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.app.ApplicationServiceImpl;
 
 public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 
 		static Logger log = LoggerFactory.getLogger(CachingIterable.class);
 		
 		Iterable<Document> iterator;
-		Class<T> clz;
 		Cache<String,T> cachedObjects;
 		Cache<String,UUIDList> cachedUUIDs;
 		String cacheName;
 		UUIDList processedUUIDs = new UUIDList();
 		int maximumCachedUUIDs = Integer.parseInt(System.getProperty("jadaptive.iteratorCache.maxUUIDs", "100"));
 		
-		public CachingIterable(Class<T> clz, 
+		public CachingIterable(
 				Iterable<Document> iterator, 
 				Cache<String,T> cachedObjects,
 				Cache<String,UUIDList> cachedUUIDs,
 				String cacheName) {
-			if(log.isInfoEnabled()) {
-				log.info("Started cached iteration for {} ", clz.getSimpleName());
-			}
-			this.clz = clz;
 			this.iterator = iterator;
 			this.cachedObjects = cachedObjects;
 			this.cachedUUIDs = cachedUUIDs;
@@ -68,16 +65,15 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 					}
 					return obj;
 				}
-				obj = DocumentHelper.convertDocumentToObject(clz, doc);
+				obj = DocumentHelper.convertDocumentToObject(
+						ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class)
+							.resolveClass(doc.getString("_clz")), doc);
 				cachedObjects.put(obj.getUuid(), obj);
 				if(processedUUIDs.size() < maximumCachedUUIDs) {
 					processedUUIDs.add(obj.getUuid());
 				}
 				
 				if(!iterator.hasNext()) {
-					if(log.isInfoEnabled()) {
-						log.info("Finished uncached iteration for {} ", clz.getSimpleName());
-					}
 					/**
 					 * We have reached end of the iterator. Should we
 					 * cache the operation?

@@ -106,7 +106,10 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		
 		e.setSystem(getBooleanNodeValue(node, "system"));
 		e.setHidden(getBooleanNodeValue(node, "hidden"));
-		
+		JsonNode n = node.findValue("_clz");
+		if(Objects.nonNull(n)) {
+			e.setClass(n.asText());
+		}
 		iterateFields(node, template.getFields(), e);
 		
 	}

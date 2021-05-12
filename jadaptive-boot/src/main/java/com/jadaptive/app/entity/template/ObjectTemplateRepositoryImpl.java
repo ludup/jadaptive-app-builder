@@ -105,9 +105,9 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 		}
 	}
 
-	@Override
-	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
-		return cacheService.getCacheOrCreate("objectTemplates.uuidCache", String.class, obj);
-	}		
+//	@Override
+//	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
+//		return cacheService.getCacheOrCreate("objectTemplates.uuidCache", String.class, obj);
+//	}		
 }
 

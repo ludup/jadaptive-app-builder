@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 
@@ -40,7 +41,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.jadaptive.api.db.ClassLoaderService;
 //import com.hazelcast.hibernate.HazelcastCacheRegionFactory;
 
-//@Configuration
+@Configuration
 public class HazelcastSpringConfiguration {
 
 	static Logger log = LoggerFactory.getLogger(HazelcastSpringConfiguration.class);
@@ -80,6 +81,7 @@ public class HazelcastSpringConfiguration {
 
 	@Bean(name = "hazelcastInstance", destroyMethod = "shutdown")
 	HazelcastInstance hazelcast(Config config) {
+		config.setClassLoader(classLoaderService.getClassLoader());
 		return Hazelcast.newHazelcastInstance(config);
 	}
 
@@ -110,6 +112,7 @@ public class HazelcastSpringConfiguration {
 		networkConfig.setJoin(joinConfig);
 		networkConfig.setPortAutoIncrement(true);
 		networkConfig.setReuseAddress(true);
+
 		return networkConfig;
 	}
 
@@ -134,10 +137,9 @@ public class HazelcastSpringConfiguration {
 				.getCachingProvider("com.hazelcast.cache.impl.HazelcastServerCachingProvider", 
 						classLoaderService.getClassLoader());
 
-		Properties properties = HazelcastCachingProvider.propertiesByInstanceName(applicationContext.getId());
-
 		URI cacheManagerName = new URI("hypersocket-cache-manager");
-		return cachingProvider.getCacheManager(cacheManagerName, classLoaderService.getClassLoader(), properties);
+		CacheManager cacheManager = cachingProvider.getCacheManager(cacheManagerName, classLoaderService.getClassLoader());
+		return cacheManager;
 	}
 
 	@Bean

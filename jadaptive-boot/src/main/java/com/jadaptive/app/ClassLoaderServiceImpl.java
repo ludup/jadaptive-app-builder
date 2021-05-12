@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.ObjectTemplate;
 
@@ -38,6 +39,9 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	
 	@Autowired
 	private PluginManager pluginManager; 
+	
+	@Autowired
+	private ObjectService objectService; 
 	
 	@PostConstruct
 	private void postConstruct() {
@@ -96,6 +100,12 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
 		
+		Class<?> clz = objectService.getTemplateClass(name);
+		
+		if(Objects.nonNull(clz)) {
+			return clz;
+		}
+		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 			try {
 				return w.getPluginClassLoader().loadClass(name);
@@ -103,7 +113,12 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 			}
 		}
 
-		return getClass().getClassLoader().loadClass(name);
+		try {
+			return getClass().getClassLoader().loadClass(name);
+		} catch(ClassNotFoundException ex) {
+		}
+		
+		return ClassLoader.getSystemClassLoader().loadClass(name);
 
 	}
 
@@ -177,6 +192,15 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 			return true;
 		} catch (ClassNotFoundException e) {
 			return false;
+		}
+	}
+
+	@Override
+	public Class<?> resolveClass(String name) {
+		try {
+			return findClass(name);
+		} catch(ClassNotFoundException e) {
+			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
 }
