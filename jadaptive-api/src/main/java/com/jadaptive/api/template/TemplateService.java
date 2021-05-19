@@ -39,8 +39,12 @@ public interface TemplateService {
 
 	Iterable<ObjectTemplate> allCollectionTemplates();
 
-	Class<?> getTemplateClass(String resourceKey);
-
 	void registerTemplateClass(String resourceKey, Class<?> templateClazz);
+	
+	Class<?> getTemplateClass(String resourceKey);
+	
+	ObjectTemplate getTemplateByClass(Class<?> clz);
+
+	void saveOrUpdate(ObjectTemplate template, Class<?> clz) throws RepositoryException, ObjectException;
 
 }

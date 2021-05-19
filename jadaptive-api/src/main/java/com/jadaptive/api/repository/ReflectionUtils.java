@@ -11,13 +11,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
 public class ReflectionUtils {
 
 
-	static Map<Class<?>, Set<Method>> setterCache = new HashMap<>();
-	static Map<Class<?>, Set<Method>> getterCache = new HashMap<>();
+	static Map<Class<?>, Map<String,Method>> setterCache = new HashMap<>();
+	static Map<Class<?>, Map<String,Method>> getterCache = new HashMap<>();
 	static Map<Class<?>, Map<String,Field>> fieldCache = new HashMap<>();
-	
 	
 	public static <T extends Annotation> Set<T> getFieldAnnotations(Class<?> clz, Class<T> annotation) {
 		
@@ -87,18 +88,27 @@ public class ReflectionUtils {
 			throw e;
 		}
 	}
-
-	public static Set<Method> getSetters(Class<?> clz) {
+	
+	public static Method getSetter(Class<?> clz, String field) {
 		
-		Set<Method> results = setterCache.get(clz);
+		Map<String, Method> methods = setterCache.get(clz);
+		if(Objects.isNull(methods)) {
+			methods = getSetters(clz);
+		}
+		return methods.get(field);
+	}
+
+	public static Map<String,Method> getSetters(Class<?> clz) {
+		
+		Map<String, Method> results = setterCache.get(clz);
 		if(Objects.isNull(results)) {
-			results = new HashSet<>();
+			results = new HashMap<>();
 			for(Method m : clz.getMethods()) {
 				if(m.getAnnotation(JadaptiveIgnore.class) != null) {
 					continue;
 				}
 				if(m.getName().startsWith("set") && m.getName().length() > 3 && m.getParameterCount()==1) {
-					results.add(m);
+					results.put(calculateFieldName(m), m);
 				}
 			}
 			setterCache.put(clz, results);
@@ -107,12 +117,20 @@ public class ReflectionUtils {
 		return results;
 	}
 	
-	
-	public static Set<Method> getGetters(Class<?> clz) {
+	public static Method getGetter(Class<?> clz, String field) {
 		
-		Set<Method> results = getterCache.get(clz);
+		Map<String, Method> methods = getterCache.get(clz);
+		if(Objects.isNull(methods)) {
+			methods = getGetters(clz);
+		}
+		return methods.get(field);
+	}
+	
+	public static Map<String,Method> getGetters(Class<?> clz) {
+		
+		Map<String,Method> results = getterCache.get(clz);
 		if(Objects.isNull(results)) {
-			results = new HashSet<>();
+			results = new HashMap<>();
 			for(Method m : clz.getMethods()) {
 				if(m.getName().equals("getClass")) {
 					continue;
@@ -122,11 +140,11 @@ public class ReflectionUtils {
 					continue;
 				}
 				if(m.getName().startsWith("get") && m.getName().length() > 3 && m.getParameterCount()==0) {
-					results.add(m);
+					results.put(calculateFieldName(m), m);
 				}
 				if(m.getName().startsWith("is") && m.getName().length() > 3 && m.getParameterCount()==0
 						&& (m.getReturnType().equals(boolean.class) || m.getReturnType().equals(Boolean.class))) {
-					results.add(m);
+					results.put(calculateFieldName(m), m);
 				}
 			}
 		

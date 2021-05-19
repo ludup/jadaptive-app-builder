@@ -15,7 +15,7 @@ import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
 @ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
-@UniqueIndex(columns = {"resourceKey"})
+//@UniqueIndex(columns = {"resourceKey"})
 public class ObjectTemplate extends NamedUUIDEntity {
 
 	private static final long serialVersionUID = -8159475909799827150L;

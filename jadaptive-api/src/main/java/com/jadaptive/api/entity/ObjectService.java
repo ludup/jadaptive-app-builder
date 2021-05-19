@@ -29,5 +29,4 @@ public interface ObjectService {
 
 	Collection<AbstractObject> personal(String resourceKey) throws RepositoryException, ObjectException;
 
-	Class<?> getTemplateClass(String name);
 }

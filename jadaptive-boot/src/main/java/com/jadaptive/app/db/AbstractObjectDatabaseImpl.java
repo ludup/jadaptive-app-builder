@@ -24,7 +24,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.utils.Utils;
 import com.mongodb.MongoWriteException;
 
@@ -40,10 +40,13 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	private CacheService cacheService; 
 	
 	@Autowired
-	private ObjectTemplateRepository templateRepository;
+	private TemplateService templateService;
 	
 	@Autowired
 	private ClassLoaderService classService; 
+	
+	@Autowired
+	private DocumentHelper documentHelper;
 	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
@@ -56,10 +59,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			template = clz.getAnnotation(ObjectDefinition.class);
 		} 
 		if(Objects.nonNull(template)) {
-			ObjectTemplate t = templateRepository.get(template.resourceKey());
+			ObjectTemplate t = templateService.get(template.resourceKey());
 			return t.getCollectionKey();
 		}
-		ObjectTemplate t = templateRepository.get(StringUtils.uncapitalize(clz.getSimpleName()));
+		ObjectTemplate t = templateService.get(StringUtils.uncapitalize(clz.getSimpleName()));
 		return t.getCollectionKey();
 	}
 	
@@ -70,7 +73,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			template = clz.getAnnotation(ObjectDefinition.class);
 		} 
 		if(Objects.nonNull(template)) {
-			ObjectTemplate t = templateRepository.get(template.resourceKey());
+			ObjectTemplate t = templateService.get(template.resourceKey());
 			return t;
 		}
 		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
@@ -94,7 +97,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		return cacheService.getCacheOrCreate(String.format("iterator.%s.%s", clz.getSimpleName(), name), clz, List.class);
 	}
 	
-	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> void saveObject(T obj,  String database) throws RepositoryException, ObjectException {
+		saveObject(obj, templateService.get(obj.getResourceKey()), database);
+	}
+	
+	protected <T extends UUIDEntity> void saveObject(T obj, ObjectTemplate template, String database) throws RepositoryException, ObjectException {
 		try {
 
 //			Document previous = null;
@@ -108,7 +115,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			Document document = new Document();
 			document.put("resourceKey", obj.getResourceKey());
-			DocumentHelper.convertObjectToDocument(obj, document);
+			documentHelper.convertObjectToDocument(obj, document, template);
 			
 //			String contentHash = DocumentHelper.generateContentHash(templateRepository.get(obj.getResourceKey()), document);
 //			document.put("contentHash", contentHash);
@@ -159,7 +166,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 					throw new ObjectNotFoundException(String.format("Object from %s not found with id %s", 
 							getCollectionName(clz), uuid));
 				}
-				result = DocumentHelper.convertDocumentToObject(clz, document);
+				result = documentHelper.convertDocumentToObject(document, templateService.getTemplateByClass(clz));
 				cachedObjects.put(result.getUuid(), result);
 				return result;
 			} else {
@@ -168,7 +175,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 					throw new ObjectNotFoundException(String.format("Object from %s not found with id %s", 
 							getCollectionName(clz), uuid));
 				}
-				return DocumentHelper.convertDocumentToObject(clz, document);
+				return documentHelper.convertDocumentToObject(document, templateService.getTemplateByClass(clz));
 			}
 		} catch (Throwable e) {
 			checkException(e);
@@ -179,6 +186,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends UUIDEntity> T getObject(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
+			ObjectTemplate template = templateService.getTemplateByClass(clz);
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				
 				Cache<String,T> cachedObjects = getCache(clz);
@@ -195,25 +203,25 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 					log.info("Get UNCACHED {} results for search {}", clz.getSimpleName(), cacheName);
 				}
 				
-				Document document = db.get(getCollectionName(clz), database, fields);
+				Document document = db.get(template.getCollectionKey(), database, fields);
 				if(Objects.isNull(document)) {
 					throw new ObjectNotFoundException(String.format("Object from %s not found for fields %s", 
 							getCollectionName(clz),
 							getSearchFieldsText(fields, "AND")));
 				}
 				
-				result = DocumentHelper.convertDocumentToObject(clz, document);
+				result = documentHelper.convertDocumentToObject(document, template);
 				cachedObjects.put(cacheName, result);
 				return result;
 			} else {
-				Document document = db.get(getCollectionName(clz), database, fields);
+				Document document = db.get(template.getCollectionKey(), database, fields);
 				if(Objects.isNull(document)) {
 					throw new ObjectNotFoundException(String.format("Object from %s not found for fields %s", 
 							getCollectionName(clz),
 							getSearchFieldsText(fields, "AND")));
 				}
 				
-				return DocumentHelper.convertDocumentToObject(clz, document);
+				return documentHelper.convertDocumentToObject(document, template);
 			}
 			
 		} catch (Throwable e) {
@@ -240,11 +248,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 					return result;
 				}
 				
-				result = DocumentHelper.convertDocumentToObject(clz, document);
+				result = documentHelper.convertDocumentToObject(document, templateService.getTemplateByClass(clz));
 				cachedObjects.put(result.getUuid(), result);
 				return result;
 			} else {
-				return  DocumentHelper.convertDocumentToObject(clz, document);
+				return  documentHelper.convertDocumentToObject(document, templateService.getTemplateByClass(clz));
 			}
 			
 		} catch (Throwable e) {
@@ -272,11 +280,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 					return result;
 				}
 				
-				result = DocumentHelper.convertDocumentToObject(clz, document);
+				result = documentHelper.convertDocumentToObject(document, templateService.getTemplateByClass(clz));
 				cachedObjects.put(result.getUuid(), result);
 				return result;
 			} else {
-				return DocumentHelper.convertDocumentToObject(clz, document);
+				return documentHelper.convertDocumentToObject(document, templateService.getTemplateByClass(clz));
 			}
 			
 		} catch (Throwable e) {
@@ -404,11 +412,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 							db.list(getCollectionName(clz), database), 
 							cachedObjects,
 							cachedUUIDs,
-							DEFAULT_ITERATOR);
+							DEFAULT_ITERATOR,
+							documentHelper);
 				}
 			} else {
 				return new NonCachingIterable<T>( 
-						db.list(getCollectionName(clz), database));
+						db.list(getCollectionName(clz), database), documentHelper);
 			}
 		} catch (Throwable e) {
 			checkException(e);
@@ -440,11 +449,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 							db.list(getCollectionName(clz), database, fields), 
 							cachedObjects,
 							cachedUUIDs,
-							cacheName);
+							cacheName,
+							documentHelper);
 				}
 			} else {
 				return new NonCachingIterable<T>( 
-						db.list(getCollectionName(clz), database, fields));
+						db.list(getCollectionName(clz), database, fields), documentHelper);
 			}
 		} catch (Throwable e) {
 			checkException(e);
@@ -457,7 +467,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.search(getCollectionName(clz), database, fields)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz, document));
+				results.add(documentHelper.convertDocumentToObject(document, templateService.getTemplateByClass(clz)));
 			}
 			
 			return results;
@@ -473,7 +483,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, fields)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz, document));
+				results.add(documentHelper.convertDocumentToObject(document, templateService.getTemplateByClass(clz)));
 			}
 			
 			return results;
@@ -501,7 +511,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.table(getCollectionName(clz), searchField, searchValue, database, start, length)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz, document));
+				results.add(documentHelper.convertDocumentToObject(document, templateService.getTemplateByClass(clz)));
 			}
 			
 			return results;

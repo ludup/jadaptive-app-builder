@@ -11,8 +11,8 @@ public class AbstractDeserializerTest {
 
 	protected ObjectMapper getMapper(Map<String, ObjectTemplate> templates) {
 		
-		ApplicationServiceImpl.getInstance().registerTestingBean(TemplateService.class, 
-				new MockEntityTemplateService(templates));
+//		ApplicationServiceImpl.getInstance().registerTestingBean(TemplateService.class, 
+//				new MockEntityTemplateService(templates));
 
 		return new ObjectMapper();
 	}

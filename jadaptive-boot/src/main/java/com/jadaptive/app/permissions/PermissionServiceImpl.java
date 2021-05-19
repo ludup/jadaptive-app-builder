@@ -165,34 +165,34 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	private synchronized void registerPermission(String permission, String... aliases) {
 		
-		Tenant tenant = tenantService.getCurrentTenant();	
-		
-		if(tenant.isSystem()) {
+//		Tenant tenant = tenantService.getCurrentTenant();	
+//		
+//		if(tenant.isSystem()) {
 			doRegisterPermission(systemPermissions, systemPermissionsAlias, permission, aliases);
-		} else {
-			
-			Set<String> allPermissions = tenantPermissions.get(tenant);
-			if(Objects.isNull(allPermissions)) {
-				allPermissions = new TreeSet<>();
-				tenantPermissions.put(tenant, allPermissions);
-			}
-			
-			Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);	
-			
-			if(Objects.isNull(aliasPermissions)) {
-				aliasPermissions = new HashMap<>();
-				tenantPermissionsAlias.put(tenant, aliasPermissions);
-			}
-			
-			doRegisterPermission(allPermissions, aliasPermissions, permission, aliases);
-		}
+//		} else {
+//			
+//			Set<String> allPermissions = tenantPermissions.get(tenant);
+//			if(Objects.isNull(allPermissions)) {
+//				allPermissions = new TreeSet<>();
+//				tenantPermissions.put(tenant, allPermissions);
+//			}
+//			
+//			Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);	
+//			
+//			if(Objects.isNull(aliasPermissions)) {
+//				aliasPermissions = new HashMap<>();
+//				tenantPermissionsAlias.put(tenant, aliasPermissions);
+//			}
+//			
+//			doRegisterPermission(allPermissions, aliasPermissions, permission, aliases);
+//		}
 	}
 	
 	private synchronized void doRegisterPermission(Set<String> allPermissions, Map<String,Set<String>> aliasPermissions, String permission, String... aliases) {
 		
 		
 		if(log.isInfoEnabled()) {
-			log.info("Registering permission {} for tenant {}", permission, tenantService.getCurrentTenant().getDomain());
+			log.info("Registering permission {}}", permission);
 		}
 		
 		if(allPermissions.contains(permission)) {

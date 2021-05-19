@@ -1,11 +1,13 @@
 package com.jadaptive.app.entity.template;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,6 +30,7 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -50,6 +53,11 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.app.db.DocumentHelper;
 
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.DynamicType.Builder;
+import net.bytebuddy.implementation.FieldAccessor;
+import net.bytebuddy.implementation.FixedValue;
+
 @Service
 public class TemplateServiceImpl extends AuthenticatedService implements TemplateService, JsonTemplateEnabledService<ObjectTemplate>, TenantAware {
 	
@@ -67,13 +75,21 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Autowired
 	private ClassLoaderService classService;
 	
+	@Autowired
+	private DocumentHelper documentHelper; 
+	
 	Map<String,List<ObjectTemplate>> objectForwardDependencies = new HashMap<>();
 	Map<String,List<String>> objectReverseDependencies = new HashMap<>();
-	Map<String,Class<?>> templateClazzes = new HashMap<>();
+	Map<String,Class<?>> templateClazzesByResourceKey = new HashMap<>();
+	Map<String,Class<?>> templateClazzesByFQN = new HashMap<>();
+	Map<Class<?>,String> templateClazzesByClass = new HashMap<>();
+	
+	Map<String,ObjectTemplate> immediateCache = new HashMap<>();
 	
 	@Override
 	public void registerTemplateClass(String resourceKey, Class<?> templateClazz) {
-		templateClazzes.put(resourceKey, templateClazz);
+		templateClazzesByResourceKey.put(resourceKey, templateClazz);
+		templateClazzesByClass.put(templateClazz, resourceKey);
 	}
 	
 	@Override
@@ -98,8 +114,14 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Override
 	public ObjectTemplate get(String resourceKey) throws RepositoryException, ObjectException {
 		
+		ObjectTemplate template = immediateCache.get(resourceKey);
+		
+		if(Objects.nonNull(template)) {
+			return template;
+		}
+		
 		ObjectTemplate e = repository.get(SearchField.or(
-				SearchField.eq("resourceKey", resourceKey),
+				SearchField.eq("uuid", resourceKey),
 				SearchField.in("aliases", resourceKey)));
 		
 		if(Objects.isNull(e)) {
@@ -146,10 +168,112 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		
 		permissionService.assertReadWrite(ObjectTemplate.RESOURCE_KEY);
 		
+		immediateCache.put(template.getResourceKey(), template);
+		
+		// Build the class file
+		if(!templateClazzesByResourceKey.containsKey(template.getResourceKey())) {
+			Class<?> generatedClass = generateClassFromTemplate(template);
+			template.setTemplateClass(generatedClass.getCanonicalName());
+			templateClazzesByFQN.put(generatedClass.getCanonicalName(), generatedClass);
+			templateClazzesByClass.put(generatedClass, template.getResourceKey());
+			templateClazzesByResourceKey.put(template.getResourceKey(), generatedClass);
+		}
+		
+		repository.saveOrUpdate(template);
+		
+	}
+	
+	@Override
+	public void saveOrUpdate(ObjectTemplate template, Class<?> clz) throws RepositoryException, ObjectException {
+		
+		permissionService.assertReadWrite(ObjectTemplate.RESOURCE_KEY);
+		
+		immediateCache.put(template.getResourceKey(), template);
+		
+		// Build the class file
+		if(!templateClazzesByResourceKey.containsKey(template.getResourceKey())) {
+			templateClazzesByFQN.put(clz.getCanonicalName(), clz);
+			templateClazzesByClass.put(clz, template.getResourceKey());
+			templateClazzesByResourceKey.put(template.getResourceKey(), clz);
+		}
+		
 		repository.saveOrUpdate(template);
 		
 	}
 
+private Class<?> generateClassFromTemplate(ObjectTemplate template) {
+		
+		Collection<ObjectTemplate> embeddedTemplates = lookupEmbeddedTemplates(template);
+		
+		
+		Builder<AbstractUUIDEntity> builder = new ByteBuddy()
+				.subclass(AbstractUUIDEntity.class)
+				.name(template.getCanonicalName());
+
+		builder = builder.defineMethod("getResourceKey", String.class).intercept(FixedValue.value(template.getResourceKey()));
+		
+		for(FieldTemplate field : template.getFields()) {
+			builder = generateField(builder, field, template);
+		}
+
+		return builder.make().load(getClass().getClassLoader()).getLoaded();
+	}
+
+	private Builder<AbstractUUIDEntity> generateField(Builder<AbstractUUIDEntity> builder, FieldTemplate field, ObjectTemplate template) {
+		
+		switch(field.getFieldType()) {
+		case TEXT:
+		case TEXT_AREA:
+		case HIDDEN:
+		case PERMISSION:
+		case PASSWORD:
+		case OBJECT_REFERENCE:
+			return generateBeanField(builder, field, String.class);
+		case INTEGER:
+			return generateBeanField(builder, field, Integer.class);
+		case LONG:
+			return generateBeanField(builder, field, Long.class);
+		case DECIMAL:
+			return generateBeanField(builder, field, Double.class);
+		case BOOL:
+			return generateBeanField(builder, field, Boolean.class);
+		case DATE:
+		case TIMESTAMP:
+			return generateBeanField(builder, field, Date.class);
+		case ENUM:
+			String enumType = field.getValidationValue(ValidationType.OBJECT_TYPE);
+			try {
+				return generateBeanField(builder, field, classService.findClass(enumType));
+			} catch (ClassNotFoundException e) {
+				throw new IllegalStateException(String.format("Cannot find enum type %s in class loader", enumType));
+			}
+		case OBJECT_EMBEDDED:
+			return generateBeanField(builder, field, templateClazzesByFQN.get(field.getValidationValue(ValidationType.RESOURCE_KEY)));
+		default:
+			throw new IllegalStateException(String.format("Unexpected field type %s in generateField", field.getFieldType().name()));
+		
+		}
+	}
+
+	private Builder<AbstractUUIDEntity> generateBeanField(Builder<AbstractUUIDEntity> builder, FieldTemplate field, Type type) {
+		builder = builder.defineField(field.getResourceKey(), type);
+		builder = builder.defineMethod(generateGetterName(field), type).intercept(FieldAccessor.ofBeanProperty());
+		builder = builder.defineMethod(generateSetterName(field), Void.TYPE).withParameter(type).intercept(FieldAccessor.ofBeanProperty());
+		return builder;
+	}
+
+	private String generateGetterName(FieldTemplate field) {
+		return "get" + StringUtils.capitalize(field.getResourceKey());
+	}
+	
+	private String generateSetterName(FieldTemplate field) {
+		return "set" + StringUtils.capitalize(field.getResourceKey());
+	}
+
+	private Collection<ObjectTemplate> lookupEmbeddedTemplates(ObjectTemplate template) {
+		return new ArrayList<>();
+	}
+	
 	@Override
 	public void delete(String uuid) throws ObjectException {
 		
@@ -157,6 +281,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		
 		entityService.deleteAll(uuid);
 		repository.delete(uuid);
+		immediateCache.remove(uuid);
 		
 	}
 	
@@ -244,7 +369,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 	@Override
 	public <T extends UUIDEntity> T createObject(Map<String,Object> values, Class<T> baseClass) throws ParseException {
-		return DocumentHelper.convertDocumentToObject(baseClass, new Document(values));
+		return documentHelper.convertDocumentToObject(new Document(values));
 	}
 
 	@Override
@@ -375,6 +500,11 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 
 	@Override
 	public Class<?> getTemplateClass(String resourceKey) {
-		return templateClazzes.get(resourceKey);
+		return templateClazzesByResourceKey.get(resourceKey);
+	}
+
+	@Override
+	public ObjectTemplate getTemplateByClass(Class<?> clz) {
+		return get(templateClazzesByClass.get(clz));
 	}
 }

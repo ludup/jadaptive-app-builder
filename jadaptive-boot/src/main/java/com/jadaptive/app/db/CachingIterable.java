@@ -23,16 +23,19 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 		String cacheName;
 		UUIDList processedUUIDs = new UUIDList();
 		int maximumCachedUUIDs = Integer.parseInt(System.getProperty("jadaptive.iteratorCache.maxUUIDs", "100"));
+		DocumentHelper documentHelper;
 		
 		public CachingIterable(
 				Iterable<Document> iterator, 
 				Cache<String,T> cachedObjects,
 				Cache<String,UUIDList> cachedUUIDs,
-				String cacheName) {
+				String cacheName,
+				DocumentHelper documentHelper) {
 			this.iterator = iterator;
 			this.cachedObjects = cachedObjects;
 			this.cachedUUIDs = cachedUUIDs;
 			this.cacheName = cacheName;
+			this.documentHelper = documentHelper;
 		}
 
 		@Override
@@ -65,9 +68,7 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 					}
 					return obj;
 				}
-				obj = DocumentHelper.convertDocumentToObject(
-						ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class)
-							.resolveClass(doc.getString("_clz")), doc);
+				obj = documentHelper.convertDocumentToObject(doc);
 				cachedObjects.put(obj.getUuid(), obj);
 				if(processedUUIDs.size() < maximumCachedUUIDs) {
 					processedUUIDs.add(obj.getUuid());

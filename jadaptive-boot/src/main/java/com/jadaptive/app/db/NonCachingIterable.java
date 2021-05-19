@@ -15,10 +15,13 @@ public class NonCachingIterable<T extends UUIDEntity> implements Iterable<T> {
 		static Logger log = LoggerFactory.getLogger(NonCachingIterable.class);
 		
 		Iterable<Document> iterator;
-
+		DocumentHelper documentHelper;
+		
 		public NonCachingIterable(
-				Iterable<Document> iterator) {
+				Iterable<Document> iterator,
+				DocumentHelper documentHelper) {
 			this.iterator = iterator;
+			this.documentHelper = documentHelper;
 		}
 
 		@Override
@@ -42,9 +45,7 @@ public class NonCachingIterable<T extends UUIDEntity> implements Iterable<T> {
 			@Override
 			public T next() {
 				Document doc = iterator.next();
-				return  DocumentHelper.convertDocumentToObject(
-						ApplicationServiceImpl.getInstance().getBean(ObjectService.class)
-							.getTemplateClass(doc.getString("_clz")), doc);
+				return  documentHelper.convertDocumentToObject(doc);
 			}
 		}
 	}

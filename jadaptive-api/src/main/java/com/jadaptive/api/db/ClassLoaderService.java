@@ -16,8 +16,6 @@ public interface ClassLoaderService {
 
 	Class<? extends UUIDDocument> getTemplateClass(ObjectTemplate template);
 
-	boolean hasTemplateClass(ObjectTemplate template);
-
 	Class<?> resolveClass(String name);
 
 }

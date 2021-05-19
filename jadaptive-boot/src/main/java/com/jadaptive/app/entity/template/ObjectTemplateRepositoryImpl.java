@@ -16,6 +16,7 @@ import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.UniqueIndex;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.utils.Utils;
@@ -39,15 +40,15 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 	}
 
 	private void createTextIndex(ObjectTemplate template, String fieldName) {
-		db.createTextIndex(fieldName, template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+		db.createTextIndex(fieldName, template.getResourceKey(), TenantService.SYSTEM_UUID);
 	}
 	
 	private void createIndex(ObjectTemplate template, String... fieldNames) {
-		db.createIndex(template.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fieldNames);
+		db.createIndex(template.getResourceKey(), TenantService.SYSTEM_UUID, fieldNames);
 	}
 	
 	private void createUniqueIndex(ObjectTemplate template, String... fieldNames) {
-		db.createUniqueIndex(template.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fieldNames);
+		db.createUniqueIndex(template.getResourceKey(), TenantService.SYSTEM_UUID, fieldNames);
 	}
 
 	@Override

@@ -22,9 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.ClassLoaderService;
-import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
@@ -41,7 +41,7 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	private PluginManager pluginManager; 
 	
 	@Autowired
-	private ObjectService objectService; 
+	private TemplateService templateService; 
 	
 	@PostConstruct
 	private void postConstruct() {
@@ -100,7 +100,7 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
 		
-		Class<?> clz = objectService.getTemplateClass(name);
+		Class<?> clz = templateService.getTemplateClass(name);
 		
 		if(Objects.nonNull(clz)) {
 			return clz;
@@ -178,23 +178,9 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	@SuppressWarnings("unchecked")
 	@Override
 	public Class<? extends UUIDDocument> getTemplateClass(ObjectTemplate template) {
-		try {
-			return (Class<? extends UUIDDocument>) findClass(template.getTemplateClass());
-		} catch (ClassNotFoundException e) {
-			throw new IllegalStateException(e.getMessage(), e);
-		}
+		return (Class<? extends UUIDDocument>) templateService.getTemplateClass(template.getResourceKey());
 	}
-
-	@Override
-	public boolean hasTemplateClass(ObjectTemplate template) {
-		try {
-			findClass(template.getTemplateClass());
-			return true;
-		} catch (ClassNotFoundException e) {
-			return false;
-		}
-	}
-
+	
 	@Override
 	public Class<?> resolveClass(String name) {
 		try {

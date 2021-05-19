@@ -485,7 +485,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 
 			template.setNameField(nameField);
-			templateRepository.saveOrUpdate(template);
+			templateService.saveOrUpdate(template, clz);
 			loadedTemplates.put(e.resourceKey(), template);
 			templateService.registerTemplateClass(e.resourceKey(), clz);
 			

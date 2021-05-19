@@ -50,6 +50,9 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 	@Autowired
 	private ObjectService entityService; 
 	
+	@Autowired
+	private DocumentHelper documentHelper; 
+	
 	@ExceptionHandler(AccessDeniedException.class)
 	public void handleException(HttpServletRequest request, 
 			HttpServletResponse response,
@@ -121,7 +124,7 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 
 		try {
 			ObjectTemplate template = templateService.get(resourceKey);
-			entityService.saveOrUpdate(DocumentHelper.buildObject(request, template.getResourceKey(), template));
+			entityService.saveOrUpdate(documentHelper.buildObject(request, template.getResourceKey(), template));
 			return new RequestStatusImpl();
 		} catch (UriRedirect e) {
 			return new RedirectStatus(e.getUri());

@@ -6,11 +6,11 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.template.ObjectTemplate;
 
 public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
 
 	
-
 	T get(String uuid) throws RepositoryException, ObjectException;
 	
 	T get(SearchField... fields) throws RepositoryException, ObjectException;
@@ -36,5 +36,7 @@ public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity>
 	Collection<T> searchTable(int start, int length, SearchField... fields);
 
 	Long searchCount(SearchField... fields);
+
+	void saveOrUpdate(T obj, ObjectTemplate template) throws RepositoryException, ObjectException;
 
 }

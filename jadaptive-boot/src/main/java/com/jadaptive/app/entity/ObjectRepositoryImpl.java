@@ -35,13 +35,16 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	static Logger log = LoggerFactory.getLogger(ObjectRepositoryImpl.class);
 	
 	@Autowired
-	DocumentDatabase db;
+	private DocumentDatabase db;
 	
 	@Autowired
-	TenantService tenantService; 
+	private TenantService tenantService; 
 
 	@Autowired
-	ObjectTemplateRepository templateRepository; 
+	private ObjectTemplateRepository templateRepository; 
+	
+	@Autowired
+	private DocumentHelper documentHelper; 
 	
 	@Override
 	public Iterable<AbstractObject> list(ObjectTemplate def, SearchField... fields) throws RepositoryException, ObjectException {
@@ -75,7 +78,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		search.add(SearchField.eq("uuid", value));
 		for(FieldTemplate field : def.getFields()) {
 			if(field.isAlternativeId() && NumberUtils.isCreatable(value)) {
-				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
+				search.add(SearchField.eq(field.getResourceKey(), documentHelper.fromString(field, value)));
 			}
 		}
 		Document document = db.get(def.getCollectionKey(),
@@ -103,7 +106,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		search.add(SearchField.eq("uuid", value));
 		for(FieldTemplate field : def.getFields()) {
 			if(field.isAlternativeId()) {
-				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
+				search.add(SearchField.eq(field.getResourceKey(), documentHelper.fromString(field, value)));
 			}
 		}
 		db.delete(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), 

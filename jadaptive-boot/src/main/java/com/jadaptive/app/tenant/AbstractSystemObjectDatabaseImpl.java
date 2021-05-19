@@ -11,6 +11,7 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
@@ -88,6 +89,11 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 		saveObject(obj, TenantService.SYSTEM_UUID);
 	}
 
+	@Override
+	public void saveOrUpdate(T obj, ObjectTemplate template) throws RepositoryException, ObjectException {
+		saveObject(obj, template, TenantService.SYSTEM_UUID);
+	}
+	
 	@Override
 	public Collection<T> table(String searchField, String searchValue, String order, int start, int length) {
 		return tableObjects(TenantService.SYSTEM_UUID, getResourceClass(), searchField, searchValue, start, length);
