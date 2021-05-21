@@ -5,12 +5,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,8 +27,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
-import com.jadaptive.api.entity.ObjectException;
-import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.ResponseHelper;
@@ -54,7 +52,7 @@ public class ResourceController {
 	}
 
 	@RequestMapping(value="/app/content/**", method = RequestMethod.GET)
-	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
+	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		tenantService.setCurrentTenant(request);
 		
@@ -93,6 +91,8 @@ public class ResourceController {
 		
 		} catch(FileNotFoundException e) { 
 			ResponseHelper.send404NotFound(uri, request, response);
+		} catch(Throwable e) { 
+			log.error("Error loading content resource " + uri, e);
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
@@ -138,7 +138,7 @@ public class ResourceController {
 						return pkg.resolvePath(uri);
 					}
 				}
-			} catch (IOException e) {
+			} catch (Throwable e) {
 				log.error("Failed to process package file for " + uri, e);
 			}
 			
@@ -158,8 +158,8 @@ public class ResourceController {
 						return pkg.resolvePath(uri);
 					}
 				}
-			} catch (IOException e) {
-				log.error("Failed to process package file for " + uri, e);
+			} catch (Throwable e) {
+				log.debug("Failed to process package file for " + uri, e);
 			}
 		}
 		
@@ -174,8 +174,8 @@ public class ResourceController {
 					return pkg.resolvePath(uri);
 				}
 			}
-		} catch (IOException e) {
-			log.error("Failed to process package file for " + uri, e);
+		} catch (Throwable e) {
+			log.debug("Failed to process package file for " + uri, e);
 		}
 		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
@@ -183,8 +183,8 @@ public class ResourceController {
 			if(Objects.nonNull(url)) {
 				try {
 					return Paths.get(url.toURI());
-				} catch (URISyntaxException e) {
-					log.error("Failed to process classpath resource for " + uri, e);
+				} catch (Throwable e) {
+					log.debug("Failed to process classpath resource for " + uri, e);
 				}
 			}
 		}
@@ -193,8 +193,8 @@ public class ResourceController {
 		if(Objects.nonNull(url)) {
 			try {
 				return Paths.get(url.toURI());
-			} catch (URISyntaxException e) {
-				log.error("Failed to process classpath resource for " + uri, e);
+			} catch (Throwable e) {
+				log.debug("Failed to process classpath resource for " + uri, e);
 			}
 		}
 		

@@ -11,16 +11,23 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 public class ResponseHelper {
 
+	static Logger log = LoggerFactory.getLogger(ResponseHelper.class);
+	
 	public static void sendRedirect(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.sendRedirect(uri);
 	}
 
 	public static  void sendContent(Path resource, String contentType, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException, IOException {
 		
+		if(log.isDebugEnabled()) {
+			log.debug("Returning resource {} with type {}", resource.toString(), contentType);
+		}
 		response.setStatus(HttpStatus.OK.value());
 		BasicFileAttributes attr = Files.readAttributes(resource, BasicFileAttributes.class);
 		response.setContentLengthLong(attr.size());
@@ -32,6 +39,10 @@ public class ResponseHelper {
 	}
 	
 	public static  void sendContent(String content, String contentType, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException, IOException {
+		
+		if(log.isDebugEnabled()) {
+			log.debug("Returning resource {} with type {}", request.getRequestURI(), contentType);
+		}
 		
 		response.setStatus(HttpStatus.OK.value());
 		byte[] buf = content.getBytes("UTF-8");
