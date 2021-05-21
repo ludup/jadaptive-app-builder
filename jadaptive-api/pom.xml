@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>org.pf4j</groupId>
 			<artifactId>pf4j-spring</artifactId>
-			<version>0.6.0-SNAPSHOT</version>
+			<version>0.6.0</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.pf4j</groupId>
@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>org.pf4j</groupId>
 			<artifactId>pf4j</artifactId>
-			<version>3.3.0-SNAPSHOT</version>
+			<version>3.3.0</version>
 		</dependency>
 
 		<dependency>
