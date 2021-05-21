@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.cache.Cache;
@@ -189,10 +190,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return 10;
 	}
 	
-	private Cache<String, Integer> getCache() {
+	private Map<String, Integer> getCache() {
 		return cacheService.getCacheOrCreate("failedLogings", 
 				String.class, Integer.class, 
-					CreatedExpiryPolicy.factoryOf(Duration.FIVE_MINUTES));
+					TimeUnit.MINUTES.toMillis(5));
 	}
 	
 	private String getCacheKey(String username) {
@@ -200,7 +201,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	private void flagFailedLogin(String username) {
-		Cache<String, Integer> cache = getCache();
+		Map<String, Integer> cache = getCache();
 		String cacheKey = getCacheKey(username);
 		Integer count = cache.get(cacheKey);
 		if(Objects.isNull(count)) {

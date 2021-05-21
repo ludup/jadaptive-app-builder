@@ -3,9 +3,8 @@ package com.jadaptive.app.db;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-
-import javax.cache.Cache;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +17,12 @@ public class CachedIterable<T extends UUIDEntity> implements Iterable<T> {
 	static Logger log = LoggerFactory.getLogger(CachedIterable.class);
 	
 		Class<T> clz;
-		Cache<String,T> cachedObjects;
+		Map<String,T> cachedObjects;
 		List<String> cachedUUIDs = new ArrayList<>();
 		int maximumCachedUUIDs = 100;
 		
 		public CachedIterable(Class<T> clz, 
-				Cache<String,T> cachedObjects,
+				Map<String,T> cachedObjects,
 				List<String> cachedUUIDs) {
 			if(log.isInfoEnabled()) {
 				log.info("Started cached iteration for {} ", clz.getSimpleName());

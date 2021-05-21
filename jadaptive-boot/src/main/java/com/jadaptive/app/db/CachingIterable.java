@@ -1,9 +1,8 @@
 package com.jadaptive.app.db;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
-
-import javax.cache.Cache;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -17,16 +16,16 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 		
 		Iterable<Document> iterator;
 		Class<T> clz;
-		Cache<String,T> cachedObjects;
-		Cache<String,UUIDList> cachedUUIDs;
+		Map<String,T> cachedObjects;
+		Map<String,UUIDList> cachedUUIDs;
 		String cacheName;
 		UUIDList processedUUIDs = new UUIDList();
 		int maximumCachedUUIDs = Integer.parseInt(System.getProperty("jadaptive.iteratorCache.maxUUIDs", "100"));
 		
 		public CachingIterable(Class<T> clz, 
 				Iterable<Document> iterator, 
-				Cache<String,T> cachedObjects,
-				Cache<String,UUIDList> cachedUUIDs,
+				Map<String,T> cachedObjects,
+				Map<String,UUIDList> cachedUUIDs,
 				String cacheName) {
 			if(log.isInfoEnabled()) {
 				log.info("Started cached iteration for {} ", clz.getSimpleName());

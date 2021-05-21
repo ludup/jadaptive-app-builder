@@ -1,6 +1,6 @@
 package com.jadaptive.app.templates;
 
-import javax.cache.Cache;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -68,7 +68,7 @@ public class TemplateVersionRepositoryImpl extends AbstractSystemObjectDatabaseI
 	}
 
 	@Override
-	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
+	protected <T extends UUIDEntity> Map<String, T> getCache(Class<T> obj) {
 		return cacheService.getCacheOrCreate("templateVersions.uuidCache", String.class, obj);
 	}
 

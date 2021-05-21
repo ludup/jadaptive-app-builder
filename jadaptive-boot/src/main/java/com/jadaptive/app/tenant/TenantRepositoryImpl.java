@@ -1,6 +1,6 @@
 package com.jadaptive.app.tenant;
 
-import javax.cache.Cache;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +92,7 @@ public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenan
 	}
 	
 	@Override
-	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
+	protected <T extends UUIDEntity> Map<String, T> getCache(Class<T> obj) {
 		return cacheService.getCacheOrCreate("tenants.uuidCache", String.class, obj);
 	}
 

@@ -1,8 +1,7 @@
 package com.jadaptive.app.entity.template;
 
+import java.util.Map;
 import java.util.Objects;
-
-import javax.cache.Cache;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +105,7 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 	}
 
 	@Override
-	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
+	protected <T extends UUIDEntity> Map<String, T> getCache(Class<T> obj) {
 		return cacheService.getCacheOrCreate("objectTemplates.uuidCache", String.class, obj);
 	}		
 }

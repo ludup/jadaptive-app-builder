@@ -1,6 +1,6 @@
 package com.jadaptive.plugins.email;
 
-import javax.cache.Cache;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,7 @@ public class EmailVerificationServiceImpl extends AuthenticatedService implement
 		
 		messageService.sendMessage(USER_REGISTRATION_CONFIRMATION_CODE, data, email);
 		
-		Cache<String,String> codes = cacheService.getCacheOrCreate("emailVerification", String.class, String.class);
+		Map<String,String> codes = cacheService.getCacheOrCreate("emailVerification", String.class, String.class);
 		log.info("Registration code is {}", code);
 		codes.put(email, code);
 		return false;
@@ -63,7 +63,7 @@ public class EmailVerificationServiceImpl extends AuthenticatedService implement
 	
 	@Override
 	public boolean assertCode(String email, String code) throws AccessDeniedException {
-		Cache<String,String> codes = cacheService.getCacheOrCreate("emailVerification", String.class, String.class);
+		Map<String,String> codes = cacheService.getCacheOrCreate("emailVerification", String.class, String.class);
 		if(codes.containsKey(email)) {
 			return codes.get(email).equalsIgnoreCase(code);
 		}

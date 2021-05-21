@@ -3,9 +3,8 @@ package com.jadaptive.app.json;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.server.MimeMappings;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,6 +43,9 @@ public class ResourceController {
 	
 	@Autowired
 	private PluginManager pluginManager; 
+	
+	@Autowired
+	private ApplicationContext applicationContext;
 	
 	private MimeMappings mimeTypes = new MimeMappings(MimeMappings.DEFAULT);
 	
@@ -189,6 +193,15 @@ public class ResourceController {
 			}
 		}
 		
+		Resource resource = applicationContext.getResource("classpath:" + uri);
+		if(Objects.nonNull(resource)) {
+			try {
+				return resource.getFile().toPath();
+			} catch (Throwable e) {
+				log.debug("Failed to process classpath resource for " + uri, e);
+			}
+		}		
+		
 		URL url = getClass().getClassLoader().getResource(uri);
 		if(Objects.nonNull(url)) {
 			try {
@@ -197,6 +210,8 @@ public class ResourceController {
 				log.debug("Failed to process classpath resource for " + uri, e);
 			}
 		}
+		
+
 		
 		return res.toPath();
 

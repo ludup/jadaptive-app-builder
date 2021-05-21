@@ -3,9 +3,8 @@ package com.jadaptive.app.db;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-
-import javax.cache.Cache;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -70,21 +69,21 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
 	}
 	
-	protected  <T extends UUIDEntity> Cache<String, T> getCache(Class<T> clz) {
+	protected  <T extends UUIDEntity> Map<String, T> getCache(Class<T> clz) {
 		return cacheService.getCacheOrCreate(String.format("%s.uuidCache", clz.getName()), String.class, clz);
 	}
 	
-	protected  <T extends UUIDEntity> Cache<String, UUIDList> getIteratorCache(Class<T> clz) {
+	protected  <T extends UUIDEntity> Map<String, UUIDList> getIteratorCache(Class<T> clz) {
 		return cacheService.getCacheOrCreate(String.format("%s.iterator", clz.getName()), String.class, UUIDList.class);
 	}
 	
-	protected  <T extends UUIDEntity> Cache<String,UUIDList> getIteratorCache(Class<T> clz, String cacheName) {
+	protected  <T extends UUIDEntity> Map<String,UUIDList> getIteratorCache(Class<T> clz, String cacheName) {
 		return cacheService.getCacheOrCreate(String.format("%s.searchCache",
 				clz.getName()), String.class, UUIDList.class);
 	}
 
 //	@SuppressWarnings("rawtypes")
-//	protected <T extends UUIDEntity> Cache<Class<T>, List> getIteratorCache(String name, Class<T> clz) {
+//	protected <T extends UUIDEntity> Map<Class<T>, List> getIteratorCache(String name, Class<T> clz) {
 //		return cacheService.getCacheOrCreate(String.format("iterator.%s.%s", clz.getSimpleName(), name), clz, List.class);
 //	}
 	
@@ -122,9 +121,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				 * Perform caching which will also inform us whether event
 				 */
 				@SuppressWarnings("unchecked")
-				Cache<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
 				
-				T prevObject = cachedObjects.getAndPut(obj.getUuid(), obj);
+				T prevObject = cachedObjects.get(obj.getUuid());
+				cachedObjects.put(obj.getUuid(), obj);
 				onObjectUpdated(prevObject, obj);
 			}
 			
@@ -140,7 +140,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		try {
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
 					return result;
@@ -179,7 +179,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				}
 				
 				T result = DocumentHelper.convertDocumentToObject(clz, document);
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				cachedObjects.put(result.getUuid(), result);
 				return result;
 			} else {
@@ -211,7 +211,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				String uuid = document.getString("_id");
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
 					return result;
@@ -243,7 +243,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				String uuid = document.getString("_id");
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
 					return result;
@@ -335,7 +335,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				@SuppressWarnings("unchecked")
-				Cache<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
+				Map<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
 				cachedObjects.remove(obj.getUuid());
 			}
 			onObjectDeleted(obj);
@@ -356,8 +356,8 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		try {
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
-				Cache<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				
 				List<String> uuids = cachedUUIDs.get(DEFAULT_ITERATOR);
 				
@@ -387,8 +387,8 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		try {
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				String cacheName = getSearchFieldsText(fields, "AND");
-				Cache<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				
 				UUIDList uuids = cachedUUIDs.get(cacheName);
 				if(Objects.nonNull(uuids) && uuids.size() > 0) {
