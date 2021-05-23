@@ -48,6 +48,8 @@ public interface DocumentDatabase {
 	
 	Document min(String table, String database, String field);
 
+	void dropSchema();
+
 	
 
 	

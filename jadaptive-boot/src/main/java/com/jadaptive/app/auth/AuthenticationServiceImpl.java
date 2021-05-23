@@ -10,9 +10,6 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
-import javax.cache.Cache;
-import javax.cache.expiry.CreatedExpiryPolicy;
-import javax.cache.expiry.Duration;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

@@ -57,13 +57,7 @@ public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenan
 	
 	@Override
 	public void dropSchema() throws RepositoryException, ObjectException {
-		
-		for(Tenant tenant : listTenants()) {
-			db.dropDatabase(tenant.getUuid());
-		}
-		
-		db.dropDatabase(TENANT_DATABASE);
-		
+		db.dropSchema();
 	}
 	
 	@Override

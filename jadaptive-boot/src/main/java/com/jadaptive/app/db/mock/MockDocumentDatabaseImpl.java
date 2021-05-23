@@ -169,4 +169,9 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		
 	}
 
+	@Override
+	public void dropSchema() {
+
+	}
+
 }

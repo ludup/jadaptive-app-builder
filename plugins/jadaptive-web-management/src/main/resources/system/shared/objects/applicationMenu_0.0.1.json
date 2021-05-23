@@ -43,7 +43,7 @@
   "keywords": "",
   "description": "",
   "system" : true,
-  "hidden" : true,
+  "hidden" : false,
   "icon": "far fa-chart-bar",
   "parent": ""
 },{ 
@@ -84,39 +84,15 @@
   "parent": "9ed7829b-3de3-4797-a41b-08dd198bb49e"
 },{
   "resourceKey" : "applicationMenu",
-  "uuid": "29f19a28-2325-4540-940c-305baf002855",
-  "title": "SMTP Configuration",
-  "path": "/app/ui/config/smtpConfiguration",
-  "permissions": [ "smtpConfiguration.read" ],
+  "uuid": "ebb98190-8a27-45bf-9288-de52d70cf0c2",
+  "title": "SSHD Configuration",
+  "path": "/app/ui/config/sshdConfiguration",
+  "permissions": [ "sshdConfiguration.read" ],
   "keywords": "",
   "description": "",
   "system" : true,
   "hidden" : false,
-  "icon": "far fa-envelope",
-  "parent": "0705001a-15b6-42ab-a197-8afb7c2e43f1"
-},{
-  "resourceKey" : "applicationMenu",
-  "uuid": "e0ab5b8b-7a9f-4189-be7c-571a328c0acf",
-  "title": "Email Templates",
-  "path": "/app/ui/table/messages",
-  "permissions": [ "messages.read" ],
-  "keywords": "",
-  "description": "",
-  "system" : true,
-  "hidden" : false,
-  "icon": "far fa-envelope-open-text",
-  "parent": "0705001a-15b6-42ab-a197-8afb7c2e43f1"
-},{
-  "resourceKey" : "applicationMenu",
-  "uuid": "9cc60bd8-f3f0-48b1-b443-c8955780a7b1",
-  "title": "HTML Templates",
-  "path": "/app/ui/table/htmlTemplates",
-  "permissions": [ "messages.read" ],
-  "keywords": "",
-  "description": "",
-  "system" : true,
-  "hidden" : false,
-  "icon": "fab fa-html5",
+  "icon": "far fa-terminal",
   "parent": "0705001a-15b6-42ab-a197-8afb7c2e43f1"
 },{
   "resourceKey" : "applicationMenu",

@@ -44,6 +44,22 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
+	public void dropSchema() {
+		
+		for(String database : mongo.getClient().listDatabaseNames()) {
+			MongoDatabase db = mongo.getClient().getDatabase(database);
+			switch(db.getName()) {
+			case "admin":
+			case "local":
+			case "config":
+				continue;
+			default:
+				db.drop();
+			}
+		}
+	}
+	
+	@Override
 	public void createTextIndex(String fieldName, String table, String database) {
 		String indexName = "text_" + fieldName;
 		MongoCollection<Document> collection = getCollection(table, database);

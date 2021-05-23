@@ -3,7 +3,6 @@ package com.jadaptive.app.json;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +21,7 @@ import org.springframework.boot.web.server.MimeMappings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -126,6 +126,9 @@ public class ResourceController {
 		
 		String uri = "webapp" + resourceUri;
 		
+		if(log.isInfoEnabled()) {
+			log.info("Resolving resource {}", resourceUri);
+		}
 		if(!tenant.isSystem()) {
 			
 			/**
@@ -133,12 +136,18 @@ public class ResourceController {
 			 */
 			File res = new File(ConfigHelper.getTenantSubFolder(tenant, "webapp"), resourceUri);
 			if(res.exists()) {
+				if(log.isInfoEnabled()) {
+					log.info("Resource {} was found in tenant webapp folder", resourceUri);
+				}
 				return res.toPath();
 			}
 			
 			try {
 				for(ResourcePackage pkg : ConfigHelper.getTenantPackages(tenant)) {
 					if(pkg.containsPath(uri)) {
+						if(log.isInfoEnabled()) {
+							log.info("Resource {} was found in tenant zip package", resourceUri);
+						}
 						return pkg.resolvePath(uri);
 					}
 				}
@@ -153,12 +162,18 @@ public class ResourceController {
 			 */
 			File res = new File(ConfigHelper.getSystemPrivateSubFolder("webapp"), resourceUri);
 			if(res.exists()) {
+				if(log.isInfoEnabled()) {
+					log.info("Resource {} was found in system private webapp folder", resourceUri);
+				}
 				return res.toPath();
 			}			
 			
 			try {
 				for(ResourcePackage pkg : ConfigHelper.getSystemPrivatePackages()) {
 					if(pkg.containsPath(uri)) {
+						if(log.isInfoEnabled()) {
+							log.info("Resource {} was found in system private zip package", resourceUri);
+						}
 						return pkg.resolvePath(uri);
 					}
 				}
@@ -169,43 +184,69 @@ public class ResourceController {
 		
 		File res = new File(ConfigHelper.getSharedSubFolder("webapp"), resourceUri);
 		if(res.exists()) {
+			if(log.isInfoEnabled()) {
+				log.info("Resource {} was found in system shared webapp folder", resourceUri);
+			}
 			return res.toPath();
 		}
 		
 		try {
 			for(ResourcePackage pkg : ConfigHelper.getSharedPackages()) {
 				if(pkg.containsPath(uri)) {
+					if(log.isInfoEnabled()) {
+						log.info("Resource {} was found in system shared zip package", resourceUri);
+					}
 					return pkg.resolvePath(uri);
 				}
 			}
 		} catch (Throwable e) {
 			log.debug("Failed to process package file for " + uri, e);
 		}
+
+		res = ResourceUtils.getFile("classpath:" + uri);
+		if(res.exists()) {
+			if(log.isInfoEnabled()) {
+				log.info("Resource {} was found in spring boot resources", resourceUri);
+			}
+			return res.toPath();
+		}
+
+		Resource resource = applicationContext.getResource("classpath:" + uri);
+		if(Objects.nonNull(resource)) {
+			try {
+				Path path = resource.getFile().toPath();
+				if(log.isInfoEnabled()) {
+					log.info("Resource {} was found in application context resources", resourceUri);
+				}
+				return path;
+			} catch (Throwable e) {
+				log.debug("Failed to process classpath resource for " + uri, e);
+			}
+		}
 		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 			URL url = w.getPluginClassLoader().getResource(FileUtils.checkStartsWithNoSlash(uri));
 			if(Objects.nonNull(url)) {
 				try {
-					return Paths.get(url.toURI());
+					Path path = Paths.get(url.toURI());
+					if(log.isInfoEnabled()) {
+						log.info("Resource {} was found in plugin {} classpath", resourceUri, w.getPluginId());
+					}
+					return path;
 				} catch (Throwable e) {
 					log.debug("Failed to process classpath resource for " + uri, e);
 				}
 			}
 		}
-		
-		Resource resource = applicationContext.getResource("classpath:" + uri);
-		if(Objects.nonNull(resource)) {
-			try {
-				return resource.getFile().toPath();
-			} catch (Throwable e) {
-				log.debug("Failed to process classpath resource for " + uri, e);
-			}
-		}		
-		
+
 		URL url = getClass().getClassLoader().getResource(uri);
 		if(Objects.nonNull(url)) {
 			try {
-				return Paths.get(url.toURI());
+				Path path = Paths.get(url.toURI());
+				if(log.isInfoEnabled()) {
+					log.info("Resource {} was found in class loader resources", resourceUri);
+				}
+				return path;
 			} catch (Throwable e) {
 				log.debug("Failed to process classpath resource for " + uri, e);
 			}

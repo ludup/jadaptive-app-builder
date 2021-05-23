@@ -136,22 +136,6 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				= ApplicationServiceImpl.getInstance().getBeans(
 						JsonTemplateEnabledService.class);
 			
-			List<JsonTemplateEnabledService> ordered = new ArrayList<JsonTemplateEnabledService>(templateServices);
-			
-			Collections.<JsonTemplateEnabledService>sort(ordered, new  Comparator<JsonTemplateEnabledService>() {
-				@Override
-				public int compare(JsonTemplateEnabledService o1, JsonTemplateEnabledService o2) {
-					return o1.getTemplateOrder().compareTo(o2.getTemplateOrder());
-				}
-			});
-			
-			
-			for(JsonTemplateEnabledService<?> repository : ordered) {
-				if(tenant.isSystem() || !repository.isSystemOnly()) { 
-					templateService.processTemplates(tenant, repository);		
-				}
-			}
-			
 			List<TenantAware> awareServices = new ArrayList<>(applicationService.getBeans(TenantAware.class));
 			Collections.sort(awareServices, new Comparator<TenantAware>() {
 
@@ -169,7 +153,22 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 					aware.initializeTenant(tenant, newSchema);
 				}
 			}
-	
+
+			List<JsonTemplateEnabledService> ordered = new ArrayList<JsonTemplateEnabledService>(templateServices);
+			
+			Collections.<JsonTemplateEnabledService>sort(ordered, new  Comparator<JsonTemplateEnabledService>() {
+				@Override
+				public int compare(JsonTemplateEnabledService o1, JsonTemplateEnabledService o2) {
+					return o1.getTemplateOrder().compareTo(o2.getTemplateOrder());
+				}
+			});
+			
+			
+			for(JsonTemplateEnabledService<?> repository : ordered) {
+				if(tenant.isSystem() || !repository.isSystemOnly()) { 
+					templateService.processTemplates(tenant, repository);		
+				}
+			}
 		} finally {
 			clearCurrentTenant();
 		}

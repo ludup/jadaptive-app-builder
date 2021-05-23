@@ -166,7 +166,7 @@ public class Entity extends AbstractPageExtension {
 		boolean first = true;
 		for(OrderedView view : views) {
 			
-			if(view.getFields().isEmpty()) {
+			if(!view.isRoot() && view.getFields().isEmpty()) {
 				continue;
 			}
 			

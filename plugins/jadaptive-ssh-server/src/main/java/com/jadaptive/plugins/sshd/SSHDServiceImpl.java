@@ -200,15 +200,38 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		}
 	}
 	
+	@Override
+	public void applyConfiguration(SshServerContext sshContext) {
+		
+		SSHDConfiguration sshdConfig = configService.getObject(SSHDConfiguration.class);
+		
+		sshContext.setIdleConnectionTimeoutSeconds(sshdConfig.getIdleConnectionTimeoutSecs());
+				
+		sshContext.getPolicy(FileSystemPolicy.class).setSftpMaxPacketSize(sshdConfig.getSftpMaximumPacketSize());
+		sshContext.getPolicy(FileSystemPolicy.class).setSftpMaxWindowSize(sshdConfig.getSftpMaximumWindowSpace());
+		sshContext.getPolicy(FileSystemPolicy.class).setSftpMinWindowSize(sshdConfig.getSftpMinimumWindowSpace());
+		sshContext.getPolicy(FileSystemPolicy.class).setSFTPCharsetEncoding(sshdConfig.getSftpCharacterSetEncoding());
+
+		if(sshdConfig.getEnableSCP()) {
+			sshContext.getChannelFactory().supportedCommands().add("scp", ScpCommand.class);
+		}
+	}
+	
 	protected void configureChannels(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
 		
 		SSHDConfiguration sshdConfig = configService.getObject(SSHDConfiguration.class);
 		
 		sshContext.setIdleConnectionTimeoutSeconds(sshdConfig.getIdleConnectionTimeoutSecs());
-		
+				
+		sshContext.getPolicy(FileSystemPolicy.class).setSftpMaxPacketSize(sshdConfig.getSftpMaximumPacketSize());
+		sshContext.getPolicy(FileSystemPolicy.class).setSftpMaxWindowSize(sshdConfig.getSftpMaximumWindowSpace());
+		sshContext.getPolicy(FileSystemPolicy.class).setSftpMinWindowSize(sshdConfig.getSftpMinimumWindowSpace());
+		sshContext.getPolicy(FileSystemPolicy.class).setSFTPCharsetEncoding(sshdConfig.getSftpCharacterSetEncoding());
+
 		if(sshdConfig.getEnableSCP()) {
-			sshContext.addCommand("scp", ScpCommand.class);
+			sshContext.getChannelFactory().supportedCommands().add("scp", ScpCommand.class);
 		}
+		
 		sshContext.setChannelFactory(new VirtualChannelFactory() {
 
 			@Override
