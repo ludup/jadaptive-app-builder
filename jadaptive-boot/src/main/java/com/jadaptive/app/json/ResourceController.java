@@ -214,7 +214,18 @@ public class ResourceController {
 		try {
 			res = ResourceUtils.getFile("classpath:" + uri);
 			if(log.isInfoEnabled()) {
-				log.info("Resource {} was found in spring boot resources", resourceUri);
+				log.info("Resource {} was found in spring boot resources with relative path", resourceUri);
+			}
+			return res.toPath();
+
+		} catch(FileNotFoundException e) {
+			log.debug("Failed to process spring boot resource for " + uri, e);
+		}
+		
+		try {
+			res = ResourceUtils.getFile("classpath:/" + uri);
+			if(log.isInfoEnabled()) {
+				log.info("Resource {} was found in spring boot resources with absolute path", resourceUri);
 			}
 			return res.toPath();
 
