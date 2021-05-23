@@ -86,10 +86,17 @@ public class ResourceController {
 				}
 				
 				if(!Files.exists(resource)) {
+					if(log.isInfoEnabled()) {
+						log.info("Resource not found {}", uri);
+					}
 					ResponseHelper.send404NotFound(uri, request, response);
 					return;
 				}
 			} 
+			
+			if(log.isInfoEnabled()) {
+				log.info("Returning content for {}", uri);
+			}
 			
 			ResponseHelper.sendContent(resource, getContentType(resource), request, response);
 		
@@ -129,6 +136,7 @@ public class ResourceController {
 		if(log.isInfoEnabled()) {
 			log.info("Resolving resource {}", resourceUri);
 		}
+		
 		if(!tenant.isSystem()) {
 			
 			/**
@@ -203,16 +211,19 @@ public class ResourceController {
 			log.debug("Failed to process package file for " + uri, e);
 		}
 
-		res = ResourceUtils.getFile("classpath:" + uri);
-		if(res.exists()) {
+		try {
+			res = ResourceUtils.getFile("classpath:" + uri);
 			if(log.isInfoEnabled()) {
 				log.info("Resource {} was found in spring boot resources", resourceUri);
 			}
 			return res.toPath();
+
+		} catch(FileNotFoundException e) {
+			log.debug("Failed to process spring boot resource for " + uri, e);
 		}
 
 		Resource resource = applicationContext.getResource("classpath:" + uri);
-		if(Objects.nonNull(resource)) {
+		if(resource.exists()) {
 			try {
 				Path path = resource.getFile().toPath();
 				if(log.isInfoEnabled()) {
@@ -252,9 +263,11 @@ public class ResourceController {
 			}
 		}
 		
-
+		if(log.isInfoEnabled()) {
+			log.info("No match for {}", uri);
+		}
 		
-		return res.toPath();
+		throw new FileNotFoundException(String.format("%s not found", uri));
 
 	}
 
