@@ -95,6 +95,7 @@ public class PageCache {
 			Map<String,String> vars = urlPathVariables( 
 					ReflectionUtils.getAnnotation(page.getClass(), RequestPage.class).path(),
 					resourceUri);
+			vars.put("resourcePath", resourceUri);
 			
 			populateFields(page, vars);
 			

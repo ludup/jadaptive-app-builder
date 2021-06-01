@@ -86,7 +86,7 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 	}
 
 	@Override
-	public void sendSuccessfulResponse(HttpServletResponse resp, String handlerName, String uri) throws IOException {
+	public void sendSuccessfulResponse(HttpServletResponse resp, String handlerName, String uri, Map<String,String> params) throws IOException {
 		RequestStatus status = new RequestStatusImpl(true);
 		byte[] data = objectMapper.writeValueAsBytes(status);
 		resp.setStatus(200);

@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.FileItemIterator;
 import org.apache.tomcat.util.http.fileupload.FileItemStream;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
@@ -106,6 +107,10 @@ public class UploadServlet extends HttpServlet {
 				    	continue;
 				    }
 				    
+				    if(StringUtils.isBlank(item.getName())) {
+				    	continue;
+				    }
+				    
 				    InputStream stream = item.openStream();
 				    
 				    if(Objects.nonNull(session)) {
@@ -133,7 +138,7 @@ public class UploadServlet extends HttpServlet {
 			    
 			}
 		
-			handler.sendSuccessfulResponse(resp, handlerName, uri);
+			handler.sendSuccessfulResponse(resp, handlerName, uri, parameters);
 
 		} catch (Throwable e) {
 			log.error("Upload failure", e);

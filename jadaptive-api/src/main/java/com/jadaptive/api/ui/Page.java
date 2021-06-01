@@ -20,4 +20,6 @@ public interface Page extends ExtensionPoint {
 	String getUri();
 
 	String getResource();
+	
+	String getResourcePath();
 }

@@ -27,6 +27,12 @@ public abstract class HtmlPage implements Page {
 	@Autowired
 	private PageCache pageCache; 
 	
+	String resourcePath;
+	
+	public String getResourcePath() {
+		return resourcePath;
+	}
+	
 	public String getResource() {
 		return String.format("%s.html", getClass().getSimpleName());
 	}
