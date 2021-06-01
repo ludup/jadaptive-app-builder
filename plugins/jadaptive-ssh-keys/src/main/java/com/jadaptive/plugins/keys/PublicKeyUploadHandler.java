@@ -107,7 +107,7 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 	
 	@Override
 	public boolean isSessionRequired() {
-		return false;
+		return true;
 	}
 
 	@Override

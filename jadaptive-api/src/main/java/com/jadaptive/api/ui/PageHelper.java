@@ -24,7 +24,9 @@ public class PageHelper {
 		if(Objects.nonNull(element)) {
 			return element;
 		}
-		return document.appendChild(new Element("head"));
+		Element head = new Element("head");
+		document.prependChild(head);
+		return head;
 	}
 	
 	public static void appendScript(Document document, String uri) {

@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.ui.AuthenticationFlow;
 import com.jadaptive.api.ui.Page;
 
 public interface AuthenticationService {
@@ -14,6 +15,7 @@ public interface AuthenticationService {
 	public static final String PASSWORD = "password";
 	public static final String ALTERNATIVE_PASSWORD = "alternativePassword";
 	public static final String AUTHENTICATION_STATE_ATTR = "authenticationState";
+	public static final String DEFAULT_AUTHENTICATION_FLOW = "defaultAuthentication";
 	
 	Session logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent);
 
@@ -32,6 +34,8 @@ public interface AuthenticationService {
 	void decorateAuthenticationPage(Document content);
 
 	void reportAuthenticationFailure(AuthenticationState state);
+
+	void registerDefaultAuthenticationFlow(AuthenticationFlow flow);
 
 
 	

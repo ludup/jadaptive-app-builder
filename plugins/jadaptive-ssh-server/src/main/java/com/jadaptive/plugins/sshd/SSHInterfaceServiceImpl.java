@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.stats.ResourceService;
 
 @Service
-public class SSHInterfaceServiceImpl implements SSHInterfaceService {
+public class SSHInterfaceServiceImpl implements SSHInterfaceService, ResourceService {
 
 	@Autowired
 	
@@ -40,6 +41,16 @@ public class SSHInterfaceServiceImpl implements SSHInterfaceService {
 	@Override
 	public Iterable<SSHInterface> allObjects() {
 		return repository.list(SSHInterface.class);
+	}
+	
+	@Override
+	public long getTotalResources() {
+		return repository.count(SSHInterface.class);
+	}
+
+	@Override
+	public String getI18NKey() {
+		return "sshInterface";
 	}
 
 }

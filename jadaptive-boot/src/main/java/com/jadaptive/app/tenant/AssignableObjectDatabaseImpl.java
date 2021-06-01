@@ -99,5 +99,10 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	public T getObject(Class<T> resourceClass, SearchField... fields) {
 		return objectDatabase.get(resourceClass, fields);
 	}
+
+	@Override
+	public long countObjects(Class<T> resourceClass) {
+		return objectDatabase.count(resourceClass);
+	}
 	
 }

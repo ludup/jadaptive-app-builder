@@ -20,6 +20,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
@@ -32,7 +33,7 @@ import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.CompoundIterable;
 
 @Service
-public class UserServiceImpl extends AuthenticatedService implements UserService, TenantAware, UUIDObjectService<User> {
+public class UserServiceImpl extends AuthenticatedService implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
 	
 	@Autowired
 	private PermissionService permissionService; 
@@ -275,6 +276,16 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public void deleteObject(User user) {
 		deleteUser(user);
+	}
+
+	@Override
+	public long getTotalResources() {
+		return userRepository.count(UserImpl.class);
+	}
+
+	@Override
+	public String getI18NKey() {
+		return "users";
 	}
 
 }

@@ -14,10 +14,10 @@
 
 	<properties>
 		<plugin.id>jadaptive-web-management</plugin.id>
-		<plugin.class></plugin.class>
+		<plugin.class>com.jadaptive.plugins.web.WebManagementPlugin</plugin.class>
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
-		<plugin.projectUrl>https://github.com/ludup/jadpative-builder</plugin.projectUrl>
+		<plugin.projectUrl>https://github.com/ludup/jadpative-app/builder/plugins</plugin.projectUrl>
 		<plugin.dependencies></plugin.dependencies>
 	</properties>
 

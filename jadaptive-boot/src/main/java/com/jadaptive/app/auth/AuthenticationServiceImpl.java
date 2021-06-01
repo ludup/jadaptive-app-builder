@@ -9,8 +9,6 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -33,19 +31,20 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.ui.AuthenticationFlow;
+import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.app.ui.Login;
 
 @Service
 @Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION }, defaultPermissions = { AuthenticationService.USER_LOGIN_PERMISSION } )
 public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService {
 
-	public static final String PASSWORD_RESOURCE_KEY = "password";
+	
 	public static final String USERNAME_RESOURCE_KEY = "username";
-
-	private static final String DEFAULT_AUTHENTICATION_FLOW = "defaultAuthentication";
+	
+	private Map<String,AuthenticationFlow> authenticationFlows = new HashMap<>();
 	
 	static Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 	
@@ -66,16 +65,17 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	
 	Map<String,Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
 	
-	
-	@PostConstruct
-	private void postConstruct() {
-		registerAuthenticationPage(PASSWORD_RESOURCE_KEY, Login.class);
-//		registerAuthenticationPage(USERNAME_RESOURCE_KEY, SetIdentity.class);
-	}
-	
 	@Override
 	public void registerAuthenticationPage(String resourceKey, Class<? extends Page> page) {
 		registeredAuthenticationPages.put(resourceKey, page);
+	}
+	
+	@Override
+	public void registerDefaultAuthenticationFlow(AuthenticationFlow flow) {
+		if(authenticationFlows.containsKey(DEFAULT_AUTHENTICATION_FLOW)) {
+			throw new IllegalStateException("A default authentication flow is already installed!!");
+		}
+		authenticationFlows.put(DEFAULT_AUTHENTICATION_FLOW, flow);
 	}
 	
 	@Override
@@ -252,24 +252,17 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	private void processRequiredAuthentication(AuthenticationState state, String authenticationFlow) {
 		
-		File authenticationProperties = new File(ConfigHelper.getConfFolder(), "authentication.properties");
 		state.getAuthenticationPages().clear();
-		try {
-			if(authenticationProperties.exists()) {
-				Properties properties = ApplicationProperties.loadPropertiesFile(authenticationProperties);
-				
-				String[] defaultAuthentications = properties.getProperty(authenticationFlow, PASSWORD_RESOURCE_KEY).split(",");
-				for(String authenticaiton :defaultAuthentications) {
-					state.getAuthenticationPages().add(registeredAuthenticationPages.get(authenticaiton));
-				}
-				
-				return;
-			} 
-		} catch(IOException e) {
-			log.error("Failed to load authenticaiton properties", e);
+	
+		AuthenticationFlow flow = authenticationFlows.get(authenticationFlow);
+		if(Objects.nonNull(flow)) {
+			for(Class<? extends Page> authenticaiton : flow.getAuthenticators()) {
+				state.getAuthenticationPages().add(authenticaiton);
+			}
+			return;
 		}
-			
-		state.getAuthenticationPages().add(Login.class);
+	
+		throw new IllegalStateException("No login flow defined for " + authenticationFlow);
 		
 	}
 	
