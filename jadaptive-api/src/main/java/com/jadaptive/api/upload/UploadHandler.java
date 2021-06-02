@@ -7,8 +7,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.pf4j.ExtensionPoint;
-import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jadaptive.api.json.RequestStatus;
+import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
 
@@ -22,11 +24,21 @@ public interface UploadHandler extends ExtensionPoint {
 	
 	String getURIName();
 
-	default void sendSuccessfulResponse(HttpServletResponse resp, String handlerName, String uri, Map<String, String> parameters) throws IOException {
-		resp.setStatus(HttpStatus.OK.value());
-	};
-
+	default void sendSuccessfulResponse(HttpServletResponse resp, String handlerName, String uri, Map<String,String> params) throws IOException {
+		RequestStatus status = new RequestStatusImpl(true);
+		byte[] data = new ObjectMapper().writeValueAsBytes(status);
+		resp.setStatus(200);
+		resp.getOutputStream().write(data);
+		resp.setContentLength(data.length);
+		resp.setContentType("application/json");
+	}
+	
 	default void sendFailedResponse(HttpServletResponse resp, String handlerName, String uri, Throwable e) throws IOException {
-		resp.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
+		RequestStatus status = new RequestStatusImpl(false, e.getMessage());
+		byte[] data = new ObjectMapper().writeValueAsBytes(status);
+		resp.setStatus(200);
+		resp.getOutputStream().write(data);
+		resp.setContentLength(data.length);
+		resp.setContentType("application/json");
 	}
 }

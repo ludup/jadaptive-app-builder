@@ -9,8 +9,7 @@
             <div class="card">
          	   	<div class="card-header"><span>Authorized Key Upload</span><div class="float-right"><a href="/app/ui/table/authorizedKeys"><i class="fa fa-times"></i></a></div></div>
        			<div class="card-body">		
-         	<form id="uploadForm" enctype="multipart/form-data" action="/upload/public-key" method="POST">
-      		
+      		<div id="feedback"></div>
       		<div id="nameGroup" class="form-group col-12"> 
           		<label for="name" class="col-form-label">Name</label> 
           		<input type="text" id="name" name="name" class="form-control" value=""> 
@@ -18,8 +17,7 @@
          	</div>
 		    
 		    <div id="uploadHolder" jad:id="uploadWidget" class="w-100"></div>
-		    
-		</form>
+
 		</div>
          </div>
          </div>
@@ -28,51 +26,12 @@
 </div>
 <script type="text/javascript">
 	
-	$(document).ready(function() {
+	$(function() {
 	
-		$('#uploadForm').submit(function(e) {
-			e.preventDefault();
-			
-			$('#uploadForm .alert').remove();
-			
-			if($('.file-input').length <= 1) {
-				$('#uploadForm').prepend('<p class="alert alert-danger">There are no files selected!</p>');
-				return;
-			}
-			$('.file-input').last().remove();
-			
-			JadaptiveUtils.startAwesomeSpin($('#uploadButton i', 'upload'));
-			
-			var form = $(this);
-		    var url = form.attr('action');
-		    
-		    var fd = new FormData($('#uploadForm')[0]);
-
-		    $.ajax({
-		           type: "POST",
-		           url: url,
-		           dataType: "json",
-		           contentType: false,
-		           processData: false,
-		           data: fd,
-		           success: function(data)
-		           {
-		        	   debugger;
-		        	   if(data.success) {
-		        		   window.location = '/app/ui/table/authorizedKeys';
-		        	   } else {
-		        		   $('form').prepend('<p class="alert alert-danger">' + data.message + '</p>');
-		        		   clearUploads();
-		        	   }
-		           },
-		           always: function() {
-		        	   JadaptiveUtils.stopAwesomeSpin($('#uploadButton i', 'upload'));
-		           }
-		         });
+		UploadWidget.init('/upload/public-key', '/app/ui/table/authorizedKeys', "#feedback", function(fd) {
+			fd.append("name", $('#name').val());
 		});
 	});
-	
-
 
 </script>
 <footer jad:id="footer"></footer>

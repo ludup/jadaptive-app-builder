@@ -337,7 +337,7 @@ public class DocumentHelper {
 				clz = processClassNameChanges(clz, classLoader);
 				obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
 			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
-				obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).newInstance();
+				obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).getConstructor().newInstance();
 			}
 
 			String uuid = (String) document.get("_id");
@@ -487,7 +487,7 @@ public class DocumentHelper {
 			}
 			
 			return obj;
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException | ClassNotFoundException | ParseException e) {
+		} catch (SecurityException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException | ClassNotFoundException | ParseException e) {
 			log.error("Error converting document", e);
 			throw new RepositoryException(String.format("Unexpected error loading UUID entity %s", baseClass.getName()), e);			
 		}
@@ -529,31 +529,31 @@ public class DocumentHelper {
 			return Boolean.parseBoolean(StringUtils.defaultIfEmpty(value, "false"));
 		} else if(type.equals(Boolean.class)) {
 			assertType(t, FieldType.BOOL, FieldType.HIDDEN);
-			return new Boolean(Boolean.parseBoolean(StringUtils.defaultIfEmpty(value, "false")));
+			return Boolean.valueOf(Boolean.parseBoolean(StringUtils.defaultIfEmpty(value, "false")));
 		} else if(type.equals(int.class)) {
 			assertType(t, FieldType.INTEGER, FieldType.HIDDEN);
 			return Integer.parseInt(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Integer.class)) {
 			assertType(t, FieldType.INTEGER, FieldType.HIDDEN);
-			return new Integer(Integer.parseInt(StringUtils.defaultIfEmpty(value, "0")));
+			return Integer.valueOf(Integer.parseInt(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(long.class)) {
 			assertType(t, FieldType.LONG, FieldType.HIDDEN);
 			return Long.parseLong(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Long.class)) {
 			assertType(t, FieldType.LONG, FieldType.HIDDEN);
-			return new Long(Long.parseLong(StringUtils.defaultIfEmpty(value, "0")));
+			return Long.valueOf(Long.parseLong(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(float.class)) {
 			assertType(t, FieldType.DECIMAL, FieldType.HIDDEN);
 			return Float.parseFloat(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Float.class)) {
 			assertType(t, FieldType.DECIMAL, FieldType.HIDDEN);
-			return new Float(Float.parseFloat(StringUtils.defaultIfEmpty(value, "0")));
+			return Float.valueOf(Float.parseFloat(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(double.class)) {
 			assertType(t, FieldType.DECIMAL, FieldType.HIDDEN);
 			return Double.parseDouble(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Double.class)) {
 			assertType(t, FieldType.DECIMAL, FieldType.HIDDEN);
-			return new Double(Double.parseDouble(StringUtils.defaultIfEmpty(value, "0")));
+			return Double.valueOf(Double.parseDouble(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(Date.class)) {
 			if(t==FieldType.TIMESTAMP) {
 				if(StringUtils.isNotBlank(value)) {

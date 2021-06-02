@@ -61,7 +61,7 @@ public class OrderedView {
 	}
 
 	public Integer getWeight() {
-		return new Integer(def==null ? Integer.MIN_VALUE : def.weight());
+		return Integer.valueOf(def==null ? Integer.MIN_VALUE : def.weight());
 	}
 
 	public String getBundle() {

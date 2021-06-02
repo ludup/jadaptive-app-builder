@@ -71,7 +71,7 @@ public class CustomSpringExtensionFactory implements ExtensionFactory {
     @SuppressWarnings("unchecked")
     protected <T> T createWithoutSpring(Class<?> extensionClass) {
         try {
-            return (T) extensionClass.newInstance();
+            return (T) extensionClass.getConstructor().newInstance();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

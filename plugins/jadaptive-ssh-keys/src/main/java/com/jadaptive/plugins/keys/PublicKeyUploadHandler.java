@@ -35,8 +35,6 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 	@Autowired
 	private AuthorizedKeyService keyService;  
 	
-	private ObjectMapper objectMapper = new ObjectMapper();
-	
 	@Override
 	public void handleUpload(String handlerName, String uri, Map<String, String> parameters, String filename,
 			InputStream in) throws IOException, SessionTimeoutException, UnauthorizedException {
@@ -85,26 +83,6 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 		}
 	}
 
-	@Override
-	public void sendSuccessfulResponse(HttpServletResponse resp, String handlerName, String uri, Map<String,String> params) throws IOException {
-		RequestStatus status = new RequestStatusImpl(true);
-		byte[] data = objectMapper.writeValueAsBytes(status);
-		resp.setStatus(200);
-		resp.getOutputStream().write(data);
-		resp.setContentLength(data.length);
-		resp.setContentType("application/json");
-	}
-	
-	@Override
-	public void sendFailedResponse(HttpServletResponse resp, String handlerName, String uri, Throwable e) throws IOException {
-		RequestStatus status = new RequestStatusImpl(false, e.getMessage());
-		byte[] data = objectMapper.writeValueAsBytes(status);
-		resp.setStatus(200);
-		resp.getOutputStream().write(data);
-		resp.setContentLength(data.length);
-		resp.setContentType("application/json");
-	}
-	
 	@Override
 	public boolean isSessionRequired() {
 		return true;

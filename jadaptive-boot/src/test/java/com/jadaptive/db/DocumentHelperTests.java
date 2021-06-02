@@ -255,10 +255,10 @@ public class DocumentHelperTests {
         TestFieldTypesObject obj = DocumentHelper.convertDocumentToObject(TestFieldTypesObject.class, doc);
         
         Assert.assertEquals("a", obj.getString());
-        Assert.assertEquals(new Long(10L), obj.getLongNumber());
-        Assert.assertEquals(new Integer(100), obj.getIntNumber());
-        Assert.assertEquals(new Float(1.0F), obj.getFloatNumber());
-        Assert.assertEquals(new Double(2.0D), obj.getDoubleNumber());
+        Assert.assertEquals(Long.valueOf(10L), obj.getLongNumber());
+        Assert.assertEquals(Integer.valueOf(100), obj.getIntNumber());
+        Assert.assertEquals(Float.valueOf(1.0F), obj.getFloatNumber());
+        Assert.assertEquals(Double.valueOf(2.0D), obj.getDoubleNumber());
         Assert.assertEquals(date, obj.getDate());
         Assert.assertEquals(TestEnum.THREE, obj.getEnumField());
         Assert.assertEquals(Boolean.TRUE, obj.getBool());
@@ -269,10 +269,10 @@ public class DocumentHelperTests {
         
         EmbeddedObject e = obj.getEmbedded();
         Assert.assertEquals("test", e.getEmbeddedString());
-        Assert.assertEquals(new Long(Long.MAX_VALUE), e.getEmbeddedLong());
-        Assert.assertEquals(new Integer(Integer.MIN_VALUE), e.getEmbeddedInt());
-        Assert.assertEquals(new Float(Float.MAX_VALUE), e.getEmbeddedFloat());
-        Assert.assertEquals(new Double(Double.MIN_VALUE), e.getEmbeddedDouble());
+        Assert.assertEquals(Long.valueOf(Long.MAX_VALUE), e.getEmbeddedLong());
+        Assert.assertEquals(Integer.valueOf(Integer.MIN_VALUE), e.getEmbeddedInt());
+        Assert.assertEquals(Float.valueOf(Float.MAX_VALUE), e.getEmbeddedFloat());
+        Assert.assertEquals(Double.valueOf(Double.MIN_VALUE), e.getEmbeddedDouble());
         Assert.assertEquals(date, e.getEmbeddedDate());
         Assert.assertEquals(TestEnum.FIVE, e.getEmbeddedEnum());
         Assert.assertEquals(Boolean.FALSE, e.getEmbeddedBool());

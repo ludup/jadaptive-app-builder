@@ -44,7 +44,7 @@ public class AuthorizedKey extends PersonalUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String name;
 	
-	@ObjectField(readOnly = true, type = FieldType.TEXT_AREA, unique = true)
+	@ObjectField(readOnly = true, type = FieldType.TEXT_AREA)
 	@ExcludeView(values = { FieldView.TABLE })
 	String publicKey;
 	

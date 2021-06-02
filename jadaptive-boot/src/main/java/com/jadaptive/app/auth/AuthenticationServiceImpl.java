@@ -1,12 +1,9 @@
 package com.jadaptive.app.auth;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.jsoup.nodes.Document;
@@ -17,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationProperties;
-import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.cache.CacheService;
@@ -32,7 +27,6 @@ import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.ui.AuthenticationFlow;
-import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
@@ -202,7 +196,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		String cacheKey = getCacheKey(username);
 		Integer count = cache.get(cacheKey);
 		if(Objects.isNull(count)) {
-			count = new Integer(0);
+			count = Integer.valueOf(0);
 		}
 		cache.put(cacheKey, ++count);
 	}

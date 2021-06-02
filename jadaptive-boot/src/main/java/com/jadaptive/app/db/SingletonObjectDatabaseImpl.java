@@ -19,7 +19,7 @@ public class SingletonObjectDatabaseImpl<T extends SingletonUUIDEntity> implemen
 	public T getObject(Class<T> resourceClass) {
 		
 		try {
-			T tmp = resourceClass.newInstance();
+			T tmp = resourceClass.getConstructor().newInstance();
 			try {
 				return objectDatabase.get(tmp.getUuid(), resourceClass);
 			} catch(ObjectNotFoundException e) {

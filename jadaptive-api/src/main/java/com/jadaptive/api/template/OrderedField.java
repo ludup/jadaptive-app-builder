@@ -23,7 +23,7 @@ public class OrderedField {
 	}
 	
 	public Integer getWeight() {
-		return new Integer(view==null ? Integer.MIN_VALUE : view.weight());
+		return Integer.valueOf(view==null ? Integer.MIN_VALUE : view.weight());
 	}
 	
 	public FieldTemplate getField() {

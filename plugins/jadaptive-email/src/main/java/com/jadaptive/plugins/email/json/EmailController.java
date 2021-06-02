@@ -64,7 +64,7 @@ public class EmailController extends AuthenticatedController implements PluginCo
 		setupSystemContext();
 		
 		try {
-			return new ResourceStatus<Boolean>(new Boolean(verificationService.assertCode(email, code)));
+			return new ResourceStatus<Boolean>(Boolean.valueOf(verificationService.assertCode(email, code)));
 		} catch(Throwable t) {
 			log.error("api/registration/assertCode", t);
 			return new ResourceStatus<Boolean>(false, t.getMessage());

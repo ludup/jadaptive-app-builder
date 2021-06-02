@@ -89,7 +89,7 @@ public class PageCache {
 	
 	private Page createNewInstance(String resourceUri, Page cachedPage) throws FileNotFoundException {
 		try {
-			Page page = cachedPage.getClass().newInstance();
+			Page page = cachedPage.getClass().getConstructor().newInstance();
 			applicationService.autowire(page);
 			
 			Map<String,String> vars = urlPathVariables( 
@@ -118,7 +118,7 @@ public class PageCache {
 				log.error("Failed to call created method", e);
 			} 
 			return page;
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
