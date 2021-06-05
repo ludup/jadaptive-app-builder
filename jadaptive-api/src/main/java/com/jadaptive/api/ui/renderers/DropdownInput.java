@@ -26,7 +26,7 @@ public class DropdownInput extends InputRender {
 	@Override
 	public Element renderInput() {
 
-		return new Element("div").attr("class", "form-group col-12")
+		return new Element("div").attr("class", "form-group")
 				.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", resourceKey))
 						.attr("style", "position: relative")

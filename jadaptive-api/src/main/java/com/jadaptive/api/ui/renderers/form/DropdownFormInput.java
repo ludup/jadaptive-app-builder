@@ -25,7 +25,7 @@ public class DropdownFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(OrderedView panel, Element rootElement, String defaultValue) {
 
-		rootElement.appendChild(new Element("div").addClass("form-group col-12")
+		rootElement.appendChild(new Element("div").addClass("form-group")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("col-form-label")
