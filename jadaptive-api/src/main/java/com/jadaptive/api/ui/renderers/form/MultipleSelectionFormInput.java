@@ -22,7 +22,7 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 			Collection<String> selectedValues,
 			boolean valueIsResourceKey) {
 		
-		rootElement.appendChild(new Element("div").addClass("form-group col-12")
+		rootElement.appendChild(new Element("div").addClass("form-group")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("col-form-label")

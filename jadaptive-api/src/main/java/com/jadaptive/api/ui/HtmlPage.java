@@ -37,7 +37,13 @@ public abstract class HtmlPage implements Page {
 		return String.format("%s.html", getClass().getSimpleName());
 	}
 	
+	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
+		
+	}
+	
 	public final void doGet(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {	
+		
+		beforeProcess(uri, request, response);
 		
 		Document document = resolveDocument(this);
 		generateContent(document);
@@ -79,6 +85,9 @@ public abstract class HtmlPage implements Page {
 	}
 
 	public final void doPost(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		
+		beforeProcess(uri, request, response);
+		
 		try {
 
 			Document doc = resolveDocument(this);

@@ -47,6 +47,7 @@ public class UserInterfaceController {
 			log.info("Redirecting to {}", e.getUri());
 			response.sendRedirect(e.getUri());
 		} catch(FileNotFoundException e) {
+			log.info("Cannot find {}", resourceUri);
 			response.sendError(HttpStatus.NOT_FOUND.value());
 		}
 	}

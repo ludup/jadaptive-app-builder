@@ -27,7 +27,7 @@ public class FieldSearchFormInput {
 			String value, String name,
 			boolean nameIsResourceKey) {
 		
-		rootElement.appendChild(new Element("div").addClass("form-group col-12 fieldSearchInput")
+		rootElement.appendChild(new Element("div").addClass("form-group fieldSearchInput")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("col-form-label")
@@ -65,7 +65,6 @@ public class FieldSearchFormInput {
 							.attr("type", "hidden")
 							.val(value)
 				.appendChild(new Element("small")
-						.addClass("col-12")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
 		

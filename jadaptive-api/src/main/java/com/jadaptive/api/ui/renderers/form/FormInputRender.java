@@ -16,7 +16,7 @@ public abstract class FormInputRender extends FieldInputRender {
 		
 
 		rootElement.appendChild(new Element("div")
-				.addClass("form-group col-12")
+				.addClass("form-group")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("col-form-label")

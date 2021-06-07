@@ -51,7 +51,7 @@ public class PageCache {
 		try {
 			Collection<Page> pages = applicationService.getBeans(Page.class);
 			for(Page page : pages) {
-				if(page.getUri().contentEquals(name) || page.getClass().getName().equalsIgnoreCase(name)) {
+				if(page.getUri().contentEquals(resourceUri) || page.getUri().contentEquals(name) || page.getClass().getName().equalsIgnoreCase(name)) {
 					aliasCache.put(page.getUri(), page);
 					pageCache.put(page.getClass(), page);
 					if(ReflectionUtils.hasAnnotation(page.getClass(), RequestPage.class)) {
@@ -92,7 +92,7 @@ public class PageCache {
 			Page page = cachedPage.getClass().getConstructor().newInstance();
 			applicationService.autowire(page);
 			
-			Map<String,String> vars = urlPathVariables( 
+			Map<String,Object> vars = urlPathVariables( 
 					ReflectionUtils.getAnnotation(page.getClass(), RequestPage.class).path(),
 					resourceUri);
 			vars.put("resourcePath", resourceUri);
@@ -123,9 +123,9 @@ public class PageCache {
 		}
 	}
 	
-	private void populateFields(Page page, Map<String, String> vars) {
+	public void populateFields(Page page, Map<String, Object> vars) {
 		
-		for(Map.Entry<String,String> e : vars.entrySet()) { 
+		for(Map.Entry<String,Object> e : vars.entrySet()) { 
 			try {
 				Field field = ReflectionUtils.getField(page.getClass(), e.getKey());
 				field.setAccessible(true);
@@ -138,8 +138,8 @@ public class PageCache {
 		
 	}
 
-	public static Map<String, String> urlPathVariables(String matchPath, String requestPath) {
-		Map<String, String> vars = new LinkedHashMap<>();
+	public static Map<String, Object> urlPathVariables(String matchPath, String requestPath) {
+		Map<String, Object> vars = new LinkedHashMap<>();
 		/**
 		 * If there are path variables in the raw path, then extract the values of these
 		 * from the request path.

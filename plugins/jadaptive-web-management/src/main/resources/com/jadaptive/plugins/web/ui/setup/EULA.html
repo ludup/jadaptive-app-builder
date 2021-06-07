@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
+<body>
+<div class="col-12 my-3">
+   <iframe class="w-100" height="600" border="0" style="background-color: #eee;" src="https://www.gnu.org/licenses/gpl-3.0-standalone.html">
+   </iframe>
+</div>
+<div class="col-12">
+   <input type="checkbox" name="agree" id="agree"><span jad:bundle="setup" jad:i18n="eula.agree"></span></textarea>
+</div>
+<script type="text/javascript">
+$(function() {
+	Wizard.initStep('setup', function(success, cancel) {
+		if($('#agree').is(':checked')) {
+			setTimeout(success, 5000);
+		} else {
+			bootbox.alert("You must accept the license agreement to continue.");
+			cancel();
+		}
+	});
+});
+</script>
+</body>
+</html>

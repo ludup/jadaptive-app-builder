@@ -22,7 +22,7 @@ public class MultipleTextFormInput {
 	public void renderInput(OrderedView panel, Element rootElement, 
 			Collection<String> selectedValues) {
 		
-		rootElement.appendChild(new Element("div").addClass("form-group col-12 multipleTextInput")
+		rootElement.appendChild(new Element("div").addClass("form-group multipleTextInput")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("col-form-label")

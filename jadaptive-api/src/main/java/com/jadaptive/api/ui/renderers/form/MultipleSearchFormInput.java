@@ -30,7 +30,7 @@ public class MultipleSearchFormInput {
 			Collection<NamePairValue> selectedValues,
 			boolean nameIsResourceKey) {
 		
-		rootElement.appendChild(new Element("div").addClass("form-group col-12 multipleSearchInput")
+		rootElement.appendChild(new Element("div").addClass("form-group multipleSearchInput")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("col-form-label")
