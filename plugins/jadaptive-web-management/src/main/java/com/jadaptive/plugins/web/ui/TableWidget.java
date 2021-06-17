@@ -17,7 +17,7 @@ import com.jadaptive.api.ui.PageDependencies;
 public class TableWidget extends AbstractPageExtension {
 
 	@Override
-	public void process(Document document, Page page) throws IOException {
+	public void process(Document document, Element element, Page page) throws IOException {
 		
 		if(!(page instanceof TemplatePage)) {
 			throw new IllegalStateException();

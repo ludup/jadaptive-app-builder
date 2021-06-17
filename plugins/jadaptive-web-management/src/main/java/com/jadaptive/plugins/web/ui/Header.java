@@ -3,6 +3,7 @@ package com.jadaptive.plugins.web.ui;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,7 +19,7 @@ public class Header extends AbstractPageExtension {
 	private PermissionService permissionService;
 	
 	@Override
-	public void process(Document document, Page page) {
+	public void process(Document document, Element element, Page page) {
 		if(Objects.nonNull(page.getClass().getAnnotation(ModalPage.class))) {
 			document.select("script").remove();
 			document.select("#searchForm").remove();

@@ -12,4 +12,8 @@ public @interface Validator {
 	String value(); 
 	
 	ValidationType type();
+	
+	String i18n();
+
+	String bundle();
 }

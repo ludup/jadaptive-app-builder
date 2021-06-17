@@ -12,7 +12,7 @@
 $(function() {
 	Wizard.initStep('setup', function(success, cancel) {
 		if($('#agree').is(':checked')) {
-			setTimeout(success, 5000);
+			success();
 		} else {
 			bootbox.alert("You must accept the license agreement to continue.");
 			cancel();

@@ -28,7 +28,7 @@ public abstract class SSHInterface extends NamedUUIDEntity {
 	String addressToBind;
 	
 	@ObjectField(required = true, type = FieldType.INTEGER, defaultValue = "22")
-	@Validator(type = ValidationType.RANGE, value = "1-65535")
+	@Validator(type = ValidationType.RANGE, value = "1-65535", bundle = RESOURCE_KEY, i18n = "port.invalid")
 	int portToBind;
 	
 	public String getAddressToBind() {

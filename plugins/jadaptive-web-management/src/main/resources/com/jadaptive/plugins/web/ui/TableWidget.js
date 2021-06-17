@@ -27,7 +27,7 @@ $(document).ready(function() {
 				sidePagination: 'server',
 				totalField: 'total',
 				dataField: 'rows',
-				url: '/app/api/' + t.resourceKey + '/table',
+				url: '/app/api/objects/' + t.resourceKey + '/table',
 				pagination: true,
 				search: true,
 				showRefresh: true,
@@ -88,7 +88,7 @@ $(document).ready(function() {
 					    },
 					    callback: function (result) {
 					        if(result) {
-					        	var url = '/app/api/' + t.resourceKey + '/' + uuid;
+					        	var url = '/app/api/objects/' + t.resourceKey + '/' + uuid;
 					    		
 					    		$.ajax({
 					                url: url,

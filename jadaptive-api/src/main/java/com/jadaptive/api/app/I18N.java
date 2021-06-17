@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.gnu.org/licenses/gpl.html
  ******************************************************************************/
-package com.jadaptive.app;
+package com.jadaptive.api.app;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;

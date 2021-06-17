@@ -21,7 +21,7 @@ import com.jadaptive.api.tenant.TenantService;
 @Controller
 public class TenantController {
 
-	static Logger log = LoggerFactory.getLogger(ObjectController.class);
+	static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	@Autowired
 	TenantService tenantService; 

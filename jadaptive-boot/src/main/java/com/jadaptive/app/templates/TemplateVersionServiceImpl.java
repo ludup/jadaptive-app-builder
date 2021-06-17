@@ -537,11 +537,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(Objects.nonNull(objd)) {
 				t.getValidators().add(new FieldValidator(
 						ValidationType.RESOURCE_KEY, 
-						objd.resourceKey()));
+						objd.resourceKey(), ObjectTemplate.RESOURCE_KEY, "resourceKey.invalid"));
 			}
 			t.getValidators().add(new FieldValidator(
 					ValidationType.OBJECT_TYPE, 
-					f.getType().getName()));
+					f.getType().getName(), ObjectTemplate.RESOURCE_KEY, "objectType.invalid"));
 			break;
 		}
 		case ENUM:
@@ -558,18 +558,26 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(StringUtils.isBlank(field.references())) {
 				t.getValidators().add(new FieldValidator(
 						ValidationType.OBJECT_TYPE, 
-						f.getType().getName()));
+						f.getType().getName(),
+						ObjectTemplate.RESOURCE_KEY,
+						"objectType.invalid"));
 				t.getValidators().add(new FieldValidator(
 						ValidationType.RESOURCE_KEY, 
-						resourceKey));
+						resourceKey,
+						ObjectTemplate.RESOURCE_KEY,
+						"resourceKey.invalid"));
 				templateService.registerObjectDependency(resourceKey, template);
 			} else {
 				t.getValidators().add(new FieldValidator(
 						ValidationType.OBJECT_TYPE, 
-						field.references()));
+						field.references(), 
+						ObjectTemplate.RESOURCE_KEY,
+						"objectType.invalid"));
 				t.getValidators().add(new FieldValidator(
 						ValidationType.RESOURCE_KEY, 
-						field.references()));
+						field.references(),
+						ObjectTemplate.RESOURCE_KEY,
+						"resourceKey.invalid"));
 				templateService.registerObjectDependency(field.references(), template);
 			}
 			break;
@@ -581,7 +589,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		Validator[] validators = f.getAnnotationsByType(Validator.class);
 		if(Objects.nonNull(validators)) {
 			for(Validator validator : validators) {
-				t.getValidators().add(new FieldValidator(validator.type(), validator.value()));
+				t.getValidators().add(new FieldValidator(validator.type(), validator.value(), validator.bundle(), validator.i18n()));
 			}
 		}
 

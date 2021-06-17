@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	if($('nav')) {
-		$.getJSON('/app/api/applicationMenu/list', function(data) {
+		$.getJSON('/app/api/objects/applicationMenu/list', function(data) {
 			if(data.success) {
 				var menus = [];
 				var top = [];

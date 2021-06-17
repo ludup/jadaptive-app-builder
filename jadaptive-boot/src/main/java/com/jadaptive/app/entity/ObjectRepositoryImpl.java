@@ -23,6 +23,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
@@ -69,7 +70,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 	
 	@Override
-	public AbstractObject getById(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
+	public AbstractObject getById(ObjectTemplate def, String value) throws RepositoryException, ObjectException, ValidationException {
 		
 		List<SearchField> search = new ArrayList<>();
 		search.add(SearchField.eq("uuid", value));
@@ -98,7 +99,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 	
 	@Override
-	public void deleteByUUIDOrAltId(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
+	public void deleteByUUIDOrAltId(ObjectTemplate def, String value) throws RepositoryException, ObjectException, ValidationException {
 		List<SearchField> search = new ArrayList<>();
 		search.add(SearchField.eq("uuid", value));
 		for(FieldTemplate field : def.getFields()) {

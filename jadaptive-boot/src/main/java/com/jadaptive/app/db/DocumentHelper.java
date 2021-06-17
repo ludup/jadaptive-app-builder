@@ -33,6 +33,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
@@ -49,8 +50,8 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
-import com.jadaptive.app.ApplicationServiceImpl;
 import com.jadaptive.app.ClassLoaderServiceImpl;
 import com.jadaptive.app.encrypt.EncryptionServiceImpl;
 import com.jadaptive.app.entity.MongoEntity;
@@ -203,11 +204,11 @@ public class DocumentHelper {
 		document.put(name, embedded);
 	}
 
-	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document) {
+	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document) throws ObjectException, ValidationException {
 		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
 	}
 
-	public static AbstractObject buildObject(HttpServletRequest request, String fieldName, ObjectTemplate template) {
+	public static AbstractObject buildObject(HttpServletRequest request, String fieldName, ObjectTemplate template) throws IOException, ValidationException {
 
 		if(log.isDebugEnabled()) {
 			log.debug("Building object {} using template {}", fieldName, template.getResourceKey());
@@ -247,7 +248,7 @@ public class DocumentHelper {
 		return obj;
 	}
 	
-	private static Object convertValue(FieldTemplate field, HttpServletRequest request) {
+	private static Object convertValue(FieldTemplate field, HttpServletRequest request) throws IOException, ValidationException {
 		
 		String fieldName = field.getFormVariable();
 		
@@ -280,7 +281,7 @@ public class DocumentHelper {
 		}
 	}
 	
-	private static List<Object> convertValues(FieldTemplate field, HttpServletRequest request) {
+	private static List<Object> convertValues(FieldTemplate field, HttpServletRequest request) throws IOException, ValidationException {
 		
 		String fieldName = field.getFormVariable();
 		
@@ -318,7 +319,7 @@ public class DocumentHelper {
 
 
 	@SuppressWarnings("unchecked")
-	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) {
+	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) throws ObjectException, ValidationException {
 		
 		try {
 			
@@ -583,29 +584,29 @@ public class DocumentHelper {
 	}
 
 
-	public static Object fromString(FieldTemplate def, String value) {
+	public static Object fromString(FieldTemplate def, String value) throws ValidationException {
 		switch(def.getFieldType()) {
 		case BOOL:
 			if(StringUtils.isNotBlank(value)) {
-				return Boolean.parseBoolean(value);
+				return DocumentValidator.validate(def,value);
 			} else {
 				return false;
 			}
 		case DECIMAL:
 			if(StringUtils.isNotBlank(value)) {
-				return Double.parseDouble(value);
+				return DocumentValidator.validate(def,value);
 			} else {
 				return null;
 			}
 		case INTEGER:
 			if(StringUtils.isNotBlank(value)) {
-				return Integer.parseInt(value);
+				return DocumentValidator.validate(def,value);
 			} else {
 				return null;
 			}
 		case LONG:
 			if(StringUtils.isNotBlank(value)) {
-				return Long.parseLong(value);
+				return DocumentValidator.validate(def,value);
 			} else {
 				return null;
 			}
@@ -615,7 +616,7 @@ public class DocumentHelper {
 		case PERMISSION:
 		case HIDDEN:
 		case ENUM:
-			return value;
+			return DocumentValidator.validate(def,value);
 		case TIMESTAMP:
 			if(StringUtils.isNotBlank(value)) {
 				return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

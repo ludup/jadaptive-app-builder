@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;

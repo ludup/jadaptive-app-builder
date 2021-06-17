@@ -19,7 +19,7 @@ public class I18N extends AbstractPageExtension {
 	I18nService i18nService; 
 	
 	@Override
-	public void process(Document document, Page page) throws IOException {
+	public void process(Document document, Element element, Page page) throws IOException {
 		
 		for(Element e : document.getElementsByAttribute("jad:i18n")) {
 			String bundle = e.attr("jad:bundle");

@@ -1,16 +1,20 @@
 package com.jadaptive.app.entity;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.bson.Document;
+import org.pf4j.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectRepository;
@@ -28,6 +32,7 @@ import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.app.db.DocumentHelper;
@@ -53,13 +58,15 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Autowired
 	private PermissionService permissionService; 
 	
+	Map<String,FormHandler> formHandlers = new HashMap<>();
+	
 	@Override
 	public AbstractObject createNew(ObjectTemplate template) {
 		return new MongoEntity(template.getResourceKey());
 	}
 	
 	@Override
-	public AbstractObject getSingleton(String resourceKey) throws RepositoryException, ObjectException {
+	public AbstractObject getSingleton(String resourceKey) throws RepositoryException, ObjectException, ValidationException {
 
 		permissionService.assertRead(resourceKey);
 		
@@ -83,7 +90,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
  	}
 	
 	@Override
-	public AbstractObject get(String resourceKey, String uuid) throws RepositoryException, ObjectException {
+	public AbstractObject get(String resourceKey, String uuid) throws RepositoryException, ObjectException, ValidationException {
 
 		permissionService.assertRead(resourceKey);
 		
@@ -269,5 +276,24 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public long count(String resourceKey, String searchField, String searchValue) {
 		return entityRepository.count(templateService.get(resourceKey), searchField, searchValue);
+	}
+
+	private void buildFormHandlers() {
+		if(formHandlers.isEmpty()) {
+			for(FormHandler handler : appService.getBeans(FormHandler.class)) {
+				formHandlers.put(handler.getResourceKey(), handler);
+			}
+		}
+	}
+	
+	@Override
+	public FormHandler getFormHandler(String handler) {
+		buildFormHandlers();
+		
+		FormHandler objectHandler = formHandlers.get(handler);
+		if(Objects.isNull(objectHandler)) {
+			throw new IllegalStateException(StringUtils.format("%s is not a known form handler", handler));
+		}
+		return objectHandler;
 	}
 }

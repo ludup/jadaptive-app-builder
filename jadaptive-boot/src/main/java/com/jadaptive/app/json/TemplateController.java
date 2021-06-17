@@ -33,7 +33,7 @@ import com.jadaptive.api.templates.TemplateVersionService;
 @Controller
 public class TemplateController {
 
-	static Logger log = LoggerFactory.getLogger(ObjectController.class);
+	static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	@Autowired
 	private TemplateService templateService; 

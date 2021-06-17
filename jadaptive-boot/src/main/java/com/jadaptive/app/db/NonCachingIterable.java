@@ -10,11 +10,11 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
-import com.jadaptive.app.ApplicationServiceImpl;
 
 public class NonCachingIterable<T extends UUIDEntity> implements Iterable<T> {
 

@@ -34,7 +34,7 @@ public class FreeMarker extends AbstractPageExtension{
 	}
 	
 	@Override
-	public void process(Document document, Page page) throws IOException {
+	public void process(Document document, Element element, Page page) throws IOException {
 		
 		String name = UUID.randomUUID().toString();
 		Template templateObj = createTemplate(name, StringUtils.defaultIfBlank(document.toString(), ""),

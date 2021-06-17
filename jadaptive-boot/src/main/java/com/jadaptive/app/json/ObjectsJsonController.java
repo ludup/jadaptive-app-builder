@@ -27,7 +27,6 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.json.BootstrapTableController;
 import com.jadaptive.api.json.BootstrapTablePageProcessor;
 import com.jadaptive.api.json.BootstrapTableResult;
-import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -35,14 +34,12 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
-import com.jadaptive.api.ui.UriRedirect;
-import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.entity.MongoEntity;
 
 @Controller
-public class ObjectController extends BootstrapTableController<AbstractObject>{
+public class ObjectsJsonController extends BootstrapTableController<AbstractObject>{
 
-	static Logger log = LoggerFactory.getLogger(ObjectController.class);
+	static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	@Autowired
 	private TemplateService templateService; 
@@ -58,7 +55,7 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 	}
 
 	
-	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
+	@RequestMapping(value="/app/api/objects/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<AbstractObject> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
@@ -66,13 +63,13 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 		   return new EntityStatus<AbstractObject>(entityService.get(resourceKey, uuid));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
-				log.error("GET api/{}/{}", resourceKey, uuid, e);
+				log.error("GET api/objects/{}/{}", resourceKey, uuid, e);
 			}
 			return new EntityStatus<AbstractObject>(false, e.getMessage());
 		}
 	}
 	
-	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/objects/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<AbstractObject> getEntity(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
@@ -84,54 +81,43 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 		try {
 			   return new EntityStatus<AbstractObject>(entityService.getSingleton(resourceKey));
 		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/objects/{}", resourceKey, e);
+			}
 			return handleException(e, "GET", resourceKey);
 		}
 	}
 	
 	private EntityStatus<AbstractObject> handleException(Throwable e, String method, String resourceKey) {
 		if(e instanceof AccessDeniedException) {
-			log.error("{} api/{} Access Denied", method, resourceKey);
+			log.error("{} api/objects/{} Access Denied", method, resourceKey);
 			throw (AccessDeniedException)e;
 		}
 		if(log.isErrorEnabled()) {
-			log.error("{} api/{}", method, resourceKey, e);
+			log.error("{} api/objects/{}", method, resourceKey, e);
 		}
 		return new EntityStatus<AbstractObject>(false, e.getMessage());
 	}
 	
-	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+	@RequestMapping(value="/app/api/objects/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
 			consumes = { "application/json" })
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus saveObjectFromJSON(HttpServletRequest request, @PathVariable String resourceKey, @RequestBody MongoEntity entity)  {
+	public RequestStatus saveObject(HttpServletRequest request, @PathVariable String resourceKey, @RequestBody MongoEntity entity)  {
 
 		try {
 			entityService.saveOrUpdate(entity);
 			return new RequestStatusImpl();
 		} catch (Throwable e) {
-			return handleException(e, "POST", resourceKey);
-		}
-	}
-	
-	@RequestMapping(value="/app/api/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
-			consumes = { "application/x-www-form-urlencoded" })
-	@ResponseBody
-	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus saveObjectFromForm(HttpServletRequest request, @PathVariable String resourceKey)  {
-
-		try {
-			ObjectTemplate template = templateService.get(resourceKey);
-			entityService.saveOrUpdate(DocumentHelper.buildObject(request, template.getResourceKey(), template));
-			return new RequestStatusImpl();
-		} catch (UriRedirect e) {
-			return new RedirectStatus(e.getUri());
-		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/objects/{}", resourceKey, e);
+			}
 			return handleException(e, "POST", resourceKey);
 		}
 	}
 
 
-	@RequestMapping(value="/app/api/{resourceKey}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
+	@RequestMapping(value="/app/api/objects/{resourceKey}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus delete(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
@@ -142,11 +128,14 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 			entityService.delete(resourceKey, uuid);
 			return new RequestStatusImpl();
 		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("DELETE api/objects/{}", resourceKey, e);
+			}
 			return handleException(e, "DELETE", resourceKey);
 		}
 	}
 	
-	@RequestMapping(value="/app/api/{resourceKey}/{name}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
+	@RequestMapping(value="/app/api/objects/{resourceKey}/{name}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus delete(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String name, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
@@ -157,11 +146,14 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 			entityService.delete(resourceKey, uuid);
 			return new RequestStatusImpl();
 		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("DELETE api/objects/{}", resourceKey, e);
+			}
 			return handleException(e, "DELETE", resourceKey);
 		}
 	}
 	
-	@RequestMapping(value="/app/api/{resourceKey}/list", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/objects/{resourceKey}/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityResultsStatus<AbstractObject> listObjects(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
@@ -169,13 +161,13 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 			   return new EntityResultsStatus<AbstractObject>(entityService.list(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
-				log.error("GET api/{}/list", resourceKey, e);
+				log.error("GET api/objects/{}/list", resourceKey, e);
 			}
 			return new EntityResultsStatus<AbstractObject>(false, e.getMessage());
 		}
 	}
 
-	@RequestMapping(value="/app/api/{resourceKey}/personal", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/objects/{resourceKey}/personal", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityListStatus<AbstractObject> listPersonal(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
@@ -183,13 +175,13 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 			   return new EntityListStatus<AbstractObject>(entityService.personal(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
-				log.error("GET api/{}/list", resourceKey, e);
+				log.error("GET api/objects/{}/personal", resourceKey, e);
 			}
 			return new EntityListStatus<AbstractObject>(false, e.getMessage());
 		}
 	}
 	
-	@RequestMapping(value="/app/api/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
+	@RequestMapping(value="/app/api/objects/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public BootstrapTableResult<AbstractObject> tableObjects(HttpServletRequest request, 
@@ -224,7 +216,7 @@ public class ObjectController extends BootstrapTableController<AbstractObject>{
 
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
-				log.error("GET api/{}/table", resourceKey, e);
+				log.error("GET api/objects/{}/table", resourceKey, e);
 			}
 			throw new IllegalStateException(e.getMessage(), e);
 		}

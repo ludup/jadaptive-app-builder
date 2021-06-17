@@ -3,9 +3,9 @@ package com.jadaptive.entity;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
-import com.jadaptive.app.ApplicationServiceImpl;
 
 public class AbstractDeserializerTest {
 

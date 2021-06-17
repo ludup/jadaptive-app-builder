@@ -58,7 +58,7 @@ public abstract class HtmlPage implements Page {
 		
 		processPageDependencies(document);
 		
-		processEmbeddedExtensions(document);
+		processDocumentExtensions(document);
 		
 		resolveScript(getUri(), document, getClass());
 		resolveStylesheet(getUri(), document, getClass());
@@ -134,24 +134,39 @@ public abstract class HtmlPage implements Page {
 		throw new FileNotFoundException();
 	}
 
-	private void processEmbeddedExtensions(Document parent) throws IOException {
-		Elements embeddedElement = parent.getElementsByAttribute("jad:id");
+	private void processDocumentExtensions(Document document) throws IOException {
+		Elements embeddedElement = document.getElementsByAttribute("jad:id");
 		for(Element embedded : embeddedElement) {
+			processEmbeddedExtensions(document, embedded);
+		}
+	}
+	
+	private void processChildExtensions(Document document, Element element) throws IOException {
+		Elements embeddedElement = element.getElementsByAttribute("jad:id");
+		for(Element embedded : embeddedElement) {
+			if(element.equals(embedded)) {
+				continue;
+			}
+ 			processEmbeddedExtensions(document, embedded);
+		}
+	}
+	
+	private void processEmbeddedExtensions(Document document, Element element) throws IOException {
 			
-			String name = embedded.attr("jad:id");
+			String name = element.attr("jad:id");
 			PageExtension ext = pageCache.resolveExtension(name);
 			Document doc = resolveDocument(ext);
-			ext.process(doc, this);
+			ext.process(doc, element, this);
 			
 			PageDependencies deps = ext.getClass().getAnnotation(PageDependencies.class);
 			if(Objects.nonNull(deps) && Objects.nonNull(deps.extensions())) {
-				processPageLevelExtensions(parent, deps.extensions());
+				processPageLevelExtensions(document, deps.extensions());
 			}
 			
 			Elements children = doc.selectFirst("body").children();
 			if(Objects.nonNull(children)) {
-				for(Element element : children) {
-					element.appendTo(embedded);
+				for(Element e : children) {
+					e.appendTo(element);
 				}
 			}
 			
@@ -160,16 +175,18 @@ public abstract class HtmlPage implements Page {
 			 * have to move them to the parent document.
 			 */
 			for(Element node : doc.select("script")) {
-				PageHelper.appendLast(PageHelper.getOrCreateTag(parent, "head"), "script", node);
+				PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "script", node);
 			}
 			
 			for(Element node : doc.select("link")) {
-				PageHelper.appendLast(PageHelper.getOrCreateTag(parent, "head"), "link", node);
+				PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "link", node);
 			}
 			
-			resolveScript(name, parent, ext.getClass());
-			resolveStylesheet(name, parent, ext.getClass());
-		}
+			resolveScript(name, document, ext.getClass());
+			resolveStylesheet(name, document, ext.getClass());
+			
+			processChildExtensions(document, element);
+//		}
 	}
 
 	private void resolveStylesheet(String uri, Document document, Class<?> clz) {
@@ -212,7 +229,7 @@ public abstract class HtmlPage implements Page {
 	private void processPageLevelExtensions(Document document, String[] extensions) throws IOException {
 		
 		for(String ext : extensions) {
-			pageCache.resolveExtension(ext).process(document, this);
+			pageCache.resolveExtension(ext).process(document, null, this);
 		}
 	}
 }

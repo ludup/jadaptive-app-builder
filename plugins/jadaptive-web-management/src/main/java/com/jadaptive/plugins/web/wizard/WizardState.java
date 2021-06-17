@@ -5,17 +5,22 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.jadaptive.api.ui.AbstractPageExtension;
+import com.jadaptive.plugins.web.objects.CreateAccount;
+import com.jadaptive.plugins.web.objects.CreateInterface;
 
 public class WizardState {
 
-	String resourceKey;
 	Integer currentStep = 0;
 	List<AbstractPageExtension> pages = new ArrayList<>();
 	AbstractPageExtension startPage;
 	AbstractPageExtension finishPage;
+	WizardFlow flow;
 	
-	public WizardState(String resourceKey) {
-		this.resourceKey = resourceKey;
+	CreateAccount account;
+	CreateInterface listeningInterface;
+	
+	public WizardState(WizardFlow flow) {
+		this.flow = flow;
 	} 
 	
 	public void init(AbstractPageExtension startPage, AbstractPageExtension finishPage, AbstractPageExtension...pages) {
@@ -66,7 +71,7 @@ public class WizardState {
 	}
 
 	public boolean hasBackButton() {
-		return currentStep > 1 && !isFinishPage();
+		return currentStep > 1;
 	}
 
 	public boolean hasNextButton() {
@@ -74,7 +79,7 @@ public class WizardState {
 	}
 
 	public String getResourceKey() {
-		return resourceKey;
+		return flow.getResourceKey();
 	}
 
 	public void start() {
@@ -88,4 +93,26 @@ public class WizardState {
 	public boolean isStartPage() {
 		return currentStep == 0;
 	}
+
+	public WizardFlow getFlow() {
+		return flow;
+	}
+
+	public CreateAccount getAccount() {
+		return account;
+	}
+
+	public void setAccount(CreateAccount account) {
+		this.account = account;
+	}
+
+	public void setInterface(CreateInterface listeningInterface) {
+		this.listeningInterface = listeningInterface;
+	}
+
+	public CreateInterface getInterface() {
+		return listeningInterface;
+	}
+	
+	
 }

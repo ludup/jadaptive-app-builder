@@ -27,7 +27,7 @@ public class HTMLTemplate extends NamedUUIDEntity {
 	
 	@ObjectField(required = true, unique = true, type = FieldType.TEXT)
 	@ObjectView(value = OPTIONS_VIEW)
-	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9]+$")
+	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9]+$", bundle = RESOURCE_KEY, i18n="shortName.invalid")
 	String shortName;
 	
 	@ObjectField(required = true, defaultValue = "body", type = FieldType.TEXT)

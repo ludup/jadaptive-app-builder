@@ -123,6 +123,8 @@ public class Wizard extends HtmlPage {
 					.appendChild(new Element("span")
 							.attr("jad:bundle", "default")
 							.attr("jad:i18n", "finish.name")));
+			
+			state.getFlow().processReview(document);
 		}
 	}
 	
