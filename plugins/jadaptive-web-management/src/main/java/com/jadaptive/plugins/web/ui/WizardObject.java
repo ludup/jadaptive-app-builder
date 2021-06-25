@@ -9,7 +9,7 @@ import com.jadaptive.api.ui.PageProcessors;
 @Extension
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "freemarker", "i18n"} )
-public class WizardObject extends ObjectPage {
+public class WizardObject extends ObjectTemplatePage {
 	
 	String wizardKey;
 	

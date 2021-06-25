@@ -11,7 +11,7 @@ import com.jadaptive.api.ui.RequestPage;
 @RequestPage(path = "update/{resourceKey}/{uuid}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "freemarker", "i18n"} )
-public class Update extends ObjectPage {
+public class Update extends ObjectTemplatePage {
 	
 	@Override
 	public FieldView getScope() {

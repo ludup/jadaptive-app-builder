@@ -33,6 +33,7 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.ViewType;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.NamePairValue;
+import com.jadaptive.api.ui.ObjectPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
@@ -73,7 +74,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	protected ThreadLocal<ObjectTemplate> currentTemplate = new ThreadLocal<>();
 	private ThreadLocal<Properties> securityProperties = new ThreadLocal<>();
 	private ThreadLocal<Map<String,AbstractObject>> childObjects = new ThreadLocal<>();
-
+	
+	protected ThreadLocal<Boolean> disableViews = new ThreadLocal<>();
+	
 	protected void process(Document contents, Page page, ObjectTemplate template, AbstractObject object, FieldView scope) throws IOException {
 
 		currentDocument.set(contents);
@@ -87,7 +90,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				
 			if(Objects.nonNull(object)) {
 				Map<String,AbstractObject> children = new HashMap<>();
-				children.put(((ObjectPage) page).getTemplate().getResourceKey(), object);
+				children.put(object.getResourceKey(), object);
 				extractChildObjects(object, children);
 				childObjects.set(children);
 			}
@@ -121,8 +124,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						
 			form.appendChild(row = new Element("div").addClass("row"));
 			
-			List<OrderedView> views = templateService.getViews(template);
-
+			Boolean disable = disableViews.get();
+			if(Objects.isNull(disable))
+			{
+				disable = Boolean.FALSE;
+			}
+			
+			List<OrderedView> views = templateService.getViews(template, disable);
+			
 			createViews(views, row, object, scope);
 
 		} catch (IOException e) {

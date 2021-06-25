@@ -90,6 +90,29 @@ public class DropdownInput extends InputRender {
 		}
 	}
 	
+	public void renderValues(Collection<I18nOption> values, String defaultValue) {
+		
+		for(I18nOption value : values) {
+			addInputValue(value);
+			if(defaultValue.equals(value.getValue())) {
+				nameElement.attr("jad:bundle", value.getBundle());
+				nameElement.attr("jad:i18n", value.getI18n());
+				valueElement.val(value.getValue());
+			}
+		}
+	}
+	
+	private void addInputValue(I18nOption value) {
+		Element el = PageHelper.createAnchor("#", value.getValue())
+				.attr("data-resourcekey", value.getValue())
+				.addClass("jdropdown-item dropdown-item");
+
+		el.attr("jad:bundle", value.getBundle());
+		el.attr("jad:i18n", value.getI18n());
+	
+		dropdownMenu.appendChild(el);
+	}
+	
 	private void addInputValue(String key, String value, boolean i18n) {
 		Element el = PageHelper.createAnchor("#", value)
 				.attr("data-resourcekey", key)

@@ -28,6 +28,7 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -295,5 +296,13 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new IllegalStateException(StringUtils.format("%s is not a known form handler", handler));
 		}
 		return objectHandler;
+	}
+
+	@Override
+	public AbstractObject convert(UUIDEntity obj) {
+
+		Document doc = new Document();
+		DocumentHelper.convertObjectToDocument(obj, doc);		
+		return new MongoEntity(obj.getResourceKey(), doc);
 	}
 }

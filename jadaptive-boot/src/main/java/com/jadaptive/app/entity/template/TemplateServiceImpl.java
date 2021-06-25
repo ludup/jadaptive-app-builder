@@ -273,10 +273,10 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	}
 
 	@Override
-	public List<OrderedView> getViews(ObjectTemplate template) {
+	public List<OrderedView> getViews(ObjectTemplate template, boolean disableViews) {
 		
 		if(StringUtils.isNotBlank(template.getTemplateClass())) {
-			return getAnnotatedViews(template);
+			return getAnnotatedViews(template, disableViews);
 		}
 		return getDynamicViews(template);
 	}
@@ -285,7 +285,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		return null;
 	}
 
-	private List<OrderedView> getAnnotatedViews(ObjectTemplate template) {
+	private List<OrderedView> getAnnotatedViews(ObjectTemplate template, boolean disableViews) {
 		try {
 			Class<?> clz = classService.findClass(template.getTemplateClass());
 				
@@ -293,22 +293,25 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			Map<String,String> childViews = new HashMap<>();
 			views.put(null, new OrderedView(template.getBundle()));
 		
-			Class<?> tmp = clz;
-			
-			do {
-				ObjectViews annonatedViews = tmp.getAnnotation(ObjectViews.class);
-
-				if(Objects.nonNull(annonatedViews)) {
-					for(ObjectViewDefinition def : annonatedViews.value()) {
-						views.put(def.value(), new OrderedView(def));
-					}
-				}
+			if(!disableViews) {
+				Class<?> tmp = clz;
 				
-				tmp = tmp.getSuperclass();
+				do {
+					ObjectViews annonatedViews = tmp.getAnnotation(ObjectViews.class);
+	
+					if(Objects.nonNull(annonatedViews)) {
+						for(ObjectViewDefinition def : annonatedViews.value()) {
+							views.put(def.value(), new OrderedView(def));
+						}
+					}
+					
+					tmp = tmp.getSuperclass();
+				
+				} while(Objects.nonNull(tmp));
 			
-			} while(Objects.nonNull(tmp));
+			}
 			
-			processFields(null,template, clz, views, new LinkedList<>()); 
+			processFields(null,template, clz, views, new LinkedList<>(), disableViews); 
 
 			for(String child : childViews.keySet()) {
 				OrderedView view = views.remove(child);
@@ -329,7 +332,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	}
 
 	@SuppressWarnings("unchecked")
-	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, OrderedView> views, LinkedList<FieldTemplate> objectPath) throws NoSuchFieldException, ClassNotFoundException {
+	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, OrderedView> views, LinkedList<FieldTemplate> objectPath, boolean disableViews) throws NoSuchFieldException, ClassNotFoundException {
 		
 		LinkedList<FieldTemplate> currentPath = null;
 		if(!objectPath.isEmpty()) {
@@ -346,19 +349,19 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
 				ObjectTemplate ct = get(resourceKey);
 				objectPath.add(field);
-				processFields(v, ct, c, views, objectPath);
+				processFields(v, ct, c, views, objectPath, disableViews);
 				continue;
 			}
 			
 			if(Objects.isNull(v) || StringUtils.isBlank(v.value())) {
-				OrderedView o = views.get(Objects.nonNull(currentView) ? currentView.value() : null);
+				OrderedView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
 				if(Objects.isNull(o)) {
 					throw new IllegalStateException(
 							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
 				}
 				o.addField(new OrderedField(null, o, field, currentPath));
 			} else {
-				OrderedView o = views.get(v.value());
+				OrderedView o = views.get(disableViews ? null : v.value());
 				if(Objects.isNull(o)) {
 					throw new IllegalStateException(
 							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));

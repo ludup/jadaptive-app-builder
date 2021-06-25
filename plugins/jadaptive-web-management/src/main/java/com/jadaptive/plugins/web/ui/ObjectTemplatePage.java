@@ -11,8 +11,9 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.ui.ObjectPage;
 
-public abstract class ObjectPage extends TemplatePage {
+public abstract class ObjectTemplatePage extends TemplatePage implements ObjectPage {
 
 	@Autowired
 	private ObjectService objectService;
@@ -73,6 +74,7 @@ public abstract class ObjectPage extends TemplatePage {
 
 	}
 
+	@Override
 	public AbstractObject getObject() {
 		return object;
 	}

@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.UriRedirect;
-import com.jadaptive.plugins.web.wizard.WizardState;
+import com.jadaptive.api.wizards.WizardState;
 
 public abstract class WizardPage extends HtmlPage {
 

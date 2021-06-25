@@ -1,6 +1,8 @@
 package com.jadaptive.plugins.web.ui;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,25 +12,32 @@ import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.ui.AbstractPageExtension;
+import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.ui.HtmlPage;
+import com.jadaptive.api.ui.ObjectPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.wizards.WizardService;
+import com.jadaptive.api.wizards.WizardState;
 import com.jadaptive.plugins.web.ui.setup.SetupWizard;
-import com.jadaptive.plugins.web.wizard.WizardService;
-import com.jadaptive.plugins.web.wizard.WizardState;
 
 @Extension
 @RequestPage(path="wizards/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "freemarker", "i18n"} )
-public class Wizard extends HtmlPage {
+public class Wizard extends HtmlPage implements ObjectPage {
 
 	@Autowired
 	private WizardService wizardService;
+	
+	@Autowired
+	private ObjectService objectService; 
 	
 	String resourceKey;
 	WizardState state;
@@ -48,18 +57,23 @@ public class Wizard extends HtmlPage {
 		throw new UriRedirect("/app/ui/wizards/" + state.getResourceKey());
 	}
 
+	protected Class<?> getResourceClass() {
+		return Wizard.class;
+	}
+	
 	@Override
-	protected void generateContent(Document document) throws FileNotFoundException {
+	protected void generateContent(Document document) throws IOException {
 		super.generateContent(document);
-		
-		AbstractPageExtension ext = state.getCurrentPage();
-		Element el = document.selectFirst("#setupStep");
-		el.attr("jad:id", ext.getName());
-		
-		Element actions = document.selectFirst("#actions");
 		
 		WizardState state = wizardService.getWizard(SetupWizard.RESOURCE_KEY).getState(Request.get());
 		
+		WizardSection ext = state.getCurrentPage();
+	
+		Element el = document.selectFirst("#setupStep");
+		doProcessEmbeddedExtensions(document, el, ext);
+		
+		Element actions = document.selectFirst("#actions");
+
 		Element content = document.selectFirst("#content");
 		if(!state.isStartPage()) {
 			Element h2;
@@ -69,7 +83,7 @@ public class Wizard extends HtmlPage {
 			
 			if(!state.isFinishPage()) {
 					h2.appendChild(new Element("span")
-						.attr("jad:bundle", state.getResourceKey())
+						.attr("jad:bundle", "setup")
 						.attr("jad:i18n", "step.name"))
 					.appendChild(new Element("span")
 							.text(" " + String.valueOf(state.getCurrentStep())))
@@ -77,8 +91,8 @@ public class Wizard extends HtmlPage {
 									.text(" - "))
 					.appendChild(new Element("span")
 							.addClass("ml-1")
-							.attr("jad:bundle", state.getResourceKey())
-							.attr("jad:i18n", "step." + state.getCurrentStep() + ".name"));
+							.attr("jad:bundle", state.getCurrentPage().getBundle())
+							.attr("jad:i18n", state.getCurrentPage().getName() + ".setup.name"));
 			} else {
 				h2.appendChild(new Element("span")
 						.attr("jad:bundle", state.getResourceKey())
@@ -124,7 +138,13 @@ public class Wizard extends HtmlPage {
 							.attr("jad:bundle", "default")
 							.attr("jad:i18n", "finish.name")));
 			
-			state.getFlow().processReview(document);
+			state.getFlow().processReview(document, state);
+			
+			Integer index = Integer.valueOf(1);
+			for(WizardSection section : state.getSections()) {
+				section.processReview(document, state, index);
+				index++;
+			}
 		}
 	}
 	
@@ -133,36 +153,18 @@ public class Wizard extends HtmlPage {
 		return "wizards";
 	}
 
-//	public void doGet(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
-//		
-//		WizardFlow wizard = wizardService.getWizard(resourceKey);
-//		WizardState state = wizard.getState(Request.get());
-//		
-//		currentState.set(state);
-//		
-//		try {
-//			currentStep startPage = state.getCurrentPage();
-//			Request.get().getSession().setAttribute(CURRENT_PAGE, startPage);
-//			startPage.doGet(uri, request, response);
-//		} finally {
-//			currentState.remove();
-//		}
-//	}
-//
-//	public void doPost(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
-//		
-//		WizardFlow wizard = wizardService.getWizard(resourceKey);
-//		WizardState state = wizard.getState(Request.get());
-//		
-//		currentState.set(state);
-//		
-//		try {
-//			Page startPage = state.getCurrentPage();
-//			Request.get().getSession().setAttribute(CURRENT_PAGE, startPage);
-//			startPage.doPost(uri, request, response);
-//		} finally {
-//			currentState.remove();
-//		}
-//	}
+	@Override
+	public AbstractObject getObject() {
+		try {
+			WizardState state = wizardService.getWizard(SetupWizard.RESOURCE_KEY).getState(Request.get());
+			UUIDEntity obj = state.getCurrentObject();
+			if(Objects.isNull(obj)) {
+				return null;
+			}
+			return objectService.convert(obj);
+		} catch (FileNotFoundException e) {
+			throw new IllegalStateException(e.getMessage(), e);		
+		}
+	}
 
 }

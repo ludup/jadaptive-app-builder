@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.web.wizard;
+package com.jadaptive.api.wizards;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -77,7 +77,7 @@ public class MockEntityTemplateService implements TemplateService {
 		
 	}
 	@Override
-	public List<OrderedView> getViews(ObjectTemplate template) {
+	public List<OrderedView> getViews(ObjectTemplate template, boolean singleView) {
 		// TODO Auto-generated method stub
 		return null;
 	}

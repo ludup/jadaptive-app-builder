@@ -21,7 +21,6 @@ public class CreateAccount extends UUIDEntity {
 	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9]{4,32}$", bundle = RESOURCE_KEY, i18n = "usernane.invalid")
 	String username;
 	
-	
 	@ObjectField(required = true,
 			type = FieldType.TEXT)
 	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", bundle = RESOURCE_KEY, i18n = "email.invalid")

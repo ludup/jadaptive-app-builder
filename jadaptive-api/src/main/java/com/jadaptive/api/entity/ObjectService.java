@@ -3,6 +3,7 @@ package com.jadaptive.api.entity;
 import java.util.Collection;
 
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationException;
 
@@ -31,5 +32,7 @@ public interface ObjectService {
 	Collection<AbstractObject> personal(String resourceKey) throws RepositoryException, ObjectException;
 
 	FormHandler getFormHandler(String handler);
+
+	AbstractObject convert(UUIDEntity object);
 	
 }

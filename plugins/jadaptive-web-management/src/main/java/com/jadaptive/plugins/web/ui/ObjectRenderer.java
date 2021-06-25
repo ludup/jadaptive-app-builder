@@ -11,6 +11,7 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.ui.ObjectPage;
 import com.jadaptive.api.ui.Page;
 
 @Extension
@@ -20,6 +21,7 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 	private TemplateService templateService; 
 	
 	ThreadLocal<String> actionURL = new ThreadLocal<>();
+	ThreadLocal<AbstractObject> object = new ThreadLocal<>();
 	
 	@Override
 	public String getName() {
@@ -29,37 +31,46 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 	 @Override
 	public void process(Document contents, Element element, Page page) throws IOException {
 
-		ObjectTemplate template = null;
-		FieldView scope = FieldView.CREATE;
-		String handler = "default";
-		AbstractObject object = null;
-		
-		if(page instanceof TemplatePage) {
-			TemplatePage templatePage = (TemplatePage) page;
-			template = templatePage.getTemplate();
-			scope = templatePage.getScope();
-		} else {
-			String resourceKey = element.attr("jad:resourceKey");
-
-			if(element.hasAttr("jad:handler")) {
-				handler = element.attr("jad:handler");
+		 try {
+			ObjectTemplate template = null;
+			FieldView scope = FieldView.CREATE;
+			String handler = "default";
+			
+			
+			if(page instanceof TemplatePage) {
+				TemplatePage templatePage = (TemplatePage) page;
+				template = templatePage.getTemplate();
+				scope = templatePage.getScope();
+			} else {
+				String resourceKey = element.attr("jad:resourceKey");
+	
+				if(element.hasAttr("jad:handler")) {
+					handler = element.attr("jad:handler");
+				}
+				
+				template = templateService.get(resourceKey);
+				
+				if(element.hasAttr("jad:scope")) {
+					scope = FieldView.valueOf(element.attr("jad:scope"));
+				}
 			}
 			
-			template = templateService.get(resourceKey);
-			
-			if(element.hasAttr("jad:scope")) {
-				scope = FieldView.valueOf(element.attr("jad:scope"));
+			if(page instanceof ObjectPage) {
+				object.set(((ObjectPage)page).getObject());
 			}
-		}
-		
-		if(page instanceof ObjectPage) {
-			object = ((ObjectPage)page).getObject();
-		}
-
-		actionURL.set(String.format("/app/api/form/%s/%s", handler, template.getResourceKey()));
-		super.process(contents, page, template, object, scope);
-		actionURL.remove();
 			
+			if(element.hasAttr("jad:disableViews")) {
+				disableViews.set(Boolean.valueOf(element.attr("jad:disableViews")));
+			} 
+	
+			actionURL.set(String.format("/app/api/form/%s/%s", handler, template.getResourceKey()));
+			super.process(contents, page, template, object.get(), scope);
+		
+		 } finally {
+			actionURL.remove();
+			object.remove();
+			disableViews.remove();
+		 }
 	 }
 
 	@Override

@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.web.wizard;
+package com.jadaptive.api.wizards;
 
 import java.io.FileNotFoundException;
 
@@ -13,7 +13,7 @@ public interface WizardFlow extends ExtensionPoint {
 
 	WizardState getState(HttpServletRequest request) throws FileNotFoundException;
 
-	void processReview(Document document);
+	void processReview(Document document, WizardState state);
 	
 	
 }

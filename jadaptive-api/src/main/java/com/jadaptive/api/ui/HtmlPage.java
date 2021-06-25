@@ -19,6 +19,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
 
@@ -26,6 +27,9 @@ public abstract class HtmlPage implements Page {
 	
 	@Autowired
 	private PageCache pageCache; 
+	
+	@Autowired
+	private ApplicationService applicationService; 
 	
 	String resourcePath;
 	
@@ -148,6 +152,7 @@ public abstract class HtmlPage implements Page {
 				continue;
 			}
  			processEmbeddedExtensions(document, embedded);
+ 			
 		}
 	}
 	
@@ -155,7 +160,18 @@ public abstract class HtmlPage implements Page {
 			
 			String name = element.attr("jad:id");
 			PageExtension ext = pageCache.resolveExtension(name);
+			
+			doProcessEmbeddedExtensions(document, element, ext);
+			
+	}
+	
+	protected void doProcessEmbeddedExtensions(Document document, Element element, PageExtension ext) throws IOException {
+			
+			// Stop this being processed again
+			element.removeAttr("jad:id"); 
+			
 			Document doc = resolveDocument(ext);
+			
 			ext.process(doc, element, this);
 			
 			PageDependencies deps = ext.getClass().getAnnotation(PageDependencies.class);
@@ -182,8 +198,8 @@ public abstract class HtmlPage implements Page {
 				PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "link", node);
 			}
 			
-			resolveScript(name, document, ext.getClass());
-			resolveStylesheet(name, document, ext.getClass());
+			resolveScript(ext.getName(), document, ext.getClass());
+			resolveStylesheet(ext.getName(), document, ext.getClass());
 			
 			processChildExtensions(document, element);
 //		}
@@ -203,7 +219,7 @@ public abstract class HtmlPage implements Page {
 		} 
 	}
 
-	protected void generateContent(Document document) throws FileNotFoundException { };
+	protected void generateContent(Document document) throws IOException { };
 
 	protected Document resolveDocument(Page page) throws IOException {
 		return resolveDocument(page.getClass(), page.getResource());
@@ -213,8 +229,15 @@ public abstract class HtmlPage implements Page {
 		return resolveDocument(ext.getClass(), ext.getResource());
 	}
 	
+	protected Class<?> getResourceClass() {
+		return getClass();
+	}
+	
 	protected Document resolveDocument(Class<?> clz, String resource) throws IOException {
-		URL url =clz.getResource(resource);
+		URL url = clz.getResource(resource);
+		if(Objects.isNull(url)) {
+			url = getResourceClass().getResource(resource);
+		}
 		if(Objects.nonNull(url)) {
 			try(InputStream in = url.openStream()) {
 				return Jsoup.parse(IOUtils.toString(in, "UTF-8"));
