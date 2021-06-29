@@ -10,7 +10,7 @@ import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.wizards.WizardState;
 
-public class WizardSection extends AbstractPageExtension {
+public abstract class WizardSection extends AbstractPageExtension {
 
 	String bundle;
 	String name;
@@ -59,6 +59,10 @@ public class WizardSection extends AbstractPageExtension {
 	}
 
 	public void processReview(Document document, WizardState state, Integer sectionIndex) {
+		
+	}
+
+	public void finish(WizardState state, Integer sectionIndex) {
 		
 	}
 }

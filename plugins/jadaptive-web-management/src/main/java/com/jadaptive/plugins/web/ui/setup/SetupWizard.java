@@ -1,5 +1,6 @@
 package com.jadaptive.plugins.web.ui.setup;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,12 +22,20 @@ import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.setup.SetupSection;
+import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.PageCache;
+import com.jadaptive.api.user.AdminUserDatabase;
+import com.jadaptive.api.user.User;
 import com.jadaptive.api.wizards.WizardFlow;
 import com.jadaptive.api.wizards.WizardState;
 import com.jadaptive.plugins.web.objects.CreateAccount;
 import com.jadaptive.plugins.web.objects.CreateInterface;
+import com.jadaptive.plugins.web.ui.Login;
 import com.jadaptive.utils.ObjectUtils;
+import com.jadaptive.utils.Utils;
 
 @Extension
 public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandler {
@@ -36,8 +45,17 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 	private static final String STATE_ATTR = "setupState";
 	
 	@Autowired
-	ApplicationService applicationService; 
+	private ApplicationService applicationService; 
 
+	@Autowired
+	private PageCache pageCache;
+	
+	@Autowired
+	private TenantService tenantService;
+	
+	@Autowired
+	private AdminUserDatabase adminDatabase; 
+	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
@@ -101,8 +119,7 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 		
 		@Override
 		public void processReview(Document document, WizardState state, Integer sectionIndex) {
-			super.processReview(document, state, sectionIndex);
-			
+	
 			Element content = document.selectFirst("#setupStep");
 			CreateInterface iface = ObjectUtils.assertObject(state.getObjectAt(sectionIndex), CreateInterface.class);
 			
@@ -142,6 +159,8 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 	
 	class AdminSection extends SetupSection {
 
+		private static final String ADMIN_UUID = "adminUUID";
+
 		public AdminSection() {
 			super("setup",
 					"adminCredentials", 
@@ -158,10 +177,25 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 
 		}
 		
+		public void finish(WizardState state, Integer sectionIndex) {
+			
+			CreateAccount account = ObjectUtils.assertObject(
+					state.getObjectAt(sectionIndex), 
+					CreateAccount.class);
+			
+			String uuid = (String) state.getParameter(ADMIN_UUID);
+			if(StringUtils.isNotBlank(uuid)) {
+				adminDatabase.deleteObject(adminDatabase.getObjectByUUID(uuid));
+			}
+			User user = adminDatabase.createAdmin(account.getUsername(), 
+					account.getFirstPassword().toCharArray(), 
+					account.getEmail(), false);
+			state.setParameter(ADMIN_UUID,user.getUuid());
+		}
+		
 		@Override
 		public void processReview(Document document, WizardState state, Integer sectionIndex) {
-			super.processReview(document, state, sectionIndex);
-			
+	
 			Element content = document.selectFirst("#setupStep");
 			CreateAccount account = ObjectUtils.assertObject(state.getObjectAt(sectionIndex), CreateAccount.class);
 			
@@ -204,10 +238,30 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 								.addClass("col-9")
 								.appendChild(new Element("span")
 										.appendChild(new Element("strong")
-										.text(account.getFirstPassword().charAt(0)
-												+ "*********"
-												+ account.getFirstPassword().charAt(
-														account.getFirstPassword().length()-1)))))));
+										.text(Utils.maskingString(account.getFirstPassword(), 2, "*")))))));
 		}
-	}	
+	}
+
+	@Override
+	public Page getCompletePage() throws FileNotFoundException {
+		return pageCache.resolvePage(Login.class);
+	}
+
+	@Override
+	public void finish() {
+		
+		WizardState state = (WizardState) Request.get().getSession().getAttribute(STATE_ATTR);
+		if(Objects.isNull(state)) {
+			throw new IllegalStateException();
+		}
+		
+		Integer sectionIndex = 1;
+		for(WizardSection section : state.getSections()) {
+			section.finish(state, sectionIndex++);
+		}
+		
+		state.setFinished(true);
+		tenantService.completeSetup();
+	}
+	
 }

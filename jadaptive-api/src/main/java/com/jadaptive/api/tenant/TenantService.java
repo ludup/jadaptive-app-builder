@@ -48,4 +48,8 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	Tenant getTenantByUUID(String uuid);
 
+	boolean isSetupMode();
+
+	void completeSetup();
+
 }

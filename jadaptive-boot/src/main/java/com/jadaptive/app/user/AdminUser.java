@@ -11,6 +11,7 @@ import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.ViewType;
+import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
@@ -24,6 +25,11 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	private static final long serialVersionUID = -4995333149629598100L;
 
 	public static final String RESOURCE_KEY = "adminUser";
+	
+	@ObjectField(required = true,
+			searchable = true,
+			type = FieldType.TEXT)
+	String username;
 	
 	@ObjectField(required = false,
 			type = FieldType.HIDDEN)
@@ -52,7 +58,11 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	
 	@Override
 	public String getUsername() {
-		return "admin";
+		return username;
+	}
+	
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	@Override

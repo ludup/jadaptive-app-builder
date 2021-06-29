@@ -12,13 +12,12 @@ var Wizard = (function () {
 			window.location = "/app/api/wizard/start/" + _resourceKey;
 		},
 		next: function() {
-			debugger;
 			if(onNext) {
-				JadaptiveUtils.startAwesomeSpin($('#nextButton i'), "fa-arrow-circle-right");
+				JadaptiveUtils.startAwesomeSpin($('.nextButton i'));
 				onNext(function() {
 					window.location = "/app/api/wizard/next/" + resourceKey;
 				}, function() {
-					JadaptiveUtils.stopAwesomeSpin($('#nextButton i'), "fa-arrow-circle-right");
+					JadaptiveUtils.stopAwesomeSpin($('.nextButton i'));
 				});
 				return;
 			}
@@ -28,7 +27,16 @@ var Wizard = (function () {
 			window.location = "/app/api/wizard/back/" + resourceKey;
 		},
 		finish: function() {
-			window.location = "/app/api/wizard/finish/" + resourceKey;
+			JadaptiveUtils.startAwesomeSpin($('#finishButton i'));
+			$.getJSON("/app/api/wizard/finish/" + resourceKey, function(data) {
+				if(data.success) {
+					window.location = "/app/api/wizard/next/" + resourceKey;
+				} else {
+					JadaptiveUtils.error(data.message);
+				}
+			}).always(function() {
+			    JadaptiveUtils.stopAwesomeSpin($('#finishButton i'));
+			});
 		}	
     }
 })();

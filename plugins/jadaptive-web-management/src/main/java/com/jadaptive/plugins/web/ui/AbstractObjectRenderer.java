@@ -33,7 +33,6 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.ViewType;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.NamePairValue;
-import com.jadaptive.api.ui.ObjectPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
@@ -207,12 +206,16 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		if(append) {
 			element.appendChild(new Element("div")
-					.attr("class", "accordion col-12")
-					.attr("id", String.format("%sAccordion", currentTemplate.get().getResourceKey())));
+					.attr("class", "row")
+					.appendChild(new Element("div")
+						.attr("class", "accordion col-12")
+						.attr("id", String.format("%sAccordion", currentTemplate.get().getResourceKey()))));
 		} else {
 			element.prependChild(new Element("div")
-					.attr("class", "accordion col-12")
-					.attr("id", String.format("%sAccordion", currentTemplate.get().getResourceKey())));
+					.attr("class", "row")
+					.appendChild(new Element("div")
+						.attr("class", "accordion col-12")
+						.attr("id", String.format("%sAccordion", currentTemplate.get().getResourceKey()))));
 		}
 	}
 	

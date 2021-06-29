@@ -21,8 +21,8 @@ import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.ObjectPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
+import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.RequestPage;
-import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.wizards.WizardService;
 import com.jadaptive.api.wizards.WizardState;
 import com.jadaptive.plugins.web.ui.setup.SetupWizard;
@@ -50,12 +50,12 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		state = wizardService.getWizard(resourceKey).getState(request);
 	}
 	
-	@Override
-	protected void processPost(String uri, HttpServletRequest request, HttpServletResponse response)
-			throws FileNotFoundException {
-		state.moveNext();
-		throw new UriRedirect("/app/ui/wizards/" + state.getResourceKey());
-	}
+//	@Override
+//	protected void processPost(String uri, HttpServletRequest request, HttpServletResponse response)
+//			throws FileNotFoundException {
+//		state.moveNext();
+//		throw new UriRedirect("/app/ui/wizards/" + state.getResourceKey());
+//	}
 
 	protected Class<?> getResourceClass() {
 		return Wizard.class;
@@ -67,6 +67,9 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		
 		WizardState state = wizardService.getWizard(SetupWizard.RESOURCE_KEY).getState(Request.get());
 		
+		if(state.isFinished()) {
+			throw new PageRedirect(state.getCompletePage());
+		}
 		WizardSection ext = state.getCurrentPage();
 	
 		Element el = document.selectFirst("#setupStep");
@@ -122,7 +125,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		if(state.hasNextButton()) {
 			actions.appendChild(new Element("a")
 						.attr("id", "nextButton")
-						.addClass("btn btn-success float-right")
+						.addClass("btn btn-success float-right nextButton")
 						.appendChild(new Element("i")
 							.addClass("far fa-arrow-circle-right mr-1"))
 						.appendChild(new Element("span")
@@ -131,7 +134,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		} else if(state.isFinishPage()) {
 			actions.appendChild(new Element("a")
 						.attr("id", "finishButton")
-						.addClass("btn btn-primary float-right")
+						.addClass("btn btn-primary float-right nextButton")
 					.appendChild(new Element("i")
 						.addClass("far fa-rocket mr-1"))
 					.appendChild(new Element("span")

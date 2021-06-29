@@ -2,6 +2,7 @@ package com.jadaptive.plugins.web.ui;
 
 import org.jsoup.nodes.Document;
 import org.pf4j.Extension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.jadaptive.api.auth.AuthenticationService;
@@ -9,8 +10,10 @@ import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.plugins.web.ui.Login.LoginForm;
@@ -19,10 +22,21 @@ import com.jadaptive.plugins.web.ui.Login.LoginForm;
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 public class Login extends AuthenticationPage<LoginForm> {
 
+	@Autowired
+	private TenantService tenantService; 
+	
 	public Login() {
 		super(LoginForm.class);
 	}
 
+	@Override
+	protected void generateContent(Document doc) {
+		if(tenantService.isSetupMode()) {
+			throw new UriRedirect("/app/ui/wizards/setup");
+		}
+		super.generateContent(doc);
+	}
+	
 	protected boolean doForm(Document document, AuthenticationState state, LoginForm form) {
 		
 		try {

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.UriRedirect;
 
 @ControllerAdvice
@@ -18,10 +19,18 @@ public class RedirectController
   extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = { UriRedirect.class })
-    protected ResponseEntity<Object> handleConflict(
+    protected ResponseEntity<Object> handleCUriRedirect(
       RuntimeException ex, WebRequest request) throws URISyntaxException {
     	HttpHeaders headers = new HttpHeaders();
     	headers.setLocation(new URI(((UriRedirect)ex).getUri()));
+    	return new ResponseEntity<>(headers, HttpStatus.FOUND);
+    }
+    
+    @ExceptionHandler(value = { PageRedirect.class })
+    protected ResponseEntity<Object> handlePageRedirect(
+      RuntimeException ex, WebRequest request) throws URISyntaxException {
+    	HttpHeaders headers = new HttpHeaders();
+    	headers.setLocation(new URI(((PageRedirect)ex).getUri()));
     	return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 }

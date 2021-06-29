@@ -1,6 +1,19 @@
 var JadaptiveUtils = {
 
 startAwesomeSpin : function(el, icon, spinner) {
+	
+	
+		if(!icon) {
+			var classList = el.prop('class');
+			if(classList) {
+				$.each(classList.split(/\s+/), function(index, item) {
+				    if (item.startsWith('fa-') && !item.startsWith("fa-spin")) {
+				       icon = item;
+					   el.data('faicon', icon);
+				    }
+				});
+			}
+		}
 		el.removeClass(icon);
 		if(spinner) {
 			el.addClass(spinner);
@@ -10,6 +23,9 @@ startAwesomeSpin : function(el, icon, spinner) {
 		el.addClass('fa-spin');
 	},
 stopAwesomeSpin : function(el, icon, spinner) {
+	    if(!icon) {
+			icon = el.data('faicon');
+		}
 		el.removeClass('fa-spin');
 		if(spinner) {
 			el.removeClass(spinner);

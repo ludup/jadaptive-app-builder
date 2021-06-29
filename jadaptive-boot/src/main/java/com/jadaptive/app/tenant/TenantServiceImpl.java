@@ -61,6 +61,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	Map<String,Tenant> tenantsByDomain = new HashMap<>();
 	Map<String,Tenant> tenantsByUUID = new HashMap<>();
 	
+	boolean setupMode = false;
+	
 	@EventListener
 	public void onApplicationStartup(ApplicationReadyEvent evt) {
 		
@@ -71,6 +73,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			if(newSchema) {
 				repository.newSchema();
 				systemTenant = createTenant(SYSTEM_UUID, "System", "localhost", true);
+				setupMode = true;
 			} else {
 				systemTenant = repository.getSystemTenant();
 			}
@@ -100,6 +103,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		} finally {
 			permissionService.clearUserContext();
 		}
+	}
+	
+	@Override
+	public boolean isSetupMode() {
+		return setupMode;
 	}
 	
 	@Override
@@ -372,5 +380,10 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public void deleteObject(Tenant object) {
 		assertManageTenant();
 		repository.deleteTenant(object);
+	}
+
+	@Override
+	public void completeSetup() {
+		this.setupMode = false;
 	}
 }

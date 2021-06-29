@@ -1,5 +1,6 @@
 package com.jadaptive.api.wizards;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,6 +11,7 @@ import java.util.Map;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.setup.WizardSection;
+import com.jadaptive.api.ui.Page;
 
 public class WizardState {
 
@@ -21,6 +23,7 @@ public class WizardState {
 
 	Map<Integer,UUIDEntity> stateObjects = new HashMap<>(); 
 	Map<String,Object> stateParameters = new HashMap<>();
+	private boolean finished;;
 	
 	public WizardState(WizardFlow flow) {
 		this.flow = flow;
@@ -90,7 +93,7 @@ public class WizardState {
 	}
 
 	public void finish() {
-		
+		flow.finish();
 	}
 
 	public boolean isStartPage() {
@@ -146,6 +149,18 @@ public class WizardState {
 	
 	public void setParameter(String name, Object value) {
 		stateParameters.put(name, value);
+	}
+
+	public Page getCompletePage() throws FileNotFoundException {
+		return flow.getCompletePage();
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void setFinished(boolean finished) {
+		this.finished = finished;
 	}
 	
 }
