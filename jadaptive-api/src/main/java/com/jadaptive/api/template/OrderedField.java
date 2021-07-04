@@ -29,6 +29,14 @@ public class OrderedField {
 	public FieldTemplate getField() {
 		return field;
 	}
+	
+	public FieldTemplate getParentField() {
+		if(Objects.isNull(objectPath) || objectPath.isEmpty()) {
+			return null;
+		} else {
+			return objectPath.getLast();
+		}
+	}
 
 	public String getFormVariable() {
 		return field.getFormVariable();

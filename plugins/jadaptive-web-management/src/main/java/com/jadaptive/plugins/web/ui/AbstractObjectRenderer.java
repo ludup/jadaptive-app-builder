@@ -93,7 +93,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				extractChildObjects(object, children);
 				childObjects.set(children);
 			}
-			
+			 
 			
 			Element row;
 			Element form;
@@ -118,7 +118,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 								.val(Objects.nonNull(object) ? object.getResourceKey() : template.getResourceKey())
 						.appendChild(new Element("input")
 								.attr("type", "hidden")
-								.attr("name", "hidden")
+					 			.attr("name", "hidden")
 								.val(Objects.nonNull(object) ?  String.valueOf(object.isHidden()) : "false"))));
 						
 			form.appendChild(row = new Element("div").addClass("row"));
@@ -470,7 +470,10 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 	
 		Map<String,AbstractObject> children = childObjects.get();
-		obj = children.get(field.getField().getParentKey());
+		FieldTemplate parent = field.getParentField();
+		if(Objects.nonNull(parent)) {
+			obj = children.get(parent.getResourceKey());
+		}
 		if(Objects.isNull(obj)) {
 			return field.getField().getDefaultValue();
 		}

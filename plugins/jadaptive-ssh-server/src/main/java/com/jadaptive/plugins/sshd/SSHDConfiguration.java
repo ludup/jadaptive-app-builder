@@ -25,9 +25,9 @@ public class SSHDConfiguration extends SingletonUUIDEntity {
 	@ObjectView(GENERAL_VIEW)
 	Integer idleConnectionTimeoutSecs = 600;
 	
-	@ObjectField(type = FieldType.LONG, defaultValue = "0")
-	@ObjectView(FILESYSTEM_VIEW)
-	Long homeDirectoryMaxSpace = 0L;
+//	@ObjectField(type = FieldType.LONG, defaultValue = "0")
+//	@ObjectView(FILESYSTEM_VIEW)
+//	Long homeDirectoryMaxSpace = 0L;
 
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "2097152")
 	@ObjectView(FILESYSTEM_VIEW)
@@ -49,13 +49,13 @@ public class SSHDConfiguration extends SingletonUUIDEntity {
 	@ObjectView(FILESYSTEM_VIEW)
 	String sftpCharacterSetEncoding = "UTF-8";
 	
-	public Long getHomeDirectoryMaxSpace() {
-		return homeDirectoryMaxSpace;
-	}
-
-	public void setHomeDirectoryMaxSpace(Long homeDirectoryMaxSpace) {
-		this.homeDirectoryMaxSpace = homeDirectoryMaxSpace;
-	}
+//	public Long getHomeDirectoryMaxSpace() {
+//		return homeDirectoryMaxSpace;
+//	}
+//
+//	public void setHomeDirectoryMaxSpace(Long homeDirectoryMaxSpace) {
+//		this.homeDirectoryMaxSpace = homeDirectoryMaxSpace;
+//	}
 
 	public Integer getIdleConnectionTimeoutSecs() {
 		return idleConnectionTimeoutSecs;

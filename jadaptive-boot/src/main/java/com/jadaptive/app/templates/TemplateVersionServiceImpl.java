@@ -509,11 +509,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 	}
 	
-	private FieldTemplate processFieldAnnotations(ObjectField field, Field f, /*Properties i18n,*/ ObjectTemplate template) {
+	private FieldTemplate processFieldAnnotations(ObjectField field, /*Field parentField,*/ Field f, /*Properties i18n,*/ ObjectTemplate template) {
 
 		FieldTemplate t = new FieldTemplate();
 		t.setResourceKey(f.getName());
 		t.setParentKey(template.getResourceKey());
+//		t.setParentField(null);
 		t.setFormVariable(StringUtils.isNotBlank(field.formVariable()) ? field.formVariable() : f.getName());
 		t.setDefaultValue(field.defaultValue());
 		t.setFieldType(selectFieldType(f.getType(), field.type()));

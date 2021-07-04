@@ -25,6 +25,9 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	String parentKey;
 	
 	@ObjectField(type = FieldType.TEXT, required = true)
+	String parentField;
+	
+	@ObjectField(type = FieldType.TEXT, required = true)
 	String formVariable;
 	
 	@ObjectField(type = FieldType.TEXT)
@@ -244,6 +247,12 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	public void setParentKey(String parentKey) {
 		this.parentKey = parentKey;
 	}
-	
-	
+
+	public String getParentField() {
+		return parentField;
+	}
+
+	public void setParentField(String parentField) {
+		this.parentField = parentField;
+	}
 }

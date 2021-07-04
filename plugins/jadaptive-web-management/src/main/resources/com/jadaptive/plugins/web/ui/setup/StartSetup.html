@@ -2,11 +2,11 @@
 <html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
 <body>
 <div class="jumbotron">
-  <h1 class="display-4">VSFTP Setup</h1>
-  <p class="lead">This wizard will guide you through the initial setup of the Virtual SFTP server. Once complete your server will be fully functional and ready to serve files.</p>
+  <h1 class="display-4" jad:bundle="setup" jad:i18n="setup.title"></h1>
+  <p class="lead" jad:bundle="setup" jad:i18n="setup.info"></p>
   <hr class="my-4">
   <p></p>
-  <a id="startButton" class="btn btn-success btn-lg" href="#" role="button"><i class="far fa-thumbs-up"></i> Get Started</a>
+  <a id="startButton" class="btn btn-success btn-lg" href="#" role="button"><i class="far fa-thumbs-up"></i> <span jad:bundle="setup" jad:i18n="setup.getStarted"></span></a>
   <script type="text/javascript">
 	$(function() {
 		$('#startButton').click(function(e) {
