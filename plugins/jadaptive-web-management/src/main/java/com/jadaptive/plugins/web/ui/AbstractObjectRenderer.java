@@ -90,7 +90,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			if(Objects.nonNull(object)) {
 				Map<String,AbstractObject> children = new HashMap<>();
 				children.put(object.getResourceKey(), object);
-				extractChildObjects(object, children);
+				extractChildObjects(object, children, template);
 				childObjects.set(children);
 			}
 			 
@@ -145,11 +145,20 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 	protected abstract String getActionURL();
 
-	private void extractChildObjects(AbstractObject object, Map<String,AbstractObject> children) {
+	private void extractChildObjects(AbstractObject object, Map<String,AbstractObject> children, ObjectTemplate template) {
 
-		for(AbstractObject child : object.getChildren().values()) {
-			children.put(child.getResourceKey(), child);
-			extractChildObjects(child, children);
+		for(FieldTemplate field : template.getFields()) {
+			switch(field.getFieldType()) {
+			case OBJECT_EMBEDDED:
+				AbstractObject child = object.getChild(field);
+				children.put(field.getResourceKey(), child);
+				extractChildObjects(child, children, templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY)));
+				break;
+			case OBJECT_REFERENCE:
+				// Do we need this?
+				break;
+			default:
+			}
 		}
 	}
 
