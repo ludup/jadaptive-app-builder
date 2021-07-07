@@ -26,5 +26,9 @@ public interface SSHDService {
 	SshEngine getEngine();
 
 	void applyConfiguration(SshServerContext sshContext);
+	
+	boolean isRunning();
+	
+	void start(boolean requireValidInterface) throws IOException;
 
 }

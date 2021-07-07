@@ -29,10 +29,10 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserImpl;
 import com.jadaptive.api.wizards.WizardFlow;
 import com.jadaptive.api.wizards.WizardState;
 import com.jadaptive.plugins.web.objects.CreateAccount;
-import com.jadaptive.plugins.web.ui.Login;
 import com.jadaptive.utils.ObjectUtils;
 import com.jadaptive.utils.Utils;
 
@@ -54,7 +54,7 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 	
 	@Autowired
 	private AdminUserDatabase adminDatabase; 
-	
+		
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
@@ -136,7 +136,10 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 			
 			String uuid = (String) state.getParameter(ADMIN_UUID);
 			if(StringUtils.isNotBlank(uuid)) {
-				adminDatabase.deleteObject(adminDatabase.getObjectByUUID(uuid));
+				UserImpl u = (UserImpl) adminDatabase.getObjectByUUID(uuid);
+				u.setSystem(false);
+				adminDatabase.saveOrUpdate(u);
+				adminDatabase.deleteObject(u);
 			}
 			User user = adminDatabase.createAdmin(account.getUsername(), 
 					account.getFirstPassword().toCharArray(), 
@@ -195,7 +198,7 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 
 	@Override
 	public Page getCompletePage() throws FileNotFoundException {
-		return pageCache.resolvePage(Login.class);
+		return pageCache.resolvePage(SetupComplete.class);
 	}
 
 	@Override

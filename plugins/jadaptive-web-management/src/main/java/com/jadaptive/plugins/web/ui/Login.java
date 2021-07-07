@@ -13,6 +13,7 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
@@ -20,6 +21,7 @@ import com.jadaptive.plugins.web.ui.Login.LoginForm;
 
 @Extension
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
+@PageProcessors(extensions = { "i18n"} )
 public class Login extends AuthenticationPage<LoginForm> {
 
 	@Autowired

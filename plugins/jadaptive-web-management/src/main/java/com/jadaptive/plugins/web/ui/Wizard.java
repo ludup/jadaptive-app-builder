@@ -49,13 +49,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
 		state = wizardService.getWizard(resourceKey).getState(request);
 	}
-	
-//	@Override
-//	protected void processPost(String uri, HttpServletRequest request, HttpServletResponse response)
-//			throws FileNotFoundException {
-//		state.moveNext();
-//		throw new UriRedirect("/app/ui/wizards/" + state.getResourceKey());
-//	}
+
 
 	protected Class<?> getResourceClass() {
 		return Wizard.class;

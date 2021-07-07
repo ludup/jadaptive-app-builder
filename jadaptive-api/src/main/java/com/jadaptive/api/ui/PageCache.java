@@ -65,6 +65,10 @@ public class PageCache {
 		throw new FileNotFoundException();
 	}
 	
+	public void registerPage(Page page) {
+		aliasCache.put(page.getUri(), page);
+	}
+	
 	public Class<?> resolvePageClass(String resourceUri) throws FileNotFoundException {
 		
 		String name = FileUtils.firstPathElement(resourceUri);

@@ -32,7 +32,7 @@ var Wizard = (function () {
 				if(data.success) {
 					window.location = "/app/api/wizard/next/" + resourceKey;
 				} else {
-					JadaptiveUtils.error(data.message);
+					JadaptiveUtils.error($('#feedback'), data.message);
 				}
 			}).always(function() {
 			    JadaptiveUtils.stopAwesomeSpin($('#finishButton i'));

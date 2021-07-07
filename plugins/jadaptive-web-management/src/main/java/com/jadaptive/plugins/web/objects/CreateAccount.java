@@ -26,12 +26,12 @@ public class CreateAccount extends UUIDEntity {
 	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", bundle = RESOURCE_KEY, i18n = "email.invalid")
 	String email;
 	
-	@ObjectField(required = true,
-			type = FieldType.PASSWORD)
+	@ObjectField(required = true,type = FieldType.PASSWORD)
+	@Validator(bundle = CreateAccount.RESOURCE_KEY, type = ValidationType.REGEX, i18n = "invalid.password", value = "^(?=^.{8,}$)(?=.*\\d)|(?=.*\\W+)(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$")
 	String firstPassword;
 	
-	@ObjectField(required = true,
-			type = FieldType.PASSWORD)
+	@ObjectField(required = true, type = FieldType.PASSWORD)
+	@Validator(bundle = CreateAccount.RESOURCE_KEY, type = ValidationType.REGEX, i18n = "invalid.password", value = "^(?=^.{8,}$)(?=.*\\d)|(?=.*\\W+)(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$")
 	String secondPassword;
 
 	public String getUsername() {
