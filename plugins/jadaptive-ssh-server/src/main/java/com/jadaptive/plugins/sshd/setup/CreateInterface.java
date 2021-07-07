@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.web.objects;
+package com.jadaptive.plugins.sshd.setup;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;

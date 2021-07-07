@@ -50,11 +50,11 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	private EntityStatus<AbstractObject> handleException(Throwable e, String method, String resourceKey) {
 		if(e instanceof AccessDeniedException) {
-			log.error("{} api/``````````````objects/{} Access Denied", method, resourceKey);
+			log.error("{} api/objects/{} Access Denied", method, resourceKey);
 			throw (AccessDeniedException)e;
 		}
 		if(log.isErrorEnabled()) {
-			log.error("{} api/objects/{}", method, resourceKey, e);
+			log.error("{} api/form/{}", method, resourceKey, e);
 		}
 		return new EntityStatus<AbstractObject>(false, e.getMessage());
 	}

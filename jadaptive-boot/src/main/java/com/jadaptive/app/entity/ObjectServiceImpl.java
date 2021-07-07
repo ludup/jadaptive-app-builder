@@ -25,6 +25,7 @@ import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
@@ -155,7 +156,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		permissionService.assertReadWrite(entity.getResourceKey());
 		
 		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
-		ObjectServiceBean annotation = clz.getAnnotation(ObjectServiceBean.class);
+
+		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
 		if(Objects.nonNull(annotation)) {
 			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
 			return bean.saveOrUpdate(DocumentHelper.convertDocumentToObject(clz, 

@@ -26,7 +26,6 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.sshd.commands.UserCommandFactory;
 import com.sshtools.common.files.AbstractFileFactory;
-import com.sshtools.common.files.SpaceRestrictedFileFactoryAdapter;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;

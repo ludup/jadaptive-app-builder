@@ -32,7 +32,6 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.wizards.WizardFlow;
 import com.jadaptive.api.wizards.WizardState;
 import com.jadaptive.plugins.web.objects.CreateAccount;
-import com.jadaptive.plugins.web.objects.CreateInterface;
 import com.jadaptive.plugins.web.ui.Login;
 import com.jadaptive.utils.ObjectUtils;
 import com.jadaptive.utils.Utils;
@@ -70,8 +69,7 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 			List<SetupSection> sections = new ArrayList<>();
 			sections.addAll(Arrays.asList(
 					new SetupSection("setup", "eula", "/com/jadaptive/plugins/web/ui/setup/EULA.html", SetupSection.START_OF_DEFAULT),
-					new AdminSection(),
-					new InterfaceSection()));
+					new AdminSection()));
 			sections.addAll(applicationService.getBeans(SetupSection.class));
 			
 			Collections.sort(sections, new Comparator<SetupSection>() {
@@ -108,54 +106,7 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 		return object.getUuid();
 	}
 
-	class InterfaceSection extends SetupSection {
-
-		public InterfaceSection() {
-			super("setup", 
-					"configureInterface", 
-					"/com/jadaptive/plugins/web/ui/setup/ConfigureInterface.html", 
-					SetupSection.START_OF_DEFAULT + 3);
-		}
-		
-		@Override
-		public void processReview(Document document, WizardState state, Integer sectionIndex) {
 	
-			Element content = document.selectFirst("#setupStep");
-			CreateInterface iface = ObjectUtils.assertObject(state.getObjectAt(sectionIndex), CreateInterface.class);
-			
-			content	.appendChild(new Element("div")
-							.addClass("col-12 w-100 my-3")
-							.appendChild(new Element("h4")
-								.attr("jad:i18n", "review.interface.header")
-								.attr("jad:bundle", "setup"))
-						.appendChild(new Element("p")
-								.attr("jad:bundle", "setup")
-								.attr("jad:i18n", "review.interface.desc"))
-						.appendChild(new Element("div")
-								.addClass("row")
-								.appendChild(new Element("div")
-										.addClass("col-3")
-										.appendChild(new Element("span")
-												.attr("jad:bundle", "createInterface")
-												.attr("jad:i18n", "addressToBind.name")))
-								.appendChild(new Element("div")
-											.addClass("col-9")
-											.appendChild(new Element("span")
-													.appendChild(new Element("strong")
-															.text(iface.getAddressToBind()))))
-								.appendChild(new Element("div")
-										.addClass("col-3")
-										.appendChild(new Element("span")
-														.attr("jad:bundle", "createInterface")
-														.attr("jad:i18n", "port.name")))
-								.appendChild(new Element("div")
-										.addClass("col-9")
-										.appendChild(new Element("span")
-												.appendChild(new Element("strong")
-												.text(String.valueOf(iface.getPort())))))));
-		}
-		
-	}
 	
 	class AdminSection extends SetupSection {
 

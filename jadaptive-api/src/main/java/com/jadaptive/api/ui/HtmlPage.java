@@ -19,7 +19,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
 
@@ -27,9 +26,6 @@ public abstract class HtmlPage implements Page {
 	
 	@Autowired
 	private PageCache pageCache; 
-	
-	@Autowired
-	private ApplicationService applicationService; 
 	
 	String resourcePath;
 	
