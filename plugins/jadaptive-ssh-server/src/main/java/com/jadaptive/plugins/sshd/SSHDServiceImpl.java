@@ -154,7 +154,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		
 		permissionService.setupUserContext(user);
 		
-		SSHDConfiguration sshdConfig = configService.getObject(SSHDConfiguration.class);
+//		SSHDConfiguration sshdConfig = configService.getObject(SSHDConfiguration.class);
 		
 		try {
 			List<VirtualMountTemplate> mounts = new ArrayList<>();

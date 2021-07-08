@@ -1,8 +1,8 @@
 package com.jadaptive.plugins.web.ui;
 
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,7 +14,9 @@ import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
+import com.jadaptive.api.ui.QuickSetupItem;
 import com.jadaptive.api.ui.renderers.DropdownInput;
+import com.jadaptive.api.ui.renderers.I18nOption;
 
 @Extension
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
@@ -46,12 +48,13 @@ public class Dashboard extends AuthenticatedPage {
 		DropdownInput input = new DropdownInput("setupTasks", "default");
 		element.appendChild(input.renderInput());
 		
-		Map<String,String> values = new HashMap<>();
-		values.put("publicFolder", "a public URL to receive files over the web anonymously");
-		values.put("sftpPartner", "credentials for a partner to send you files via SFTP");
-		input.renderValues(values, "", false);
+		List<I18nOption> options = new ArrayList<>();
+
+		for(QuickSetupItem item : applicationService.getBeans(QuickSetupItem.class)) {
+			options.add(new I18nOption(item.getBundle(), item.getI18n(), item.getLink()));
+		}
 		
-		
+		input.renderValues(options, "");
 		
 	}
 

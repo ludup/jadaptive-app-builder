@@ -1,4 +1,4 @@
-$(document).ready(function(e) {
+$(function() {
 	
 	$(document).on('click', '.jdropdown-item', function(e) {
 		e.preventDefault();

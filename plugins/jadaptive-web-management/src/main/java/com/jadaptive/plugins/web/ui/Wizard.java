@@ -18,6 +18,7 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.ui.HtmlPage;
+import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.ObjectPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
@@ -31,6 +32,7 @@ import com.jadaptive.plugins.web.ui.setup.SetupWizard;
 @RequestPage(path="wizards/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "freemarker", "i18n"} )
+@ModalPage
 public class Wizard extends HtmlPage implements ObjectPage {
 
 	@Autowired
@@ -59,7 +61,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	protected void generateContent(Document document) throws IOException {
 		super.generateContent(document);
 		
-		WizardState state = wizardService.getWizard(SetupWizard.RESOURCE_KEY).getState(Request.get());
+		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
 		
 		if(state.isFinished()) {
 			throw new PageRedirect(state.getCompletePage());
@@ -153,7 +155,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	@Override
 	public AbstractObject getObject() {
 		try {
-			WizardState state = wizardService.getWizard(SetupWizard.RESOURCE_KEY).getState(Request.get());
+			WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
 			UUIDEntity obj = state.getCurrentObject();
 			if(Objects.isNull(obj)) {
 				return null;

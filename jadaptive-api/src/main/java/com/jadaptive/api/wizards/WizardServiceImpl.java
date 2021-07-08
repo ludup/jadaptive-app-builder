@@ -3,8 +3,6 @@ package com.jadaptive.api.wizards;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +15,6 @@ public class WizardServiceImpl implements WizardService {
 	private ApplicationService applicationService; 
 	
 	Map<String,WizardFlow> wizards = new HashMap<>();
-	
-	@PostConstruct
-	private void postConstruct() {
-
-	}
 	
 	@Override
 	public WizardFlow getWizard(String resourceKey) {

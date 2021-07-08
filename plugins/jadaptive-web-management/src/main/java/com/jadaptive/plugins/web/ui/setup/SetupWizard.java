@@ -1,15 +1,9 @@
 package com.jadaptive.plugins.web.ui.setup;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.UUID;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
@@ -17,7 +11,6 @@ import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
@@ -30,6 +23,7 @@ import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserImpl;
+import com.jadaptive.api.wizards.AbstractWizard;
 import com.jadaptive.api.wizards.WizardFlow;
 import com.jadaptive.api.wizards.WizardState;
 import com.jadaptive.plugins.web.objects.CreateAccount;
@@ -37,20 +31,14 @@ import com.jadaptive.utils.ObjectUtils;
 import com.jadaptive.utils.Utils;
 
 @Extension
-public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandler {
+public class SetupWizard extends AbstractWizard<SetupSection> implements WizardFlow, FormHandler {
 
 	public static final String RESOURCE_KEY = "setup";
 
 	private static final String STATE_ATTR = "setupState";
-	
-	@Autowired
-	private ApplicationService applicationService; 
 
 	@Autowired
 	private PageCache pageCache;
-	
-	@Autowired
-	private TenantService tenantService;
 	
 	@Autowired
 	private AdminUserDatabase adminDatabase; 
@@ -59,54 +47,38 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}
-	
-	@Override
-	public WizardState getState(HttpServletRequest request) {
-		WizardState state = (WizardState) request.getSession().getAttribute(STATE_ATTR);
-		if(Objects.isNull(state)) {
-			state = new WizardState(this);
-			
-			List<SetupSection> sections = new ArrayList<>();
-			sections.addAll(Arrays.asList(
-					new SetupSection("setup", "eula", "/com/jadaptive/plugins/web/ui/setup/EULA.html", SetupSection.START_OF_DEFAULT),
-					new AdminSection()));
-			sections.addAll(applicationService.getBeans(SetupSection.class));
-			
-			Collections.sort(sections, new Comparator<SetupSection>() {
 
-				@Override
-				public int compare(SetupSection o1, SetupSection o2) {
-					return Integer.valueOf(o1.getPosition()).compareTo(o2.getPosition());
-				}
-				
-			});
-			state.init(new SetupSection("setup", "startSetup", "/com/jadaptive/plugins/web/ui/setup/StartSetup.html", -1),
-					new SetupSection("setup", "finishSetup", "/com/jadaptive/plugins/web/ui/setup/FinishSetup.html", -1), 
-					sections.toArray(new SetupSection[0])); 
-			request.getSession().setAttribute(STATE_ATTR, state);
-		}
-		return state;
-	}
-	
 	@Override
-	public void processReview(Document document, WizardState state) {
-		
+	public Page getCompletePage() throws FileNotFoundException {
+		return pageCache.resolvePage(SetupComplete.class);
 	}
 
 	@Override
-	public <T extends UUIDEntity> String saveObject(T object) {
-		
-		if(StringUtils.isBlank(object.getUuid())) {
-			object.setUuid(UUID.randomUUID().toString());
-		}
-		WizardState state = getState(Request.get());
-		
-		state.getCurrentPage().validateAndSave(object, state);
-	
-		return object.getUuid();
+	protected Class<SetupSection> getSectionClass() {
+		return SetupSection.class;
 	}
 
-	
+	@Override
+	protected String getStateAttribute() {
+		return STATE_ATTR;
+	}
+
+	@Override
+	protected Collection<SetupSection> getDefaultSections() {
+		return Arrays.asList(
+				new SetupSection("setup", "eula", "/com/jadaptive/plugins/web/ui/setup/EULA.html", SetupSection.START_OF_DEFAULT),
+				new AdminSection());
+	}
+
+	@Override
+	protected SetupSection getStartSection() {
+		return new SetupSection("setup", "startSetup", "/com/jadaptive/plugins/web/ui/setup/StartSetup.html", -1);
+	}
+
+	@Override
+	protected SetupSection getFinishSection() {
+		return new SetupSection("setup", "finishSetup", "/com/jadaptive/plugins/web/ui/setup/FinishSetup.html", -1);
+	}
 	
 	class AdminSection extends SetupSection {
 
@@ -194,28 +166,6 @@ public class SetupWizard extends AbstractWizard implements WizardFlow, FormHandl
 										.appendChild(new Element("strong")
 										.text(Utils.maskingString(account.getFirstPassword(), 2, "*")))))));
 		}
-	}
-
-	@Override
-	public Page getCompletePage() throws FileNotFoundException {
-		return pageCache.resolvePage(SetupComplete.class);
-	}
-
-	@Override
-	public void finish() {
-		
-		WizardState state = (WizardState) Request.get().getSession().getAttribute(STATE_ATTR);
-		if(Objects.isNull(state)) {
-			throw new IllegalStateException();
-		}
-		
-		Integer sectionIndex = 1;
-		for(WizardSection section : state.getSections()) {
-			section.finish(state, sectionIndex++);
-		}
-		
-		state.setFinished(true);
-		tenantService.completeSetup();
 	}
 	
 }

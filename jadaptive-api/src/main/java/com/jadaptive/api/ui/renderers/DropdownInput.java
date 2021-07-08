@@ -33,7 +33,6 @@ public class DropdownInput extends InputRender {
 						.addClass("input-group")
 						.addClass("dropdown")
 					.appendChild(valueElement = new Element("input")
-							.attr("id", resourceKey)
 							.attr("name", resourceKey)
 							.attr("type", "hidden"))
 					.appendChild(nameElement = new Element("input")
@@ -42,6 +41,7 @@ public class DropdownInput extends InputRender {
 							.attr("class", "dropdown-toggle form-control")
 							.attr("readonly", "readonly")
 							.attr("type", "text")
+							.attr("autocomplete", "off")
 							.attr("data-toggle", "dropdown")
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false"))
@@ -102,6 +102,14 @@ public class DropdownInput extends InputRender {
 		}
 	}
 	
+	public void addEmptyValue() {
+		Element el = PageHelper.createAnchor("#", " ")
+				.attr("data-resourcekey", "")
+				.addClass("jdropdown-item dropdown-item");
+	
+		dropdownMenu.appendChild(el);
+	}
+	
 	private void addInputValue(I18nOption value) {
 		Element el = PageHelper.createAnchor("#", value.getValue())
 				.attr("data-resourcekey", value.getValue())
@@ -113,7 +121,7 @@ public class DropdownInput extends InputRender {
 		dropdownMenu.appendChild(el);
 	}
 	
-	private void addInputValue(String key, String value, boolean i18n) {
+	public void addInputValue(String key, String value, boolean i18n) {
 		Element el = PageHelper.createAnchor("#", value)
 				.attr("data-resourcekey", key)
 				.addClass("jdropdown-item dropdown-item");

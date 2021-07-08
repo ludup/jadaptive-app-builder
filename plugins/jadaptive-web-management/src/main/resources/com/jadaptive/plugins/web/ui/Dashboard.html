@@ -6,35 +6,43 @@
 		<main class="container mt-3">
 			<div class="row">
 				<ol class="breadcrumb col-12">
-					<li class="breadcrumb-item"><a href="/app/ui/dashboard">Home</a></li>
+					<li class="breadcrumb-item"><a href="/app/ui/dashboard"><span jad:bundle="userInterface" jad:i18n="home.name"></span></a></li>
 				</ol>
 			</div>
 			<div class="row">
-				<h1>Dashboard</h1>
+				<h1><span jad:bundle="userInterface" jad:i18n="dashboard.name"></span></h1>
 			</div>
 			<div class="row">
-				<div class="col-md-6">
+				<div class="col-md-6 mb-3">
 					<div class="card">
-						<div class="card-header"><i class="fas fa-server"></i> Server Statistics</div>
+						<div class="card-header"><i class="fas fa-server"></i> <span jad:bundle="userInterface" jad:i18n="server.stats.name"></span></div>
 						<div class="card-body">
-							<h6 class="card-title">I am currently serving...</h6>
+							<h6 class="card-title"><span jad:bundle="userInterface" jad:i18n="server.stats.desc"></span></h6>
 							<p id="resources" class="card-text"></p>
 							
 						</div>
 					</div>
 				</div>
-				<div class="col-md-6">
+				<div class="col-md-6 mb-3">
 					<div class="card">
-						<div class="card-header"><i class="fas fa-wand-magic"></i> Quick Setup</div>
+						<div class="card-header"><i class="fas fa-wand-magic"></i> <span jad:bundle="userInterface" jad:i18n="quick.setup.name"></span></div>
 						<div class="card-body">
-							<h6 class="card-title">I can help you setup...</h6>
+							<h6 class="card-title"><span jad:bundle="userInterface" jad:i18n="quick.setup.desc"></span></h6>
 							<div id="setupTasks"></div>
 						</div>
 					</div>
 				</div>
 			</div>
+			<div jad:id="dashboardWidgets"></div>
 		</main>
 	</div>
 	<footer jad:id="footer"></footer>
+	<script type="text/javascript">
+		$('input[name="setupTasks"]').change(function(e) {
+			if($(this).val()!=='') {
+				window.location = $(this).val();
+			}
+		});
+	</script>
 </body>
 </html>

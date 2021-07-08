@@ -142,7 +142,7 @@ public class PageCache {
 		
 	}
 
-	public static Map<String, Object> urlPathVariables(String matchPath, String requestPath) {
+	public static Map<String, Object> urlPathVariables(String matchPath, String requestPath) throws FileNotFoundException {
 		Map<String, Object> vars = new LinkedHashMap<>();
 		/**
 		 * If there are path variables in the raw path, then extract the values of these
@@ -152,7 +152,7 @@ public class PageCache {
 			String[] t1 = requestPath.split("/");
 			String[] t2 = matchPath.split("/");
 			if (t1.length != t2.length)
-				throw new IllegalArgumentException(String.format(
+				throw new FileNotFoundException(String.format(
 						"View path %s matched the request path %s, but they have a different number of path elements.",
 						requestPath, matchPath));
 			for (int i = 0; i < t1.length; i++) {
@@ -160,7 +160,7 @@ public class PageCache {
 				int sidx = t2[i].indexOf('{');
 				if (eidx != 1 && sidx != -1) {
 					if (sidx > 0 || (eidx != t2[i].length() - 1 && eidx != -1))
-						throw new IllegalArgumentException(String.format(
+						throw new FileNotFoundException(String.format(
 								"View path %s matched the request path %s, but element %s did not consist solely of a path variable.",
 								requestPath, matchPath));
 					String name = t2[i].substring(1, t2[i].length() - 1);
