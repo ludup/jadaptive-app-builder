@@ -32,7 +32,7 @@ public class Request {
 
 	public static String generateBaseUrl(HttpServletRequest request) {
 		StringBuffer b = new StringBuffer();
-		b.append(request.getProtocol());
+		b.append(request.getScheme());
 		b.append("://");
 		b.append(request.getHeader("Host"));
 		return b.toString();

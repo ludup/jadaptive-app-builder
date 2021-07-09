@@ -37,7 +37,10 @@ public abstract class AbstractWizard<T extends WizardSection> implements WizardF
 	@SuppressWarnings("unchecked")
 	@Override
 	public WizardState getState(HttpServletRequest request) {
+		
+		
 		WizardState state = (WizardState) request.getSession().getAttribute(getStateAttribute());
+		
 		if(Objects.isNull(state)) {
 			state = new WizardState(this);
 			
@@ -59,7 +62,16 @@ public abstract class AbstractWizard<T extends WizardSection> implements WizardF
 					sections.toArray((T[]) Array.newInstance(getSectionClass(), 0))); 
 			request.getSession().setAttribute(getStateAttribute(), state);
 		}
+		
+		assertPermissions(state);
 		return state;
+	}
+	
+	protected abstract void assertPermissions(WizardState state);
+
+	@Override
+	public void clearState(HttpServletRequest request) {
+		request.getSession().setAttribute(getStateAttribute(), null);
 	}
 	
 	@Override

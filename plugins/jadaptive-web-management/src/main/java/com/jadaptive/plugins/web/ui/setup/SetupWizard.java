@@ -3,7 +3,6 @@ package com.jadaptive.plugins.web.ui.setup;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
@@ -12,10 +11,10 @@ import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.FormHandler;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.setup.SetupSection;
-import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
@@ -39,6 +38,9 @@ public class SetupWizard extends AbstractWizard<SetupSection> implements WizardF
 
 	@Autowired
 	private PageCache pageCache;
+	
+	@Autowired
+	private TenantService tenantService; 
 	
 	@Autowired
 	private AdminUserDatabase adminDatabase; 
@@ -78,6 +80,14 @@ public class SetupWizard extends AbstractWizard<SetupSection> implements WizardF
 	@Override
 	protected SetupSection getFinishSection() {
 		return new SetupSection("setup", "finishSetup", "/com/jadaptive/plugins/web/ui/setup/FinishSetup.html", -1);
+	}
+	
+	@Override
+	protected void assertPermissions(WizardState state) throws AccessDeniedException {
+		
+		if(!state.isFinished() && !tenantService.isSetupMode()) {
+			throw new AccessDeniedException("Setup wizard can only be run in setup mode!");
+		}
 	}
 	
 	class AdminSection extends SetupSection {

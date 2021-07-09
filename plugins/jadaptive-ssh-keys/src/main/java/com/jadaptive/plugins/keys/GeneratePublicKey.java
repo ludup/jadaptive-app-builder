@@ -23,8 +23,23 @@ public abstract class GeneratePublicKey extends AuthenticatedPage {
 				.attr("name", "uuid")
 				.attr("value", getUser().getUuid()));
 		
+		document.selectFirst("#nameGroup").after(new Element("div")
+				.attr("id", "typeGroup")
+				.addClass("form-group")
+				.appendChild(new Element("label")
+						.attr("for", "type")
+						.addClass("col-form-label")
+						.attr("jad:bundle", "authorizedKeys")
+						.attr("jad:i18n", "type.name"))
+				.appendChild(new Element("div")
+						.attr("id", "typeInput"))
+				.appendChild(new Element("small")
+						.addClass("form-text text-muted")
+						.attr("jad:bundle", "authorizedKeys")
+						.attr("jad:i18n", "type.desc")));
+		
 		DropdownInput type = new DropdownInput("type", AuthorizedKeyService.RESOURCE_BUNDLE);
-		document.selectFirst("#nameGroup").after(type.renderInput());
+		document.selectFirst("#typeInput").after(type.renderInput());
 		type.renderValues(PublicKeyType.values(), PublicKeyType.ED25519.name(), false);
 
 	}

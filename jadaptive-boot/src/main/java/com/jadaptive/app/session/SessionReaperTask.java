@@ -1,9 +1,11 @@
-package com.jadaptive.api.session;
+package com.jadaptive.app.session;
 
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.scheduler.ScheduledTask;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionService;
 
 @Extension
 public class SessionReaperTask implements ScheduledTask {
@@ -17,7 +19,6 @@ public class SessionReaperTask implements ScheduledTask {
 		for(Session session : sessionService.iterateSessions()) {
 			sessionService.isLoggedOn(session, false);
 		}
-		
 	}
 
 	@Override

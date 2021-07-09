@@ -13,7 +13,7 @@ public @interface Validator {
 	
 	ValidationType type();
 	
-	String i18n();
+	String i18n() default "";
 
-	String bundle();
+	String bundle() default "";
 }

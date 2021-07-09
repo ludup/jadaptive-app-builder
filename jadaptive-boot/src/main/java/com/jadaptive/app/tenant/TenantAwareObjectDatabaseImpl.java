@@ -47,7 +47,7 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public T get(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException {
 		try {
 			T result = getObject(uuid, getCurrentTenant().getUuid(), resourceClass);
-			eventService.publishStandardEvent(EventType.READ, result);
+			//eventService.publishStandardEvent(EventType.READ, result);
 			return result;
 		} catch(RepositoryException | ObjectException e) {
 			/**
@@ -61,7 +61,7 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 			T result = getObject(getCurrentTenant().getUuid(), resourceClass, fields);
-			eventService.publishStandardEvent(EventType.READ, result);
+			//eventService.publishStandardEvent(EventType.READ, result);
 			return result;
 		} catch(RepositoryException | ObjectException e) {
 			/**
