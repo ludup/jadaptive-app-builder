@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
@@ -24,12 +26,17 @@ public class SessionServiceImpl implements SessionService {
 	@Autowired
 	private TenantAwareObjectDatabase<Session> repository;
 	
+	@Autowired
+	private SingletonObjectDatabase<SessionConfiguration> configService;
+	
 	@Override
 	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent) {
 		
+		SessionConfiguration sessionConfig = configService.getObject(SessionConfiguration.class);
+		
 		Session session = new Session();
 		session.setRemoteAddress(remoteAddress);
-		session.setSessionTimeout(60 * 15);
+		session.setSessionTimeout(sessionConfig.getTimeout());
 		session.setSignedIn(new Date());
 		session.setTenant(tenant);
 		session.setUserAgent(userAgent);

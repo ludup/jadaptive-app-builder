@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-base</artifactId>
-			<version>3.0.0-FINAL</version>
+			<version>3.0.1-FINAL</version>
 		</dependency>
 	</dependencies>
 

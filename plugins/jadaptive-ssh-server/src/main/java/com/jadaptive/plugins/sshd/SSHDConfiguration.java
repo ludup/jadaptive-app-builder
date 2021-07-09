@@ -11,7 +11,8 @@ import com.jadaptive.api.template.ObjectViews;
 
 @ObjectDefinition(resourceKey = SSHDConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
 @ObjectViews({@ObjectViewDefinition(value = SSHDConfiguration.GENERAL_VIEW, bundle = SSHDConfiguration.RESOURCE_KEY),
-	@ObjectViewDefinition(value = SSHDConfiguration.FILESYSTEM_VIEW, bundle = SSHDConfiguration.RESOURCE_KEY)})
+	@ObjectViewDefinition(value = SSHDConfiguration.FILESYSTEM_VIEW, bundle = SSHDConfiguration.RESOURCE_KEY, weight = 100),
+	@ObjectViewDefinition(value = SSHDConfiguration.ADVANCED_VIEW, bundle = SSHDConfiguration.RESOURCE_KEY, weight = 200)})
 public class SSHDConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = -9112641261620391141L;
@@ -20,6 +21,7 @@ public class SSHDConfiguration extends SingletonUUIDEntity {
 
 	public static final String GENERAL_VIEW =  "general";
 	public static final String FILESYSTEM_VIEW =  "filesystem";
+	public static final String ADVANCED_VIEW =  "advanced";
 	
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "600")
 	@ObjectView(GENERAL_VIEW)
@@ -30,15 +32,15 @@ public class SSHDConfiguration extends SingletonUUIDEntity {
 //	Long homeDirectoryMaxSpace = 0L;
 
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "2097152")
-	@ObjectView(FILESYSTEM_VIEW)
+	@ObjectView(ADVANCED_VIEW)
 	Integer sftpMaximumWindowSpace = 2097152;
 	
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "1048576")
-	@ObjectView(FILESYSTEM_VIEW)
+	@ObjectView(ADVANCED_VIEW)
 	Integer sftpMinimumWindowSpace = 1048576;
 	
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "34000")
-	@ObjectView(FILESYSTEM_VIEW)
+	@ObjectView(ADVANCED_VIEW)
 	Integer sftpMaximumPacketSize = 34000;
 	
 	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
