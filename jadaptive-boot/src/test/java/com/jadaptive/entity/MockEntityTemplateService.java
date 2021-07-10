@@ -96,5 +96,10 @@ public class MockEntityTemplateService implements TemplateService {
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public String getTemplateResourceKey(Class<?> clz) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

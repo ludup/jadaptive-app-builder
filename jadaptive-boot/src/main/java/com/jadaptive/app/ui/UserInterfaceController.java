@@ -18,22 +18,38 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.entity.ObjectException;
-import com.jadaptive.api.permissions.ExceptionHandlingController;
+import com.jadaptive.api.json.RequestStatus;
+import com.jadaptive.api.json.RequestStatusImpl;
+import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageExtension;
 import com.jadaptive.api.ui.Redirect;
 
 @Controller
-public class UserInterfaceController extends ExceptionHandlingController{
+public class UserInterfaceController extends AuthenticatedController {
 
 	static Logger log = LoggerFactory.getLogger(UserInterfaceController.class);
 	
 	@Autowired
 	private PageCache pageCache; 
+	
+	@Autowired
+	private SessionUtils sessionUtils;
+	
+	@RequestMapping(value="/app/verify", method = RequestMethod.GET, produces = "application/json")
+	@ResponseBody
+	public RequestStatus verifySession(HttpServletRequest request, HttpServletResponse response)  {
+
+		Session session = sessionUtils.getActiveSession(request);
+		return new RequestStatusImpl(session!=null);
+	}
 	
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.GET)
 	public void doPageGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {

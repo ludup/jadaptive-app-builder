@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.StartupAware;
+import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -55,7 +56,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Autowired
 	private ApplicationService applicationService; 
 
-	
+	@Autowired
+	private SingletonObjectDatabase<SystemConfiguration> systemConfig;
 	Tenant systemTenant;
 	
 	Map<String,Tenant> tenantsByDomain = new HashMap<>();
@@ -107,7 +109,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	@Override
 	public boolean isSetupMode() {
-		return setupMode;
+		SystemConfiguration cfg = systemConfig.getObject(SystemConfiguration.class);
+		return !cfg.getSetupComplete().booleanValue();
 	}
 	
 	@Override
@@ -384,6 +387,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 
 	@Override
 	public void completeSetup() {
-		this.setupMode = false;
+		SystemConfiguration cfg = systemConfig.getObject(SystemConfiguration.class);
+		cfg.setSetupComplete(true);
+		systemConfig.saveObject(cfg);
 	}
 }
