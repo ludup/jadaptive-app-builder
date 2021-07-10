@@ -26,7 +26,6 @@ public class SessionConfiguration extends SingletonUUIDEntity {
 		return timeout;
 	}
 
-
 	public void setTimeout(Integer timeout) {
 		this.timeout = timeout;
 	}

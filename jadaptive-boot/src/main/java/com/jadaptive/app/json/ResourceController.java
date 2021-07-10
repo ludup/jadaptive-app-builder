@@ -28,13 +28,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
+import com.jadaptive.api.permissions.ExceptionHandlingController;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.ResponseHelper;
 import com.jadaptive.utils.FileUtils;
 
 @Controller
-public class ResourceController {
+public class ResourceController extends ExceptionHandlingController {
 	
 	static Logger log = LoggerFactory.getLogger(ResourceController.class);
 	
@@ -94,8 +95,8 @@ public class ResourceController {
 				}
 			} 
 			
-			if(log.isInfoEnabled()) {
-				log.info("Returning content for {}", uri);
+			if(log.isDebugEnabled()) {
+				log.debug("Returning content for {}", uri);
 			}
 			
 			ResponseHelper.sendContent(resource, getContentType(resource), request, response);
@@ -133,8 +134,8 @@ public class ResourceController {
 		
 		String uri = "webapp" + resourceUri;
 		
-		if(log.isInfoEnabled()) {
-			log.info("Resolving resource {}", resourceUri);
+		if(log.isDebugEnabled()) {
+			log.debug("Resolving resource {}", resourceUri);
 		}
 		
 		if(!tenant.isSystem()) {
@@ -144,8 +145,8 @@ public class ResourceController {
 			 */
 			File res = new File(ConfigHelper.getTenantSubFolder(tenant, "webapp"), resourceUri);
 			if(res.exists()) {
-				if(log.isInfoEnabled()) {
-					log.info("Resource {} was found in tenant webapp folder", resourceUri);
+				if(log.isDebugEnabled()) {
+					log.debug("Resource {} was found in tenant webapp folder", resourceUri);
 				}
 				return res.toPath();
 			}
@@ -153,8 +154,8 @@ public class ResourceController {
 			try {
 				for(ResourcePackage pkg : ConfigHelper.getTenantPackages(tenant)) {
 					if(pkg.containsPath(uri)) {
-						if(log.isInfoEnabled()) {
-							log.info("Resource {} was found in tenant zip package", resourceUri);
+						if(log.isDebugEnabled()) {
+							log.debug("Resource {} was found in tenant zip package", resourceUri);
 						}
 						return pkg.resolvePath(uri);
 					}
@@ -170,8 +171,8 @@ public class ResourceController {
 			 */
 			File res = new File(ConfigHelper.getSystemPrivateSubFolder("webapp"), resourceUri);
 			if(res.exists()) {
-				if(log.isInfoEnabled()) {
-					log.info("Resource {} was found in system private webapp folder", resourceUri);
+				if(log.isDebugEnabled()) {
+					log.debug("Resource {} was found in system private webapp folder", resourceUri);
 				}
 				return res.toPath();
 			}			
@@ -179,8 +180,8 @@ public class ResourceController {
 			try {
 				for(ResourcePackage pkg : ConfigHelper.getSystemPrivatePackages()) {
 					if(pkg.containsPath(uri)) {
-						if(log.isInfoEnabled()) {
-							log.info("Resource {} was found in system private zip package", resourceUri);
+						if(log.isDebugEnabled()) {
+							log.debug("Resource {} was found in system private zip package", resourceUri);
 						}
 						return pkg.resolvePath(uri);
 					}
@@ -192,8 +193,8 @@ public class ResourceController {
 		
 		File res = new File(ConfigHelper.getSharedSubFolder("webapp"), resourceUri);
 		if(res.exists()) {
-			if(log.isInfoEnabled()) {
-				log.info("Resource {} was found in system shared webapp folder", resourceUri);
+			if(log.isDebugEnabled()) {
+				log.debug("Resource {} was found in system shared webapp folder", resourceUri);
 			}
 			return res.toPath();
 		}
@@ -201,8 +202,8 @@ public class ResourceController {
 		try {
 			for(ResourcePackage pkg : ConfigHelper.getSharedPackages()) {
 				if(pkg.containsPath(uri)) {
-					if(log.isInfoEnabled()) {
-						log.info("Resource {} was found in system shared zip package", resourceUri);
+					if(log.isDebugEnabled()) {
+						log.debug("Resource {} was found in system shared zip package", resourceUri);
 					}
 					return pkg.resolvePath(uri);
 				}
@@ -251,8 +252,8 @@ public class ResourceController {
 			if(Objects.nonNull(url)) {
 				try {
 					Path path = Paths.get(url.toURI());
-					if(log.isInfoEnabled()) {
-						log.info("Resource {} was found in plugin {} classpath", resourceUri, w.getPluginId());
+					if(log.isDebugEnabled()) {
+						log.debug("Resource {} was found in plugin {} classpath", resourceUri, w.getPluginId());
 					}
 					return path;
 				} catch (Throwable e) {
@@ -265,8 +266,8 @@ public class ResourceController {
 		if(Objects.nonNull(url)) {
 			try {
 				Path path = Paths.get(url.toURI());
-				if(log.isInfoEnabled()) {
-					log.info("Resource {} was found in class loader resources", resourceUri);
+				if(log.isDebugEnabled()) {
+					log.debug("Resource {} was found in class loader resources", resourceUri);
 				}
 				return path;
 			} catch (Throwable e) {

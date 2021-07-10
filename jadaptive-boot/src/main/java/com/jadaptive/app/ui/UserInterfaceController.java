@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.permissions.ExceptionHandlingController;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
@@ -27,7 +28,7 @@ import com.jadaptive.api.ui.PageExtension;
 import com.jadaptive.api.ui.Redirect;
 
 @Controller
-public class UserInterfaceController {
+public class UserInterfaceController extends ExceptionHandlingController{
 
 	static Logger log = LoggerFactory.getLogger(UserInterfaceController.class);
 	

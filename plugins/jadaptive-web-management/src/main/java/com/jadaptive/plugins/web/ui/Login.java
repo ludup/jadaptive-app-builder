@@ -2,6 +2,8 @@ package com.jadaptive.plugins.web.ui;
 
 import org.jsoup.nodes.Document;
 import org.pf4j.Extension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
@@ -24,6 +26,8 @@ import com.jadaptive.plugins.web.ui.Login.LoginForm;
 @PageProcessors(extensions = { "i18n"} )
 public class Login extends AuthenticationPage<LoginForm> {
 
+	static Logger log = LoggerFactory.getLogger(Login.class);
+	
 	@Autowired
 	private TenantService tenantService; 
 	
@@ -66,6 +70,8 @@ public class Login extends AuthenticationPage<LoginForm> {
     		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
     		document.selectFirst("#feedback").append("<div class=\"alert alert-danger\">" + e.getMessage() + "</div>");
     	} catch(ObjectNotFoundException e) {
+    	} catch(Throwable e) {
+    		log.error("Error in login", e);
     	}
     	
     	Request.response().setStatus(HttpStatus.FORBIDDEN.value());
