@@ -25,7 +25,7 @@ import com.jadaptive.plugins.email.EmailVerificationService;
 
 @Controller
 @Extension
-public class EmailController extends AuthenticatedController implements PluginController {
+public class EmailController extends AuthenticatedController {
 
 	static Logger log = LoggerFactory.getLogger(EmailController.class);
 	

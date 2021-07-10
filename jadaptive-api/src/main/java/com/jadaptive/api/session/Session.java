@@ -41,6 +41,7 @@ public class Session extends AbstractUUIDEntity {
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, required = true)
 	User user;
 	
+	@ObjectField(type = FieldType.HIDDEN, required = true)
 	String csrfToken; 
 	
 	public Session() {

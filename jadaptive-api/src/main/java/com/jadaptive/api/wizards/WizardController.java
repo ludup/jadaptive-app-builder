@@ -29,7 +29,7 @@ import com.jadaptive.api.ui.UriRedirect;
 
 @Controller
 @Extension
-public class WizardController extends AuthenticatedController implements PluginController {
+public class WizardController extends AuthenticatedController {
 
 	static Logger log = LoggerFactory.getLogger(WizardController.class);
 	

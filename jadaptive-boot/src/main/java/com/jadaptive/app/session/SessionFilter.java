@@ -96,7 +96,7 @@ public class SessionFilter implements Filter {
 			}
 			
 			chain.doFilter(request, response);
-			
+
 			postHandle(req, resp);
 			
 		} finally {
@@ -119,6 +119,7 @@ public class SessionFilter implements Filter {
 			Request.tearDown();
 		
 		} catch(Throwable e) {
+			log.error("Caught exception in SessionFilter postHandle",e);
 			throw new ServletException(e);
 		}
 		
@@ -184,6 +185,7 @@ public class SessionFilter implements Filter {
 			
 			return true;
 		} catch(Throwable e) {
+			log.error("Caught exception in SessionFilter preHandle",e);
 			throw new ServletException(e);
 		}
 		
