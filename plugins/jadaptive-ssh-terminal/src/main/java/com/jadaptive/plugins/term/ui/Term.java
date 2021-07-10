@@ -27,6 +27,8 @@ public class Term extends AuthenticatedPage {
 		
 		PageHelper.appendScript(document, "/app/content/term/lib/jquery.ui.scroller.js");
 		PageHelper.appendScript(document, "/app/content/term/lib/jquery.mousewheel.js");
+		
+		super.documentComplete(document);
 	}
 
 	String sessionId;

@@ -37,10 +37,18 @@ public abstract class AuthenticatedPage extends HtmlPage {
 		try {
 			currentSession.set(sessionUtils.getActiveSession(Request.get()));
 			generateAuthenticatedContent(document);
+			
 		} finally {
 			currentSession.remove();
 		}
 	}
+
+	@Override
+	protected void documentComplete(Document document) {
+		PageHelper.appendScript(document, "/app/content/jadaptive-session.js");
+		super.documentComplete(document);
+	}
+
 
 	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException {
 		
