@@ -10,10 +10,14 @@ import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.ui.AuthenticatedPage;
+import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
+import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.QuickSetupItem;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
@@ -25,10 +29,21 @@ public class Dashboard extends AuthenticatedPage {
 
 	@Autowired
 	private ApplicationService applicationService; 
+
+	@Autowired
+	private PermissionService permissionService; 
+	
+	@Autowired
+	private PageCache pageCache;
 	
 	@Override
 	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException {
 
+		try {
+			permissionService.assertAdministrator();
+		} catch(AccessDeniedException ex) {
+			throw new PageRedirect(pageCache.getHomePage());
+		}
 		super.generateAuthenticatedContent(document);
 		
 		Element element = document.selectFirst("#resources");

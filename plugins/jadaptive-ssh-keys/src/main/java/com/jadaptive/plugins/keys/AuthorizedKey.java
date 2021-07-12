@@ -2,8 +2,11 @@ package com.jadaptive.plugins.keys;
 
 import java.util.UUID;
 
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.permissions.PermissionUtils;
+import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.template.DisableStandardActions;
 import com.jadaptive.api.template.ExcludeView;
@@ -30,11 +33,14 @@ import com.jadaptive.api.template.UniqueIndex;
 			actions = {
 				@TableAction(resourceKey = "generateKey", bundle = AuthorizedKey.RESOURCE_KEY, url = "generate-key", icon = "far fa-wrench"),
 				@TableAction(resourceKey = "uploadPublicKey",  bundle = AuthorizedKey.RESOURCE_KEY, url = "upload-key", icon = "far fa-upload")})
+@Permissions(defaultPermissions = { AuthorizedKey.RESOURCE_KEY + ".readWrite" } )
 public class AuthorizedKey extends PersonalUUIDEntity {
 
 	private static final long serialVersionUID = 9215617764035887442L;
 
 	public static final String RESOURCE_KEY = "authorizedKeys";
+	
+	public static final String PERSONAL_KEYS_PERMISSION = "authorizedKeys.personal";
 	
 	@ObjectField(searchable = true, alternativeId = true,
 			hidden = true, type = FieldType.LONG)

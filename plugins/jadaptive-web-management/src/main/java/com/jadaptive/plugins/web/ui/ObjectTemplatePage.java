@@ -38,6 +38,10 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		return Objects.nonNull(object) ? object.getResourceKey() : template.getResourceKey();
 	}
 	
+	protected void assertPermissions() {
+		permissionService.assertReadWrite(template.getResourceKey());
+	}
+	
 	public void created() throws FileNotFoundException {
 
 		super.created();
@@ -50,7 +54,7 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 			}
 
 			try {
-				permissionService.assertReadWrite(template.getResourceKey());
+				assertPermissions();
 			} catch (AccessDeniedException e) {
 				switch (getScope()) {
 				case CREATE:

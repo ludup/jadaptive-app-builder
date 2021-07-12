@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.tenant.TenantService;
@@ -45,6 +45,9 @@ public class SetupWizard extends AbstractWizard<SetupSection> implements WizardF
 	@Autowired
 	private AdminUserDatabase adminDatabase; 
 		
+	@Autowired
+	private RoleService roleService; 
+	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
@@ -119,6 +122,7 @@ public class SetupWizard extends AbstractWizard<SetupSection> implements WizardF
 			String uuid = (String) state.getParameter(ADMIN_UUID);
 			if(StringUtils.isNotBlank(uuid)) {
 				UserImpl u = (UserImpl) adminDatabase.getObjectByUUID(uuid);
+				roleService.unassignRole(roleService.getAdministrationRole(), u);
 				u.setSystem(false);
 				adminDatabase.saveOrUpdate(u);
 				adminDatabase.deleteObject(u);

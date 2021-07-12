@@ -22,6 +22,7 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
+import com.jadaptive.app.user.UserServiceImpl;
 
 @Service
 public class RoleServiceImpl extends AuthenticatedService implements RoleService, TenantAware, UserAware {
@@ -68,6 +69,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		role.setSystem(true);
 		role.setAllUsers(true);
 		
+		role.setPermissions(Arrays.asList(UserServiceImpl.CHANGE_PASSWORD_PERMISSION));
 		repository.saveOrUpdate(role);
 	}
 

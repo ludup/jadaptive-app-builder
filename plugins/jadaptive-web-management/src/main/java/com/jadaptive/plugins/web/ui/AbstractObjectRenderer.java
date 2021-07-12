@@ -424,6 +424,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		{
 			BooleanFormInput render = new BooleanFormInput(currentTemplate.get(), orderedField);
 			render.renderInput(panel, element, getFieldValue(orderedField, obj));
+			if(field.isReadOnly() || view == FieldView.READ) {
+				render.disable();
+			}
 			break;
 		}
 		case PERMISSION:

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.AdminUserDatabase;
@@ -26,6 +27,9 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	
 	@Autowired
 	private TemplateService templateService; 
+	
+	@Autowired
+	private RoleService roleService; 
 	
 	private final Set<UserDatabaseCapabilities> capabilities = new HashSet<>(
 			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD,
@@ -45,6 +49,8 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 		user.setSystem(true);
 		setPassword(user, password, forceChange);
 		objectDatabase.saveOrUpdate(user);
+		
+		roleService.assignRole(roleService.getAdministrationRole(), user);
 		return user;
 	}
 	

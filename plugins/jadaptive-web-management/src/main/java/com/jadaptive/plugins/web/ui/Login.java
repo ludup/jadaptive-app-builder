@@ -11,6 +11,7 @@ import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
@@ -19,6 +20,7 @@ import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.web.ui.Login.LoginForm;
 
 @Extension
@@ -30,6 +32,9 @@ public class Login extends AuthenticationPage<LoginForm> {
 	
 	@Autowired
 	private TenantService tenantService; 
+	
+	@Autowired
+	private PermissionService permissionService; 
 	
 	public Login() {
 		super(LoginForm.class);
@@ -53,15 +58,25 @@ public class Login extends AuthenticationPage<LoginForm> {
 			if(userService.verifyPassword(user, form.getPassword().toCharArray())) {
 				
 				state.setUser(user);
-				if(user instanceof PasswordEnabledUser) {
-					
-			    	if(((PasswordEnabledUser)user).getPasswordChangeRequired()) {
-						state.getPostAuthenticationPages().add(ChangePassword.class);
-			    	}
-		    	}
+				permissionService.setupUserContext(user);
 				
-				state.setAttribute(AuthenticationService.PASSWORD, form.getPassword());
-				return true;
+				try {
+					if(user instanceof PasswordEnabledUser) {
+						
+				    	if(((PasswordEnabledUser)user).getPasswordChangeRequired()) {
+				    		try {
+					    		permissionService.assertPermission(UserService.CHANGE_PASSWORD_PERMISSION);
+								state.getPostAuthenticationPages().add(ChangePassword.class);
+				    		} catch(AccessDeniedException e) { }
+				    	}
+			    	}
+					
+					state.setAttribute(AuthenticationService.PASSWORD, form.getPassword());
+					return true;
+				
+				} finally {
+					permissionService.clearUserContext();
+				}
 			}
 			
 			authenticationService.reportAuthenticationFailure(state);

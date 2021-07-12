@@ -64,13 +64,13 @@ public class SessionUtils {
 			}
 			
 			if (session != null && sessionService.isLoggedOn(session, true)) {
-				return session;
+				return verifySameSiteRequest(request, session);
 			}
 			
 			if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
 				session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
 				if(sessionService.isLoggedOn(session, true)) {
-					return session;
+					return verifySameSiteRequest(request, session);
 				}
 			}
 			
@@ -78,7 +78,7 @@ public class SessionUtils {
 				session = (Session) request.getSession().getAttribute(
 						AUTHENTICATED_SESSION);
 				if(sessionService.isLoggedOn(session, true)) {
-					return session;
+					return verifySameSiteRequest(request, session);
 				}
 			}
 			
@@ -87,7 +87,7 @@ public class SessionUtils {
 					if (c.getName().equals(SESSION_COOKIE)) {
 						session = sessionService.getSession(c.getValue());
 						if (session != null && sessionService.isLoggedOn(session, true)) {
-							return session;
+							return verifySameSiteRequest(request, session);
 						}
 					}
 				}
@@ -189,24 +189,25 @@ public class SessionUtils {
 	}
 
 	
-	public void verifySameSiteRequest(HttpServletRequest request,HttpServletResponse response, Session session) throws UnauthorizedException {
-				
-		String requestToken = request.getHeader("X-Csrf-Token");
-		if(requestToken==null) {
-			requestToken = request.getParameter("token");
-			if(requestToken==null) {
-				log.warn(String.format("CSRF token missing from %s", request.getRemoteAddr()));
-				debugRequest(request);
-				throw new UnauthorizedException();
-			}
-		}
+	public Session verifySameSiteRequest(HttpServletRequest request, Session session) {
 		
-		if(!session.getCsrfToken().equals(requestToken)) {
-			log.warn(String.format("CSRF token mistmatch from %s", request.getRemoteAddr()));
-			debugRequest(request);
-			throw new UnauthorizedException();
-		}
+//		String requestToken = request.getHeader("X-Csrf-Token");
+//		if(requestToken==null) {
+//			requestToken = request.getParameter("token");
+//			if(requestToken==null) {
+//				log.warn(String.format("CSRF token missing from %s", request.getRemoteAddr()));
+//				debugRequest(request);
+//				return null;
+//			}
+//		}
+//		
+//		if(!session.getCsrfToken().equals(requestToken)) {
+//			log.warn(String.format("CSRF token mistmatch from %s", request.getRemoteAddr()));
+//			debugRequest(request);
+//			return null;
+//		}
 
+		return session;
 	}
 
 	protected void debugRequest(HttpServletRequest request) {
@@ -227,16 +228,18 @@ public class SessionUtils {
 		
 		String requestOrigin = request.getHeader("Origin");
 		
-		if(Objects.nonNull(requestOrigin) && log.isInfoEnabled()) {
-			log.info("CORS request for origin {}", requestOrigin);
+		if(Objects.nonNull(requestOrigin)) {
+			if(log.isDebugEnabled()) {
+				log.debug("CORS request for origin {}", requestOrigin);
+			}
 		} else if(Objects.isNull(requestOrigin)) {
 			return false;
 		}
 		
 		boolean pathAllowsCORS = Boolean.parseBoolean(properties.getProperty("cors.enabled", "true"));
 		if(!pathAllowsCORS) {
-			if(log.isInfoEnabled()) {
-				log.info("Security properties of URI {} explicitly deny CORS", request.getRequestURI());
+			if(log.isDebugEnabled()) {
+				log.debug("Security properties of URI {} explicitly deny CORS", request.getRequestURI());
 			}
 			return false;
 		}
@@ -244,8 +247,10 @@ public class SessionUtils {
 		List<String> origins = new ArrayList<>();
 		origins.addAll(Arrays.asList(properties.getProperty("cors.origins", "").split(",")));
 		
-		if(origins.size() > 0 && log.isInfoEnabled()) {
-			log.info("Security properties allows origins {}", Utils.csv(origins));
+		if(origins.size() > 0) {
+			if(log.isDebugEnabled()) {
+				log.debug("Security properties allows origins {}", Utils.csv(origins));
+			}
 		}
 		
 		if(ApplicationProperties.getValue("cors.enabled", false) && !Objects.isNull(requestOrigin)) {
@@ -253,16 +258,18 @@ public class SessionUtils {
 			List<String> tmp =  new ArrayList<>();
 			tmp.addAll(Arrays.asList(ApplicationProperties.getValue("cors.origins", "").split(",")));
 			
-			if(tmp.size() > 0 && log.isInfoEnabled()) {
-				log.info("Global configuration allows origins {}", Utils.csv(tmp));
+			if(tmp.size() > 0) {
+				if(log.isDebugEnabled()) {
+					log.debug("Global configuration allows origins {}", Utils.csv(tmp));
+				}
 			}	
 			
 			origins.addAll(tmp);
 		}
 
 		if(origins.contains(requestOrigin)) {
-			if(log.isInfoEnabled()) {
-				log.info("Origin {} allowed for URI {}", requestOrigin, request.getRequestURI());
+			if(log.isDebugEnabled()) {
+				log.debug("Origin {} allowed for URI {}", requestOrigin, request.getRequestURI());
 			}
 			/**
 			 * Allow CORS to this realm. We must allow credentials as the

@@ -28,7 +28,7 @@ public class AuthorizedKeysMenu implements ApplicationMenu {
 
 	@Override
 	public Collection<String> getPermissions() {
-		return Arrays.asList("users.login");
+		return Arrays.asList("authorizedKeys.read");
 	}
 
 	@Override

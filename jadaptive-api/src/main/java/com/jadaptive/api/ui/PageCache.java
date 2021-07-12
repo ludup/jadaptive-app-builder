@@ -34,6 +34,7 @@ public class PageCache {
 	Map<String,PageExtension> extensionsByName = new HashMap<>();
 	Map<String,Page> aliasCache = new HashMap<>();
 	Map<Class<? extends Page>, Page> pageCache = new HashMap<>();
+	Class<? extends Page> homePage;
 	
 	public Page resolvePage(String resourceUri) throws FileNotFoundException {
 		
@@ -236,5 +237,17 @@ public class PageCache {
 		} catch(NoSuchBeanDefinitionException e) { }
 		
 		throw new IllegalStateException();
+	}
+
+	public Page getHomePage() throws FileNotFoundException {
+		if(Objects.isNull(homePage)) {
+			throw new IllegalStateException("Product does not appear to have set non-administrative home page!");
+		}
+		
+		return resolvePage(homePage);
+	}
+	
+	public void setHomePage(Class<? extends Page> homePage) {
+		this.homePage = homePage;
 	}
 }

@@ -77,22 +77,10 @@ public class Header extends AbstractPageExtension {
 						continue;
 					}
 				}
-				Element parentElement;
-				topMenu.appendChild(new Element("li")
-						.addClass("nav-item dropdown mr-3")
-						.appendChild(new Element("a")
-								.addClass("nav-link dropdown-toggle")
-								.attr("href", "#")
-								.attr("data-toggle", "dropdown")
-								.attr("aria-haspopup", "true")
-								.attr("aria-expanded", "false")
-								.appendChild(new Element("span")
-										.attr("jad:bundle", parent.getBundle())
-										.attr("jad:i18n", parent.getResourceKey())))
-						.appendChild(parentElement = new Element("div")
-								.addClass("dropdown-menu")
-								.attr("aria-labelledby", "navbarDropdown")));
-				
+				Element parentElement = new Element("div")
+						.addClass("dropdown-menu")
+						.attr("aria-labelledby", "navbarDropdown");
+						
 				List<ApplicationMenu> children = sorted.get(parent.getUuid());
 				Collections.sort(children, new Comparator<ApplicationMenu>() {
 					@Override
@@ -118,6 +106,21 @@ public class Header extends AbstractPageExtension {
 							.appendChild(new Element("span")
 									.attr("jad:bundle", child.getBundle())
 										.attr("jad:i18n", child.getResourceKey())));
+				}
+				
+				if(!parentElement.children().isEmpty()) {
+					topMenu.appendChild(new Element("li")
+							.addClass("nav-item dropdown mr-3")
+							.appendChild(new Element("a")
+									.addClass("nav-link dropdown-toggle")
+									.attr("href", "#")
+									.attr("data-toggle", "dropdown")
+									.attr("aria-haspopup", "true")
+									.attr("aria-expanded", "false")
+									.appendChild(new Element("span")
+											.attr("jad:bundle", parent.getBundle())
+											.attr("jad:i18n", parent.getResourceKey())))
+							.appendChild(parentElement));
 				}
 			}
 		}

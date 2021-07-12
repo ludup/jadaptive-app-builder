@@ -8,6 +8,8 @@ import com.jadaptive.api.template.OrderedView;
 
 public class BooleanFormInput extends FieldInputRender {
 
+	Element input;
+	
 	public BooleanFormInput(ObjectTemplate template, OrderedField field) {
 		super(template, field);
 	}
@@ -15,7 +17,7 @@ public class BooleanFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(OrderedView panel, Element rootElement, String value) {
 		
-		Element input;
+
 		rootElement.appendChild(new Element("div")
 						.addClass("form-group")
 				.appendChild(input = new Element("input")
@@ -37,6 +39,10 @@ public class BooleanFormInput extends FieldInputRender {
 		if("true".equalsIgnoreCase(value)) {
 			input.attr("checked", "checked");
 		}
+	}
+
+	public void disable() {
+		input.attr("disabled", "disabled");
 	}
 
 }

@@ -43,7 +43,7 @@ public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser
 	PasswordEncryptionType encodingType;
 	
 	@ObjectField(required = false,
-			defaultValue = "true",
+			defaultValue = "false",
 			type = FieldType.BOOL)
 	@ObjectView(value = "passwordOptions")
 	boolean passwordChangeRequired;
