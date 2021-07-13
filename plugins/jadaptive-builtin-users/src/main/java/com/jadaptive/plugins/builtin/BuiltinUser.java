@@ -38,7 +38,8 @@ public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser
 	
 	@ObjectField(required = false,
 			defaultValue = "PBKDF2_SHA512_50000",
-			type = FieldType.ENUM)
+			type = FieldType.ENUM,
+			hidden = true)
 	@ObjectView(value = "passwordOptions")
 	PasswordEncryptionType encodingType;
 	

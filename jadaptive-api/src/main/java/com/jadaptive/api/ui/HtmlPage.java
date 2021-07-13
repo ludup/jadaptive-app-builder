@@ -94,7 +94,14 @@ public abstract class HtmlPage implements Page {
 			
 			if(this instanceof FormProcessor) {
 				FormProcessor<?> fp = (FormProcessor<?>) this;
-				Method m = ReflectionUtils.getMethod(getClass(), "processForm", Document.class, Object.class);
+				
+				Method m;
+				
+				try {
+					m = ReflectionUtils.getMethod(getClass(), "processForm", Document.class, fp.getFormClass());
+				} catch(NoSuchMethodException e) {
+					m = ReflectionUtils.getMethod(getClass(), "processForm", Document.class, Object.class);
+				}
 				Object formProxy = Proxy.newProxyInstance(
 						  getClass().getClassLoader(), 
 						  new Class<?>[] { fp.getFormClass() }, 

@@ -26,11 +26,6 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 
 	public static final String RESOURCE_KEY = "adminUser";
 	
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT)
-	String username;
-	
 	@ObjectField(required = false,
 			type = FieldType.HIDDEN)
 	String encodedPassword;
@@ -41,12 +36,13 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	
 	@ObjectField(required = false,
 			defaultValue = "PBKDF2_SHA512_50000",
-			type = FieldType.ENUM)
+			type = FieldType.ENUM,
+			hidden = true)
 	@ObjectView(value = "passwordOptions")
 	PasswordEncryptionType encodingType;
 	
 	@ObjectField(required = false,
-			defaultValue = "true",
+			defaultValue = "false",
 			type = FieldType.BOOL)
 	@ObjectView(value = "passwordOptions")
 	boolean passwordChangeRequired;
@@ -55,15 +51,6 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 			searchable = true,
 			type = FieldType.TEXT)
 	String email;
-	
-	@Override
-	public String getUsername() {
-		return username;
-	}
-	
-	public void setUsername(String username) {
-		this.username = username;
-	}
 
 	@Override
 	public String getName() {

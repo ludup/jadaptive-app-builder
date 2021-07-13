@@ -17,6 +17,8 @@ import com.jadaptive.utils.PasswordUtils;
 public abstract class PasswordEnabledUserDatabaseImpl 
 	extends AuthenticatedService implements PasswordEnabledUserDatabase, UUIDObjectService<User> {
 
+	private static final String ENCRYPTION_PREFIX = "!ENC!";
+	
 	@Autowired
 	private TenantAwareObjectDatabase<UserImpl> objectDatabase;
 	
@@ -24,18 +26,23 @@ public abstract class PasswordEnabledUserDatabaseImpl
 	public void setPassword(User u, char[] password, boolean passwordChangeRequired) {
 		
 		try {
+			
 			PasswordEnabledUser user = (PasswordEnabledUser)u;
-			byte[] salt = PasswordUtils.generateSalt();
-			byte[] encodedPassword = PasswordUtils.getEncryptedPassword(
-					password, 
-					salt, 
-					PasswordEncryptionType.PBKDF2_SHA512_100000);
 			
-			user.setEncodingType(PasswordEncryptionType.PBKDF2_SHA512_100000);
-			user.setSalt(Base64.getEncoder().encodeToString(salt));
-			user.setEncodedPassword(Base64.getEncoder().encodeToString(encodedPassword));
+			if(!new String(password).startsWith(ENCRYPTION_PREFIX)) {
+				byte[] salt = PasswordUtils.generateSalt();
+				byte[] encodedPassword = PasswordUtils.getEncryptedPassword(
+						password, 
+						salt, 
+						PasswordEncryptionType.PBKDF2_SHA512_100000);
+				
+				user.setEncodingType(PasswordEncryptionType.PBKDF2_SHA512_100000);
+				user.setSalt(Base64.getEncoder().encodeToString(salt));
+				user.setEncodedPassword(ENCRYPTION_PREFIX + Base64.getEncoder().encodeToString(encodedPassword));
+			
+			}
+			
 			user.setPasswordChangeRequired(passwordChangeRequired);
-			
 			objectDatabase.saveOrUpdate(user);
 			
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
@@ -52,9 +59,9 @@ public abstract class PasswordEnabledUserDatabaseImpl
 			byte[] encodedPassword = PasswordUtils.getEncryptedPassword(
 					password, 
 					salt, 
-					PasswordEncryptionType.PBKDF2_SHA512_100000);
+					user.getEncodingType());
 			
-			byte[] storedPassword = Base64.getDecoder().decode(user.getEncodedPassword());
+			byte[] storedPassword = Base64.getDecoder().decode(user.getEncodedPassword().replace(ENCRYPTION_PREFIX, ""));
 			
 			return Arrays.equals(encodedPassword, storedPassword);
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {

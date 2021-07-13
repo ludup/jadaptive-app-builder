@@ -49,7 +49,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	public final void processForm(Document document, T form) throws FileNotFoundException {
 		
 		try {
-
+			
 			AuthenticationState state = authenticationService.getCurrentState();
 			
 			if(doForm(document, state, form)) {

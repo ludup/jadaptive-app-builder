@@ -8,7 +8,7 @@ import com.jadaptive.api.template.ValidationException;
 public class ObjectUtils {
 
 	@SuppressWarnings("unchecked")
-	public static <T extends UUIDEntity> T assertObject(Object object, Class<T> clz) {
+	public static <T> T assertObject(Object object, Class<T> clz) {
 		if(Objects.isNull(object)) {
 			throw new ValidationException("Object is null");
 		}

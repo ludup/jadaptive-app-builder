@@ -23,7 +23,7 @@ public class ChangePasswordMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/change-password";
+		return "/app/ui/change-my-password";
 	}
 
 	@Override

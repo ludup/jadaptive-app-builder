@@ -2,6 +2,9 @@ package com.jadaptive.api.ui;
 
 import java.io.FileNotFoundException;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,14 +28,21 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	
 	ThreadLocal<Session> currentSession = new ThreadLocal<>();
 	
+	
 	@Override
-	public final void generateContent(Document document) throws FileNotFoundException {
+	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response)
+			throws FileNotFoundException {
+		super.beforeProcess(uri, request, response);
 		
-		if(!sessionUtils.hasActiveSession(Request.get())) {
+		if(!sessionUtils.hasActiveSession(request)) {
 			AuthenticationState state = authenticationService.getCurrentState();
 			state.setHomePage(Request.get().getRequestURI());
 			throw new PageRedirect(pageCache.resolvePage("login"));
 		}
+	}
+
+	@Override
+	public final void generateContent(Document document) throws FileNotFoundException {
 		
 		try {
 			currentSession.set(sessionUtils.getActiveSession(Request.get()));
