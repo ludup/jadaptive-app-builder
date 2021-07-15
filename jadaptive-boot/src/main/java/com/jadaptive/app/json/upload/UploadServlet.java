@@ -75,6 +75,10 @@ public class UploadServlet extends HttpServlet {
 
 		UploadHandler handler = getUploadHandler(handlerName);
 		
+		if(Objects.isNull(handler)) {
+			ResponseHelper.send404NotFound(uri, req, resp);
+			return;
+		}
 		Session session = sessionUtils.getActiveSession(req);
 		
 		if(handler.isSessionRequired() && Objects.isNull(session)) {
