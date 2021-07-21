@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.jadaptive.api.json.ResourceStatus;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedController;
-import com.jadaptive.api.servlet.PluginController;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.plugins.email.EmailVerificationService;

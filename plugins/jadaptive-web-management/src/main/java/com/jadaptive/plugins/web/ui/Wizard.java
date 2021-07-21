@@ -26,7 +26,6 @@ import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.wizards.WizardService;
 import com.jadaptive.api.wizards.WizardState;
-import com.jadaptive.plugins.web.ui.setup.SetupWizard;
 
 @Extension
 @RequestPage(path="wizards/{resourceKey}")

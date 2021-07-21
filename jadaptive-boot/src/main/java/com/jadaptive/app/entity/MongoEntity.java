@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -21,7 +23,6 @@ import com.jadaptive.api.template.FieldTemplate;
 public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 
 	private static final long serialVersionUID = 7834313955696773158L;
-	
 	AbstractObject parent;
 	Map<String,AbstractObject> children = new HashMap<>();
 	Document document;
@@ -45,6 +46,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public MongoEntity(AbstractObject parent, String resourceKey, Map<String,Object> document) {
 		this.parent = parent;
 		this.document = new Document(document);
@@ -53,6 +55,11 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 		}
 		if(!Objects.isNull(parent)) {
 			parent.addChild(resourceKey, this);
+		}
+		for(Map.Entry<String,Object> entry : document.entrySet()) {
+			if(entry.getValue() instanceof Document) {
+				new MongoEntity(this, entry.getKey(), (Map<String,Object>)entry.getValue());
+			}
 		}
 	}
 	

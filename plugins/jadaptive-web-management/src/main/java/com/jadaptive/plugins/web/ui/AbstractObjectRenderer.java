@@ -481,10 +481,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			return field.getField().getDefaultValue();
 		}
 	
-		Map<String,AbstractObject> children = childObjects.get();
-		FieldTemplate parent = field.getParentField();
-		if(Objects.nonNull(parent)) {
-			obj = children.get(parent.getResourceKey());
+		//Map<String,AbstractObject> children = childObjects.get();
+		List<FieldTemplate> parents = field.getParentFields();
+		if(Objects.nonNull(parents)) {
+			for(FieldTemplate parentField : parents) {
+				obj = obj.getChild(parentField);
+			}
 		}
 		if(Objects.isNull(obj)) {
 			return field.getField().getDefaultValue();

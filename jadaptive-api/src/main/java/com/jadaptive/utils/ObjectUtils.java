@@ -2,7 +2,6 @@ package com.jadaptive.utils;
 
 import java.util.Objects;
 
-import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ValidationException;
 
 public class ObjectUtils {

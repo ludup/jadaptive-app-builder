@@ -30,11 +30,11 @@ public class OrderedField {
 		return field;
 	}
 	
-	public FieldTemplate getParentField() {
+	public LinkedList<FieldTemplate> getParentFields() {
 		if(Objects.isNull(objectPath) || objectPath.isEmpty()) {
 			return null;
 		} else {
-			return objectPath.getLast();
+			return objectPath;
 		}
 	}
 

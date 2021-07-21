@@ -39,13 +39,13 @@
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-synergy</artifactId>
-			<version>3.0.1-FINAL</version>
+			<version>3.0.3-FINAL</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-bc</artifactId>
-			<version>3.0.1-FINAL</version>
+			<version>3.0.3-FINAL</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.bouncycastle</groupId>
@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-sshagent</artifactId>
-			<version>3.0.1-FINAL</version>
+			<version>3.0.2-FINAL</version>
 		</dependency>
 
 		<dependency>
@@ -149,6 +149,28 @@
 				<enabled>false</enabled>
 			</snapshots>
 			<releases/>
+		</repository>
+		<repository>
+			<id>sshtools-releases</id>
+			<name>sshtools-releases</name>
+			<url>http://artifactory.javassh.com/public-releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>sshtools-snapshots</id>
+			<name>sshtools-snapshots</name>
+			<url>http://artifactory.javassh.com/public-snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 </project>

@@ -2,10 +2,8 @@ package com.jadaptive.plugins.keys;
 
 import java.util.UUID;
 
-import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.permissions.PermissionUtils;
 import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.template.DisableStandardActions;

@@ -5,7 +5,6 @@ import java.util.Collection;
 
 import org.pf4j.Extension;
 
-import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 

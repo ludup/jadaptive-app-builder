@@ -9,7 +9,6 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.events.EventService;
-import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.tenant.Tenant;
