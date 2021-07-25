@@ -295,12 +295,10 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	}
 
 	@Override
-	public void addInterface(SSHInterface sshInterface) throws IOException {
-		addInterface(sshInterface.getAddressToBind(), 
-				sshInterface.getPortToBind(), 
-				getDefaultContextFactory());
-		interfaces.put(sshInterface.getInterface(), 
-				sshInterface);
+	public void addInterface(SSHInterface iface) throws IOException {
+		SSHInterfaceFactory factory = appContext.getBean(iface.getInterfaceFactory());
+		addInterface(iface.getAddressToBind(),  iface.getPortToBind(), 
+				new SSHDInterface(factory, iface));
 	}
 
 	@Override
