@@ -6,7 +6,7 @@
 		<groupId>com.jadaptive</groupId>
 		<artifactId>plugins</artifactId>
 		<relativePath>..</relativePath>
-		<version>0.1.0</version>
+		<version>0.1.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jadaptive-ssh-server</artifactId>
@@ -71,7 +71,7 @@
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-sshagent</artifactId>
-			<version>3.0.2-FINAL</version>
+			<version>3.0.3-FINAL</version>
 		</dependency>
 
 		<dependency>
