@@ -1,5 +1,6 @@
 package com.jadaptive.app.scheduler;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,9 +61,15 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 			if(task.isSystemOnly() && !tenant.isSystem()) {
 				continue;
 			}
-			TenantJobRunner job = new TenantJobRunner(tenant);
-			applicationService.autowire(job);
-			job.schedule(task);
+			
+			try {
+				TenantJobRunner job = new TenantJobRunner(tenant);
+				applicationService.autowire(job);
+				job.schedule(task);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new IllegalStateException(e.getMessage(), e);
+			}
+			
 		}
 	}
 
@@ -74,11 +81,17 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		schedule.setExpression(expression);
 		
 		cronDatabase.saveOrUpdate(schedule);
-		ScheduleJobRunner runner = new ScheduleJobRunner(getCurrentTenant());
-		applicationService.autowire(runner);
+		
+		try {
+			ScheduleJobRunner runner = new ScheduleJobRunner(getCurrentTenant());
+			applicationService.autowire(runner);
+			runner.schedule(schedule);
+			scheduledJobs.put(schedule.getUuid(), runner);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 
-		runner.schedule(schedule);
-		scheduledJobs.put(schedule.getUuid(), runner);
+		
 	}
 
 	@Override
@@ -116,9 +129,13 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	@Override
 	public void run(Job job, Instant startTime) {
 		
-		JobRunner runner = new JobRunner(job, getCurrentTenant());
-		applicationService.autowire(runner);
-		scheduler.schedule(runner,startTime);
+		try {
+			JobRunner runner = new JobRunner(job, getCurrentTenant());
+			applicationService.autowire(runner);
+			scheduler.schedule(runner,startTime);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 		
 	}
 

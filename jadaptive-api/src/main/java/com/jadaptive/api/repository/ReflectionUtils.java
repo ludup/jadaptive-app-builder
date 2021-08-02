@@ -2,6 +2,7 @@ package com.jadaptive.api.repository;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
@@ -10,6 +11,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 public class ReflectionUtils {
 
@@ -177,6 +180,22 @@ public class ReflectionUtils {
 		} while(!clz.equals(Object.class));
 		
 		return null;
+	}
+
+
+	public static void executeAnnotatedMethods(Object obj, Class<PostConstruct> class1) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		
+		Class<?> parent = obj.getClass();
+		do {
+			for(Method m : obj.getClass().getDeclaredMethods()) {
+				if(m.isAnnotationPresent(PostConstruct.class)) {
+					m.setAccessible(true);
+					m.invoke(obj);
+				}
+			}
+			parent = parent.getSuperclass();
+		} while(parent!=null);
+		
 	}
 
 	

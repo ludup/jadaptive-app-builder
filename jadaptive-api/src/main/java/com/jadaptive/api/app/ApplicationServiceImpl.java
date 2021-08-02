@@ -1,5 +1,6 @@
 package com.jadaptive.api.app;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.repository.ReflectionUtils;
 
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
@@ -110,7 +112,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 	}
 	
 	@Override
-	public <T> T autowire(T obj) {
+	public <T> T autowire(T obj) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		
 		if(obj.getClass().getClassLoader() instanceof PluginClassLoader) {
 			PluginClassLoader classLoader = (PluginClassLoader) obj.getClass().getClassLoader();
@@ -119,6 +121,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 					if(w.getPlugin() instanceof SpringPlugin) {
 						SpringPlugin plugin = (SpringPlugin) w.getPlugin();
 						plugin.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(obj);
+						ReflectionUtils.executeAnnotatedMethods(obj, PostConstruct.class);
 						return obj;
 					}
 				}
@@ -126,6 +129,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 		}
 		
 		context.getAutowireCapableBeanFactory().autowireBean(obj);
+		ReflectionUtils.executeAnnotatedMethods(obj, PostConstruct.class);
 		return obj;
 	}
 	

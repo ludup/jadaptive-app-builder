@@ -129,6 +129,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public User getCurrentUser() {
 		Stack<User> userStack = currentUser.get();
 		if(Objects.isNull(userStack) || userStack.isEmpty()) {
+			if(log.isErrorEnabled()) {
+				log.error("Calling getCurrentUser without having previously setup a user context on the current thread!!!!");
+			}
 			throw new AccessDeniedException("There is no user context setup on this thread!");
 		}
 		return userStack.peek();
@@ -144,6 +147,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		Stack<User> userStack = currentUser.get();
 		if(Objects.isNull(userStack) || userStack.isEmpty()) {
+			if(log.isErrorEnabled()) {
+				log.error("Calling clearUserContext without having previously setup a user context on the current thread!!!!");
+			}
 			throw new IllegalStateException("There is no user context to clear on this thread!");
 		}
 		User user = userStack.pop();
@@ -299,7 +305,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			return;
 		}
 		
-		if(log.isDebugEnabled()) {
+		if(log.isWarnEnabled()) {
 			log.debug("User {} denied permission from permission set {}", 
 					user.getUsername(), 
 					StringUtils.defaultIfBlank(Utils.csv(resolvedPermissions), "<empty>"));
@@ -324,8 +330,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		for(String permission : permissions) {
 			if(!resolvedPermissions.contains(permission)) {
-				if(log.isInfoEnabled()) {
-					log.info("User {} denied permission from permission set {}", 
+				if(log.isWarnEnabled()) {
+					log.warn("User {} denied permission from permission set {}", 
 							user.getUsername(), 
 							Utils.csv(resolvedPermissions));
 				}
@@ -421,6 +427,10 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Override
 	public void assertAdministrator() {
 		if(!isAdministrator(getCurrentUser())) {
+			if(log.isWarnEnabled()) {
+				log.warn("User {} denied administrative access", 
+						getCurrentUser().getUsername());
+			}
 			throw new AccessDeniedException(String.format("%s is not an Administrator", 
 					getCurrentUser().getName()));
 		}

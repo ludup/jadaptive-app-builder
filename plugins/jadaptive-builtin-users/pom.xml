@@ -59,8 +59,8 @@
 	<repositories>
 		<repository>
 			<id>ext-releases-local</id>
-			<name>artifactory.javassh.com-ext-releases</name>
-			<url>http://artifactory.javassh.com/ext-releases-local</url>
+			<name>artifactory.jadaptive.com-ext-releases</name>
+			<url>https://artifactory.jadaptive.com/ext-releases-local</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
