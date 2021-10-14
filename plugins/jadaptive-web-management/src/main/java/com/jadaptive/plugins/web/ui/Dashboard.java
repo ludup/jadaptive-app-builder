@@ -58,7 +58,7 @@ public class Dashboard extends AuthenticatedPage {
 		}
 		
 		element = document.selectFirst("#setupTasks");
-		
+		Element parent = document.selectFirst("#quickSetup");
 		
 		DropdownInput input = new DropdownInput("setupTasks", "default");
 		element.appendChild(input.renderInput());
@@ -69,8 +69,11 @@ public class Dashboard extends AuthenticatedPage {
 			options.add(new I18nOption(item.getBundle(), item.getI18n(), item.getLink()));
 		}
 		
-		input.renderValues(options, "");
-		
+		if(options.size() > 0) {
+			input.renderValues(options, "");
+		} else {
+			parent.remove();
+		}
 	}
 
 	@Override
