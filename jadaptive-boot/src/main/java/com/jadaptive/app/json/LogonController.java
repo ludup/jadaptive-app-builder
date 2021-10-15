@@ -70,6 +70,8 @@ public class LogonController {
 				return new SessionStatus("Permission denied");
 			}
 			
+			
+			
 			Session session = authenticationService.logonUser(username, password,
 					tenantService.getCurrentTenant(), 
 					request.getRemoteAddr(), 
