@@ -15,7 +15,6 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.DashboardWidget;
 import com.jadaptive.api.ui.Page;
-import com.jadaptive.api.ui.PageHelper;
 
 @Extension
 public class DashboardWidgets extends AbstractPageExtension {

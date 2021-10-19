@@ -3,7 +3,6 @@ package com.jadaptive.api.json;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.jadaptive.api.template.ObjectTemplate;
 
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class BootstrapTableResult<T> {

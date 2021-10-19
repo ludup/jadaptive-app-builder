@@ -1,6 +1,5 @@
 package com.jadaptive.api.ui;
 
-import java.net.URL;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;
