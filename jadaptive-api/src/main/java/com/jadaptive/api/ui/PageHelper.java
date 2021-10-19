@@ -1,5 +1,6 @@
 package com.jadaptive.api.ui;
 
+import java.net.URL;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;
@@ -43,6 +44,18 @@ public class PageHelper {
 		return new Element("a")
 				.attr("href", href)
 				.text(text);
+	}
+	
+	public static void appendScriptSnippet(Document document, String script) {
+		Element scriptTag = document.selectFirst("#inlineJavascript");
+		if(Objects.isNull(scriptTag)) {
+			Element body = document.selectFirst("body");
+			body.appendChild(
+					scriptTag = new Element("script")
+						.attr("id", "inlineJavascript")
+						.attr("type", "text/javascript"));
+		}
+		scriptTag.appendText(script);
 	}
 
 }

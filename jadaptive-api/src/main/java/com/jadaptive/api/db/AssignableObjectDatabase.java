@@ -13,7 +13,7 @@ public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> {
 
 	void deleteObject(T virtualFolder);
 
-	T getObject(Class<T> resourceClass, User user, SearchField... fields);
+	T getAssignedObject(Class<T> resourceClass, User user, SearchField... fields);
 
 	Iterable<T> getObjects(Class<T> class1);
 

@@ -284,7 +284,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	}
 
 	@Override
-	public String getI18NKey() {
+	public String getResourceKey() {
 		return "users";
 	}
 

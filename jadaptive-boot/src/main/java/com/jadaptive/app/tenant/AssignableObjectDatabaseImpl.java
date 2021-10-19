@@ -71,7 +71,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	}
 
 	@Override
-	public T getObject(Class<T> resourceClass, User user, SearchField... fields) {
+	public T getAssignedObject(Class<T> resourceClass, User user, SearchField... fields) {
 		
 		if(permissionService.isAdministrator(user)) {
 			 return getObject(resourceClass, fields);

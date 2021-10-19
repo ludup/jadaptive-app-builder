@@ -1,5 +1,6 @@
 package com.jadaptive.api.ui;
 
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.ExtensionPoint;
 
@@ -11,7 +12,9 @@ public interface DashboardWidget extends ExtensionPoint {
 	
 	String getName();
 	
-	void renderWidget(Element element);
+	void renderWidget(Document document, Element element);
 
 	Integer weight();
+
+	boolean wantsDisplay();
 }

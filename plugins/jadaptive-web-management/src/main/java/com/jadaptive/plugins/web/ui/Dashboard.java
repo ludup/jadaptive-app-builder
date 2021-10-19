@@ -46,34 +46,8 @@ public class Dashboard extends AuthenticatedPage {
 		}
 		super.generateAuthenticatedContent(document);
 		
-		Element element = document.selectFirst("#resources");
-		for(ResourceService rs : applicationService.getBeans(ResourceService.class)) {
-			long count = rs.getTotalResources();
-			element.appendChild(new Element("span")
-						.html(String.format("%s&nbsp;", String.valueOf(count)))) 
-					.appendChild(new Element("span")
-							.attr("jad:bundle", rs.getI18NKey())
-							.attr("jad:i18n", rs.getI18NKey() + (count > 1 || count == 0 ? ".names" : ".name")))
-					.appendChild(new Element("br"));
-		}
 		
-		element = document.selectFirst("#setupTasks");
-		Element parent = document.selectFirst("#quickSetup");
-		
-		DropdownInput input = new DropdownInput("setupTasks", "default");
-		element.appendChild(input.renderInput());
-		
-		List<I18nOption> options = new ArrayList<>();
 
-		for(QuickSetupItem item : applicationService.getBeans(QuickSetupItem.class)) {
-			options.add(new I18nOption(item.getBundle(), item.getI18n(), item.getLink()));
-		}
-		
-		if(options.size() > 0) {
-			input.renderValues(options, "");
-		} else {
-			parent.remove();
-		}
 	}
 
 	@Override

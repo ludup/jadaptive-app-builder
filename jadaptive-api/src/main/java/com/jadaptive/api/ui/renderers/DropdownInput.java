@@ -83,8 +83,12 @@ public class DropdownInput extends InputRender {
 		for(Map.Entry<String,String> entry : values.entrySet()) {
 			addInputValue(entry.getKey(), entry.getValue(), i18n);
 			if(defaultValue.equals(entry.getKey())) {
-				nameElement.attr("jad:bundle", bundle);
-				nameElement.attr("jad:i18n", entry.getValue());
+				if(!i18n) {
+					nameElement.text(entry.getValue());
+				} else {
+					nameElement.attr("jad:bundle", bundle);
+					nameElement.attr("jad:i18n", entry.getValue());
+				}
 				valueElement.val(entry.getKey());
 			}
 		}

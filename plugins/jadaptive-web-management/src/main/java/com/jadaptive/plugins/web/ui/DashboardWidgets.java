@@ -15,6 +15,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.DashboardWidget;
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.PageHelper;
 
 @Extension
 public class DashboardWidgets extends AbstractPageExtension {
@@ -49,25 +50,28 @@ public class DashboardWidgets extends AbstractPageExtension {
 		element.appendChild(row = new Element("div").addClass("row"));;
 		for(DashboardWidget widget : widgets) {
 			
-			if(count > 0 && count % 2 == 0) {
-				element.appendChild(row = new Element("div").addClass("row"));
+			if(widget.wantsDisplay()) {
+				if(count > 0 && count % 2 == 0) {
+					element.appendChild(row = new Element("div").addClass("row"));
+				}
+				Element w;
+				row.appendChild(new Element("div")
+						.addClass("col-md-6 mb-3 h-100")
+						.appendChild(new Element("div")
+								.addClass("card")
+								.appendChild(new Element("div")
+										.addClass("card-header")
+										.appendChild(new Element("i")
+												.addClass("fas fa-" + widget.getIcon()))
+										.appendChild(new Element("span")
+												.attr("jad:bundle", widget.getBundle())
+												.attr("jad:i18n",String.format("%s.name", widget.getName()) )))
+								.appendChild(w = new Element("div")
+										.addClass("card-body"))));
+				widget.renderWidget(document, w);
+
+				count++;
 			}
-			Element w;
-			row.appendChild(new Element("div")
-					.addClass("col-md-6 mb-3 h-100")
-					.appendChild(new Element("div")
-							.addClass("card")
-							.appendChild(new Element("div")
-									.addClass("card-header")
-									.appendChild(new Element("i")
-											.addClass("fas fa-" + widget.getIcon()))
-									.appendChild(new Element("span")
-											.attr("jad:bundle", widget.getBundle())
-											.attr("jad:i18n", widget.getName())))
-							.appendChild(w = new Element("div")
-									.addClass("card-body"))));
-			widget.renderWidget(w);
-			count++;
 		}
 		
 	}
