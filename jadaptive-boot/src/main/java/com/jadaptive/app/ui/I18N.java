@@ -28,7 +28,7 @@ public class I18N extends AbstractPageExtension {
 				e.val(i18nService.format(bundle, Locale.getDefault(), e.attr("jad:i18n")));
 				break;
 			default:
-				e.text(i18nService.format(bundle, Locale.getDefault(), e.attr("jad:i18n")));
+				e.html(i18nService.format(bundle, Locale.getDefault(), e.attr("jad:i18n")));
 				break;
 			}
 			
