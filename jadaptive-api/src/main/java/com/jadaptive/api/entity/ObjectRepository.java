@@ -22,13 +22,13 @@ public interface ObjectRepository {
 
 	String save(AbstractObject entity) throws RepositoryException, ObjectException;
 
-	Collection<AbstractObject> table(ObjectTemplate def, String searchField, String searchValue, int offset, int limit);
-
-	long count(ObjectTemplate def);
+	Collection<AbstractObject> table(ObjectTemplate def, int offset, int limit, SearchField... fields);
 
 	long count(ObjectTemplate def, String searchField, String searchValue);
 
 	Collection<AbstractObject> personal(ObjectTemplate def, User currentUser);
+
+	long count(ObjectTemplate def, SearchField... fields);
 
 	
 }

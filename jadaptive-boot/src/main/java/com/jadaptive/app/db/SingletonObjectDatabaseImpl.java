@@ -22,7 +22,7 @@ public class SingletonObjectDatabaseImpl<T extends SingletonUUIDEntity> implemen
 		try {
 			T tmp = resourceClass.getConstructor().newInstance();
 			try {
-				return objectDatabase.get(tmp.getUuid(), resourceClass);
+				return objectDatabase.get(tmp.getResourceKey(), resourceClass);
 			} catch(ObjectNotFoundException e) {
 				Document doc = new Document();
 				DocumentHelper.buildDocument(tmp.getResourceKey(), tmp, resourceClass, doc);

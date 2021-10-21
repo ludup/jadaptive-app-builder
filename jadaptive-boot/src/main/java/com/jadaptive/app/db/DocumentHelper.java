@@ -266,6 +266,12 @@ public class DocumentHelper {
 				log.debug("Returning {} as reference {}", field.getResourceKey(), value);
 			}
 			return value;
+		case BOOL:
+			if(Objects.isNull(value)) {
+				return false;
+			} else {
+				return Boolean.valueOf(value);
+			}
 		default:
 			if(Objects.isNull(value)) {
 				

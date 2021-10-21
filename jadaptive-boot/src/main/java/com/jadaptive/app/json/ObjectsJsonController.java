@@ -167,19 +167,19 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 		}
 	}
 
-	@RequestMapping(value="/app/api/objects/{resourceKey}/personal", method = RequestMethod.GET, produces = {"application/json"})
-	@ResponseBody
-	@ResponseStatus(value=HttpStatus.OK)
-	public EntityListStatus<AbstractObject> listPersonal(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
-		try {
-			   return new EntityListStatus<AbstractObject>(entityService.personal(resourceKey));
-		} catch(Throwable e) {
-			if(log.isErrorEnabled()) {
-				log.error("GET api/objects/{}/personal", resourceKey, e);
-			}
-			return new EntityListStatus<AbstractObject>(false, e.getMessage());
-		}
-	}
+//	@RequestMapping(value="/app/api/objects/{resourceKey}/personal", method = RequestMethod.GET, produces = {"application/json"})
+//	@ResponseBody
+//	@ResponseStatus(value=HttpStatus.OK)
+//	public EntityListStatus<AbstractObject> listPersonal(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
+//		try {
+//			   return new EntityListStatus<AbstractObject>(entityService.personal(resourceKey));
+//		} catch(Throwable e) {
+//			if(log.isErrorEnabled()) {
+//				log.error("GET api/objects/{}/personal", resourceKey, e);
+//			}
+//			return new EntityListStatus<AbstractObject>(false, e.getMessage());
+//		}
+//	}
 	
 	@RequestMapping(value="/app/api/objects/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
 	@ResponseBody

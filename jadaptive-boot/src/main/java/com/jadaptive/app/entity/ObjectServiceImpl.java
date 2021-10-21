@@ -1,5 +1,7 @@
 package com.jadaptive.app.entity;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.entity.ObjectException;
@@ -31,6 +34,8 @@ import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.role.Role;
+import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
@@ -38,6 +43,7 @@ import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.app.db.DocumentHelper;
+import com.jadaptive.utils.UUIDObjectUtils;
 
 @Service
 public class ObjectServiceImpl extends AuthenticatedService implements ObjectService, JsonTemplateEnabledService<MongoEntity> {
@@ -59,6 +65,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Autowired
 	private PermissionService permissionService; 
+	
+	@Autowired
+	private RoleService roleService; 
 	
 	Map<String,FormHandler> formHandlers = new HashMap<>();
 	
@@ -125,15 +134,15 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		return entityRepository.list(template);
 	}
 	
-	@Override
-	public Collection<AbstractObject> personal(String resourceKey) throws RepositoryException, ObjectException {
-		
-		ObjectTemplate template = templateService.get(resourceKey);
-		if(template.getScope()!=ObjectScope.PERSONAL) {
-			throw new ObjectException(String.format("%s is a not personal scoped object. Use list API", resourceKey));
-		}
-		return entityRepository.personal(template, getCurrentUser());
-	}
+//	@Override
+//	public Collection<AbstractObject> personal(String resourceKey) throws RepositoryException, ObjectException {
+//		
+//		ObjectTemplate template = templateService.get(resourceKey);
+//		if(template.getScope()!=ObjectScope.PERSONAL) {
+//			throw new ObjectException(String.format("%s is a not personal scoped object. Use list API", resourceKey));
+//		}
+//		return entityRepository.personal(template, getCurrentUser());
+//	}
 
 	@Override
 	public String saveOrUpdate(AbstractObject entity) throws RepositoryException, ObjectException {
@@ -268,17 +277,73 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 	@Override
 	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
-		return entityRepository.table(templateService.get(resourceKey), searchField, searchValue, offset, limit);
+		ObjectTemplate template = templateService.get(resourceKey);
+		switch(template.getScope()) {
+		case PERSONAL:
+			return entityRepository.table(template, offset, limit,
+						generateSearchFields(searchField, searchValue, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+		case ASSIGNED:
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return entityRepository.table(template, offset, limit, 
+					generateSearchFields(searchField, searchValue, SearchField.or(
+							SearchField.in("users", getCurrentUser().getUuid()),
+							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
+		case GLOBAL:
+		default:
+			return entityRepository.table(template, offset, limit, 
+					generateSearchFields(searchField, searchValue));
+		}
+		
 	}
 
+	private SearchField[] generateSearchFields(String searchField, String searchValue, SearchField... additional) {
+		List<SearchField> fields = new ArrayList<>();
+		if(StringUtils.isNotNullOrEmpty(searchValue)) {
+			fields.add(SearchField.eq(searchField, searchValue));
+		}
+		fields.addAll(Arrays.asList(additional));
+		return fields.toArray(new SearchField[0]);
+	}
+	
 	@Override
 	public long count(String resourceKey) {
-		return entityRepository.count(templateService.get(resourceKey));
+		ObjectTemplate template = templateService.get(resourceKey);
+		switch(template.getScope()) {
+		case PERSONAL:
+			return entityRepository.count(template,
+					SearchField.eq("ownerUUID", getCurrentUser().getUuid()));
+		case ASSIGNED:
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return entityRepository.count(template,
+					SearchField.or(
+							SearchField.in("users", getCurrentUser().getUuid()),
+							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
+					));			
+		case GLOBAL:
+		default:
+			return entityRepository.count(template);
+		}
+		
 	}
 	
 	@Override
 	public long count(String resourceKey, String searchField, String searchValue) {
-		return entityRepository.count(templateService.get(resourceKey), searchField, searchValue);
+		
+		ObjectTemplate template = templateService.get(resourceKey);
+		switch(template.getScope()) {
+		case PERSONAL:
+			return entityRepository.count(template,
+					generateSearchFields(searchField, searchValue, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));
+		case ASSIGNED:
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return entityRepository.count(template,
+					generateSearchFields(searchField, searchValue, SearchField.or(
+							SearchField.in("users", getCurrentUser().getUuid()),
+							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
+		case GLOBAL:
+		default:
+			return entityRepository.count(template, generateSearchFields(searchField, searchValue));
+		}
 	}
 
 	private void buildFormHandlers() {

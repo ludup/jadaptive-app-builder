@@ -163,10 +163,9 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 
 	@Override
-	public Collection<AbstractObject> table(ObjectTemplate def, String field, String search, int offset, int limit) {
+	public Collection<AbstractObject> table(ObjectTemplate def, int offset, int limit, SearchField... fields) {
 		List<AbstractObject> results = new ArrayList<>();
-		
-		for(Document document : db.table(def.getCollectionKey(), field, search, tenantService.getCurrentTenant().getUuid(), offset, limit)) {
+		for(Document document : db.searchTable(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), offset, limit, fields)) {
 			results.add(buildEntity(def, document));
 		}
 		
@@ -174,8 +173,8 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 	
 	@Override
-	public long count(ObjectTemplate def) {
-		return db.count(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid());
+	public long count(ObjectTemplate def, SearchField... fields) {
+		return db.count(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), fields);
 	}
 	
 	@Override
