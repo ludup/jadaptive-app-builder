@@ -352,8 +352,8 @@ public class SessionUtils {
 
 	public boolean hasActiveSession(HttpServletRequest request) {
 		try {
-			return getSession(request)!=null;
-		} catch (ObjectNotFoundException | UnauthorizedException | SessionTimeoutException e) {
+			return getActiveSession(request)!=null;
+		} catch (ObjectNotFoundException e) {
 			return false;
 		}
 	}
