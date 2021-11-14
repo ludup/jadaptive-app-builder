@@ -9,7 +9,7 @@ public class UUIDEntityUpdatedEvent<T extends UUIDEntity> extends UUIDEntityEven
 	T previousObject;
 	
 	public UUIDEntityUpdatedEvent(T object, T previousObject) {
-		super(generateKey(object.getResourceKey()), object.getResourceKey(), object);
+		super(generateKey(object.getEventGroup()), object.getEventGroup(), object);
 		this.previousObject = previousObject;
 	}
 	

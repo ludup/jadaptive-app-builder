@@ -104,6 +104,10 @@ public class ObjectTemplate extends NamedUUIDEntity {
 		return toMap().get(name);
 	}
 
+	public String getEventGroup() {
+		return RESOURCE_KEY;
+	}
+	
 	public String getResourceKey() {
 		return resourceKey;
 	}

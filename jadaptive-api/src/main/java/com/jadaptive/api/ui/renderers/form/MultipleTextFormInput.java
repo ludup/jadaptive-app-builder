@@ -50,7 +50,7 @@ public class MultipleTextFormInput {
 							.attr("id", field.getFormVariable())
 							.addClass("col-md-12")
 							.appendChild(selected = new Element("select")
-									.attr("size", "10")
+									.attr("size", "5")
 									.attr("name", field.getFormVariable())
 									.attr("multiple", "mulitple")
 									.addClass("w-100 multipleTextTarget"))))
@@ -68,10 +68,11 @@ public class MultipleTextFormInput {
 									.attr("href", "#")
 									.appendChild(new Element("i")
 											.addClass("far fa-trash"))
-									.appendChild(new Element("span")
-											.addClass("ml-1")
-											.attr("jad:bundle", "default")
-											.attr("jad:i18n", "delete.name")))		
+//									.appendChild(new Element("span")
+//											.addClass("ml-1")
+//											.attr("jad:bundle", "default")
+//											.attr("jad:i18n", "delete.name"))
+											)		
 								)));
 		
 		for(String value : selectedValues) {
