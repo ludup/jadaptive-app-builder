@@ -69,8 +69,9 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 	}
 
 	@Override
-	public void saveOrUpdate(T obj) throws RepositoryException, ObjectException {
+	public String saveOrUpdate(T obj) throws RepositoryException, ObjectException {
 		saveObject(obj, tenantService.getCurrentTenant().getUuid());
+		return obj.getUuid();
 	}
 
 	@Override

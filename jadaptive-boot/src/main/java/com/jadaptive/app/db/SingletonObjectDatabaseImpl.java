@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
 
@@ -15,6 +17,9 @@ public class SingletonObjectDatabaseImpl<T extends SingletonUUIDEntity> implemen
 
 	@Autowired
 	private TenantAwareObjectDatabase<T> objectDatabase;
+	
+	@Autowired
+	private EventService eventService; 
 	
 	@Override
 	public T getObject(Class<T> resourceClass) {

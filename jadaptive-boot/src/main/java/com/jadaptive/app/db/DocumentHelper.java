@@ -77,7 +77,7 @@ public class DocumentHelper {
 	public static void convertObjectToDocument(UUIDDocument obj, Document document) throws RepositoryException, ObjectException {
 
 		try {
-			
+
 			if(StringUtils.isNotBlank(obj.getUuid())) {
 				document.put("_id", obj.getUuid());
 			}
@@ -726,7 +726,7 @@ public class DocumentHelper {
 		return v;
 	}
 	
-	public static String generateContentHash(Document entity) {
+	public static String generateContentHash(ObjectTemplate template, Document entity) {
 		
 		try {
 			SHA256Digest sha2 = new SHA256Digest();

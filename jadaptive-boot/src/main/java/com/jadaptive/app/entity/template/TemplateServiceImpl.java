@@ -250,8 +250,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	}
 
 	@Override
-	public Iterable<ObjectTemplate> getTemplatesWithScope(ObjectScope personal) {
-		return repository.list(SearchField.eq("scope", ObjectScope.PERSONAL.name()));
+	public Iterable<ObjectTemplate> getTemplatesWithScope(ObjectScope scope) {
+		return repository.list(SearchField.eq("scope", scope.name()));
 	}
 
 	@Override

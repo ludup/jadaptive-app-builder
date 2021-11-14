@@ -20,7 +20,7 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 		extends AbstractObjectDatabaseImpl implements AbstractTenantAwareObjectDatabase<T> {
 
 	
-	protected AbstractSystemObjectDatabaseImpl(DocumentDatabase db) {
+	public AbstractSystemObjectDatabaseImpl(DocumentDatabase db) {
 		super(db);
 	}
 
@@ -84,8 +84,9 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 	}
 
 	@Override
-	public void saveOrUpdate(T obj) throws RepositoryException, ObjectException {
+	public String saveOrUpdate(T obj) throws RepositoryException, ObjectException {
 		saveObject(obj, TenantService.SYSTEM_UUID);
+		return obj.getUuid();
 	}
 
 	@Override

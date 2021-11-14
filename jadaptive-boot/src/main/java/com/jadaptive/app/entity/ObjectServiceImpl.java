@@ -24,8 +24,6 @@ import com.jadaptive.api.entity.ObjectRepository;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.events.EventService;
-import com.jadaptive.api.events.EventType;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.ReflectionUtils;
@@ -42,8 +40,18 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
+import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
+import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.db.DocumentHelper;
+import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
+import com.jadaptive.app.tenant.TenantAwareObjectDatabaseImpl;
 import com.jadaptive.utils.UUIDObjectUtils;
+
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.description.type.TypeDescription.Generic;
+import net.bytebuddy.dynamic.scaffold.subclass.ConstructorStrategy;
+import net.bytebuddy.implementation.FixedValue;
 
 @Service
 public class ObjectServiceImpl extends AuthenticatedService implements ObjectService, JsonTemplateEnabledService<MongoEntity> {
@@ -53,9 +61,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Autowired
 	private TemplateService templateService; 
-	
-	@Autowired
-	private EventService eventService;
 	
 	@Autowired
 	private ClassLoaderService classService; 
@@ -68,6 +73,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Autowired
 	private RoleService roleService; 
+	
+	@Autowired
+	private DocumentDatabase documentDatabase;
 	
 	Map<String,FormHandler> formHandlers = new HashMap<>();
 	
@@ -110,7 +118,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new ObjectException(String.format("%s is not a collection entity", resourceKey));
 		}
 
-		
 		AbstractObject e = entityRepository.getById(template, uuid);
 		if(!resourceKey.equals(e.getResourceKey()) && !template.getChildTemplates().contains(e.getResourceKey())) {
 			throw new IllegalStateException(String.format("Unexpected template %s", e.getResourceKey()));
@@ -150,9 +157,17 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		permissionService.assertReadWrite(entity.getResourceKey());
 		
 		ObjectTemplate template = templateService.get(entity.getResourceKey());
-		if(template.getType()==ObjectType.SINGLETON && !entity.getUuid().equals(entity.getResourceKey())) {	
-			throw new ObjectException("You cannot save a Singleton Entity with a new UUID");
+		
+		switch(template.getType()) {
+		case SINGLETON:
+			if(!entity.getUuid().equals(entity.getResourceKey())) {	
+				throw new ObjectException("You cannot save a Singleton Entity with a new UUID");
+			}
+			break;
+		default:
+			break;
 		}
+		
 		if(Objects.nonNull(template.getTemplateClass())) {
 			return saveViaObjectBean(entity, template);
 		} else {
@@ -167,12 +182,60 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
 
 		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+		
 		if(Objects.nonNull(annotation)) {
 			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-			return bean.saveOrUpdate(DocumentHelper.convertDocumentToObject(clz, 
-					new Document(entity.getDocument())));
+			return bean.saveOrUpdate(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
+		} else { 
+			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
+			return db.saveOrUpdate(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
+		}
+
+		
+	}
+	
+	private AbstractTenantAwareObjectDatabase<?> createService(Class<? extends UUIDDocument> clz, ObjectTemplate template) {
+	
+		if(template.isSystem()) {
+			return createSystemService(clz);
 		} else {
-			return entityRepository.save(entity);
+			return createTenantAwareService(clz);
+		}
+	}
+	
+	private AbstractTenantAwareObjectDatabase<?> createSystemService(Class<? extends UUIDDocument> clz) {
+		try {
+			Generic genericType = TypeDescription.Generic.Builder.parameterizedType(AbstractSystemObjectDatabaseImpl.class, clz).build();
+			Generic resourceClass = TypeDescription.Generic.Builder.parameterizedType(Class.class, clz).build();
+			Class<?> subclass = new ByteBuddy()
+					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+					  .defineMethod("getResourceClass", resourceClass).intercept(FixedValue.value(clz))
+					  .make()
+					  .load(clz.getClassLoader())
+					  .getLoaded();
+			AbstractTenantAwareObjectDatabase<?> obj = (AbstractTenantAwareObjectDatabase<?>) 
+					subclass.getConstructor(DocumentDatabase.class).newInstance(documentDatabase);
+			appService.autowire(obj);
+			return obj;
+		} catch (Throwable e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+	
+	private AbstractTenantAwareObjectDatabase<?> createTenantAwareService(Class<? extends UUIDDocument> clz) {
+		try {
+			Generic genericType = TypeDescription.Generic.Builder.parameterizedType(TenantAwareObjectDatabaseImpl.class, clz).build();
+			Class<?> subclass = new ByteBuddy()
+					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+					  .make()
+					  .load(clz.getClassLoader())
+					  .getLoaded();
+			AbstractTenantAwareObjectDatabase<?> obj = (AbstractTenantAwareObjectDatabase<?>) 
+					subclass.getConstructor(DocumentDatabase.class).newInstance(documentDatabase);
+			appService.autowire(obj);
+			return obj;
+		} catch (Throwable e) {
+			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
 
@@ -200,17 +263,11 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 					UUIDObjectService<?> bean = appService.getBean(annotation.bean());
 					bean.deleteObject(DocumentHelper.convertDocumentToObject(clz, 
 							new Document(e.getDocument())));
-					
-					eventService.publishStandardEvent(EventType.DELETE, 
-							DocumentHelper.convertDocumentToObject(clz, 
-									new Document(e.getDocument())));
 					return;
 				}
 			} 
 			
 			entityRepository.deleteByUUIDOrAltId(template, uuid);
-			
-			eventService.publishDocumentEvent(EventType.DELETE, e);
 			
 			
 		} catch(RepositoryException | ObjectException ex) {
@@ -372,4 +429,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		DocumentHelper.convertObjectToDocument(obj, doc);		
 		return new MongoEntity(obj.getResourceKey(), doc);
 	}
+	
+	
 }

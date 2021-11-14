@@ -1,49 +1,60 @@
 package com.jadaptive.app.events;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.entity.AbstractObject;
-import com.jadaptive.api.events.CustomEvent;
+import com.jadaptive.api.events.EventListener;
 import com.jadaptive.api.events.EventService;
-import com.jadaptive.api.events.EventType;
-import com.jadaptive.api.repository.UUIDEntity;
-
+import com.jadaptive.api.events.SystemEvent;
 
 @Service
 public class EventServiceImpl implements EventService { 
-	
-	
-	@Autowired
-	private ApplicationEventPublisher eventPublisher;
+
+	Collection<EventListener> eventListeners = new ArrayList<>();
+	Map<String,Collection<EventListener>> keyedListeners = new HashMap<>();
+	Executor eventExecutor = Executors.newCachedThreadPool();
 	
 	@Override
-	public <T extends UUIDEntity> void publishStandardEvent(EventType type, T evt) {
-		switch(type) {
-		case CREATE:
-			eventPublisher.publishEvent(new UUIDEntityCreatedEvent<T>(evt));
-			break;
-		case READ:
-			eventPublisher.publishEvent(new UUIDEntityReadEvent<T>(evt));
-			break;
-		case UPDATE:
-			eventPublisher.publishEvent(new UUIDEntityUpdatedEvent<T>(evt));
-			break;
-		case DELETE:
-			eventPublisher.publishEvent(new UUIDEntityDeletedEvent<T>(evt));
-			break;
+	public void publishEvent(SystemEvent<?> evt) {
+	
+		for(EventListener listener : eventListeners) {
+			fireEvent(listener, evt);
+		}
+		
+		Collection<EventListener> keyed = keyedListeners.get(evt.getResourceKey());
+		if(Objects.nonNull(keyed)) {
+			for(EventListener listener : keyed) {
+				fireEvent(listener, evt);
+			}
+		}
+	}
+	
+	private void fireEvent(EventListener listener, SystemEvent<?> evt) {
+		if(evt.async()) {
+			eventExecutor.execute(() -> listener.onEvent(evt));
+		} else {
+			/**
+			 * Non async events can throw exceptions back up the chain
+			 */
+			listener.onEvent(evt);
 		}
 	}
 
 	@Override
-	public <T extends CustomEvent> void publishCustomEvent(T evt) {
-		
-		
-	}
+	public void on(String resourceKey, EventListener handler) {
 
-	@Override
-	public void publishDocumentEvent(EventType type, AbstractObject e) {
+		if(!keyedListeners.containsKey(resourceKey)) {
+			keyedListeners.put(resourceKey, new ArrayList<>());
+		}
+		
+		keyedListeners.get(resourceKey).add(handler);
 		
 	}
 }

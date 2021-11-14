@@ -20,12 +20,12 @@ import com.jadaptive.app.db.DocumentDatabase;
 public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity> 
 		extends AbstractObjectDatabaseImpl implements TenantAwareObjectDatabase<T> {
 
-	protected TenantAwareObjectDatabaseImpl(DocumentDatabase db) {
+	public TenantAwareObjectDatabaseImpl(DocumentDatabase db) {
 		super(db);
 	}
 	
-	protected String forcedTenantUUID;
-	protected Class<T> resourceClass;
+	//protected String forcedTenantUUID;
+	//protected Class<T> resourceClass;
 	
 	@Autowired
 	protected TenantService tenantService;
@@ -46,7 +46,6 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public T get(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException {
 		try {
 			T result = getObject(uuid, getCurrentTenant().getUuid(), resourceClass);
-			//eventService.publishStandardEvent(EventType.READ, result);
 			return result;
 		} catch(RepositoryException | ObjectException e) {
 			/**
@@ -60,7 +59,6 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 			T result = getObject(getCurrentTenant().getUuid(), resourceClass, fields);
-			//eventService.publishStandardEvent(EventType.READ, result);
 			return result;
 		} catch(RepositoryException | ObjectException e) {
 			/**

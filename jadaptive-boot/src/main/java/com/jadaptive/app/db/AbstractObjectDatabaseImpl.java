@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,10 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.events.UUIDEntityCreatedEvent;
+import com.jadaptive.api.events.UUIDEntityDeletedEvent;
+import com.jadaptive.api.events.UUIDEntityUpdatedEvent;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -38,6 +43,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	@Autowired
 	private ObjectTemplateRepository templateRepository;
+	
+	@Autowired
+	private EventService eventService; 
 	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
@@ -87,17 +95,18 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 //		return cacheService.getCacheOrCreate(String.format("iterator.%s.%s", clz.getSimpleName(), name), clz, List.class);
 //	}
 	
+	@SuppressWarnings("unchecked")
 	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
 		try {
 
-//			Document previous = null;
-//			
-//			if(StringUtils.isNotBlank(obj.getUuid())) {
-//				try {
-//					previous = db.getByUUID(obj.getUuid(), getCollectionName(obj.getClass()), database);
-//				} catch(ObjectNotFoundException ex) {
-//				}
-//			}
+			T previous = null;
+			
+			if(StringUtils.isNotBlank(obj.getUuid())) {
+				try {
+					previous = getObject(obj.getUuid(), database, (Class<T>) obj.getClass());
+				} catch(ObjectNotFoundException ex) {
+				}
+			}
 			
 			Document document = new Document();
 			document.put("resourceKey", obj.getResourceKey());
@@ -105,7 +114,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 //			String contentHash = DocumentHelper.generateContentHash(templateRepository.get(obj.getResourceKey()), document);
 //			document.put("contentHash", contentHash);
-//			
+			
 //			if(Objects.nonNull(previous) && previous.getString("contentHash").equals(contentHash)) {
 //				if(log.isDebugEnabled()) {
 //					log.debug("Object {} with uuid {} has not been updated because it's new content hash is the same as the previous");
@@ -116,19 +125,22 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
 			obj.setUuid(document.getString("_id"));
 			
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				/**
-				 * Perform caching which will also inform us whether event
-				 */
-				@SuppressWarnings("unchecked")
-				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
-				
-				T prevObject = cachedObjects.get(obj.getUuid());
-				cachedObjects.put(obj.getUuid(), obj);
-				onObjectUpdated(prevObject, obj);
-			}
+//			if(Boolean.getBoolean("jadaptive.cache")) {
+//				/**
+//				 * Perform caching which will also inform us whether event
+//				 */
+//				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+//				
+//				T prevObject = cachedObjects.get(obj.getUuid());
+//				cachedObjects.put(obj.getUuid(), obj);
+//				onObjectUpdated(prevObject, obj);
+//			}
 			
-			onObjectUpdated(null, obj);
+			if(Objects.isNull(previous)) {
+				onObjectCreated(obj);
+			} else {
+				onObjectUpdated(obj, previous);
+			}
 			
 		} catch(Throwable e) {
 			checkException(e);
@@ -345,11 +357,17 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> void onObjectDeleted(T obj) { }
+	protected <T extends UUIDEntity> void onObjectDeleted(T obj) {
+		eventService.publishEvent(new UUIDEntityDeletedEvent<T>(obj));		
+	}
 
-	protected <T extends UUIDEntity> void onObjectCreated(T obj) { }
+	protected <T extends UUIDEntity> void onObjectCreated(T obj) { 
+		eventService.publishEvent(new UUIDEntityCreatedEvent<T>(obj));
+	}
 	
-	protected <T extends UUIDEntity> void onObjectUpdated(T previousObject, T obj) { }
+	protected <T extends UUIDEntity> void onObjectUpdated(T obj, T previousObject) {
+		eventService.publishEvent(new UUIDEntityUpdatedEvent<T>(obj, previousObject));
+	}
 	
 	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {
 		

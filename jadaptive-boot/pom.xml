@@ -149,6 +149,12 @@
 			<artifactId>freemarker</artifactId>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.12.1</version><!--$NO-MVN-MAN-VER$-->
+		</dependency>
 	</dependencies>
 
 

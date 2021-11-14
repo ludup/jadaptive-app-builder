@@ -14,6 +14,45 @@ $(function() {
 		el.dropdown('toggle');
 	});
 	
+	function duplicate(text, list) {
+		var found = false;
+		list.find('option').each(function(idx, obj) {
+			if($(obj).val() === text) {
+				found = true;
+				return true;
+			}
+		});
+		return found;
+	};
+	
+	$(document).on('click', '.multipleTextAdd', function(e) {
+		e.stopPropagation();
+		var source = $(this).closest('.multipleTextInput').find('.multipleTextSource');
+		var target = $(this).closest('.multipleTextInput').find('.multipleTextTarget');
+		if(source.val() !== '' && !duplicate(source.val(), target)) {
+			target.append("<option value'" + source.val() + '">' + source.val() + '</option>');
+			source.val('');
+		}
+	});
+	
+	$(document).on('keyup', '.multipleTextSource', function(e) {
+		e.stopPropagation();
+		if (e.keyCode === 13) {
+			var source = $(this).closest('.multipleTextInput').find('.multipleTextSource');
+			var target = $(this).closest('.multipleTextInput').find('.multipleTextTarget');
+			if(source.val() !== '' && !duplicate(source.val(), target)) {
+				target.append("<option value'" + source.val() + '">' + source.val() + '</option>');
+				source.val('');
+			}
+		}
+	});
+	
+	$(document).on('click', '.multipleTextRemove', function(e) {
+		e.preventDefault();
+		var source = $(this).closest('.multipleTextInput').find('.multipleTextTarget');
+		source.children('option:selected').detach();
+	});
+	
 	$(document).on('click', '.multipleSelectAdd', function(e) {
 		e.stopPropagation();
 		var source = $(this).closest('.row').find('.multipleSelectSource');
