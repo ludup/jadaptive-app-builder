@@ -16,43 +16,59 @@ public class DropdownInput extends InputRender {
 	Element dropdownMenu;
 	Element valueElement;
 	Element nameElement;
-	
+	boolean up;
+	boolean dark;
 	String bundle;
+	
 	public DropdownInput(String resourceKey, String bundle) {
 		super(resourceKey);
 		this.bundle = bundle;
 	}
 
+	public DropdownInput up() {
+		this.up = true;
+		return this;
+	}
+	public DropdownInput down() {
+		this.up = false;
+		return this;
+	}
+	
+	public DropdownInput dark() {
+		this.dark = true;
+		return this;
+	}
+	
 	@Override
 	public Element renderInput() {
 
-		return new Element("div").attr("class", "form-group")
+		return new Element("div").attr("class", "row mb-3")
 				.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", resourceKey))
 						.attr("style", "position: relative")
 						.addClass("input-group")
-						.addClass("dropdown")
+						.addClass("dropdown" + (up ? " dropup" : ""))
 					.appendChild(valueElement = new Element("input")
 							.attr("name", resourceKey)
 							.attr("type", "hidden"))
 					.appendChild(nameElement = new Element("input")
 							.attr("id", String.format("%sText", resourceKey))
 							.attr("data-display", "static")
-							.attr("class", "dropdown-toggle form-control")
+							.addClass("dropdown-toggle form-control" + (dark ? " text-light" : ""))
 							.attr("readonly", "readonly")
 							.attr("type", "text")
 							.attr("autocomplete", "off")
-							.attr("data-toggle", "dropdown")
+							.attr("data-bs-toggle", "dropdown")
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false"))
-					.appendChild(new Element("div")
-							.attr("class", "input-group-append")
-								.appendChild(new Element("span")
-										.attr("class", ".jdropdown input-group-text")
-									.appendChild(new Element("i")
-											.attr("class", "fas fa-chevron-down"))))
+					.appendChild(new Element("a")
+							.attr("style", "text-decoration: none;")
+							.attr("class", ".jdropdown input-group-text")
+						.appendChild(new Element("i")
+								.attr("class", "fas fa-chevron-down")))
 					.appendChild(dropdownMenu = new Element("div")
-							.attr("class", "dropdown-menu")
+							.attr("style", "max-height: 280px; overflow-y: auto;")
+							.attr("class", "dropdown-menu" + (dark ? " dropdown-menu-dark" : ""))
 							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
 	}
 

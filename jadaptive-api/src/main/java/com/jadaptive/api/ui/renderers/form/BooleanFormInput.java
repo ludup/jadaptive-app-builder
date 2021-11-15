@@ -19,7 +19,9 @@ public class BooleanFormInput extends FieldInputRender {
 		
 
 		rootElement.appendChild(new Element("div")
-						.addClass("form-group")
+						.addClass("row mb-3")
+						.appendChild(new Element("div")
+								.addClass("col-12")
 				.appendChild(input = new Element("input")
 						.attr("id", field.getFormVariable())
 						.attr("name", field.getFormVariable())
@@ -27,14 +29,14 @@ public class BooleanFormInput extends FieldInputRender {
 						.val("true"))
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
-						.addClass("col-form-label")
+						.addClass("form-label")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
-				.appendChild(new Element("small")
+				.appendChild(new Element("p")
 						.addClass("form-text")
-						.addClass("text-muted")
+						.addClass("text-muted text-small")
 						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))));
+						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
 
 		if("true".equalsIgnoreCase(value)) {
 			input.attr("checked", "checked");

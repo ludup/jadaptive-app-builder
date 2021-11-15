@@ -45,7 +45,7 @@ $(document).ready(function() {
 			$('#table').on('post-header.bs.table', function(e) {
 				
 				if($('#searchField').length == 0) {
-					$('.search').parent().append('<div id="searchDropdownHolder" class="columns columns-right mr-1 float-right"></div>');
+					$('.search').parent().append('<div id="searchDropdownHolder" class="columns columns-right me-1 float-end"></div>');
 					
 					$('#searchDropdownMenu').empty();
 

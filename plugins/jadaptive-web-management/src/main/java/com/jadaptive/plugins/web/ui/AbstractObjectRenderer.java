@@ -534,7 +534,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			.appendElement("a")
 				.addClass("btn")
 				.addClass("btn-link")
-				.attr("data-toggle", "collapse")
+				.attr("data-bs-toggle", "collapse")
 				.attr("data-target", "#collapse" + view.getResourceKey())
 				.attr("href", "#collapse" + view.getResourceKey())
 				.attr("aria-expanded", String.valueOf(first))
@@ -568,7 +568,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				.addClass("nav-item")
 					.appendChild(new Element("a")
 						.addClass("nav-link")
-						.attr("data-toggle", "tab")
+						.attr("data-bs-toggle", "tab")
 						.attr("href", String.format("#%s", view.getResourceKey()))
 						.attr("jad:bundle", view.getBundle())
 						.attr("jad:i18n", String.format("%s.name", view.getResourceKey()))));

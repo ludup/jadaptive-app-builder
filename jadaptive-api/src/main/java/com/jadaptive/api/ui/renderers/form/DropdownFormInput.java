@@ -25,10 +25,12 @@ public class DropdownFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(OrderedView panel, Element rootElement, String defaultValue) {
 
-		rootElement.appendChild(new Element("div").addClass("form-group")
+		rootElement.appendChild(new Element("div").addClass("row mb-3")
+				.appendChild(new Element("div")
+						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
-						.addClass("col-form-label")
+						.addClass("form-label")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
 				.appendChild(dropdownInput = new Element("div")
@@ -46,20 +48,18 @@ public class DropdownFormInput extends FieldInputRender {
 							.addClass("form-control")
 							.addClass("dropdown-toggle")
 							.attr("type", "text")
-							.attr("data-toggle", "dropdown")
+							.attr("data-bs-toggle", "dropdown")
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false"))
-					.appendChild(new Element("div")
-							.attr("class", "input-group-append")
-								.appendChild(new Element("span")
+					.appendChild(new Element("span")
 										.attr("class", ".jdropdown input-group-text")
 									.appendChild(new Element("i")
-											.attr("class", "fas fa-chevron-down")))))
+											.attr("class", "fas fa-chevron-down"))))
 				.appendChild(new Element("small")
 							.addClass("form-text")
 							.addClass("text-muted")
 							.attr("jad:bundle", field.getBundle())
-							.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))));
+							.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
 
 	}
 

@@ -22,10 +22,13 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 			Collection<String> selectedValues,
 			boolean valueIsResourceKey) {
 		
-		rootElement.appendChild(new Element("div").addClass("form-group")
+		rootElement.appendChild(new Element("div")
+				.addClass("row mb-3")
+				.appendChild(new Element("div")
+						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
-						.addClass("col-form-label")
+						.addClass("form-label")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
 				.appendChild(new Element("div")
@@ -58,7 +61,7 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 										.attr("id", field.getFormVariable())
 										.attr("size", "10")
 										.attr("multiple", "mulitple")
-										.addClass("w-100 multipleSelectTarget")))));
+										.addClass("w-100 multipleSelectTarget"))))));
 
 		
 		for(String value : availableValues) {

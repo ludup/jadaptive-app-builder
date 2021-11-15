@@ -24,7 +24,7 @@
 					<div class="csvColumns">
 
 					</div>
-					<div class="form-group">
+					<div class="row">
 						<button id="addColumn" type="button"
 							class="bg-dark btn btn-success">Add Column</button>
 					</div>
@@ -36,7 +36,7 @@
 					action="/app/upload" method="post">
 					<input type="hidden" id="orderedFields" name="orderedFields"
 						class="form-control" value="">
-					<div class="form-group row">
+					<div class="row">
 						<div class="col-6">
 							<label for="quoteChar">Quote Character</label>
 						</div>
@@ -45,7 +45,7 @@
 								class="form-control" value="&quot">
 						</div>
 					</div>
-					<div class="form-group row">
+					<div class="row">
 						<div class="col-6">
 							<label for="delimiterChar">Delimiter Character</label>
 						</div>
@@ -54,7 +54,7 @@
 								class="form-control" value=",">
 						</div>
 					</div>
-					<div class="form-group row">
+					<div class="row">
 						<div class="col-6">
 							<label for="containsHeader">Contains Headers</label>
 						</div>
@@ -63,7 +63,7 @@
 								class="form-check-input" value="true">
 						</div>
 					</div>
-					<div class="form-group row">
+					<div class="row">
 						<div class="col-6">
 							<label for="surroundingSpacesNeedQuotes">Spaces Need
 								Quotes</label>
@@ -73,7 +73,7 @@
 								class="form-check-input" value="true">
 						</div>
 					</div>
-					<div class="form-group row">
+					<div class="row">
 						<div class="col-6">
 							<label for="ignoreEmptyLines">Ignore Empty Lines</label>
 						</div>
@@ -82,7 +82,7 @@
 								class="form-check-input" value="true">
 						</div>
 					</div>
-					<div class="form-group row">
+					<div class="row">
 						<div class="col-6">
 							<label for="file">CSV File</label>
 						</div>
@@ -90,7 +90,7 @@
 							<input id="image-file" type="file" name="file" />
 						</div>
 					</div>
-					<div class="form-group">
+					<div class="row">
 						<button id="importButton" class="bg-dark btn btn-success">Import</button>
 					</div>
 				</form>
@@ -114,7 +114,7 @@ $(document).ready(function() {
 			$('#addColumn').off('click');
 			$('#addColumn').on('click', function(e) {
 				var column = $('.csvColumn').length+1;
-				$('.csvColumns').append('<div id="c' + column + '" class="row form-group"><div class="csvColumn col-10"><select class="orderedFields form-control" id="templateFields' + column + '"><option value="">&lt;Unused&gt;</option><option value="UUID">UUID</option></select></div><div class="col-2 text-left m-auto"><a href="#" id="d' + column + '"><i class="fas fa-trash-alt"></i></a></div></div></div>');
+				$('.csvColumns').append('<div id="c' + column + '" class="row"><div class="csvColumn col-10"><select class="orderedFields form-control" id="templateFields' + column + '"><option value="">&lt;Unused&gt;</option><option value="UUID">UUID</option></select></div><div class="col-2 text-start m-auto"><a href="#" id="d' + column + '"><i class="fas fa-trash-alt"></i></a></div></div></div>');
 				debugger;
 				$.each(t.fields, function(idx, obj) {
 					$('select[id="templateFields' + column  + '"]').append('<option value="' + obj.resourceKey + '">' + obj.name + "</option>");

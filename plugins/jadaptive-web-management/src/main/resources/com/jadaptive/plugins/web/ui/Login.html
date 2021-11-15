@@ -11,24 +11,26 @@
                   <div class="card-body">
                   	<div id="feedback"></div>
                       <form id="loginForm" action="/app/ui/login" method="POST" autocomplete="off">
-                          <div class="form-group row">
-                              <label for="username" class="col-md-4 col-form-label text-md-right">Username</label>
+                          <div class="row mb-3">
+                              <label for="username" class="col-md-4 form-label text-md-end">Username</label>
                               <div class="col-md-6">
                                   <input type="text" id="username" class="form-control" name="username" autocomplete="username" required autofocus>
                               </div>
                           </div>
 
-                          <div class="form-group row">
-                              <label for="password" class="col-md-4 col-form-label text-md-right">Password</label>
+                          <div class="row mb-3">
+                              <label for="password" class="col-md-4 form-label text-md-end">Password</label>
                               <div class="col-md-6">
                                   <input type="password" id="password" class="form-control" name="password" autocomplete="password" required>
                               </div>
                           </div>
 
-                          <div class="col-md-6 offset-md-4">
-                              <button id="loginSubmit" class="bg-dark btn btn-primary">
-                                  <i class="fa fa-sign-in-alt"></i>&nbsp;Login
-                              </button>
+						  <div class="row mb-3">
+	                          <div class="col-md-6 offset-md-4">
+	                              <button id="loginSubmit" class="bg-dark btn btn-primary">
+	                                  <i class="fa fa-sign-in-alt"></i>&nbsp;Login
+	                              </button>
+	                          </div>
                           </div>
                            <div class="col-md-6 offset-md-4 mt-3">
                            	 <div id="actions"></div>

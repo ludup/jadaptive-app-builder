@@ -1,5 +1,6 @@
 package com.jadaptive.plugins.web.ui;
 
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
@@ -7,6 +8,7 @@ import org.pf4j.Extension;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageHelper;
+import com.jadaptive.api.ui.renderers.DropdownInput;
 
 @Extension
 public class Bootstrap extends AbstractPageExtension {
@@ -17,6 +19,7 @@ public class Bootstrap extends AbstractPageExtension {
 		
 		PageHelper.appendScript(document, "/app/content/bootbox/bootbox.min.js");
 		PageHelper.appendStylesheet(document, "/app/content/bootstrap-5.1.3-dist/css/bootstrap.min.css");
+
 	}
 
 	@Override

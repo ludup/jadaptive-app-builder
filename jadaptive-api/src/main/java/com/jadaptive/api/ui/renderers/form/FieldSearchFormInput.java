@@ -27,10 +27,13 @@ public class FieldSearchFormInput {
 			String value, String name,
 			boolean nameIsResourceKey) {
 		
-		rootElement.appendChild(new Element("div").addClass("form-group fieldSearchInput")
+		rootElement.appendChild(new Element("div")
+				.addClass("row mb-3 fieldSearchInput")
+				.appendChild(new Element("div")
+						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
-						.addClass("col-form-label")
+						.addClass("form-label")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
 				.appendChild(new Element("div")
@@ -42,7 +45,7 @@ public class FieldSearchFormInput {
 							.attr("id", String.format("%sText", field.getResourceKey()))
 							.attr("data-display", "static")
 							.addClass("form-control fieldSearchInput")
-							.attr("data-toggle", "dropdown")
+							.attr("data-bs-toggle", "dropdown")
 							.attr("data-url", url)
 							.attr("data-field", searchField)
 							.attr("data-id", idField)
@@ -50,12 +53,10 @@ public class FieldSearchFormInput {
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false")
 							.val(name))
-					.appendChild(new Element("div")
-							.attr("class", "input-group-append")
-								.appendChild(new Element("span")
-										.attr("class", "input-group-text")
-									.appendChild(new Element("i")
-											.attr("class", "fas fa-search"))))
+					.appendChild(new Element("span")
+							.attr("class", "input-group-text")
+							.appendChild(new Element("i")
+								.attr("class", "fas fa-search")))
 					.appendChild(new Element("div")
 							.addClass("dropdown-menu")
 							.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))))
@@ -66,7 +67,7 @@ public class FieldSearchFormInput {
 							.val(value)
 				.appendChild(new Element("small")
 						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
+						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))))));
 		
 	}
 

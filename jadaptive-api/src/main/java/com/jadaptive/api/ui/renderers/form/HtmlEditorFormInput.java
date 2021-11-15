@@ -30,11 +30,13 @@ public class HtmlEditorFormInput extends FieldInputRender {
 				
 
 		rootElement.appendChild(new Element("div")
-				.addClass("form-group")
+				.addClass("row mb-3")
 				.addClass("w-100")
+				.appendChild(new Element("div")
+						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
-						.addClass("col-form-label")
+						.addClass("form-label")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
 				.appendChild(new Element("textarea")
@@ -46,7 +48,7 @@ public class HtmlEditorFormInput extends FieldInputRender {
 						.addClass("form-text")
 						.addClass("text-muted")
 						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))));
+						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
 
 		rootElement.appendChild(new Element("script")
 							.attr("type", "application/javascript")

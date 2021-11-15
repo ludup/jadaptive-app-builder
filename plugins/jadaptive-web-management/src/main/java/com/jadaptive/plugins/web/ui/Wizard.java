@@ -88,7 +88,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 					.appendChild(new Element("span")
 									.text(" - "))
 					.appendChild(new Element("span")
-							.addClass("ml-1")
+							.addClass("ms-1")
 							.attr("jad:bundle", state.getCurrentPage().getBundle())
 							.attr("jad:i18n", state.getCurrentPage().getName() + ".setup.name"));
 			} else {
@@ -109,9 +109,9 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		if(state.hasBackButton()) {
 			actions.appendChild(new Element("a")
 					.attr("id", "backButton")
-					.addClass("btn btn-danger float-left")
+					.addClass("btn btn-danger float-start")
 					.appendChild(new Element("i")
-						.addClass("far fa-arrow-circle-left mr-1"))
+						.addClass("far fa-arrow-circle-left me-1"))
 					.appendChild(new Element("span")
 						.attr("jad:bundle", "default")
 						.attr("jad:i18n", "back.name")));
@@ -120,18 +120,18 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		if(state.hasNextButton()) {
 			actions.appendChild(new Element("a")
 						.attr("id", "nextButton")
-						.addClass("btn btn-success float-right nextButton")
+						.addClass("btn btn-success float-end nextButton")
 						.appendChild(new Element("i")
-							.addClass("far fa-arrow-circle-right mr-1"))
+							.addClass("far fa-arrow-circle-right me-1"))
 						.appendChild(new Element("span")
 							.attr("jad:bundle", "default")
 							.attr("jad:i18n", "next.name")));
 		} else if(state.isFinishPage()) {
 			actions.appendChild(new Element("a")
 						.attr("id", "finishButton")
-						.addClass("btn btn-primary float-right nextButton")
+						.addClass("btn btn-primary float-end nextButton")
 					.appendChild(new Element("i")
-						.addClass("far fa-rocket mr-1"))
+						.addClass("far fa-rocket me-1"))
 					.appendChild(new Element("span")
 							.attr("jad:bundle", "default")
 							.attr("jad:i18n", "finish.name")));

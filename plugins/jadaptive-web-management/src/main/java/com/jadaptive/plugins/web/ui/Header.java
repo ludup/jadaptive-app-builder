@@ -99,10 +99,10 @@ public class Header extends AbstractPageExtension {
 						}
 					}
 					parentElement.appendChild(new Element("a")
-							.addClass("dropdown-item mr-3")
+							.addClass("dropdown-item me-3")
 							.attr("href", child.getPath())
 							.appendChild(new Element("i")
-									.addClass("nav-icon mr-1 fas fa-" + child.getIcon()))
+									.addClass("nav-icon me-1 fas fa-" + child.getIcon()))
 							.appendChild(new Element("span")
 									.attr("jad:bundle", child.getBundle())
 										.attr("jad:i18n", child.getResourceKey())));
@@ -110,7 +110,7 @@ public class Header extends AbstractPageExtension {
 				
 				if(!parentElement.children().isEmpty()) {
 					topMenu.appendChild(new Element("li")
-							.addClass("nav-item dropdown mr-3")
+							.addClass("nav-item dropdown me-3")
 							.appendChild(new Element("a")
 									.addClass("nav-link dropdown-toggle")
 									.attr("href", "#")
@@ -142,8 +142,8 @@ public class Header extends AbstractPageExtension {
 //		});
 //		$('#topMenu').empty();
 		
-//		$('#topMenu').append('<li class="nav-item dropdown mr-3">'
-//				+ '<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'
+//		$('#topMenu').append('<li class="nav-item dropdown me-3">'
+//				+ '<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'
 //				+ obj.title + '</a><div id="' + obj.uuid + '" class="dropdown-menu" aria-labelledby="navbarDropdown"></div></li>');
 //		
 //		$.each(menus[obj.uuid], function(idx, child) {
@@ -151,7 +151,7 @@ public class Header extends AbstractPageExtension {
 //			if(child.hidden) {
 //				return;
 //			}
-//			$('#' + child.parent).append('<a class="dropdown-item mr-3" href="' 
+//			$('#' + child.parent).append('<a class="dropdown-item me-3" href="' 
 //					+ child.path + '"><i class="' + child.icon + ' nav-icon"></i>&nbsp;' + child.title + '</a>');
 //	
 //		});

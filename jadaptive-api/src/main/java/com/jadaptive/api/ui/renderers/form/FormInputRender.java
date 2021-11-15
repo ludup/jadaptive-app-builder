@@ -16,10 +16,12 @@ public abstract class FormInputRender extends FieldInputRender {
 		
 
 		rootElement.appendChild(new Element("div")
-				.addClass("form-group")
+				.addClass("row mb-3")
+				.appendChild(new Element("div")
+						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
-						.addClass("col-form-label")
+						.addClass("form-label")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
 				.appendChild(new Element("input")
@@ -32,12 +34,12 @@ public abstract class FormInputRender extends FieldInputRender {
 						.addClass("form-text")
 						.addClass("text-muted")
 						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))));
+						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
 //		
 //		
-//		rootElement.append(replaceResourceKey("<div id=\"${resourceKey}Group\" class=\"form-group col-12\"></div>")); 
+//		rootElement.append(replaceResourceKey("<div id=\"${resourceKey}Group\" class=\"row col-12\"></div>")); 
 //		Element div = rootElement.select(replaceResourceKey("#${resourceKey}Group")).first();
-//		div.append(replaceResourceKey("<label for=\"${resourceKey}\" class=\"col-form-label\" ${i18nName}></label>"));
+//		div.append(replaceResourceKey("<label for=\"${resourceKey}\" class=\"form-label\" ${i18nName}></label>"));
 //		div.append(replaceResourceKey("<input type=\"${inputType}\" id=\"${resourceKey}\" name=\"${resourceKey}\" class=\"form-control\" value=\"" + value + "\">"));
 //		div.append(replaceResourceKey("<small class=\"form-text text-muted\" ${i18nDesc}></small>"));
 
