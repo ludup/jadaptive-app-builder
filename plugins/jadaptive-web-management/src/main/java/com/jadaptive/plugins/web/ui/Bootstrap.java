@@ -13,10 +13,10 @@ public class Bootstrap extends AbstractPageExtension {
 
 	@Override
 	public void process(Document document, Element element, Page page) {
-		PageHelper.appendScript(document, "/app/content/bootstrap-4.5.3-dist/js/bootstrap.bundle.min.js");
+		PageHelper.appendScript(document, "/app/content/bootstrap-5.1.3-dist/js/bootstrap.bundle.min.js");
 		
 		PageHelper.appendScript(document, "/app/content/bootbox/bootbox.min.js");
-		PageHelper.appendStylesheet(document, "/app/content/bootstrap-4.5.3-dist/css/bootstrap.min.css");
+		PageHelper.appendStylesheet(document, "/app/content/bootstrap-5.1.3-dist/css/bootstrap.min.css");
 	}
 
 	@Override

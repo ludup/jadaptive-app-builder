@@ -114,7 +114,7 @@ public class Header extends AbstractPageExtension {
 							.appendChild(new Element("a")
 									.addClass("nav-link dropdown-toggle")
 									.attr("href", "#")
-									.attr("data-toggle", "dropdown")
+									.attr("data-bs-toggle", "dropdown")
 									.attr("aria-haspopup", "true")
 									.attr("aria-expanded", "false")
 									.appendChild(new Element("span")
