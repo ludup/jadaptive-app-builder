@@ -7,12 +7,13 @@ $(document).ready(function() {
         
     	var form = $('form');
     	var url = form.attr('action');
-    
+
         JadaptiveUtils.startAwesomeSpin($('#saveButton i'), 'fa-save');
+
     	$.ajax({
            type: "POST",
            url: url,
-           data: form.serialize(),
+           data: JadaptiveUtils.serializeForm(form),
            success: function(data)
            {
            	   if(data.success) {

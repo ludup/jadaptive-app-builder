@@ -10,13 +10,10 @@ $(document).ready(function() {
     
         JadaptiveUtils.startAwesomeSpin($('#saveButton i'), 'fa-save');
         
-        $('.multipleSearchTarget option').prop('selected', true);
-    	$('.multipleSelectTarget option').prop('selected', true);
-        
     	$.ajax({
            type: "POST",
            url: url,
-           data: form.serialize(),
+           data: JadaptiveUtils.serializeForm(form),
            success: function(data)
            {
                if(data.redirect) {

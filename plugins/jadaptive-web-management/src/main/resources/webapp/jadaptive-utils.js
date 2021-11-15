@@ -59,5 +59,17 @@ checkBlank: function(elements) {
 		}
 	});
 	return !empty;
-}
+},
+serializeForm: function(form) {
+	form.find('.multipleSearchTarget option').prop('selected', true);
+    form.find('.multipleSelectTarget option').prop('selected', true);
+	form.find('.multipleTextTarget option').prop('selected', true);
+	
+    var results = form.serialize();
+
+	form.find('.multipleSearchTarget option').prop('selected', false);
+    form.find('.multipleSelectTarget option').prop('selected', false);
+	form.find('.multipleTextTarget option').prop('selected', false);
+    return results;
+} 
 };

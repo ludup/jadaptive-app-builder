@@ -30,7 +30,7 @@ $(function() {
 		var source = $(this).closest('.multipleTextInput').find('.multipleTextSource');
 		var target = $(this).closest('.multipleTextInput').find('.multipleTextTarget');
 		if(source.val() !== '' && !duplicate(source.val(), target)) {
-			target.append("<option value'" + source.val() + '">' + source.val() + '</option>');
+			target.append('<option value="' + source.val() + '">' + source.val() + '</option>');
 			source.val('');
 		}
 	});
@@ -41,7 +41,7 @@ $(function() {
 			var source = $(this).closest('.multipleTextInput').find('.multipleTextSource');
 			var target = $(this).closest('.multipleTextInput').find('.multipleTextTarget');
 			if(source.val() !== '' && !duplicate(source.val(), target)) {
-				target.append("<option value'" + source.val() + '">' + source.val() + '</option>');
+				target.append('<option value="' + source.val() + '">' + source.val() + '</option>');
 				source.val('');
 			}
 		}
