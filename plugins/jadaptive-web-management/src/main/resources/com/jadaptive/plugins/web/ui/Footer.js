@@ -4,6 +4,7 @@ $(function() {
 		e.preventDefault();
 		$(this).closest(".dropdown").find('input[type="hidden"]').val($(this).data('resourcekey')).change();
 		$(this).closest(".dropdown").find('input[type="text"]').val($(this).text());
+		$(this).closest(".dropdown").find('.jdropdown-text').html($(this).text());
 		$(this).closest(".dropdown").find('.dropdown-menu').removeClass('show');
 	});
 	
@@ -130,4 +131,8 @@ $(function() {
 
 	});
 
+	$('input[name="theme"').on('change', function(e) {
+		document.cookie = "userTheme=" + $(this).val() + '; path=/';
+		window.location.reload();
+	});
 });

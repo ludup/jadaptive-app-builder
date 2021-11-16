@@ -410,4 +410,12 @@ public class Utils {
 	public static List<String> fromCsv(String value) {
 		return new ArrayList<String>(Arrays.asList(value.split(",")));
 	}
+
+	public static int parseIntOrDefault(String value, int defaultValue) {
+		try {
+			return Integer.parseInt(value);
+		} catch(NumberFormatException e) {
+			return 0;
+		}
+	}
 }
