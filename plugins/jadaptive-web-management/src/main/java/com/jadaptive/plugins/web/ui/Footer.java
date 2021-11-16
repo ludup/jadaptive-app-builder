@@ -1,10 +1,10 @@
 package com.jadaptive.plugins.web.ui;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.servlet.http.Cookie;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -61,12 +61,15 @@ public class Footer extends AbstractPageExtension {
 
 	private BootstrapTheme getThemeFromCookie(BootstrapTheme defaultValue) {
 		
-		for(Cookie c : Request.get().getCookies()) {
-			if("userTheme".equals(c.getName())) {
-				if(NumberUtils.isNumber(c.getValue())) {
-					return BootstrapTheme.values()[Utils.parseIntOrDefault(c.getValue(), 0)];
-				} else {
-					return BootstrapTheme.valueOf(c.getValue());
+		Cookie[] cookies = Request.get().getCookies();
+		if(Objects.nonNull(cookies)) {
+			for(Cookie c : cookies) {
+				if("userTheme".equals(c.getName())) {
+					if(NumberUtils.isNumber(c.getValue())) {
+						return BootstrapTheme.values()[Utils.parseIntOrDefault(c.getValue(), 0)];
+					} else {
+						return BootstrapTheme.valueOf(c.getValue());
+					}
 				}
 			}
 		}
