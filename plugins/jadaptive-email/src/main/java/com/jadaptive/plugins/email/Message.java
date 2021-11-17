@@ -24,14 +24,14 @@ public class Message extends NamedUUIDEntity {
 	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
 	String group;
 	
-	@ObjectField(required = true, type = FieldType.TEXT)
+	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
 	String subject;
 	
-	@ObjectField(required = true, type = FieldType.TEXT_AREA)
+	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT_AREA)
 	@ExcludeView(values = FieldView.TABLE)
 	String plainText;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = "htmlTemplates")
 	@ExcludeView(values = FieldView.TABLE)
 	HTMLTemplate htmlTemplate;
 	
