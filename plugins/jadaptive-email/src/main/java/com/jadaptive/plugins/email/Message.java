@@ -4,7 +4,9 @@ import java.util.Collection;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 
@@ -16,6 +18,7 @@ public class Message extends NamedUUIDEntity {
 	public static final String RESOURCE_KEY = "messages";
 	
 	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
+	@ExcludeView(values = FieldView.TABLE)
 	String shortName;
 	
 	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
@@ -25,12 +28,15 @@ public class Message extends NamedUUIDEntity {
 	String subject;
 	
 	@ObjectField(required = true, type = FieldType.TEXT_AREA)
+	@ExcludeView(values = FieldView.TABLE)
 	String plainText;
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE)
+	@ExcludeView(values = FieldView.TABLE)
 	HTMLTemplate htmlTemplate;
 	
 	@ObjectField(type = FieldType.TEXT_AREA)
+	@ExcludeView(values = FieldView.TABLE)
 	String html;
 	
 	@ObjectField(defaultValue = "true", 
@@ -38,9 +44,11 @@ public class Message extends NamedUUIDEntity {
 	boolean enabled = true;
 	
 	@ObjectField(type = FieldType.TEXT)
+	@ExcludeView(values = FieldView.TABLE)
 	String replyToName;
 	
 	@ObjectField(type = FieldType.TEXT)
+	@ExcludeView(values = FieldView.TABLE)
 	String replyToEmail;
 	
 	@ObjectField(defaultValue = "true", 
@@ -48,6 +56,7 @@ public class Message extends NamedUUIDEntity {
 	boolean archive = true;
 	
 	@ObjectField(type = FieldType.TEXT)
+	@ExcludeView(values = FieldView.TABLE)
 	Collection<String> replacementVariables;
 	
 	@Override

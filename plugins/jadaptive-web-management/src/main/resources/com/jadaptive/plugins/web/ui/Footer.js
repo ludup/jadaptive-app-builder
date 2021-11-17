@@ -132,7 +132,7 @@ $(function() {
 	});
 
 	$('input[name="theme"').on('change', function(e) {
-		document.cookie = "userTheme=" + $(this).val() + '; path=/';
+		document.cookie = "userTheme=" + $(this).val() + '; path=/; expires=Tue, 01 Jan 2038 00:00:00 UTC; secure; HttpOnly;';
 		window.location.reload();
 	});
 });

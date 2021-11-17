@@ -18,6 +18,6 @@ body {
     width: 100%;
 }
 
-input[readonly] {
-  background-color:transparent !important;
-}
+/* input[readonly] { */
+/*   background-color:transparent !important; */
+/* } */

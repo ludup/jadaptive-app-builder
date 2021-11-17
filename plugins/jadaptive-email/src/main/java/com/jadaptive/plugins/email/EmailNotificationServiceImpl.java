@@ -39,13 +39,6 @@ import com.jadaptive.api.user.UserUtils;
 public class EmailNotificationServiceImpl extends AuthenticatedService implements EmailNotificationService {
 	
 	private final static List<String> NO_REPLY_ADDRESSES = Arrays.asList("noreply", "no.reply", "no-reply", "no_reply", "do_not_reply", "do.not.reply", "do_not_reply");
-
-	
-//	@Autowired
-//	private EmailTrackerService trackerService; 
-	
-//	@Autowired
-//	private EventService eventService;
 	
 	@Autowired
 	private SingletonObjectDatabase<SMTPConfiguration> smtpDatabase;

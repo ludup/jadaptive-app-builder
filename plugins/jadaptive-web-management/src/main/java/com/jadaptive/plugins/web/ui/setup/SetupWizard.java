@@ -1,9 +1,11 @@
 package com.jadaptive.plugins.web.ui.setup;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -71,7 +73,15 @@ public class SetupWizard extends AbstractWizard<SetupSection> implements WizardF
 	@Override
 	protected Collection<SetupSection> getDefaultSections() {
 		return Arrays.asList(
-				new SetupSection("setup", "eula", "/com/jadaptive/plugins/web/ui/setup/EULA.html", SetupSection.START_OF_DEFAULT),
+				new SetupSection("setup", "eula", "/com/jadaptive/plugins/web/ui/setup/EULA.html", SetupSection.START_OF_DEFAULT) {
+					@Override
+					public void process(Document document, Element element, Page page) throws IOException {
+						document.selectFirst("textarea")
+							.attr("readonly", "readonly")
+							.text(IOUtils.toString(getClass().getResource("EULA.txt"), "UTF-8"));
+						super.process(document, element, page);
+					}
+				},
 				new AdminSection());
 	}
 
