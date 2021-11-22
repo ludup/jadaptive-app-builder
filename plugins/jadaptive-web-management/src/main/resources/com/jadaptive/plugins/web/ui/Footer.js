@@ -12,7 +12,9 @@ $(function() {
 		e.stopPropagation();
 		var el = $(this).closest(".dropdown");
 		el = el.find('.dropdown-toggle');
-		el.dropdown('toggle');
+		const dropdownToggleEl = el[0];
+		const dropdownList = new bootstrap.Dropdown(dropdownToggleEl);
+		dropdownList.toggle();
 	});
 	
 	function duplicate(text, list) {
@@ -114,7 +116,9 @@ $(function() {
 				$.each(data.rows, function(idx, obj) {
 					createItem(menu, obj[id], obj[field], selectionClass);
 				});
-				toggle.dropdown('toggle');
+				const dropdownToggleEl = toggle[0];
+				const dropdownList = new bootstrap.Dropdown(dropdownToggleEl);
+				dropdownList.show();
 			}
 			
 			

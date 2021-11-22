@@ -48,6 +48,7 @@ public class MultipleSearchFormInput {
 							.attr("data-display", "static")
 							.addClass("form-control multipleSearchInputText")
 							.attr("data-bs-toggle", "dropdown")
+							.attr("autocomplete", "off")
 							.attr("data-url", url)
 							.attr("data-field", searchField)
 							.attr("data-id", idField)

@@ -203,7 +203,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 							int length, String sortBy)
 							throws UnauthorizedException,
 							AccessDeniedException {
-						return entityService.table(resourceKey, searchColumn, searchPattern, offset, limit);
+ 						return entityService.table(resourceKey, searchColumn, searchPattern, offset, limit);
 					}
 
 					@Override

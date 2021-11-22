@@ -52,7 +52,7 @@ public class DropdownFormInput extends FieldInputRender {
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false"))
 					.appendChild(new Element("span")
-										.attr("class", ".jdropdown input-group-text")
+										.attr("class", "jdropdown input-group-text")
 									.appendChild(new Element("i")
 											.attr("class", "fas fa-chevron-down"))))
 				.appendChild(new Element("small")

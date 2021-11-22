@@ -43,7 +43,9 @@ public class BootstrapTableController<T> extends AuthenticatedController {
 		
 		if(request.getParameter("search") != null) {
 			searchPattern = request.getParameter("search");
-		} 
+		} else if(request.getParameter("searchValue") != null) {
+			searchPattern = request.getParameter("searchValue");
+		}  
 		
 		if(request.getParameter("searchField") != null) {
 			searchColumn = request.getParameter("searchField");

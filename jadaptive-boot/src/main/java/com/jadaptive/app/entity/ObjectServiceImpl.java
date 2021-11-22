@@ -356,7 +356,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	private SearchField[] generateSearchFields(String searchField, String searchValue, SearchField... additional) {
 		List<SearchField> fields = new ArrayList<>();
 		if(StringUtils.isNotNullOrEmpty(searchValue)) {
-			fields.add(SearchField.eq(searchField, searchValue));
+			fields.add(SearchField.like(searchField, searchValue));
 		}
 		fields.addAll(Arrays.asList(additional));
 		return fields.toArray(new SearchField[0]);
