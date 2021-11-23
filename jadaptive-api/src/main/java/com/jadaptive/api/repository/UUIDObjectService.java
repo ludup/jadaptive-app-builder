@@ -8,5 +8,7 @@ public interface UUIDObjectService<T extends UUIDDocument> {
 
 	void deleteObject(T object);
 	
+	void deleteObjectByUUID(String uuid);
+	
 	Iterable<T> allObjects();
 }

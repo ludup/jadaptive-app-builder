@@ -170,5 +170,10 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 		objectDatabase.delete((BuiltinUser)user);
 		
 	}
+	
+	@Override
+	public void deleteObjectByUUID(String uuid) {
+		deleteObject(getObjectByUUID(uuid));
+	}
 
 }

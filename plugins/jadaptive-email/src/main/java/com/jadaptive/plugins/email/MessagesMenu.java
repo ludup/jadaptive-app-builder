@@ -8,7 +8,7 @@ import org.pf4j.Extension;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
-@Extension
+//@Extension
 public class MessagesMenu implements ApplicationMenu {
 
 	@Override

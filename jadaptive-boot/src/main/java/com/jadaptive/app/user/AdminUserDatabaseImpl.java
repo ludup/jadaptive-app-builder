@@ -116,5 +116,8 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 		objectDatabase.delete((AdminUser)object);
 	}
 
-
+	@Override
+	public void deleteObjectByUUID(String uuid) {
+		deleteObject(getObjectByUUID(uuid));
+	}
 }

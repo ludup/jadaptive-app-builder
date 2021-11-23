@@ -114,9 +114,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		permissionService.assertRead(resourceKey);
 		
 		ObjectTemplate template = templateService.get(resourceKey);
-		if(template.getType()!=ObjectType.COLLECTION) {
-			throw new ObjectException(String.format("%s is not a collection entity", resourceKey));
-		}
 
 		AbstractObject e = entityRepository.getById(template, uuid);
 		if(!resourceKey.equals(e.getResourceKey()) && !template.getChildTemplates().contains(e.getResourceKey())) {
@@ -249,11 +246,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new ObjectException("You cannot delete a Singleton Entity");
 		}
 		
-		AbstractObject e = get(resourceKey, uuid);
-		if(e.isSystem()) {
-			throw new ObjectException("You cannot delete a system object");
-		}
-		
 		try {
 			
 			if(classService.hasTemplateClass(template)) {
@@ -261,13 +253,23 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				ObjectServiceBean annotation = clz.getAnnotation(ObjectServiceBean.class);
 				if(Objects.nonNull(annotation)) {
 					UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-					bean.deleteObject(DocumentHelper.convertDocumentToObject(clz, 
-							new Document(e.getDocument())));
+					
+					UUIDDocument obj = bean.getObjectByUUID(uuid);
+					if(obj.isSystem()) {
+						throw new ObjectException("You cannot delete a system object");
+					}
+					bean.deleteObjectByUUID(uuid);
 					return;
 				}
 			} 
-			
+			AbstractObject e = get(resourceKey, uuid);
+			if(e.isSystem()) {
+				throw new ObjectException("You cannot delete a system object");
+			}
 			entityRepository.deleteByUUIDOrAltId(template, uuid);
+			
+			
+			
 			
 			
 		} catch(RepositoryException | ObjectException ex) {

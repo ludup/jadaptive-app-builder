@@ -78,4 +78,9 @@ public abstract class PasswordEnabledUserDatabaseImpl
 		setPassword(user, user.getEncodedPassword().toCharArray(), user.getPasswordChangeRequired());
 		return user.getUuid();
 	}
+	
+	@Override
+	public void deleteObjectByUUID(String uuid) {
+		deleteObject(getObjectByUUID(uuid));
+	}
 }

@@ -391,4 +391,9 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		cfg.setSetupComplete(true);
 		systemConfig.saveObject(cfg);
 	}
+	
+	@Override
+	public void deleteObjectByUUID(String uuid) {
+		deleteObject(getObjectByUUID(uuid));
+	}
 }

@@ -8,7 +8,7 @@ import org.pf4j.Extension;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
-@Extension
+//@Extension
 public class HTMLTemplatesMenu implements ApplicationMenu {
 
 	@Override
@@ -33,7 +33,7 @@ public class HTMLTemplatesMenu implements ApplicationMenu {
 
 	@Override
 	public String getIcon() {
-		return "html5";
+		return "file-code";
 	}
 
 	@Override

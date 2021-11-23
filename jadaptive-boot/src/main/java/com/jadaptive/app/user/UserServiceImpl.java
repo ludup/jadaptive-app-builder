@@ -287,5 +287,10 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public String getResourceKey() {
 		return "users";
 	}
+	
+	@Override
+	public void deleteObjectByUUID(String uuid) {
+		deleteObject(getObjectByUUID(uuid));
+	}
 
 }
