@@ -28,25 +28,48 @@ $(function() {
 		return found;
 	};
 	
-	$(document).on('click', '.multipleTextAdd', function(e) {
-		e.stopPropagation();
-		var source = $(this).closest('.multipleTextInput').find('.multipleTextSource');
-		var target = $(this).closest('.multipleTextInput').find('.multipleTextTarget');
+	function addTag(_this) {
+		var source = _this.closest('.multipleTagInput').find('.multipleTagSource');
+		var target = _this.closest('.multipleTagInput').find('.multipleTagTarget');
+		if(source.val() !== '' && !duplicate(source.val(), target)) {
+			target.append('<option class="badge bg-primary me-3" value="' + source.val()
+				 + '" class="me-1"><span class="pe-1">' + source.val() + '</span><a href="#" class="jadaptive-tag text-light"><i class="far fa-times"></i></a></option>');
+			source.val('');
+		}
+	}
+	
+	function addText(_this) {
+		var source = _this.closest('.multipleTextInput').find('.multipleTextSource');
+		var target = _this.closest('.multipleTextInput').find('.multipleTextTarget');
 		if(source.val() !== '' && !duplicate(source.val(), target)) {
 			target.append('<option value="' + source.val() + '">' + source.val() + '</option>');
 			source.val('');
 		}
+	}
+	
+	$(document).on('click', '.multipleTextAdd', function(e) {
+		e.stopPropagation();
+		addText($(this));
+	});
+	
+	$(document).on('click', '.multipleTagAdd', function(e) {
+		e.stopPropagation();
+		addTag($(this));
 	});
 	
 	$(document).on('keyup', '.multipleTextSource', function(e) {
-		e.stopPropagation();
+		
 		if (e.keyCode === 13) {
-			var source = $(this).closest('.multipleTextInput').find('.multipleTextSource');
-			var target = $(this).closest('.multipleTextInput').find('.multipleTextTarget');
-			if(source.val() !== '' && !duplicate(source.val(), target)) {
-				target.append('<option value="' + source.val() + '">' + source.val() + '</option>');
-				source.val('');
-			}
+			e.stopPropagation();
+			addText($(this));
+		}
+	});
+	
+	$(document).on('keyup', '.multipleTagSource', function(e) {
+		
+		if (e.keyCode === 13) {
+			e.stopPropagation();
+			addTag($(this));
 		}
 	});
 	
@@ -138,5 +161,10 @@ $(function() {
 	$('input[name="theme"').on('change', function(e) {
 		document.cookie = "userTheme=" + $(this).val() + '; path=/; expires=Tue, 01 Jan 2038 00:00:00 UTC;';
 		window.location.reload();
+	});
+	
+	$('.jadaptive-tag').on('click', function() {
+		debugger;
+		$(this).parents().find('option').remove();
 	});
 });

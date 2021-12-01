@@ -61,7 +61,7 @@ public abstract class AbstractJobRunner implements Runnable {
 			beforeJobStarts(startedExecution);
 			
 			TaskResult result = taskService.getTaskImplementation(task).doTask(task);
-			//eventService.publishEvent(result);
+			eventService.publishEvent(result);
 
 			afterJobComplete(startedExecution, new Date(), task);
 			

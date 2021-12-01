@@ -61,7 +61,7 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 										.attr("id", field.getFormVariable())
 										.attr("size", "10")
 										.attr("multiple", "mulitple")
-										.addClass("w-100 multipleSelectTarget"))))));
+										.addClass("w-100 multipleSelectTarget jadaptive-select"))))));
 
 		
 		for(String value : availableValues) {

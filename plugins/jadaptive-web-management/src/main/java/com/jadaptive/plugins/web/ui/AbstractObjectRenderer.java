@@ -45,6 +45,7 @@ import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleTextFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
+import com.jadaptive.api.ui.renderers.form.MultipleTagsFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimestampFormInput;
@@ -340,11 +341,27 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			break;
 		case TEXT:
 		{
-			MultipleTextFormInput render = new MultipleTextFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(panel, element, 
-					Objects.nonNull(obj) ? 
-							obj.getCollection(field.getResourceKey()) 
-							: Collections.emptyList());
+			switch(orderedField.getRenderer()) {
+			case TAGS:
+			{
+				MultipleTagsFormInput render = new MultipleTagsFormInput(currentTemplate.get(), orderedField);
+				render.renderInput(panel, element, Objects.nonNull(obj) ? 
+						obj.getCollection(field.getResourceKey()) 
+						: Collections.emptyList());
+				break;
+			}
+			default:
+			{
+				MultipleTextFormInput render = new MultipleTextFormInput(currentTemplate.get(), orderedField);
+				render.renderInput(panel, element, 
+						Objects.nonNull(obj) ? 
+								obj.getCollection(field.getResourceKey()) 
+								: Collections.emptyList());
+				break;
+			}
+			}
+			
+
 			break;
 		}
 		case TEXT_AREA:
@@ -380,8 +397,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case TEXT:
 		{
-			TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(panel, element, getFieldValue(orderedField, obj));
+			switch(orderedField.getRenderer()) {
+			default:
+			{
+				TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
+				render.renderInput(panel, element, getFieldValue(orderedField, obj));
+				break;
+			}
+			}
 			break;
 		}
 		case TEXT_AREA:

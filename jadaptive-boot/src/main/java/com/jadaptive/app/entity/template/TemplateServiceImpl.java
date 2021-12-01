@@ -354,13 +354,20 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				continue;
 			}
 			
-			if(Objects.isNull(v) || StringUtils.isBlank(v.value())) {
+			if(Objects.isNull(v)) { 
+				OrderedView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
+				if(Objects.isNull(o)) {
+					throw new IllegalStateException(
+							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", field.getResourceKey()));
+				}
+				o.addField(new OrderedField(null, o, field, objectPath));				
+			} else if(StringUtils.isBlank(v.value())) {
 				OrderedView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
 				if(Objects.isNull(o)) {
 					throw new IllegalStateException(
 							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
 				}
-				o.addField(new OrderedField(null, o, field, objectPath));
+				o.addField(new OrderedField(v, o, field, objectPath));
 			} else {
 				OrderedView o = views.get(disableViews ? null : v.value());
 				if(Objects.isNull(o)) {

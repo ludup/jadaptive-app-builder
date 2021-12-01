@@ -35,7 +35,6 @@ public @interface ObjectField {
 		
 		String formVariable() default "";
 		
-		@Deprecated
 		String references() default "";
 
 //		// USER INTERFACE PROPERTIES

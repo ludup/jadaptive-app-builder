@@ -71,7 +71,7 @@ public class MultipleSearchFormInput {
 									.attr("size", "10")
 									.attr("name", field.getFormVariable())
 									.attr("multiple", "mulitple")
-									.addClass("w-100 multipleSearchTarget"))))
+									.addClass("w-100 multipleSearchTarget jadaptive-select"))))
 					.appendChild(new Element("div")
 							.addClass("row")
 						.appendChild(new Element("div")
