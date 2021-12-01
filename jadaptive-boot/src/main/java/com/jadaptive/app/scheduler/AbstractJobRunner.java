@@ -30,8 +30,8 @@ public abstract class AbstractJobRunner implements Runnable {
 	@Autowired
 	private TaskService taskService; 
 	
-	@Autowired
-	private EventService eventService; 
+//	@Autowired
+//	private EventService eventService; 
 	
 	@Autowired
 	private TenantService tenantService; 
@@ -61,7 +61,7 @@ public abstract class AbstractJobRunner implements Runnable {
 			beforeJobStarts(startedExecution);
 			
 			TaskResult result = taskService.getTaskImplementation(task).doTask(task);
-			eventService.publishEvent(result);
+//			eventService.publishEvent(result);
 
 			afterJobComplete(startedExecution, new Date(), task);
 			
