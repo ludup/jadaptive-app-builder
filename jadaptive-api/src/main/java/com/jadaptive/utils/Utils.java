@@ -36,6 +36,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriUtils;
 
 public class Utils {
 
@@ -375,7 +376,7 @@ public class Utils {
 	}
 
 	public static String encodeURIPath(String url) {
-		return url.replace(" ", "%20");
+		return UriUtils.encodePath(url, "UTF-8");
 	}
 
 	public static Date thirtyDays() {
