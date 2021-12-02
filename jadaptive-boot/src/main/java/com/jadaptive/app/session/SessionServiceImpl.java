@@ -2,6 +2,7 @@ package com.jadaptive.app.session;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +97,7 @@ public class SessionServiceImpl implements SessionService {
 	@Override
 	public void touch(Session session) {
 		if(session.isReadyForUpdate()) {
-			log.info("REMOVEME: Touching " + session.getId() + " " + session.getLastUpdated().toString());
+			log.info("REMOVEME: Touching " + session.getId() + " " + (Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : ""));
 			session.setLastUpdated(new Date());
 			repository.saveOrUpdate(session);
 		}
