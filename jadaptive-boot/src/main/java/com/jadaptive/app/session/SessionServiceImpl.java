@@ -96,6 +96,7 @@ public class SessionServiceImpl implements SessionService {
 	@Override
 	public void touch(Session session) {
 		if(session.isReadyForUpdate()) {
+			log.info("REMOVEME: Touching " + session.getId());
 			session.setLastUpdated(new Date());
 			repository.saveOrUpdate(session);
 		}

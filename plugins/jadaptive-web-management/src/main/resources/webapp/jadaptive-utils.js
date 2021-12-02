@@ -60,6 +60,13 @@ checkBlank: function(elements) {
 	});
 	return !empty;
 },
+toggleDropdown: function(element) {
+	var el = element.closest(".dropdown");
+		el = el.find('.dropdown-toggle');
+		const dropdownToggleEl = el[0];
+		const dropdownList = new bootstrap.Dropdown(dropdownToggleEl);
+		dropdownList.toggle();	
+},
 serializeForm: function(form) {
 	form.find('.jadaptive-select option').prop('selected', true);
     var results = form.serialize();
