@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 
@@ -57,16 +58,7 @@ public class SessionUtils {
 		permissionService.setupSystemContext();
 		
 		try {
-			if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
-				session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
-			} else if(request.getHeader(SESSION_COOKIE) != null) {
-				session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
-			}
-			
-			if (session != null && sessionService.isLoggedOn(session, true)) {
-				return verifySameSiteRequest(request, session);
-			}
-			
+
 			if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
 				session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
 				if(sessionService.isLoggedOn(session, true)) {
@@ -80,6 +72,16 @@ public class SessionUtils {
 				if(sessionService.isLoggedOn(session, true)) {
 					return verifySameSiteRequest(request, session);
 				}
+			}
+			
+			if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
+				session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
+			} else if(request.getHeader(SESSION_COOKIE) != null) {
+				session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
+			}
+			
+			if (session != null && sessionService.isLoggedOn(session, true)) {
+				return verifySameSiteRequest(request, session);
 			}
 			
 			if(Objects.nonNull(request.getCookies())) {
@@ -103,33 +105,7 @@ public class SessionUtils {
 	}
 
 	public Session touchSession(HttpServletRequest request,
-			HttpServletResponse response) throws UnauthorizedException,
-			SessionTimeoutException {
-
-		Session session = null;
-		
-		if (request.getSession().getAttribute(AUTHENTICATED_SESSION) == null) {
-			if (log.isDebugEnabled()) {
-				log.debug("Session object not attached to HTTP session");
-			}
-			session = getActiveSession(request);
-			if (session == null) {
-				if (log.isDebugEnabled()) {
-					log.debug("No session attached to request");
-				}
-				throw new UnauthorizedException();
-			}
-			if (!sessionService.isLoggedOn(session, true)) {
-				throw new SessionTimeoutException();
-			}
-		} else {
-			session = (Session) request.getSession().getAttribute(
-					AUTHENTICATED_SESSION);
-			if (!sessionService.isLoggedOn(session, true)) {
-				throw new UnauthorizedException();
-			}
-		}
-
+			HttpServletResponse response, Session session) {
 
 		// Preserve the session for future lookups in this request and session
 		request.setAttribute(AUTHENTICATED_SESSION, session);
@@ -184,7 +160,7 @@ public class SessionUtils {
 				}
 			}
 		}
-
+		
 		throw new UnauthorizedException();
 	}
 
@@ -206,6 +182,8 @@ public class SessionUtils {
 //			debugRequest(request);
 //			return null;
 //		}
+		
+		touchSession(request, Request.response(), session);
 
 		return session;
 	}
@@ -287,6 +265,10 @@ public class SessionUtils {
 	public void addSessionCookies(HttpServletRequest request,
 			HttpServletResponse response, Session session) {
 
+		if(Boolean.TRUE.equals(request.getAttribute("processedCookies"))) {
+			return;
+		}
+		
 		Cookie cookie = new Cookie(SESSION_COOKIE, session.getUuid());
 		cookie.setMaxAge((session.getSessionTimeout() > 0 ? 60 * session.getSessionTimeout() : Integer.MAX_VALUE));
 		if(request.getProtocol().equalsIgnoreCase("https")) {
@@ -303,6 +285,8 @@ public class SessionUtils {
 		cookie.setSecure(request.getProtocol().equalsIgnoreCase("https"));
 		cookie.setPath("/");
 		response.addCookie(cookie);
+		
+		request.setAttribute("processedCookies", Boolean.TRUE);
 	
 	}
 

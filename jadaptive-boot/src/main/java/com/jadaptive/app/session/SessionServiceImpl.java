@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionService;
@@ -97,7 +98,7 @@ public class SessionServiceImpl implements SessionService {
 	@Override
 	public void touch(Session session) {
 		if(session.isReadyForUpdate()) {
-			log.info("REMOVEME: Touching " + session.getId() + " " + (Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : ""));
+			log.info("REMOVEME: Touching " + session.getId() + " " + (Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : "") + " timeout=" + session.getSessionTimeout());
 			session.setLastUpdated(new Date());
 			repository.saveOrUpdate(session);
 		}
@@ -106,6 +107,8 @@ public class SessionServiceImpl implements SessionService {
 	@Override
 	public void closeSession(Session session) {
 
+		log.info("REMOVEME: Closing " + session.getId() + " " + (Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : "") + " timeout=" + session.getSessionTimeout());
+		
 		if (session.getSignedOut() != null) {
 			log.error("Attempting to close a session which is already closed!");
 			return;

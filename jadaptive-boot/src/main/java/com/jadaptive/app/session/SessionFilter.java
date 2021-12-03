@@ -37,7 +37,9 @@ import com.jadaptive.api.redirect.Redirect;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
@@ -130,8 +132,13 @@ public class SessionFilter implements Filter {
 		try {
 			Request.setUp(request, response);
 			
-			Session session = sessionUtils.getActiveSession(request);
+			Session session = null;
 			
+			try {
+				session = sessionUtils.getSession(request);
+			} catch (UnauthorizedException | SessionTimeoutException e) {
+			}
+//			
 			/**
 			 * Get the security.properties hierarchy from the web application
 			 */

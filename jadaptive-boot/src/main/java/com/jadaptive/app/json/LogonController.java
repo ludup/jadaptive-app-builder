@@ -121,15 +121,13 @@ public class LogonController {
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus touchSession(HttpServletRequest request, HttpServletResponse response)  {
 
-		try {
-			Session session = sessionUtils.getSession(request);
-			if(!sessionService.isLoggedOn(session, true)) {
-				return new RequestStatusImpl(false, "Session closed");
-			}
-			
-			return new RequestStatusImpl(true, "");
-		} catch(UnauthorizedException | SessionTimeoutException e) {
-			return new RequestStatusImpl(false, e.getMessage());
+
+		Session session = sessionUtils.getActiveSession(request);
+		if(!sessionService.isLoggedOn(session, true)) {
+			return new RequestStatusImpl(false, "Session closed");
 		}
+		
+		return new RequestStatusImpl(true, "");
+
 	}
 }

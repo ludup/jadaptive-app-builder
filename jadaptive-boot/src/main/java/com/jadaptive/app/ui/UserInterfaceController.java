@@ -26,7 +26,9 @@ import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageExtension;
@@ -47,8 +49,14 @@ public class UserInterfaceController extends AuthenticatedController {
 	@ResponseBody
 	public RequestStatus verifySession(HttpServletRequest request, HttpServletResponse response)  {
 
-		Session session = sessionUtils.getActiveSession(request);
-		return new RequestStatusImpl(session!=null);
+		Session session;
+		try {
+			session = sessionUtils.getSession(request);
+			return new RequestStatusImpl(session!=null);
+		} catch (UnauthorizedException | SessionTimeoutException e) {
+			return new RequestStatusImpl(false);
+		}
+		
 	}
 	
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.GET)
