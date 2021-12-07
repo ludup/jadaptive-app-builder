@@ -100,7 +100,7 @@ var UploadWidget = {
 				}
 			}			
 			if($('.file-input').length <= 1) {
-				$(_self._options.feedbackDiv).prepend('<p class="alert alert-danger">There are no files selected!</p>');
+				$(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="far fa-exclamation-circle"></i> There are no files selected!</p>');
 				return;
 			}
 			$('.file-input').last().remove();
@@ -112,8 +112,10 @@ var UploadWidget = {
 				_self._options.callback(fd);
 			}
 			
+			var countFiles = 0;
 			$('.file-input').each(function(idx, file) {
 				fd.append('file', this.files[0]);
+				countFiles++;
 			});
 		    
 			$('#progressBar').css("width", 0).attr('aria-valuenow', "0");
@@ -131,18 +133,16 @@ var UploadWidget = {
 		           {
 		        	   if(data.success) {
 					       
-						   setTimeout(function() {
-							
+							$(_self._options.feedbackDiv).prepend('<p class="alert alert-success"><i class="far fa-check"></i> The upload of ' + countFiles + ' file(s) completed.</p>');
 							JadaptiveUtils.stopAwesomeSpin($('#uploadButton i'), 'fa-upload');
-							_self.reset();
+							
 							
 							if(_self._options.successUrl) {
 								window.location = _self._options.successUrl;
 							}
-						   }, 2000);
-		        		   
+ 
 		        	   } else {
-		        		   $(_self._options.feedbackDiv).prepend('<p class="alert alert-danger">' + data.message + '</p>');
+		        		   $(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="far fa-exclamation-circle"></i> ' + data.message + '</p>');
 							_self.clearFiles();
 		        	   }
 		           },
