@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jadaptive</groupId>
 	<artifactId>jadaptive</artifactId>
-	<version>0.1.4-SNAPSHOT</version>
+	<version>0.1.4</version>
 	<url>https://jadaptive.com</url>
 	<packaging>pom</packaging>
 	<name>JADAPTIVE - Group POM</name>
