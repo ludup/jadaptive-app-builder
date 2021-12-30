@@ -95,7 +95,7 @@ public class SessionUtils {
 				}
 			}
 			
-		} catch(ObjectNotFoundException e) { 
+		} catch(UnauthorizedException | ObjectNotFoundException e) { 
 
 		} finally {
 			permissionService.clearUserContext();

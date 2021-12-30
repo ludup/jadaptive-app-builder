@@ -13,7 +13,7 @@ public interface SessionService {
 
 	Session createSession(Tenant S, User user, String remoteAddress, String userAgent);
 
-	Session getSession(String uuid);
+	Session getSession(String uuid) throws UnauthorizedException;
 
 	Iterable<Session> iterateSessions();
 

@@ -501,6 +501,10 @@ public class DocumentHelper {
 		
 	}
 
+	public static void registerClassNameChange(String from, String to) {
+		classNameChanges.put(from, to);
+	}
+	
 	public static String processClassNameChanges(String clz, ClassLoader classLoader) {
 		
 		String change = classNameChanges.get(clz);

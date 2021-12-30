@@ -3,8 +3,6 @@ package com.jadaptive.plugins.email;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.pf4j.Extension;
-
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 

@@ -12,12 +12,13 @@ public class SystemEvent<T> implements Serializable {
 	String resourceKey;
 	String group;
 	public SystemEvent(String resourceKey, String group) {
-		this(resourceKey, System.currentTimeMillis());
+		this(resourceKey, group, System.currentTimeMillis());
 	}
 	
-	public SystemEvent(String resourceKey, long timestamp) {
+	public SystemEvent(String resourceKey, String group, long timestamp) {
 		this.timestamp = timestamp;
 		this.resourceKey = resourceKey;
+		this.group = group;
 	}
 
 	public String getResourceKey() {

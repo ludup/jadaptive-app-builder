@@ -13,6 +13,7 @@ import com.jadaptive.api.jobs.JobRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.tasks.Task;
 import com.jadaptive.api.tasks.TaskResult;
+import com.jadaptive.api.tasks.TaskResultEvent;
 import com.jadaptive.api.tasks.TaskService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
@@ -30,8 +31,8 @@ public abstract class AbstractJobRunner implements Runnable {
 	@Autowired
 	private TaskService taskService; 
 	
-//	@Autowired
-//	private EventService eventService; 
+	@Autowired
+	private EventService eventService; 
 	
 	@Autowired
 	private TenantService tenantService; 
@@ -61,7 +62,7 @@ public abstract class AbstractJobRunner implements Runnable {
 			beforeJobStarts(startedExecution);
 			
 			TaskResult result = taskService.getTaskImplementation(task).doTask(task);
-//			eventService.publishEvent(result);
+			eventService.publishEvent(new TaskResultEvent(result));
 
 			afterJobComplete(startedExecution, new Date(), task);
 			

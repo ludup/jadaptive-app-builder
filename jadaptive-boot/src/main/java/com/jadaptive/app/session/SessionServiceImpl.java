@@ -12,10 +12,11 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionService;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
@@ -120,8 +121,12 @@ public class SessionServiceImpl implements SessionService {
 	}
 
 	@Override
-	public Session getSession(String uuid) {
+	public Session getSession(String uuid) throws UnauthorizedException {
+		try {
 		return repository.get(uuid, Session.class);
+		} catch(ObjectNotFoundException e) {
+			throw new UnauthorizedException();
+		}
 	}
 
 	@Override

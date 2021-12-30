@@ -5,7 +5,7 @@ import com.jadaptive.api.events.CustomEvent;
 import com.jadaptive.api.template.ObjectDefinition;
 
 @ObjectDefinition(recurse = false, resourceKey = "taskResult", type = ObjectType.OBJECT)
-public class TaskResult extends CustomEvent {
+public abstract class TaskResult extends CustomEvent {
 
 	private static final long serialVersionUID = 5269923561715448655L;
 
@@ -16,4 +16,7 @@ public class TaskResult extends CustomEvent {
 	public TaskResult(String resourceKey) {
 		super(resourceKey);
 	}
+	
+
+	public abstract String getEventGroup();
 }

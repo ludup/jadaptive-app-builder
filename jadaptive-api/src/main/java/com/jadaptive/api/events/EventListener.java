@@ -1,6 +1,6 @@
 package com.jadaptive.api.events;
 
-public interface EventListener {
+public interface EventListener<T> {
 
-	void onEvent(SystemEvent<?> evt);
+	void onEvent(T evt);
 }
