@@ -11,6 +11,6 @@ public interface EventService {
 	<T extends UUIDEntity> void deleted(Class<T> clz, EventListener<UUIDEntityDeletedEvent<T>> handler);
 	
 	
-	void publishEvent(SystemEvent<?> evt);
+	void publishEvent(SystemEvent evt);
 
 }

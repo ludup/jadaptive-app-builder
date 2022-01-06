@@ -12,7 +12,7 @@ public class TriggerServiceImpl extends AuthenticatedService implements TriggerS
 
 	@EventListener
 	@Override
-	public void onAuditEvent(SystemEvent<?> evt) {
+	public void onAuditEvent(SystemEvent evt) {
 		
 		//System.out.println("Processing audit event " + evt.getResourceKey());
 	}

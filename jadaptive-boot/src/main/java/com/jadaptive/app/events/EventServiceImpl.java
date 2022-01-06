@@ -37,7 +37,7 @@ public class EventServiceImpl implements EventService {
 	
 	@SuppressWarnings("rawtypes")
 	@Override
-	public void publishEvent(SystemEvent<?> evt) {
+	public void publishEvent(SystemEvent evt) {
 	
 		for(EventListener listener : eventListeners) {
 			fireEvent(listener, evt);
@@ -52,7 +52,7 @@ public class EventServiceImpl implements EventService {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void fireEvent(EventListener listener, SystemEvent<?> evt) {
+	private void fireEvent(EventListener listener, SystemEvent evt) {
 		if(evt.async()) {
 			eventExecutor.execute(() -> listener.onEvent(evt));
 		} else {

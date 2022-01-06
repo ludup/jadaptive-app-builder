@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.jadaptive.api.repository.JadaptiveIgnore;
 
-public class SystemEvent<T> implements Serializable {
+public class SystemEvent implements Serializable {
 
 	private static final long serialVersionUID = 4068966863055480029L;
 

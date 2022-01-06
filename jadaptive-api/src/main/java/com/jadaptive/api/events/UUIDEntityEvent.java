@@ -2,7 +2,7 @@ package com.jadaptive.api.events;
 
 import com.jadaptive.api.repository.UUIDEntity;
 
-public class UUIDEntityEvent<T extends UUIDEntity> extends SystemEvent<T> {
+public class UUIDEntityEvent<T extends UUIDEntity> extends SystemEvent {
 
 	private static final long serialVersionUID = 6015292582999672923L;
 
