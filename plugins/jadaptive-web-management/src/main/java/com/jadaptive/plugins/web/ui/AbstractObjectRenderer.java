@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -22,6 +23,7 @@ import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldView;
@@ -35,17 +37,17 @@ import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.NamePairValue;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.renderers.form.BooleanFormInput;
+import com.jadaptive.api.ui.renderers.form.BootstrapBadgeRender;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
-import com.jadaptive.api.ui.renderers.form.HiddenFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
+import com.jadaptive.api.ui.renderers.form.MultipleTagsFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleTextFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
-import com.jadaptive.api.ui.renderers.form.MultipleTagsFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimestampFormInput;
@@ -69,6 +71,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	
 	@Autowired
 	private ObjectService objectService; 
+	
+	@Autowired
+	private I18nService i18nService; 
 	
 	protected ThreadLocal<Document> currentDocument = new ThreadLocal<>();
 	protected ThreadLocal<ObjectTemplate> currentTemplate = new ThreadLocal<>();
@@ -153,7 +158,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			case OBJECT_EMBEDDED:
 				AbstractObject child = object.getChild(field);
 				children.put(field.getResourceKey(), child);
-				extractChildObjects(child, children, templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY)));
+				ObjectTemplate childTemplate = templateService.get(templateService.getTemplateResourceKey((String)child.getValue("_clz")));
+				extractChildObjects(child, children, childTemplate);
 				break;
 			case OBJECT_REFERENCE:
 				// Do we need this?
@@ -390,14 +396,22 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 		switch(field.getFieldType()) {
 		case HIDDEN:
-		{
-			HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(panel, element, getFieldValue(orderedField, obj));
-			break;
-		}
 		case TEXT:
 		{
 			switch(orderedField.getRenderer()) {
+			case BOOTSTRAP_BADGE:
+			{
+				BootstrapBadgeRender render = new BootstrapBadgeRender(currentTemplate.get(), orderedField);
+				render.renderInput(panel, element, getFieldValue(orderedField, obj));
+				break;
+			}
+			case I18N:
+			{
+				String i18nValue = i18nService.format(currentTemplate.get().getBundle(), Locale.getDefault(), getFieldValue(orderedField, obj));
+				TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
+				render.renderInput(panel, element, i18nValue);
+				break;
+			}
 			default:
 			{
 				TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
@@ -414,6 +428,13 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			{
 				HtmlEditorFormInput render = new HtmlEditorFormInput(currentTemplate.get(), orderedField, currentDocument.get());
 				render.renderInput(panel, element, getFieldValue(orderedField, obj));
+				break;
+			}
+			case I18N:
+			{
+				String i18nValue = i18nService.format(panel.getBundle(), Locale.getDefault(), getFieldValue(orderedField, obj));
+				TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), orderedField);
+				render.renderInput(panel, element, i18nValue);
 				break;
 			}
 			default:

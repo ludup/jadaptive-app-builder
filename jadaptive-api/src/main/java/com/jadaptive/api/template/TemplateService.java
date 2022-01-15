@@ -45,4 +45,6 @@ public interface TemplateService {
 
 	String getTemplateResourceKey(Class<?> clz);
 
+	String getTemplateResourceKey(String clz);
+
 }

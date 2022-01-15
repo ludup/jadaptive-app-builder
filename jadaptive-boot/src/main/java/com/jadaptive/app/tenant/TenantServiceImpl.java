@@ -64,7 +64,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	Map<String,Tenant> tenantsByUUID = new HashMap<>();
 	
 	boolean setupMode = false;
-	
+	boolean ready = false;
 	@EventListener
 	public void onApplicationStartup(ApplicationReadyEvent evt) {
 		
@@ -88,6 +88,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				}
 			}	
 			
+			this.ready = true;
 			
             List<StartupAware> startups = new ArrayList<>(applicationService.getBeans(StartupAware.class));
             Collections.<StartupAware>sort(startups, new Comparator<StartupAware>() {
@@ -105,6 +106,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		} finally {
 			permissionService.clearUserContext();
 		}
+	}
+	
+	@Override
+	public boolean isReady() {
+		return ready;
 	}
 	
 	@Override

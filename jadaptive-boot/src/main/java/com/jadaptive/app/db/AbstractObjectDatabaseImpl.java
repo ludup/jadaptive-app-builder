@@ -24,6 +24,7 @@ import com.jadaptive.api.events.UUIDEntityDeletedEvent;
 import com.jadaptive.api.events.UUIDEntityUpdatedEvent;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDEvent;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
@@ -53,7 +54,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	protected String getCollectionName(Class<?> clz) {
 		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
-		while(template!=null && template.type() == ObjectType.OBJECT) {
+		while(template==null || template.type() == ObjectType.OBJECT) {
 			clz = clz.getSuperclass();
 			template = clz.getAnnotation(ObjectDefinition.class);
 		} 
@@ -100,8 +101,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		try {
 
 			T previous = null;
+			final boolean isEvent = obj instanceof UUIDEvent;
 			
-			if(StringUtils.isNotBlank(obj.getUuid())) {
+			if(!isEvent && StringUtils.isNotBlank(obj.getUuid())) {
 				try {
 					previous = getObject(obj.getUuid(), database, (Class<T>) obj.getClass());
 				} catch(ObjectNotFoundException ex) {
@@ -136,10 +138,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 //				onObjectUpdated(prevObject, obj);
 //			}
 			
-			if(Objects.isNull(previous)) {
-				onObjectCreated(obj);
-			} else {
-				onObjectUpdated(obj, previous);
+			if(!isEvent) {
+				if(Objects.isNull(previous)) {
+					onObjectCreated(obj);
+				} else {
+					onObjectUpdated(obj, previous);
+				}
 			}
 			
 		} catch(Throwable e) {

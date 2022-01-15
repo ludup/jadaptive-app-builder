@@ -1,6 +1,9 @@
 function renderActions(val, obj, idx, total) {
 
-	var ret = '<a href="/app/ui/update/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-edit"></i></a>&nbsp;';
+	var ret = '';
+	if($(document).data('t').updateable) {
+	ret += '<a href="/app/ui/update/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-edit"></i></a>&nbsp;';
+	}
 	ret += '<a href="/app/ui/view/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-eye"></i></a>&nbsp;';
 	if(!obj.system) {
 		ret += '<a class="clickDelete" href="#" data-uuid="' + obj.uuid + '"><i class="far fa-trash-alt"></i></a>';
@@ -21,8 +24,8 @@ $(document).ready(function() {
 
 	$.getJSON('/app/api/template/' + $('#table').data('resourcekey'), function(data) {
 		if(data.success) {
+			$(document).data('t', data.resource);
 			var t = data.resource;
-
 			$('#table').bootstrapTable({
 				sidePagination: 'server',
 				totalField: 'total',

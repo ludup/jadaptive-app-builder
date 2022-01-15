@@ -393,4 +393,13 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	public String getTemplateResourceKey(Class<?> clz) {
 		return templateResourceKeys.get(clz);
 	}
+	
+	@Override
+	public String getTemplateResourceKey(String clz) {
+		try {
+			return getTemplateResourceKey(classService.getClassLoader().loadClass(clz));
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException(String.format("Missing template for class %s", clz));
+		}
+	}
 }

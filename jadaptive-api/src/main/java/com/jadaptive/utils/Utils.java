@@ -370,7 +370,9 @@ public class Utils {
 			if(b.length() > 0) {
 				b.append(",");
 			}
-			b.append(i.toString());
+			if(Objects.nonNull(i)) {
+				b.append(i.toString());
+			} 
 		}
 		return b.toString();
 	}
@@ -418,5 +420,9 @@ public class Utils {
 		} catch(NumberFormatException e) {
 			return 0;
 		}
+	}
+
+	public static Date now() {
+		return new Date();
 	}
 }

@@ -62,17 +62,18 @@ public class TablePage extends TemplatePage {
 					creatableTemplates.add(childTemplate);
 				}
 			}
-		} else if(template.isCreatable()) {
-			creatableTemplates.add(template);
-		}
+		} 
 		
-		if(creatableTemplates.size() > 1) {
-			createMultipleOptionAction(document, "create", creatableTemplates, template.getCollectionKey());
-		} else if(creatableTemplates.size() == 1) {
-			ObjectTemplate singleTemplate = creatableTemplates.get(0);
-			createTableAction(document, String.format("create/%s", singleTemplate.getResourceKey()), 
-					template.getCollectionKey(), "far fa-plus",
-					"primary", "create");
+		if(template.isCreatable()) {
+			creatableTemplates.add(template);
+			if(creatableTemplates.size() > 1) {
+				createMultipleOptionAction(document, "create", creatableTemplates, template.getCollectionKey());
+			} else if(creatableTemplates.size() == 1) {
+				ObjectTemplate singleTemplate = creatableTemplates.get(0);
+				createTableAction(document, String.format("create/%s", singleTemplate.getResourceKey()), 
+						template.getCollectionKey(), "far fa-plus",
+						"primary", "create");
+			}
 		}
 		
 		TableView view = templateClazz.getAnnotation(TableView.class);

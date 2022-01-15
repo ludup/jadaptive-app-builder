@@ -52,4 +52,6 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	void completeSetup();
 
+	boolean isReady();
+
 }
