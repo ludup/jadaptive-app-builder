@@ -1,7 +1,8 @@
 function renderActions(val, obj, idx, total) {
 
 	var ret = '';
-	if($(document).data('t').updateable) {
+	var t = $(document).data('t');
+	if(t.updatable) {
 	ret += '<a href="/app/ui/update/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-edit"></i></a>&nbsp;';
 	}
 	ret += '<a href="/app/ui/view/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="far fa-eye"></i></a>&nbsp;';

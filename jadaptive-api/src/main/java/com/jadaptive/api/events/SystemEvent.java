@@ -39,9 +39,17 @@ public class SystemEvent extends UUIDEvent {
 	@ObjectView(value = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.I18N)
 	String group;
 	
-	@ObjectField(type = FieldType.TEXT_AREA)
+	@ObjectField(type = FieldType.TEXT)
 	@ObjectView(value = SystemEvent.EVENT_VIEW)
 	String message;
+	
+	/**
+	 * TODO: We want the ability to hide fields from the UI if they 
+	 * have no value
+	 */
+	@ObjectField(type = FieldType.TEXT_AREA)
+	@ObjectView(value = SystemEvent.EVENT_VIEW)
+	String extendedInformation;
 	
 	@ObjectField(type = FieldType.ENUM)
 	@ObjectView(value = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.BOOTSTRAP_BADGE)
@@ -52,8 +60,9 @@ public class SystemEvent extends UUIDEvent {
 	}
 	
 	public SystemEvent(String resourceKey, String group, Throwable e) {
-		this(resourceKey, group, ExceptionUtils.getStackTrace(e), Utils.now());
+		this(resourceKey, group, e.getMessage(), Utils.now());
 		this.state = EventState.ERROR;
+		this.extendedInformation = ExceptionUtils.getFullStackTrace(e);
 	}
 	
 	public SystemEvent(String resourceKey, String group, String message, Date timestamp) {
@@ -66,6 +75,10 @@ public class SystemEvent extends UUIDEvent {
 
 	public String getResourceKey() {
 		return resourceKey;
+	}
+	
+	public String getEventGroup() {
+		return group;
 	}
 	
 	public Date getTimestamp() {
@@ -82,6 +95,10 @@ public class SystemEvent extends UUIDEvent {
 	
 	public EventState getState() {
 		return state;
+	}
+	
+	public String getExtendedInformation() {
+		return extendedInformation;
 	}
 	
 	public SystemEvent flagFailed() {

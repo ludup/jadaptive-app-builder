@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.events.AuditedObject;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
@@ -22,6 +23,7 @@ import com.jadaptive.api.template.TableView;
 	@ObjectViewDefinition(value = Role.PERMISSIONS_VIEW, bundle = "permissions", weight = 50),
 	@ObjectViewDefinition(value = Role.OPTIONS_VIEW, bundle = Role.RESOURCE_KEY, weight = 100)})
 @TableView(defaultColumns = { "name", "allPermissions", "allUsers" })
+@AuditedObject
 public class Role extends NamedUUIDEntity {
 	
 	private static final long serialVersionUID = -5211370653998523985L;

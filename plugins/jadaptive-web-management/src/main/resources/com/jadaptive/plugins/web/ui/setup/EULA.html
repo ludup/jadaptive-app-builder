@@ -14,7 +14,10 @@ $(function() {
 		if($('#agree').is(':checked')) {
 			success();
 		} else {
-			bootbox.alert("You must accept the license agreement to continue.");
+			bootbox.alert({
+				closeButton: false,
+				message: "You must accept the license agreement to continue."	
+			});
 			cancel();
 		}
 	});

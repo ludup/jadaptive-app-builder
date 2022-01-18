@@ -70,6 +70,9 @@ public class Header extends AbstractPageExtension {
 			
 			for(ApplicationMenu parent : parents) {
 				
+				if(!parent.isEnabled()) {
+					continue;
+				}
 				if(Objects.nonNull(parent.getPermissions()) && !parent.getPermissions().isEmpty()) {
 					try {
 						permissionService.assertAnyPermission(parent.getPermissions().toArray(new String[0]));
@@ -90,6 +93,10 @@ public class Header extends AbstractPageExtension {
 				});
 
 				for(ApplicationMenu child : children) {
+					
+					if(!child.isEnabled()) {
+						continue;
+					}
 					
 					if(Objects.nonNull(child.getPermissions()) && !child.getPermissions().isEmpty()) {
 						try {

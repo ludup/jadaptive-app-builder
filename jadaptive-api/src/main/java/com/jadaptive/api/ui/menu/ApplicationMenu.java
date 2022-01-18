@@ -1,6 +1,7 @@
 package com.jadaptive.api.ui.menu;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import org.pf4j.ExtensionPoint;
 
@@ -12,7 +13,7 @@ public interface ApplicationMenu extends ExtensionPoint {
 
 	String getPath();
 
-	Collection<String> getPermissions();
+	default Collection<String> getPermissions() { return Collections.emptyList(); }
 
 	String getIcon();
 
@@ -22,4 +23,5 @@ public interface ApplicationMenu extends ExtensionPoint {
 	
 	Integer weight();
 
+	default boolean isEnabled() { return true; }
 }

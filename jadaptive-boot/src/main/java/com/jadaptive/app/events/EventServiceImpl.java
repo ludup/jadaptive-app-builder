@@ -54,7 +54,14 @@ public class EventServiceImpl implements EventService {
 			fireEvent(listener, evt);
 		}
 		
-		Collection<EventListener> keyed = keyedListeners.get(evt.getResourceKey());
+		Collection<EventListener> keyed = keyedListeners.get(evt.getEventGroup());
+		if(Objects.nonNull(keyed)) {
+			for(EventListener listener : keyed) {
+				fireEvent(listener, evt);
+			}
+		}
+		
+		keyed = keyedListeners.get(evt.getResourceKey());
 		if(Objects.nonNull(keyed)) {
 			for(EventListener listener : keyed) {
 				fireEvent(listener, evt);
@@ -102,6 +109,11 @@ public class EventServiceImpl implements EventService {
 		
 	}
 
+	@Override
+	public <T extends UUIDEntity> void any(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+		on(templateService.getTemplateResourceKey(clz), handler);
+	}
+	
 	@Override
 	public <T extends UUIDEntity> void created(Class<T> clz, EventListener<UUIDEntityCreatedEvent<T>> handler) {
 		on(Events.created(templateService.getTemplateResourceKey(clz)), handler);

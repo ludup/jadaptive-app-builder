@@ -13,10 +13,13 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.session.events.SessionClosedEvent;
+import com.jadaptive.api.session.events.SessionOpenedEvent;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
@@ -31,6 +34,9 @@ public class SessionServiceImpl implements SessionService {
 	
 	@Autowired
 	private SingletonObjectDatabase<SessionConfiguration> configService;
+	
+	@Autowired
+	private EventService eventService; 
 	
 	@Override
 	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent) {
@@ -48,6 +54,7 @@ public class SessionServiceImpl implements SessionService {
 		
 		repository.saveOrUpdate(session);
 		
+		eventService.publishEvent(new SessionOpenedEvent(session));
 		return session;
 	}
 
@@ -117,6 +124,8 @@ public class SessionServiceImpl implements SessionService {
 
 		session.setSignedOut(new Date());
 		repository.saveOrUpdate(session);
+		
+		eventService.publishEvent(new SessionClosedEvent(session));
 
 	}
 
