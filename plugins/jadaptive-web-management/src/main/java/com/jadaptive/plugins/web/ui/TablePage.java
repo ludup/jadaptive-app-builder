@@ -3,9 +3,7 @@ package com.jadaptive.plugins.web.ui;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,7 +14,6 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldView;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.TableAction;

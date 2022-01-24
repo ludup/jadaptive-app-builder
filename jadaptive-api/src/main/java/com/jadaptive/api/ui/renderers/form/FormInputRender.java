@@ -38,9 +38,5 @@ public abstract class FormInputRender extends FieldInputRender {
 
 	}
 
-	private String formatTimestamp(String value) {
-		return value;
-	}
-
 	public abstract String getInputType();
 }

@@ -226,10 +226,6 @@ public class ServerSideTablePage extends TemplatePage {
 		return String.format("/app/ui/table2/%s/%d/%d", template.getCollectionKey(), start, length);
 	}
 
-	private Element renderElement(Element element, FieldTemplate fieldTemplate) {
-		return element;
-	}
-
 	private void createMultipleOptionAction(Document document, String id, Collection<ObjectTemplate> actions,
 			String bundle) {
 		

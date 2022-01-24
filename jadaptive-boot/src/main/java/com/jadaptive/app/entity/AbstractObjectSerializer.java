@@ -16,7 +16,6 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
-import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.utils.Utils;
 
 public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
