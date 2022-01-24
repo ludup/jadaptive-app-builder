@@ -11,7 +11,7 @@ public class TimestampFormInput extends FormInputRender {
 
 	@Override
 	public String getInputType() {
-		return "datetime-local";
+		return "text";
 	}
 
 	

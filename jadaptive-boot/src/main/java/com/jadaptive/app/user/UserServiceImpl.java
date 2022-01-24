@@ -293,4 +293,9 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		deleteObject(getObjectByUUID(uuid));
 	}
 
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
 }

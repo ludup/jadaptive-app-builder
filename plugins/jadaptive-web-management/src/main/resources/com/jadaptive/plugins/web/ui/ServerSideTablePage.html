@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
+<head>
+<title>${page.template.name}</title>
+</head>
+<body>
+<div class="wrapper">
+<header jad:id="header"></header>
+<main class="container mt-3">  
+  <div class="row">
+	<ol class="breadcrumb col-12">
+	  <li class="breadcrumb-item"><a jad:bundle="default" jad:i18n="home.name" href="/app/ui/dashboard"></a></li>
+	  <li class="breadcrumb-item active"><a jad:bundle="${page.template.bundle}" jad:i18n="${page.template.resourceKey}.names" href="/app/ui/table/${page.template.resourceKey}"></a></li>
+	</ol>
+  </div>
+  <div class="row">
+  	<div class="col-12">
+       <h1 jad:bundle="${page.template.bundle}" jad:i18n="${page.template.resourceKey}.names"></h1>
+    </div>
+  </div>
+  <div class="row">
+      <div id="searchForm" class="col-12 mb-3">
+      	<div class="row">
+	      	<div id="searchColumnHolder" class="col-md-4">
+	      		<label class="form-label" jad:bundle="default" jad:i18n="search.column.name" >Search Column</label>
+	      		<div id="searchDropdownHolder"></div>
+	      	</div>
+	      	<div id="searchValueHolder" class="col-md-4">
+	      		<label class="form-label" jad:bundle="default" jad:i18n="search.fitler.name">Search Filter</label>
+	      	</div>
+	      	<div id="searchValueHolder" class="col-md-4">
+	      		<label class="form-label">&nbsp;</label>
+	      		<button class="btn btn-primary"><i class="far fa-search"></i> <span jad:bundle="default" jad:i18n="search.name"></span></button>
+	      	</div>
+      	</div>
+      </div>
+	  
+  	  <div id="tableholder" class="col-12 mb-3">
+  	  	
+	  </div>
+	  <div id="pagnation" class="col-6 mt-3">
+	  </div>
+	  <div id="objectActions" class="col-6 mt-3">
+	  </div>
+  </div>
+  
+
+</main>
+</div>
+<footer jad:id="footer"></footer>
+<div id="rowActions" style="display: none;"></div>
+</body>
+</html>

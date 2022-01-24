@@ -38,7 +38,8 @@ $(document).ready(function() {
 				minWidth: 767,
 				mobileResponsive: true,
 				queryParams: function(params) {
-					params['searchField'] = $('#searchValue').val();
+					params['searchField'] = $('#searchColumn').val();
+					params['searchValue'] = $('#searchValue').val();
 					return params;
 				}
 			});
@@ -48,20 +49,17 @@ $(document).ready(function() {
 			$('#table').off('post-header.bs.table');
 			$('#table').on('post-header.bs.table', function(e) {
 				
-				if($('#searchField').length == 0) {
-					$('.search').parent().append('<div id="searchDropdownHolder" class="columns columns-right me-1 float-end"></div>');
+				/*if($('#searchDropdownHolder').length == 0) {
+					$('.fixed-table-toolbar').append('<div id="searchDropdownHolder" class="float-end"></div>');
 					
-					$('#searchDropdownMenu').empty();
-
 					$.each(t.fields, function(idx, obj) {
 						if(!obj.hidden && obj.searchable) {
-							$('#searchDropdownMenu').append('<a data-resourcekey="' + obj.resourceKey +'" + class="clickSearch dropdown-item" href="#">' + obj.name + '</a>');
+							$('#searchColumnItems').append('<a data-resourcekey="' + obj.resourceKey +'" + class="clickSearch jdropdown-item dropdown-item" href="#">' + obj.resourceKey + '</a>');
 						}
 					});
 						
 						
-					
-					$("#searchDropdown").appendTo("#searchDropdownHolder");
+					$('#searchDropdown').appendTo($("#searchDropdownHolder"));
 					$('#searchDropdown').show();
 					
 					$('.clickSearch').click(function(e) {
@@ -71,7 +69,7 @@ $(document).ready(function() {
 						$('#searchValue').val(value);
 						$('#searchText').val(text);
 					});
-				}
+				}*/
 
 				$('.clickDelete').off('click');
 				

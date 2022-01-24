@@ -49,6 +49,7 @@ public class DropdownInput extends InputRender {
 						.addClass("input-group")
 						.addClass("dropdown" + (up ? " dropup" : ""))
 					.appendChild(valueElement = new Element("input")
+							.attr("id", resourceKey)
 							.attr("name", resourceKey)
 							.attr("type", "hidden"))
 					.appendChild(nameElement = new Element("input")

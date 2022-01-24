@@ -3,6 +3,8 @@ package com.jadaptive.api.ui;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 
+import com.jadaptive.utils.Utils;
+
 public class Html {
 
 	public static Element a(String href, String classes) {
@@ -31,5 +33,25 @@ public class Html {
 	
 	public static Element span(String text, String classes) {
 		return span(text).addClass(classes);
+	}
+
+	public static Element li(String... classes) {
+		return new Element("li").addClass(Utils.csv(" ", classes));
+	}
+	
+	public static Element ul(String... classes) {
+		return new Element("ul").addClass(Utils.csv(" ", classes));
+	}
+
+	public static Element nav() {
+		return new Element("nav");
+	}
+
+	public static Node text(String id, String name, String value, String... classes) {
+		return new Element("input").attr("type", "text")
+				.attr("id", id)
+				.attr("name", name)
+				.val(value)
+				.addClass(Utils.csv(" ", classes));
 	}
 }

@@ -31,7 +31,6 @@ public class I18N extends AbstractPageExtension {
 				e.html(i18nService.format(bundle, Locale.getDefault(), e.attr("jad:i18n")));
 				break;
 			}
-			
 		}
 	}
 

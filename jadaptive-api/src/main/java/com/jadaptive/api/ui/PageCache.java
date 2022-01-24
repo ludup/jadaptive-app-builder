@@ -134,7 +134,13 @@ public class PageCache {
 			try {
 				Field field = ReflectionUtils.getField(page.getClass(), e.getKey());
 				field.setAccessible(true);
-				field.set(page, e.getValue());
+
+				if(field.getType().isAssignableFrom(Integer.class)) {
+					field.set(page, Integer.parseInt(e.getValue().toString()));
+				} else {
+					field.set(page, e.getValue());
+				}
+				
 			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e1) {
 				log.error("Failed to populate path arg {}", e.getKey(), e);
 			}

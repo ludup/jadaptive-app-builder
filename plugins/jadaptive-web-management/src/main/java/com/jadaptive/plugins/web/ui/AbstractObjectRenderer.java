@@ -3,6 +3,7 @@ package com.jadaptive.plugins.web.ui;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -412,6 +413,15 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				render.renderInput(panel, element, i18nValue);
 				break;
 			}
+			case OPTIONAL:
+			{
+				String value = getFieldValue(orderedField, obj);
+				if(StringUtils.isNotBlank(value) || view!=FieldView.READ) {
+					TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
+					render.renderInput(panel, element, value);
+				}
+				break;
+			}
 			default:
 			{
 				TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
@@ -435,6 +445,15 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				String i18nValue = i18nService.format(panel.getBundle(), Locale.getDefault(), getFieldValue(orderedField, obj));
 				TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), orderedField);
 				render.renderInput(panel, element, i18nValue);
+				break;
+			}
+			case OPTIONAL:
+			{
+				String value = getFieldValue(orderedField, obj);
+				if(StringUtils.isNotBlank(value) || view!=FieldView.READ) {
+					TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), orderedField);
+					render.renderInput(panel, element, value);
+				}
 				break;
 			}
 			default:
@@ -483,16 +502,24 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case ENUM:
 		{
-			Class<?> values;
-			try {
-				values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
-				DropdownFormInput render = new DropdownFormInput(currentTemplate.get(), orderedField);
+			switch(orderedField.getRenderer()) {
+			case BOOTSTRAP_BADGE:
+			{
+				BootstrapBadgeRender render = new BootstrapBadgeRender(currentTemplate.get(), orderedField);
 				render.renderInput(panel, element, getFieldValue(orderedField, obj));
-				render.renderValues((Enum<?>[])values.getEnumConstants(), getFieldValue(orderedField, obj), view == FieldView.READ);
-			} catch (ClassNotFoundException e) {
-				throw new IllegalStateException(e.getMessage(), e);
+				break;
 			}
-			
+			default:
+				Class<?> values;
+				try {
+					values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
+					DropdownFormInput render = new DropdownFormInput(currentTemplate.get(), orderedField);
+					render.renderInput(panel, element, getFieldValue(orderedField, obj));
+					render.renderValues((Enum<?>[])values.getEnumConstants(), getFieldValue(orderedField, obj), view == FieldView.READ);
+				} catch (ClassNotFoundException e) {
+					throw new IllegalStateException(e.getMessage(), e);
+				}
+			}
 			break;
 		}
 		case DECIMAL:
@@ -539,7 +566,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		if(Objects.isNull(val)) {
 			return field.getField().getDefaultValue();
 		}
-		return val.toString(); 
+		return val.toString(); 	
 	}
 
 	private Element createViewElement(OrderedView view, Element rootElement, boolean first) {

@@ -6,5 +6,6 @@ public enum FieldRenderer {
 	HTML_EDITOR,
 	TAGS,
 	I18N,
-	BOOTSTRAP_BADGE;
+	BOOTSTRAP_BADGE,
+	OPTIONAL;
 }

@@ -41,15 +41,17 @@ public class ServerStatsWidget implements DashboardWidget {
 		element.appendChild(e = new Element("p"));
 		
 		for(ResourceService rs : applicationService.getBeans(ResourceService.class)) {
+			if(rs.isEnabled()) {
 			long count = rs.getTotalResources();
-			e.appendChild(new Element("a")
-					.attr("href", String.format("/app/ui/table/%s", rs.getResourceKey()))
-						.appendChild(new Element("span")
-							.html(String.format("%s&nbsp;", String.valueOf(count)))) 
-						.appendChild(new Element("span")
-								.attr("jad:bundle", rs.getResourceKey())
-								.attr("jad:i18n", rs.getResourceKey() + (count > 1 || count == 0 ? ".names" : ".name")))
-						.appendChild(new Element("br")));
+				e.appendChild(new Element("a")
+						.attr("href", String.format("/app/ui/table/%s", rs.getResourceKey()))
+							.appendChild(new Element("span")
+								.html(String.format("%s&nbsp;", String.valueOf(count)))) 
+							.appendChild(new Element("span")
+									.attr("jad:bundle", rs.getResourceKey())
+									.attr("jad:i18n", rs.getResourceKey() + (count > 1 || count == 0 ? ".names" : ".name")))
+							.appendChild(new Element("br")));
+			}
 		}
 	}
 

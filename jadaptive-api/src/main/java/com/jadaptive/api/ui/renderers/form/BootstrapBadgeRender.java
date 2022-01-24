@@ -19,21 +19,29 @@ public class BootstrapBadgeRender extends FieldInputRender {
 				.addClass("row mb-3")
 				.appendChild(new Element("div")
 						.addClass("col-12")
-				.appendChild(new Element("input")
-						.addClass("badge bg-success")
+				.appendChild(new Element("span")
+						.addClass(String.format("badge bg-%s p-2", getBadgeClass(value)))
 						.text(value))
 				.appendChild(new Element("input")
 						.attr("id", field.getFormVariable())
 						.attr("name", field.getFormVariable())
 						.addClass("form-control")
 						.attr("value", value)
-						.attr("type", "hidden"))
-				.appendChild(new Element("small")
-						.addClass("form-text")
-						.addClass("text-muted")
-						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
+						.attr("type", "hidden"))));
 
+	}
+
+	private Object getBadgeClass(String value) {
+		switch(value.toUpperCase()) {
+		case "SUCCESS":
+			return "success";
+		case "ERROR":
+			return "danger";
+		case "WARNING":
+			return "warning";
+		default:
+			return "info";
+		}
 	}
 
 
