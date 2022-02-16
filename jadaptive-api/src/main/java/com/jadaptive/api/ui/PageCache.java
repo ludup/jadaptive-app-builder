@@ -256,4 +256,8 @@ public class PageCache {
 	public void setHomePage(Class<? extends Page> homePage) {
 		this.homePage = homePage;
 	}
+
+	public static String getPageURL(Page returnTo) {
+		return new PageRedirect(returnTo).getUri();
+	}
 }

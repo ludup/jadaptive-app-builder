@@ -14,7 +14,7 @@ import com.jadaptive.api.ui.AuthenticatedPage;
 public abstract class TemplatePage extends AuthenticatedPage {
 
 	@Autowired
-	private TemplateService templateService;
+	protected TemplateService templateService;
 	
 	protected String resourceKey;
 	

@@ -23,7 +23,7 @@ public class UsersMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/table/users";
+		return "/app/ui/search/users";
 	}
 
 	@Override

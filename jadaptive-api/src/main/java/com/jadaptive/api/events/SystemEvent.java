@@ -22,7 +22,7 @@ import com.jadaptive.api.template.TableView;
 import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = SystemEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
-     creatable = false, updatable = false, system = true)
+     creatable = false, updatable = false, system = true, defaultColumn = "eventKey")
 @ObjectViews({@ObjectViewDefinition(value = "event", bundle = SystemEvent.RESOURCE_KEY)})
 @TableView(defaultColumns = { "state", "timestamp", "eventKey", "eventGroup", "ipAddress"})
 public class SystemEvent extends UUIDEvent {
@@ -76,7 +76,7 @@ public class SystemEvent extends UUIDEvent {
 	}
 	
 	public String getResourceKey() {
-		return RESOURCE_KEY;
+		return eventKey;
 	}
 
 	public String getEventKey() {

@@ -9,9 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface TableView {
 				
-		String[] defaultColumns() default { };
-		
-		String[] optionalColumns() default { };
+		String[] defaultColumns();
 		
 		TableAction[] actions() default { };
 }

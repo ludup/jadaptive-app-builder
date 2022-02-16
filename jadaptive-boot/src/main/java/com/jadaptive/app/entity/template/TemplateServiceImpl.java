@@ -73,7 +73,10 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	Map<Class<?>,String> templateResourceKeys = new HashMap<>();
 	
 	@Override
-	public void registerTemplateClass(String resourceKey, Class<?> templateClazz) {
+	public void registerTemplateClass(String resourceKey, Class<?> templateClazz, ObjectTemplate template) {
+		for(String alias : template.getAliases()) {
+			templateClazzes.put(alias, templateClazz);
+		}
 		templateClazzes.put(resourceKey, templateClazz);
 		templateResourceKeys.put(templateClazz, resourceKey);
 	}
@@ -340,7 +343,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			Field f = ReflectionUtils.getField(clz, field.getResourceKey());
 			ObjectView v = f.getAnnotation(ObjectView.class);
 			
-			if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
+			if(field.getFieldType()==FieldType.OBJECT_EMBEDDED && !field.getCollection()) {
 				Class<?> c = ReflectionUtils.getObjectType(f);
 				String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
 				ObjectTemplate ct = get(resourceKey);

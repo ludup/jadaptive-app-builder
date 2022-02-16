@@ -5,19 +5,19 @@ Object.defineProperty(Number.prototype,'fileSize',{value:function(a,b,c,d){
 		},writable:false,enumerable:false});
 	
 function appendFile(fileInput) {
-	var row = fileInput.parents('.jfiles').find('tr').last();
-	row.parent().append(row.clone());
-	var index = Date.now();
-	row.attr('data-index', index);
-	row.addClass('file-index');
-
-	fileInput.attr('data-index', index);
-	fileInput.parent().append('<input class="file-input file-index" type="file" name="file" style="display: none;" />');
 	
-	row.find(".filename").text(fileInput[0].files[0].name);
-	row.find(".size").text((fileInput[0].files[0].size).fileSize(1));
-	row.show();
-		
+	for(var i=0;i<fileInput[0].files.length;i++) {
+		debugger;
+		var row = fileInput.parents('.jfiles').find('tr').last();
+		row.parent().append(row.clone());
+		row.attr('data-filename', fileInput[0].files[i].name);
+		row.addClass('file-index');
+		row.find(".filename").text(fileInput[0].files[i].name);
+		row.find(".size").text((fileInput[0].files[i].size).fileSize(1));
+		row.show();
+	}
+
+	fileInput.parent().append('<input class="file-input file-index" type="file" name="file" style="display: none;" multiple/>');
 	$('.jfiles').show();
 }
 $(function() {
@@ -32,12 +32,18 @@ $(function() {
 	$(document).on('click', '.deleteFile', function(e) {
 		e.preventDefault();
 		var index=  $(this).parents('tr').data('index');
-		$('.file-index[data-index="' + index + '"]').remove();
+		$(this).parents('tr').remove();
+	});
+	
+	$('#uploadButton').click(function(e) {
+		e.preventDefault();
+		debugger;
+		UploadWidget.upload();
 	});
 	
 	$('#uploadForm').submit(function(e) {
 		e.preventDefault();
-		UploadWidget.upload();
+		e.stopPropagation();
 	});
 	
 	$('#uploadForm').on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
@@ -77,7 +83,7 @@ var UploadWidget = {
 	clearFiles: function() {
 		$('.file-input').remove();
 		$('.file-index').remove();
-		$('#files').append('<input class="file-input" type="file" name="file" style="display: none;" />');
+		$('#files').append('<input class="file-input" type="file" name="file" style="display: none;" multiple/>');
 	},
 	reset: function() {
 			$('#progressBar').css("width", 0).attr('aria-valuenow', "0");
@@ -114,8 +120,12 @@ var UploadWidget = {
 			
 			var countFiles = 0;
 			$('.file-input').each(function(idx, file) {
-				fd.append('file', this.files[0]);
-				countFiles++;
+				for(i=0;i<this.files.length;i++) {
+					if($("[data-filename='" + this.files[i].name + "']").length > 0) {
+						fd.append('file', this.files[i]);
+						countFiles++;
+					}
+				}
 			});
 		    
 			$('#progressBar').css("width", 0).attr('aria-valuenow', "0");
@@ -151,7 +161,7 @@ var UploadWidget = {
 					    $('#uploadButton').attr('disabled', false);
 						$('#uploadProgress').hide();
 						$('.file-index').remove();
-						$('#files').append('<input class="file-input" type="file" name="file" style="display: none;" />');
+						$('#files').append('<input class="file-input" type="file" name="file" style="display: none;" multiple/>');
 						$('#helpText').show(); 
 		           },
 				   xhr: function() {

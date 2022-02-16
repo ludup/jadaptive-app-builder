@@ -27,10 +27,12 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	public static final String RESOURCE_KEY = "adminUser";
 	
 	@ObjectField(required = false,
+			hidden = true,
 			type = FieldType.HIDDEN)
 	String encodedPassword;
 	
 	@ObjectField(required = false,
+			hidden = true,
 			type = FieldType.HIDDEN)
 	String salt;
 	

@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -211,8 +212,8 @@ public class Utils {
 
 	public static String after(String value, String string) {
 		int idx = value.indexOf(string);
-		if(idx > -1) {
-			return value.substring(idx+1);
+		if(idx > -1 && idx+string.length() < value.length()) {
+			return value.substring(idx+string.length());
 		}
 		return "";
 	}
@@ -380,12 +381,19 @@ public class Utils {
 		}
 		return b.toString();
 	}
+	
+	public static String getBaseURL(String url) {
+		String protocol = before(url, "//");
+		String tmp = after(url, "//");
+		
+		return protocol + "//" + before(tmp, "/");
+	}
 
 	public static String encodeURIPath(String url) {
 		return UriUtils.encodePath(url, "UTF-8");
 	}
 
-	public static Date thirtyDays() {
+	public static Calendar thirtyDaysCalendar() {
 		
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 0);
@@ -395,7 +403,30 @@ public class Utils {
 		
 		date.add(Calendar.DAY_OF_MONTH, 30);
 		
-		return date.getTime();
+		return date;
+		
+	}
+	
+	public static Date thirtyDays() {
+		return thirtyDaysCalendar().getTime();
+	}
+	
+	public static Calendar thirtyDaysAgoCalendar() {
+		
+		Calendar date = Calendar.getInstance();
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+		
+		date.add(Calendar.DAY_OF_MONTH, -30);
+		
+		return date;
+		
+	}
+	
+	public static Date thirtyDaysAgo() {
+		return thirtyDaysAgoCalendar().getTime();
 	}
 
 	public static byte[] getUTF8Bytes(String str) {
@@ -428,5 +459,20 @@ public class Utils {
 
 	public static Date now() {
 		return new Date();
+	}
+	
+	public static Set<String> extractVariables(String str) {
+		Set<String> vars = new HashSet<>();
+		int idx = 0;
+		while((idx = str.indexOf('{', idx)) != -1) {
+			int start = idx+1;
+			idx = str.indexOf('}', start);
+			if(idx==-1) {
+				throw new IllegalArgumentException("Unterminated variable detected!");
+			}
+			vars.add(str.substring(start, idx));
+			idx++;
+		}
+		return vars;
 	}
 }

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface TableAction {
+public @interface TableAction  {
 	
 	enum Target { TABLE, ROW };
 	
@@ -26,4 +26,7 @@ public @interface TableAction {
 	String buttonClass() default "primary";
 	
 	String icon();
+	
+	boolean confirmationRequired() default false;
+
 }

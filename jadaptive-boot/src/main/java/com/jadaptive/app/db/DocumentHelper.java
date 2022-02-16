@@ -184,6 +184,8 @@ public class DocumentHelper {
 				AbstractUUIDEntity e = (AbstractUUIDEntity) value;
 				if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 					Document embeddedDocument = new Document();
+					
+					
 					convertObjectToDocument(e, embeddedDocument);
 					list.add(embeddedDocument);
 				} else {

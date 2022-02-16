@@ -46,6 +46,7 @@
 		<module>jadaptive-builtin-users</module>
 		<module>jadaptive-remote-users</module>
 		<module>jadaptive-web-management</module>
+		<module>jadaptive-logonbox-authenticator</module>
 	</modules>
 
 	<dependencies>

@@ -2,6 +2,7 @@ package com.jadaptive.plugins.web.ui;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +52,7 @@ import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimestampFormInput;
+import com.jadaptive.plugins.web.ui.renderers.TableRenderer;
 import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectRenderer extends AbstractPageExtension {
@@ -154,17 +156,19 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	private void extractChildObjects(AbstractObject object, Map<String,AbstractObject> children, ObjectTemplate template) {
 
 		for(FieldTemplate field : template.getFields()) {
-			switch(field.getFieldType()) {
-			case OBJECT_EMBEDDED:
-				AbstractObject child = object.getChild(field);
-				children.put(field.getResourceKey(), child);
-				ObjectTemplate childTemplate = templateService.get(templateService.getTemplateResourceKey((String)child.getValue("_clz")));
-				extractChildObjects(child, children, childTemplate);
-				break;
-			case OBJECT_REFERENCE:
-				// Do we need this?
-				break;
-			default:
+			if(!field.getCollection()) {
+				switch(field.getFieldType()) {
+				case OBJECT_EMBEDDED:
+					AbstractObject child = object.getChild(field);
+					children.put(field.getResourceKey(), child);
+					ObjectTemplate childTemplate = templateService.get(templateService.getTemplateResourceKey((String)child.getValue("_clz")));
+					extractChildObjects(child, children, childTemplate);
+					break;
+				case OBJECT_REFERENCE:
+					// Do we need this?
+					break;
+				default:
+				}
 			}
 		}
 	}
@@ -324,8 +328,23 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case LONG:
 			break;
 		case OBJECT_EMBEDDED:
+		{
+			TableRenderer table = new TableRenderer();
+			String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
+			ObjectTemplate objectTemplate = templateService.get(objectType);
 			
+			Collection<AbstractObject> objects = obj.getObjectCollection(field.getResourceKey());
+			
+			table.setLength(objects.size());
+			table.setStart(0);
+			table.setTotalObjects(objects.size());
+			table.setObjects(objects);
+			table.setTemplate(objectTemplate);
+			table.setTemplateClazz(templateService.getTemplateClass(objectTemplate.getResourceKey()));
+			
+			element.insertChildren(0, table.render());
 			break;
+		}
 		case OBJECT_REFERENCE:
 		{
 			String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);

@@ -7,7 +7,7 @@
  <div class="row">
 	<ol class="breadcrumb col-12">
 	  <li class="breadcrumb-item"><a href="/app/ui/dashboard" class="checkExit" jad:bundle="default" jad:i18n="home.name">[Home]</a></li>
-	  <li class="breadcrumb-item active"><a href="/app/ui/table/${page.template.collectionKey}" class="checkExit" jad:bundle="${page.template.bundle}" jad:i18n="${page.template.collectionKey}.names">[${page.template.name}]</a></li>
+	  <li class="breadcrumb-item active"><a href="/app/ui/search/${page.template.collectionKey}" class="checkExit" jad:bundle="${page.template.bundle}" jad:i18n="${page.template.collectionKey}.names">[${page.template.name}]</a></li>
 	  <li class="breadcrumb-item active"><span jad:bundle="default" jad:i18n="update.name">[Update]]</span></li>
 	</ol>
   </div>
@@ -16,9 +16,9 @@
    </div>
    <div class="row my-3">
          <div class="col-12">
-         	<a class="btn btn-danger float-start ms-3 checkExit" href="/app/ui/table/${page.template.collectionKey}">
+         	<a class="btn btn-danger float-start checkExit" href="/app/ui/search/${page.template.collectionKey}">
          	<i class="fas fa-ban"></i>&nbsp;<span jad:bundle="default" jad:i18n="cancel.name">[Cancel]</span></a>
-         	<a id="saveButton" class="btn btn-success float-end me-3" href="#">
+         	<a id="saveButton" class="btn btn-success float-end" href="#">
          	<i class="fas fa-save"></i>&nbsp;<span jad:bundle="default" jad:i18n="save.name">[Save]</span></a>
          </div>
    </div>

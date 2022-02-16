@@ -11,7 +11,7 @@
  <div class="row">
 	<ol class="breadcrumb col-12">
 	  <li class="breadcrumb-item"><a href="/app/ui/dashboard">Home</a></li>
-	  <li class="breadcrumb-item active"><a href="/app/ui/table/${page.template.collectionKey}" jad:bundle="${page.template.collectionKey}" jad:i18n="${page.template.collectionKey}.name">[${page.template.name}]</a></li>
+	  <li class="breadcrumb-item active"><a href="/app/ui/search/${page.template.collectionKey}" jad:bundle="${page.template.bundle}" jad:i18n="${page.template.collectionKey}.name">[${page.template.name}]</a></li>
 	  <li class="breadcrumb-item active"><a href="/app/ui/view/${page.template.resourceKey}/${page.uuid}" jad:bundle="default" jad:i18n="view.name">[View]]</a></li>
 	</ol>
   </div>
@@ -20,7 +20,7 @@
    </div>
    <div class="row my-1">
          <div class="col-12">
-         	<a class="btn btn-danger float-start ms-3" href="/app/ui/table/${page.template.collectionKey}">
+         	<a class="btn btn-danger float-start" href="/app/ui/search/${page.template.collectionKey}">
          	<i class="fas fa-step-backward"></i>&nbsp;<span jad:bundle="default" jad:i18n="back.name">[Back]</span></a>
          </div>
    </div>

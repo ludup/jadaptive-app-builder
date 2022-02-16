@@ -24,7 +24,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 @Extension
-public class FreeMarker extends AbstractPageExtension{
+public class FreeMarker extends AbstractPageExtension {
 
 	static Logger log = LoggerFactory.getLogger(FreeMarker.class);
 	

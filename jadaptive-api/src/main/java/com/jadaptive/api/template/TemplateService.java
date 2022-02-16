@@ -41,7 +41,7 @@ public interface TemplateService {
 
 	Class<?> getTemplateClass(String resourceKey);
 
-	void registerTemplateClass(String resourceKey, Class<?> templateClazz);
+	void registerTemplateClass(String resourceKey, Class<?> templateClazz, ObjectTemplate template);
 
 	String getTemplateResourceKey(Class<?> clz);
 

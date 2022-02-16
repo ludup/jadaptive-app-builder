@@ -311,6 +311,26 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				buf.append(" IS NOT ");
 				buf.append(field.getValue()[0]);
 				break;
+			case GT:
+				buf.append(field.getColumn());
+				buf.append(">");
+				buf.append(field.getValue());
+				break;
+			case GTE:
+				buf.append(field.getColumn());
+				buf.append(">=");
+				buf.append(field.getValue());
+				break;
+			case LT:
+				buf.append(field.getColumn());
+				buf.append("<");
+				buf.append(field.getValue());
+				break;
+			case LTE:
+				buf.append(field.getColumn());
+				buf.append("<=");
+				buf.append(field.getValue());
+				break;
 			}
 			
 			if(i < fields.length-1) {

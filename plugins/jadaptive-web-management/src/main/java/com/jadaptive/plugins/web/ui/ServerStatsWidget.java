@@ -44,7 +44,7 @@ public class ServerStatsWidget implements DashboardWidget {
 			if(rs.isEnabled()) {
 			long count = rs.getTotalResources();
 				e.appendChild(new Element("a")
-						.attr("href", String.format("/app/ui/table/%s", rs.getResourceKey()))
+						.attr("href", String.format("/app/ui/search/%s", rs.getResourceKey()))
 							.appendChild(new Element("span")
 								.html(String.format("%s&nbsp;", String.valueOf(count)))) 
 							.appendChild(new Element("span")

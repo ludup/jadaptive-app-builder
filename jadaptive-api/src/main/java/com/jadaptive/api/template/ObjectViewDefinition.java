@@ -21,4 +21,5 @@ public @interface ObjectViewDefinition {
 	int weight() default 0;
 	
 	String bundle();
+	
 }

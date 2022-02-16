@@ -23,7 +23,7 @@ public class QuickSetupWidget implements DashboardWidget {
 	
 	@Override
 	public String getIcon() {
-		return "server";
+		return "bolt-lightning";
 	}
 
 	@Override

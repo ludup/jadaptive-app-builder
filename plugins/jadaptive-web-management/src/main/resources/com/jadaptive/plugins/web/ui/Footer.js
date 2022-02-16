@@ -167,4 +167,36 @@ $(function() {
 		debugger;
 		$(this).parents().find('option').remove();
 	});
+	
+	$('.copyURL').on('click', function(e) {
+		e.preventDefault();
+		navigator.clipboard.writeText($(this).attr('href'));
+		JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
+	});
+	
+		$('.deleteConfirmation').on('click', function(e) {
+		e.preventDefault();
+		var name = $(this).data('name');
+		var row = $(this).parents().find('tr').first();
+		bootbox.confirm({
+    		message: 'Are you sure you want to delete ' + name + '?',
+		    buttons: {
+		        confirm: {
+		            label: 'Yes',
+		            className: 'btn-success'
+		        },
+		        cancel: {
+		            label: 'No',
+		            className: 'btn-danger'
+		        }
+		    },
+		    callback: function (result) {
+		        if(result)
+		        {
+					row.remove();
+		        	JadaptiveUtils.success($('#feedback'), name + " has been deleted");
+		        }
+		    }
+		});
+	});
 });

@@ -278,4 +278,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	public void clearAuthenticationState() {
 		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
 	}
+
+	@Override
+	public Class<? extends Page> getAuthenticationPage(String authenticator) {
+		if(registeredAuthenticationPages.containsKey(authenticator)) {
+			return registeredAuthenticationPages.get(authenticator);
+		}
+		throw new IllegalStateException(String.format("%s is not an installed authenticator", authenticator));
+	}
 }

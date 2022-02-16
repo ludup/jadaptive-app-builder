@@ -37,6 +37,9 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String defaultFilter;
 	
+	@ObjectField(type = FieldType.TEXT)
+	String defaultColumn;
+	
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = FieldTemplate.RESOURCE_KEY)
 	Collection<FieldTemplate> fields = new ArrayList<>();
 	
@@ -57,6 +60,9 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	
 	@ObjectField(type = FieldType.HIDDEN)
 	Boolean updatable;
+	
+	@ObjectField(type = FieldType.HIDDEN)
+	Boolean deletable;
 	
 	@ObjectField(type = FieldType.HIDDEN)
 	Boolean permissionProtected;
@@ -140,6 +146,14 @@ public class ObjectTemplate extends NamedUUIDEntity {
 		this.defaultFilter = defaultFilter;
 	}
 
+	public String getDefaultColumn() {
+		return StringUtils.isBlank(defaultColumn) ? "uuid" : defaultColumn;
+	}
+
+	public void setDefaultColumn(String defaultColumn) {
+		this.defaultColumn = defaultColumn;
+	}
+
 	@JsonIgnore
 	public Map<String,FieldTemplate> toMap() {
 		
@@ -220,5 +234,13 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	@JadaptiveIgnore
 	public String getCanonicalName() {
 		return "com.jadaptive.dynamic." + StringUtils.capitalize(resourceKey);
+	}
+
+	public Boolean isDeletable() {
+		return deletable;
+	}
+
+	public void setDeletable(Boolean deletable) {
+		this.deletable = deletable;
 	}
 }

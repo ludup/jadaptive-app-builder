@@ -16,4 +16,5 @@ public @interface ObjectView {
 	FieldRenderer renderer() default FieldRenderer.DEFAULT;
 
 	String bundle() default "";
+	
 }

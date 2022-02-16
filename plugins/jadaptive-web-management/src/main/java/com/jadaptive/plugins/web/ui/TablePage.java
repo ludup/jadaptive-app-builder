@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
@@ -23,8 +22,6 @@ import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UriRedirect;
-import com.jadaptive.api.ui.renderers.DropdownInput;
-import com.jadaptive.api.ui.renderers.I18nOption;
 
 @Extension
 @RequestPage(path="table/{resourceKey}")
@@ -79,18 +76,18 @@ public class TablePage extends TemplatePage {
 			}
 		}
 		
-		DropdownInput searchColumns = new DropdownInput("searchColumn", "default");
-		document.selectFirst("#searchDropdownHolder").appendChild(searchColumns.renderInput());
-		List<I18nOption> columns = new ArrayList<>();
-		columns.add(new I18nOption("default", "default.value", ""));
-		
-		for(FieldTemplate field : template.getFields()) {
-			if(field.isSearchable()) {
-				columns.add(new I18nOption(template.getBundle(), String.format("%s.name", field.getResourceKey()), field.getResourceKey()));
-			}
-		}
-		
-		searchColumns.renderValues(columns, "");
+//		DropdownInput searchColumns = new DropdownInput("searchColumn", "default");
+//		document.selectFirst("#searchDropdownHolder").appendChild(searchColumns.renderInput());
+//		List<I18nOption> columns = new ArrayList<>();
+//		columns.add(new I18nOption("default", "default.value", ""));
+//		
+//		for(FieldTemplate field : template.getFields()) {
+//			if(field.isSearchable()) {
+//				columns.add(new I18nOption(template.getBundle(), String.format("%s.name", field.getResourceKey()), field.getResourceKey()));
+//			}
+//		}
+//		
+//		searchColumns.renderValues(columns, "");
 		
 		
 		TableView view = templateClazz.getAnnotation(TableView.class);

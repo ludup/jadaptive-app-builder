@@ -13,7 +13,7 @@ public class Fontawesome extends AbstractPageExtension {
 
 	@Override
 	public void process(Document document, Element element, Page page) {
-		PageHelper.appendStylesheet(document, "/app/content/fontawesome-pro-5.15.1-web/css/all.css");
+		PageHelper.appendStylesheet(document, "/app/content/fontawesome-pro-6.0.0-web/css/all.css");
 		
 	}
 

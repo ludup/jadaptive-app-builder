@@ -23,7 +23,7 @@ public class RolesMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/table/roles";
+		return "/app/ui/search/roles";
 	}
 
 	@Override

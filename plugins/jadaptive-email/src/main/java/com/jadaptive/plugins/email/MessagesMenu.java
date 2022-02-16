@@ -21,7 +21,7 @@ public class MessagesMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/table/messages";
+		return "/app/ui/search/messages";
 	}
 
 	@Override

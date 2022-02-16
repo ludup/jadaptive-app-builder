@@ -112,7 +112,16 @@ public abstract class HtmlPage implements Page {
 						if(method.getName().length() > 4) {
 							name += method.getName().substring(4);
 						}
-						return Request.get().getParameter(name);
+						String value = Request.get().getParameter(name);
+						if(method.getReturnType().isAssignableFrom(int.class)) {
+							return Integer.parseInt(value);
+						} else if(method.getReturnType().isAssignableFrom(long.class)) {
+							return Long.parseLong(value);
+						} else if(method.getReturnType().isAssignableFrom(boolean.class)) {
+							return Boolean.parseBoolean(value);
+						} else {
+							return value;
+						}
 					} else {
 						throw new UnsupportedOperationException();
 					}
@@ -137,7 +146,7 @@ public abstract class HtmlPage implements Page {
 		}
 	}
 	
-	protected void processPost(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
+	protected void processPost(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		throw new FileNotFoundException();
 	}
 

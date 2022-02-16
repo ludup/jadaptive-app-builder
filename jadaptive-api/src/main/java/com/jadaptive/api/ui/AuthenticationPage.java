@@ -41,7 +41,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	}
 	
 	@Override
-	protected void generateContent(Document doc) {
+	protected void generateContent(Document doc) throws FileNotFoundException {
 	}
 	
 	protected abstract boolean doForm(Document document, AuthenticationState state, T form) throws AccessDeniedException;

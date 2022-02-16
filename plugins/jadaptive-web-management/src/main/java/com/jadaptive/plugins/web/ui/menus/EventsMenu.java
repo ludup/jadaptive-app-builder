@@ -26,7 +26,7 @@ public class EventsMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/table/systemEvent";
+		return "/app/ui/search/systemEvent";
 	}
 
 	@Override

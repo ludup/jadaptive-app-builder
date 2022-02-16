@@ -24,6 +24,10 @@ public interface UploadHandler extends ExtensionPoint {
 	
 	String getURIName();
 
+	default void onUploadsComplete() { };
+	
+	default void onUploadsFailure(Throwable e) { };
+	
 	default void sendSuccessfulResponse(HttpServletResponse resp, String handlerName, String uri, Map<String,String> params) throws IOException {
 		RequestStatus status = new RequestStatusImpl(true);
 		byte[] data = new ObjectMapper().writeValueAsBytes(status);
@@ -31,6 +35,8 @@ public interface UploadHandler extends ExtensionPoint {
 		resp.getOutputStream().write(data);
 		resp.setContentLength(data.length);
 		resp.setContentType("application/json");
+		
+		onUploadsComplete();
 	}
 	
 	default void sendFailedResponse(HttpServletResponse resp, String handlerName, String uri, Throwable e) throws IOException {
@@ -40,5 +46,7 @@ public interface UploadHandler extends ExtensionPoint {
 		resp.getOutputStream().write(data);
 		resp.setContentLength(data.length);
 		resp.setContentType("application/json");
+		
+		onUploadsFailure(e);
 	}
 }

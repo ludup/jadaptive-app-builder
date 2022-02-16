@@ -18,7 +18,6 @@ public class TextAreaFormInput extends FieldInputRender {
 		
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")
-				.addClass("w-100")
 				.appendChild(new Element("div")
 						.addClass("col-12")
 				.appendChild(new Element("label")

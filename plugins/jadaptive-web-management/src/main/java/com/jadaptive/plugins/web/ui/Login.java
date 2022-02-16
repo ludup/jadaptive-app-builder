@@ -1,5 +1,7 @@
 package com.jadaptive.plugins.web.ui;
 
+import java.io.FileNotFoundException;
+
 import org.jsoup.nodes.Document;
 import org.pf4j.Extension;
 import org.slf4j.Logger;
@@ -41,7 +43,7 @@ public class Login extends AuthenticationPage<LoginForm> {
 	}
 
 	@Override
-	protected void generateContent(Document doc) {
+	protected void generateContent(Document doc) throws FileNotFoundException {
 		if(tenantService.isSetupMode()) {
 			throw new UriRedirect("/app/ui/wizards/setup");
 		}

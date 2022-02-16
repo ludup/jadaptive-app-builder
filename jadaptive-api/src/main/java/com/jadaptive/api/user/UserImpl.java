@@ -5,8 +5,10 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.TableView;
 
-@ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
+@TableView(defaultColumns = { "username", "name"})
 public abstract class UserImpl extends UUIDEntity implements User {
 
 	private static final long serialVersionUID = 2210375165051752363L;

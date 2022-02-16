@@ -6,7 +6,7 @@ import org.springframework.util.StringUtils;
 
 public class SearchField {
 
-	public enum Type { EQUALS, LIKE, IN, NOT, OR, AND }
+	public enum Type { EQUALS, LIKE, IN, NOT, OR, AND, GT, LT, GTE, LTE }
 	
 	String searchField;
 	Object[] searchValue;
@@ -86,5 +86,21 @@ public class SearchField {
 	
 	public static SearchField and(SearchField...fields) {
 		return new SearchField(Type.AND, fields);
+	}
+	
+	public static SearchField gt(String searchField, Object searchValue) {
+		return new SearchField(Type.GT, searchField, searchValue);
+	}
+	
+	public static SearchField gte(String searchField, Object searchValue) {
+		return new SearchField(Type.GTE, searchField, searchValue);
+	}
+	
+	public static SearchField lt(String searchField, Object searchValue) {
+		return new SearchField(Type.LT, searchField, searchValue);
+	}
+	
+	public static SearchField lte(String searchField, Object searchValue) {
+		return new SearchField(Type.LTE, searchField, searchValue);
 	}
 }

@@ -53,6 +53,11 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 				object = objectService.getSingleton(template.getResourceKey());
 			}
 
+			if(!object.getResourceKey().equals(template.getResourceKey())) {
+				template = templateService.get(object.getResourceKey());
+				templateClazz = templateService.getTemplateClass(template.getResourceKey());
+			}
+			
 			try {
 				assertPermissions();
 			} catch (AccessDeniedException e) {

@@ -370,6 +370,26 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				builder.append(Utils.csv(field.getValue()));
 				builder.append(" ) ");
 				break;
+			case GT:
+				builder.append(field.getColumn());
+				builder.append(" > ");
+				builder.append(field.getValue()[0]);
+				break;
+			case GTE:
+				builder.append(field.getColumn());
+				builder.append(" >= ");
+				builder.append(field.getValue()[0]);
+				break;
+			case LT:
+				builder.append(field.getColumn());
+				builder.append(" < ");
+				builder.append(field.getValue()[0]);
+				break;
+			case LTE:
+				builder.append(field.getColumn());
+				builder.append(" <= ");
+				builder.append(field.getValue()[0]);
+				break;
 			case NOT:
 				builder.append(field.getColumn());
 				builder.append(" != ");
@@ -414,6 +434,18 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				break;
 			case LIKE:
 				tmp.add(Filters.regex(field.getColumn(), field.getValue()[0].toString()));
+				break;
+			case GT:
+				tmp.add(Filters.gt(field.getColumn(), field.getValue()[0]));
+				break;
+			case GTE:
+				tmp.add(Filters.gte(field.getColumn(), field.getValue()[0]));
+				break;
+			case LT:
+				tmp.add(Filters.lt(field.getColumn(), field.getValue()[0]));
+				break;
+			case LTE:
+				tmp.add(Filters.lte(field.getColumn(), field.getValue()[0]));
 				break;
 			case OR:
 				tmp.add(buildFilter(SearchField.Type.OR, field.getFields()));

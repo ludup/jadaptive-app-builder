@@ -1,8 +1,6 @@
 package com.jadaptive.api.ui;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,38 +12,43 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.servlet.Request;
 
 @Component
-@RequestPage(path = "error")
+@RequestPage(path = "message")
 @ModalPage
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "i18n"} )
 @PageProcessors(extensions = { "i18n"} )
-public class ErrorPage extends HtmlPage {
+public class MessagePage extends HtmlPage {
 
-	static Logger log = LoggerFactory.getLogger(ErrorPage.class);
+static Logger log = LoggerFactory.getLogger(ErrorPage.class);
 	
-	private static final String THROWABLE = "lastError";
 	private static final String RETURN_TO = "returnTo";
 	
-	public ErrorPage() {
+	String title;
+	String message;
+	String icon;
+	
+	public MessagePage() {
 		
 	}
 	
-	public ErrorPage(Throwable e) {
-		Request.get().getSession().setAttribute(THROWABLE, e);
+	public MessagePage(String title, String message, String icon) {
+		this.title = title;
+		this.message = message;
+		this.icon = icon;
 	}
 	
-	public ErrorPage(Throwable e, String returnTo) {
-		Request.get().getSession().setAttribute(THROWABLE, e);
+	public MessagePage(String title, String message, String icon, String returnTo) {
+		this(title, message, icon);
 		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
 	}
 	
-	public ErrorPage(Throwable e, Page returnTo) {
-		Request.get().getSession().setAttribute(THROWABLE, e);
+	public MessagePage(String title, String message, String icon, Page returnTo) {
+		this(title, message, icon);
 		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
 	}
 
 	@Override
 	public String getUri() {
-		return "error";
+		return "message";
 	}
 
 	@Override
@@ -65,19 +68,6 @@ public class ErrorPage extends HtmlPage {
 				log.warn("Unexpected object in return to parameter [{}]", returnTo.getClass().getName());
 				document.selectFirst("#returnTo").remove();
 			}
-			
-			
-		}
-		Throwable e = (Throwable) Request.get().getSession().getAttribute(THROWABLE);
-		document.selectFirst("#message").text(e.getMessage());
-		
-		try(StringWriter w = new StringWriter()) {
-			try(PrintWriter pw = new PrintWriter(w)) {
-				e.printStackTrace(pw);
-				document.selectFirst("#stacktrace").text(w.toString());
-			}
 		}
 	}
-
-	
 }

@@ -97,6 +97,7 @@ public class UploadServlet extends HttpServlet {
 			// Parse the request
 			FileItemIterator iter = upload.getItemIterator(req);
 			Map<String,String> parameters = new HashMap<>();
+			
 			while (iter.hasNext()) {
 			    FileItemStream item = iter.next();
 
@@ -105,11 +106,6 @@ public class UploadServlet extends HttpServlet {
 			        String value = IOUtils.toString(item.openStream(), "UTF-8");
 			        parameters.put(name, value);
 			    } else {
-			     
-				    if(Objects.isNull(handler)) {
-				    	log.warn("Missing upload handler for {}", handlerName);
-				    	continue;
-				    }
 				    
 				    if(StringUtils.isBlank(item.getName())) {
 				    	continue;

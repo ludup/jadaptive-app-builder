@@ -457,9 +457,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.getAliases().clear();
 			template.getAliases().addAll(Arrays.asList(e.aliases()));
 			template.setDefaultFilter(e.defaultFilter());
+			template.setDefaultColumn(e.defaultColumn());
 			template.setName(e.resourceKey());
+			
 			template.setCreatable(e.creatable());
 			template.setUpdatable(e.updatable());
+			template.setDeletable(e.deletable());
 			template.setPermissionProtected(e.requiresPermission());
 			
 			String nameField = "uuid";
@@ -487,7 +490,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.setNameField(nameField);
 			templateRepository.saveOrUpdate(template);
 			loadedTemplates.put(e.resourceKey(), template);
-			templateService.registerTemplateClass(e.resourceKey(), clz);
+			templateService.registerTemplateClass(e.resourceKey(), clz, template);
 			
 			switch(template.getType()) {
 			case COLLECTION:

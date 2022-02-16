@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang.WordUtils;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.repository.NamedUUIDEntity;
@@ -42,7 +41,7 @@ public class DropdownInput extends InputRender {
 	@Override
 	public Element renderInput() {
 
-		return new Element("div").attr("class", "row mb-3")
+		return new Element("div").attr("class", "row")
 				.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", resourceKey))
 						.attr("style", "position: relative")
@@ -92,7 +91,7 @@ public class DropdownInput extends InputRender {
 	}
 	
 	private String processEnumName(String name) {
-		return WordUtils.capitalizeFully(name.replace('_', ' '));
+		return name.replace('_', ' ');
 	}
 	
 	public void renderValues(Map<String,String> values, String defaultValue, boolean i18n) {

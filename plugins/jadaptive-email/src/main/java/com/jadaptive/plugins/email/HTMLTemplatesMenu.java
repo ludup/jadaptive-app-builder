@@ -21,7 +21,7 @@ public class HTMLTemplatesMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/table/htmlTemplates";
+		return "/app/ui/search/htmlTemplates";
 	}
 
 	@Override

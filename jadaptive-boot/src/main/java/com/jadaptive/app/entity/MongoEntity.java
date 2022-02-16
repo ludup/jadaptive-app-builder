@@ -51,6 +51,10 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 		if(!this.document.containsKey("resourceKey")) {
 			this.document.put("resourceKey", resourceKey);
 		}
+		String uuid = (String) document.getOrDefault("_id", null);
+		if(Objects.nonNull(uuid)) {
+			setUuid(uuid);
+		}
 		if(!Objects.isNull(parent)) {
 			parent.addChild(resourceKey, this);
 		}
@@ -105,6 +109,9 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 
 	@Override
 	public Object getValue(String fieldName) {
+		if(fieldName.equals("uuid")) {
+			return getUuid();
+		}
 		return document.get(fieldName);
 	}
 	

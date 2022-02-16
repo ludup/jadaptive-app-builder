@@ -8,11 +8,23 @@ import com.jadaptive.utils.Utils;
 public class Html {
 
 	public static Element a(String href, String classes) {
-		return new Element("a").attr("href", href).addClass(classes);
+		return a(href).addClass(classes);
+	}
+	
+	public static Element a(String href, String... classes) {
+		return a(href).addClass(Utils.csv(" ", classes));
+	}
+	
+	public static Element a(String href) {
+		return new Element("a").attr("href", href);
 	}
 	
 	public static Node i(String classes) {
 		return new Element("i").addClass(classes);
+	}
+	
+	public static Node i(String... classes) {
+		return new Element("i").addClass(Utils.csv(" ", classes));
 	}
 	
 	public static Element option(String value, String classes) {
@@ -29,6 +41,10 @@ public class Html {
 	
 	public static Element span(String text) {
 		return new Element("span").text(text);
+	}
+	
+	public static Element i18n(String bundle, String i18n) {
+		return new Element("span").attr("jad:bundle", bundle).attr("jad:i18n", i18n);
 	}
 	
 	public static Element span(String text, String classes) {
@@ -53,5 +69,33 @@ public class Html {
 				.attr("name", name)
 				.val(value)
 				.addClass(Utils.csv(" ", classes));
+	}
+
+	public static Element div(String... classes) {
+		return new Element("div").addClass(Utils.csv(" ", classes));
+	}
+
+	public static Element table(String classes) {
+		return new Element("table").addClass(Utils.csv("", classes));
+	}
+	
+	public static Element thead() {
+		return new Element("thead");
+	}
+	
+	public static Element tr() {
+		return new Element("tr");
+	}
+	
+	public static Element td() {
+		return new Element("td");
+	}
+	
+	public static Element td(String... classes) {
+		return td().addClass(Utils.csv("", classes));
+	}
+
+	public static Element tbody() {
+		return new Element("tbody");
 	}
 }

@@ -92,7 +92,7 @@ public class MockEntityTemplateService implements TemplateService {
 		return null;
 	}
 	@Override
-	public void registerTemplateClass(String resourceKey, Class<?> templateClazz) {
+	public void registerTemplateClass(String resourceKey, Class<?> templateClazz, ObjectTemplate template) {
 		// TODO Auto-generated method stub
 		
 	}

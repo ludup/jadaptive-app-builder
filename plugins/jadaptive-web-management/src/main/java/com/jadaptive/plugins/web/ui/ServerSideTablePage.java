@@ -1,9 +1,13 @@
 package com.jadaptive.plugins.web.ui;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
@@ -23,6 +27,7 @@ import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
+import com.jadaptive.api.ui.FormProcessor;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
@@ -30,12 +35,14 @@ import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
+import com.jadaptive.plugins.web.ui.ServerSideTablePage.SearchForm;
+import com.jadaptive.plugins.web.ui.renderers.TableRenderer;
 
 @Extension
-@RequestPage(path="table2/{resourceKey}/{start}/{length}")
+@RequestPage(path="search/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "freemarker", "i18n"} )
 @PageProcessors(extensions = { "freemarker", "i18n"} )
-public class ServerSideTablePage extends TemplatePage {
+public class ServerSideTablePage extends TemplatePage implements FormProcessor<SearchForm> {
 
 	@Autowired
 	private PermissionService permissionService; 
@@ -46,16 +53,14 @@ public class ServerSideTablePage extends TemplatePage {
 	@Autowired
 	private ObjectService objectService;;
 	
-	Integer start;
-	
-	Integer length;
-	
-	String searchField = "resourceKey";
-	String searchValue = "";
+	Integer start = 0;
+	Integer length = 10;
+	String searchField;
+	String searchValue;
 	
 	@Override
 	public String getUri() {
-		return "table2";
+		return "search";
 	}
 
 	@Override
@@ -63,16 +68,47 @@ public class ServerSideTablePage extends TemplatePage {
 		super.created();
 		
 		if(!template.getCollectionKey().equals(resourceKey)) {
-			throw new UriRedirect(String.format("/app/ui/table2/%s", template.getCollectionKey()));
+			throw new UriRedirect(String.format("/app/ui/search/%s", template.getCollectionKey()));
 		}
 	}	
+	
+	public final void processForm(Document document, SearchForm form) throws FileNotFoundException {
+		
+		searchField = form.getSearchColumn();
+		searchValue = form.getSearchValue();
+		start = form.getStart();
+		length = form.getLength();
+
+		generateTable(document);
+	}
+	
+	protected void processPost(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		doGet(uri, request, response);
+	}
 
 	@Override
 	protected void generateAuthenticatedContent(Document document) {
 		
-		searchField = StringUtils.defaultString(Request.get().getParameter("column"), "resourceKey");
-		searchValue = StringUtils.defaultString(Request.get().getParameter("filter"), "");
+		searchField = StringUtils.defaultString(Request.get().getParameter("column"), template.getDefaultColumn());
+		searchValue = StringUtils.defaultString(Request.get().getParameter("filter"), template.getDefaultFilter());
 		
+		generateTable(document);
+	
+	}
+	
+	private void generateTableActions(Document document, TableView view) {
+		
+		if(view != null) {
+			for(TableAction action : view.actions()) {
+				if(action.target()==Target.TABLE) {
+					createTableAction(document, action.url(), action.bundle(), action.icon(), action.buttonClass(), action.resourceKey());
+				}
+			}
+		}
+		
+	}
+
+	protected void generateTable(Document document) {
 		List<ObjectTemplate> creatableTemplates = new ArrayList<>();
 		
 		if(!template.getChildTemplates().isEmpty()) {
@@ -112,108 +148,35 @@ public class ServerSideTablePage extends TemplatePage {
 		
 		document.selectFirst("#searchValueHolder").appendChild(Html.text("searchValue", "searchValue", searchValue, "form-control"));
 		
+		
+		DropdownInput searchPage = new DropdownInput("length", "default");
+		document.selectFirst("#searchPageHolder").appendChild(searchPage.renderInput());
+		
+		var pageResults = new ArrayList<I18nOption>();
+		pageResults.add(new I18nOption("default", "5.items", "5"));
+		pageResults.add(new I18nOption("default", "10.items", "10"));
+		pageResults.add(new I18nOption("default", "25.items", "25"));
+		pageResults.add(new I18nOption("default", "50.items", "50"));
+		pageResults.add(new I18nOption("default", "100.items", "100"));
+		pageResults.add(new I18nOption("default", "250.items", "250"));
+		searchPage.renderValues(pageResults, String.valueOf(length));
+		
 		Element table = document.selectFirst("#tableholder");
-		table.appendChild(table = new Element("table").attr("data-toggle", "table").addClass("table"));
-		Element el;
-		table.appendChild(new Element("thead").appendChild(el = new Element("tr")));
-		
-		TableView view = templateClazz.getAnnotation(TableView.class);
-
-		for(String column : view.defaultColumns()) {
-			el.appendChild(new Element("td").appendChild(new Element("span")
-					.attr("jad:bundle", template.getBundle())
-					.attr("jad:i18n", String.format("%s.name", column))));
-		}
-		
-		table.appendChild(el = new Element("tbody"));
 		
 		long totalObjects = objectService.count(template.getCollectionKey(), searchField, searchValue);
-		for(AbstractObject obj : objectService.table(template.getResourceKey(), searchField, searchValue, start, length)) {
-			Element row = new Element("tr");
-			
-			for(String column : view.defaultColumns()) {
-				row.appendChild(new Element("td").appendChild(new Element("span").text(StringUtils.defaultString(obj.getValue(column).toString()))));
-			}
-			
-			el.appendChild(row);
-		}
+		Collection<AbstractObject> objects = objectService.table(template.getResourceKey(), searchField, searchValue, start, length);
 		
-		long pages = totalObjects / length;
-		if(totalObjects % length > 0) {
-			pages++;
-		}
+		TableRenderer renderer = new TableRenderer();
+		renderer.setLength(length);
+		renderer.setStart(start);
+		renderer.setObjects(objects);
+		renderer.setTotalObjects(totalObjects);
+		renderer.setTemplate(template);
+		renderer.setTemplateClazz(templateClazz);
 		
-		int currentPage = 0;
-		if(start > 0) {
-			currentPage = start / length;
-		}
-		
-		if(pages > 1) {
-			
-			
-			Element pageList;
-			Element pagnation = document.selectFirst("#pagnation");
-			pagnation.appendChild(Html.nav().appendChild(pageList = Html.ul("pagination")));
-			
-			if(currentPage > 0) {
-				pageList.appendChild(Html.li("page-item")
-						.appendChild(Html.a(generateTableURL(0, length), "page-link searchTable")
-								.appendChild(Html.i("far fa-chevron-double-left"))));
-				
-				pageList.appendChild(Html.li("page-item")
-							.appendChild(Html.a(generateTableURL((currentPage-1)*length, length), "page-link searchTable")
-									.appendChild(Html.i("far fa-chevron-left"))));
-			} else {
-				pageList.appendChild(Html.li("page-item disabled")
-						.appendChild(Html.a("#", "page-link")
-								.appendChild(Html.i("far fa-chevron-double-left"))));
-				pageList.appendChild(Html.li("page-item disabled")
-						.appendChild(Html.a("#", "page-link")
-								.appendChild(Html.i("far fa-chevron-left"))));
-			}
+		table.insertChildren(0, renderer.render());
 	
-			for(int i=0;i<pages;i++) {
-				pageList.appendChild(Html.li("page-item", currentPage == i ? "active" : "")
-							.appendChild(Html.a(generateTableURL(i*length, length), "page-link searchTable")
-									.text(String.valueOf(i+1))));
-				if(i== 4)
-					break;
-			}
-			
-			if(currentPage < pages - 1) {
-				pageList.appendChild(Html.li("page-item")
-						.appendChild(Html.a(generateTableURL((currentPage+1)*length, length), "page-link searchTable")
-								.appendChild(Html.i("far fa-chevron-right"))));
-				pageList.appendChild(Html.li("page-item")
-						.appendChild(Html.a(generateTableURL((int) (pages-1)*length, length), "page-link searchTable")
-								.appendChild(Html.i("far fa-chevron-double-right"))));
-			} else {
-				pageList.appendChild(Html.li("page-item disabled")
-						.appendChild(Html.a("#", "page-link")
-								.appendChild(Html.i("far fa-chevron-right"))));
-				pageList.appendChild(Html.li("page-item disabled")
-						.appendChild(Html.a("#", "page-link")
-								.appendChild(Html.i("far fa-chevron-double-right"))));
-			}
-		}
-		
-		Element rowActions = document.selectFirst("#rowActions");
-		
-		if(view != null) {
-			for(TableAction action : view.actions()) {
-				if(action.target()==Target.TABLE) {
-					createTableAction(document, action.url(), action.bundle(), action.icon(), action.buttonClass(), action.resourceKey());
-				} else {
-					rowActions.appendChild( new Element("div")
-						.addClass("tableAction")
-						.attr("data-url", action.url())
-						.attr("data-bundle", action.bundle())
-						.attr("data-icon", action.icon())
-						.attr("data-resourcekey", action.resourceKey())
-						.attr("data-window", action.window().name()));
-				}
-			}
-		}
+		generateTableActions(document, renderer.getView());
 		
 		try {
 			permissionService.assertReadWrite(template.getResourceKey());
@@ -222,10 +185,7 @@ public class ServerSideTablePage extends TemplatePage {
 		}
 	}
 
-	private String generateTableURL(int start, int length) {
-		return String.format("/app/ui/table2/%s/%d/%d", template.getCollectionKey(), start, length);
-	}
-
+	
 	private void createMultipleOptionAction(Document document, String id, Collection<ObjectTemplate> actions,
 			String bundle) {
 		
@@ -256,13 +216,12 @@ public class ServerSideTablePage extends TemplatePage {
 					.attr("jad:bundle", action.getBundle())
 					.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
 		}
-				 
 	}
 	
 	private void createTableAction(Document document, String url, String bundle, String icon, String buttonClass, String resourceKey) {
 		document.selectFirst("#objectActions").appendChild(
 				new Element("a").attr("href", String.format("/app/ui/%s", replaceParameters(url)))
-				.attr("class", String.format("btn btn-%s", buttonClass))
+				.attr("class", String.format("btn btn-%s me-3", buttonClass))
 				.appendChild(new Element("i")
 						.attr("class", icon + " me-1"))
 				.appendChild(new Element("span")
@@ -295,6 +254,17 @@ public class ServerSideTablePage extends TemplatePage {
 		this.length = length;
 	}
 	
-	
+	public interface SearchForm {
+		String getSearchColumn();
+		String getSearchValue();
+		int getStart();
+		int getLength();
+		
+	}
+
+	@Override
+	public Class<SearchForm> getFormClass() {
+		return SearchForm.class;
+	}
 
 }

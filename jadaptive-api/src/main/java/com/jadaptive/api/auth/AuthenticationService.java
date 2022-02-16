@@ -16,6 +16,7 @@ public interface AuthenticationService {
 	public static final String ALTERNATIVE_PASSWORD = "alternativePassword";
 	public static final String AUTHENTICATION_STATE_ATTR = "authenticationState";
 	public static final String DEFAULT_AUTHENTICATION_FLOW = "defaultAuthentication";
+	public static final String USERNAME_AND_PASSWORD = "usernameAndPassword";
 	
 	Session logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent);
 
@@ -36,6 +37,8 @@ public interface AuthenticationService {
 	void reportAuthenticationFailure(AuthenticationState state);
 
 	void registerDefaultAuthenticationFlow(AuthenticationFlow flow);
+
+	Class<? extends Page> getAuthenticationPage(String authenticator);
 
 
 	

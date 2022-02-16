@@ -34,7 +34,7 @@ public class EntityUploadHandler implements UploadHandler {
 	
 	public EntityUploadHandler() {
 	}
-	
+
 	@Override
 	public void handleUpload(String handlerName, String uri, Map<String,String> parameters, String filename, InputStream in) throws IOException, SessionTimeoutException, UnauthorizedException {
 		

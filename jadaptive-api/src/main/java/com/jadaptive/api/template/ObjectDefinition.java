@@ -30,9 +30,13 @@ public @interface ObjectDefinition {
 		
 		boolean updatable() default true;
 		
+		boolean deletable() default true;
+		
 		String[] aliases() default { };
 		
 		String defaultFilter() default "";
+		
+		String defaultColumn() default "";
 
 		boolean requiresPermission() default true;
 }
