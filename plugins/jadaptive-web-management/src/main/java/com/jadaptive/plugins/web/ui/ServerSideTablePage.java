@@ -123,12 +123,15 @@ public class ServerSideTablePage extends TemplatePage implements FormProcessor<S
 		} 
 		
 		if(template.isCreatable()) {
-			creatableTemplates.add(template);
 			if(creatableTemplates.size() > 1) {
 				createMultipleOptionAction(document, "create", creatableTemplates, template.getCollectionKey());
 			} else if(creatableTemplates.size() == 1) {
 				ObjectTemplate singleTemplate = creatableTemplates.get(0);
 				createTableAction(document, String.format("create/%s", singleTemplate.getResourceKey()), 
+						template.getCollectionKey(), "far fa-plus",
+						"primary", "create");
+			} else {
+				createTableAction(document, String.format("create/%s", template.getResourceKey()), 
 						template.getCollectionKey(), "far fa-plus",
 						"primary", "create");
 			}

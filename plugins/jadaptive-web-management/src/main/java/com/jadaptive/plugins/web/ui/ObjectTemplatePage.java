@@ -25,6 +25,7 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 	
 	protected AbstractObject object;
 
+	
 	public boolean isModal() {
 		return true;
 	}
@@ -53,11 +54,6 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 				object = objectService.getSingleton(template.getResourceKey());
 			}
 
-			if(!object.getResourceKey().equals(template.getResourceKey())) {
-				template = templateService.get(object.getResourceKey());
-				templateClazz = templateService.getTemplateClass(template.getResourceKey());
-			}
-			
 			try {
 				assertPermissions();
 			} catch (AccessDeniedException e) {

@@ -15,6 +15,8 @@ public class SMTPConfigurationMenu implements ApplicationMenu {
 	public String getResourceKey() {
 		return "smtpConfiguration.name";
 	}
+	
+	public boolean isEnabled() { return false; }
 
 	@Override
 	public String getBundle() {

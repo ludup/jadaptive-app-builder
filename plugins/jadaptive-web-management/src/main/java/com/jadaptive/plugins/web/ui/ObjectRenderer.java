@@ -1,6 +1,7 @@
 package com.jadaptive.plugins.web.ui;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -64,7 +65,16 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			} 
 	
 			actionURL.set(String.format("/app/api/form/%s/%s", handler, template.getResourceKey()));
-			super.process(contents, page, template, object.get(), scope);
+			
+			AbstractObject displayObject = object.get();
+			ObjectTemplate displayTemplate = template;
+			if(Objects.nonNull(displayObject)) {
+				if(!displayObject.getResourceKey().equals(displayTemplate.getResourceKey())) {
+					displayTemplate = templateService.get(displayObject.getResourceKey());
+				}
+			}
+			
+			super.process(contents, page, displayTemplate, displayObject, scope);
 		
 		 } finally {
 			actionURL.remove();

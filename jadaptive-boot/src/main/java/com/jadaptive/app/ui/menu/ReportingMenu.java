@@ -16,6 +16,8 @@ public class ReportingMenu implements ApplicationMenu {
 		return ApplicationMenuService.REPORTING_MENU_UUID;
 	}
 	
+	public boolean isEnabled() { return false; }
+	
 	@Override
 	public String getResourceKey() {
 		return "reporting.name";

@@ -165,8 +165,8 @@ public class TableRenderer {
 		Element el = Html.td("text-end");
 		
 		if(template.isUpdatable()) {
-			el.appendChild(Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "ms-2")
-					.appendChild(Html.i("far", "fa-edit","fa-fw")));
+			el.appendChild(Html.a(replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "ms-2")
+					.appendChild(Html.i("far", "fa-eye","fa-fw")));
 		}
 		
 		for(TableAction action : view.actions()) {
@@ -220,7 +220,12 @@ public class TableRenderer {
 		boolean isDefault = template.getDefaultColumn().equals(field.getResourceKey());
 		
 		if(isDefault) {
-			return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+			if(template.isUpdatable()) {
+				return Html.a(String.format("/app/ui/update/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+			} else {
+				return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+			}
+			
 		}
 		
 		switch(field.getFieldType()) {

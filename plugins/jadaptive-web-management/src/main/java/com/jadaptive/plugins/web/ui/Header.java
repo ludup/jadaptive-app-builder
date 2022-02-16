@@ -109,7 +109,7 @@ public class Header extends AbstractPageExtension {
 							.addClass("dropdown-item me-3")
 							.attr("href", child.getPath())
 							.appendChild(new Element("i")
-									.addClass("nav-icon me-1 fas fa-" + child.getIcon()))
+									.addClass("nav-icon me-2 far fa-fw fa-" + child.getIcon()))
 							.appendChild(new Element("span")
 									.attr("jad:bundle", child.getBundle())
 										.attr("jad:i18n", child.getResourceKey())));
@@ -124,6 +124,8 @@ public class Header extends AbstractPageExtension {
 									.attr("data-bs-toggle", "dropdown")
 									.attr("aria-haspopup", "true")
 									.attr("aria-expanded", "false")
+									.appendChild(new Element("i")
+											.addClass("nav-icon me-2 far fa-fw fa-" + parent.getIcon()))
 									.appendChild(new Element("span")
 											.attr("jad:bundle", parent.getBundle())
 											.attr("jad:i18n", parent.getResourceKey())))

@@ -67,7 +67,10 @@ public class AuthenticatorStart extends HtmlPage {
 		
 		AuthenticatorClient client = new AuthenticatorClient(hostname, port);
 		client.setAuthorizeText(config.getAuthorizeAction());
-		client.setPromptText(config.getAuthorizePrompt());
+		client.setPromptText(replaceVariables(config.getAuthorizePrompt(), 
+				(EmailEnabledUser)state.getUser(),
+				config.getApplicationName(), 
+				config.getDirectoryHostname()));
 		client.setRemoteName(config.getApplicationName());
 		
 		if(config.getDebug()) {
@@ -92,6 +95,12 @@ public class AuthenticatorStart extends HtmlPage {
 		} catch(IOException e) {
 			throw new PageRedirect(new ErrorPage(e));
 		}
-
+	}
+	
+	private String replaceVariables(String prompt, EmailEnabledUser user, String appName, String hostname) {
+		return prompt.replace("${username}", user.getUsername())
+				.replace("${email}", user.getEmail())
+				.replace("${hostname}", hostname)
+				.replace("${applicationName}", appName);
 	}
 }
