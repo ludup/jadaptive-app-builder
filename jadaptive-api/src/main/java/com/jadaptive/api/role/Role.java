@@ -17,7 +17,10 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TableView;
 
-@ObjectDefinition(resourceKey = Role.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = Role.RESOURCE_KEY, 
+					scope = ObjectScope.GLOBAL,
+					type = ObjectType.COLLECTION,
+					defaultColumn = "name")
 @ObjectViews({ 
 	@ObjectViewDefinition(value = Role.USERS_VIEW, bundle = "users"),
 	@ObjectViewDefinition(value = Role.PERMISSIONS_VIEW, bundle = "permissions", weight = 50),

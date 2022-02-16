@@ -166,7 +166,7 @@ public class TableRenderer {
 		
 		if(template.isUpdatable()) {
 			el.appendChild(Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "ms-2")
-					.appendChild(Html.i("far", "fa-edit")));
+					.appendChild(Html.i("far", "fa-edit","fa-fw")));
 		}
 		
 		for(TableAction action : view.actions()) {
@@ -176,28 +176,31 @@ public class TableRenderer {
 						el.appendChild(Html.a("#", "deleteConfirmation", "ms-2")
 									.attr("data-name", obj.getValue(template.getDefaultColumn()).toString())
 									.attr("data-url", replaceVariables(action.url(), obj))
-									.appendChild(Html.i("far ", action.icon())));
+									.appendChild(Html.i("far ", action.icon(), "fa-fw")));
 					} else {
 						el.appendChild(Html.a("#", "deleteConfirmation", "ms-2")
 								.attr("data-name", obj.getUuid())
 								.attr("data-url", action.url().replace("{uuid}", obj.getUuid()))
-								.appendChild(Html.i("far ", action.icon())));
+								.appendChild(Html.i("far ", action.icon(), "fa-fw")));
 					}
 				} else {
 					el.appendChild(Html.a(replaceVariables(action.url(), obj), "ms-2")
-							.appendChild(Html.i("far ", action.icon())));
+							.appendChild(Html.i("far ", action.icon(), "fa-fw")));
 				}
 			} 
 		}
 		
-		if(!obj.isSystem()) {
-			if(template.isDeletable()) {
+		if(template.isDeletable()) {
+			if(!obj.isSystem()) {
 				el.appendChild(Html.a("#", "deleteConfirmation", "ms-2")
 						.attr("data-name", obj.getValue(template.getDefaultColumn()).toString())
 						.attr("data-url", replaceVariables("/app/api/objects/{resourceKey}/{uuid}", obj))
-						.appendChild(Html.i("far", "fa-trash")));
+						.appendChild(Html.i("far", "fa-trash", "fa-fw")));
+			} else {
+				el.appendChild(Html.i("far", "fa-fw", "ms-2"));
 			}
-		}
+		} 
+		
 		
 		if(el.children().size() > 0) {
 			row.appendChild(el);
@@ -219,7 +222,14 @@ public class TableRenderer {
 		if(isDefault) {
 			return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
 		}
-		return Html.span(StringUtils.defaultString(obj.getValue(field).toString()));
+		
+		switch(field.getFieldType()) {
+		case BOOL:
+			return Html.i("far", Boolean.parseBoolean(obj.getValue(field).toString()) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
+		default:
+			return Html.span(StringUtils.defaultString(obj.getValue(field).toString()));
+		}
+		
 	}
 
 	public void setStart(int start) {
