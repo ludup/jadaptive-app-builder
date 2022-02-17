@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jsoup.nodes.Document;
+
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.wizards.WizardState;
@@ -18,7 +20,7 @@ public abstract class WizardPage extends HtmlPage {
 	}
 
 	@Override
-	protected void processPost(String uri, HttpServletRequest request, HttpServletResponse response)
+	protected void processPost(Document document, String uri, HttpServletRequest request, HttpServletResponse response)
 			throws FileNotFoundException {
 		state.moveNext();
 		throw new UriRedirect("/app/ui/wizard/setupWizard");

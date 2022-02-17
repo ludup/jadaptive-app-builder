@@ -130,7 +130,7 @@ public abstract class HtmlPage implements Page {
 				m.invoke(this, doc, formProxy);
 				
 			} else {
-				processPost(uri, request, response);
+				processPost(doc, uri, request, response);
 			}
 			
 			processPageExtensions(uri, doc);
@@ -146,7 +146,7 @@ public abstract class HtmlPage implements Page {
 		}
 	}
 	
-	protected void processPost(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
+	protected void processPost(Document document, String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		throw new FileNotFoundException();
 	}
 
@@ -266,5 +266,27 @@ public abstract class HtmlPage implements Page {
 		for(String ext : extensions) {
 			pageCache.resolveExtension(ext).process(document, null, this);
 		}
+	}
+	
+	private void showFeedback(Document document, String icon, String bundle, String i18n, String... classes) {
+		document.selectFirst("#feedback").appendChild(Html.div(classes)
+				.appendChild(Html.i("far", icon))
+				.appendChild(Html.i18n(bundle, i18n)));
+	}
+	
+	protected void showError(Document document, String bundle, String i18n) {
+		showFeedback(document, "fa-square-exclamation", bundle, i18n, "alert", "alert-danger");
+	}
+	
+	protected void showSuccess(Document document, String bundle, String i18n) {
+		showFeedback(document, "fa-thumbs-up", bundle, i18n, "alert", "alert-success");
+	}
+	
+	protected void showInfo(Document document, String bundle, String i18n) {
+		showFeedback(document, "fa-square-info", bundle, i18n, "alert", "alert-info");
+	}
+	
+	protected void showWarning(Document document, String bundle, String i18n) {
+		showFeedback(document, "fa-triangle-exclamation", bundle, i18n, "alert", "alert-warning");
 	}
 }
