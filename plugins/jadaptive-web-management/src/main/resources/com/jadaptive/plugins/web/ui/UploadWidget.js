@@ -143,13 +143,14 @@ var UploadWidget = {
 		           {
 		        	   if(data.success) {
 					       
-							$(_self._options.feedbackDiv).prepend('<p class="alert alert-success"><i class="far fa-check"></i> The upload of ' + countFiles + ' file(s) completed.</p>');
-							JadaptiveUtils.stopAwesomeSpin($('#uploadButton i'), 'fa-upload');
+							$(_self._options.feedbackDiv).prepend('<p class="alert alert-success"><i class="far fa-check"></i> The upload of ' + countFiles + ' file(s) completed.</p>');		
 							
-							
-							if(_self._options.successUrl) {
-								window.location = _self._options.successUrl;
-							}
+//							setTimeout(function() {
+								JadaptiveUtils.stopAwesomeSpin($('#uploadButton i'), 'fa-upload');
+								if(_self._options.successUrl) {
+									window.location = _self._options.successUrl;
+								}
+//							}, 2000);
  
 		        	   } else {
 		        		   $(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="far fa-exclamation-circle"></i> ' + data.message + '</p>');

@@ -19,7 +19,7 @@ import com.jadaptive.api.ui.renderers.DropdownInput;
 
 @Extension
 @RequestPage(path="tables/{resourceKey}")
-@PageDependencies(extensions = { "jquery", "bootstrap", "bootstrapTable", "fontawesome", "jadaptive-utils", "freemarker", "i18n"} )
+@PageDependencies(extensions = { "jquery", "bootstrap", "bootstrapTable", "fontawesome", "jadaptive-utils", "i18n"} )
 @PageProcessors(extensions = { "freemarker", "i18n"} )
 public class MultipleTables extends TemplatePage {
 	@Autowired

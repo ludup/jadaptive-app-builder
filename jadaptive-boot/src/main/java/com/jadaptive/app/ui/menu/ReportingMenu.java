@@ -4,19 +4,24 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.pf4j.Extension;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
 @Extension
 public class ReportingMenu implements ApplicationMenu {
 
+	@Autowired
+	private ProductService productService; 
+	
 	@Override
 	public String getUuid() {
 		return ApplicationMenuService.REPORTING_MENU_UUID;
 	}
 	
-	public boolean isEnabled() { return false; }
+	public boolean isEnabled() { return productService.supportsFeature("eventLog"); }
 	
 	@Override
 	public String getResourceKey() {

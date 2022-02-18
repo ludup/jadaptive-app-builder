@@ -36,6 +36,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationUpdateManager;
+import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.utils.Version;
 
 @Service

@@ -23,7 +23,6 @@ public abstract class AssignableUUIDEntity extends AbstractUUIDEntity {
 	
 	@ObjectField(defaultValue = "false", 
 			type = FieldType.OBJECT_REFERENCE,
-			searchable = true,
 			references = "roles")
 	@ObjectView(ROLES_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
@@ -31,7 +30,6 @@ public abstract class AssignableUUIDEntity extends AbstractUUIDEntity {
 	
 	@ObjectField(defaultValue = "false", 
 			type = FieldType.OBJECT_REFERENCE,
-			searchable = true,
 			references = "users")
 	@ObjectView(USERS_VIEW)
 	@ExcludeView(values = FieldView.TABLE)

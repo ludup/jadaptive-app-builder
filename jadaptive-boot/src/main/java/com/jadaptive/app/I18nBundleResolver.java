@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.template.FieldTemplate;
@@ -14,7 +15,20 @@ public class I18nBundleResolver implements I18nService {
 
 	@Override
 	public String format(String bundle, Locale locale, String key, Object... args) {
-		return I18N.getResource(locale, bundle, key, args);
+		switch(bundle) {
+		case "app":
+		{
+			switch(key) {
+			case "version.text":
+				return ApplicationVersion.getVersion();
+			default:
+				return null;
+			}
+		}
+		default:
+			return I18N.getResource(locale, bundle, key, args);
+		}
+		
 	}
 	
 	@Override

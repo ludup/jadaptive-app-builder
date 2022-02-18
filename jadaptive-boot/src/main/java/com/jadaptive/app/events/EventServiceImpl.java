@@ -21,6 +21,7 @@ import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.events.UUIDEntityCreatedEvent;
 import com.jadaptive.api.events.UUIDEntityDeletedEvent;
 import com.jadaptive.api.events.UUIDEntityUpdatedEvent;
+import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.TemplateService;
@@ -46,6 +47,9 @@ public class EventServiceImpl implements EventService {
 	@Autowired
 	private TenantService tenantService; 
 	
+	@Autowired
+	private ProductService productService;
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void publishEvent(SystemEvent evt) {
@@ -69,7 +73,9 @@ public class EventServiceImpl implements EventService {
 		}
 		
 		if(tenantService.isReady() && canAudit(evt)) {
-			eventDatabase.saveOrUpdate(evt);
+			if(productService.supportsFeature("eventLog")) {
+				eventDatabase.saveOrUpdate(evt);
+			}
 		}
 	}
 	

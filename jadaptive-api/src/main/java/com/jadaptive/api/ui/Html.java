@@ -43,8 +43,12 @@ public class Html {
 		return new Element("span").text(text);
 	}
 	
-	public static Element i18n(String bundle, String i18n) {
-		return new Element("span").attr("jad:bundle", bundle).attr("jad:i18n", i18n);
+	public static Element i18n(String bundle, String i18n, Object... args) {
+		Element el = new Element("span").attr("jad:bundle", bundle).attr("jad:i18n", i18n);
+		for(int i=0;i<args.length;i++) {
+			el.attr(String.format("jad:arg%d",i), args[i].toString());
+		}
+		return el;
 	}
 	
 	public static Element span(String text, String classes) {

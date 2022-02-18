@@ -174,10 +174,11 @@ $(function() {
 		JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
 	});
 	
-		$('.deleteConfirmation').on('click', function(e) {
+	$('.deleteAction').on('click', function(e) {
 		e.preventDefault();
 		var name = $(this).data('name');
-		var row = $(this).parents().find('tr').first();
+		var url = $(this).data('url');
+
 		bootbox.confirm({
     		message: 'Are you sure you want to delete ' + name + '?',
 		    buttons: {
@@ -193,8 +194,14 @@ $(function() {
 		    callback: function (result) {
 		        if(result)
 		        {
-					row.remove();
-		        	JadaptiveUtils.success($('#feedback'), name + " has been deleted");
+		        	$.ajax({
+					    url: url,
+					    type: 'DELETE',
+					    dataType: 'JSON',
+					    success: function(result) {
+					        window.location.reload();
+					    }
+					});
 		        }
 		    }
 		});

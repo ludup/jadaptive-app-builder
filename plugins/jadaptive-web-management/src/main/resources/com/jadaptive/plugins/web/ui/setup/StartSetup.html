@@ -1,11 +1,14 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<head>
+<title jad:bundle="setup" jad:i18n="setup.title"></title>
+</head>
 <body>
 <div class="bg-light p-5 rounded-lg m-3">
   <h1 class="display-4" jad:bundle="setup" jad:i18n="setup.title"></h1>
   <p class="lead" jad:bundle="setup" jad:i18n="setup.info"></p>
   <hr class="my-4">
-  <p><span jad:bundle="vendor" jad:i18n="product.name"></span> <span jad:bundle="vendor" jad:i18n="product.version"></span><br/>
+  <p><span jad:bundle="vendor" jad:i18n="product.name"></span> <span jad:bundle="app" jad:i18n="version.text"></span><br/>
   <span jad:bundle="vendor" jad:i18n="product.copyright"></span></p>
   <a id="startButton" class="btn btn-success btn-lg" href="#" role="button"><i class="far fa-thumbs-up"></i> <span jad:bundle="setup" jad:i18n="setup.getStarted"></span></a>
   <script type="text/javascript">

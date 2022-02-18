@@ -47,8 +47,10 @@ public abstract class HtmlPage implements Page {
 		
 		Document document = resolveDocument(this);
 		generateContent(document);
+		injectFeedback(document, request);
 		processPageExtensions(uri, document);
 		documentComplete(document);
+		
 		ResponseHelper.sendContent(document.toString(), "text/html; charset=UTF-8;", request, response);
 	}
 
@@ -133,6 +135,7 @@ public abstract class HtmlPage implements Page {
 				processPost(doc, uri, request, response);
 			}
 			
+			injectFeedback(doc, request);
 			processPageExtensions(uri, doc);
 			ResponseHelper.sendContent(doc.toString(), "text/html; charset=UTF-8;", request, response);
 			
@@ -146,6 +149,36 @@ public abstract class HtmlPage implements Page {
 		}
 	}
 	
+	private void injectFeedback(Document doc, HttpServletRequest request) {
+		Feedback feedback = (Feedback) request.getSession().getAttribute("feedback");
+		if(Objects.nonNull(feedback)) {
+			request.getSession().removeAttribute("feedback");
+			Element element = doc.selectFirst("#feedback");
+			if(Objects.isNull(element)) {
+				element = doc.selectFirst("#content");
+				if(Objects.nonNull(element)) {
+					element.appendChild(Html.div("col-12")
+								.appendChild(Html.div("alert", feedback.getAlert())
+								.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
+								.appendChild(Html.i18n(feedback.getBundle(), feedback.getI18n(), feedback.getArgs()))));
+				} else {
+					element = doc.selectFirst("main");
+					if(Objects.nonNull(element)) {
+						element.appendChild(Html.div("col-12")
+								.appendChild(Html.div("alert", feedback.getAlert())
+								.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
+								.appendChild(Html.i18n(feedback.getBundle(), feedback.getI18n(), feedback.getArgs()))));
+					}
+				}
+			} else {
+				element.appendChild(Html.div("alert", feedback.getAlert())
+						.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
+						.appendChild(Html.i18n(feedback.getBundle(), feedback.getI18n(), feedback.getArgs())));
+			}
+		}
+		
+	}
+
 	protected void processPost(Document document, String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		throw new FileNotFoundException();
 	}

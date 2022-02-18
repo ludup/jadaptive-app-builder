@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:jad="http://jadaptive.com/jadaptive">
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
 <body>
 <div class="wrapper">
 <header jad:id="header"></header>
@@ -10,9 +10,11 @@
          	   	<div class="card-header"><span jad:bundle="default" jad:i18n="text.unexpectedError">Unexpected Error</span><div class="float-end"><a id="returnTo" href="/app/ui"><i class="far fa-window-close"></i></a></div></div>
        			<div class="card-body text-center">	
        		<p><i class="fad fa-bomb fa-4x"></i></p>
-       		<h2 jad:bundle="publicDownload"><span id="message"></span></h2>
-       		
-         	<div class="col-12 px-3 mt-5 text-start">
+       		<h2><span id="message"></span></h2>
+       		<div class="col-12 my-5">
+       			<a id="toggleStack" href="#"><i class="far fa-layer-group"></i> <span jad:bundle="userInterface" jad:i18n="stacktrace.show"></span></a>
+       		</div>
+         	<div id="stack" class="col-12 text-start" style="display: none">
 	         	<pre id="stacktrace"></pre>
          	</div>
 		</div>

@@ -25,7 +25,7 @@ import com.jadaptive.api.ui.UriRedirect;
 
 @Extension
 @RequestPage(path="table/{resourceKey}")
-@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "freemarker", "i18n"} )
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "i18n"} )
 @PageProcessors(extensions = { "freemarker", "i18n"} )
 public class TablePage extends TemplatePage {
 

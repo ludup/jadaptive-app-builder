@@ -14,6 +14,7 @@ import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.FormProcessor;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.web.ui.ChangeMyPassword.PasswordForm;
@@ -21,6 +22,7 @@ import com.jadaptive.plugins.web.ui.ChangeMyPassword.PasswordForm;
 @Extension
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @ModalPage
+@PageProcessors(extensions = { "i18n" })
 public class ChangeMyPassword extends AuthenticatedPage implements FormProcessor<PasswordForm>{
 
 	@Autowired

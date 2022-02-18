@@ -12,6 +12,7 @@ import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
+import com.jadaptive.api.template.TableAction.Window;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.utils.Utils;
@@ -171,20 +172,24 @@ public class TableRenderer {
 		
 		for(TableAction action : view.actions()) {
 			if(action.target()==Target.ROW) {
+				Object val = obj.getValue(template.getDefaultColumn());
 				if(action.confirmationRequired()) {
 					if(StringUtils.isNotBlank(template.getDefaultColumn())) {
-						el.appendChild(Html.a("#", "deleteConfirmation", "ms-2")
-									.attr("data-name", obj.getValue(template.getDefaultColumn()).toString())
+						el.appendChild(Html.a("#", "deleteAction", "ms-2")
+									.attr("data-name", val == null ? "" : val.toString())
 									.attr("data-url", replaceVariables(action.url(), obj))
+									.attr("target", action.window() == Window.BLANK ? "_blank" : "_self")
 									.appendChild(Html.i("far ", action.icon(), "fa-fw")));
 					} else {
-						el.appendChild(Html.a("#", "deleteConfirmation", "ms-2")
+						el.appendChild(Html.a("#", "deleteAction", "ms-2")
 								.attr("data-name", obj.getUuid())
-								.attr("data-url", action.url().replace("{uuid}", obj.getUuid()))
+								.attr("data-url", replaceVariables(action.url(), obj))
+								.attr("target", action.window() == Window.BLANK ? "_blank" : "_self")
 								.appendChild(Html.i("far ", action.icon(), "fa-fw")));
 					}
 				} else {
 					el.appendChild(Html.a(replaceVariables(action.url(), obj), "ms-2")
+							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self")
 							.appendChild(Html.i("far ", action.icon(), "fa-fw")));
 				}
 			} 
@@ -192,7 +197,7 @@ public class TableRenderer {
 		
 		if(template.isDeletable()) {
 			if(!obj.isSystem()) {
-				el.appendChild(Html.a("#", "deleteConfirmation", "ms-2")
+				el.appendChild(Html.a("#", "deleteAction", "ms-2")
 						.attr("data-name", obj.getValue(template.getDefaultColumn()).toString())
 						.attr("data-url", replaceVariables("/app/api/objects/{resourceKey}/{uuid}", obj))
 						.appendChild(Html.i("far", "fa-trash", "fa-fw")));
@@ -217,7 +222,7 @@ public class TableRenderer {
 
 	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field) {
 		
-		boolean isDefault = template.getDefaultColumn().equals(field.getResourceKey());
+		boolean isDefault = StringUtils.defaultString(template.getDefaultColumn()).equals(field.getResourceKey());
 		
 		if(isDefault) {
 			if(template.isUpdatable()) {

@@ -78,7 +78,7 @@ public class ApplicationVersion {
 	}
 
 	public static String getProductId() {
-		return System.getProperty("jadaptive.id", "jadaptive-basecamp");
+		return System.getProperty("jadaptive.id", "jadaptive-app-builder");
 	} 
 	
 	public static String getBrandId() {

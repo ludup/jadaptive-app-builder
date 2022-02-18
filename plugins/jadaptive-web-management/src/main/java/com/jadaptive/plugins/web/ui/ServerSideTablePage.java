@@ -40,7 +40,7 @@ import com.jadaptive.plugins.web.ui.renderers.TableRenderer;
 
 @Extension
 @RequestPage(path="search/{resourceKey}")
-@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "freemarker", "i18n"} )
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "i18n"} )
 @PageProcessors(extensions = { "freemarker", "i18n"} )
 public class ServerSideTablePage extends TemplatePage implements FormProcessor<SearchForm> {
 

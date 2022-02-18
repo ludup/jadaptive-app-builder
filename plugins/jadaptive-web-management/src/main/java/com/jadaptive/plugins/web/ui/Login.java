@@ -47,6 +47,12 @@ public class Login extends AuthenticationPage<LoginForm> {
 		if(tenantService.isSetupMode()) {
 			throw new UriRedirect("/app/ui/wizards/setup");
 		}
+		
+		AuthenticationState state = authenticationService.getCurrentState();
+		if(!state.getCurrentPage().equals(Login.class)) {
+			authenticationService.clearAuthenticationState();
+		}
+		
 		super.generateContent(doc);
 	}
 	
