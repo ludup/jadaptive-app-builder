@@ -14,6 +14,7 @@ import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionService;
@@ -25,7 +26,7 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 
 @Service
-public class SessionServiceImpl implements SessionService {
+public class SessionServiceImpl extends AuthenticatedService implements SessionService {
 
 	static Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
 	
@@ -63,43 +64,49 @@ public class SessionServiceImpl implements SessionService {
 		
 		session = repository.get(session.getUuid(), Session.class);
 		
-		if (session.getSignedOut() == null) {
-
-			if(session.getSessionTimeout() > 0) {
-				Calendar currentTime = Calendar.getInstance();
-				Calendar c = Calendar.getInstance();
-				if(session.getLastUpdated()!=null) {
-					c.setTime(session.getLastUpdated());
-					c.add(Calendar.MINUTE, session.getSessionTimeout());
-				}
-				if (log.isDebugEnabled()) {
-					log.debug("Checking session timeout currentTime="
-							+ currentTime.getTime() + " lastUpdated="
-							+ session.getLastUpdated() + " timeoutThreshold="
-							+ c.getTime());
-				}
+		setupUserContext(session.getUser());
+		
+		try {
+			if (session.getSignedOut() == null) {
 	
-				if (c.before(currentTime)) {
-					if (log.isDebugEnabled()) {
-						log.debug("Session has timed out");
+				if(session.getSessionTimeout() > 0) {
+					Calendar currentTime = Calendar.getInstance();
+					Calendar c = Calendar.getInstance();
+					if(session.getLastUpdated()!=null) {
+						c.setTime(session.getLastUpdated());
+						c.add(Calendar.MINUTE, session.getSessionTimeout());
 					}
-					closeSession(session);
-	
 					if (log.isDebugEnabled()) {
-						log.debug("Session "
-								+ session.getUser().getUsername() + "/"
-								+ session.getUuid() + " is now closed");
+						log.debug("Checking session timeout currentTime="
+								+ currentTime.getTime() + " lastUpdated="
+								+ session.getLastUpdated() + " timeoutThreshold="
+								+ c.getTime());
 					}
-	
-					return false;
+		
+					if (c.before(currentTime)) {
+						if (log.isDebugEnabled()) {
+							log.debug("Session has timed out");
+						}
+						closeSession(session);
+		
+						if (log.isDebugEnabled()) {
+							log.debug("Session "
+									+ session.getUser().getUsername() + "/"
+									+ session.getUuid() + " is now closed");
+						}
+		
+						return false;
+					}
 				}
+				if (touch) {
+					touch(session);
+				}
+				return true;
+			} else {
+				return false;
 			}
-			if (touch) {
-				touch(session);
-			}
-			return true;
-		} else {
-			return false;
+		} finally {
+			clearUserContext();
 		}
 	}
 	

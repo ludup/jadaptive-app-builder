@@ -11,6 +11,9 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.ObjectPage;
 
 public abstract class ObjectTemplatePage extends TemplatePage implements ObjectPage {
@@ -52,6 +55,16 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 				object = objectService.get(template.getResourceKey(), uuid);
 			} else if (template.getType() == ObjectType.SINGLETON) {
 				object = objectService.getSingleton(template.getResourceKey());
+			} else {
+				Object obj = Request.get().getSession().getAttribute(template.getResourceKey());
+				if(Objects.nonNull(obj)) {
+					if(obj instanceof AbstractObject) {
+						object = (AbstractObject)obj;
+					} else if(obj instanceof UUIDEntity) {
+						Request.get().getSession().removeAttribute(template.getResourceKey());
+						object = objectService.convert((UUIDEntity) obj);
+					}
+				}
 			}
 
 			try {

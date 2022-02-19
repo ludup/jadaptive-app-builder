@@ -166,6 +166,26 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 			return new EntityResultsStatus<AbstractObject>(false, e.getMessage());
 		}
 	}
+	
+	@RequestMapping(value="/app/api/objects/{resourceKey}/copy/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
+	public void copyObject(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey,
+			@PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
+		try {
+			   AbstractObject obj = entityService.get(resourceKey, uuid);
+			   obj.setUuid(null);
+			   obj.getDocument().remove("_id");
+			   obj.getDocument().remove("uuid");
+			   request.getSession().setAttribute(resourceKey, obj);
+			  
+			   response.sendRedirect(String.format("/app/ui/create/%s", resourceKey));
+			   
+		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/objects/{}/copy", resourceKey, e);
+			}
+			throw new ObjectException(e);
+		}
+	}
 
 //	@RequestMapping(value="/app/api/objects/{resourceKey}/personal", method = RequestMethod.GET, produces = {"application/json"})
 //	@ResponseBody

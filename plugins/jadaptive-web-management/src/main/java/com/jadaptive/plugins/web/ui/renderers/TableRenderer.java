@@ -170,6 +170,11 @@ public class TableRenderer {
 					.appendChild(Html.i("far", "fa-eye","fa-fw")));
 		}
 		
+		if(template.isCreatable()) {
+			el.appendChild(Html.a(replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "ms-2")
+					.appendChild(Html.i("far", "fa-copy","fa-fw")));
+		}
+		
 		for(TableAction action : view.actions()) {
 			if(action.target()==Target.ROW) {
 				Object val = obj.getValue(template.getDefaultColumn());
