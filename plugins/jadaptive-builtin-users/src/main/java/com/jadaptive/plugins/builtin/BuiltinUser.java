@@ -33,7 +33,7 @@ public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser
 	String encodedPassword;
 	
 	@ObjectField(required = false,
-			hidden = false,
+			hidden = true,
 			type = FieldType.TEXT)
 	String salt;
 	
