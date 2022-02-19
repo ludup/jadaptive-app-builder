@@ -11,7 +11,6 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.ObjectPage;
