@@ -124,9 +124,9 @@ public class Authenticator extends AuthenticationPage<EmptyForm> {
 
 	private String replaceVariables(String authorizeAction, EmailEnabledUser user, String appName, String hostname) {
 		return authorizeAction.replace("${username}", user.getUsername())
-				.replace("${email}", user.getEmail())
-				.replace("${hostname}", hostname)
-				.replace("${applicationName}", appName);
+				.replace("{email}", user.getEmail())
+				.replace("{hostname}", hostname)
+				.replace("{applicationName}", appName);
 	}
 
 	interface EmptyForm {

@@ -98,9 +98,9 @@ public class AuthenticatorStart extends HtmlPage {
 	}
 	
 	private String replaceVariables(String prompt, EmailEnabledUser user, String appName, String hostname) {
-		return prompt.replace("${username}", user.getUsername())
-				.replace("${email}", user.getEmail())
-				.replace("${hostname}", hostname)
-				.replace("${applicationName}", appName);
+		return prompt.replace("{username}", user.getUsername())
+				.replace("{email}", user.getEmail())
+				.replace("{hostname}", hostname)
+				.replace("{applicationName}", appName);
 	}
 }
