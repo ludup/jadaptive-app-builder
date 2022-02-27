@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.auth.AuthenticationService;
-import com.jadaptive.plugins.logonbox.ui.Authenticator;
 import com.jadaptive.plugins.logonbox.ui.AuthenticatorStart;
 
 @Service

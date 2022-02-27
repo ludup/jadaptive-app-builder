@@ -7,6 +7,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -14,6 +15,7 @@ import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableAction.Window;
 import com.jadaptive.api.template.TableView;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.utils.Utils;
 
@@ -72,7 +74,13 @@ public class TableRenderer {
 					row.appendChild(Html.td().appendChild(renderElement(obj, template, template.getField(column))));
 				}
 				
-				renderRowActions(row, obj, view, template);
+				if(template.getResourceKey().equals(obj.getResourceKey())) {
+					renderRowActions(row, obj, view, template);
+				} else {
+					renderRowActions(row, obj, view, ApplicationServiceImpl.getInstance().getBean(
+							TemplateService.class).get(obj.getResourceKey()));
+				}
+				
 				
 				el.appendChild(row);
 			}
@@ -165,18 +173,26 @@ public class TableRenderer {
 		
 		Element el = Html.td("text-end");
 		
-		if(template.isUpdatable()) {
-			el.appendChild(Html.a(replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "ms-2")
+		el.appendChild(Html.a(replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "ms-2")
 					.appendChild(Html.i("far", "fa-eye","fa-fw")));
-		}
 		
 		if(template.isCreatable()) {
 			el.appendChild(Html.a(replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "ms-2")
 					.appendChild(Html.i("far", "fa-copy","fa-fw")));
+		} else {
+			el.appendChild(Html.i("far", "fa-fw", "ms-2"));
 		}
 		
 		for(TableAction action : view.actions()) {
 			if(action.target()==Target.ROW) {
+				if(action.requiresCreate() && !template.isCreatable()) {
+					el.appendChild(Html.i("far", "fa-fw", "ms-2"));
+					continue;
+				}
+				if(action.requiresUpdate() && !template.isUpdatable()) {
+					el.appendChild(Html.i("far", "fa-fw", "ms-2"));
+					continue;
+				}
 				Object val = obj.getValue(template.getDefaultColumn());
 				if(action.confirmationRequired()) {
 					if(StringUtils.isNotBlank(template.getDefaultColumn())) {

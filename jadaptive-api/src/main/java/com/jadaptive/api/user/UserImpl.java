@@ -5,10 +5,14 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.TableAction;
+import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
 
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
-@TableView(defaultColumns = { "username", "name"})
+@TableView(defaultColumns = { "username", "name"}, 
+			actions = { @TableAction(bundle = "default", icon = "fa-key", 
+	resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}", requiresUpdate = true)})
 public abstract class UserImpl extends UUIDEntity implements User {
 
 	private static final long serialVersionUID = 2210375165051752363L;
