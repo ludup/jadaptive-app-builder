@@ -4,9 +4,10 @@ import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationVersion;
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.i18n.I18nService;
+import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 
@@ -17,12 +18,17 @@ public class I18nBundleResolver implements I18nService {
 	public String format(String bundle, Locale locale, String key, Object... args) {
 		switch(bundle) {
 		case "app":
+		case "vendor":
 		{
+			ProductService service = ApplicationServiceImpl.getInstance().getBean(ProductService.class);
 			switch(key) {
 			case "version.text":
-				return ApplicationVersion.getVersion();
+			case "product.version":
+				return service.getVersion();
+			case "product.copyright":
+				return service.getCopyright();
 			default:
-				return null;
+				return I18N.getResource(locale, bundle, key, args);
 			}
 		}
 		default:

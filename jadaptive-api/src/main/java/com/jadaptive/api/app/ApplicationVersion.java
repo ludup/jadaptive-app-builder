@@ -2,6 +2,8 @@ package com.jadaptive.api.app;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.prefs.Preferences;
@@ -13,7 +15,7 @@ import org.w3c.dom.Document;
 
 public class ApplicationVersion {
 
-	static String version;
+	static Map<String,String> versions = new HashMap<>();
 	
 	public static String getVersion() {
 		return getVersion("jadaptive-api");
@@ -34,6 +36,8 @@ public class ApplicationVersion {
 		if(fakeVersion != null) {
 			return fakeVersion;
 		}
+		
+		String version = versions.get(artifactId);
 		
 	    if (version != null) {
 	        return version;
@@ -71,9 +75,9 @@ public class ApplicationVersion {
 	    	} catch (Exception e) {
 				version = "DEV_VERSION";
 			} 
-	        
 	    }
 
+	    versions.put(artifactId, version);
 	    return version;
 	}
 

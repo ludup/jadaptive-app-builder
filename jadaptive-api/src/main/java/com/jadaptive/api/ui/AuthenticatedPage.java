@@ -39,15 +39,15 @@ public abstract class AuthenticatedPage extends HtmlPage {
 			state.setHomePage(Request.get().getRequestURI());
 			throw new PageRedirect(pageCache.resolvePage("login"));
 		}
+		
+		currentSession.set(sessionUtils.getActiveSession(Request.get()));
 	}
 
 	@Override
 	public final void generateContent(Document document) throws FileNotFoundException {
 		
 		try {
-			currentSession.set(sessionUtils.getActiveSession(Request.get()));
-			generateAuthenticatedContent(document);
-			
+			generateAuthenticatedContent(document);			
 		} finally {
 			currentSession.remove();
 		}
@@ -62,6 +62,10 @@ public abstract class AuthenticatedPage extends HtmlPage {
 
 	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException {
 		
+	}
+	
+	protected void setCurrentSession(Session session) {
+		currentSession.set(session);
 	}
 	
 	protected User getCurrentUser() {
