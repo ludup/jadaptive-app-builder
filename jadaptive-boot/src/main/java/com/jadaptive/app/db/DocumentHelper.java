@@ -83,6 +83,7 @@ public class DocumentHelper {
 			}
 
 			document.put("_clz", obj.getClass().getName());
+			document.put("resourceKey", obj.getResourceKey());
 			
 			Map<String,Field> fields = ReflectionUtils.getFields(obj.getClass());
 			

@@ -11,4 +11,6 @@ public interface UUIDDocument extends Serializable {
 	public Boolean isHidden();
 
 	public void setUuid(String string);
+	
+	String getResourceKey();
 }

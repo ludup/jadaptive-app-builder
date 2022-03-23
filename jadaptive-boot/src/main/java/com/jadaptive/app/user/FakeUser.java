@@ -52,6 +52,11 @@ public class FakeUser implements User {
 	public String getSystemName() {
 		return getUsername();
 	}
+
+	@Override
+	public String getResourceKey() {
+		return "user";
+	}
 	
 	
 

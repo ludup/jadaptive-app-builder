@@ -101,6 +101,11 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			return getUsername();
 		}
 
+		@Override
+		public String getResourceKey() {
+			return "user";
+		}
+
 	};
 
 	@Override

@@ -12,4 +12,10 @@ public @interface TableView {
 		String[] defaultColumns();
 		
 		TableAction[] actions() default { };
+		
+		boolean requiresView() default true;
+		
+		boolean requiresUpdate() default false;
+		
+		boolean requiresCreate() default false;
 }

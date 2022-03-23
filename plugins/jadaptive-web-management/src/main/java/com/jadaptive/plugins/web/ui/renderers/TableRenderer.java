@@ -173,23 +173,25 @@ public class TableRenderer {
 		
 		Element el = Html.td("text-end");
 		
-		el.appendChild(Html.a(replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "ms-2")
-					.appendChild(Html.i("far", "fa-eye","fa-fw")));
+		if(view.requiresView()) {
+			el.appendChild(Html.a(replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "ms-2")
+						.appendChild(Html.i("far", "fa-eye","fa-fw")));
+		}
 		
 		if(template.isCreatable()) {
 			el.appendChild(Html.a(replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "ms-2")
 					.appendChild(Html.i("far", "fa-copy","fa-fw")));
-		} else {
+		} else if(view.requiresCreate()) {
 			el.appendChild(Html.i("far", "fa-fw", "ms-2"));
 		}
 		
 		for(TableAction action : view.actions()) {
 			if(action.target()==Target.ROW) {
-				if(action.requiresCreate() && !template.isCreatable()) {
+				if(view.requiresCreate() && !template.isCreatable()) {
 					el.appendChild(Html.i("far", "fa-fw", "ms-2"));
 					continue;
 				}
-				if(action.requiresUpdate() && !template.isUpdatable()) {
+				if(view.requiresUpdate() && !template.isUpdatable()) {
 					el.appendChild(Html.i("far", "fa-fw", "ms-2"));
 					continue;
 				}

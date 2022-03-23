@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.user.User;
 
@@ -26,7 +25,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	@Autowired
 	private PageCache pageCache;
 	
-	ThreadLocal<Session> currentSession = new ThreadLocal<>();
+	ThreadLocal<User> currentUser = new ThreadLocal<>();
 	
 	
 	@Override
@@ -40,7 +39,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 			throw new PageRedirect(pageCache.resolvePage("login"));
 		}
 		
-		currentSession.set(sessionUtils.getActiveSession(Request.get()));
+		currentUser.set(sessionUtils.getActiveSession(Request.get()).getUser());
 	}
 
 	@Override
@@ -49,7 +48,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 		try {
 			generateAuthenticatedContent(document);			
 		} finally {
-			currentSession.remove();
+			currentUser.remove();
 		}
 	}
 
@@ -64,15 +63,12 @@ public abstract class AuthenticatedPage extends HtmlPage {
 		
 	}
 	
-	protected void setCurrentSession(Session session) {
-		currentSession.set(session);
+	protected void setCurrentUser(User user) {
+		currentUser.set(user);
 	}
 	
 	protected User getCurrentUser() {
-		return getCurrentSession().getUser();
+		return currentUser.get();
 	}
-	
-	protected Session getCurrentSession() {
-		return currentSession.get();
-	}
+
 }

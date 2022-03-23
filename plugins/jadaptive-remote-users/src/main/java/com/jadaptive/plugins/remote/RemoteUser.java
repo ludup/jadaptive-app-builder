@@ -68,4 +68,9 @@ public class RemoteUser implements User, EmailEnabledUser {
 	public void setEmail(String email) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
+	}
 }

@@ -28,9 +28,6 @@ public @interface TableAction  {
 	String icon();
 	
 	boolean confirmationRequired() default false;
-	
-	boolean requiresUpdate() default false;
-	
-	boolean requiresCreate() default false;
+
 
 }
