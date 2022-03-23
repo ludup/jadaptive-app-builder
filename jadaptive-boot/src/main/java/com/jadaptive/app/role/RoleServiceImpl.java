@@ -284,5 +284,15 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		}
 		return false;
 	}
+	
+	@Override
+	public Collection<Role> getRolesByUUID(Collection<String> roles) {
+		
+		List<Role> tmp = new ArrayList<>();
+		for(Role role : repository.list(Role.class, SearchField.in("uuid", roles))) {
+			tmp.add(role);
+		}
+		return tmp;
+	}
 
 }

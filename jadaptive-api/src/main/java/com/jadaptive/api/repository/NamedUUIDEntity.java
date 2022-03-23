@@ -3,7 +3,7 @@ package com.jadaptive.api.repository;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectField;
 
-public abstract class NamedUUIDEntity extends AbstractUUIDEntity {
+public abstract class NamedUUIDEntity extends AbstractUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 2690511827179922811L;
 

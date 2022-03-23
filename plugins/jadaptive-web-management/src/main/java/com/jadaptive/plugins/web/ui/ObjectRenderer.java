@@ -1,6 +1,8 @@
 package com.jadaptive.plugins.web.ui;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;
@@ -63,6 +65,10 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			if(element.hasAttr("jad:disableViews")) {
 				disableViews.set(Boolean.valueOf(element.attr("jad:disableViews")));
 			} 
+			
+			if(element.hasAttr("jad:ignores")) {
+				ignoreResources.set(new HashSet<>(Arrays.asList(element.attr("jad:ignores").split(","))));
+			}
 	
 			actionURL.set(String.format("/app/api/form/%s/%s", handler, template.getResourceKey()));
 			

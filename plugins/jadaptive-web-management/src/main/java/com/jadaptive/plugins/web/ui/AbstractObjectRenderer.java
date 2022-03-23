@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
@@ -83,6 +84,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	private ThreadLocal<Map<String,AbstractObject>> childObjects = new ThreadLocal<>();
 	
 	protected ThreadLocal<Boolean> disableViews = new ThreadLocal<>();
+	protected ThreadLocal<Set<String>> ignoreResources = new ThreadLocal<>();
 	
 	protected void process(Document contents, Page page, ObjectTemplate template, AbstractObject object, FieldView scope) throws IOException {
 
@@ -264,6 +266,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	private void renderField(Element element, AbstractObject obj, OrderedField orderedField,  FieldView view, OrderedView panel) {
 		
 		FieldTemplate field = orderedField.getField();
+		
+		Set<String> ignores = ignoreResources.get();
+		if(Objects.nonNull(ignores) && ignores.contains(field.getResourceKey())) {
+			return;
+		}
+		
 		if(!field.getViews().isEmpty()) {
 			if(!field.getViews().contains(view)) {
 				if(log.isDebugEnabled()) {

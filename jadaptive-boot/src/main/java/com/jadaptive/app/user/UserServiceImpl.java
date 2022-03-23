@@ -298,4 +298,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		return true;
 	}
 
+	@Override
+	public Collection<User> getUsersByUUID(Collection<String> users) {
+		
+		List<User> tmp = new ArrayList<>();
+		for(User user : userRepository.list(UserImpl.class, SearchField.in("uuid", users))) {
+			tmp.add(user);
+		}
+		return tmp;
+	}
+
 }

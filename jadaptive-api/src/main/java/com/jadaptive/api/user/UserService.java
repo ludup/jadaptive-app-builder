@@ -44,5 +44,7 @@ public interface UserService extends UUIDObjectService<User> {
 
 	Map<String, String> getUserProperties(User user);
 
+	Collection<User> getUsersByUUID(Collection<String> users);
+
 
 }

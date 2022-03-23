@@ -48,4 +48,6 @@ public interface RoleService {
 	Collection<Role> getAllUserRoles();
 	
 	boolean isAssigned(AssignableUUIDEntity obj, User user);
+
+	Collection<Role> getRolesByUUID(Collection<String> roles);
 }
