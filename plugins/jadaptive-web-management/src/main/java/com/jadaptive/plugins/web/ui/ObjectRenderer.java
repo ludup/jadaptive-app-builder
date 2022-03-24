@@ -69,9 +69,7 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			if(element.hasAttr("jad:ignores")) {
 				ignoreResources.set(new HashSet<>(Arrays.asList(element.attr("jad:ignores").split(","))));
 			}
-	
-			actionURL.set(String.format("/app/api/form/%s/%s", handler, template.getResourceKey()));
-			
+
 			AbstractObject displayObject = object.get();
 			ObjectTemplate displayTemplate = template;
 			if(Objects.nonNull(displayObject)) {
@@ -79,6 +77,8 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 					displayTemplate = templateService.get(displayObject.getResourceKey());
 				}
 			}
+			
+			actionURL.set(String.format("/app/api/form/%s/%s", handler, displayTemplate.getResourceKey()));
 			
 			super.process(contents, page, displayTemplate, displayObject, scope);
 		
