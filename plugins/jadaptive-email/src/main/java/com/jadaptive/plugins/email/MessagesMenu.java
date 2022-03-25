@@ -3,11 +3,18 @@ package com.jadaptive.plugins.email;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.pf4j.Extension;
+
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
-//@Extension
+@Extension
 public class MessagesMenu implements ApplicationMenu {
+
+	@Override
+	public boolean isEnabled() {
+		return false;
+	}
 
 	@Override
 	public String getResourceKey() {

@@ -25,6 +25,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	Map<String,AbstractObject> children = new HashMap<>();
 	Document document;
 	String contentHash;
+	String resourceKey;
 	
 	public MongoEntity(Map<String,Object> document) {	
 		this((String)document.get("resourceKey"), document);
@@ -47,6 +48,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	@SuppressWarnings("unchecked")
 	public MongoEntity(AbstractObject parent, String resourceKey, Map<String,Object> document) {
 		this.parent = parent;
+		this.resourceKey = resourceKey;
 		this.document = new Document(document);
 		if(!this.document.containsKey("resourceKey")) {
 			this.document.put("resourceKey", resourceKey);
@@ -65,6 +67,10 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 		}
 	}
 	
+	public void setResourceKey(String resourceKey) {
+		this.resourceKey = resourceKey;
+	}
+
 	@Override
 	public void addChild(String resourceKey, AbstractObject e) {
 		children.put(resourceKey, e);
@@ -152,7 +158,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	public Collection<AbstractObject> getObjectCollection(String fieldName) {
 		List<AbstractObject> tmp = new ArrayList<>();
 		for(Map<String,Object> child : document.getList(fieldName, Map.class)) {
-			tmp.add(new MongoEntity(fieldName, child));
+			tmp.add(new MongoEntity((String)child.get("resourceKey"), child));
 		}
 		return tmp;
 	}

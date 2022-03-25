@@ -49,6 +49,7 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
@@ -347,7 +348,8 @@ public class DocumentHelper {
 				clz = processClassNameChanges(clz, classLoader);
 				obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
 			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
-				obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).getConstructor().newInstance();
+				obj = (T) ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(document.getString("resourceKey")).getConstructor().newInstance();
+				//obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).getConstructor().newInstance();
 			}
 
 			String uuid = (String) document.get("_id");
@@ -497,7 +499,7 @@ public class DocumentHelper {
 			}
 			
 			return obj;
-		} catch (SecurityException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException | ClassNotFoundException | ParseException e) {
+		} catch (SecurityException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException | ParseException e) {
 			log.error("Error converting document", e);
 			throw new RepositoryException(String.format("Unexpected error loading UUID entity %s", baseClass.getName()), e);			
 		}

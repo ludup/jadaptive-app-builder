@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -193,6 +195,8 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 		
 		try {
 			
+			Locale locale = Locale.getDefault();
+			
 			RecipientHolder recipient = recipients.next();
 
 			if(StringUtils.isBlank(recipient.getEmail())) {
@@ -227,30 +231,56 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 				}
 			}
 			
+			MessageContent defaultContent = null;
+			MessageContent localeContent = null;
+			for(MessageContent content : message.getContent()) {
+				if(StringUtils.isBlank(content.getLocale())) {
+					defaultContent = content;
+				}
+				if(localeContent == null) {
+					if(content.getLocale().equals(locale.getLanguage()) || content.getLocale().equals(locale.toString())) {
+						localeContent = content;
+					}
+				}
+			}
+			
+			if(Objects.isNull(localeContent)) {
+				if(Objects.nonNull(defaultContent)) {
+					localeContent = defaultContent;
+				} else if(message.getContent().size() > 0){
+					localeContent = message.getContent().iterator().next();
+				}
+			} 
+			
+			if(Objects.isNull(localeContent)) {
+				log.warn("Message content could not be determined for locale {}", locale.toString());
+				return;
+			}
+			
 			Template subjectTemplate = freeMarker.createTemplate("message.subject." + message.getUuid(),
-					message.getSubject(), message.getLastModified().getTime());
+					localeContent.getSubject(), message.getLastModified().getTime());
 			StringWriter subjectWriter = new StringWriter();
 			subjectTemplate.process(data, subjectWriter);
 
 			Template bodyTemplate = freeMarker.createTemplate("message.body." + message.getUuid(),
-					message.getPlainText(), message.getLastModified().getTime());
+					localeContent.getPlainText(), message.getLastModified().getTime());
 			StringWriter bodyWriter = new StringWriter();
 			bodyTemplate.process(data, bodyWriter);
 
 			String receipientHtml = "";
 
-			if (StringUtils.isNotBlank(message.getHtml())) {
-				if (message.getHtmlTemplate() != null) {
-					Document doc = Jsoup.parse(message.getHtmlTemplate().getHtml());
-					Elements elements = doc.select(message.getHtmlTemplate().getContentSelector());
+			if (StringUtils.isNotBlank(localeContent.getHtmlText())) {
+				if (localeContent.getHtmlTemplate() != null) {
+					Document doc = Jsoup.parse(localeContent.getHtmlTemplate().getHtml());
+					Elements elements = doc.select(localeContent.getHtmlTemplate().getContentSelector());
 					if (elements.isEmpty()) {
 						throw new IllegalStateException(String.format("Invalid content selector %s",
-								message.getHtmlTemplate().getContentSelector()));
+								localeContent.getHtmlTemplate().getContentSelector()));
 					}
-					elements.first().append(message.getHtml());
+					elements.first().append(localeContent.getHtmlText());
 					receipientHtml = doc.toString();
 				} else {
-					receipientHtml = message.getHtml();
+					receipientHtml = localeContent.getHtmlText();
 				}
 			}
 

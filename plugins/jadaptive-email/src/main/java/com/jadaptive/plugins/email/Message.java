@@ -9,8 +9,17 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectView;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.TableView;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 
-@ObjectDefinition(resourceKey = Message.RESOURCE_KEY, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = Message.RESOURCE_KEY, type = ObjectType.COLLECTION, system = true, deletable = false, creatable = false)
+@TableView(defaultColumns = { "name", "group", "enabled", "archive"} )
+@ObjectViews({ @ObjectViewDefinition(bundle = Message.RESOURCE_KEY, value = "locales"),
+	@ObjectViewDefinition(bundle = Message.RESOURCE_KEY, value = "replyTo")})
 public class Message extends NamedUUIDEntity {
 
 	private static final long serialVersionUID = 2912430699573395419L;
@@ -18,35 +27,18 @@ public class Message extends NamedUUIDEntity {
 	public static final String RESOURCE_KEY = "messages";
 	
 	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
-	@ExcludeView(values = FieldView.TABLE)
-	String shortName;
-	
-	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
 	String group;
-	
-	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
-	String subject;
-	
-	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT_AREA)
-	@ExcludeView(values = FieldView.TABLE)
-	String plainText;
-	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = "htmlTemplates")
-	@ExcludeView(values = FieldView.TABLE)
-	HTMLTemplate htmlTemplate;
-	
-	@ObjectField(type = FieldType.TEXT_AREA)
-	@ExcludeView(values = FieldView.TABLE)
-	String html;
 	
 	@ObjectField(defaultValue = "true", 
 		    type = FieldType.BOOL)
 	boolean enabled = true;
 	
+	@ObjectView("replyTo")
 	@ObjectField(type = FieldType.TEXT)
 	@ExcludeView(values = FieldView.TABLE)
 	String replyToName;
 	
+	@ObjectView("replyTo")
 	@ObjectField(type = FieldType.TEXT)
 	@ExcludeView(values = FieldView.TABLE)
 	String replyToEmail;
@@ -55,21 +47,18 @@ public class Message extends NamedUUIDEntity {
 		    type = FieldType.BOOL)
 	boolean archive = true;
 	
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT, hidden = true)
 	@ExcludeView(values = FieldView.TABLE)
 	Collection<String> replacementVariables;
+	
+	@ObjectView("locales")
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
+	@Validator(value = MessageContent.RESOURCE_KEY, type = ValidationType.RESOURCE_KEY)
+	Collection<MessageContent> content;
 	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
-	}
-
-	public String getShortName() {
-		return shortName;
-	}
-
-	public void setShortName(String shortName) {
-		this.shortName = shortName;
 	}
 
 	public void setGroup(String group) {
@@ -79,30 +68,6 @@ public class Message extends NamedUUIDEntity {
 	public String getGroup() {
 		return group;
 	}
-	
-	public String getSubject() {
-		return subject;
-	}
-
-	public void setSubject(String subject) {
-		this.subject = subject;
-	}
-
-	public String getPlainText() {
-		return plainText;
-	}
-
-	public void setPlainText(String plainText) {
-		this.plainText = plainText;
-	}
-
-	public String getHtml() {
-		return html;
-	}
-
-	public void setHtml(String html) {
-		this.html = html;
-	}
 
 	public boolean isEnabled() {
 		return enabled;
@@ -110,14 +75,6 @@ public class Message extends NamedUUIDEntity {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
-	}
-
-	public HTMLTemplate getHtmlTemplate() {
-		return htmlTemplate;
-	}
-
-	public void setHtmlTemplate(HTMLTemplate htmlTemplate) {
-		this.htmlTemplate = htmlTemplate;
 	}
 
 	public String getReplyToName() {
@@ -151,4 +108,14 @@ public class Message extends NamedUUIDEntity {
 	public void setReplacementVariables(Collection<String> replacementVariables) {
 		this.replacementVariables = replacementVariables;
 	}
+
+	public Collection<MessageContent> getContent() {
+		return content;
+	}
+
+	public void setContent(Collection<MessageContent> content) {
+		this.content = content;
+	}
+	
+	
 }

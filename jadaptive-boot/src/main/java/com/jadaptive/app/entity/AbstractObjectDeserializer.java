@@ -163,7 +163,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 
 	private void processEmbeddedObjects(FieldTemplate field, JsonNode node, AbstractObject e) throws ValidationException, IOException {
 		
-		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
+		String type = field.getValidationValue(ValidationType.RESOURCE_KEY);
 		
 		try {
  			ObjectTemplate template = templateService.get(type);
@@ -171,7 +171,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
  			if(node.isArray()) {
  				List<Document> documents = new ArrayList<>();
  				for(JsonNode element : node) {
- 					MongoEntity child = new MongoEntity(e, field.getResourceKey(), new Document());
+ 					MongoEntity child = new MongoEntity(e, type, new Document());
  					iterateType(element, template, child, false);
  					documents.add(new Document(child.getDocument()));
  				}
