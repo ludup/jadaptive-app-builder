@@ -16,6 +16,6 @@ public class LogonBoxAuthenticatorServiceImpl implements LogonBoxAuthenticatorSe
 	
 	@PostConstruct
 	private void postConstruct() {
-		authenticationService.registerAuthenticationPage("logonbox-directory", AuthenticatorStart.class);
+		authenticationService.registerAuthenticationPage("logonboxAuthenticator", AuthenticatorStart.class);
 	}
 }

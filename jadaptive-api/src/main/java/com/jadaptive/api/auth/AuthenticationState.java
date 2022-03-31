@@ -73,6 +73,11 @@ public class AuthenticationState {
 		this.user = user;
 	}
 	
+	public void clear() {
+		currentPageIndex = 0;
+		authenticationPages.clear();
+	}
+	
 	public List<Class<? extends Page>> getAuthenticationPages() {
 		return authenticationPages;
 	}

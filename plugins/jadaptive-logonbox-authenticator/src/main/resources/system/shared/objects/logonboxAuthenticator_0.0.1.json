@@ -1,0 +1,9 @@
+[{
+    "uuid": "d8144432-f618-4396-8aa4-49059a8e4a1d",
+	"resourceKey": "authenticationModule",
+	"authenticatorKey": "logonboxAuthenticator",
+	"name": "LogonBox Authenticator",
+	"identityCapture": false,
+	"secretCapture": true,
+	"system": true
+}]

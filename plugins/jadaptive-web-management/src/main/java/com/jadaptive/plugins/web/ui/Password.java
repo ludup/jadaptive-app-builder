@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-import com.jadaptive.api.auth.AuthenticationPolicyService;
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -17,18 +17,21 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
+import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
-import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
-import com.jadaptive.plugins.web.ui.Login.LoginForm;
+import com.jadaptive.api.user.UserService;
+import com.jadaptive.plugins.web.ui.Password.LoginForm;
 
 @Extension
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "i18n"} )
-public class Login extends AuthenticationPage<LoginForm> {
+public class Password extends AuthenticationPage<LoginForm> {
 
-	static Logger log = LoggerFactory.getLogger(Login.class);
+	static Logger log = LoggerFactory.getLogger(Password.class);
 	
 	@Autowired
 	private TenantService tenantService; 
@@ -37,21 +40,20 @@ public class Login extends AuthenticationPage<LoginForm> {
 	private PermissionService permissionService; 
 	
 	@Autowired
-	private AuthenticationPolicyService policyService;
+	private PageCache pageCache; 
 	
-	public Login() {
+	public Password() {
 		super(LoginForm.class);
 	}
 
 	@Override
 	protected void generateContent(Document doc) throws FileNotFoundException {
-		if(tenantService.isSetupMode()) {
-			throw new UriRedirect("/app/ui/wizards/setup");
-		}
+
 		
 		AuthenticationState state = authenticationService.getCurrentState();
-		if(!state.getCurrentPage().equals(Login.class)) {
+		if(!state.getCurrentPage().equals(Password.class)) {
 			authenticationService.clearAuthenticationState();
+			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
 		
 		super.generateContent(doc);
@@ -60,12 +62,32 @@ public class Login extends AuthenticationPage<LoginForm> {
 	protected boolean doForm(Document document, AuthenticationState state, LoginForm form) {
 		
 		try {
-			state.setAttemptedUsername(form.getUsername());
-			User user = userService.getUser(form.getUsername());
-			state.setUser(user);
+
+			User user = state.getUser();
+			if(userService.verifyPassword(state.getUser(), form.getPassword().toCharArray())) {
+				
+				permissionService.setupUserContext(user);
+				
+				try {
+					if(user instanceof PasswordEnabledUser) {
+						
+				    	if(((PasswordEnabledUser)user).getPasswordChangeRequired()) {
+				    		try {
+					    		permissionService.assertPermission(UserService.CHANGE_PASSWORD_PERMISSION);
+								state.getPostAuthenticationPages().add(ChangePassword.class);
+				    		} catch(AccessDeniedException e) { }
+				    	}
+			    	}
+					
+					state.setAttribute(AuthenticationService.PASSWORD, form.getPassword());
+					return true;
+				
+				} finally {
+					permissionService.clearUserContext();
+				}
+			}
 			
-			authenticationService.processRequiredAuthentication(state, policyService.getAssignedPolicy(user));
-			return true;
+			authenticationService.reportAuthenticationFailure(state);
     	
     	} catch(AccessDeniedException e) {
     		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
@@ -82,10 +104,10 @@ public class Login extends AuthenticationPage<LoginForm> {
 	
 	@Override
 	public String getUri() {
-		return "login";
+		return "password";
 	}
 	
 	public interface LoginForm {
-		String getUsername();
+		String getPassword();
 	}
 }

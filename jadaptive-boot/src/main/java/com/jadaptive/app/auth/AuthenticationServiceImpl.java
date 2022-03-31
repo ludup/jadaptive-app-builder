@@ -1,5 +1,6 @@
 package com.jadaptive.app.auth;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,9 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.auth.AuthenticationModule;
+import com.jadaptive.api.auth.AuthenticationPolicy;
+import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.cache.CacheService;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -26,8 +31,8 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
-import com.jadaptive.api.ui.AuthenticationFlow;
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
@@ -38,8 +43,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	
 	public static final String USERNAME_RESOURCE_KEY = "username";
 	
-	private Map<String,AuthenticationFlow> authenticationFlows = new HashMap<>();
-	
+
 	static Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 	
 	@Autowired
@@ -57,20 +61,22 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Autowired
 	private SessionUtils sessionUtils; 
 	
+	@Autowired
+	private TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
+	
+	@Autowired
+	private AuthenticationPolicyService policyService; 
+	
+	@Autowired
+	private PageCache pageCache;
+	
 	Map<String,Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
 	
 	@Override
 	public void registerAuthenticationPage(String resourceKey, Class<? extends Page> page) {
 		registeredAuthenticationPages.put(resourceKey, page);
 	}
-	
-	@Override
-	public void registerDefaultAuthenticationFlow(AuthenticationFlow flow) {
-		if(authenticationFlows.containsKey(DEFAULT_AUTHENTICATION_FLOW)) {
-			throw new IllegalStateException("A default authentication flow is already installed!!");
-		}
-		authenticationFlows.put(DEFAULT_AUTHENTICATION_FLOW, flow);
-	}
+
 	
 	@Override
 	public void decorateAuthenticationPage(Document content) {
@@ -236,7 +242,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			state = new AuthenticationState();
 			state.setRemoteAddress(Request.get().getRemoteAddr());
 			state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
-			processRequiredAuthentication(state, DEFAULT_AUTHENTICATION_FLOW);
+			
+			try {
+				state.getAuthenticationPages().add(pageCache.resolvePage("login").getClass());
+			} catch (FileNotFoundException e) {
+			}
 			
 			Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
 		}
@@ -244,20 +254,25 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return state;
 	}
 
-	private void processRequiredAuthentication(AuthenticationState state, String authenticationFlow) {
+	@Override
+	public void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy) throws FileNotFoundException {
 		
 		state.getAuthenticationPages().clear();
-	
-		AuthenticationFlow flow = authenticationFlows.get(authenticationFlow);
-		if(Objects.nonNull(flow)) {
-			for(Class<? extends Page> authenticaiton : flow.getAuthenticators()) {
-				state.getAuthenticationPages().add(authenticaiton);
-			}
-			return;
+		state.getAuthenticationPages().add(pageCache.resolvePage("login").getClass());
+		boolean hasSecret = false;
+		for(String authenticatorKey : policy.getRequiredAuthenticators()) {
+			AuthenticationModule module = moduleDatabase.get(authenticatorKey, AuthenticationModule.class);
+			hasSecret |= module.isSecretCapture();
+			state.getAuthenticationPages().add(getAuthenticationPage(module.getAuthenticatorKey()));
 		}
-	
-		throw new IllegalStateException("No login flow defined for " + authenticationFlow);
 		
+		if(!hasSecret) {
+			throw new IllegalStateException("Invalid authentication policy " + policy.getName() + "! No secret capture at any index");
+		}
+
+		if(state.getAuthenticationPages().isEmpty()) {
+			throw new IllegalStateException("Invalid authentication policy " + policy.getName() + "! No valid modules");
+		}
 	}
 	
 	@Override
@@ -269,7 +284,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
 		AuthenticationState state = getCurrentState();
-		processRequiredAuthentication(state, authenticationFlow);
+		
 		state.getAuthenticationPages().addAll(Arrays.asList(additionalClasses));
 		return state.getCurrentPage();
 	}

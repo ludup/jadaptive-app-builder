@@ -88,11 +88,14 @@ public class AuthenticatorStart extends HtmlPage {
 				Utils.getBaseURL(Request.get().getRequestURL().toString())
 					+ "/app/ui/authenticator-finish/{response}");
 	
-		Request.get().getSession().setAttribute(AUTHENTICATOR_REQUEST, request);
+			Request.get().getSession().setAttribute(AUTHENTICATOR_REQUEST, request);
+			
+			throw new UriRedirect(request.getUrl());
 		
-		throw new UriRedirect(request.getUrl());
-		
-		} catch(IOException e) {
+		} catch(Throwable e) {
+			if(e instanceof UriRedirect) {
+				throw (UriRedirect) e;
+			}
 			throw new PageRedirect(new ErrorPage(e));
 		}
 	}

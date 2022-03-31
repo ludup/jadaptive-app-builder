@@ -69,7 +69,7 @@ public class ErrorPage extends HtmlPage {
 			
 		}
 		Throwable e = (Throwable) Request.get().getSession().getAttribute(THROWABLE);
-		document.selectFirst("#message").text(e.getMessage());
+		document.selectFirst("#message").text(StringUtils.defaultString(e.getMessage()));
 		
 		try(StringWriter w = new StringWriter()) {
 			try(PrintWriter pw = new PrintWriter(w)) {

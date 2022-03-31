@@ -12,11 +12,10 @@ import com.jadaptive.api.ui.Page;
 public interface AuthenticationService {
 
 	public static final String USER_LOGIN_PERMISSION =  "users.login";
-	public static final String PASSWORD = "password";
 	public static final String ALTERNATIVE_PASSWORD = "alternativePassword";
 	public static final String AUTHENTICATION_STATE_ATTR = "authenticationState";
 	public static final String DEFAULT_AUTHENTICATION_FLOW = "defaultAuthentication";
-	public static final String USERNAME_AND_PASSWORD = "usernameAndPassword";
+	public static final String PASSWORD = "password";
 	
 	Session logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent);
 
@@ -36,9 +35,9 @@ public interface AuthenticationService {
 
 	void reportAuthenticationFailure(AuthenticationState state);
 
-	void registerDefaultAuthenticationFlow(AuthenticationFlow flow);
-
 	Class<? extends Page> getAuthenticationPage(String authenticator);
+
+	void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy) throws FileNotFoundException;
 
 
 	
