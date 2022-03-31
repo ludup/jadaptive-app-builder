@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,21 @@ public class Application {
 		 
 		 PropertyConfigurator.configure("conf/app-logging.properties");
 		 
+		 
+		 File pluginsFolder = new File("plugins");
 
+		 if(pluginsFolder.exists()) {
+			 File[] files = pluginsFolder.listFiles();
+			 if(files!=null) {
+			 for(File file : files) {
+				 if(file.isFile() && file.getName().endsWith(".zip")) {
+					 continue;
+				 }
+				 FileUtils.deleteQuietly(file);
+			 }
+			 }
+		 }
+		 
 		 try {
 			checkDefaultCertificate();
 		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException
