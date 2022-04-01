@@ -6,7 +6,6 @@ import org.jsoup.nodes.Document;
 
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.Tenant;
-import com.jadaptive.api.ui.AuthenticationFlow;
 import com.jadaptive.api.ui.Page;
 
 public interface AuthenticationService {

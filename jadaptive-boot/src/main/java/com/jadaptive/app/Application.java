@@ -121,8 +121,7 @@ public class Application {
 			 log.info("Application shutting down with exitCode={}", exitCode);
 			 exitCode = SpringApplication.exit(context, () -> exitCode);
 			 log.info("System exit being called with exitCode={}", exitCode);
-			 System.exit(exitCode);
-		 }
+			 System.exit(exitCode);		 }
 	}
 	
 	private static void checkDefaultCertificate() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, MismatchedCertificateException {

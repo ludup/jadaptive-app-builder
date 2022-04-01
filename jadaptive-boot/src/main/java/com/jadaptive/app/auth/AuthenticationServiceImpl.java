@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.auth.AuthenticationPolicy;
-import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.cache.CacheService;
@@ -63,9 +62,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	
 	@Autowired
 	private TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
-	
-	@Autowired
-	private AuthenticationPolicyService policyService; 
 	
 	@Autowired
 	private PageCache pageCache;

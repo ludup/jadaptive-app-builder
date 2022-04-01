@@ -13,7 +13,6 @@ import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
-import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
@@ -32,9 +31,6 @@ public class Login extends AuthenticationPage<LoginForm> {
 	
 	@Autowired
 	private TenantService tenantService; 
-	
-	@Autowired
-	private PermissionService permissionService; 
 	
 	@Autowired
 	private AuthenticationPolicyService policyService;

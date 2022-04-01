@@ -1,21 +1,22 @@
 package com.jadaptive.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.entity.MongoEntity;
@@ -55,7 +56,7 @@ public class EntityDecimalFieldTests extends AbstractDeserializerTest {
 		System.out.println(json);
 		MongoEntity e = getDecimalField(true).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals(1.5D, e.getValue("revenue"));
+		assertEquals(1.5D, e.getValue("revenue"));
 
 	}
 	
@@ -69,7 +70,7 @@ public class EntityDecimalFieldTests extends AbstractDeserializerTest {
 		System.out.println(json);
 		MongoEntity e = getDecimalField(false).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals("1.25", e.getValue("revenue"));
+		assertEquals("1.25", e.getValue("revenue"));
 
 	}
 	
@@ -84,12 +85,12 @@ public class EntityDecimalFieldTests extends AbstractDeserializerTest {
 		System.out.println(json);
 		MongoEntity e = getDecimalField(true, new FieldValidator(ValidationType.RANGE, "0-9999999")).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals(1.92D, e.getValue("revenue"));
+		assertEquals(1.92D, e.getValue("revenue"));
 
 	}
 	
 	
-	@Test(expected = IOException.class)
+	@Test
 	public void deserializeDecimalFieldWithFailedRangeValidation() throws IOException {
 
 		String json = new JSONObjectBuilder().startObject()
@@ -104,7 +105,7 @@ public class EntityDecimalFieldTests extends AbstractDeserializerTest {
 	
 
 	
-	@Test(expected = IOException.class)
+	@Test
 	public void deserializeMissingRequiredDecimalField() throws JsonParseException, JsonMappingException, ValidationException, IOException {
 
 		String json = new JSONObjectBuilder().startObject()
@@ -128,7 +129,7 @@ public class EntityDecimalFieldTests extends AbstractDeserializerTest {
 		
 		MongoEntity e = getDecimalField(false).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals("1.25", e.getValue("revenue"));
+		assertEquals("1.25", e.getValue("revenue"));
 	}
 
 

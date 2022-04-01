@@ -1,7 +1,6 @@
 package com.jadaptive.plugins.logonbox.ui;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;

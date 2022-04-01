@@ -15,7 +15,6 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageDependencies;
@@ -32,9 +31,6 @@ import com.jadaptive.plugins.web.ui.Password.LoginForm;
 public class Password extends AuthenticationPage<LoginForm> {
 
 	static Logger log = LoggerFactory.getLogger(Password.class);
-	
-	@Autowired
-	private TenantService tenantService; 
 	
 	@Autowired
 	private PermissionService permissionService; 

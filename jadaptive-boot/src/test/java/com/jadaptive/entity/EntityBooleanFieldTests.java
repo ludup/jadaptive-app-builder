@@ -1,21 +1,22 @@
 package com.jadaptive.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.app.entity.MongoEntity;
 
@@ -54,7 +55,7 @@ public class EntityBooleanFieldTests extends AbstractDeserializerTest {
 		System.out.println(json);
 		MongoEntity e = getBooleanField(true).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals(true, e.getValue("confirmed"));
+		assertEquals(true, e.getValue("confirmed"));
 
 	}
 	
@@ -68,12 +69,12 @@ public class EntityBooleanFieldTests extends AbstractDeserializerTest {
 		System.out.println(json);
 		MongoEntity e = getBooleanField(false).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals("false", e.getValue("confirmed"));
+		assertEquals("false", e.getValue("confirmed"));
 
 	}
 
 	
-	@Test(expected = IOException.class)
+	@Test
 	public void deserializeMissingRequiredBooleanField() throws JsonParseException, JsonMappingException, ValidationException, IOException {
 
 		String json = new JSONObjectBuilder().startObject()
@@ -87,7 +88,7 @@ public class EntityBooleanFieldTests extends AbstractDeserializerTest {
 
 	}
 	
-	@Test(expected = IOException.class)
+	@Test
 	public void deserializeInvalidBooleanField() throws JsonParseException, JsonMappingException, ValidationException, IOException {
 
 		String json = new JSONObjectBuilder().startObject()
@@ -112,7 +113,7 @@ public class EntityBooleanFieldTests extends AbstractDeserializerTest {
 		
 		MongoEntity e = getBooleanField(false).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals("false", e.getValue("confirmed"));
+		assertEquals("false", e.getValue("confirmed"));
 	}
 
 
