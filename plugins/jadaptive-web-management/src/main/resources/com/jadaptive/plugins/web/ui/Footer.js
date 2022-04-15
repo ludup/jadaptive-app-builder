@@ -164,7 +164,6 @@ $(function() {
 	});
 	
 	$('.jadaptive-tag').on('click', function() {
-		debugger;
 		$(this).parents().find('option').remove();
 	});
 	
