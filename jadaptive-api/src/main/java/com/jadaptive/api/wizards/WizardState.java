@@ -107,6 +107,10 @@ public class WizardState {
 	public UUIDEntity getCurrentObject() {
 		return stateObjects.get(getCurrentStep());
 	}
+	
+	public void setCurrentObject(UUIDEntity obj) {
+		stateObjects.put(getCurrentStep(), obj);
+	}
 
 	public void saveObject(UUIDEntity object) {
 		stateObjects.put(getCurrentStep(), object);
@@ -162,5 +166,4 @@ public class WizardState {
 	public void setFinished(boolean finished) {
 		this.finished = finished;
 	}
-	
 }
