@@ -20,6 +20,7 @@ import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
 import com.jadaptive.app.user.UserServiceImpl;
@@ -35,6 +36,9 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	@Autowired
 	private TenantAwareObjectDatabase<Role> repository; 
 
+	@Autowired
+	private TenantService tenantService; 
+	
 	@Override
 	public Integer getOrder() {
 		return Integer.MIN_VALUE;
@@ -195,7 +199,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 			
 			Set<String> roleUuids = new HashSet<>(role.getUsers());
 			roleUuids.removeAll(uuids);
-			if(roleUuids.isEmpty()) {
+			if(roleUuids.isEmpty() && !tenantService.isSetupMode()) {
 				throw new ObjectException("This operation would remove the last user from the Administration role");
 			}
 		}
