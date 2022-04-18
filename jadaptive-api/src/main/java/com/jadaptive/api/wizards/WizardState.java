@@ -124,7 +124,7 @@ public class WizardState {
 		return stateObjects.get(sectionIndex);
 	}
 
-	public void insertNextPage(SetupSection setupSection) {
+	public void insertNextPage(WizardSection setupSection) {
 		pages.add(getCurrentStep(), setupSection);
 	}
 	
