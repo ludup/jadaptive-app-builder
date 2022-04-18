@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.i18n.I18nService;
@@ -77,6 +78,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	
 	@Autowired
 	private I18nService i18nService; 
+	
+	@Autowired
+	private EncryptionService encryptionService;
 	
 	protected ThreadLocal<Document> currentDocument = new ThreadLocal<>();
 	protected ThreadLocal<ObjectTemplate> currentTemplate = new ThreadLocal<>();
@@ -591,6 +595,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		Object val = obj.getValue(field.getField());
 		if(Objects.isNull(val)) {
 			return field.getField().getDefaultValue();
+		}
+		if(field.requiresDecryption()) {
+			val = encryptionService.decrypt(val.toString());
 		}
 		return val.toString(); 	
 	}

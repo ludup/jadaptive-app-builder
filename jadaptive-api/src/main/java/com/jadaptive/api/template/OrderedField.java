@@ -69,4 +69,11 @@ public class OrderedField {
 		}
 		return String.valueOf(val);
 	}
+
+	public boolean requiresDecryption() {
+		if(field.getFieldType()==FieldType.PASSWORD) {
+			return false;
+		}
+		return field.isManuallyEncrypted();
+	}
 }
