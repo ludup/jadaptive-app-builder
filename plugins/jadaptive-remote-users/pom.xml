@@ -6,7 +6,7 @@
 		<groupId>com.jadaptive</groupId>
 		<artifactId>plugins</artifactId>
 		<relativePath>..</relativePath>
-		<version>0.1.7</version>
+		<version>0.1.8-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>jadaptive-remote-users</artifactId>
