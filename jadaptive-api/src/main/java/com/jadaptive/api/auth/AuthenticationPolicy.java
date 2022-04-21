@@ -33,7 +33,7 @@ public class AuthenticationPolicy extends AssignableUUIDEntity {
 	@ObjectView(value = "factors")
 	Collection<String> requiredAuthenticators;
 
-	@ObjectField(type = FieldType.INTEGER)	
+	@ObjectField(type = FieldType.INTEGER, unique = true)	
 	Integer weight;
 	
 	public String getName() {
