@@ -1,6 +1,7 @@
 package com.jadaptive.plugins.web.ui;
 
 import java.io.FileNotFoundException;
+import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.pf4j.Extension;
@@ -47,10 +48,17 @@ public class Password extends AuthenticationPage<LoginForm> {
 
 		
 		AuthenticationState state = authenticationService.getCurrentState();
+		
 		if(!state.getCurrentPage().equals(Password.class)) {
 			authenticationService.clearAuthenticationState();
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
+		
+		if(Objects.isNull(state.getUser()) ) {
+			throw new PageRedirect(pageCache.resolvePage(Login.class));
+		}
+		
+		doc.selectFirst("#username").val(state.getUser().getUsername());
 		
 		super.generateContent(doc);
 	}

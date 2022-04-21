@@ -41,11 +41,11 @@ import com.jadaptive.api.ui.NamePairValue;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.api.ui.renderers.form.BootstrapBadgeRender;
+import com.jadaptive.api.ui.renderers.form.CollectionSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
-import com.jadaptive.api.ui.renderers.form.MultipleSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleTagsFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleTextFormInput;
@@ -368,7 +368,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					values.add(new NamePairValue(referencedObject.getValue(objectTemplate.getNameField()).toString(), uuid));
 				}
 			}
-			MultipleSearchFormInput render = new MultipleSearchFormInput(
+			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), orderedField, String.format("/app/api/objects/%s/table", objectType),
 					objectTemplate.getNameField(), "uuid");
 			render.renderInput(panel, element, values, false);
@@ -679,6 +679,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 		rootElement.selectFirst(".tab-content").appendChild(new Element("div")
 														.attr("id", view.getResourceKey())
+														.addClass("px-3")
 														.addClass("tab-pane")
 														.addClass("panel-body")
 														.addClass("fade")
