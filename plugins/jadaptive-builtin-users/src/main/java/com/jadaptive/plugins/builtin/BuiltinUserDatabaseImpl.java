@@ -35,22 +35,6 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 					UserDatabaseCapabilities.DELETE,
 					UserDatabaseCapabilities.LOGON));
 	
-	@Override
-	public BuiltinUser getUser(String username) {
-		return objectDatabase.get(BuiltinUser.class, 
-				SearchField.or(SearchField.eq("username", username), SearchField.eq("email", username)));
-	}
-	
-	public BuiltinUser getUserByEmail(String email) {
-		return objectDatabase.get(BuiltinUser.class, 
-				SearchField.eq("email", email));
-	}
-	
-	@Override
-	public BuiltinUser getUserByUUID(String uuid) {
-		return objectDatabase.get(uuid, BuiltinUser.class);
-	}
-	
 	public BuiltinUser createUser(String username, String name, String email, char[] password, boolean passwordChangeRequired) {
 		
 		assertWrite(UserService.USER_RESOURCE_KEY);
@@ -66,7 +50,7 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 
 	@Override
 	public Iterable<User> allObjects() {
-		return new UserIterable(objectDatabase.list(BuiltinUser.class));
+		return new UserIterable(objectDatabase.list(BuiltinUser.class, SearchField.eq("resourceKey", BuiltinUser.RESOURCE_KEY)));
 	}
 	
 	class UserIterable implements Iterable<User> {

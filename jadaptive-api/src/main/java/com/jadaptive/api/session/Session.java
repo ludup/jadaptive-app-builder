@@ -10,7 +10,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 
-@ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL)
+@ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL, requiresPermission = false)
 public class Session extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -3842259533277443038L;

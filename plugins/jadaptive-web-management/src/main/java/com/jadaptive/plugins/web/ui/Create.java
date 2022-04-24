@@ -10,7 +10,7 @@ import com.jadaptive.api.ui.RequestPage;
 @Extension
 @RequestPage(path = "create/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = { "freemarker", "i18n"} )
+@PageProcessors(extensions = { "i18n"} )
 public class Create extends ObjectTemplatePage {
 	
 	@Override

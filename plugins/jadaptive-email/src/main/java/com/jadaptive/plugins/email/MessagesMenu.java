@@ -13,12 +13,12 @@ public class MessagesMenu implements ApplicationMenu {
 
 	@Override
 	public boolean isEnabled() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public String getResourceKey() {
-		return "messages.names";
+		return "emailMessages.names";
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class MessagesMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/search/messages";
+		return "/app/ui/search/emailMessages";
 	}
 
 	@Override

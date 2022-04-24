@@ -3,7 +3,8 @@ package com.jadaptive.plugins.email;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javax.activation.DataSource;
+import jakarta.activation.DataSource;
+
 
 public abstract class EmailAttachment implements DataSource {
 

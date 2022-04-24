@@ -12,7 +12,6 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.ViewType;
 import com.jadaptive.api.user.AdminUserDatabase;
-import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
 
@@ -20,7 +19,7 @@ import com.jadaptive.utils.PasswordEncryptionType;
 @ObjectServiceBean(bean = AdminUserDatabase.class)
 @ObjectViews({ 
 	@ObjectViewDefinition(type = ViewType.ACCORDION, bundle = "users", value = "passwordOptions")})
-public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
+public class AdminUser extends PasswordEnabledUser {
 
 	private static final long serialVersionUID = -4995333149629598100L;
 
@@ -49,11 +48,6 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	@ObjectView(value = "passwordOptions")
 	boolean passwordChangeRequired;
 	
-	@ObjectField(required = false,
-			searchable = true,
-			type = FieldType.TEXT)
-	String email;
-
 	@Override
 	public String getName() {
 		return "Administrator";
@@ -67,16 +61,6 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	@Override
 	public void setPasswordChangeRequired(boolean change) {
 		this.passwordChangeRequired = change;
-	}
-
-	@Override
-	public String getEmail() {
-		return email;
-	}
-
-	@Override
-	public void setEmail(String email) {
-		this.email = email;
 	}
 
 	@Override
@@ -115,11 +99,6 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
-	}
-	
-	@Override
-	public String getSystemName() {
-		return getUsername();
 	}
 
 }

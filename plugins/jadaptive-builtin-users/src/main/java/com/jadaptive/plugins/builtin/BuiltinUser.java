@@ -12,7 +12,6 @@ import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.ViewType;
-import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.utils.PasswordEncryptionType;
 
@@ -20,7 +19,7 @@ import com.jadaptive.utils.PasswordEncryptionType;
 @ObjectServiceBean(bean = BuiltinUserDatabase.class)
 @ObjectViews({ 
 	@ObjectViewDefinition(type = ViewType.ACCORDION, bundle = "users", value = "passwordOptions")})
-public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser {
+public class BuiltinUser extends PasswordEnabledUser {
 
 	private static final long serialVersionUID = -4186606233520076592L;
 
@@ -49,11 +48,6 @@ public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser
 			type = FieldType.BOOL)
 	@ObjectView(value = "passwordOptions")
 	boolean passwordChangeRequired;
-	
-	@ObjectField(required = false,
-			searchable = true,
-			type = FieldType.TEXT)
-	String email;
 
 	@Override
 	public String getEncodedPassword() {
@@ -93,21 +87,8 @@ public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser
 		this.passwordChangeRequired = passwordChangeRequired;
 	}
 
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
-	}
-	
-	@Override
-	public String getSystemName() {
-		return getUsername();
 	}
 }

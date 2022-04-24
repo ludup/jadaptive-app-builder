@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.ui.Page;
 

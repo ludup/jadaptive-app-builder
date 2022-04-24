@@ -1,8 +1,11 @@
 package com.jadaptive.plugins.web.ui;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Objects;
 
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.AbstractObject;
@@ -45,24 +48,44 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		permissionService.assertReadWrite(template.getResourceKey());
 	}
 	
+	@Override
+	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
+		super.generateAuthenticatedContent(document);
+		
+		Element element = document.selectFirst("#searchBreadcrumb");
+		if(Objects.nonNull(element)) {
+			element.attr("href", String.format("/app/ui/search/%s", template.getCollectionKey()))
+			.attr("jad:bundle", template.getBundle())
+			.attr("jad:i18n", String.format("%s.names", template.getResourceKey()));
+		}
+		
+		element = document.selectFirst("#cancelButton");
+		
+		if(Objects.nonNull(element)) {
+			element.attr("href", String.format("/app/api/form/cancel/%s", template.getCollectionKey()));
+		}
+	}
+	
 	public void created() throws FileNotFoundException {
 
 		super.created();
 
 		try {
-			if (Objects.nonNull(uuid)) {
-				object = objectService.get(template.getResourceKey(), uuid);
-			} else if (template.getType() == ObjectType.SINGLETON) {
-				object = objectService.getSingleton(template.getResourceKey());
+			
+			Object obj = Request.get().getSession().getAttribute(template.getResourceKey());
+			if(Objects.nonNull(obj)) {
+				if(obj instanceof AbstractObject) {
+					object = (AbstractObject)obj;
+				} else if(obj instanceof UUIDEntity) {
+					Request.get().getSession().removeAttribute(template.getResourceKey());
+					object = objectService.convert((UUIDEntity) obj);
+				}
+				
 			} else {
-				Object obj = Request.get().getSession().getAttribute(template.getResourceKey());
-				if(Objects.nonNull(obj)) {
-					if(obj instanceof AbstractObject) {
-						object = (AbstractObject)obj;
-					} else if(obj instanceof UUIDEntity) {
-						Request.get().getSession().removeAttribute(template.getResourceKey());
-						object = objectService.convert((UUIDEntity) obj);
-					}
+				if (Objects.nonNull(uuid)) {
+					object = objectService.get(template.getResourceKey(), uuid);
+				} else if (template.getType() == ObjectType.SINGLETON) {
+					object = objectService.getSingleton(template.getResourceKey());
 				}
 			}
 
@@ -77,7 +100,9 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 							String.format("You do not have permission to %s", getScope().name().toLowerCase()));
 				default:
 					try {
-						permissionService.assertRead(template.getResourceKey());
+						if(template.getPermissionProtected()) {
+							permissionService.assertRead(template.getResourceKey());
+						}
 					} catch (AccessDeniedException ex) {
 						throw new FileNotFoundException(
 								String.format("You do not have permission to %s", getScope().name().toLowerCase()));

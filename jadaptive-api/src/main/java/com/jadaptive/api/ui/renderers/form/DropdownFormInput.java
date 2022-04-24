@@ -28,6 +28,7 @@ public class DropdownFormInput extends FieldInputRender {
 		rootElement.appendChild(new Element("div").addClass("row mb-3")
 				.appendChild(new Element("div")
 						.addClass("col-12")
+						.addClass("dropdownInput")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("form-label")

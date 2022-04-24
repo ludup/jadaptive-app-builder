@@ -1,12 +1,18 @@
 package com.jadaptive.plugins.web.ui.renderers;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.Collection;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.FieldTemplate;
@@ -31,70 +37,96 @@ public class TableRenderer {
 	Class<?> templateClazz;
 	
 	TableView view;
+	AbstractObject parentObject = null;
+	FieldTemplate field;
+	private boolean readOnly;
 	
-	public Elements render() {
+	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field) {
+		this.parentObject = parentObject;
+		this.field = field;
+		this.readOnly = readOnly;
+	}
+	
+	public TableRenderer(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
+
+	public Elements render() throws IOException {
 		
-		Elements tableholder = new Elements();
-		Element table;
-		tableholder.add(table = Html.table("table").attr("data-toggle", "table"));
-		
-		Element el;
-		table.appendChild(Html.thead().appendChild(el = Html.tr()));
-		
-		view = templateClazz.getAnnotation(TableView.class);
-		int columns = 0;
-		for(String column : view.defaultColumns()) {
-			el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column))));
-			columns++;
-		}
-		
-		if(objects.size() > 0) {
-			boolean requiresActions = template.isUpdatable() || template.isDeletable();
+		try {
+			Elements tableholder = new Elements();
+			Element table;
+			tableholder.add(table = Html.table("table").attr("data-toggle", "table"));
 			
-			for(TableAction action : view.actions()) {
-				if(action.target()==Target.ROW) {
-					requiresActions |= true;
-					break;
-				}
-			}
-			if(requiresActions) {
-				el.appendChild(Html.td());
+			Element el;
+			table.appendChild(Html.thead().appendChild(el = Html.tr()));
+			
+			view = templateClazz.getAnnotation(TableView.class);
+			int columns = 0;
+			for(String column : view.defaultColumns()) {
+				el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column))));
 				columns++;
 			}
-		}
-	
-		
-		table.appendChild(el = Html.tbody());
-		
-		if(objects.size() > 0) {
-			for(AbstractObject obj : objects) {
-				Element row = Html.tr();
+			
+			if(objects.size() > 0) {
+				boolean requiresActions = template.isUpdatable() || template.isDeletable();
 				
-				for(String column : view.defaultColumns()) {
-					row.appendChild(Html.td().appendChild(renderElement(obj, template, template.getField(column))));
+				for(TableAction action : view.actions()) {
+					if(action.target()==Target.ROW) {
+						requiresActions |= true;
+						break;
+					}
 				}
-				
-				if(template.getResourceKey().equals(obj.getResourceKey())) {
-					renderRowActions(row, obj, view, template);
-				} else {
-					renderRowActions(row, obj, view, ApplicationServiceImpl.getInstance().getBean(
-							TemplateService.class).get(obj.getResourceKey()));
+				if(requiresActions) {
+					el.appendChild(Html.td());
+					columns++;
 				}
-				
-				
-				el.appendChild(row);
 			}
-		} else {
-			el.appendChild(Html.tr().appendChild(Html.td().attr("colspan", String.valueOf(columns))
-					.addClass("text-center")
-					.appendChild(Html.i18n("default", "noResults.text"))));
-		}
 		
-		if(isPaginationRequired()) {
-			tableholder.add(renderPagination());
+			
+			table.appendChild(el = Html.tbody());
+			
+			ObjectMapper json = new ObjectMapper();
+			
+			if(objects.size() > 0) {
+				for(AbstractObject obj : objects) {
+					Element row = Html.tr();
+					
+					if(Objects.nonNull(parentObject)) {
+						row.appendChild(new Element("input").attr("type", "hidden")
+							.attr("name", this.field.getResourceKey())
+							.val(Base64.getUrlEncoder().encodeToString(json.writeValueAsBytes(obj))));
+					}
+					
+					for(String column : view.defaultColumns()) {
+						row.appendChild(Html.td().appendChild(renderElement(obj, template, template.getField(column))));
+					}
+					
+					if(template.getResourceKey().equals(obj.getResourceKey())) {
+						renderRowActions(row, obj, view, template);
+					} else {
+						renderRowActions(row, obj, view, ApplicationServiceImpl.getInstance().getBean(
+								TemplateService.class).get(obj.getResourceKey()));
+					}
+					
+					
+					el.appendChild(row);
+				}
+			} else {
+				el.appendChild(Html.tr().appendChild(Html.td().attr("colspan", String.valueOf(columns))
+						.addClass("text-center")
+						.appendChild(Html.i18n("default", "noResults.text"))));
+			}
+			
+			if(isPaginationRequired()) {
+				tableholder.add(renderPagination());
+			}
+	
+			return tableholder;
+		
+		} catch (JsonProcessingException e) {
+			throw new IllegalStateException(e.getMessage(), e);
 		}
-
-		return tableholder;
 		
 	}
 	
@@ -173,15 +205,33 @@ public class TableRenderer {
 		
 		Element el = Html.td("text-end");
 		
-		if(view.requiresView()) {
-			el.appendChild(Html.a(replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "ms-2")
-						.appendChild(Html.i("far", "fa-eye","fa-fw")));
+		if(template.isUpdatable() && !readOnly) {
+			if(Objects.isNull(parentObject)) {
+				el.appendChild(Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "ms-2")
+						.appendChild(Html.i("far", "fa-edit","fa-fw")));
+			} else {
+				el.appendChild(Html.a("#", "ms-2", "stash") 
+						.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+						.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid())
+						.appendChild(Html.i("far", "fa-edit","fa-fw")));
+			}
 		}
 		
-		if(template.isCreatable()) {
+		if(view.requiresView()) {
+			if(Objects.isNull(parentObject)) {
+				el.appendChild(Html.a(replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "ms-2")
+						.appendChild(Html.i("far", "fa-eye","fa-fw")));
+			} else {
+				el.appendChild(Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)
+						+ "/" + field.getResourceKey() + "/" + obj.getUuid(), "ms-2")
+							.appendChild(Html.i("far", "fa-eye","fa-fw")));
+			}
+		}
+		
+		if(template.isCreatable() && !readOnly) {
 			el.appendChild(Html.a(replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "ms-2")
 					.appendChild(Html.i("far", "fa-copy","fa-fw")));
-		} else if(view.requiresCreate()) {
+		} else {
 			el.appendChild(Html.i("far", "fa-fw", "ms-2"));
 		}
 		
@@ -219,7 +269,7 @@ public class TableRenderer {
 		}
 		
 		if(template.isDeletable()) {
-			if(!obj.isSystem()) {
+			if(!obj.isSystem() && !readOnly) {
 				el.appendChild(Html.a("#", "deleteAction", "ms-2")
 						.attr("data-name", obj.getValue(template.getDefaultColumn()).toString())
 						.attr("data-url", replaceVariables("/app/api/objects/{resourceKey}/{uuid}", obj))
@@ -243,15 +293,27 @@ public class TableRenderer {
 		return url;
 	}
 
-	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field) {
+	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field) throws UnsupportedEncodingException {
 		
 		boolean isDefault = StringUtils.defaultString(template.getDefaultColumn()).equals(field.getResourceKey());
 		
 		if(isDefault) {
-			if(template.isUpdatable()) {
-				return Html.a(String.format("/app/ui/update/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+			if(template.isUpdatable() && !readOnly) {
+				if(Objects.isNull(parentObject)) {
+					return Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+				} else {
+					return Html.a("#", "underline", "stash")
+							.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+							.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + this.field.getResourceKey() + "/" + obj.getUuid())
+							.text(StringUtils.defaultString(obj.getValue(field).toString()));
+				}
 			} else {
-				return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+				if(Objects.isNull(parentObject)) {
+					return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+				} else {
+					return Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)  + "/" + this.field.getResourceKey() + "/" + obj.getUuid(), "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+				}
+				
 			}
 			
 		}
@@ -260,7 +322,7 @@ public class TableRenderer {
 		case BOOL:
 			return Html.i("far", Boolean.parseBoolean(obj.getValue(field).toString()) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
 		default:
-			return Html.span(StringUtils.defaultString(obj.getValue(field).toString()));
+			return Html.span(StringUtils.defaultString(obj.getValue(field).toString()), "UTF-8");
 		}
 		
 	}

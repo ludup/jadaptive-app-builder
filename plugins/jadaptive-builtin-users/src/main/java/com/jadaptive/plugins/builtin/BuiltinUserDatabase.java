@@ -8,6 +8,4 @@ public interface BuiltinUserDatabase extends PasswordEnabledUserDatabase {
 
 	void deleteUser(BuiltinUser user);
 
-	BuiltinUser getUserByEmail(String email);
-
 }

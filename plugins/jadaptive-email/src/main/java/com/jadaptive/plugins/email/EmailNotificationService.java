@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.mail.Message.RecipientType;
 
-import org.codemonkey.simplejavamail.MailException;
+import org.simplejavamail.MailException;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.template.ValidationException;
@@ -20,12 +20,12 @@ public interface EmailNotificationService {
 	String populateEmailList(String[] emails, List<RecipientHolder> recipients,
 			RecipientType type) throws ValidationException;
 
-	void sendEmail(String subject, String text, String html, RecipientHolder[] recipients,
+	void sendEmail(String subject, String html, RecipientHolder[] recipients,
 			boolean archive, EmailAttachment... attachments)
 			throws MailException, AccessDeniedException, ValidationException;
 
 
-	void sendEmail(String subject, String text, String html, String replyToName, String replyToEmail,
+	void sendEmail(String subject, String html, String replyToName, String replyToEmail,
 			RecipientHolder[] recipients, boolean archive, EmailAttachment... attachments)
 			throws MailException, ValidationException, AccessDeniedException;
 

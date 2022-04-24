@@ -1,6 +1,7 @@
 package com.jadaptive.api.ui;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,7 +45,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	}
 
 	@Override
-	public final void generateContent(Document document) throws FileNotFoundException {
+	public final void generateContent(Document document) throws IOException {
 		
 		try {
 			generateAuthenticatedContent(document);			
@@ -60,7 +61,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	}
 
 
-	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException {
+	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
 		
 	}
 	

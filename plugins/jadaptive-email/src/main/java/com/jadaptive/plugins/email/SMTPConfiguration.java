@@ -1,6 +1,6 @@
 package com.jadaptive.plugins.email;
 
-import org.codemonkey.simplejavamail.TransportStrategy;
+import org.simplejavamail.api.mailer.config.TransportStrategy;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
@@ -35,7 +35,7 @@ public class SMTPConfiguration extends SingletonUUIDEntity {
 	@ObjectView(SERVER_VIEW)
 	String hostname;
 	
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.INTEGER)
 	@ObjectView(SERVER_VIEW)
 	int port;
 	

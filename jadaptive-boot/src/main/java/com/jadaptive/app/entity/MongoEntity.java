@@ -18,7 +18,7 @@ import com.jadaptive.api.template.FieldTemplate;
 
 @JsonDeserialize(using=AbstractObjectDeserializer.class)
 @JsonSerialize(using=AbstractObjectSerializer.class)
-public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
+public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 
 	private static final long serialVersionUID = 7834313955696773158L;
 	AbstractObject parent;
@@ -57,6 +57,8 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 		if(Objects.nonNull(uuid)) {
 			setUuid(uuid);
 		}
+		setSystem((Boolean)document.getOrDefault("system", Boolean.FALSE));
+		setHidden((Boolean)document.getOrDefault("hidden", Boolean.FALSE));
 		if(!Objects.isNull(parent)) {
 			parent.addChild(resourceKey, this);
 		}
@@ -161,6 +163,16 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 			tmp.add(new MongoEntity((String)child.get("resourceKey"), child));
 		}
 		return tmp;
+	}
+	
+	@Override
+	public void removeCollectionObject(String fieldName, AbstractObject e) {
+		document.getList(fieldName, Map.class).removeIf(entries->entries.get("_id").equals(e.getUuid()));
+	}
+	
+	@Override
+	public void addCollectionObject(String fieldName, AbstractObject e) {
+		document.getList(fieldName, Map.class).add(e.getDocument());
 	}
 
 	public void setValue(String key, String value) {

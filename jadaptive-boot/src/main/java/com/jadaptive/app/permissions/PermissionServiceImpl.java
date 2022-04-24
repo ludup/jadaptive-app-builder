@@ -95,12 +95,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		public Boolean isHidden() {
 			return true;
 		}
-
-		@Override
-		public String getSystemName() {
-			return getUsername();
-		}
-
+		
 		@Override
 		public String getResourceKey() {
 			return "user";

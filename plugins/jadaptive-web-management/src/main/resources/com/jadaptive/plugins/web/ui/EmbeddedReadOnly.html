@@ -1,20 +1,13 @@
 <!DOCTYPE html>
 <html lang="en"  xmlns:jad="https://jadaptive.com/jadaptive">
 <head>
-	<title></title>
+	<title>View ${page.childTemplate.resourceKey}</title>
 	<meta charset="UTF-8">
 </head>
 <body>
 <div class="wrapper">
 <header jad:id="header"></header>
 <main class="container mt-3">
- <div class="row">
-	<ol class="breadcrumb col-12">
-	  <li class="breadcrumb-item"><a href="/app/ui/dashboard">Home</a></li>
-	  <li class="breadcrumb-item active"><a id="searchBreadcrumb" href="#">[Template Name]</a></li>
-	  <li class="breadcrumb-item active"><span jad:bundle="default" jad:i18n="view.name">[View]]</span></li>
-	</ol>
-  </div>
    <div class="row my-1">
    		 <div class="col-12" jad:id="objectRenderer"></div>
    </div>

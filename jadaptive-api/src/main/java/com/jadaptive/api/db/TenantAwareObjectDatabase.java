@@ -4,9 +4,9 @@ import java.util.Collection;
 
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
 
-public interface TenantAwareObjectDatabase<T extends UUIDEntity> {
+public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
 	Iterable<T> list(Class<T> resourceClass, SearchField...fields);
 

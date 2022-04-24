@@ -39,7 +39,7 @@ public class AuthenticationPolicyMenu implements ApplicationMenu {
 
 	@Override
 	public String getParent() {
-		return ApplicationMenuService.SYSTEM_MENU_UUID;
+		return ApplicationMenuService.ADMINISTRATION_MENU_UUID;
 	}
 
 	@Override

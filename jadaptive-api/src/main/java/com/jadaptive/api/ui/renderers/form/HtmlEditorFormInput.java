@@ -1,5 +1,8 @@
 package com.jadaptive.api.ui.renderers.form;
 
+import java.io.IOException;
+import java.util.Base64;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -13,13 +16,15 @@ import com.jadaptive.api.ui.PageHelper;
 public class HtmlEditorFormInput extends FieldInputRender {
 
 	private Document document;
-	public HtmlEditorFormInput(ObjectTemplate template, OrderedField field, Document document) {
+	private boolean readOnly;
+	public HtmlEditorFormInput(ObjectTemplate template, OrderedField field, Document document, boolean readOnly) {
 		super(template, field);
 		this.document = document;
+		this.readOnly = readOnly;
 	}
 
 	@Override
-	public void renderInput(OrderedView panel, Element rootElement, String value) {
+	public void renderInput(OrderedView panel, Element rootElement, String value) throws IOException {
 
 		PageHelper.appendScript(document, "/app/content/codemirror/lib/codemirror.js");
 		PageHelper.appendScript(document, "/app/content/codemirror/mode/xml/xml.js");
@@ -43,7 +48,7 @@ public class HtmlEditorFormInput extends FieldInputRender {
 						.attr("id", field.getFormVariable())
 						.attr("name", field.getFormVariable())
 						.addClass("form-control")
-						.val(value))
+						.val(Base64.getEncoder().encodeToString(value.getBytes("UTF-8"))))
 				.appendChild(new Element("small")
 						.addClass("form-text")
 						.addClass("text-muted")
@@ -52,11 +57,17 @@ public class HtmlEditorFormInput extends FieldInputRender {
 
 		rootElement.appendChild(new Element("script")
 							.attr("type", "application/javascript")
-							.text("CodeMirror.fromTextArea(document.getElementById('" + field.getResourceKey() + "'), {\n"
+							.text("$('#" + field.getResourceKey() + "').val(window.atob($('#" + field.getResourceKey() + "').val()));\n"
+								+ "var " + field.getFormVariable() + "Editor = CodeMirror.fromTextArea(document.getElementById('" + field.getResourceKey() + "'), {\n"
 								+ "    lineNumbers: true,\n"
 								+ "    lineWrapping: true,\n"
+								+ "    readOnly: " + String.valueOf(readOnly) + ",\n"
 								+ "    mode:  'htmlmixed'\n"
-								+ "  });"));
+								+ "  });\n"
+								+ field.getFormVariable() + "Editor.on('change', function(e) {\n"
+								+ "  const text = e.doc.getValue();\n"
+								+ "  $('#"  +field.getFormVariable() + "').val(text);\n"
+								+ "});"));
 	}
 
 }

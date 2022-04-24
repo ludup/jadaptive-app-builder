@@ -1,5 +1,7 @@
 package com.jadaptive.api.ui.renderers.form;
 
+import java.io.IOException;
+
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
@@ -16,6 +18,6 @@ public abstract class FieldInputRender {
 		this.field = field;
 	}
 	
-	public abstract void renderInput(OrderedView panel, Element rootElement, String value);
+	public abstract void renderInput(OrderedView panel, Element rootElement, String value) throws IOException;
 
 }

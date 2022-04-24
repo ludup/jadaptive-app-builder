@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 
 import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserUtils;
 
 public class RecipientHolder {
 
@@ -45,7 +44,7 @@ public class RecipientHolder {
 	
 	public RecipientHolder(User principal) {
 		this.name = principal.getName();
-		this.email = UserUtils.getEmailAddress(principal);
+		this.email = principal.getEmail();
 		this.principal = principal;
 	}
 	

@@ -179,7 +179,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 	}
 
-	private void createViews(List<OrderedView> views, Element element, AbstractObject obj, FieldView currentView) {
+	private void createViews(List<OrderedView> views, Element element, AbstractObject obj, FieldView currentView) throws IOException {
 		
 		int tabIndex = hasTabbedView(views);
 		int acdIndex = hasAccordionView(views);
@@ -267,7 +267,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		return -1;
 	}
 
-	private void renderField(Element element, AbstractObject obj, OrderedField orderedField,  FieldView view, OrderedView panel) {
+	private void renderField(Element element, AbstractObject obj, OrderedField orderedField,  FieldView view, OrderedView panel) throws IOException {
 		
 		FieldTemplate field = orderedField.getField();
 		
@@ -309,7 +309,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				FieldSearchFormInput input = new FieldSearchFormInput(currentTemplate.get(), orderedField, 
 						String.format("/app/api/objects/%s/table", objectType),
 						objectTemplate.getNameField(), "uuid");
-				input.renderInput(panel, element, uuid, name, false);
+				input.renderInput(panel, element, uuid, name, false, view == FieldView.READ);
 				break;
 			case OBJECT_EMBEDDED:
 //				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
@@ -322,7 +322,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	}
 	
 	private void renderColletion(Element element, AbstractObject obj, OrderedField orderedField,
-			FieldView view, OrderedView panel) {
+			FieldView view, OrderedView panel) throws IOException {
 		
 		FieldTemplate field = orderedField.getField();
 		
@@ -341,7 +341,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			break;
 		case OBJECT_EMBEDDED:
 		{
-			TableRenderer table = new TableRenderer();
+			TableRenderer table = new TableRenderer(view == FieldView.READ, obj, field);
 			String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
 			ObjectTemplate objectTemplate = templateService.get(objectType);
 			
@@ -421,7 +421,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	}
 	
 	private void renderFormField(Element element, AbstractObject obj, OrderedField orderedField,
-			FieldView view, OrderedView panel) {
+			FieldView view, OrderedView panel) throws IOException {
 		
 		FieldTemplate field = orderedField.getField();
 
@@ -466,7 +466,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			switch(orderedField.getRenderer()) {
 			case HTML_EDITOR:
 			{
-				HtmlEditorFormInput render = new HtmlEditorFormInput(currentTemplate.get(), orderedField, currentDocument.get());
+				HtmlEditorFormInput render = new HtmlEditorFormInput(currentTemplate.get(), orderedField, currentDocument.get(), view == FieldView.READ);
 				render.renderInput(panel, element, getFieldValue(orderedField, obj));
 				break;
 			}

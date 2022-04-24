@@ -6,48 +6,19 @@ $(document).ready(function() {
         $('#feedback').remove();
         
     	var form = $('form');
-    	var url = form.attr('action');
-    
+    	var action = $(this).data('action');
+    	var url = $(this).data('url');
+    	
         JadaptiveUtils.startAwesomeSpin($('#saveButton i'), 'fa-save');
         
     	$.ajax({
            type: "POST",
-           url: url,
+           url: action,
            data: JadaptiveUtils.serializeForm(form),
            success: function(data)
            {
-               if(data.redirect) {
-                	window.location = data.location;
-               } else if(data.success) {
-                   window.location = '/app/ui/search/' + form.data('resourcekey');
-               } else {
-               	   $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="far fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
-               	   $('#feedbackText').text(data.message);
-               }
-           },
-           complete: function() {
-           		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
-           }
-         });
-    });
-    
-    $('.stash').click(function(e) {
-		e.preventDefault();
-		
-		$('#feedback').remove();
-		
-		var url = $(this).data('action');
-		var redirect = $(this).data('url');
-		var form = $('form');
-		
-		$.ajax({
-           type: "POST",
-           url: url,
-           data: JadaptiveUtils.serializeForm(form),
-           success: function(data)
-           {
-                if(data.success) {
-                   window.location = redirect;
+               if(data.success) {
+                   window.location = url;
                } else {
                	   $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="far fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
                	   $('#feedbackText').text(data.message);
@@ -57,10 +28,8 @@ $(document).ready(function() {
            		
            }
          });
-		
-		
-	});
-	
+    });
+    
     $('.checkExit').click(function(e) {
         e.preventDefault();
         var _self = $(this);

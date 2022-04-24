@@ -72,7 +72,7 @@ public class ServerSideTablePage extends TemplatePage implements FormProcessor<S
 		}
 	}	
 	
-	public final void processForm(Document document, SearchForm form) throws FileNotFoundException {
+	public final void processForm(Document document, SearchForm form) throws IOException {
 		
 		searchField = form.getSearchColumn();
 		searchValue = form.getSearchValue();
@@ -87,7 +87,7 @@ public class ServerSideTablePage extends TemplatePage implements FormProcessor<S
 	}
 
 	@Override
-	protected void generateAuthenticatedContent(Document document) {
+	protected void generateAuthenticatedContent(Document document) throws IOException {
 		
 		searchField = StringUtils.defaultString(Request.get().getParameter("column"), template.getDefaultColumn());
 		searchValue = StringUtils.defaultString(Request.get().getParameter("filter"), template.getDefaultFilter());
@@ -108,7 +108,7 @@ public class ServerSideTablePage extends TemplatePage implements FormProcessor<S
 		
 	}
 
-	protected void generateTable(Document document) {
+	protected void generateTable(Document document) throws IOException {
 		List<ObjectTemplate> creatableTemplates = new ArrayList<>();
 		
 		if(!template.getChildTemplates().isEmpty()) {
@@ -169,7 +169,7 @@ public class ServerSideTablePage extends TemplatePage implements FormProcessor<S
 		long totalObjects = objectService.count(template.getCollectionKey(), searchField, searchValue);
 		Collection<AbstractObject> objects = objectService.table(template.getResourceKey(), searchField, searchValue, start, length);
 		
-		TableRenderer renderer = new TableRenderer();
+		TableRenderer renderer = new TableRenderer(false);
 		renderer.setLength(length);
 		renderer.setStart(start);
 		renderer.setObjects(objects);

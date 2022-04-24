@@ -50,4 +50,5 @@ public interface RoleService {
 	boolean isAssigned(AssignableUUIDEntity obj, User user);
 
 	Collection<Role> getRolesByUUID(Collection<String> roles);
+
 }

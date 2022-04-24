@@ -210,6 +210,10 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 
 	private Object validate(FieldTemplate field, JsonNode node, AbstractObject e) throws IOException, ValidationException {
 		
+		if(node.isNull()) {
+			return null;
+		}
+		
 		switch(field.getFieldType()) {
 		case BOOL:
 			validateBoolean(node, field);

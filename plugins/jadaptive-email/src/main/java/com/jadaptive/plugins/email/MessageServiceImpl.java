@@ -4,7 +4,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -13,16 +12,15 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
-import org.codemonkey.simplejavamail.MailException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.simplejavamail.MailException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.user.UserService;
@@ -166,18 +164,14 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 		}
 		RecipientHolder holder = new RecipientHolder(emailAddress);
 		sendMessage(uuid, tokenResolver, 
-				new ArrayList<RecipientHolder>(Arrays.asList(holder)).iterator(), 
+				new ArrayList<RecipientHolder>(Arrays.asList(holder)), 
 				attachments);
 	}
 	
 	@Override
 	public void sendMessage(String uuid, ITokenResolver tokenResolver, 
-//			RecipientHolder replyTo,
-			Iterator<RecipientHolder> recipients, 
-//			Date schedule,
+			Iterable<RecipientHolder> recipients, 
 			EmailAttachment... attachments) {
-//		if(schedule == null)
-//			schedule = new Date();
 
 		Message message = repository.get(uuid, Message.class);
 		
@@ -190,15 +184,13 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 		 */
 		Set<String> processedEmails = new HashSet<>();
 		
-		while(recipients.hasNext()) {
+		for(RecipientHolder recipient : recipients) {
 			
 		
 		try {
 			
 			Locale locale = Locale.getDefault();
 			
-			RecipientHolder recipient = recipients.next();
-
 			if(StringUtils.isBlank(recipient.getEmail())) {
 				log.warn("Detected empty email in a RecipientHolder! Skipping");
 				continue;
@@ -231,26 +223,7 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 				}
 			}
 			
-			MessageContent defaultContent = null;
-			MessageContent localeContent = null;
-			for(MessageContent content : message.getContent()) {
-				if(StringUtils.isBlank(content.getLocale())) {
-					defaultContent = content;
-				}
-				if(localeContent == null) {
-					if(content.getLocale().equals(locale.getLanguage()) || content.getLocale().equals(locale.toString())) {
-						localeContent = content;
-					}
-				}
-			}
-			
-			if(Objects.isNull(localeContent)) {
-				if(Objects.nonNull(defaultContent)) {
-					localeContent = defaultContent;
-				} else if(message.getContent().size() > 0){
-					localeContent = message.getContent().iterator().next();
-				}
-			} 
+			MessageContent localeContent = message.getLocaleContent(locale.toLanguageTag(), locale.getLanguage()); 
 			
 			if(Objects.isNull(localeContent)) {
 				log.warn("Message content could not be determined for locale {}", locale.toString());
@@ -262,89 +235,48 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 			StringWriter subjectWriter = new StringWriter();
 			subjectTemplate.process(data, subjectWriter);
 
-			Template bodyTemplate = freeMarker.createTemplate("message.body." + message.getUuid(),
-					localeContent.getPlainText(), message.getLastModified().getTime());
-			StringWriter bodyWriter = new StringWriter();
-			bodyTemplate.process(data, bodyWriter);
-
 			String receipientHtml = "";
 
-			if (StringUtils.isNotBlank(localeContent.getHtmlText())) {
-				if (localeContent.getHtmlTemplate() != null) {
-					Document doc = Jsoup.parse(localeContent.getHtmlTemplate().getHtml());
-					Elements elements = doc.select(localeContent.getHtmlTemplate().getContentSelector());
-					if (elements.isEmpty()) {
-						throw new IllegalStateException(String.format("Invalid content selector %s",
-								localeContent.getHtmlTemplate().getContentSelector()));
-					}
-					elements.first().append(localeContent.getHtmlText());
-					receipientHtml = doc.toString();
-				} else {
-					receipientHtml = localeContent.getHtmlText();
+			long lastModified = message.getLastModified().getTime();
+			
+			if (localeContent.getHtmlTemplate() != null) {
+				Document doc = Jsoup.parse(localeContent.getHtmlTemplate().getHtml());
+				Elements elements = doc.select(localeContent.getHtmlTemplate().getContentSelector());
+				if (elements.isEmpty()) {
+					throw new IllegalStateException(String.format("Invalid content selector %s",
+							localeContent.getHtmlTemplate().getContentSelector()));
 				}
+				elements.first().append(localeContent.getHtmlText());
+				receipientHtml = doc.toString();
+				lastModified = Math.max(lastModified, localeContent.getHtmlTemplate().getLastModified().getTime());
+			} else {
+				receipientHtml = localeContent.getHtmlText();
 			}
+			
 
 			Template htmlTemplate = freeMarker.createTemplate("message.html." + message.getUuid(),
-					receipientHtml, message.getLastModified().getTime());
+					receipientHtml, lastModified);
 
 			data.put("htmlTitle", subjectWriter.toString());
 
 			StringWriter htmlWriter = new StringWriter();
 			htmlTemplate.process(data, htmlWriter);
 
-//			String attachmentsListString = message.getAttachments();
-//			List<String> attachmentUUIDs = new ArrayList<>(
-//					Arrays.asList(ResourceUtils.explodeValues(attachmentsListString)));
-//
-//			if (tokenResolver instanceof ResolverWithAttachments) {
-//				attachmentUUIDs.addAll(((ResolverWithAttachments) tokenResolver).getAttachmentUUIDS());
-//			}
 
-//			if (attachments != null) {
-//				for (EmailAttachment attachment : attachments) {
-//					attachmentUUIDs.add(attachment.getName());
-//				}
-//			}
+			List<EmailAttachment> emailAttachments = new ArrayList<EmailAttachment>();
+			if (attachments != null) {
+				emailAttachments.addAll(Arrays.asList(attachments));
+			}
 
-//			if (schedule != null) {
 
-//				attachmentsListString = ResourceUtils.implodeValues(attachmentUUIDs);
-
-//				batchService.scheduleEmail(realm, subjectWriter.toString(), bodyWriter.toString(),
-//						htmlWriter.toString(), replyTo != null ? replyTo.getName() : message.getReplyToName(),
-//						replyTo != null ? replyTo.getEmail() : message.getReplyToEmail(), recipient.getName(),
-//						recipient.getEmail(), message.isArchive(), false, attachmentsListString, schedule, context);
-//
-//			} else {
-				List<EmailAttachment> emailAttachments = new ArrayList<EmailAttachment>();
-				if (attachments != null) {
-					emailAttachments.addAll(Arrays.asList(attachments));
-				}
-//				for (String uuid : attachmentUUIDs) {
-//					try {
-//						FileUpload upload = uploadService.getFileUpload(uuid);
-//						emailAttachments
-//								.add(new EmailAttachment(upload.getFileName(), uploadService.getContentType(uuid)) {
-//									@Override
-//									public InputStream getInputStream() throws IOException {
-//										return uploadService.getInputStream(getName());
-//									}
-//								});
-//					} catch (ResourceNotFoundException | IOException e) {
-//						log.error(String.format("Unable to locate upload %s", uuid), e);
-//					}
-//				}
-
-				if(log.isInfoEnabled()) {
-					log.info("Sending \"{}\" email to {}", subjectWriter.toString(), recipient.getEmail());
-				}
-				
-				emailService.sendEmail(subjectWriter.toString(), bodyWriter.toString(),
-						htmlWriter.toString(), message.getReplyToName(), message.getReplyToEmail(),
-						new RecipientHolder[] { recipient }, message.isArchive(),
-						emailAttachments.toArray(new EmailAttachment[0]));
-
-//			}
+			if(log.isInfoEnabled()) {
+				log.info("Sending \"{}\" email to {}", subjectWriter.toString(), recipient.getEmail());
+			}
+			
+			emailService.sendEmail(subjectWriter.toString(), 
+					htmlWriter.toString(), message.getReplyToName(), message.getReplyToEmail(),
+					new RecipientHolder[] { recipient }, message.isArchive(),
+					emailAttachments.toArray(new EmailAttachment[0]));
 			
 
 			} catch (MailException e) {
@@ -362,13 +294,13 @@ public class MessageServiceImpl extends AuthenticatedService implements MessageS
 	}
 
 	@Override
-	public Message getMessageByShortName(String name) {
-		return repository.get(Message.class, SearchField.eq("shortName", name));
+	public void saveMessage(Message message) {
+		repository.saveOrUpdate(message);
 	}
 
 	@Override
-	public void saveMessage(Message message) {
-		repository.saveOrUpdate(message);
+	public Message getMessageByUUID(String uuid) {
+		return repository.get(uuid, Message.class);
 	}
 
 }

@@ -16,7 +16,7 @@ public class SMTPConfigurationMenu implements ApplicationMenu {
 		return "smtpConfiguration.name";
 	}
 	
-	public boolean isEnabled() { return false; }
+	public boolean isEnabled() { return true; }
 
 	@Override
 	public String getBundle() {

@@ -3,6 +3,7 @@ package com.jadaptive.app.session;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
@@ -13,11 +14,20 @@ public class SessionReaperTask implements ScheduledTask {
 	@Autowired
 	private SessionService sessionService; 
 	
+	@Autowired
+	private PermissionService permissionService; 
+	
 	@Override
 	public void run() {
 		
-		for(Session session : sessionService.iterateSessions()) {
-			sessionService.isLoggedOn(session, false);
+		permissionService.setupSystemContext();
+		
+		try {
+			for(Session session : sessionService.iterateSessions()) {
+				sessionService.isLoggedOn(session, false);
+			}
+		} finally {
+			permissionService.clearUserContext();
 		}
 	}
 

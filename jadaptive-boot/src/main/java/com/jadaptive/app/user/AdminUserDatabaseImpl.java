@@ -34,11 +34,7 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	private final Set<UserDatabaseCapabilities> capabilities = new HashSet<>(
 			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD,
 					UserDatabaseCapabilities.LOGON));
-	
-	@Override
-	public User getUser(String username) {
-		return objectDatabase.get(AdminUser.class, SearchField.eq("username", username));
-	}
+
 
 	@Override
 	public AdminUser createAdmin(String username, char[] password, String email, boolean forceChange) {
@@ -53,16 +49,12 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 		roleService.assignRole(roleService.getAdministrationRole(), user);
 		return user;
 	}
-	
-	@Override
-	public AdminUser getUserByUUID(String uuid) {
-		return objectDatabase.get(AdminUser.class, SearchField.eq("uuid", uuid));
-	}
+
 
 	@Override
 	public Iterable<User> allObjects() {
 		ArrayList<User> users = new ArrayList<>();
-		for(AdminUser user : objectDatabase.list(AdminUser.class)) {
+		for(AdminUser user : objectDatabase.list(AdminUser.class, SearchField.eq("resourceKey", AdminUser.RESOURCE_KEY))) {
 			users.add(user);
 		}
 		return users;

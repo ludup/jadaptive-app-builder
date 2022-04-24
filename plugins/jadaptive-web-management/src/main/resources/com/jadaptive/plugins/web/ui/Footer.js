@@ -164,6 +164,7 @@ $(function() {
 						  '</td></tr>');
 		}
 	}); 
+ 
 	
 	var createItem = function(menu, key, value, selectionClass) {
 		menu.append('<a data-resourcekey="' + key + '" class="' + selectionClass + ' dropdown-item" href="#">' + value + '</a>');
@@ -191,10 +192,12 @@ $(function() {
 	$('.jsearchText').on('keyup', function(e) {
 		
 		createDropdown($(this).val(), 
-				$(this).data('url'),
-				$(this).closest(".dropdown").find('.dropdown-menu'),
-				$(this).closest(".dropdown").find('.jsearchText'));
-    
+							$(this).data('url'), 
+							$(this).data('field'),
+							$(this).data('id'),
+							$(this).closest(".dropdown").find('.dropdown-menu'),
+							$(this),
+							"jdropdown-item");
 
 	});
 

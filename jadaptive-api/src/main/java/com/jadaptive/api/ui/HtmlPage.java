@@ -157,7 +157,7 @@ public abstract class HtmlPage implements Page {
 			if(Objects.isNull(element)) {
 				element = doc.selectFirst("#content");
 				if(Objects.nonNull(element)) {
-					element.appendChild(Html.div("col-12")
+					element.prependChild(Html.div("col-12")
 								.appendChild(Html.div("alert", feedback.getAlert())
 								.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
 								.appendChild(Html.i18n(feedback.getBundle(), feedback.getI18n(), feedback.getArgs()))));

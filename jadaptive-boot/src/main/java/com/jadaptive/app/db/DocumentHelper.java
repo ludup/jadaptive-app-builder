@@ -12,7 +12,9 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +35,7 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
@@ -295,7 +298,6 @@ public class DocumentHelper {
 		String fieldName = field.getFormVariable();
 		
 		List<Object> result = new ArrayList<>();
-		
 		String[] values = request.getParameterValues(fieldName);
 		if(Objects.isNull(values) || values.length == 0) {
 			return result;
@@ -303,20 +305,28 @@ public class DocumentHelper {
 		
 		switch(field.getFieldType()) {
 		case OBJECT_EMBEDDED:
-//			TODO build a collection of objects
-//			result.add(buildObject(request, 
-//				ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
-//					.get(field.getValidationValue(ValidationType.RESOURCE_KEY))));
+			
+			ObjectMapper mapper = new ObjectMapper();
+
+			for(String value : values) {
+				result.add(mapper.readValue(Base64.getUrlDecoder().decode(value), MongoEntity.class).getDocument());
+			}
+
+			break;
 		case OBJECT_REFERENCE:
+		{
 			for(String value : values) {
 				result.add(value);
 			}
 			break;
+		}
 		default:
+		{
 			for(String value : values) {
 				result.add(fromString(field, value));
 			}
 			break;
+		}
 		}
 		
 		if(log.isDebugEnabled()) {
@@ -444,6 +454,7 @@ public class DocumentHelper {
 					Class<?> type = (Class<?>) o.getActualTypeArguments()[0];
 					List<?> list = (List<?>) document.get(name);
 					if(Objects.isNull(list)) {
+						m.invoke(obj, Collections.emptySet());
 						continue;
 					}
 					if(UUIDEntity.class.isAssignableFrom(type)) {

@@ -2,8 +2,6 @@ package com.jadaptive.app.user;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +26,7 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
 import com.jadaptive.api.user.UserDatabase;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
-import com.jadaptive.api.user.UserImpl;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.utils.CompoundIterable;
 
 @Service
 public class UserServiceImpl extends AuthenticatedService implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
@@ -44,7 +40,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
 	
 	@Autowired
-	private TenantAwareObjectDatabase<UserImpl> userRepository;
+	private TenantAwareObjectDatabase<User> userRepository;
 	
 	@Override
 	public Integer getOrder() {
@@ -72,7 +68,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public User getUserByUUID(String uuid) {
 		
-		User user = userRepository.get(uuid, UserImpl.class);
+		User user = userRepository.get(uuid, User.class);
 		
 //		for(UserDatabase userDatabase : getOrderedDatabases()) {
 //			try {
@@ -89,18 +85,18 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		return user;
 	}
 
-	private List<UserDatabase> getOrderedDatabases() {
-		loadUserDatabases();
-		List<UserDatabase> tmp = new ArrayList<>(userDatabases.values());
-		Collections.sort(tmp, new Comparator<UserDatabase>() {
-
-			@Override
-			public int compare(UserDatabase o1, UserDatabase o2) {
-				return o1.weight().compareTo(o2.weight());
-			}
-		});
-		return tmp;
-	}
+//	private List<UserDatabase> getOrderedDatabases() {
+//		loadUserDatabases();
+//		List<UserDatabase> tmp = new ArrayList<>(userDatabases.values());
+//		Collections.sort(tmp, new Comparator<UserDatabase>() {
+//
+//			@Override
+//			public int compare(UserDatabase o1, UserDatabase o2) {
+//				return o1.weight().compareTo(o2.weight());
+//			}
+//		});
+//		return tmp;
+//	}
 
 	@Override
 	public boolean verifyPassword(User user, char[] password) {
@@ -115,7 +111,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public User getUser(String username) {
 
-		User user = userRepository.get(UserImpl.class, SearchField.eq("username", username));
+		User user = userRepository.get(User.class, SearchField.eq("username", username));
 		
 //		for(UserDatabase userDatabase : getOrderedDatabases()) {
 //			try {
@@ -135,16 +131,16 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public User getUserByEmail(String email) {
 
-		User user = null;
+		User user = userRepository.get(User.class, SearchField.eq("email", email));
 		
-		for(UserDatabase userDatabase : getOrderedDatabases()) {
-			try {
-				user = userDatabase.getUser(email);
-				if(Objects.nonNull(user)) {
-					break;
-				}
-			} catch(ObjectNotFoundException e) { }
-		}
+//		for(UserDatabase userDatabase : getOrderedDatabases()) {
+//			try {
+//				user = userDatabase.getUser(email);
+//				if(Objects.nonNull(user)) {
+//					break;
+//				}
+//			} catch(ObjectNotFoundException e) { }
+//		}
 		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("%s not found", email));
@@ -197,12 +193,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 
 	@Override
 	public Iterable<User> allObjects() {
-		
-		CompoundIterable<User> iterator = new CompoundIterable<>();
-		userDatabases.forEach((k,v)->{
-			iterator.add(v.allObjects());
-		});
-		return iterator;
+		return userRepository.list(User.class);
 	}
 
 	@Override
@@ -280,7 +271,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 
 	@Override
 	public long getTotalResources() {
-		return userRepository.count(UserImpl.class);
+		return userRepository.count(User.class);
 	}
 
 	@Override
@@ -302,7 +293,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public Collection<User> getUsersByUUID(Collection<String> users) {
 		
 		List<User> tmp = new ArrayList<>();
-		for(User user : userRepository.list(UserImpl.class, SearchField.in("uuid", users))) {
+		for(User user : userRepository.list(User.class, SearchField.in("uuid", users))) {
 			tmp.add(user);
 		}
 		return tmp;

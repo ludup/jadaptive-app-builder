@@ -20,7 +20,7 @@ public abstract class PasswordEnabledUserDatabaseImpl
 	private static final String ENCRYPTION_PREFIX = "!ENC!";
 	
 	@Autowired
-	private TenantAwareObjectDatabase<UserImpl> objectDatabase;
+	private TenantAwareObjectDatabase<User> objectDatabase;
 	
 	@Override
 	public void setPassword(User u, char[] password, boolean passwordChangeRequired) {
@@ -69,8 +69,8 @@ public abstract class PasswordEnabledUserDatabaseImpl
 		}
 	}
 	
-	public UserImpl getObjectByUUID(String uuid) {
-		return objectDatabase.get(uuid, UserImpl.class);
+	public User getObjectByUUID(String uuid) {
+		return objectDatabase.get(uuid, User.class);
 	}
 
 	public String saveOrUpdate(User u) {

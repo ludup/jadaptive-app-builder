@@ -87,9 +87,14 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public AbstractObject getSingleton(String resourceKey) throws RepositoryException, ObjectException, ValidationException {
 
-		permissionService.assertRead(resourceKey);
+		
 		
 		ObjectTemplate template = templateService.get(resourceKey);
+		
+		if(template.getPermissionProtected()) {
+			permissionService.assertRead(resourceKey);
+		}
+		
 		if(template.getType()!=ObjectType.SINGLETON) {
 			throw new ObjectException(String.format("%s is not a singleton entity", resourceKey));
 		}
@@ -111,10 +116,12 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public AbstractObject get(String resourceKey, String uuid) throws RepositoryException, ObjectException, ValidationException {
 
-		permissionService.assertRead(resourceKey);
-		
 		ObjectTemplate template = templateService.get(resourceKey);
 
+		if(template.getPermissionProtected()) {
+			permissionService.assertRead(resourceKey);
+		}
+		
 		AbstractObject e = entityRepository.getById(template, uuid);
 		if(!resourceKey.equals(e.getResourceKey()) && !template.getChildTemplates().contains(e.getResourceKey())) {
 			throw new IllegalStateException(String.format("Unexpected template %s", e.getResourceKey()));

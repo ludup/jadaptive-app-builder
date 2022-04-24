@@ -37,7 +37,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	private TenantAwareObjectDatabase<Role> repository; 
 
 	@Autowired
-	private TenantService tenantService; 
+	private TenantService tenantService;  
 	
 	@Override
 	public Integer getOrder() {

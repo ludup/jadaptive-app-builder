@@ -1,9 +1,11 @@
 package com.jadaptive.plugins.email;
 
 import java.util.Collection;
+import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.repository.ReadOnlyNamedUUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
@@ -16,21 +18,20 @@ import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
-@ObjectDefinition(resourceKey = Message.RESOURCE_KEY, type = ObjectType.COLLECTION, system = true, deletable = false, creatable = false)
+@ObjectDefinition(resourceKey = Message.RESOURCE_KEY, type = ObjectType.COLLECTION, system = true, deletable = false, creatable = false, defaultColumn = "name")
 @TableView(defaultColumns = { "name", "group", "enabled", "archive"} )
 @ObjectViews({ @ObjectViewDefinition(bundle = Message.RESOURCE_KEY, value = "locales"),
 	@ObjectViewDefinition(bundle = Message.RESOURCE_KEY, value = "replyTo")})
-public class Message extends NamedUUIDEntity {
+public class Message extends ReadOnlyNamedUUIDEntity {
 
 	private static final long serialVersionUID = 2912430699573395419L;
 
-	public static final String RESOURCE_KEY = "messages";
+	public static final String RESOURCE_KEY = "emailMessages";
 	
 	@ObjectField(required = true, readOnly = true, type = FieldType.TEXT)
 	String group;
 	
-	@ObjectField(defaultValue = "true", 
-		    type = FieldType.BOOL)
+	@ObjectField(defaultValue = "true", type = FieldType.BOOL)
 	boolean enabled = true;
 	
 	@ObjectView("replyTo")
@@ -115,6 +116,36 @@ public class Message extends NamedUUIDEntity {
 
 	public void setContent(Collection<MessageContent> content) {
 		this.content = content;
+	}
+
+	@JsonIgnore
+	public MessageContent getDefaultContent() {
+		for(MessageContent c : content) {
+			if(c.getLocale().equals("DEFAULT")) {
+				return c;
+			}
+		}
+		return null;
+	}
+
+	@JsonIgnore
+	public MessageContent getLocaleContent(String... locales) {
+		for(String locale : locales) {
+			MessageContent c = getLocaleContent(locale);
+			if(Objects.nonNull(c)) {
+				return c;
+			}
+		}
+		return getDefaultContent();
+	}
+	
+	private MessageContent getLocaleContent(String locale) {
+		for(MessageContent c : content) {
+			if(c.getLocale().equals(locale)) {
+				return c;
+			}
+		}
+		return null;
 	}
 	
 	

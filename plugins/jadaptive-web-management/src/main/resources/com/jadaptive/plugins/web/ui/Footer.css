@@ -18,6 +18,10 @@ body {
     width: 100%;
 }
 
+.CodeMirror {
+	resize: vertical;
+}
+
 /* input[readonly] { */
 /*   background-color:transparent !important; */
 /* } */

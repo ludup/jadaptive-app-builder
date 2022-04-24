@@ -1,6 +1,6 @@
 package com.jadaptive.plugins.web.ui;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.jsoup.nodes.Document;
 import org.pf4j.Extension;
@@ -26,7 +26,7 @@ public class Dashboard extends AuthenticatedPage {
 	private PageCache pageCache;
 	
 	@Override
-	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException {
+	protected void generateAuthenticatedContent(Document document) throws IOException {
 
 		try {
 			permissionService.assertAdministrator();

@@ -23,7 +23,6 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserImpl;
 import com.jadaptive.api.wizards.AbstractWizard;
 import com.jadaptive.api.wizards.WizardFlow;
 import com.jadaptive.api.wizards.WizardState;
@@ -131,7 +130,7 @@ public class SetupWizard extends AbstractWizard<SetupSection> implements WizardF
 			
 			String uuid = (String) state.getParameter(ADMIN_UUID);
 			if(StringUtils.isNotBlank(uuid)) {
-				UserImpl u = (UserImpl) adminDatabase.getObjectByUUID(uuid);
+				User u = (User) adminDatabase.getObjectByUUID(uuid);
 				roleService.unassignRole(roleService.getAdministrationRole(), u);
 				u.setSystem(false);
 				adminDatabase.saveOrUpdate(u);

@@ -37,4 +37,8 @@ public interface AbstractObject extends UUIDDocument {
 	Map<String, AbstractObject> getChildren();
 
 	void addChild(String resourceKey, AbstractObject e);
+
+	void removeCollectionObject(String fieldName, AbstractObject existing);
+
+	void addCollectionObject(String fieldName, AbstractObject e);
 }

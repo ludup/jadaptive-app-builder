@@ -133,45 +133,50 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 
 	private void writeField(JsonGenerator gen, FieldTemplate t, Object value) throws IOException {
 		
-		switch (t.getFieldType()) {
-		case BOOL:
-			gen.writeBooleanField(t.getResourceKey(), (Boolean) (value == null ? false : value));
-			break;
-		case DECIMAL:
-			gen.writeNumberField(t.getResourceKey(), (Double) (value == null ? 0D : value));
-			break;
-		case LONG:
-			gen.writeNumberField(t.getResourceKey(), (Long) (value == null ? 0L : value));
-			break;
-		case INTEGER:
-			gen.writeNumberField(t.getResourceKey(), (Integer) (value == null ? 0 : value));
-			break;
-		case TIMESTAMP:
-			gen.writeStringField(t.getResourceKey(), value == null ? "" : Utils.formatDate((Date)value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
-			break;
-		case TEXT:
-		case TEXT_AREA:
-		case PASSWORD:
-		case OBJECT_REFERENCE:
-		case PERMISSION:
-		case HIDDEN:
-		case ENUM:
-			gen.writeStringField(t.getResourceKey(), checkNull(value));
-			break;
-		default:
-			throw new IllegalStateException(
-					String.format("Unexpected field type %s in writeField", 
-						t.getFieldType().name()));
+		if(value == null) {
+			gen.writeNullField(t.getResourceKey());
+		} else {
+			switch (t.getFieldType()) {
+			case BOOL:
+				gen.writeBooleanField(t.getResourceKey(), (Boolean) value);
+				break;
+			case DECIMAL:
+				gen.writeNumberField(t.getResourceKey(), (Double) value);
+				break;
+			case LONG:
+				gen.writeNumberField(t.getResourceKey(), (Long) value);
+				break;
+			case INTEGER:
+				gen.writeNumberField(t.getResourceKey(), (Integer) value);
+				break;
+			case TIMESTAMP:
+				gen.writeStringField(t.getResourceKey(), Utils.formatDate((Date)value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+				break;
+			case TEXT:
+			case TEXT_AREA:
+			case PASSWORD:
+			case OBJECT_REFERENCE:
+			case PERMISSION:
+			case HIDDEN:
+			case ENUM:
+				gen.writeStringField(t.getResourceKey(), value.toString());
+				break;
+			default:
+				throw new IllegalStateException(
+						String.format("Unexpected field type %s in writeField", 
+							t.getFieldType().name()));
+			}
 		}
 		
 	}
 	
-	private String checkNull(Object obj) {
-		if(Objects.nonNull(obj)) {
-			return obj.toString();
-		}
-		return "";
-	}
+//	private String checkNull(Object obj) {
+//		if(Objects.nonNull(obj)) {
+//			return obj.toString();
+//		}
+//		return "";
+//	}
+	
 	private void writeCollectionField(JsonGenerator gen, FieldTemplate t, Object value) throws IOException {
 		
 		switch (t.getFieldType()) {

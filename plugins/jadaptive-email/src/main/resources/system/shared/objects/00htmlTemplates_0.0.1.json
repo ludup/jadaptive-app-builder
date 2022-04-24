@@ -1,0 +1,8 @@
+[{
+    "uuid": "16fbfa1e-d012-47b3-a987-a306120ea46a",
+	"resourceKey": "htmlTemplates",
+	"name": "Default",
+	"contentSelector": "body",
+	"html": "<html>\n <head>\n <title>${subject}</title>\n </head>\n <body>\n </body>\n</html>",
+	"system": true
+}]
