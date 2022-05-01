@@ -38,7 +38,7 @@ public class MessagesMenu implements ApplicationMenu {
 
 	@Override
 	public String getIcon() {
-		return "typewriter";
+		return "envelope";
 	}
 
 	@Override

@@ -68,6 +68,7 @@ public class FieldSearchFormInput {
 							.addClass(readOnly ? "disabled-dropdown" : "dropdown-menu")
 							.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))))
 				.appendChild(new Element("small")
+						.addClass("text-muted")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
 		
