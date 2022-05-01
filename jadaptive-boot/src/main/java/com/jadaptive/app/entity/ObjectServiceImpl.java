@@ -34,10 +34,12 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
@@ -347,25 +349,39 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		switch(template.getScope()) {
 		case PERSONAL:
 			return entityRepository.table(template, offset, limit,
-						generateSearchFields(searchField, searchValue, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+						generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
 		case ASSIGNED:
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return entityRepository.table(template, offset, limit, 
-					generateSearchFields(searchField, searchValue, SearchField.or(
+					generateSearchFields(searchField, searchValue, template, SearchField.or(
 							SearchField.in("users", getCurrentUser().getUuid()),
 							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
 			return entityRepository.table(template, offset, limit, 
-					generateSearchFields(searchField, searchValue));
+					generateSearchFields(searchField, searchValue, template));
 		}
 		
 	}
 
-	private SearchField[] generateSearchFields(String searchField, String searchValue, SearchField... additional) {
+	private SearchField[] generateSearchFields(String searchField, String searchValue, ObjectTemplate template, SearchField... additional) {
 		List<SearchField> fields = new ArrayList<>();
 		if(StringUtils.isNotNullOrEmpty(searchValue)) {
-			fields.add(SearchField.like(searchField, searchValue));
+			FieldTemplate f = template.getField(searchField);
+			switch(f.getFieldType()) {
+			case OBJECT_REFERENCE:
+				String resourceKey = f.getValidationValue(ValidationType.RESOURCE_KEY);
+				ObjectTemplate t = templateService.get(resourceKey);
+				Collection<String> uuids = new ArrayList<>();
+				for(AbstractObject obj : entityRepository.list(t, SearchField.like(t.getNameField(), searchValue))) {
+					uuids.add(obj.getUuid());
+				}
+				fields.add(SearchField.in(searchField, uuids));
+				break;
+			default:
+				fields.add(SearchField.like(searchField, searchValue));
+				break;
+			}
 		}
 		fields.addAll(Arrays.asList(additional));
 		return fields.toArray(new SearchField[0]);
@@ -399,16 +415,16 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		switch(template.getScope()) {
 		case PERSONAL:
 			return entityRepository.count(template,
-					generateSearchFields(searchField, searchValue, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));
+					generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));
 		case ASSIGNED:
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return entityRepository.count(template,
-					generateSearchFields(searchField, searchValue, SearchField.or(
+					generateSearchFields(searchField, searchValue, template, SearchField.or(
 							SearchField.in("users", getCurrentUser().getUuid()),
 							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
-			return entityRepository.count(template, generateSearchFields(searchField, searchValue));
+			return entityRepository.count(template, generateSearchFields(searchField, searchValue, template));
 		}
 	}
 

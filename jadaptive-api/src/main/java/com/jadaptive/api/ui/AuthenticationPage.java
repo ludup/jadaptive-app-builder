@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
@@ -61,21 +60,13 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
     	} catch(AccessDeniedException e) {
     		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
     		if(StringUtils.isNotBlank(e.getMessage())) {
-	    		document.selectFirst("#feedback").appendChild(new Element("div")
-	    				.text(e.getMessage())
-	    				.addClass("alert alert-danger"));
+    			Feedback.error(e.getMessage());
     		} else {
-        		document.selectFirst("#feedback").appendChild(new Element("div")
-        				.attr("jad:bundle", "userInterface")
-        				.attr("i18n", "error.accessDenied")
-        				.addClass("alert alert-danger"));
+        		Feedback.error("userInterface","error.accessDenied");
     		}
     	} catch(ObjectNotFoundException e) {
     		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-    		document.selectFirst("#feedback").appendChild(new Element("div")
-    				.attr("jad:bundle", "userInterface")
-    				.attr("jad:i18n", "error.invalidCredentials")
-    				.addClass("alert alert-danger"));
+    		Feedback.error("userInterface","error.invalidCredentials");
     	}
     	
     	

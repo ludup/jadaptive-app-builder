@@ -3,7 +3,6 @@ package com.jadaptive.api.ui.renderers.form;
 import java.util.Collection;
 import java.util.Objects;
 
-import org.apache.commons.lang.WordUtils;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
@@ -111,7 +110,7 @@ public class DropdownFormInput extends FieldInputRender {
 	}
 	
 	private String processEnumName(String name) {
-		return WordUtils.capitalizeFully(name.replace('_', ' '));
+		return name.replace('_', ' ');
 	}
 	
 	private void addInputValue(String key, String value) {

@@ -33,6 +33,7 @@ import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.ui.UserInterfaceService;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
 import com.jadaptive.plugins.web.ui.ServerSideTablePage.SearchForm;
@@ -52,6 +53,9 @@ public class ServerSideTablePage extends TemplatePage implements FormProcessor<S
 	
 	@Autowired
 	private ObjectService objectService;;
+	
+	@Autowired
+	private UserInterfaceService uiService;
 	
 	Integer start = 0;
 	Integer length = 10;
@@ -109,20 +113,23 @@ public class ServerSideTablePage extends TemplatePage implements FormProcessor<S
 	}
 
 	protected void generateTable(Document document) throws IOException {
-		List<ObjectTemplate> creatableTemplates = new ArrayList<>();
 		
-		if(!template.getChildTemplates().isEmpty()) {
-			ObjectTemplate collectionTemplate = templateRepository.get(template.getCollectionKey());
+		
+		if(uiService.canCreate(template)) {
 			
-			for(String template : collectionTemplate.getChildTemplates()) {
-				ObjectTemplate childTemplate = templateRepository.get(template);
-				if(childTemplate.isCreatable()) {
-					creatableTemplates.add(childTemplate);
+			List<ObjectTemplate> creatableTemplates = new ArrayList<>();
+			
+			if(!template.getChildTemplates().isEmpty()) {
+				ObjectTemplate collectionTemplate = templateRepository.get(template.getCollectionKey());
+				
+				for(String template : collectionTemplate.getChildTemplates()) {
+					ObjectTemplate childTemplate = templateRepository.get(template);
+					if(childTemplate.isCreatable()) {
+						creatableTemplates.add(childTemplate);
+					}
 				}
-			}
-		} 
-		
-		if(template.isCreatable()) {
+			} 
+			
 			if(creatableTemplates.size() > 1) {
 				createMultipleOptionAction(document, "create", creatableTemplates, template.getCollectionKey());
 			} else if(creatableTemplates.size() == 1) {

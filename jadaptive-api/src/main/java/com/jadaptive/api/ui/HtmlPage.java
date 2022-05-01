@@ -27,6 +27,9 @@ public abstract class HtmlPage implements Page {
 	@Autowired
 	private PageCache pageCache; 
 	
+//	@Autowired
+//	private UserInterfaceService uiService; 
+	
 	protected String resourcePath;
 	
 	public String getResourcePath() {
@@ -137,6 +140,7 @@ public abstract class HtmlPage implements Page {
 			
 			injectFeedback(doc, request);
 			processPageExtensions(uri, doc);
+			
 			ResponseHelper.sendContent(doc.toString(), "text/html; charset=UTF-8;", request, response);
 			
 			
@@ -151,6 +155,9 @@ public abstract class HtmlPage implements Page {
 	
 	private void injectFeedback(Document doc, HttpServletRequest request) {
 		Feedback feedback = (Feedback) request.getSession().getAttribute("feedback");
+//		if(Objects.isNull(feedback)) {
+//			feedback = uiService.getFeedback(request, this);
+//		}
 		if(Objects.nonNull(feedback)) {
 			request.getSession().removeAttribute("feedback");
 			Element element = doc.selectFirst("#feedback");
@@ -160,25 +167,32 @@ public abstract class HtmlPage implements Page {
 					element.prependChild(Html.div("col-12")
 								.appendChild(Html.div("alert", feedback.getAlert())
 								.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
-								.appendChild(Html.i18n(feedback.getBundle(), feedback.getI18n(), feedback.getArgs()))));
+								.appendChild(getTextElement(feedback))));
 				} else {
 					element = doc.selectFirst("main");
 					if(Objects.nonNull(element)) {
 						element.appendChild(Html.div("col-12")
 								.appendChild(Html.div("alert", feedback.getAlert())
 								.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
-								.appendChild(Html.i18n(feedback.getBundle(), feedback.getI18n(), feedback.getArgs()))));
+								.appendChild(getTextElement(feedback))));
 					}
 				}
 			} else {
 				element.appendChild(Html.div("alert", feedback.getAlert())
 						.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
-						.appendChild(Html.i18n(feedback.getBundle(), feedback.getI18n(), feedback.getArgs())));
+						.appendChild(getTextElement(feedback)));
 			}
 		}
 		
 	}
 
+	private Element getTextElement(Feedback feedback) {
+		if(feedback.isRawText()) {
+			return Html.span(feedback.getI18n());
+		} else {
+			return Html.i18n(feedback.getBundle(), feedback.getI18n(), feedback.getArgs());
+		}
+	}
 	protected void processPost(Document document, String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		throw new FileNotFoundException();
 	}

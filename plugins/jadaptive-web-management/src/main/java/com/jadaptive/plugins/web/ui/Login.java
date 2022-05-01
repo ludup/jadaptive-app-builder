@@ -16,6 +16,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
+import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.UriRedirect;
@@ -65,14 +66,15 @@ public class Login extends AuthenticationPage<LoginForm> {
     	
     	} catch(AccessDeniedException e) {
     		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-    		document.selectFirst("#feedback").append("<div class=\"alert alert-danger\">" + e.getMessage() + "</div>");
+    		Feedback.error(e.getMessage());
     	} catch(ObjectNotFoundException e) {
     	} catch(Throwable e) {
     		log.error("Error in login", e);
     	}
     	
     	Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-		document.selectFirst("#feedback").append("<div class=\"alert alert-danger\">Invalid credentials</div>");
+    	Feedback.error("default", "error.invalidCredentials");
+
 		return false;
 	}
 	

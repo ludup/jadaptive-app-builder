@@ -22,6 +22,7 @@ import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.ui.UserInterfaceService;
 
 @Extension
 @RequestPage(path="table/{resourceKey}")
@@ -34,6 +35,10 @@ public class TablePage extends TemplatePage {
 	
 	@Autowired
 	private ObjectTemplateRepository templateRepository; 
+	
+	@Autowired
+	private UserInterfaceService uiService;
+	
 	@Override
 	public String getUri() {
 		return "table";
@@ -51,20 +56,23 @@ public class TablePage extends TemplatePage {
 	@Override
 	protected void generateAuthenticatedContent(Document document) {
 		
-		List<ObjectTemplate> creatableTemplates = new ArrayList<>();
 		
-		if(!template.getChildTemplates().isEmpty()) {
-			ObjectTemplate collectionTemplate = templateRepository.get(template.getCollectionKey());
+		
+		if(uiService.canCreate(template)) {
 			
-			for(String template : collectionTemplate.getChildTemplates()) {
-				ObjectTemplate childTemplate = templateRepository.get(template);
-				if(childTemplate.isCreatable()) {
-					creatableTemplates.add(childTemplate);
+			List<ObjectTemplate> creatableTemplates = new ArrayList<>();
+			
+			if(!template.getChildTemplates().isEmpty()) {
+				ObjectTemplate collectionTemplate = templateRepository.get(template.getCollectionKey());
+				
+				for(String template : collectionTemplate.getChildTemplates()) {
+					ObjectTemplate childTemplate = templateRepository.get(template);
+					if(childTemplate.isCreatable()) {
+						creatableTemplates.add(childTemplate);
+					}
 				}
-			}
-		} 
-		
-		if(template.isCreatable()) {
+			} 
+			
 			creatableTemplates.add(template);
 			if(creatableTemplates.size() > 1) {
 				createMultipleOptionAction(document, "create", creatableTemplates, template.getCollectionKey());

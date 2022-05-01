@@ -1,8 +1,10 @@
 [{
-    "uuid": "16fbfa1e-d012-47b3-a987-a306120ea46a",
-	"resourceKey": "htmlTemplates",
-	"name": "Default",
-	"contentSelector": "body",
-	"html": "<html>\n <head>\n <title>${subject}</title>\n </head>\n <body>\n </body>\n</html>",
-	"system": true
+    "uuid" : "16fbfa1e-d012-47b3-a987-a306120ea46a",
+    "resourceKey" : "htmlTemplates",
+    "_clz" : "com.jadaptive.plugins.email.HTMLTemplate",
+    "html" : "<html>\r\n <head>\r\n <title>${htmlTitle}</title>\r\n </head>\r\n <body>\r\n   <div id=\"body\">\r\n     \r\n   </div>\r\n   <div>\r\n      <p>Powered by Virtual SFTP from <a href=\"https://jadaptive.com\">jadaptive.com</a>.</p>\r\n   </div>\r\n </body>\r\n</html>",
+    "name" : "Default",
+    "system" : true,
+    "hidden" : false,
+    "contentSelector" : "#body"
 }]

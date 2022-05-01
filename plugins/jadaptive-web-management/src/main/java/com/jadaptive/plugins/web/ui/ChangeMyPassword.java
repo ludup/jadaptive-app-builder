@@ -3,7 +3,6 @@ package com.jadaptive.plugins.web.ui;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,6 +10,7 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.AuthenticatedPage;
+import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.FormProcessor;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
@@ -44,23 +44,13 @@ public class ChangeMyPassword extends AuthenticatedPage implements FormProcessor
 		User user = session.getUser();
 		
 		if(!userService.verifyPassword(user, form.getCurrentPassword().toCharArray())) {
-			document.selectFirst("#feedback").appendChild(new Element("div")
-					.addClass("alert alert-danger")
-					.appendChild(new Element("i")
-							.addClass("far fa-exclamation-square"))
-					.appendChild(new Element("span")
-							.text("Incorrect password")));
+			Feedback.error("default", "error.incorrectPassword");
 			return;
 		}
 		
 		userService.changePassword(user, form.getNewPassword().toCharArray(), false);
 		
-		document.selectFirst("#feedback").appendChild(new Element("div")
-				.addClass("alert alert-success")
-				.appendChild(new Element("i")
-						.addClass("far fa-thumbs-up"))
-				.appendChild(new Element("span")
-						.text("Password changed")));
+		Feedback.success("default", "success.passwordChanged");
 
 	}
 	public interface PasswordForm {

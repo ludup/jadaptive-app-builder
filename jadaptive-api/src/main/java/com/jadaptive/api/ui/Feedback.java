@@ -9,7 +9,8 @@ public class Feedback {
 	String i18n;
 	String alert;
 	Object[] args;
-
+	boolean rawText = false;
+	
 	public Feedback(String icon, String bundle, String i18n, String alert, Object... args) {
 		super();
 		this.icon = icon;
@@ -17,6 +18,12 @@ public class Feedback {
 		this.i18n = i18n;
 		this.alert = alert;
 		this.args = args;
+	}
+	
+	public Feedback(String message) {
+		super();
+		this.i18n = message;
+		this.rawText = true;
 	}
 	
 	public String getIcon() {
@@ -29,6 +36,10 @@ public class Feedback {
 
 	public String getI18n() {
 		return i18n;
+	}
+	
+	public boolean isRawText() {
+		return rawText;
 	}
 	
 	public static void success(String bundle, String i18n, Object...args) {
@@ -53,6 +64,10 @@ public class Feedback {
 	
 	public Object[] getArgs() {
 		return args;
+	}
+
+	public static void error(String message) {
+		Request.get().getSession().setAttribute("feedback", new ErrorFeedback(message));
 	}
 	
 }

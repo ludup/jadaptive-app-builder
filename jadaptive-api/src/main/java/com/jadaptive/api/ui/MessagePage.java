@@ -22,27 +22,30 @@ static Logger log = LoggerFactory.getLogger(ErrorPage.class);
 	
 	private static final String RETURN_TO = "returnTo";
 	
-	String title;
-	String message;
-	String icon;
+	private static final String BUNDLE = "bundle";
+	private static final String TITLE = "title";
+	private static final String MESSAGE = "message";
+	private static final String ICON = "icon";
+	
 	
 	public MessagePage() {
 		
 	}
 	
-	public MessagePage(String title, String message, String icon) {
-		this.title = title;
-		this.message = message;
-		this.icon = icon;
+	public MessagePage(String bundle, String title, String message, String icon) {
+		Request.get().getSession().setAttribute(BUNDLE, bundle);
+		Request.get().getSession().setAttribute(TITLE, title);
+		Request.get().getSession().setAttribute(MESSAGE, message);
+		Request.get().getSession().setAttribute(ICON, icon);
 	}
 	
-	public MessagePage(String title, String message, String icon, String returnTo) {
-		this(title, message, icon);
+	public MessagePage(String bundle, String title, String message, String icon, String returnTo) {
+		this(bundle, title, message, icon);
 		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
 	}
 	
-	public MessagePage(String title, String message, String icon, Page returnTo) {
-		this(title, message, icon);
+	public MessagePage(String bundle, String title, String message, String icon, Page returnTo) {
+		this(bundle, title, message, icon);
 		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
 	}
 
@@ -56,6 +59,16 @@ static Logger log = LoggerFactory.getLogger(ErrorPage.class);
 		super.generateContent(document);
 		
 		Object returnTo = Request.get().getSession().getAttribute(RETURN_TO);
+		
+		String bundle = (String) Request.get().getSession().getAttribute(BUNDLE);		
+		String title = (String) Request.get().getSession().getAttribute(TITLE);	
+		String message = (String) Request.get().getSession().getAttribute(MESSAGE);	
+		String icon = (String) Request.get().getSession().getAttribute(ICON);	
+		
+		document.selectFirst("#title")
+				.appendChild(Html.i18n(bundle, title));
+		document.selectFirst("#icon").appendChild(Html.i("far", icon));
+		document.selectFirst("#message").appendChild(Html.i18n(bundle, message));
 		
 		if(Objects.isNull(returnTo) || StringUtils.isBlank(returnTo.toString())) {
 			document.selectFirst("#returnTo").remove();

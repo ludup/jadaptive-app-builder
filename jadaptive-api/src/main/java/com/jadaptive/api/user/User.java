@@ -18,6 +18,8 @@ import com.jadaptive.api.template.TableView;
 	resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}")})
 public abstract class User extends UUIDEntity implements NamedDocument {
 
+	public static final String RESOURCE_KEY = "users";
+	
 	private static final long serialVersionUID = 2210375165051752363L;
 
 	@ObjectField(required = true,

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TableAction;
@@ -22,7 +23,9 @@ import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableAction.Window;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.ui.Html;
+import com.jadaptive.api.ui.UserInterfaceService;
 import com.jadaptive.utils.Utils;
 
 public class TableRenderer {
@@ -68,8 +71,9 @@ public class TableRenderer {
 				columns++;
 			}
 			
+			boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
 			if(objects.size() > 0) {
-				boolean requiresActions = template.isUpdatable() || template.isDeletable();
+				boolean requiresActions = canUpdate || template.isDeletable();
 				
 				for(TableAction action : view.actions()) {
 					if(action.target()==Target.ROW) {
@@ -205,7 +209,10 @@ public class TableRenderer {
 		
 		Element el = Html.td("text-end");
 		
-		if(template.isUpdatable() && !readOnly) {
+		boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		boolean canCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+		
+		if(canUpdate && !readOnly) {
 			if(Objects.isNull(parentObject)) {
 				el.appendChild(Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "ms-2")
 						.appendChild(Html.i("far", "fa-edit","fa-fw")));
@@ -228,7 +235,8 @@ public class TableRenderer {
 			}
 		}
 		
-		if(template.isCreatable() && !readOnly) {
+		
+		if(canCreate && !readOnly) {
 			el.appendChild(Html.a(replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "ms-2")
 					.appendChild(Html.i("far", "fa-copy","fa-fw")));
 		} else {
@@ -237,11 +245,11 @@ public class TableRenderer {
 		
 		for(TableAction action : view.actions()) {
 			if(action.target()==Target.ROW) {
-				if(view.requiresCreate() && !template.isCreatable()) {
+				if(view.requiresCreate() && !canCreate) {
 					el.appendChild(Html.i("far", "fa-fw", "ms-2"));
 					continue;
 				}
-				if(view.requiresUpdate() && !template.isUpdatable()) {
+				if(view.requiresUpdate() && !canUpdate) {
 					el.appendChild(Html.i("far", "fa-fw", "ms-2"));
 					continue;
 				}
@@ -296,9 +304,10 @@ public class TableRenderer {
 	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field) throws UnsupportedEncodingException {
 		
 		boolean isDefault = StringUtils.defaultString(template.getDefaultColumn()).equals(field.getResourceKey());
+		boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
 		
 		if(isDefault) {
-			if(template.isUpdatable() && !readOnly) {
+			if(canUpdate && !readOnly) {
 				if(Objects.isNull(parentObject)) {
 					return Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
 				} else {
@@ -321,6 +330,15 @@ public class TableRenderer {
 		switch(field.getFieldType()) {
 		case BOOL:
 			return Html.i("far", Boolean.parseBoolean(obj.getValue(field).toString()) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
+		case OBJECT_REFERENCE: 
+			String value = (String) obj.getValue(field);
+			if(StringUtils.isBlank(value)) {
+				return Html.span("-");
+			} else {
+				ObjectTemplate t = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(field.getValidationValue(ValidationType.RESOURCE_KEY));
+				AbstractObject ref = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(t.getResourceKey(), value.toString());
+				return Html.span(StringUtils.defaultIfEmpty((String) ref.getValue(t.getNameField()), "-"));
+			}
 		default:
 			return Html.span(StringUtils.defaultString(obj.getValue(field).toString()), "UTF-8");
 		}
