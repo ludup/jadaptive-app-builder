@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
 
@@ -27,8 +29,10 @@ public abstract class HtmlPage implements Page {
 	@Autowired
 	private PageCache pageCache; 
 	
-//	@Autowired
-//	private UserInterfaceService uiService; 
+	@Autowired
+	private ApplicationService applicationService; 
+	
+	private Collection<HtmlPageExtender> extenders = null;
 	
 	protected String resourcePath;
 	
@@ -44,16 +48,32 @@ public abstract class HtmlPage implements Page {
 		
 	}
 	
+	public final void created() throws FileNotFoundException {
+		
+		extenders = applicationService.getBean(UserInterfaceService.class).getExtenders(this);
+		onCreated();
+	}
+	
+	public void onCreated() throws FileNotFoundException { }
+	
 	public final void doGet(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {	
 		
 		beforeProcess(uri, request, response);
 		
 		Document document = resolveDocument(this);
+		
+		for(HtmlPageExtender extender : extenders) {
+			extender.processStart(document);
+		}
+		
 		generateContent(document);
 		injectFeedback(document, request);
 		processPageExtensions(uri, document);
 		documentComplete(document);
 		
+		for(HtmlPageExtender extender : extenders) {
+			extender.processEnd(document);
+		}
 		ResponseHelper.sendContent(document.toString(), "text/html; charset=UTF-8;", request, response);
 	}
 
@@ -96,6 +116,10 @@ public abstract class HtmlPage implements Page {
 		try {
 
 			Document doc = resolveDocument(this);
+			
+			for(HtmlPageExtender extender : extenders) {
+				extender.processStart(doc);
+			}
 			
 			if(this instanceof FormProcessor) {
 				FormProcessor<?> fp = (FormProcessor<?>) this;
@@ -140,6 +164,10 @@ public abstract class HtmlPage implements Page {
 			
 			injectFeedback(doc, request);
 			processPageExtensions(uri, doc);
+			
+			for(HtmlPageExtender extender : extenders) {
+				extender.processEnd(doc);
+			}
 			
 			ResponseHelper.sendContent(doc.toString(), "text/html; charset=UTF-8;", request, response);
 			

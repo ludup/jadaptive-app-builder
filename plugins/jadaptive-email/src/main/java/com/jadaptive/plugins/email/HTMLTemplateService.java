@@ -1,9 +1,8 @@
 package com.jadaptive.plugins.email;
 
-public interface HTMLTemplateService {
+import com.jadaptive.api.repository.UUIDObjectService;
 
-	Iterable<HTMLTemplate> allTemplates();
+public interface HTMLTemplateService extends UUIDObjectService<HTMLTemplate>{
 
-	void saveTemplate(HTMLTemplate template);
 
 }

@@ -14,10 +14,10 @@ public class MultipleTextFormInput {
 	protected ObjectTemplate template;
 	protected OrderedField field;
 	
-	public MultipleTextFormInput(ObjectTemplate template, OrderedField field) {
-		this.template = template;
-		this.field = field;
-	}
+//	public MultipleTextFormInput(ObjectTemplate template, OrderedField field) {
+//		this.template = template;
+//		this.field = field;
+//	}
 
 	public void renderInput(OrderedView panel, Element rootElement, 
 			Collection<String> selectedValues) {

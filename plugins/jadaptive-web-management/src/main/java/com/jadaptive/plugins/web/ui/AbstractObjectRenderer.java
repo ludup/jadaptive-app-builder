@@ -42,13 +42,13 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.api.ui.renderers.form.BootstrapBadgeRender;
 import com.jadaptive.api.ui.renderers.form.CollectionSearchFormInput;
+import com.jadaptive.api.ui.renderers.form.CollectionTextFormInput;
+import com.jadaptive.api.ui.renderers.form.CssEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
+import com.jadaptive.api.ui.renderers.form.FileFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
-import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
-import com.jadaptive.api.ui.renderers.form.MultipleTagsFormInput;
-import com.jadaptive.api.ui.renderers.form.MultipleTextFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
@@ -116,7 +116,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						.attr("id", "objectForm")
 						.attr("method", "POST")
 						.attr("data-resourcekey", template.getResourceKey())
-						.attr("enctype", "application/x-www-form-urlencoded")
+						.attr("enctype", "multipart/form-data")
 						.attr("action", getActionURL())
 						.appendChild(new Element("input")
 							.attr("type", "hidden")
@@ -379,17 +379,17 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case TEXT:
 		{
 			switch(orderedField.getRenderer()) {
-			case TAGS:
-			{
-				MultipleTagsFormInput render = new MultipleTagsFormInput(currentTemplate.get(), orderedField);
-				render.renderInput(panel, element, Objects.nonNull(obj) ? 
-						obj.getCollection(field.getResourceKey()) 
-						: Collections.emptyList());
-				break;
-			}
+//			case TAGS:
+//			{
+//				MultipleTagsFormInput render = new MultipleTagsFormInput(currentTemplate.get(), orderedField);
+//				render.renderInput(panel, element, Objects.nonNull(obj) ? 
+//						obj.getCollection(field.getResourceKey()) 
+//						: Collections.emptyList());
+//				break;
+//			}
 			default:
 			{
-				MultipleTextFormInput render = new MultipleTextFormInput(currentTemplate.get(), orderedField);
+				CollectionTextFormInput render = new CollectionTextFormInput(currentTemplate.get(), orderedField);
 				render.renderInput(panel, element, 
 						Objects.nonNull(obj) ? 
 								obj.getCollection(field.getResourceKey()) 
@@ -409,9 +409,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			break;
 		case PERMISSION:
 		{
-			MultipleSelectionFormInput render = new MultipleSelectionFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(panel, element, permissionService.getAllPermissions(), 
-					Objects.nonNull(obj) ? obj.getCollection(field.getResourceKey()) : Collections.emptyList(), true);
+//			CollectionTextFormInput render = new CollectionTextFormInput(currentTemplate.get(), orderedField);
+//			render.renderInput(panel, element, permissionService.getAllPermissions(), 
+//					Objects.nonNull(obj) ? obj.getCollection(field.getResourceKey()) : Collections.emptyList());
 			break;
 		}
 		default:
@@ -461,9 +461,21 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			break;
 		}
+		case IMAGE:
+		{
+			FileFormInput render = new FileFormInput(currentTemplate.get(), orderedField);
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
+			break;
+		}
 		case TEXT_AREA:
 		{
 			switch(orderedField.getRenderer()) {
+			case CSS_EDITOR:
+			{
+				CssEditorFormInput render = new CssEditorFormInput(currentTemplate.get(), orderedField, currentDocument.get(), view == FieldView.READ);
+				render.renderInput(panel, element, getFieldValue(orderedField, obj));
+				break;
+			}
 			case HTML_EDITOR:
 			{
 				HtmlEditorFormInput render = new HtmlEditorFormInput(currentTemplate.get(), orderedField, currentDocument.get(), view == FieldView.READ);

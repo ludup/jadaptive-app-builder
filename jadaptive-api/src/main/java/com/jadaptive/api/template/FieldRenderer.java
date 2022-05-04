@@ -7,5 +7,6 @@ public enum FieldRenderer {
 	TAGS,
 	I18N,
 	BOOTSTRAP_BADGE,
-	OPTIONAL;
+	OPTIONAL, 
+	CSS_EDITOR;
 }

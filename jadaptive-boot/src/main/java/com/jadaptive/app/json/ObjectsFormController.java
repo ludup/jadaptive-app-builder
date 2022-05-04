@@ -95,6 +95,34 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		}
 	}
 	
+	@RequestMapping(value="/app/api/form/multipart/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+			consumes = { "multipart/form-data" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus saveFormAsObjectMultipart(HttpServletRequest request, @PathVariable String resourceKey)  {
+
+		try {
+			ObjectTemplate template = templateService.get(resourceKey);
+			request.getSession().removeAttribute(resourceKey);
+			
+			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
+			String uuid = objectService.saveOrUpdate(obj);
+			
+			Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+			
+			return new UUIDStatus(uuid);
+		}  catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/objects/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		}
+	}
+
 	@RequestMapping(value="/app/api/form/cancel/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	public void cancelForm(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey)  {
 
@@ -195,6 +223,10 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			@PathVariable String resourceKey)  {
 
 		try {
+			
+			if(handler.equals("multipart")) {
+				return saveFormAsObjectMultipart(request, resourceKey);
+			}
 			ObjectTemplate template = templateService.get(resourceKey);
 			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
 			objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(

@@ -38,6 +38,11 @@ public class PageHelper {
 		Element head = PageHelper.getOrCreateTag(document, "head");
 		PageHelper.appendLast(head, "link", new Element("link").attr("href", uri).attr("rel", "stylesheet"));
 	}
+	
+	public static void appendStylesheet(Document document, String uri, String id) {
+		Element head = PageHelper.getOrCreateTag(document, "head");
+		PageHelper.appendLast(head, "link", new Element("link").attr("id", id).attr("href", uri).attr("rel", "stylesheet"));
+	}
 
 	public static Element createAnchor(String href, String text) {
 		return new Element("a")

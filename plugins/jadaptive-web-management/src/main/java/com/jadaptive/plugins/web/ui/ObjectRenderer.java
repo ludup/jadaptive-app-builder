@@ -44,6 +44,10 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 				TemplatePage templatePage = (TemplatePage) page;
 				template = templatePage.getTemplate();
 				scope = templatePage.getScope();
+				
+				if(element.hasAttr("jad:handler")) {
+					handler = element.attr("jad:handler");
+				}
 			} else {
 				String resourceKey = element.attr("jad:resourceKey");
 	

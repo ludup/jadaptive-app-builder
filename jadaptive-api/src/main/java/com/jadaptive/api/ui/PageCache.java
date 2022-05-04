@@ -45,7 +45,10 @@ public class PageCache {
 		Page cachedPage = aliasCache.get(name);
 		if(Objects.nonNull(cachedPage)) {
 			if(ReflectionUtils.hasAnnotation(cachedPage.getClass(), RequestPage.class)) {
-				return createNewInstance(resourceUri, cachedPage);
+				Page page = createNewInstance(resourceUri, cachedPage);
+				postCreation(page);
+				page.onCreate();
+				return page;
 			}
 			return cachedPage;
 		}
@@ -56,18 +59,16 @@ public class PageCache {
 					aliasCache.put(page.getUri(), page);
 					pageCache.put(page.getClass(), page);
 					if(ReflectionUtils.hasAnnotation(page.getClass(), RequestPage.class)) {
-						return createNewInstance(resourceUri, page);
+						page = createNewInstance(resourceUri, page);
 					}
+					postCreation(page);
+					page.onCreate();
 					return page;
 				}
 			}
 		} catch(NoSuchBeanDefinitionException e) { }
 		
 		throw new FileNotFoundException();
-	}
-	
-	public void registerPage(Page page) {
-		aliasCache.put(page.getUri(), page);
 	}
 	
 	public Class<?> resolvePageClass(String resourceUri) throws FileNotFoundException {
@@ -104,28 +105,32 @@ public class PageCache {
 			
 			populateFields(page, vars);
 			
-			try {
-				Method m = ReflectionUtils.getMethod(page.getClass(), "created");
-				m.invoke(page);
-			} catch (NoSuchMethodException e) {
-			} catch (IllegalArgumentException e) {
-				log.error("Failed to call created method", e);
-			} catch (InvocationTargetException e) {
-				if(e.getTargetException() instanceof FileNotFoundException) {
-					throw (FileNotFoundException) e.getTargetException();
-				}
-				if(e.getTargetException() instanceof Redirect) {
-					throw (Redirect) e.getTargetException();
-				}
-				if(e.getTargetException() instanceof ObjectNotFoundException) {
-					throw new FileNotFoundException();
-				}
-				log.error("Failed to call created method", e);
-			} 
 			return page;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
+	}
+	
+	private void postCreation(Page page) throws FileNotFoundException {
+		try {
+			Method m = ReflectionUtils.getMethod(page.getClass(), "created");
+			log.info("Calling created on " + page.getClass().getName());
+			m.invoke(page);
+		} catch (NoSuchMethodException e) {
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			log.error("Failed to call created method", e);
+		} catch (InvocationTargetException e) {
+			if(e.getTargetException() instanceof FileNotFoundException) {
+				throw (FileNotFoundException) e.getTargetException();
+			}
+			if(e.getTargetException() instanceof Redirect) {
+				throw (Redirect) e.getTargetException();
+			}
+			if(e.getTargetException() instanceof ObjectNotFoundException) {
+				throw new FileNotFoundException();
+			}
+			log.error("Failed to call created method", e);
+		} 
 	}
 	
 	public void populateFields(Page page, Map<String, Object> vars) {
@@ -198,6 +203,7 @@ public class PageCache {
 			for(Page page : pages) {
 				if(page.getClass().equals(clz)) {
 					aliasCache.put(page.getUri(), page);
+					postCreation(page);
 					pageCache.put(page.getClass(), page);
 					return page;
 				}

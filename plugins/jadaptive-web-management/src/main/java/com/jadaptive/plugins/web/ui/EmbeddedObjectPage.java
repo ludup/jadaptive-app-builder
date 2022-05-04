@@ -42,9 +42,9 @@ public abstract class EmbeddedObjectPage extends ObjectTemplatePage {
 		permissionService.assertReadWrite(template.getResourceKey());
 	}
 	
-	public void created() throws FileNotFoundException {
+	public void onCreate() throws FileNotFoundException {
 
-		super.created();
+		super.onCreate();
 
 		try {
 			FieldTemplate field = template.getField(fieldName);

@@ -29,7 +29,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		return resourceKey;
 	}
 
-	public void created() throws FileNotFoundException {
+	public void onCreate() throws FileNotFoundException {
 		
 		try {
 			template = templateService.get(resourceKey);

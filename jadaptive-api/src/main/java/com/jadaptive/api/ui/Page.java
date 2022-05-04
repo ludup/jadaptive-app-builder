@@ -1,5 +1,6 @@
 package com.jadaptive.api.ui;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,4 +23,6 @@ public interface Page extends ExtensionPoint {
 	String getResource();
 	
 	String getResourcePath();
+
+	default void onCreate() throws FileNotFoundException { };
 }

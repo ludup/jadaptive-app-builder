@@ -45,8 +45,9 @@ public class TablePage extends TemplatePage {
 	}
 
 	@Override
-	public void created() throws FileNotFoundException {
-		super.created();
+	public void onCreate() throws FileNotFoundException {
+		
+		super.onCreate();
 		
 		if(!template.getCollectionKey().equals(resourceKey)) {
 			throw new UriRedirect(String.format("/app/ui/table/%s", template.getCollectionKey()));

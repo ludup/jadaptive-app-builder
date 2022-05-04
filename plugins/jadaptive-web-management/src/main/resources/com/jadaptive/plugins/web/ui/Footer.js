@@ -102,6 +102,24 @@ $(function() {
 							'collectionSearchInputSelection');
 	});
 	
+	$(document).on('keyup', '.collectionTextInputText', function(e) {
+		
+		if (e.keyCode === 13) {
+			e.stopPropagation();
+			
+			var select = $(this).closest(".collectionTextInput").find('table');
+			var name = $(this).closest('.collectionTextInput').data('resourcekey');
+			
+			select.append('<tr><input type="hidden" name="' + name + '" value="' + $(this).val() + '"><td>' + $(this).val() + '</td><td>' +
+//							'<a href="#" class="collectionSearchUp"><i class="far fa-fw fa-arrow-up me-2"></i></a>'  +
+//							'<a href="#" class="collectionSearchDown"><i class="far fa-fw fa-arrow-down me-2"></i></a>' +
+							'<a href="#" class="collectionSearchDelete"><i class="far fa-fw fa-trash me-2"></i></a>' + 
+						  '</td></tr>');
+		    $(this).val('');
+		}
+
+	});
+	
 	$(document).on('click', '.collectionSearchDelete', function(e) {
 		e.preventDefault();
 		$(this).closest("tr").remove();

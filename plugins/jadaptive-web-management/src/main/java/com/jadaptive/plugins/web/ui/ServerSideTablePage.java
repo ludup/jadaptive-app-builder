@@ -68,8 +68,8 @@ public class ServerSideTablePage extends TemplatePage implements FormProcessor<S
 	}
 
 	@Override
-	public void created() throws FileNotFoundException {
-		super.created();
+	public void onCreate() throws FileNotFoundException {
+		super.onCreate();
 		
 		if(!template.getCollectionKey().equals(resourceKey)) {
 			throw new UriRedirect(String.format("/app/ui/search/%s", template.getCollectionKey()));

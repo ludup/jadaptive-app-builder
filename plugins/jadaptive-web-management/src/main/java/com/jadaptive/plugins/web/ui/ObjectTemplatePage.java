@@ -78,9 +78,9 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 
 	}
 
-	public void created() throws FileNotFoundException {
+	public void onCreate() throws FileNotFoundException {
 
-		super.created();
+		super.onCreate();
 
 		try {
 			

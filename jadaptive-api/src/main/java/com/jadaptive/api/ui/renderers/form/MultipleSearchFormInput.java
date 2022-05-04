@@ -18,13 +18,13 @@ public class MultipleSearchFormInput {
 	protected ObjectTemplate template;
 	protected OrderedField field;
 	
-	public MultipleSearchFormInput(ObjectTemplate template, OrderedField field, String url, String searchField, String idField) {
-		this.template = template;
-		this.field = field;
-		this.url = url;
-		this.searchField = searchField;
-		this.idField = idField;
-	}
+//	public MultipleSearchFormInput(ObjectTemplate template, OrderedField field, String url, String searchField, String idField) {
+//		this.template = template;
+//		this.field = field;
+//		this.url = url;
+//		this.searchField = searchField;
+//		this.idField = idField;
+//	}
 
 	public void renderInput(OrderedView panel, Element rootElement, 
 			Collection<NamePairValue> selectedValues,

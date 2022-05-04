@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -34,6 +35,8 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
@@ -278,6 +281,21 @@ public class DocumentHelper {
 			} else {
 				return Boolean.valueOf(value);
 			}
+		case IMAGE:
+			if(request instanceof StandardMultipartHttpServletRequest) {
+				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
+				if(file.isEmpty()) {
+					return null;
+				}
+				if(file.size() > 1) {
+					throw new IllegalStateException("Multiple file parts for single value!");
+				}
+				MultipartFile f = file.get(0);
+				if(StringUtils.isNotBlank(f.getOriginalFilename()) && f.getSize() > 0) {
+					return String.format("data:%s;base64, %s", f.getContentType(), Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream())));
+				}
+			}
+			return request.getParameter(field.getFormVariable() + "_previous");
 		default:
 			if(Objects.isNull(value)) {
 				
@@ -417,9 +435,11 @@ public class DocumentHelper {
 						String objectUUID =  document.getString(name);
 						ObjectServiceBean service = parameter.getType().getAnnotation(ObjectServiceBean.class);
 						if(Objects.nonNull(service)) {
-							UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
-							Object ref = bean.getObjectByUUID(objectUUID);
-							m.invoke(obj, ref);
+							if(Objects.nonNull(objectUUID)) {
+								UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
+								Object ref = bean.getObjectByUUID(objectUUID);
+								m.invoke(obj, ref);
+							}
 						} else {
 							String resourceKey = getTemplateResourceKey(parameter.getType());
 							

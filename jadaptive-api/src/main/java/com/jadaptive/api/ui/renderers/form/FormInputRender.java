@@ -14,8 +14,8 @@ public abstract class FormInputRender extends FieldInputRender {
 	
 	public final void renderInput(OrderedView panel, Element rootElement, String value) {
 		
-
-		rootElement.appendChild(new Element("div")
+		Element myElement;
+		rootElement.appendChild(myElement = new Element("div")
 				.addClass("row mb-3")
 				.appendChild(new Element("div")
 						.addClass("col-12")
@@ -35,8 +35,12 @@ public abstract class FormInputRender extends FieldInputRender {
 						.addClass("text-muted")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
+		
+		onRender(panel, myElement, value);
 
 	}
 
+	protected void onRender(OrderedView panel, Element rootElement, String value) { }
+	
 	public abstract String getInputType();
 }
