@@ -7,7 +7,7 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
-@ObjectDefinition(resourceKey = ObjectEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT)
+@ObjectDefinition(resourceKey = ObjectEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT, creatable = false, updatable = false, deletable = false, system = true)
 @ObjectViews({@ObjectViewDefinition(value = "object", bundle = SystemEvent.RESOURCE_KEY)})
 public abstract class ObjectEvent<T extends UUIDEntity> extends SystemEvent {
 
@@ -23,6 +23,10 @@ public abstract class ObjectEvent<T extends UUIDEntity> extends SystemEvent {
 	
 	public ObjectEvent(String resourceKey, String group, Throwable e) {
 		super(resourceKey, group, e);
+	}
+	
+	public String getResourceKey() {
+		return RESOURCE_KEY;
 	}
 	
 	public abstract T getObject();
