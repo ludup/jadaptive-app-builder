@@ -371,7 +371,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), orderedField, String.format("/app/api/objects/%s/table", objectType),
 					objectTemplate.getNameField(), "uuid");
-			render.renderInput(panel, element, values, false);
+			render.renderInput(panel, element, values, false, view == FieldView.READ);
 			break;
 		}
 		case PASSWORD:
@@ -409,9 +409,18 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			break;
 		case PERMISSION:
 		{
-//			CollectionTextFormInput render = new CollectionTextFormInput(currentTemplate.get(), orderedField);
-//			render.renderInput(panel, element, permissionService.getAllPermissions(), 
-//					Objects.nonNull(obj) ? obj.getCollection(field.getResourceKey()) : Collections.emptyList());
+			List<NamePairValue> values = new ArrayList<>();
+			if(Objects.nonNull(obj)) {
+				for(String permission : obj.getCollection(field.getResourceKey())) {
+					values.add(new NamePairValue(permission, permission));
+				}
+			}
+			
+			CollectionSearchFormInput render = new CollectionSearchFormInput(
+					currentTemplate.get(), orderedField, "/app/api/permissions/table",
+					"name", "value");
+			render.renderInput(panel, element, values, false, view == FieldView.READ);
+			
 			break;
 		}
 		default:

@@ -28,6 +28,7 @@ import com.jadaptive.api.repository.UUIDEvent;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.utils.Utils;
 import com.mongodb.MongoWriteException;
 
@@ -470,11 +471,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, fields)) {
+			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, order, sortField, fields)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -497,12 +498,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 
-	protected <T extends UUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, String searchField, String searchValue, int start, int length) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, String searchField, String searchValue, int start, int length, SortOrder order, String sortField) throws RepositoryException, ObjectException {
 		
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.table(getCollectionName(clz), searchField, searchValue, database, start, length)) {
+			for(Document document : db.table(getCollectionName(clz), searchField, searchValue, database, start, length, order, sortField)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			

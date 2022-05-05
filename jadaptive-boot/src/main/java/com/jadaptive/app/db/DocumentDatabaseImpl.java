@@ -19,6 +19,7 @@ import com.jadaptive.api.db.SearchField.Type;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.FindIterable;
@@ -29,6 +30,9 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.result.DeleteResult;
+
+import static com.mongodb.client.model.Sorts.ascending;
+import static com.mongodb.client.model.Sorts.descending;
 
 @Repository
 public class DocumentDatabaseImpl implements DocumentDatabase {
@@ -250,16 +254,26 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public Iterable<Document> searchTable(String table, String database, int start, int length, SearchField...fields) {
+	public Iterable<Document> searchTable(String table, String database, int start, int length, SortOrder order, String sortField, SearchField...fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		if(fields.length == 0) {
-			return collection.find().skip(start).limit(length);
+			return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
 		} else {
-			return collection.find(buildFilter(fields)).skip(start).limit(length);
+			return collection.find(buildFilter(fields)).sort(getOrder(order, sortField)).skip(start).limit(length);
 		}
 	}
 		
+	private Bson getOrder(SortOrder order, String sortField) {
+		switch(order) {
+		case DESC:
+			return descending(sortField);
+		case ASC:
+		default:
+			return ascending(sortField);
+		}
+	}
+
 	@Override
 	public Long searchCount(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
@@ -271,14 +285,14 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length) {
+	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		searchField = configureSearch(searchField);
 		if(StringUtils.isBlank(searchValue)) {
-			return collection.find().skip(start).limit(length);
+			return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
 		} else {
-			return collection.find(Filters.regex(searchField, searchValue)).skip(start).limit(length);
+			return collection.find(Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);
 		}
 	}
 
@@ -419,7 +433,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	public Bson buildFilter(SearchField.Type queryType, SearchField...fields) {
-		
+
 		List<Bson> tmp = new ArrayList<>();
 		for(SearchField field : fields) {
 			switch(field.getSearchType()) {

@@ -70,9 +70,6 @@ public class Header extends AbstractPageExtension {
 			
 			for(ApplicationMenu parent : parents) {
 				
-				if(!parent.isEnabled()) {
-					continue;
-				}
 				if(Objects.nonNull(parent.getPermissions()) && !parent.getPermissions().isEmpty()) {
 					try {
 						permissionService.assertAnyPermission(parent.getPermissions().toArray(new String[0]));
@@ -80,6 +77,7 @@ public class Header extends AbstractPageExtension {
 						continue;
 					}
 				}
+				
 				Element parentElement = new Element("div")
 						.addClass("dropdown-menu")
 						.attr("aria-labelledby", "navbarDropdown");
@@ -94,10 +92,6 @@ public class Header extends AbstractPageExtension {
 
 				for(ApplicationMenu child : children) {
 					
-					if(!child.isEnabled()) {
-						continue;
-					}
-					
 					if(Objects.nonNull(child.getPermissions()) && !child.getPermissions().isEmpty()) {
 						try {
 							permissionService.assertAnyPermission(child.getPermissions().toArray(new String[0]));
@@ -105,7 +99,9 @@ public class Header extends AbstractPageExtension {
 							continue;
 						}
 					}
-					parentElement.appendChild(new Element("a")
+					
+					Element link;
+					parentElement.appendChild(link = new Element("a")
 							.addClass("dropdown-item me-3")
 							.attr("href", child.getPath())
 							.appendChild(new Element("i")
@@ -113,12 +109,19 @@ public class Header extends AbstractPageExtension {
 							.appendChild(new Element("span")
 									.attr("jad:bundle", child.getBundle())
 										.attr("jad:i18n", child.getResourceKey())));
+					
+					if(!child.isEnabled()) {
+						link.addClass("disabled");
+						link.attr("href", "#");
+					}
 				}
 				
 				if(!parentElement.children().isEmpty()) {
+					
+					Element link;
 					topMenu.appendChild(new Element("li")
 							.addClass("nav-item dropdown me-3")
-							.appendChild(new Element("a")
+							.appendChild(link = new Element("a")
 									.addClass("nav-link dropdown-toggle")
 									.attr("href", "#")
 									.attr("data-bs-toggle", "dropdown")
@@ -130,6 +133,11 @@ public class Header extends AbstractPageExtension {
 											.attr("jad:bundle", parent.getBundle())
 											.attr("jad:i18n", parent.getResourceKey())))
 							.appendChild(parentElement));
+					
+					if(!parent.isEnabled()) {
+						link.addClass("disabled");
+						link.attr("href", "#");
+					}
 				}
 			}
 		}

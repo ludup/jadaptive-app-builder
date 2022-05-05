@@ -41,7 +41,6 @@
 	</build>
 
 	<modules>
-		<module>jadaptive-email</module>
 		<module>jadaptive-http</module>
 		<module>jadaptive-builtin-users</module>
 		<module>jadaptive-remote-users</module>

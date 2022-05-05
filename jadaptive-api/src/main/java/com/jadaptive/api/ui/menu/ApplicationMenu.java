@@ -24,4 +24,6 @@ public interface ApplicationMenu extends ExtensionPoint {
 	Integer weight();
 
 	default boolean isEnabled() { return true; }
+	
+	default boolean isVisible() { return true; }
 }

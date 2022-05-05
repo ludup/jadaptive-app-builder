@@ -3,6 +3,7 @@ package com.jadaptive.app.db;
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.template.SortOrder;
 
 public interface DocumentDatabase {
 
@@ -26,15 +27,13 @@ public interface DocumentDatabase {
 
 	void dropDatabase(String uuid);
 
-	Iterable<Document> table(String table, String field, String value, String database, int start, int length);
-
 	Document find(String field, String value, String table, String database);
 
 	Iterable<Document> list(String table, String database, SearchField... fields);
 
 	Iterable<Document> search(String table, String database, SearchField... fields);
 
-	Iterable<Document> searchTable(String table, String database, int start, int length, SearchField... fields);
+	Iterable<Document> searchTable(String table, String database, int start, int length, SortOrder order, String sortField, SearchField... fields);
 
 	Long searchCount(String table, String database, SearchField... fields);
 
@@ -49,6 +48,8 @@ public interface DocumentDatabase {
 	Document min(String table, String database, String field);
 
 	void dropSchema();
+
+	Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField);
 
 	
 

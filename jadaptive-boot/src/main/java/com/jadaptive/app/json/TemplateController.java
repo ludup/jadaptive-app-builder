@@ -26,6 +26,7 @@ import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionService;
@@ -150,7 +151,7 @@ public class TemplateController {
 			@RequestParam int limit) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
 
-		   return new TableStatus<ObjectTemplate>(templateService.table(searchField, searchValue, order, offset, limit), templateService.count());
+		   return new TableStatus<ObjectTemplate>(templateService.table(searchField, searchValue, offset, limit, SortOrder.ASC, "resourceKey"), templateService.count());
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/template/table", e);

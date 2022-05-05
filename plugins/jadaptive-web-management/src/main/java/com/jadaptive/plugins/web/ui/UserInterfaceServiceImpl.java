@@ -12,7 +12,6 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.HtmlPageExtender;
 import com.jadaptive.api.ui.UserInterfaceService;
-import com.jadaptive.api.ui.menu.ApplicationMenu;
 
 @Service
 public class UserInterfaceServiceImpl implements UserInterfaceService {
@@ -40,17 +39,7 @@ public class UserInterfaceServiceImpl implements UserInterfaceService {
 		}
 		return template.isUpdatable();
 	}
-
-	@Override
-	public boolean isEnabled(ApplicationMenu menu) {
-		for(UserInterfaceAdapter adapter : applicationService.getBeans(UserInterfaceAdapter.class)) {
-			if(adapter.isController(menu)) {
-				return adapter.isEnabled(menu);
-			}
-		}
-		return menu.isEnabled();
-	}
-
+	
 	@Override
 	public Collection<HtmlPageExtender> getExtenders(HtmlPage htmlPage) {
 		

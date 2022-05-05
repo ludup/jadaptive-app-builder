@@ -11,6 +11,7 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
@@ -96,8 +97,8 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 
 	@Override
-	public Collection<T> table(String searchField, String searchValue, String order, int start, int length, Class<T> resourceClass) {
-		return tableObjects(getCurrentTenant().getUuid(), resourceClass, searchField, searchValue, start, length);
+	public Collection<T> table(String searchField, String searchValue, int start, int length, Class<T> resourceClass, SortOrder order, String sortField) {
+		return tableObjects(getCurrentTenant().getUuid(), resourceClass, searchField, searchValue, start, length, order, sortField);
 	}
 
 	@Override
@@ -106,8 +107,8 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 	
 	@Override
-	public Collection<T> searchTable(Class<T> resourceClass, int start, int length, SearchField... fields) {
-		return searchTable(getCurrentTenant().getUuid(), resourceClass, start, length, fields);
+	public Collection<T> searchTable(Class<T> resourceClass, int start, int length, SortOrder order, String sortField, SearchField... fields) {
+		return searchTable(getCurrentTenant().getUuid(), resourceClass, start, length, order, sortField, fields);
 	}
 	
 	@Override

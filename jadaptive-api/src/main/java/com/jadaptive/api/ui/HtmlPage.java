@@ -63,7 +63,7 @@ public abstract class HtmlPage implements Page {
 		Document document = resolveDocument(this);
 		
 		for(HtmlPageExtender extender : extenders) {
-			extender.processStart(document);
+			extender.processStart(document, this);
 		}
 		
 		generateContent(document);
@@ -72,7 +72,7 @@ public abstract class HtmlPage implements Page {
 		documentComplete(document);
 		
 		for(HtmlPageExtender extender : extenders) {
-			extender.processEnd(document);
+			extender.processEnd(document, this);
 		}
 		ResponseHelper.sendContent(document.toString(), "text/html; charset=UTF-8;", request, response);
 	}
@@ -118,7 +118,7 @@ public abstract class HtmlPage implements Page {
 			Document doc = resolveDocument(this);
 			
 			for(HtmlPageExtender extender : extenders) {
-				extender.processStart(doc);
+				extender.processStart(doc, this);
 			}
 			
 			if(this instanceof FormProcessor) {
@@ -166,7 +166,7 @@ public abstract class HtmlPage implements Page {
 			processPageExtensions(uri, doc);
 			
 			for(HtmlPageExtender extender : extenders) {
-				extender.processEnd(doc);
+				extender.processEnd(doc, this);
 			}
 			
 			ResponseHelper.sendContent(doc.toString(), "text/html; charset=UTF-8;", request, response);

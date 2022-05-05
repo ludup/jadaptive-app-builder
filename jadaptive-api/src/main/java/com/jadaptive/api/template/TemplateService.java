@@ -19,7 +19,7 @@ public interface TemplateService {
 	
 	Iterable<ObjectTemplate> singletons() throws RepositoryException, ObjectException;
 	
-	Collection<ObjectTemplate> table(String searchField, String searchValue, String order, int start, int length) throws RepositoryException, ObjectException;
+	Collection<ObjectTemplate> table(String searchField, String searchValue, int start, int length, SortOrder order, String sortField) throws RepositoryException, ObjectException;
 
 	void saveOrUpdate(ObjectTemplate template) throws RepositoryException, ObjectException;
 
@@ -46,5 +46,11 @@ public interface TemplateService {
 	String getTemplateResourceKey(Class<?> clz);
 
 	String getTemplateResourceKey(String clz);
+
+	FieldRenderer getRenderer(FieldTemplate field, ObjectTemplate template);
+
+	SortOrder getTableSortOrder(ObjectTemplate template);
+
+	String getTableSortField(ObjectTemplate def);
 
 }

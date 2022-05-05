@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.events.AuditedObject;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
@@ -435,6 +436,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			ObjectDefinition parent = getParentTemplate(clz);
+			boolean auditObject = ReflectionUtils.hasAnnotation(clz, AuditedObject.class);
+			
 			if(Objects.nonNull(parent)) {
 				if(log.isInfoEnabled()) {
 					log.info("{} template has {} as parent", e.resourceKey(), parent.resourceKey());
@@ -449,7 +452,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.setBundle(StringUtils.isBlank(e.bundle()) ? e.resourceKey() : e.bundle());
 			template.setName(e.resourceKey());
 			template.setHidden(e.hidden());
-			template.setSystem(e.system());
+			template.setSystem(!auditObject && e.system());
 			template.setType(e.type());
 			template.setScope(e.scope());
 			template.getFields().clear();
@@ -460,9 +463,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.setDefaultColumn(e.defaultColumn());
 			template.setName(e.resourceKey());
 			
-			template.setCreatable(e.creatable());
-			template.setUpdatable(e.updatable());
-			template.setDeletable(e.deletable());
+			
+			
+			template.setCreatable(!auditObject && e.creatable());
+			template.setUpdatable(!auditObject && e.updatable());
+			template.setDeletable(!auditObject && e.deletable());
 			template.setPermissionProtected(e.requiresPermission());
 			
 			String nameField = "uuid";

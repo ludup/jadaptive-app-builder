@@ -18,4 +18,8 @@ public @interface TableView {
 		boolean requiresUpdate() default false;
 		
 		boolean requiresCreate() default false;
+		
+		SortOrder sortOrder() default SortOrder.ASC;
+
+		String sortField() default "_id";
 }

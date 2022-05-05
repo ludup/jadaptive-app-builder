@@ -13,6 +13,7 @@ import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.app.db.DocumentDatabase;
 
 public class MockDocumentDatabaseImpl implements DocumentDatabase {
@@ -64,7 +65,7 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length) {
+	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField) {
 		Collection<Document> tmp = getCollection(table, database).values();
 		return new ArrayList<>(tmp).subList(start, Math.min(start + length, tmp.size()-1));
 	}
@@ -116,7 +117,7 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public Iterable<Document> searchTable(String table, String database, int start, int length, SearchField... fields) {
+	public Iterable<Document> searchTable(String table, String database, int start, int length, SortOrder order, String sortField, SearchField... fields) {
 		// TODO Auto-generated method stub
 		return null;
 	}

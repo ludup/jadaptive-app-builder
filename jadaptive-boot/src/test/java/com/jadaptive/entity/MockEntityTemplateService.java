@@ -12,8 +12,11 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.template.FieldRenderer;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.app.db.DocumentHelper;
 
@@ -44,7 +47,7 @@ public class MockEntityTemplateService implements TemplateService {
 
 	}
 	@Override
-	public Collection<ObjectTemplate> table(String searchField, String searchValue,  String order, int start, int length) throws RepositoryException, ObjectException {
+	public Collection<ObjectTemplate> table(String searchField, String searchValue,  int start, int length, SortOrder order, String sortField) throws RepositoryException, ObjectException {
 		return new ArrayList<>(templates.values()).subList(start, Math.min(start + length, templates.values().size()-1));
 	}
 	@Override
@@ -103,6 +106,21 @@ public class MockEntityTemplateService implements TemplateService {
 	}
 	@Override
 	public String getTemplateResourceKey(String clz) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public FieldRenderer getRenderer(FieldTemplate field, ObjectTemplate template) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public SortOrder getTableSortOrder(ObjectTemplate template) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public String getTableSortField(ObjectTemplate def) {
 		// TODO Auto-generated method stub
 		return null;
 	}

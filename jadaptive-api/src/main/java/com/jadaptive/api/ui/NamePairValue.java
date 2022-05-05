@@ -1,6 +1,6 @@
 package com.jadaptive.api.ui;
 
-public class NamePairValue {
+public class NamePairValue implements Comparable<NamePairValue> {
 
 	String name;
 	String value;
@@ -22,6 +22,11 @@ public class NamePairValue {
 	}
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	@Override
+	public int compareTo(NamePairValue o) {
+		return name.compareTo(o.getName());
 	}
 	
 	

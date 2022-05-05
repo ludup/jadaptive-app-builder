@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.ui.NamePairValue;
 import com.jadaptive.api.user.User;
 
 public interface PermissionService {
@@ -22,6 +23,8 @@ public interface PermissionService {
 	void registerStandardPermissions(String resourceKey);
 
 	Collection<String> getAllPermissions();
+	
+	Collection<NamePairValue> getPermissions();
 
 	Collection<String> getAllPermissions(Tenant tenant);
 

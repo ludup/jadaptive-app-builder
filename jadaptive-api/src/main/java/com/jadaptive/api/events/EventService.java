@@ -13,6 +13,8 @@ public interface EventService {
 	
 	void publishEvent(SystemEvent evt);
 
+	void registerListener(EventListener<?> listener);
+
 	
 
 }

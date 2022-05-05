@@ -19,9 +19,7 @@ public class BootstrapBadgeRender extends FieldInputRender {
 				.addClass("row mb-3")
 				.appendChild(new Element("div")
 						.addClass("col-12")
-				.appendChild(new Element("span")
-						.addClass(String.format("badge bg-%s p-2", getBadgeClass(value)))
-						.text(value))
+				.appendChild(generateBadge(value))
 				.appendChild(new Element("input")
 						.attr("id", field.getFormVariable())
 						.attr("name", field.getFormVariable())
@@ -31,7 +29,13 @@ public class BootstrapBadgeRender extends FieldInputRender {
 
 	}
 
-	private Object getBadgeClass(String value) {
+	public static Element generateBadge(String value) {
+		return new Element("span")
+				.addClass(String.format("badge bg-%s p-2", getBadgeClass(value)))
+				.text(value);
+	}
+	
+	private static Object getBadgeClass(String value) {
 		switch(value.toUpperCase()) {
 		case "SUCCESS":
 			return "success";

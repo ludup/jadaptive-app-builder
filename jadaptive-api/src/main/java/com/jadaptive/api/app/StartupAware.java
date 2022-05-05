@@ -4,5 +4,5 @@ public interface StartupAware {
 
 	void onApplicationStartup();
 	
-	Integer getStartupPosition();
+	default Integer getStartupPosition() { return Integer.MAX_VALUE; };
 }

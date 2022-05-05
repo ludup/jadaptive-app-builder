@@ -30,7 +30,4 @@ public abstract class ObjectEvent<T extends UUIDEntity> extends SystemEvent {
 	@Override
 	public boolean async() { return false; };
 
-	public String getEventGroup() {
-		return getObject().getEventGroup();
-	}
 }

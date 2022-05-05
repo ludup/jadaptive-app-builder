@@ -18,13 +18,14 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = SystemEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
      creatable = false, updatable = false, system = true, defaultColumn = "eventKey")
 @ObjectViews({@ObjectViewDefinition(value = "event", bundle = SystemEvent.RESOURCE_KEY)})
-@TableView(defaultColumns = { "state", "timestamp", "eventKey", "eventGroup", "ipAddress"})
+@TableView(defaultColumns = { "state", "timestamp", "eventKey", "eventGroup", "ipAddress"}, sortOrder = SortOrder.DESC, sortField = "timestamp")
 public class SystemEvent extends UUIDEvent {
 
 	private static final long serialVersionUID = 4068966863055480029L;
@@ -42,6 +43,7 @@ public class SystemEvent extends UUIDEvent {
 	
 	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@ExcludeView(values = { FieldView.READ, FieldView.TABLE })
+	@ObjectView(value = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.I18N)
 	String eventGroup;
 	
 	@ObjectField(type = FieldType.TEXT, searchable = true)

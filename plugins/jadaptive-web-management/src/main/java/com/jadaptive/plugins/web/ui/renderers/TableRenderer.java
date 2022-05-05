@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TableAction;
@@ -26,6 +27,7 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.UserInterfaceService;
+import com.jadaptive.api.ui.renderers.form.BootstrapBadgeRender;
 import com.jadaptive.utils.Utils;
 
 public class TableRenderer {
@@ -94,6 +96,11 @@ public class TableRenderer {
 			
 			if(objects.size() > 0) {
 				for(AbstractObject obj : objects) {
+					
+					ObjectTemplate rowTemplate = template;
+					if(!obj.getResourceKey().equals(template.getResourceKey())) {
+						rowTemplate = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(obj.getResourceKey());
+					}
 					Element row = Html.tr();
 					
 					if(Objects.nonNull(parentObject)) {
@@ -103,16 +110,10 @@ public class TableRenderer {
 					}
 					
 					for(String column : view.defaultColumns()) {
-						row.appendChild(Html.td().appendChild(renderElement(obj, template, template.getField(column))));
+						row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, template.getField(column))));
 					}
 					
-					if(template.getResourceKey().equals(obj.getResourceKey())) {
-						renderRowActions(row, obj, view, template);
-					} else {
-						renderRowActions(row, obj, view, ApplicationServiceImpl.getInstance().getBean(
-								TemplateService.class).get(obj.getResourceKey()));
-					}
-					
+					renderRowActions(row, obj, view, rowTemplate);
 					
 					el.appendChild(row);
 				}
@@ -309,18 +310,18 @@ public class TableRenderer {
 		if(isDefault) {
 			if(canUpdate && !readOnly) {
 				if(Objects.isNull(parentObject)) {
-					return Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+					return Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "underline").appendChild(renderText(field, obj, template));
 				} else {
 					return Html.a("#", "underline", "stash")
 							.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
 							.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + this.field.getResourceKey() + "/" + obj.getUuid())
-							.text(StringUtils.defaultString(obj.getValue(field).toString()));
+							.appendChild(renderText(field, obj, template));
 				}
 			} else {
 				if(Objects.isNull(parentObject)) {
-					return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+					return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").appendChild(renderText(field, obj, template));
 				} else {
-					return Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)  + "/" + this.field.getResourceKey() + "/" + obj.getUuid(), "underline").text(StringUtils.defaultString(obj.getValue(field).toString()));
+					return Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)  + "/" + this.field.getResourceKey() + "/" + obj.getUuid(), "underline").appendChild(renderText(field, obj, template));
 				}
 				
 			}
@@ -339,12 +340,35 @@ public class TableRenderer {
 				AbstractObject ref = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(t.getResourceKey(), value.toString());
 				return Html.span(StringUtils.defaultIfEmpty((String) ref.getValue(t.getNameField()), "-"));
 			}
+		case TEXT:
+		case ENUM:
+		{
+			return renderText(field, obj, template);
+		}
 		default:
 			return Html.span(StringUtils.defaultString(obj.getValue(field).toString()), "UTF-8");
 		}
 		
 	}
 
+	private Element renderText(FieldTemplate field, AbstractObject obj, ObjectTemplate template) {
+		FieldRenderer renderer = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getRenderer(field, template);
+		switch(renderer) {
+		case BOOTSTRAP_BADGE:
+		{
+			return BootstrapBadgeRender.generateBadge(StringUtils.defaultString(obj.getValue(field).toString()));
+		}
+		case I18N:
+		{
+			return Html.i18n(template.getBundle(), StringUtils.defaultString(obj.getValue(field).toString()));
+		}
+		default:
+		{
+			return Html.span(StringUtils.defaultString(obj.getValue(field).toString()), "UTF-8");
+		}
+		}
+	}
+	
 	public void setStart(int start) {
 		this.start = start;
 	}

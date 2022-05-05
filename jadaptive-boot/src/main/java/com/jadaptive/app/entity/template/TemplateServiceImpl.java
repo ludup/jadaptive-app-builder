@@ -32,6 +32,7 @@ import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
@@ -42,6 +43,8 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.OrderedField;
 import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
@@ -134,11 +137,11 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	}
 	
 	@Override
-	public Collection<ObjectTemplate> table(String searchField, String searchValue, String order, int start, int length) throws RepositoryException, ObjectException {
+	public Collection<ObjectTemplate> table(String searchField, String searchValue, int start, int length, SortOrder order, String sortField) throws RepositoryException, ObjectException {
 		
 		permissionService.assertRead(ObjectTemplate.RESOURCE_KEY);
 		
-		return repository.table(searchField, searchValue, order, start, length);
+		return repository.table(searchField, searchValue, start, length, order, sortField);
 	}
 	
 	@Override
@@ -336,6 +339,47 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		}
 	}
 
+	@Override
+	public SortOrder getTableSortOrder(ObjectTemplate template) {
+	
+		Class<?> clz = getTemplateClass(template.getResourceKey());
+		
+		TableView view = ReflectionUtils.getAnnotation(clz, TableView.class);
+		if(Objects.nonNull(view)) {
+			return view.sortOrder();
+		}
+		return SortOrder.DESC;
+		
+	}
+	
+	@Override
+	public String getTableSortField(ObjectTemplate template) {
+	
+		Class<?> clz = getTemplateClass(template.getResourceKey());
+		
+		TableView view = ReflectionUtils.getAnnotation(clz, TableView.class);
+		if(Objects.nonNull(view)) {
+			return view.sortField();
+		}
+		return "_id";
+		
+	}
+	
+	@Override
+	public FieldRenderer getRenderer(FieldTemplate field, ObjectTemplate template) {
+		
+		try {
+			Field f = ReflectionUtils.getField(getTemplateClass(template.getResourceKey()), field.getResourceKey());
+			ObjectView v = f.getAnnotation(ObjectView.class);
+			if(Objects.nonNull(v)) {
+				return v.renderer() == null ? FieldRenderer.DEFAULT : v.renderer();
+			}
+		} catch (NoSuchFieldException e) {
+		}
+		
+		return FieldRenderer.DEFAULT;
+	}
+	
 	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, OrderedView> views, LinkedList<FieldTemplate> objectPath, boolean disableViews) throws NoSuchFieldException, ClassNotFoundException {
 		
 		for(FieldTemplate field : template.getFields()) {

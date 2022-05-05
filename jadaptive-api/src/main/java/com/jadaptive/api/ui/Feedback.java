@@ -57,7 +57,11 @@ public class Feedback {
 	public static void warning(String bundle, String i18n, Object...args) {
 		Request.get().getSession().setAttribute("feedback", new WarningFeedback(bundle, i18n, args));
 	}
-
+	
+	public static void dark(String bundle, String i18n, Object...args) {
+		Request.get().getSession().setAttribute("feedback", new DarkFeedback(bundle, i18n, args));
+	}
+	
 	public String getAlert() {
 		return alert;
 	}

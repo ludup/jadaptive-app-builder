@@ -29,7 +29,8 @@ public class CollectionSearchFormInput {
 
 	public void renderInput(OrderedView panel, Element rootElement, 
 			Collection<NamePairValue> selectedValues,
-			boolean nameIsResourceKey) {
+			boolean nameIsResourceKey,
+			boolean readOnly) {
 		
 		rootElement.appendChild(new Element("div").addClass("row mb-3 collectionSearchInput")
 				.attr("data-resourcekey", field.getResourceKey())
@@ -92,20 +93,25 @@ public class CollectionSearchFormInput {
 								)));
 		for(NamePairValue value : selectedValues) {
 			Element displayName;
-			table.appendChild(new Element("tr")
+			Element row;
+			table.appendChild(row = new Element("tr")
 					.appendChild(new Element("input")
 							.attr("type", "hidden")
 							.attr("name", field.getResourceKey())
 							.attr("value", value.getValue()))
 					.appendChild(new Element("td")
-							.appendChild(displayName = Html.span(value.getName(), "underline"))
-					.appendChild(new Element("td")
+							.appendChild(displayName = Html.span(value.getName(), "underline"))));
+			if(!readOnly) {
+					row.appendChild(new Element("td")
 //							.appendChild(Html.a("#", "collectionSearchUp")
 //									.appendChild(Html.i("far", "fa-fw", "fa-arrow-up", "me-2")))
 //							.appendChild(Html.a("#", "collectionSearchDown")
 //									.appendChild(Html.i("far", "fa-fw", "fa-arrow-down", "me-2")))
 							.appendChild(Html.a("#", "collectionSearchDelete")
-									.appendChild(Html.i("far", "fa-fw", "fa-trash", "me-2"))))));			
+									.appendChild(Html.i("far", "fa-fw", "fa-trash", "me-2"))));		
+			} else {
+				row.appendChild(new Element("td"));
+			}
 			if(nameIsResourceKey) {
 				displayName.attr("jad:bundle", field.getBundle())
 							.attr("jad:i18n", value.getName());

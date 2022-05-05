@@ -7,7 +7,7 @@ public interface HtmlPageExtender extends ExtensionPoint {
 
 	boolean isExtending(Page page);
 
-	void processEnd(Document doc);
+	void processEnd(Document doc, Page page);
 
-	void processStart(Document doc);
+	void processStart(Document doc, Page page);
 }

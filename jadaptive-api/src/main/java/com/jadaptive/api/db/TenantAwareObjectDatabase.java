@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.SortOrder;
 
 public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
@@ -20,12 +21,7 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 	
 	void saveOrUpdate(T obj) throws RepositoryException, ObjectException;
 
-	Collection<T> table(String searchField, String searchValue, String order, int start, int length,
-			Class<T> resourceClass);
-
 	long count(Class<T> resourceClass, SearchField... fields);
-
-	Collection<T> searchTable(Class<T> resourceClass, int start, int length, SearchField... fields);
 
 	Collection<T> searchObjects(Class<T> resourceClass, SearchField... fields);
 
@@ -34,5 +30,11 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 	T max(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
 
 	T min(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
+
+	Collection<T> searchTable(Class<T> resourceClass, int start, int length, SortOrder order, String sortField,
+			SearchField... fields);
+
+	Collection<T> table(String searchField, String searchValue, int start, int length, Class<T> resourceClass,
+			SortOrder order, String sortField);
 
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +82,7 @@ public class BootstrapTableController<T> extends AuthenticatedController {
 			start = Integer.parseInt(request.getParameter("offset"));
 		}
 		
-		Integer length = 0;
+		Integer length = 100;
 		if(request.getParameter("limit") != null) {
 			length = Integer.parseInt(request.getParameter("limit"));
 		}
@@ -96,6 +97,12 @@ public class BootstrapTableController<T> extends AuthenticatedController {
 		if(request.getParameter("search") != null) {
 			searchPattern = request.getParameter("search");
 		} 
+		
+		if(StringUtils.isBlank(searchPattern)) {
+			if(request.getParameter("searchValue") != null) {
+				searchPattern = request.getParameter("searchValue");
+			} 
+		}
 		
 		if(request.getParameter("searchField") != null) {
 			searchColumn = request.getParameter("searchField");

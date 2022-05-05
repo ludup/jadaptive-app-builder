@@ -23,6 +23,8 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.tenant.TenantService;
@@ -43,6 +45,9 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 
 	@Autowired
 	ObjectTemplateRepository templateRepository; 
+	
+	@Autowired
+	TemplateService templateService;
 	
 	@Override
 	public Iterable<AbstractObject> list(ObjectTemplate def, SearchField... fields) throws RepositoryException, ObjectException {
@@ -165,7 +170,9 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	@Override
 	public Collection<AbstractObject> table(ObjectTemplate def, int offset, int limit, SearchField... fields) {
 		List<AbstractObject> results = new ArrayList<>();
-		for(Document document : db.searchTable(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), offset, limit, fields)) {
+		SortOrder order = templateService.getTableSortOrder(def);
+		String sortField = templateService.getTableSortField(def);
+		for(Document document : db.searchTable(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), offset, limit, order, sortField, fields)) {
 			results.add(buildEntity(def, document));
 		}
 		

@@ -1,10 +1,13 @@
 package com.jadaptive.app.permissions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -27,6 +30,7 @@ import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.NamePairValue;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.app.user.AdminUser;
@@ -53,9 +57,11 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	private PropertyService propertyService;
 	
 	Map<Tenant,Set<String>> tenantPermissions = new HashMap<>();
+	Map<Tenant,Set<NamePairValue>> tenantPermissionObjects = new HashMap<>();
 	Map<Tenant,Map<String,Set<String>>> tenantPermissionsAlias = new HashMap<>();
 	
 	Set<String> systemPermissions = new TreeSet<>();
+	Set<NamePairValue> systemPermissionObjects = new TreeSet<>();
 	Map<String,Set<String>> systemPermissionsAlias = new HashMap<>();
 	
 	ThreadLocal<Stack<User>> currentUser = new ThreadLocal<>();
@@ -174,13 +180,18 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		Tenant tenant = tenantService.getCurrentTenant();	
 		
 		if(tenant.isSystem()) {
-			doRegisterPermission(systemPermissions, systemPermissionsAlias, permission, aliases);
+			doRegisterPermission(systemPermissions, systemPermissionObjects, systemPermissionsAlias, permission, aliases);
 		} else {
 			
 			Set<String> allPermissions = tenantPermissions.get(tenant);
+			Set<NamePairValue> objectPermissions = tenantPermissionObjects.get(tenant);
+			
 			if(Objects.isNull(allPermissions)) {
 				allPermissions = new TreeSet<>();
 				tenantPermissions.put(tenant, allPermissions);
+				
+				objectPermissions = new TreeSet<>();
+				tenantPermissionObjects.put(tenant, objectPermissions);
 			}
 			
 			Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);	
@@ -190,11 +201,11 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 				tenantPermissionsAlias.put(tenant, aliasPermissions);
 			}
 			
-			doRegisterPermission(allPermissions, aliasPermissions, permission, aliases);
+			doRegisterPermission(allPermissions, objectPermissions, aliasPermissions, permission, aliases);
 		}
 	}
 	
-	private synchronized void doRegisterPermission(Set<String> allPermissions, Map<String,Set<String>> aliasPermissions, String permission, String... aliases) {
+	private synchronized void doRegisterPermission(Set<String> allPermissions, Set<NamePairValue> objectPermissions, Map<String,Set<String>> aliasPermissions, String permission, String... aliases) {
 		
 		
 		if(log.isInfoEnabled()) {
@@ -206,6 +217,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		}
 		
 		allPermissions.add(permission);
+		objectPermissions.add(new NamePairValue(permission, permission));
 		
 		if(aliases.length > 0) {
 			if(!aliasPermissions.containsKey(permission)) {
@@ -434,5 +446,24 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			throw new AccessDeniedException(String.format("%s is not an Administrator", 
 					getCurrentUser().getName()));
 		}
+	}
+
+	@Override
+	public Collection<NamePairValue> getPermissions() {
+
+		List<NamePairValue> tmp = new ArrayList<>();
+		tmp.addAll(systemPermissionObjects);
+		if(tenantPermissions.containsKey(tenantService.getCurrentTenant())) {
+			tmp.addAll(tenantPermissionObjects.get(tenantService.getCurrentTenant()));
+		}
+		Collections.sort(tmp, new Comparator<NamePairValue>() {
+
+			@Override
+			public int compare(NamePairValue o1, NamePairValue o2) {
+				return	o1.getName().compareTo(o2.getName());
+			}
+		});
+		
+		return Collections.unmodifiableCollection(tmp);
 	}
 }

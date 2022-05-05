@@ -346,6 +346,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
 		ObjectTemplate template = templateService.get(resourceKey);
+		
 		switch(template.getScope()) {
 		case PERSONAL:
 			return entityRepository.table(template, offset, limit,

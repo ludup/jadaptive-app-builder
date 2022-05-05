@@ -11,6 +11,7 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
@@ -43,8 +44,8 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 	}
 	
 	@Override
-	public Collection<T> searchTable(int start, int length, SearchField... fields) {
-		return searchTable(TenantService.SYSTEM_UUID, getResourceClass(), start, length, fields);
+	public Collection<T> searchTable(int start, int length, SortOrder order, String sortField, SearchField... fields) {
+		return searchTable(TenantService.SYSTEM_UUID, getResourceClass(), start, length, order, sortField, fields);
 	}
 	
 	@Override
@@ -90,8 +91,8 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 	}
 
 	@Override
-	public Collection<T> table(String searchField, String searchValue, String order, int start, int length) {
-		return tableObjects(TenantService.SYSTEM_UUID, getResourceClass(), searchField, searchValue, start, length);
+	public Collection<T> table(String searchField, String searchValue, int start, int length, SortOrder order, String sortField) {
+		return tableObjects(TenantService.SYSTEM_UUID, getResourceClass(), searchField, searchValue, start, length, order, sortField);
 	}
 
 	@Override

@@ -11,8 +11,6 @@ import java.util.concurrent.Executors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.events.AuditedObject;
 import com.jadaptive.api.events.EventListener;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.Events;
@@ -21,11 +19,8 @@ import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.events.UUIDEntityCreatedEvent;
 import com.jadaptive.api.events.UUIDEntityDeletedEvent;
 import com.jadaptive.api.events.UUIDEntityUpdatedEvent;
-import com.jadaptive.api.product.ProductService;
-import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.TemplateService;
-import com.jadaptive.api.tenant.TenantService;
 
 @Service
 public class EventServiceImpl implements EventService { 
@@ -40,15 +35,6 @@ public class EventServiceImpl implements EventService {
 	
 	@Autowired
 	private TemplateService templateService; 
-	
-	@Autowired
-	private TenantAwareObjectDatabase<SystemEvent> eventDatabase;
-	
-	@Autowired
-	private TenantService tenantService; 
-	
-	@Autowired
-	private ProductService productService;
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -71,26 +57,14 @@ public class EventServiceImpl implements EventService {
 				fireEvent(listener, evt);
 			}
 		}
-		
-		if(tenantService.isReady() && canAudit(evt)) {
-			if(productService.supportsFeature("eventLog")) {
-				eventDatabase.saveOrUpdate(evt);
-			}
-		}
-	}
-	
-	private boolean canAudit(SystemEvent evt) {
-		if(ReflectionUtils.hasAnnotation(evt.getClass(), AuditedObject.class)) {
-			return true;
-		}
-		
-		if(evt instanceof ObjectEvent) {
-			return ReflectionUtils.hasAnnotation(((ObjectEvent<?>)evt).getObject().getClass(), AuditedObject.class);
-		}
-		
-		return false;
+
 	}
 
+	@Override
+	public void registerListener(EventListener<?> listener) {
+		eventListeners.add(listener);
+	}
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void fireEvent(EventListener listener, SystemEvent evt) {
 		if(evt.async()) {
