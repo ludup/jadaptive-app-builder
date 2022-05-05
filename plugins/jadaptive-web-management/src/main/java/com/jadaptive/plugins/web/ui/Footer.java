@@ -59,7 +59,7 @@ public class Footer extends AbstractPageExtension {
 		}
 	}
 
-	private BootstrapTheme getThemeFromCookie(BootstrapTheme defaultValue) {
+	public static BootstrapTheme getThemeFromCookie(BootstrapTheme defaultValue) {
 		
 		Cookie[] cookies = Request.get().getCookies();
 		if(Objects.nonNull(cookies)) {
