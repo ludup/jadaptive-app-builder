@@ -463,11 +463,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.setDefaultColumn(e.defaultColumn());
 			template.setName(e.resourceKey());
 			
-			
-			
-			template.setCreatable(!auditObject && e.creatable());
-			template.setUpdatable(!auditObject && e.updatable());
-			template.setDeletable(!auditObject && e.deletable());
+			template.setCreatable(e.creatable());
+			template.setUpdatable(e.updatable());
+			template.setDeletable(e.deletable());
 			template.setPermissionProtected(e.requiresPermission());
 			
 			String nameField = "uuid";
