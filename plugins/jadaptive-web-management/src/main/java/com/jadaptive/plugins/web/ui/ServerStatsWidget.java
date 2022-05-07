@@ -38,19 +38,23 @@ public class ServerStatsWidget implements DashboardWidget {
 								.attr("jad:bundle", getBundle())
 								.attr("jad:i18n", "serverStats.desc")));
 		Element e;
-		element.appendChild(e = new Element("p"));
+		element.appendChild(e = new Element("div").addClass("row"));
 		
 		for(ResourceService rs : applicationService.getBeans(ResourceService.class)) {
 			if(rs.isEnabled()) {
 			long count = rs.getTotalResources();
-				e.appendChild(new Element("a")
+				e.appendChild(
+					new Element("div")
+						.addClass("col-6")
+						.appendChild(
+					new Element("a")
 						.attr("href", String.format("/app/ui/search/%s", rs.getResourceKey()))
 							.appendChild(new Element("span")
 								.html(String.format("%s&nbsp;", String.valueOf(count)))) 
 							.appendChild(new Element("span")
 									.attr("jad:bundle", rs.getResourceKey())
 									.attr("jad:i18n", rs.getResourceKey() + (count > 1 || count == 0 ? ".names" : ".name")))
-							.appendChild(new Element("br")));
+							.appendChild(new Element("br"))));
 			}
 		}
 	}

@@ -242,6 +242,14 @@ public class Utils {
 	public static byte[] base64Decode(String property) throws IOException {
 		return java.util.Base64.getDecoder().decode(property.getBytes("UTF-8"));
 	}
+	
+	public static String base64DecodeToString(String str) {
+		try {
+			return new String(base64Decode(str), "UTF-8");
+		} catch (IOException e) {
+			throw new IllegalStateException("System does not appear to support UTF-8!", e);
+		}
+	}
 
 	public static String format(Double d) {
 		return new DecimalFormat("0.00").format(d);

@@ -49,6 +49,7 @@ import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.FileFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
+import com.jadaptive.api.ui.renderers.form.ImageFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
@@ -454,8 +455,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			case OPTIONAL:
 			{
-				String value = getFieldValue(orderedField, obj);
-				if(StringUtils.isNotBlank(value) || view!=FieldView.READ) {
+				String value = getFieldValue(orderedField, obj); 
+				if(StringUtils.isNotBlank(value) || (!orderedField.getField().isReadOnly() && view !=FieldView.READ)) {
 					TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
 					render.renderInput(panel, element, value);
 				}
@@ -471,6 +472,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			break;
 		}
 		case IMAGE:
+		{
+			ImageFormInput render = new ImageFormInput(currentTemplate.get(), orderedField);
+			render.renderInput(panel, element, getFieldValue(orderedField, obj));
+			break;
+		}
+		case FILE:
 		{
 			FileFormInput render = new FileFormInput(currentTemplate.get(), orderedField);
 			render.renderInput(panel, element, getFieldValue(orderedField, obj));

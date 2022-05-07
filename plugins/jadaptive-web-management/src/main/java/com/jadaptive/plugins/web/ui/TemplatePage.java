@@ -31,6 +31,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 
 	public void onCreate() throws FileNotFoundException {
 		
+		
 		try {
 			template = templateService.get(resourceKey);
 			templateClazz = templateService.getTemplateClass(resourceKey);

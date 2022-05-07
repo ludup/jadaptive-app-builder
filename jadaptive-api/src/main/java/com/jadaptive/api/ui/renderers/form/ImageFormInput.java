@@ -6,9 +6,9 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.OrderedField;
 import com.jadaptive.api.template.OrderedView;
 
-public class FileFormInput extends FormInputRender {
+public class ImageFormInput extends FormInputRender {
 
-	public FileFormInput(ObjectTemplate template, OrderedField field) {
+	public ImageFormInput(ObjectTemplate template, OrderedField field) {
 		super(template, field);
 	}
 
@@ -18,6 +18,10 @@ public class FileFormInput extends FormInputRender {
 	}
 	
 	protected void onRender(OrderedView panel, Element rootElement, String value) { 
+		
+		rootElement.selectFirst("small").after(
+				new Element("div").addClass("col-12 my-3").appendChild(
+						new Element("img").attr("src", value)));
 		
 		rootElement.selectFirst("input").val("");
 		rootElement.appendChild(new Element("input")

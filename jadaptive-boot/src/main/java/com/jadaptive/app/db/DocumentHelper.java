@@ -296,6 +296,21 @@ public class DocumentHelper {
 				}
 			}
 			return request.getParameter(field.getFormVariable() + "_previous");
+		case FILE:
+			if(request instanceof StandardMultipartHttpServletRequest) {
+				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
+				if(file.isEmpty()) {
+					return null;
+				}
+				if(file.size() > 1) {
+					throw new IllegalStateException("Multiple file parts for single value!");
+				}
+				MultipartFile f = file.get(0);
+				if(StringUtils.isNotBlank(f.getOriginalFilename()) && f.getSize() > 0) {
+					return Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
+				}
+			}
+			return request.getParameter(field.getFormVariable() + "_previous");
 		default:
 			if(Objects.isNull(value)) {
 				

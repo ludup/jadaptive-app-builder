@@ -16,7 +16,8 @@ public enum FieldType {
 	DATE,
 	PERMISSION, 
 	HIDDEN,
-	IMAGE;
+	IMAGE,
+	FILE;
 	
 	ValidationType[] options;
 	
