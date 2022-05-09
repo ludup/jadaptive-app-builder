@@ -4,21 +4,18 @@ import org.jsoup.nodes.Document;
 
 import com.jadaptive.api.wizards.WizardState;
 
-public class SetupSection extends WizardSection {
+public abstract class SetupSection extends WizardSection {
 
-	public SetupSection(String bundle, String name, String resource, Integer position) {
-		super(bundle, name, resource, position);
+	public SetupSection(String bundle, String name, String resource) {
+		super(bundle, name, resource);
 	}
 
 	@Override
-	public void processReview(Document document, WizardState state, Integer sectionIndex) {
+	public void processReview(Document document, WizardState state) {
 			
 	}
-
-	@Override
-	public void finish(WizardState state, Integer sectionIndex) {
-
+	
+	public void finish(WizardState state) {
+		
 	}
-	
-	
 }

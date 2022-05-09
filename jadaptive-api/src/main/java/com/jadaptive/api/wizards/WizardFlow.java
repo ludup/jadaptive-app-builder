@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.jsoup.nodes.Document;
 import org.pf4j.ExtensionPoint;
 
 import com.jadaptive.api.ui.Page;
@@ -15,13 +14,11 @@ public interface WizardFlow extends ExtensionPoint {
 
 	WizardState getState(HttpServletRequest request) throws FileNotFoundException;
 
-	void processReview(Document document, WizardState state);
-
+	void clearState(HttpServletRequest request);
+	
 	Page getCompletePage() throws FileNotFoundException;
 
-	void finish();
-
-	void clearState(HttpServletRequest request);
+	void finish(WizardState wizardState);
 	
 	
 }

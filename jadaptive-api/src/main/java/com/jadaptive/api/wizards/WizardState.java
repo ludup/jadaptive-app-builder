@@ -20,7 +20,7 @@ public class WizardState {
 	WizardSection finishPage;
 	WizardFlow flow;
 
-	Map<Integer,UUIDEntity> stateObjects = new HashMap<>(); 
+	Map<Class<?>,UUIDEntity> stateObjects = new HashMap<>(); 
 	Map<String,Object> stateParameters = new HashMap<>();
 	private boolean finished;;
 	
@@ -92,7 +92,8 @@ public class WizardState {
 	}
 
 	public void finish() {
-		flow.finish();
+		flow.finish(this);
+		setFinished(true);
 	}
 
 	public boolean isStartPage() {
@@ -104,23 +105,23 @@ public class WizardState {
 	}
 
 	public UUIDEntity getCurrentObject() {
-		return stateObjects.get(getCurrentStep());
+		return stateObjects.get(pages.get(getCurrentStep()-1).getClass());
 	}
 	
 	public void setCurrentObject(UUIDEntity obj) {
-		stateObjects.put(getCurrentStep(), obj);
+		stateObjects.put(pages.get(getCurrentStep()-1).getClass(), obj);
 	}
 
 	public void saveObject(UUIDEntity object) {
-		stateObjects.put(getCurrentStep(), object);
+		stateObjects.put(pages.get(getCurrentStep()-1).getClass(), object);
 	}
 
 	public Collection<WizardSection> getSections() {
 		return pages;
 	}
 
-	public UUIDEntity getObjectAt(Integer sectionIndex) {
-		return stateObjects.get(sectionIndex);
+	public UUIDEntity getObject(Class<? extends WizardSection> section) {
+		return stateObjects.get(section);
 	}
 
 	public void insertNextPage(WizardSection setupSection) {

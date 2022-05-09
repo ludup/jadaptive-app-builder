@@ -15,16 +15,11 @@ public abstract class WizardSection extends AbstractPageExtension {
 	String bundle;
 	String name;
 	String resource;
-	Integer position;
 	
-	public static final Integer START_OF_DEFAULT = 0;
-	public static final Integer END_OF_DEFAULT = 9999;
-	
-	public WizardSection(String bundle, String name, String resource, Integer position) {
+	public WizardSection(String bundle, String name, String resource) {
 		this.bundle = bundle;
 		this.name = name;
 		this.resource = resource;
-		this.position = position;
 	}
 	
 	@Override
@@ -41,10 +36,6 @@ public abstract class WizardSection extends AbstractPageExtension {
 		return name;
 	}
 	
-	public Integer getPosition() {
-		return position;
-	}
-
 	public String getBundle() {
 		return bundle;
 	}
@@ -58,11 +49,7 @@ public abstract class WizardSection extends AbstractPageExtension {
 		
 	}
 
-	public void processReview(Document document, WizardState state, Integer sectionIndex) {
-		
-	}
-
-	public void finish(WizardState state, Integer sectionIndex) {
+	public void processReview(Document document, WizardState state) {
 		
 	}
 }

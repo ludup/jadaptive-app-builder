@@ -39,6 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriUtils;
 
+import com.jadaptive.api.repository.NamedDocument;
+
 public class Utils {
 
 	public static final int ONE_MINUTE = 60000;
@@ -482,5 +484,18 @@ public class Utils {
 			idx++;
 		}
 		return vars;
+	}
+	
+	public static String getCommaSeparatedNames(Collection<? extends NamedDocument> values) {
+		
+		StringBuffer buf = new StringBuffer();
+		for(NamedDocument value : values) {
+			if(buf.length() > 0) {
+				buf.append(",");
+			}
+			buf.append(value.getName());
+		}
+				
+		return buf.toString();
 	}
 }

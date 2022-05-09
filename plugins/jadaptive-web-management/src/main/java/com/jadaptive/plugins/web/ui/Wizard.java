@@ -136,12 +136,8 @@ public class Wizard extends HtmlPage implements ObjectPage {
 							.attr("jad:bundle", "default")
 							.attr("jad:i18n", "finish.name")));
 			
-			state.getFlow().processReview(document, state);
-			
-			Integer index = Integer.valueOf(1);
 			for(WizardSection section : state.getSections()) {
-				section.processReview(document, state, index);
-				index++;
+				section.processReview(document, state);
 			}
 		}
 	}

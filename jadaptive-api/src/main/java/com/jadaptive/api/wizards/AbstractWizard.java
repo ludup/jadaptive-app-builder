@@ -3,8 +3,6 @@ package com.jadaptive.api.wizards;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -12,7 +10,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
@@ -20,21 +17,20 @@ import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.setup.WizardSection;
-import com.jadaptive.api.tenant.TenantService;
 
-public abstract class AbstractWizard<T extends WizardSection> implements WizardFlow, FormHandler {
+public abstract class AbstractWizard implements WizardFlow, FormHandler {
 
+	public static final String EXISTING_UUID = "existingUUID";
+	
 	@Autowired
 	private ApplicationService applicationService; 
 	
-	@Autowired
-	private TenantService tenantService; 
-	
-	protected abstract Class<? extends T> getSectionClass();
+	protected abstract Class<? extends WizardSection> getSectionClass();
 	
 	protected abstract String getStateAttribute();
 	
-	@SuppressWarnings("unchecked")
+	public abstract void finish(WizardState state);
+	
 	@Override
 	public WizardState getState(HttpServletRequest request) {
 		
@@ -44,22 +40,13 @@ public abstract class AbstractWizard<T extends WizardSection> implements WizardF
 		if(Objects.isNull(state)) {
 			state = new WizardState(this);
 			
-			List<T> sections = new ArrayList<>();
+			List<WizardSection> sections = new ArrayList<>();
 			sections.addAll(getDefaultSections());
 			sections.addAll(applicationService.getBeans(getSectionClass()));
-			
-			Collections.sort(sections, new Comparator<T>() {
-
-				@Override
-				public int compare(T o1, T o2) {
-					return Integer.valueOf(o1.getPosition()).compareTo(o2.getPosition());
-				}
-				
-			});
-			
+						
 			state.init(getStartSection(),
 					getFinishSection(), 
-					sections.toArray((T[]) Array.newInstance(getSectionClass(), 0))); 
+					sections.toArray((WizardSection[]) Array.newInstance(getSectionClass(), 0))); 
 			request.getSession().setAttribute(getStateAttribute(), state);
 		}
 		
@@ -72,28 +59,6 @@ public abstract class AbstractWizard<T extends WizardSection> implements WizardF
 	@Override
 	public void clearState(HttpServletRequest request) {
 		request.getSession().setAttribute(getStateAttribute(), null);
-	}
-	
-	@Override
-	public void finish() {
-		
-		WizardState state = (WizardState) Request.get().getSession().getAttribute(getStateAttribute());
-		if(Objects.isNull(state)) {
-			throw new IllegalStateException();
-		}
-		
-		Integer sectionIndex = 1;
-		for(WizardSection section : state.getSections()) {
-			section.finish(state, sectionIndex++);
-		}
-		
-		state.setFinished(true);
-		tenantService.completeSetup();
-	}
-	
-	@Override
-	public void processReview(Document document, WizardState state) {
-		
 	}
 
 	@Override
@@ -109,9 +74,9 @@ public abstract class AbstractWizard<T extends WizardSection> implements WizardF
 		return object.getUuid();
 	}
 
-	protected abstract T getFinishSection();
+	protected abstract WizardSection getFinishSection();
 
-	protected abstract T getStartSection();
+	protected abstract WizardSection getStartSection();
 
-	protected abstract Collection<T> getDefaultSections();
+	protected abstract Collection<? extends WizardSection> getDefaultSections();
 }
