@@ -1,6 +1,7 @@
 package com.jadaptive.api.db;
 
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.util.Collection;
 
 import com.jadaptive.api.repository.UUIDDocument;
@@ -17,5 +18,7 @@ public interface ClassLoaderService {
 	Class<? extends UUIDDocument> getTemplateClass(ObjectTemplate template);
 
 	boolean hasTemplateClass(ObjectTemplate template);
+
+	URL getResource(String string);
 
 }

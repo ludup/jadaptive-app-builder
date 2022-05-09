@@ -60,6 +60,11 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 
 		return getClass().getClassLoader().getResource(name);
 	}
+	
+	@Override
+	public URL getResource(String name) {
+		return findResource(name);
+	}
 
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {
