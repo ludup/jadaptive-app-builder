@@ -43,10 +43,13 @@ $(document).ready(function() {
 		var redirect = $(this).data('url');
 		var form = $('form');
 		
-		$.ajax({
+    	$.ajax({
            type: "POST",
            url: url,
-           data: JadaptiveUtils.serializeForm(form),
+           cache: false,
+           contentType: false,
+    	   processData: false,
+           data: new FormData(form[0]),
            success: function(data)
            {
                 if(data.success) {

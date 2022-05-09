@@ -68,7 +68,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	}
 	
 	@RequestMapping(value="/app/api/form/default/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
-			consumes = { "application/x-www-form-urlencoded" })
+			consumes = { "multipart/form-data" })
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus saveFormAsObject(HttpServletRequest request, @PathVariable String resourceKey)  {
@@ -140,7 +140,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	}
 	
 	@RequestMapping(value="/app/api/form/stash/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
-			consumes = { "application/x-www-form-urlencoded" })
+			consumes = { "multipart/form-data" })
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus stashObject(HttpServletRequest request, 
@@ -165,7 +165,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	}
 	
 	@RequestMapping(value="/app/api/form/stash/{resourceKey}/{childResource}/{fieldName}", method = RequestMethod.POST, produces = {"application/json"},
-			consumes = { "application/x-www-form-urlencoded" })
+			consumes = { "multipart/form-data" })
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus stashEmbeddedObject(HttpServletRequest request, 
@@ -217,7 +217,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	@RequestMapping(value="/app/api/form/{handler}/{resourceKey}", 
 			method = RequestMethod.POST, produces = {"application/json"},
-			consumes = { "application/x-www-form-urlencoded" })
+			consumes = { "multipart/form-data" })
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus saveObjectFromForm(HttpServletRequest request, 
@@ -226,9 +226,6 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			
-			if(handler.equals("multipart")) {
-				return saveFormAsObjectMultipart(request, resourceKey);
-			}
 			ObjectTemplate template = templateService.get(resourceKey);
 			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
 			objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(

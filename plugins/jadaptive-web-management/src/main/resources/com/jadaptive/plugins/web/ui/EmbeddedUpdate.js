@@ -14,7 +14,10 @@ $(document).ready(function() {
     	$.ajax({
            type: "POST",
            url: action,
-           data: JadaptiveUtils.serializeForm(form),
+           cache: false,
+           contentType: false,
+    	   processData: false,
+           data: new FormData(form[0]),
            success: function(data)
            {
                if(data.success) {
