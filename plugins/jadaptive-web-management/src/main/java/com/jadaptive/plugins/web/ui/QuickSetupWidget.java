@@ -9,6 +9,8 @@ import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.ui.DashboardWidget;
 import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.QuickSetupItem;
@@ -20,6 +22,9 @@ public class QuickSetupWidget implements DashboardWidget {
 
 	@Autowired
 	private ApplicationService applicationService;
+	
+	@Autowired
+	private PermissionService permissionService; 
 	
 	@Override
 	public String getIcon() {
@@ -71,7 +76,12 @@ public class QuickSetupWidget implements DashboardWidget {
 
 	@Override
 	public boolean wantsDisplay() {
-		return applicationService.getBeans(QuickSetupItem.class).size() > 0;
+		try {
+			permissionService.assertAdministrator();
+			return applicationService.getBeans(QuickSetupItem.class).size() > 0;
+		} catch(AccessDeniedException e) {
+			return false;
+		}
 	}
 
 }

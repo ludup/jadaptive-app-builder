@@ -32,6 +32,8 @@ public interface DocumentDatabase {
 	Iterable<Document> list(String table, String database, SearchField... fields);
 
 	Iterable<Document> search(String table, String database, SearchField... fields);
+	
+	Iterable<Document> search(String table, String database, SortOrder order, String sortField, SearchField... fields);
 
 	Iterable<Document> searchTable(String table, String database, int start, int length, SortOrder order, String sortField, SearchField... fields);
 

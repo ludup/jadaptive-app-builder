@@ -12,6 +12,7 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.UUIDObjectUtils;
 
@@ -41,19 +42,39 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	}
 	
 	@Override
-	public Iterable<T> getAssignedObjects(Class<T> resourceClass, User user) {
+	public Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SortOrder order, String sortField, SearchField... fields) {
 		
 		if(permissionService.isAdministrator(user)) {
 			 return getObjects(resourceClass);
 		} else {
 			Collection<Role> userRoles = roleService.getRolesByUser(user);
 			return objectDatabase.searchObjects(resourceClass, 
+					order,
+					sortField,
+					SearchField.and(fields),
 					SearchField.or(
 							SearchField.in("users", user.getUuid()),
 							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
 					));
 		}
 	}
+	
+	@Override
+	public Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SearchField... fields) {
+		
+		if(permissionService.isAdministrator(user)) {
+			 return getObjects(resourceClass);
+		} else {
+			Collection<Role> userRoles = roleService.getRolesByUser(user);
+			return objectDatabase.searchObjects(resourceClass, 
+					SearchField.add(fields,
+					SearchField.or(
+							SearchField.in("users", user.getUuid()),
+							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))
+					));
+		}
+	}
+
 
 	@Override
 	public T getObjectByUUID(Class<T> resourceClass, String uuid) {

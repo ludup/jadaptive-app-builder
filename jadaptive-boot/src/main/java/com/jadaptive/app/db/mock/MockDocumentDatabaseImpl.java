@@ -175,4 +175,11 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 
 	}
 
+	@Override
+	public Iterable<Document> search(String table, String database, SortOrder order, String sortField,
+			SearchField... fields) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

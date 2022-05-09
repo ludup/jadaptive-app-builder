@@ -1,7 +1,7 @@
 package com.jadaptive.plugins.web.ui.menus;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.pf4j.Extension;
 
@@ -29,7 +29,7 @@ public class DashboardMenu implements ApplicationMenu {
 
 	@Override
 	public Collection<String> getPermissions() {
-		return Arrays.asList("tenant.read");
+		return Collections.emptyList();
 	}
 
 	@Override

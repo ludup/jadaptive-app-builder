@@ -276,11 +276,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				throw new ObjectException("You cannot delete a system object");
 			}
 			entityRepository.deleteByUUIDOrAltId(template, uuid);
-			
-			
-			
-			
-			
+
 		} catch(RepositoryException | ObjectException ex) {
 			throw ex;
 		} catch(Throwable ex) {

@@ -6,6 +6,8 @@ import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.ui.DashboardWidget;
 
@@ -14,6 +16,9 @@ public class ServerStatsWidget implements DashboardWidget {
 
 	@Autowired
 	private ApplicationService applicationService; 
+	
+	@Autowired
+	private PermissionService permissionService; 
 	
 	@Override
 	public String getIcon() {
@@ -66,7 +71,12 @@ public class ServerStatsWidget implements DashboardWidget {
 
 	@Override
 	public boolean wantsDisplay() {
-		return true;
+		try {
+			permissionService.assertAdministrator();
+			return true;
+		} catch(AccessDeniedException e) {
+			return false;
+		}
 	}
 
 }

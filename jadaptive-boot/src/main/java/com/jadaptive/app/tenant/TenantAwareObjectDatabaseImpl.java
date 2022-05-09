@@ -115,6 +115,11 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public Collection<T> searchObjects(Class<T> resourceClass, SearchField... fields) {
 		return searchObjects(getCurrentTenant().getUuid(), resourceClass, fields);
 	}
+	
+	@Override
+	public Collection<T> searchObjects(Class<T> resourceClass, SortOrder order, String sortField, SearchField... fields) {
+		return searchObjects(getCurrentTenant().getUuid(), resourceClass, fields);
+	}
 
 	@Override
 	public Long searchCount(Class<T> resourceClass, SearchField... fields) {

@@ -10,7 +10,7 @@ import com.jadaptive.api.template.SortOrder;
 public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
 	Iterable<T> list(Class<T> resourceClass, SearchField...fields);
-
+	
 	T get(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException;
 	
 	T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException;
@@ -23,6 +23,8 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
 	long count(Class<T> resourceClass, SearchField... fields);
 
+	Collection<T> searchObjects(Class<T> resourceClass, SortOrder order, String sortField, SearchField... fields);
+	
 	Collection<T> searchObjects(Class<T> resourceClass, SearchField... fields);
 
 	Long searchCount(Class<T> resourceClass, SearchField... fields);

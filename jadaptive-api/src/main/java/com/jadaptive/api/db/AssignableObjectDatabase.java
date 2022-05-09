@@ -1,11 +1,14 @@
 package com.jadaptive.api.db;
 
 import com.jadaptive.api.repository.AssignableUUIDEntity;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.user.User;
 
 public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> {
 
-	Iterable<T> getAssignedObjects(Class<T> resourceClass, User user);
+	Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SearchField... fields);
+	
+	Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SortOrder order, String sortField, SearchField... fields);
 
 	T getObjectByUUID(Class<T> resourceClass, String uuid);
 

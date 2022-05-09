@@ -254,6 +254,17 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
+	public Iterable<Document> search(String table, String database, SortOrder order, String sortField, SearchField...fields) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		if(fields.length == 0) {
+			return collection.find().sort(getOrder(order, sortField));
+		} else {
+			return collection.find(buildFilter(fields)).sort(getOrder(order, sortField));
+		}
+	}
+	
+	@Override
 	public Iterable<Document> searchTable(String table, String database, int start, int length, SortOrder order, String sortField, SearchField...fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);

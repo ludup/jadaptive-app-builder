@@ -1,6 +1,9 @@
 package com.jadaptive.api.db;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.util.StringUtils;
 
@@ -102,5 +105,13 @@ public class SearchField {
 	
 	public static SearchField lte(String searchField, Object searchValue) {
 		return new SearchField(Type.LTE, searchField, searchValue);
+	}
+
+	public static SearchField[] add(SearchField[] fields, SearchField... field) {
+		List<SearchField> tmp = new ArrayList<>();
+		tmp.addAll(Arrays.asList(fields));
+		tmp.addAll(Arrays.asList(field));
+		return tmp.toArray(new SearchField[0]);
+		
 	}
 }

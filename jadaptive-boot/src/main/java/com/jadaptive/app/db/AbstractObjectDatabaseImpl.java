@@ -471,6 +471,22 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	protected <T extends UUIDEntity> Collection<T> searchObjects(String database, Class<T> clz, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
+		try {
+
+			List<T> results = new ArrayList<>();
+			for(Document document : db.search(getCollectionName(clz), database, order, sortField, fields)) {
+				results.add(DocumentHelper.convertDocumentToObject(clz, document));
+			}
+			
+			return results;
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(String.format("%s: %s", clz.getSimpleName(), e.getMessage()), e);
+		}
+	}
+	
 	protected <T extends UUIDEntity> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
