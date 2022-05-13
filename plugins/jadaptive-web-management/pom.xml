@@ -6,7 +6,7 @@
 		<groupId>com.jadaptive</groupId>
 		<artifactId>plugins</artifactId>
 		<relativePath>..</relativePath>
-		<version>0.1.8-SNAPSHOT</version>
+		<version>0.1.8</version>
 	</parent>
 
 	<artifactId>jadaptive-web-management</artifactId>
