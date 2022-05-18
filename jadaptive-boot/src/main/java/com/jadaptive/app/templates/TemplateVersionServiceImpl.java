@@ -62,6 +62,7 @@ import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.app.json.ObjectMapperHolder;
 import com.jadaptive.utils.Version;
@@ -91,6 +92,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	@Autowired
 	private TemplateService templateService; 
 	
+	@Autowired
+	private TenantService tenantService; 
+	
 	private Map<String,ObjectTemplate> loadedTemplates = new HashMap<>();
 	
 	@Override
@@ -102,7 +106,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	public <E extends AbstractUUIDEntity> void processTemplates(Tenant tenant, JsonTemplateEnabledService<E> templateEnabledService) {
 		
 		if(log.isInfoEnabled()) {
-			log.info("Processing templates for {}", templateEnabledService.getResourceKey());
+			log.info("Processing templates for {} in {}", 
+					templateEnabledService.getResourceKey(),
+					tenant.getName());
 		}
 		
 		try {
@@ -284,7 +290,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		try {
 			
 			if(log.isInfoEnabled()) {
-				log.info("Processing template {} resource {}", resourceKey, version.toString());
+				log.info("Processing template {} resource {} on tenant {}", 
+						resourceKey, version.toString(),
+						tenantService.getCurrentTenant().getName());
 			}
 			
 			List<E> objects = objectMapper.getObjectMapper().readValue(
@@ -470,8 +478,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			String nameField = "uuid";
 			
-			Index[] nonUnique = clz.getAnnotationsByType(Index.class);
-			UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);
 			
 			List<Field> fields = new ArrayList<>();
 			resolveFields(clz, fields, e.recurse());
@@ -498,9 +504,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			switch(template.getType()) {
 			case COLLECTION:
 			case SINGLETON:
-				if(!template.hasParent()) {
-					templateRepository.createIndexes(template, nonUnique, unique);
-				}
 				if(template.getPermissionProtected()) {
 					permissionService.registerStandardPermissions(template.getResourceKey());
 				}
@@ -509,12 +512,42 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				// Embedded objects do not have direct permissions
 			}
 			
+			registerIndexes(template, clz);
+			
 		} catch(RepositoryException | ObjectException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
 			System.exit(0);
 		}
 	}
 	
+	@Override
+	public void registerTenantIndexes() {
+		
+		for(ObjectTemplate template : loadedTemplates.values()) {
+			if(!template.isSystem()) {
+				registerIndexes(template, templateService.getTemplateClass(template.getResourceKey()));
+			}
+		}
+ 	}
+	
+	private void registerIndexes(ObjectTemplate template, Class<?> clz) {
+		
+		Index[] nonUnique = clz.getAnnotationsByType(Index.class);
+		UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);
+		
+		switch(template.getType()) {
+		case COLLECTION:
+		case SINGLETON:
+			if(!template.hasParent()) {
+				templateRepository.createIndexes(template, nonUnique, unique);
+			}
+			break;
+		default:
+			// Embedded objects do not have direct permissions
+		}
+		
+	}
+
 	private FieldTemplate processFieldAnnotations(ObjectField field, /*Field parentField,*/ Field f, /*Properties i18n,*/ ObjectTemplate template) {
 
 		FieldTemplate t = new FieldTemplate();

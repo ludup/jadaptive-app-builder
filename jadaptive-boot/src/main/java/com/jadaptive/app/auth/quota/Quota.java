@@ -10,7 +10,7 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
 @ObjectDefinition(resourceKey = Quota.RESOURCE_KEY, 
-	hidden = true, system = true, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+	hidden = true, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class Quota extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 2226026565046618484L;

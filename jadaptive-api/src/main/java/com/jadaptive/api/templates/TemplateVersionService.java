@@ -15,4 +15,6 @@ public interface TemplateVersionService {
 
 	void registerAnnotatedTemplate(Class<?> clz);
 
+	void registerTenantIndexes();
+
 }

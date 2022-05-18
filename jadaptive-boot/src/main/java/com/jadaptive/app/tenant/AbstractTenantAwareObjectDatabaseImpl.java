@@ -16,9 +16,8 @@ import com.jadaptive.app.db.DocumentDatabase;
 
 public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUUIDEntity> 
 		extends AbstractObjectDatabaseImpl implements AbstractTenantAwareObjectDatabase<T> {
-
 	
-	protected AbstractTenantAwareObjectDatabaseImpl(DocumentDatabase db) {
+	public AbstractTenantAwareObjectDatabaseImpl(DocumentDatabase db) {
 		super(db);
 	}
 

@@ -23,7 +23,7 @@ import com.jadaptive.api.template.TableView;
 import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = SystemEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
-     creatable = false, updatable = false, system = true, defaultColumn = "eventKey")
+     creatable = false, updatable = false, defaultColumn = "eventKey")
 @ObjectViews({@ObjectViewDefinition(value = "event", bundle = SystemEvent.RESOURCE_KEY)})
 @TableView(defaultColumns = { "state", "timestamp", "eventKey", "eventGroup", "ipAddress"}, sortOrder = SortOrder.DESC, sortField = "timestamp")
 public class SystemEvent extends UUIDEvent {

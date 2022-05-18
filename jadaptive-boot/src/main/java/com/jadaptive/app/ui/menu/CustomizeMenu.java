@@ -9,16 +9,16 @@ import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
 @Extension
-public class AdministrationMenu implements ApplicationMenu {
+public class CustomizeMenu implements ApplicationMenu {
 
 	@Override
 	public String getUuid() {
-		return ApplicationMenuService.ADMINISTRATION_MENU_UUID;
+		return ApplicationMenuService.CUSTOMIZE_MENU_UUID;
 	}
 	
 	@Override
 	public String getResourceKey() {
-		return "administration.name";
+		return "customize.name";
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class AdministrationMenu implements ApplicationMenu {
 
 	@Override
 	public String getIcon() {
-		return "lock";
+		return "palette";
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class AdministrationMenu implements ApplicationMenu {
 	
 	@Override
 	public Integer weight() {
-		return 200;
+		return 999;
 	}
 
 }

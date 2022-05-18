@@ -22,7 +22,7 @@ public @interface ObjectDefinition {
 
 		boolean hidden() default false;
 		
-		boolean system() default true;
+		boolean system() default false;
 		
 		boolean recurse() default true;
 		

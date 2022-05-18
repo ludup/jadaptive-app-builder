@@ -9,11 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Stack;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -28,6 +31,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
@@ -36,9 +40,11 @@ import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
 
 @Service
-public class TenantServiceImpl implements TenantService, JsonTemplateEnabledService<Tenant> {
+public class TenantServiceImpl implements TenantService, JsonTemplateEnabledService<Tenant>, UUIDObjectService<Tenant> {
 
-	ThreadLocal<Tenant> currentTenant = new ThreadLocal<>();
+	final static Logger log = LoggerFactory.getLogger(TenantServiceImpl.class);
+	
+	ThreadLocal<Stack<Tenant>> currentTenant = new ThreadLocal<>();
 	
 	final public static String SYSTEM_TENANT_UUID = "cb3129ea-b8b1-48a4-85de-8443945d95e3";
 	
@@ -79,12 +85,20 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			} else {
 				systemTenant = repository.getSystemTenant();
 			}
-				
+			
+			templateService.registerAnnotatedTemplates();
+			
 			initialiseTenant(systemTenant, newSchema);
 			
 			for(Tenant tenant : allObjects()) {
 				if(!tenant.isSystem()) {
-					initialiseTenant(tenant, false);
+					setCurrentTenant(tenant);
+					try {
+						templateService.registerTenantIndexes();
+						initialiseTenant(tenant, false);
+					} finally {
+						clearCurrentTenant();
+					}
 				}
 			}	
 			
@@ -147,7 +161,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		try {
 			
-			templateService.registerAnnotatedTemplates();
+			
 			
 			Collection<JsonTemplateEnabledService> templateServices
 				= ApplicationServiceImpl.getInstance().getBeans(
@@ -236,21 +250,33 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 
 	@Override
 	public Tenant getCurrentTenant() throws RepositoryException, ObjectException {
-		Tenant tenant = currentTenant.get();
-		if(Objects.isNull(tenant)) {
+		Stack<Tenant> tenant = currentTenant.get();
+		if(Objects.isNull(tenant) || tenant.isEmpty()) {
 			return getSystemTenant();
 		}
-		return tenant;
+		return tenant.peek();
 	}
 	
 	@Override
 	public void setCurrentTenant(Tenant tenant) {
-		currentTenant.set(tenant);
+		Stack<Tenant> tenants = currentTenant.get();
+		if(Objects.isNull(tenants)) {
+			currentTenant.set(new Stack<>());
+			tenants = currentTenant.get();
+		}
+		currentTenant.get().push(tenant);
 	}
 	
 	@Override
 	public void clearCurrentTenant() {
-		currentTenant.remove();
+		Stack<Tenant> tenants = currentTenant.get();
+		if(Objects.isNull(tenants) || tenants.isEmpty()) {
+			if(log.isWarnEnabled()) {
+				log.warn("Attempt to clear current tenant when no tenant is set");
+			}
+			return;
+		}
+		tenants.pop();
 	}
 
 	@Override
@@ -382,7 +408,18 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Override
 	public String saveOrUpdate(Tenant object) {
 		repository.saveTenant(object);
-		return object.getUuid();
+		
+		setCurrentTenant(object);
+		
+		try {
+			if(!tenantsByUUID.containsKey(object.getUuid())) {
+				templateService.registerTenantIndexes();
+				initialiseTenant(object, true);
+			}
+			return object.getUuid();
+		} finally {
+			clearCurrentTenant();
+		}
 	}
 
 	@Override

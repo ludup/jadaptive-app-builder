@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -242,7 +241,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 
 	@Override
 	public boolean isSystemOnly() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -268,15 +267,15 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
 		
-		if(log.isInfoEnabled()) {
-			log.info("Object dependencies");
-		}
-		for(Entry<String,List<String>> e : objectReverseDependencies.entrySet()) {
-			log.info(String.format(" %s", e.getKey()));
-			for(String t : e.getValue()) {
-				log.info(String.format(" - %s", t));
-			}
-		}
+//		if(log.isInfoEnabled()) {
+//			log.info("Object dependencies");
+//		}
+//		for(Entry<String,List<String>> e : objectReverseDependencies.entrySet()) {
+//			log.info(String.format(" %s", e.getKey()));
+//			for(String t : e.getValue()) {
+//				log.info(String.format(" - %s", t));
+//			}
+//		}
 		
 	}
 

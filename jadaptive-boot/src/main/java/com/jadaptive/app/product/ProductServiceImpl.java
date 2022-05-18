@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
+import com.jadaptive.api.product.Product;
 import com.jadaptive.api.product.ProductService;
 
 @Service
@@ -22,5 +23,17 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public String getCopyright() {
 		return String.format("&copy; 2008-%s Jadaptive Limited", Calendar.getInstance().get(Calendar.YEAR));
+	}
+	
+	@Override
+	public String getLogoResource() {
+		Product product = appService.getBean(Product.class);
+		return product.getLogoResource();
+	}
+	
+	@Override
+	public String getFaviconResource() {
+		Product product = appService.getBean(Product.class);
+		return product.getFaviconResource();
 	}
 }

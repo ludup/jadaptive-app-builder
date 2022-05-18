@@ -9,6 +9,10 @@ public abstract class SetupSection extends WizardSection {
 	public SetupSection(String bundle, String name, String resource) {
 		super(bundle, name, resource);
 	}
+	
+	public boolean isSystem() {
+		return false;
+	}
 
 	@Override
 	public void processReview(Document document, WizardState state) {

@@ -8,5 +8,7 @@ public interface Product extends ExtensionPoint {
 	
 	String getVersion();
 	
-	boolean supportsFeature(String feature);
+	String getLogoResource();
+	
+	String getFaviconResource();
 }

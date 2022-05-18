@@ -46,7 +46,7 @@ import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
-import com.jadaptive.app.tenant.TenantAwareObjectDatabaseImpl;
+import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 import com.jadaptive.utils.UUIDObjectUtils;
 
 import net.bytebuddy.ByteBuddy;
@@ -230,7 +230,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	private AbstractTenantAwareObjectDatabase<?> createTenantAwareService(Class<? extends UUIDDocument> clz) {
 		try {
-			Generic genericType = TypeDescription.Generic.Builder.parameterizedType(TenantAwareObjectDatabaseImpl.class, clz).build();
+			Generic genericType = TypeDescription.Generic.Builder.parameterizedType(AbstractTenantAwareObjectDatabaseImpl.class, clz).build();
 			Class<?> subclass = new ByteBuddy()
 					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
 					  .make()

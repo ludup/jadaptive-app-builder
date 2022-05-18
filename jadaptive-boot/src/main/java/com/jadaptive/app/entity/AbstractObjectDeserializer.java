@@ -133,8 +133,8 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 	private void validateNode(JsonNode node, FieldTemplate field,
 			AbstractObject e) throws IOException, ValidationException {
 		
-		if(log.isInfoEnabled()) {
-			log.info("Validating node {}", field.getResourceKey());
+		if(log.isDebugEnabled()) {
+			log.debug("Validating node {}", field.getResourceKey());
 		}
 
 		node = node.findPath(field.getResourceKey());

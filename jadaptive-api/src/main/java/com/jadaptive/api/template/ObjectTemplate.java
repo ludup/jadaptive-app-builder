@@ -14,7 +14,7 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 
-@ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, system = true)
 @UniqueIndex(columns = {"resourceKey"})
 public class ObjectTemplate extends NamedUUIDEntity {
 

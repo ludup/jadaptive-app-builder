@@ -9,12 +9,16 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticatedPage;
 
 public abstract class TemplatePage extends AuthenticatedPage {
 
 	@Autowired
 	protected TemplateService templateService;
+	
+	@Autowired
+	private TenantService tenantService; 
 	
 	protected String resourceKey;
 	
@@ -35,6 +39,10 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		try {
 			template = templateService.get(resourceKey);
 			templateClazz = templateService.getTemplateClass(resourceKey);
+			
+			if(!tenantService.getCurrentTenant().isSystem() && template.isSystem()) {
+				throw new FileNotFoundException(String.format("%s not found", resourceKey));
+			}
 		} catch (RepositoryException e) {
 			e.printStackTrace();
 			throw e;

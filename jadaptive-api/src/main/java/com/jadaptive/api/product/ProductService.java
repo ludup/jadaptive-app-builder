@@ -6,4 +6,8 @@ public interface ProductService {
 	
 	String getCopyright();
 
+	String getLogoResource();
+
+	String getFaviconResource();
+
 }

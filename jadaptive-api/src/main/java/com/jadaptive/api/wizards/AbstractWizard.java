@@ -17,6 +17,7 @@ import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.setup.WizardSection;
+import com.jadaptive.api.tenant.TenantService;
 
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
 
@@ -24,6 +25,9 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	
 	@Autowired
 	private ApplicationService applicationService; 
+	
+	@Autowired
+	private TenantService tenantService; 
 	
 	protected abstract Class<? extends WizardSection> getSectionClass();
 	
@@ -36,13 +40,20 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 		
 		
 		WizardState state = (WizardState) request.getSession().getAttribute(getStateAttribute());
+		boolean isSystem = tenantService.getCurrentTenant().isSystem();
 		
 		if(Objects.isNull(state)) {
 			state = new WizardState(this);
 			
 			List<WizardSection> sections = new ArrayList<>();
 			sections.addAll(getDefaultSections());
-			sections.addAll(applicationService.getBeans(getSectionClass()));
+			
+			for(WizardSection section : applicationService.getBeans(getSectionClass())) {
+				if(!isSystem && section.isSystem()) {
+					continue;
+				}
+				sections.add(section);
+			}
 						
 			state.init(getStartSection(),
 					getFinishSection(), 

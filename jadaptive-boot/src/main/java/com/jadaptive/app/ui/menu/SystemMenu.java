@@ -48,7 +48,7 @@ public class SystemMenu implements ApplicationMenu {
 	
 	@Override
 	public Integer weight() {
-		return 300;
+		return Integer.MAX_VALUE;
 	}
 
 }

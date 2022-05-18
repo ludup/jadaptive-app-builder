@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.Page;
@@ -29,6 +31,9 @@ public class Header extends AbstractPageExtension {
 	
 	@Autowired
 	private ApplicationMenuService menuService;
+	
+	@Autowired
+	private ProductService productService; 
 	
 	@Override
 	public void process(Document document, Element element, Page page) {
@@ -140,6 +145,17 @@ public class Header extends AbstractPageExtension {
 					}
 				}
 			}
+		}
+		
+		if(StringUtils.isNotBlank(productService.getLogoResource())) {
+			document.selectFirst("#logo").attr("src", productService.getLogoResource());
+		}
+		
+		if(StringUtils.isNotBlank(productService.getFaviconResource())) {
+			document.selectFirst("head")
+				.appendElement("link")
+					.attr("href", productService.getFaviconResource())
+					.attr("rel", "icon");
 		}
 
 	}

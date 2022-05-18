@@ -52,4 +52,6 @@ public abstract class WizardSection extends AbstractPageExtension {
 	public void processReview(Document document, WizardState state) {
 		
 	}
+
+	public abstract boolean isSystem();
 }
