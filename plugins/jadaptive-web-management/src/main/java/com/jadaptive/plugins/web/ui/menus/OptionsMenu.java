@@ -1,54 +1,46 @@
 package com.jadaptive.plugins.web.ui.menus;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.pf4j.Extension;
 
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
 @Extension
-public class TenantsMenu implements ApplicationMenu {
+public class OptionsMenu implements ApplicationMenu {
 
 	@Override
 	public String getResourceKey() {
-		return "tenant.names";
+		return "options.name";
 	}
 
 	@Override
 	public String getBundle() {
-		return "tenant";
+		return "userInterface";
 	}
 
 	@Override
 	public String getPath() {
-		return "/app/ui/search/tenant";
+		return "/app/ui/options";
 	}
 
 	@Override
 	public String getIcon() {
-		return "tent";
+		return "gears";
 	}
 
 	@Override
 	public String getParent() {
-		return ApplicationMenuService.SYSTEM_MENU_UUID;
+		return ApplicationMenuService.CONFIGURATION_MENU;
 	}
 
 	@Override
 	public String getUuid() {
-		return "9e936c73-ec12-4f66-8e07-6c0c0889b7d4";
+		return "3ef00f24-cfd1-4730-b357-0d5f79828bd2";
 	}
 
 	@Override
 	public Integer weight() {
-		return Integer.MAX_VALUE;
-	}
-	
-	@Override
-	public Collection<String> getPermissions() {
-		return Arrays.asList("tenant.read");
+		return 0;
 	}
 
 }

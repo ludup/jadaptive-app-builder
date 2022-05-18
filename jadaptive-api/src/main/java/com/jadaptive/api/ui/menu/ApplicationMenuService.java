@@ -10,6 +10,7 @@ public interface ApplicationMenuService {
 	String SYSTEM_MENU_UUID = "7dc19db3-0547-451f-8f7b-cf5c3e147c97";
 	String REPORTING_MENU_UUID = "21e4615c-82ac-4b85-abf7-81640df4645c";
 	String CUSTOMIZE_MENU_UUID = "7c76fc26-971c-4e9b-9077-d4e198b26d3c";
+	String CONFIGURATION_MENU = "7f9f9207-6774-4565-95b4-3375abd795b9";
 
 	
 	Collection<ApplicationMenu> getMenus();

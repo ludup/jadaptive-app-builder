@@ -2,12 +2,11 @@ package com.jadaptive.app.tenant;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
-import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 
-@ObjectDefinition(resourceKey = SessionConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
+@ObjectDefinition(resourceKey = SystemConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
 public class SystemConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = 9123803748701702401L;

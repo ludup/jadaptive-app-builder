@@ -4,16 +4,26 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.pf4j.Extension;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
 @Extension
 public class SystemMenu implements ApplicationMenu {
 
+	@Autowired
+	private TenantService tenantService;
+	
 	@Override
 	public String getUuid() {
 		return ApplicationMenuService.SYSTEM_MENU_UUID;
+	}
+	
+	@Override
+	public boolean isVisible() {
+		return tenantService.getCurrentTenant().isSystem();
 	}
 	
 	@Override

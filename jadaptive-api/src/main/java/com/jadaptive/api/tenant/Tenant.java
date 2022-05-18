@@ -19,7 +19,7 @@ import com.jadaptive.api.template.TableView;
 @ObjectDefinition(resourceKey = Tenant.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, system = true)
 @ObjectServiceBean(bean = TenantService.class)
 @ObjectViews({ 
-	@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = "domains")})
+	@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)})
 @TableView(defaultColumns = { "name", "hostname" })
 public class Tenant extends AbstractUUIDEntity implements NamedDocument {
 

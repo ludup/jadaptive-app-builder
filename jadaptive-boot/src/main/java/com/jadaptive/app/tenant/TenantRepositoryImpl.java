@@ -21,7 +21,6 @@ import com.jadaptive.app.db.DocumentDatabase;
 public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenant> implements TenantRepository {
 
 	private static Logger log = LoggerFactory.getLogger(TenantRepositoryImpl.class);
-	private static final String TENANT_DATABASE = "tenants";
 		
 	@Autowired
 	private CacheService cacheService;

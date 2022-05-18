@@ -27,6 +27,8 @@ import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.db.DocumentDatabase;
@@ -51,7 +53,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	
 	@Override
 	public Iterable<AbstractObject> list(ObjectTemplate def, SearchField... fields) throws RepositoryException, ObjectException {
-		return new ObjectIterable(def, db.list(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), fields));
+		return new ObjectIterable(def, db.list(def.getCollectionKey(), getDatabase(def), fields));
 	}
 	
 	@Override
@@ -59,7 +61,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		
 		List<AbstractObject> results = new ArrayList<>();
 		
-		for(Document document : db.list(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), SearchField.eq("ownerUUID", user.getUuid()))) {
+		for(Document document : db.list(def.getCollectionKey(), getDatabase(def), SearchField.eq("ownerUUID", user.getUuid()))) {
 			results.add(buildEntity(def, document));
 		}
 		
@@ -85,7 +87,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 			}
 		}
 		Document document = db.get(def.getCollectionKey(),
-				tenantService.getCurrentTenant().getUuid(), 
+				getDatabase(def), 
 				SearchField.or(search.toArray(new SearchField[0])));
 		if(Objects.isNull(document)) {
 			throw new ObjectNotFoundException(String.format("No document for resource %s with value %s", def.getResourceKey(), value));
@@ -95,12 +97,12 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 
 	@Override
 	public void deleteByUUID(ObjectTemplate def, String uuid) throws RepositoryException, ObjectException {
-		db.deleteByUUID(uuid, def.getCollectionKey(), tenantService.getCurrentTenant().getUuid());
+		db.deleteByUUID(uuid, def.getCollectionKey(), getDatabase(def));
 	}
 
 	@Override
 	public void deleteAll(ObjectTemplate def) throws RepositoryException, ObjectException {
-		db.dropCollection(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid());
+		db.dropCollection(def.getCollectionKey(), getDatabase(def));
 	}
 	
 	@Override
@@ -112,7 +114,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
 			}
 		}
-		db.delete(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), 
+		db.delete(def.getCollectionKey(), getDatabase(def), 
 				SearchField.or(search.toArray(new SearchField[0])));
 	}
 	
@@ -124,11 +126,9 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		validateReferences(template, entity);
 
 		Document document = new Document(entity.getDocument());
-		db.insertOrUpdate(document, template.getCollectionKey(), tenantService.getCurrentTenant().getUuid());
+		db.insertOrUpdate(document, template.getCollectionKey(), getDatabase(template));
 		return document.getString("_id");
 	}
-
-
 
 	private void validateReferences(ObjectTemplate template, AbstractObject entity) {
 		validateReferences(template.getFields(), entity);
@@ -143,11 +143,11 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 						@SuppressWarnings("unchecked")
 						Collection<String> values = (Collection<String>)entity.getValue(t);
 						for(String value : values) {
-							validateEntityExists(value, t.getValidationValue(ValidationType.OBJECT_TYPE));
+							validateEntityExists(value, templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
 						}
 					} else {
 						if(StringUtils.isNotBlank((String)entity.getValue(t))) {
-							validateEntityExists((String)entity.getValue(t), t.getValidationValue(ValidationType.OBJECT_TYPE));
+							validateEntityExists((String)entity.getValue(t), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
 						}
 					}
 					break;
@@ -163,8 +163,8 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		}
 	}
 	
-	private void validateEntityExists(String uuid, String resourceKey) {
-		db.getFirst(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
+	private void validateEntityExists(String uuid, ObjectTemplate def) {
+		db.getFirst(uuid, def.getCollectionKey(), getDatabase(def));
 	}
 
 	@Override
@@ -172,7 +172,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		List<AbstractObject> results = new ArrayList<>();
 		SortOrder order = templateService.getTableSortOrder(def);
 		String sortField = templateService.getTableSortField(def);
-		for(Document document : db.searchTable(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), offset, limit, order, sortField, fields)) {
+		for(Document document : db.searchTable(def.getCollectionKey(), getDatabase(def), offset, limit, order, sortField, fields)) {
 			results.add(buildEntity(def, document));
 		}
 		
@@ -181,12 +181,23 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	
 	@Override
 	public long count(ObjectTemplate def, SearchField... fields) {
-		return db.count(def.getCollectionKey(), tenantService.getCurrentTenant().getUuid(), fields);
+		return db.count(def.getCollectionKey(), getDatabase(def), fields);
 	}
 	
+	private String getDatabase(ObjectTemplate def) {
+		if(def.getResourceKey().equals(Tenant.RESOURCE_KEY)) {
+			return TenantRepository.TENANT_DATABASE;
+		}
+		if(def.isSystem()) {
+			return TenantService.SYSTEM_UUID;
+		} else {
+			return tenantService.getCurrentTenant().getUuid();
+		}
+	}
+
 	@Override
 	public long count(ObjectTemplate def, String searchField, String searchValue) {
-		return db.count(def.getCollectionKey(), searchField, searchValue, tenantService.getCurrentTenant().getUuid());
+		return db.count(def.getCollectionKey(), searchField, searchValue, getDatabase(def));
 	}
 
 	
