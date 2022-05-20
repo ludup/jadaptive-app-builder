@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
+import com.jadaptive.api.ui.menu.ApplicationMenuExtender;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
 @Service
@@ -22,7 +23,17 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
 		
 		List<ApplicationMenu> menus = new ArrayList<>();
 		for(ApplicationMenu menu :  applicationService.getBeans(ApplicationMenu.class)) {
-			if(menu.isVisible()) {
+			boolean extended = false;
+			for(ApplicationMenuExtender ext : applicationService.getBeans(ApplicationMenuExtender.class)) {
+				if(ext.isExtending(menu)) {
+					extended = true;
+					if(ext.isVisible(menu)) {
+						menus.add(menu);
+						break;
+					}
+				}
+			}
+			if(!extended && menu.isVisible()) {
 				menus.add(menu);
 			}
 		}

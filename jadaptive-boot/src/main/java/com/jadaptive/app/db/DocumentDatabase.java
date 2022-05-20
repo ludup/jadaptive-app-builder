@@ -53,6 +53,8 @@ public interface DocumentDatabase {
 
 	Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField);
 
+	void doInTransaction(Runnable r);
+
 	
 
 	

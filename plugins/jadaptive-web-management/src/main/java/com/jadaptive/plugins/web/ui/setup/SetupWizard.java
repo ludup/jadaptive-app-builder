@@ -12,6 +12,7 @@ import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -48,6 +49,9 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 		
 	@Autowired
 	private RoleService roleService; 
+	
+	@Autowired
+	private TransactionService transactionService;
 	
 	@Override
 	public String getResourceKey() {
@@ -105,10 +109,12 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	@Override
 	public void finish(WizardState state) {
 		
-		for(WizardSection section : state.getSections()) {
-			((SetupSection)section).finish(state);
-		}
-		
+		transactionService.executeTransaction(()-> {
+			for(WizardSection section : state.getSections()) {
+				((SetupSection)section).finish(state);
+			}
+		});
+
 		tenantService.completeSetup();
 	}
 	

@@ -182,4 +182,10 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return null;
 	}
 
+	@Override
+	public void doInTransaction(Runnable r) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

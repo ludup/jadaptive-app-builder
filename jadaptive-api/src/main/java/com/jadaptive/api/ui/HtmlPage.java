@@ -33,7 +33,6 @@ public abstract class HtmlPage implements Page {
 	private ApplicationService applicationService; 
 	
 	private Collection<HtmlPageExtender> extenders = null;
-	
 	protected String resourcePath;
 	
 	public String getResourcePath() {
@@ -62,8 +61,10 @@ public abstract class HtmlPage implements Page {
 		
 		Document document = resolveDocument(this);
 		
-		for(HtmlPageExtender extender : extenders) {
-			extender.processStart(document, this);
+		if(Objects.nonNull(extenders)) {
+			for(HtmlPageExtender extender : extenders) {
+				extender.processStart(document, this);
+			}
 		}
 		
 		generateContent(document);
@@ -71,8 +72,10 @@ public abstract class HtmlPage implements Page {
 		processPageExtensions(uri, document);
 		documentComplete(document);
 		
-		for(HtmlPageExtender extender : extenders) {
-			extender.processEnd(document, this);
+		if(Objects.nonNull(extenders)) {
+			for(HtmlPageExtender extender : extenders) {
+				extender.processEnd(document, this);
+			}
 		}
 		ResponseHelper.sendContent(document.toString(), "text/html; charset=UTF-8;", request, response);
 	}
@@ -117,8 +120,10 @@ public abstract class HtmlPage implements Page {
 
 			Document doc = resolveDocument(this);
 			
-			for(HtmlPageExtender extender : extenders) {
-				extender.processStart(doc, this);
+			if(Objects.nonNull(extenders)) {
+				for(HtmlPageExtender extender : extenders) {
+					extender.processStart(doc, this);
+				}
 			}
 			
 			if(this instanceof FormProcessor) {
@@ -165,8 +170,10 @@ public abstract class HtmlPage implements Page {
 			injectFeedback(doc, request);
 			processPageExtensions(uri, doc);
 			
-			for(HtmlPageExtender extender : extenders) {
-				extender.processEnd(doc, this);
+			if(Objects.nonNull(extenders)) {
+				for(HtmlPageExtender extender : extenders) {
+					extender.processEnd(doc, this);
+				}
 			}
 			
 			ResponseHelper.sendContent(doc.toString(), "text/html; charset=UTF-8;", request, response);

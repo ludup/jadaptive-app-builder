@@ -1,5 +1,8 @@
 package com.jadaptive.app.db;
 
+import static com.mongodb.client.model.Sorts.ascending;
+import static com.mongodb.client.model.Sorts.descending;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +25,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -30,9 +34,6 @@ import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.result.DeleteResult;
-
-import static com.mongodb.client.model.Sorts.ascending;
-import static com.mongodb.client.model.Sorts.descending;
 
 @Repository
 public class DocumentDatabaseImpl implements DocumentDatabase {
@@ -60,6 +61,22 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			default:
 				db.drop();
 			}
+		}
+	}
+	
+	@Override
+	public void doInTransaction(Runnable r) {
+		
+		ClientSession session = mongo.getClient().startSession();
+		session.startTransaction();
+		try {
+			r.run();
+			session.commitTransaction();
+		} catch(Throwable t) {
+			session.abortTransaction();
+			throw new IllegalStateException("Transaction failed with " + t.getMessage());
+		} finally {
+			session.close();
 		}
 	}
 	

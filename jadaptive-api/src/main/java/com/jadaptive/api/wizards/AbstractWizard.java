@@ -20,8 +20,6 @@ import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.tenant.TenantService;
 
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
-
-	public static final String EXISTING_UUID = "existingUUID";
 	
 	@Autowired
 	private ApplicationService applicationService; 

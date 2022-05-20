@@ -271,9 +271,6 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public void clearCurrentTenant() {
 		Stack<Tenant> tenants = currentTenant.get();
 		if(Objects.isNull(tenants) || tenants.isEmpty()) {
-			if(log.isWarnEnabled()) {
-				log.warn("Attempt to clear current tenant when no tenant is set");
-			}
 			return;
 		}
 		tenants.pop();
