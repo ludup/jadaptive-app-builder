@@ -1,5 +1,6 @@
 package com.jadaptive.app;
 
+import java.io.FileFilter;
 import java.nio.file.Paths;
 
 import javax.annotation.PreDestroy;
@@ -13,6 +14,8 @@ import org.pf4j.ExtensionFinder;
 import org.pf4j.JarPluginRepository;
 import org.pf4j.PluginRepository;
 import org.pf4j.spring.SpringPluginManager;
+import org.pf4j.util.NameFileFilter;
+import org.pf4j.util.OrFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +30,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.jadaptive.app.json.upload.UploadServlet;
 import com.jadaptive.app.scheduler.LockableTaskScheduler;
-import com.jadaptive.utils.Utils;
 
 @Configuration
 @ComponentScan({"com.jadaptive.app.**", "com.jadaptive.api.**"})
@@ -46,7 +48,7 @@ public class ApplicationConfig {
     @Bean
     public SpringPluginManager pluginManager() {
         pluginManager = new SpringPluginManager() {
-        	
+
 			@Override
 			protected ExtensionFinder createExtensionFinder() {
 				return new ScanningExtensionFinder(this);
@@ -62,17 +64,35 @@ public class ApplicationConfig {
         		
                CompoundPluginRepository pluginRepository = new CompoundPluginRepository();
                
-               pluginRepository.add(new DevelopmentPluginRepository(getPluginsRoot()), this::isDevelopment);
+               pluginRepository.add(new DevelopmentPluginRepository(getPluginsRoot()) {
+            	   protected FileFilter createHiddenPluginFilter() {
+            	        OrFileFilter hiddenPluginFilter = (OrFileFilter) super.createHiddenPluginFilter();
+
+            	        for(String id : System.getProperty("disabled.plugins", "").split(",")) {
+            	        	hiddenPluginFilter.addFileFilter(new NameFileFilter(id));
+            	        }
+            	        
+            	        return hiddenPluginFilter;
+            	    }
+               }, this::isDevelopment);
                
                String[] additionalDevelopmentPaths = System.getProperty(
             		   "jadaptive.developmentPluginDirs", 
-            		   Utils.csv("../../jadaptive-vsftp",
-            				    "../../jadaptive-updates",
-            				    "../../jadaptive-ssh-proxy",
-            				    "../../jadaptive-key-server")).split(",");
+            		   "").split(",");
+               
                for(String path : additionalDevelopmentPaths) {
             	   if(StringUtils.isNotBlank(path)) {
-            		   pluginRepository.add(new DevelopmentPluginRepository(Paths.get(path)), this::isDevelopment);
+            		   pluginRepository.add(new DevelopmentPluginRepository(Paths.get(path)) {
+                    	   protected FileFilter createHiddenPluginFilter() {
+                   	        OrFileFilter hiddenPluginFilter = (OrFileFilter) super.createHiddenPluginFilter();
+
+                   	        for(String id : System.getProperty("disabled.plugins", "").split(",")) {
+                   	        	hiddenPluginFilter.addFileFilter(new NameFileFilter(id));
+                   	        }
+                   	        
+                   	        return hiddenPluginFilter;
+                   	    }
+                      }, this::isDevelopment);
             	   }
                }
                pluginRepository.add(new JarPluginRepository(getPluginsRoot()), this::isNotDevelopment);
