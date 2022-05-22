@@ -6,6 +6,7 @@ import static com.mongodb.client.model.Sorts.descending;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -25,6 +26,8 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
+import com.mongodb.TransactionOptions;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -42,6 +45,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	
 	@Autowired
 	protected MongoDatabaseService mongo;
+	
+	ThreadLocal<ClientSession> currentSession = new ThreadLocal<>();
 	
 	private MongoCollection<Document> getCollection(String table, String database) {
 		MongoDatabase db = mongo.getClient().getDatabase(database);
@@ -67,16 +72,29 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Override
 	public void doInTransaction(Runnable r) {
 		
-		ClientSession session = mongo.getClient().startSession();
-		session.startTransaction();
+		currentSession.set(mongo.getClient().startSession());
+		if(log.isDebugEnabled()) {
+			log.debug("Starting transaction");
+		}
+		currentSession.get().startTransaction();
 		try {
 			r.run();
-			session.commitTransaction();
+			if(log.isDebugEnabled()) {
+				log.debug("Committing transaction");
+			}
+			currentSession.get().commitTransaction();
 		} catch(Throwable t) {
-			session.abortTransaction();
+			if(log.isDebugEnabled()) {
+				log.debug("Aborting transaction");
+			}
+			currentSession.get().abortTransaction();
 			throw new IllegalStateException("Transaction failed with " + t.getMessage());
 		} finally {
-			session.close();
+			if(log.isDebugEnabled()) {
+				log.debug("Closing session");
+			}
+			currentSession.get().close();
+			currentSession.remove();
 		}
 	}
 	
@@ -84,14 +102,26 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void createTextIndex(String fieldName, String table, String database) {
 		String indexName = "text_" + fieldName;
 		MongoCollection<Document> collection = getCollection(table, database);
-		collection.createIndex(Indexes.text(fieldName), new IndexOptions().name(indexName));
+		
+		ClientSession session = currentSession.get();
+		if(Objects.nonNull(session)) {
+			collection.createIndex(session, Indexes.text(fieldName), new IndexOptions().name(indexName));
+		} else {
+			collection.createIndex(Indexes.text(fieldName), new IndexOptions().name(indexName));		
+		}
 	}
 	
 	@Override
 	public void createIndex(String table, String database, String... fieldNames) {
 		String indexName = "index_" + StringUtils.join(fieldNames, "_");
 		MongoCollection<Document> collection = getCollection(table, database);
-		collection.createIndex(Indexes.ascending(fieldNames), new IndexOptions().name(indexName));
+		
+		ClientSession session = currentSession.get();
+		if(Objects.nonNull(session)) {
+			collection.createIndex(session, Indexes.ascending(fieldNames), new IndexOptions().name(indexName));
+		} else {
+			collection.createIndex(Indexes.ascending(fieldNames), new IndexOptions().name(indexName));		
+		}
 	}
 	
 	@Override
@@ -99,7 +129,13 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		String indexName = "unique_" + StringUtils.join(fieldNames, "_");
 		MongoCollection<Document> collection = getCollection(table, database);
 		IndexOptions indexOptions = new IndexOptions().unique(true).name(indexName);
-		collection.createIndex(Indexes.ascending(fieldNames), indexOptions);
+		
+		ClientSession session = currentSession.get();
+		if(Objects.nonNull(session)) {
+			collection.createIndex(session, Indexes.ascending(fieldNames), indexOptions);
+		} else {
+			collection.createIndex(Indexes.ascending(fieldNames), indexOptions);
+		}
 	}
 	
 	@Override
@@ -119,7 +155,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			
 //			String contentHash = DocumentHelper.generateContentHash(document);
 //			document.put("contentHash", contentHash);
-			collection.insertOne(document);		
+			ClientSession session = currentSession.get();
+			if(Objects.nonNull(session)) {
+				collection.insertOne(session, document);	
+			} else {
+				collection.insertOne(document);		
+			}
 			
 			// Created Event
 		} else {
@@ -144,9 +185,16 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 //			if(log.isDebugEnabled()) {
 //				log.debug("Saving {} object with content hash {}", table, contentHash);
 //			}
+			ClientSession session = currentSession.get();
+			if(Objects.nonNull(session)) {
+				collection.replaceOne(session, Filters.eq("_id", document.getString("_id")), 
+						document, new ReplaceOptions().upsert(true));
+			} else {
+				collection.replaceOne(Filters.eq("_id", document.getString("_id")), 
+						document, new ReplaceOptions().upsert(true));
+			}
 			
-			collection.replaceOne(Filters.eq("_id", document.getString("_id")), 
-					document, new ReplaceOptions().upsert(true));
+			
 			
 			// Updated Event
 		}
@@ -235,14 +283,28 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		getByUUID(uuid, table, database);
 		MongoCollection<Document> collection = getCollection(table, database);
-		collection.deleteOne(Filters.eq("_id", uuid));
+		
+		ClientSession session = currentSession.get();
+		if(Objects.nonNull(session)) {
+			collection.deleteOne(session, Filters.eq("_id", uuid));
+		} else {
+			collection.deleteOne(Filters.eq("_id", uuid));
+		}
 	}
 	
 	@Override
 	public void delete(String table, String database, SearchField... fields) {
 
 		MongoCollection<Document> collection = getCollection(table, database);
-		DeleteResult result = collection.deleteMany(buildFilter(fields));
+		DeleteResult result;
+		
+		ClientSession session = currentSession.get();
+		if(Objects.nonNull(session)) {
+			result = collection.deleteMany(session, buildFilter(fields));
+		} else {
+			result = collection.deleteMany(buildFilter(fields));
+		}
+		
 		if(result.getDeletedCount() == 0) {
 			throw new ObjectException("Object not deleted!");
 		}
@@ -356,7 +418,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void dropCollection(String table, String database) {
-		getCollection(table, database).drop();
+		ClientSession session = currentSession.get();
+		if(Objects.nonNull(session)) {
+			getCollection(table, database).drop(session);
+		} else {
+			getCollection(table, database).drop();
+		}
 	}
 
 	@Override
@@ -371,7 +438,13 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void dropDatabase(String database) {
-		mongo.getClient().getDatabase(database).drop();
+		ClientSession session = currentSession.get();
+		if(Objects.nonNull(session)) {
+			mongo.getClient().getDatabase(database).drop(session);
+		} else {
+			mongo.getClient().getDatabase(database).drop();
+		}
+		
 	}
 	
 	
