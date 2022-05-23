@@ -67,6 +67,7 @@ public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenan
 		if(log.isInfoEnabled()) {
 			log.info("Creating new application schema");
 		}
+		
 	}
 
 	@Override

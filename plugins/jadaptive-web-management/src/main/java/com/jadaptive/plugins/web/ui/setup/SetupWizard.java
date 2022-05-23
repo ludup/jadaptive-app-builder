@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
@@ -16,7 +15,6 @@ import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.template.ValidationException;
@@ -24,7 +22,6 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.user.AdminUserDatabase;
-import com.jadaptive.api.user.User;
 import com.jadaptive.api.wizards.AbstractWizard;
 import com.jadaptive.api.wizards.WizardState;
 import com.jadaptive.plugins.web.objects.CreateAccount;
@@ -46,9 +43,6 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	
 	@Autowired
 	private AdminUserDatabase adminDatabase; 
-		
-	@Autowired
-	private RoleService roleService; 
 	
 	@Autowired
 	private TransactionService transactionService;
@@ -120,8 +114,6 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	
 	class AdminSection extends SetupSection {
 
-		private static final String ADMIN_UUID = "adminUUID";
-
 		public AdminSection() {
 			super("setup",
 					"adminCredentials", 
@@ -148,18 +140,10 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 					state.getObject(getClass()), 
 					CreateAccount.class);
 			
-			String uuid = (String) state.getParameter(ADMIN_UUID);
-			if(StringUtils.isNotBlank(uuid)) {
-				User u = (User) adminDatabase.getObjectByUUID(uuid);
-				roleService.unassignRole(roleService.getAdministrationRole(), u);
-				u.setSystem(false);
-				adminDatabase.saveOrUpdate(u);
-				adminDatabase.deleteObject(u);
-			}
-			User user = adminDatabase.createAdmin(account.getUsername(), 
+			adminDatabase.createAdmin(account.getUsername(), 
 					account.getFirstPassword().toCharArray(), 
 					account.getEmail(), false);
-			state.setParameter(ADMIN_UUID,user.getUuid());
+
 		}
 		
 		@Override

@@ -39,19 +39,6 @@
 			<artifactId>de.flapdoodle.embed.mongo</artifactId>
 		</dependency>
 
-		<!-- while this provides a spring factory bean for the embedded mongodb -->
-		<!-- <dependency> -->
-		<!-- <groupId>cz.jirutka.spring</groupId> -->
-		<!-- <artifactId>embedmongo-spring</artifactId> -->
-		<!-- <version>RELEASE</version> -->
-		<!-- </dependency> -->
-
-		<!-- finally this one is the spring-boot starter for mongodb -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.springframework.boot</groupId> -->
-		<!-- <artifactId>spring-boot-starter-data-mongodb</artifactId> -->
-		<!-- </dependency> -->
-
 		<dependency>
 			<groupId>io.github.classgraph</groupId>
 			<artifactId>classgraph</artifactId>
@@ -208,7 +195,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.2.2.RELEASE</version>
+				<version>2.7.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -250,7 +237,7 @@
 				<!-- Import dependency management from Spring Boot -->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>2.6.6</version>
+				<version>2.7.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

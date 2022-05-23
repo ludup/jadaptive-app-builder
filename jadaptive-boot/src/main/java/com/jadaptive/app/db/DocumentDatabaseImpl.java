@@ -26,8 +26,6 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
-import com.mongodb.TransactionOptions;
-import com.mongodb.WriteConcern;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -88,7 +86,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				log.debug("Aborting transaction");
 			}
 			currentSession.get().abortTransaction();
-			throw new IllegalStateException("Transaction failed with " + t.getMessage());
+			throw new IllegalStateException("Transaction failed with " + t.getMessage(), t);
 		} finally {
 			if(log.isDebugEnabled()) {
 				log.debug("Closing session");

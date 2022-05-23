@@ -1,6 +1,7 @@
 package com.jadaptive.api.wizards;
 
 import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.ui.Page;
@@ -125,11 +127,19 @@ public class WizardState {
 	}
 
 	public void insertNextPage(WizardSection setupSection) {
-		pages.add(getCurrentStep(), setupSection);
+		try {
+			ApplicationServiceImpl.getInstance().autowire(setupSection);
+			pages.add(getCurrentStep(), setupSection);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		}
+		
 	}
 	
 	public void removePage(Class<? extends WizardSection> clz) {
-		pages.remove(pageIndex(clz));
+		int idx = pageIndex(clz);
+		if(idx > -1) {
+			pages.remove(idx);
+		}
 	}
 
 	public boolean containsPage(Class<? extends WizardSection> clz) {

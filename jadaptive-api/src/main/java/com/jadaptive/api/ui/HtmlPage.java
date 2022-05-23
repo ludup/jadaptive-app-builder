@@ -47,6 +47,10 @@ public abstract class HtmlPage implements Page {
 		
 	}
 	
+	protected void afterProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
+		
+	}
+	
 	public final void created() throws FileNotFoundException {
 		
 		extenders = applicationService.getBean(UserInterfaceService.class).getExtenders(this);
@@ -77,6 +81,8 @@ public abstract class HtmlPage implements Page {
 				extender.processEnd(document, this);
 			}
 		}
+		
+		afterProcess(uri, request, response);
 		ResponseHelper.sendContent(document.toString(), "text/html; charset=UTF-8;", request, response);
 	}
 

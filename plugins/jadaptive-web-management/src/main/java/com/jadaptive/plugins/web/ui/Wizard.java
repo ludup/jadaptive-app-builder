@@ -43,14 +43,24 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	String resourceKey;
 	WizardState state;
 	
+	static ThreadLocal<WizardState> currentState = new ThreadLocal<>();
+	
 	public WizardState getState() {
 		return state;
 	}
 	
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
 		state = wizardService.getWizard(resourceKey).getState(request);
+		currentState.set(state);
+	}
+	
+	protected void afterProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
+		currentState.remove();
 	}
 
+	public static WizardState getCurrentState() {
+		return currentState.get();
+	}
 
 	protected Class<?> getResourceClass() {
 		return Wizard.class;

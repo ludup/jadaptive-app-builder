@@ -29,6 +29,7 @@ public abstract class FormInputRender extends FieldInputRender {
 						.attr("name", field.getFormVariable())
 						.addClass("form-control")
 						.attr("value", value)
+						.attr("autocomplete", "off")
 						.attr("type", getInputType()))
 				.appendChild(new Element("small")
 						.addClass("form-text")

@@ -68,7 +68,7 @@ public class Application {
 		 PropertyConfigurator.configure("conf/app-logging.properties");
 		 
 		 System.setProperty("spring.main.allow-circular-references", "true");
-		 System.setProperty("spring.mongodb.embedded.version", "3.5.5");
+		 System.setProperty("spring.mongodb.embedded.version", "4.4.13");
 		 
 		 File pluginsFolder = new File("plugins");
 
