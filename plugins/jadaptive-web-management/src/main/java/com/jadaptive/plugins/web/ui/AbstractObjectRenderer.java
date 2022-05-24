@@ -167,9 +167,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				switch(field.getFieldType()) {
 				case OBJECT_EMBEDDED:
 					AbstractObject child = object.getChild(field);
-					children.put(field.getResourceKey(), child);
-					ObjectTemplate childTemplate = templateService.get(templateService.getTemplateResourceKey((String)child.getValue("_clz")));
-					extractChildObjects(child, children, childTemplate);
+					if(Objects.nonNull(child)) {
+						children.put(field.getResourceKey(), child);
+						ObjectTemplate childTemplate = templateService.get((String)child.getValue("resourceKey"));
+						extractChildObjects(child, children, childTemplate);
+					}
 					break;
 				case OBJECT_REFERENCE:
 					// Do we need this?
