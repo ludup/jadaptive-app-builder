@@ -1,14 +1,10 @@
 package com.jadaptive.plugins.web.ui.setup;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,13 +17,14 @@ import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
+import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.wizards.AbstractWizard;
 import com.jadaptive.api.wizards.WizardState;
 
 @Extension
-public class SetupWizard extends AbstractWizard implements FormHandler {
+public class TenantWizard extends AbstractWizard implements FormHandler {
 
-	public static final String RESOURCE_KEY = "setup";
+	public static final String RESOURCE_KEY = "createTenant";
 
 	private static final String STATE_ATTR = "setupState";
 
@@ -38,10 +35,13 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	private TenantService tenantService; 
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private AdminUserDatabase adminDatabase; 
 	
 	@Autowired
 	private TransactionService transactionService;
+	
+	@Autowired
+	private ApplicationService applicationService; 
 	
 	@Override
 	public String getResourceKey() {
@@ -67,50 +67,29 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	protected Collection<? extends WizardSection> getDefaultSections() {
 		List<SetupSection> sections = new ArrayList<>();
 
-		
-		sections.add(new SetupSection("setup", "eula", "/com/jadaptive/plugins/web/ui/setup/EULA.html") {
-				@Override
-				public void process(Document document, Element element, Page page) throws IOException {
-					document.selectFirst("textarea")
-						.attr("readonly", "readonly")
-						.text(IOUtils.toString(getClass().getResource("EULA.txt"), "UTF-8"));
-					super.process(document, element, page);
-				}
-		});
-		
-		
-		sections.add(applicationService.autowire(new AdminSection()));
+		sections.add(applicationService.autowire(new CreateTenantSection()));
 		return sections;
 	}
 
 	@Override
 	protected WizardSection getStartSection() {
-		return new DefaultSetupSection("setup", "startSetup", "/com/jadaptive/plugins/web/ui/setup/StartSetup.html");
+		return new DefaultSetupSection("setup", "startTenant", "/com/jadaptive/plugins/web/ui/setup/StartTenant.html");
 	}
 
 	@Override
 	protected WizardSection getFinishSection() {
-		return new DefaultSetupSection("setup", "finishSetup", "/com/jadaptive/plugins/web/ui/setup/FinishSetup.html");
+		return new DefaultSetupSection("setup", "finishTenant", "/com/jadaptive/plugins/web/ui/setup/FinishTenant.html");
 	}
 	
 	@Override
 	protected void assertPermissions(WizardState state) throws AccessDeniedException {
 		
-		if(!state.isFinished() && !tenantService.isSetupMode()) {
-			throw new AccessDeniedException("Setup wizard can only be run in setup mode!");
-		}
 	}
 	
 	@Override
 	public void finish(WizardState state) {
 		
-		transactionService.executeTransaction(()-> {
-			for(WizardSection section : state.getSections()) {
-				((SetupSection)section).finish(state);
-			}
-		});
 
-		tenantService.completeSetup();
 	}
 	
 }

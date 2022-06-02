@@ -1,7 +1,6 @@
 package com.jadaptive.api.wizards;
 
 import java.io.FileNotFoundException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -127,11 +126,9 @@ public class WizardState {
 	}
 
 	public void insertNextPage(WizardSection setupSection) {
-		try {
-			ApplicationServiceImpl.getInstance().autowire(setupSection);
-			pages.add(getCurrentStep(), setupSection);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-		}
+
+		ApplicationServiceImpl.getInstance().autowire(setupSection);
+		pages.add(getCurrentStep(), setupSection);
 		
 	}
 	

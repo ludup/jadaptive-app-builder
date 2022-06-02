@@ -112,25 +112,30 @@ public class ApplicationServiceImpl implements ApplicationService {
 	}
 	
 	@Override
-	public <T> T autowire(T obj) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public <T> T autowire(T obj) {
 		
-		if(obj.getClass().getClassLoader() instanceof PluginClassLoader) {
-			PluginClassLoader classLoader = (PluginClassLoader) obj.getClass().getClassLoader();
-			for(PluginWrapper w : pluginManager.getPlugins()) {
-				if(w.getPluginClassLoader().equals(classLoader)) {
-					if(w.getPlugin() instanceof SpringPlugin) {
-						SpringPlugin plugin = (SpringPlugin) w.getPlugin();
-						plugin.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(obj);
-						ReflectionUtils.executeAnnotatedMethods(obj, PostConstruct.class);
-						return obj;
+		try {
+			if(obj.getClass().getClassLoader() instanceof PluginClassLoader) {
+				PluginClassLoader classLoader = (PluginClassLoader) obj.getClass().getClassLoader();
+				for(PluginWrapper w : pluginManager.getPlugins()) {
+					if(w.getPluginClassLoader().equals(classLoader)) {
+						if(w.getPlugin() instanceof SpringPlugin) {
+							SpringPlugin plugin = (SpringPlugin) w.getPlugin();
+							plugin.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(obj);
+							ReflectionUtils.executeAnnotatedMethods(obj, PostConstruct.class);
+							return obj;
+						}
 					}
 				}
 			}
-		}
+			
+			context.getAutowireCapableBeanFactory().autowireBean(obj);
+			ReflectionUtils.executeAnnotatedMethods(obj, PostConstruct.class);
+			return obj;
 		
-		context.getAutowireCapableBeanFactory().autowireBean(obj);
-		ReflectionUtils.executeAnnotatedMethods(obj, PostConstruct.class);
-		return obj;
+		} catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 	
 	@Override

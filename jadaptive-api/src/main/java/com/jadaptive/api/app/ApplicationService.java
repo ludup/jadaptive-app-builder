@@ -1,6 +1,5 @@
 package com.jadaptive.api.app;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 public interface ApplicationService {
@@ -13,6 +12,5 @@ public interface ApplicationService {
 
 	Class<?> resolveClass(String type) throws ClassNotFoundException;
 
-	<T> T autowire(T obj) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException;
-
+	<T> T autowire(T obj);
 }

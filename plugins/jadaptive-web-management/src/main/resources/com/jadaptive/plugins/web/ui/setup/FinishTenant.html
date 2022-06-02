@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<body>
+<div id="feedback" class="col-12"></div>
+<div id="content" class="col-12">
+
+</div>
+<script type="text/javascript">
+
+ $(function() {
+	 Wizard.initStep('setup', function(success, failure) {
+		 success();
+	 });
+	 
+	 $('#finishButton').click(function(e) {
+		 Wizard.finish();
+	 });
+ });
+</script>
+</body>
+</html>
