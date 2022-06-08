@@ -161,7 +161,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	public AbstractObject getObject() {
 		try {
 			WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
-			UUIDEntity obj = state.getCurrentObject();
+			UUIDEntity obj = state.getObject(state.getCurrentPage().getClass());
 			if(Objects.isNull(obj)) {
 				return null;
 			}

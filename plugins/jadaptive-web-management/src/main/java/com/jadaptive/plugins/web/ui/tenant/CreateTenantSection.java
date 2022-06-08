@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.web.ui.setup;
+package com.jadaptive.plugins.web.ui.tenant;
 
 import java.io.IOException;
 
@@ -13,7 +13,7 @@ public class CreateTenantSection extends SetupSection {
 	public CreateTenantSection() {
 		super("setup",
 		"tenantCreation", 
-		"/com/jadaptive/plugins/web/ui/setup/TenantCreation.html");
+		"/com/jadaptive/plugins/web/ui/tenant/CreateTenant.html");
 	}
 
 	@Override

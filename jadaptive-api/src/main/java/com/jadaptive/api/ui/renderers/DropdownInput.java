@@ -114,7 +114,7 @@ public class DropdownInput extends InputRender {
 		
 		for(I18nOption value : values) {
 			addInputValue(value);
-			if(defaultValue.equals(value.getValue())) {
+			if(Objects.nonNull(defaultValue) && defaultValue.equals(value.getValue())) {
 				nameElement.attr("jad:bundle", value.getBundle());
 				nameElement.attr("jad:i18n", value.getI18n());
 				valueElement.val(value.getValue());

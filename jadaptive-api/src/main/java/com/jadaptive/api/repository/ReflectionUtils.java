@@ -197,6 +197,4 @@ public class ReflectionUtils {
 		} while(parent!=null);
 		
 	}
-
-	
 }

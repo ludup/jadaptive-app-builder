@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.web.ui.setup;
+package com.jadaptive.plugins.web.ui.tenant;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -9,15 +9,12 @@ import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.setup.WizardSection;
-import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
-import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.wizards.AbstractWizard;
 import com.jadaptive.api.wizards.WizardState;
 
@@ -31,14 +28,14 @@ public class TenantWizard extends AbstractWizard implements FormHandler {
 	@Autowired
 	private PageCache pageCache;
 	
-	@Autowired
-	private TenantService tenantService; 
-	
-	@Autowired
-	private AdminUserDatabase adminDatabase; 
-	
-	@Autowired
-	private TransactionService transactionService;
+//	@Autowired
+//	private TenantService tenantService; 
+//	
+//	@Autowired
+//	private AdminUserDatabase adminDatabase; 
+//	
+//	@Autowired
+//	private TransactionService transactionService;
 	
 	@Autowired
 	private ApplicationService applicationService; 
@@ -50,7 +47,7 @@ public class TenantWizard extends AbstractWizard implements FormHandler {
 
 	@Override
 	public Page getCompletePage() throws FileNotFoundException {
-		return pageCache.resolvePage(SetupComplete.class);
+		return pageCache.resolvePage(TenantComplete.class);
 	}
 
 	@Override
@@ -73,12 +70,12 @@ public class TenantWizard extends AbstractWizard implements FormHandler {
 
 	@Override
 	protected WizardSection getStartSection() {
-		return new DefaultSetupSection("setup", "startTenant", "/com/jadaptive/plugins/web/ui/setup/StartTenant.html");
+		return new DefaultTenantSection("setup", "startTenant", "/com/jadaptive/plugins/web/ui/tenant/StartTenant.html");
 	}
 
 	@Override
 	protected WizardSection getFinishSection() {
-		return new DefaultSetupSection("setup", "finishTenant", "/com/jadaptive/plugins/web/ui/setup/FinishTenant.html");
+		return new DefaultTenantSection("setup", "finishTenant", "/com/jadaptive/plugins/web/ui/tenant/FinishTenant.html");
 	}
 	
 	@Override

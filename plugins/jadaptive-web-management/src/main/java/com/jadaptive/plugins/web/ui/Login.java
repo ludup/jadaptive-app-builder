@@ -59,6 +59,7 @@ public class Login extends AuthenticationPage<LoginForm> {
 		try {
 			state.setAttemptedUsername(form.getUsername());
 			User user = userService.getUser(form.getUsername());
+
 			state.setUser(user);
 			
 			authenticationService.processRequiredAuthentication(state, policyService.getAssignedPolicy(user));

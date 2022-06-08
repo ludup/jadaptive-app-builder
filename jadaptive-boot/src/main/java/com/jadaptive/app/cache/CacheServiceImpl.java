@@ -15,7 +15,7 @@ public class CacheServiceImpl implements CacheService {
 	Map<String,Map<?,?>> caches = new HashMap<>();
 	
 	public <K,V> Map<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value){
-		return cache(name, key, value, Long.MAX_VALUE);
+		return cache(name, key, value, 60000 * 60 * 24); // One day
 	}
 	
 	public <K,V> Map<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value,long expiryTime){
@@ -88,7 +88,8 @@ public class CacheServiceImpl implements CacheService {
 		private void purgeEntries() {
 	        long currentTime = new Date().getTime();
 	        for (K key : entryTime.keySet()) {
-	            if (currentTime > (entryTime.get(key) + expiryInMillis)) {
+	        	long expiry = (entryTime.get(key) + expiryInMillis);
+	            if (currentTime > expiry) {
 	                remove(key);
 	                entryTime.remove(key);
 	            }

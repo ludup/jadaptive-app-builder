@@ -23,6 +23,8 @@ public class WizardState {
 
 	Map<Class<?>,UUIDEntity> stateObjects = new HashMap<>(); 
 	Map<String,Object> stateParameters = new HashMap<>();
+	UUIDEntity completedObject;
+	
 	private boolean finished;;
 	
 	public WizardState(WizardFlow flow) {
@@ -172,5 +174,13 @@ public class WizardState {
 
 	public void setFinished(boolean finished) {
 		this.finished = finished;
+	}
+
+	public void setCompletedObject(UUIDEntity completedObject) {
+		this.completedObject = completedObject;
+	}
+	
+	public UUIDEntity getCompletedObject() {
+		return completedObject;
 	}
 }
