@@ -54,4 +54,6 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	boolean isReady();
 
+	void executeAs(Tenant tenant, Runnable r);
+
 }

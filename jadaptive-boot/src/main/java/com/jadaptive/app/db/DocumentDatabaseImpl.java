@@ -4,6 +4,7 @@ import static com.mongodb.client.model.Sorts.ascending;
 import static com.mongodb.client.model.Sorts.descending;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -26,10 +27,13 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Accumulators;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
@@ -53,7 +57,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void dropSchema() {
-		
+
 		for(String database : mongo.getClient().listDatabaseNames()) {
 			MongoDatabase db = mongo.getClient().getDatabase(database);
 			switch(db.getName()) {
@@ -263,6 +267,35 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			throw new ObjectNotFoundException(String.format("No entity %s was not found", table));
 		}
 		return result.first();
+	}
+	
+	@Override
+	public Long sum(String table, String database, String groupBy, SearchField... fields) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		AggregateIterable<Document> results;
+		
+		if(fields.length > 0) {
+			results = collection.aggregate(
+			    Arrays.asList(
+			        Aggregates.match(buildFilter(fields)),
+			        Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+			    )
+			);
+		} else {
+			results = collection.aggregate(
+				    Arrays.asList(
+				    	Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+				    )
+				);
+		}
+		
+		if(!results.cursor().hasNext()) {
+			throw new ObjectNotFoundException(String.format("Sum of %s for entity %s was not found", groupBy, table));
+		}
+		
+		Document doc = results.first();
+		return doc.getLong("total");
 	}
 	
 	@Override

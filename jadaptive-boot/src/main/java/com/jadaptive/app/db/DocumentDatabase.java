@@ -55,6 +55,8 @@ public interface DocumentDatabase {
 
 	void doInTransaction(Runnable r);
 
+	Long sum(String table, String database, String groupBy, SearchField... fields);
+
 	
 
 	

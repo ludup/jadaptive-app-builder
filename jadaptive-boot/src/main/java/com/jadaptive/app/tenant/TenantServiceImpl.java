@@ -436,4 +436,14 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public void deleteObjectByUUID(String uuid) {
 		deleteObject(getObjectByUUID(uuid));
 	}
+	
+	@Override
+	public void executeAs(Tenant tenant, Runnable r) {
+		setCurrentTenant(tenant);
+		try {
+			r.run();
+		} finally {
+			clearCurrentTenant();
+		}
+	}
 }

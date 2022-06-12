@@ -36,4 +36,10 @@ public class ProductServiceImpl implements ProductService {
 		Product product = appService.getBean(Product.class);
 		return product.getFaviconResource();
 	}
+	
+	@Override
+	public String getProductName() {
+		Product product = appService.getBean(Product.class);
+		return product.getName();	
+	}
 }

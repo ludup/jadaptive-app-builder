@@ -188,4 +188,10 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		
 	}
 
+	@Override
+	public Long sum(String table, String database, String groupBy, SearchField... fields) {
+		// TODO Auto-generated method stub
+		return 0L;
+	}
+
 }

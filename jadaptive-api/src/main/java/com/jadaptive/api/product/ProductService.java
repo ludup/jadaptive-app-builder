@@ -10,4 +10,6 @@ public interface ProductService {
 
 	String getFaviconResource();
 
+	String getProductName();
+
 }
