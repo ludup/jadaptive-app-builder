@@ -291,7 +291,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		}
 		
 		if(!results.cursor().hasNext()) {
-			throw new ObjectNotFoundException(String.format("Sum of %s for entity %s was not found", groupBy, table));
+			return 0L;
 		}
 		
 		Document doc = results.first();
