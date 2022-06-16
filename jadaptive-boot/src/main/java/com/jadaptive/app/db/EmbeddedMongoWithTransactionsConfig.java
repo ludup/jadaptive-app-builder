@@ -7,6 +7,7 @@ import org.bson.Document;
 import org.springframework.boot.autoconfigure.AbstractDependsOnBeanFactoryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.embedded.EmbeddedMongoAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +36,7 @@ import de.flapdoodle.embed.process.runtime.Network;
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore({ MongoAutoConfiguration.class })
 @ConditionalOnClass({ MongoClient.class, MongodStarter.class })
+@ConditionalOnProperty(matchIfMissing = true, name = "mongodb.embedded", havingValue = "true")
 @Import({ 
     EmbeddedMongoAutoConfiguration.class,
     EmbeddedMongoWithTransactionsConfig.DependenciesConfiguration.class 
