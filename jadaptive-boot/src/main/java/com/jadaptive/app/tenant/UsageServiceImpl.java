@@ -1,6 +1,7 @@
 package com.jadaptive.app.tenant;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,19 @@ public class UsageServiceImpl implements UsageService {
 		usageDatabase.saveOrUpdate(usage);
 	}
 	
-	public Long sum(String key) {
-		return usageDatabase.sum(Usage.class, "value", SearchField.in("keys", key));
+	@Override
+	public Long sum(String key, Date from, Date to) {
+		return usageDatabase.sum(Usage.class, "value", 
+				SearchField.in("keys", key), 
+				SearchField.gte("created", from),
+				SearchField.lt("created", to));
+	}
+
+	@Override
+	public Long sum(Date from, Date to, String... keys) {
+		return usageDatabase.sum(Usage.class, "value", 
+				SearchField.in("keys", Arrays.asList(keys)), 
+				SearchField.gte("created", from),
+				SearchField.lt("created", to));
 	}
 }
