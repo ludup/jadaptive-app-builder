@@ -27,9 +27,24 @@ public class ApplicationProperties {
 		
 		confFolder = new File(System.getProperty("jadaptive.conf", "conf"));
 		try{
+			log.info("Loading properties file jadaptive.properties");
 			properties = loadPropertiesFile(new File(confFolder, "jadaptive.properties"));
 		} catch(IOException e) {
 			log.warn("Could not load jadaptive.properties file [{}]", e.getMessage());
+		}
+
+		File confd = new File(confFolder, "conf.d");
+		if(confd.exists()) {
+			for(File file : confd.listFiles()) {
+				if(file.isFile() && file.getName().endsWith(".properties")) {
+					log.info("Loading extended properties file {}", file.getName());
+					try {
+						properties.putAll(loadPropertiesFile(file));
+					} catch (IOException e) {
+						log.error("Faild to load properties file {}", file.getName(), e);
+					}
+				}
+			}
 		}
 		checkLoaded();
 	}
