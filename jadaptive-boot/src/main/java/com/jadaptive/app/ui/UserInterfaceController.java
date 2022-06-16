@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Objects;
 
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
@@ -44,6 +46,9 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@Autowired
 	private SessionUtils sessionUtils;
+	
+	@Autowired
+	private ClassLoaderService classLoader; 
 	
 	@RequestMapping(value="/app/verify", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
@@ -143,5 +148,21 @@ public class UserInterfaceController extends AuthenticatedController {
 				response.sendError(HttpStatus.NOT_FOUND.value());
 			}
 		}
+	}
+	
+	@RequestMapping(value="/app/script/**", method = RequestMethod.GET)
+	public void doScript(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
+
+		String name = request.getRequestURI().substring(12);
+		URL url = classLoader.getResource(name);
+		if(Objects.isNull(url)) {
+			throw new FileNotFoundException();
+		}
+		response.setContentType("application/javascript");
+		response.setStatus(HttpStatus.OK.value());
+		try(InputStream in = url.openStream()) {
+			IOUtils.copy(in, response.getOutputStream());
+		}
+
 	}
 }
