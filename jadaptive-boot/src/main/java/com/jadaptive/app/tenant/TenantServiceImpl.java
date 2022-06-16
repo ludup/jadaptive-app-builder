@@ -128,6 +128,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 	
 	@Override
+	public boolean hasCurrentTenant() {
+		return currentTenant.get()!=null;
+	}
+	
+	@Override
 	public boolean isSetupMode() {
 		SystemConfiguration cfg = systemConfig.getObject(SystemConfiguration.class);
 		return !cfg.getSetupComplete().booleanValue();
