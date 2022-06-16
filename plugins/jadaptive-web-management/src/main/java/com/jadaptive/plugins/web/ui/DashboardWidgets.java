@@ -45,17 +45,20 @@ public class DashboardWidgets extends AbstractPageExtension {
 		
 		int count = 0;
 		
-		Element row;
-		element.appendChild(row = new Element("div").addClass("row"));;
+		Element left;
+		Element right;
+		Element root;
+		element.appendChild(root = new Element("div").addClass("row"));
+		root.appendChild(left = new Element("div").addClass("col-md-6"));
+		root.appendChild(right = new Element("div").addClass("col-md-6"));;
+		
 		for(DashboardWidget widget : widgets) {
 			
 			if(widget.wantsDisplay()) {
-				if(count > 0 && count % 2 == 0) {
-					element.appendChild(row = new Element("div").addClass("row"));
-				}
+				Element row = count % 2 == 0 ? left : right;
 				Element w;
-				row.appendChild(new Element("div")
-						.addClass("col-md-6 mb-3 h-100")
+				row.appendChild(new Element("div").addClass("row").appendChild(new Element("div")
+						.addClass("col-md-12 mb-3 h-100")
 						.appendChild(new Element("div")
 								.addClass("card")
 								.appendChild(new Element("div")
@@ -66,7 +69,7 @@ public class DashboardWidgets extends AbstractPageExtension {
 												.attr("jad:bundle", widget.getBundle())
 												.attr("jad:i18n",String.format("%s.name", widget.getName()) )))
 								.appendChild(w = new Element("div")
-										.addClass("card-body"))));
+										.addClass("card-body")))));
 				widget.renderWidget(document, w);
 
 				count++;
