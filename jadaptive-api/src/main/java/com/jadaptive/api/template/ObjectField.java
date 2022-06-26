@@ -14,8 +14,6 @@ public @interface ObjectField {
 		String defaultValue() default "";
 
 		boolean readOnly() default false;
-		
-		boolean required() default false;
 
 		boolean hidden() default false;
 

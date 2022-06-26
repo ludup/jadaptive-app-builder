@@ -10,6 +10,8 @@ import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.template.ViewType;
 import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.user.PasswordEnabledUser;
@@ -25,27 +27,31 @@ public class AdminUser extends PasswordEnabledUser {
 
 	public static final String RESOURCE_KEY = "adminUser";
 	
-	@ObjectField(required = false,
+	@ObjectField(
 			hidden = true,
-			type = FieldType.HIDDEN)
+			type = FieldType.PASSWORD)
+	@Validator(type = ValidationType.REQUIRED)
 	String encodedPassword;
 	
-	@ObjectField(required = false,
+	@ObjectField(
 			hidden = true,
-			type = FieldType.HIDDEN)
+			type = FieldType.PASSWORD)
+	@Validator(type = ValidationType.REQUIRED)
 	String salt;
 	
-	@ObjectField(required = false,
+	@ObjectField(
 			defaultValue = "PBKDF2_SHA512_50000",
 			type = FieldType.ENUM,
 			hidden = true)
+	@Validator(type = ValidationType.REQUIRED)
 	@ObjectView(value = "passwordOptions")
 	PasswordEncryptionType encodingType;
 	
-	@ObjectField(required = false,
+	@ObjectField(
 			defaultValue = "false",
 			type = FieldType.BOOL)
 	@ObjectView(value = "passwordOptions")
+	@Validator(type = ValidationType.REQUIRED)
 	boolean passwordChangeRequired;
 	
 	@Override

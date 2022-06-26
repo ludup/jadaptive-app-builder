@@ -2,6 +2,8 @@ package com.jadaptive.api.redirect;
 
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
@@ -12,10 +14,12 @@ public class Redirect extends UUIDEntity {
 
 	public static final String RESOURCE_KEY = "redirects";
 	
-	@ObjectField(required = true, searchable = true, type = FieldType.TEXT)
+	@ObjectField(searchable = true, type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String path;
 	
-	@ObjectField(required = true, type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String location;
 	
 	

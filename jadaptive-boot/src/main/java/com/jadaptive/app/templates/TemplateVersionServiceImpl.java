@@ -553,12 +553,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		FieldTemplate t = new FieldTemplate();
 		t.setResourceKey(f.getName());
 		t.setParentKey(template.getUuid());
-//		t.setParentField(null);
 		t.setFormVariable(StringUtils.isNotBlank(field.formVariable()) ? field.formVariable() : f.getName());
 		t.setDefaultValue(field.defaultValue());
 		t.setFieldType(selectFieldType(f.getType(), field.type()));
 		t.setHidden(field.hidden());
-		t.setRequired(field.required());
 		t.setSystem(false);
 		t.setSearchable(field.searchable());
 		t.setTextIndex(field.textIndex());
@@ -629,7 +627,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		Validator[] validators = f.getAnnotationsByType(Validator.class);
 		if(Objects.nonNull(validators)) {
 			for(Validator validator : validators) {
-				t.getValidators().add(new FieldValidator(validator.type(), validator.value(), validator.bundle(), validator.i18n()));
+				t.getValidators().add(new FieldValidator(validator.type(), validator.value(), 
+						StringUtils.firstNonBlank(validator.bundle(), template.getBundle()), validator.i18n()));
 			}
 		}
 

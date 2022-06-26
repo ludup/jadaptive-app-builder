@@ -2,47 +2,21 @@
 <html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
 <body>
 <div class="col-12">
-	<p class="alert alert-info"><i class="far fa-info"></i> <span jad:bundle="createTenant" jad:i18n="createTenant.summary"></span></p>
+	<p class="alert alert-info"><i class="far fa-info"></i> <span jad:bundle="setupTenant" jad:i18n="createTenant.summary"></span></p>
 </div>
 <div id="feedback" class="col-12"></div>
 <div class="row" id="content">
 	<div class="ms-3">
-		<form action="/app/api/form/setup/createTenant">
-			
-			<div class="col-md-12 mb-3">
-	           <label for="company" class="form-label" jad:bundle="createTenant" jad:i18n="company.name"></label>
-	           <input id="company" name="company" class="form-control" value="" autocomplete="off" type="text">
-	           <small class="form-text text-muted" jad:bundle="createTenant" jad:i18n="company.desc"></small>
-			</div>
-
-			<div class="col-md-12 mb-3">
-			   <label for="subdomain" class="form-label" jad:bundle="createTenant" jad:i18n="subdomain.name"></label>
-	           <div class="input-group">
-				  <input type="text" id="subdomain" name="subdomain" class="form-control" aria-describedby="basic-addon2">
-				  <span class="input-group-text" id="basic-addon2"><span id="domain"></span></span>
-				</div>
-	           <small class="form-text text-muted" jad:bundle="createTenant" jad:i18n="subdomain.desc"></small>
-			</div>
-			
-			<div class="col-md-12 mb-3">
-	           <label for="name" class="form-label" jad:bundle="createTenant" jad:i18n="name.name"></label>
-	           <input id="name" name="name" class="form-control" value="" autocomplete="off" type="text">
-	           <small class="form-text text-muted" jad:bundle="createTenant" jad:i18n="name.desc"></small>
-			</div>
-			
-			<div class="col-md-12 mb-3">
-	           <label for="emailAddress" class="form-label" jad:bundle="createTenant" jad:i18n="emailAddress.name"></label>
-	           <input id="emailAddress" name="emailAddress" class="form-control" value="" autocomplete="off" type="text">
-	           <small class="form-text text-muted" jad:bundle="createTenant" jad:i18n="emailAddress.desc"></small>
-			</div>
-		</form>
+		<div class="col-12" jad:id="objectRenderer" jad:handler="setupTenant" jad:resourceKey="createTenant">
+		
+		</div>
 	</div>
 </div>
 <div>
 <script type="text/javascript">
 
  $(function() {
-	 Wizard.initStep('createTenant', function(success, cancel) {
+	 Wizard.initStep('setupTenant', function(success, cancel) {
 		  
 		 $.ajax({
 	           type: "POST",

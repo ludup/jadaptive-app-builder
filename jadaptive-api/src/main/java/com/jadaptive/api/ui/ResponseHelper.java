@@ -34,7 +34,7 @@ public class ResponseHelper {
 		response.setContentType(contentType);
 
 		try(InputStream in = Files.newInputStream(resource)) {
-			IOUtils.copy(in, response.getOutputStream());
+			IOUtils.copy(in, response.getOutputStream(), 16384);
 		}
 	}
 	

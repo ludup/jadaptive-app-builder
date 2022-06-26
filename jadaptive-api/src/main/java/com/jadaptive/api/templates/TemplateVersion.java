@@ -7,6 +7,8 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 
@@ -17,15 +19,14 @@ public class TemplateVersion extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "templateVersion";
 
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT)
-	String version; 
-	
-	@ObjectField(required = true,
-			type = FieldType.TIMESTAMP)
+	@ObjectField(searchable = true, type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
+	String version;
+
+	@ObjectField(type = FieldType.TIMESTAMP)
+	@Validator(type = ValidationType.REQUIRED)
 	Date timestamp;
-	
+
 	public Date getTimestamp() {
 		return Objects.isNull(timestamp) ? new Date() : timestamp;
 	}

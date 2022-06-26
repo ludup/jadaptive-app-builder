@@ -16,6 +16,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.ObjectPage;
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.pages.TemplatePage;
 
 @Extension
 public class ObjectRenderer extends AbstractObjectRenderer {

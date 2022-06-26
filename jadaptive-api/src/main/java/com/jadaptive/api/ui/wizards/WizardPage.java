@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.web.ui;
+package com.jadaptive.api.ui.wizards;
 
 import java.io.FileNotFoundException;
 
@@ -9,7 +9,6 @@ import org.jsoup.nodes.Document;
 
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.UriRedirect;
-import com.jadaptive.api.wizards.WizardState;
 
 public abstract class WizardPage extends HtmlPage {
 

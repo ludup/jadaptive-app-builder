@@ -17,35 +17,26 @@ import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(resourceKey = BuiltinUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 @ObjectServiceBean(bean = BuiltinUserDatabase.class)
-@ObjectViews({ 
-	@ObjectViewDefinition(type = ViewType.ACCORDION, bundle = "users", value = "passwordOptions")})
+@ObjectViews({ @ObjectViewDefinition(type = ViewType.ACCORDION, bundle = "users", value = "passwordOptions") })
 public class BuiltinUser extends PasswordEnabledUser {
 
 	private static final long serialVersionUID = -4186606233520076592L;
 
 	public static final String RESOURCE_KEY = "builtinUsers";
-	
-	@ObjectField(required = false,
-			type = FieldType.PASSWORD)
+
+	@ObjectField(type = FieldType.PASSWORD)
 	@IncludeView(values = FieldView.CREATE)
 	@ObjectView(value = "passwordOptions")
 	String encodedPassword;
-	
-	@ObjectField(required = false,
-			hidden = true,
-			type = FieldType.TEXT)
+
+	@ObjectField(hidden = true, type = FieldType.TEXT)
 	String salt;
-	
-	@ObjectField(required = false,
-			defaultValue = "PBKDF2_SHA512_50000",
-			type = FieldType.ENUM,
-			hidden = true)
+
+	@ObjectField(defaultValue = "PBKDF2_SHA512_50000", type = FieldType.ENUM, hidden = true)
 	@ObjectView(value = "passwordOptions")
 	PasswordEncryptionType encodingType;
-	
-	@ObjectField(required = false,
-			defaultValue = "false",
-			type = FieldType.BOOL)
+
+	@ObjectField(defaultValue = "false", type = FieldType.BOOL)
 	@ObjectView(value = "passwordOptions")
 	boolean passwordChangeRequired;
 

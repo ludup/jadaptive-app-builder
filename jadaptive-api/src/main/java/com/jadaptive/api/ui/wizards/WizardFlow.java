@@ -1,4 +1,4 @@
-package com.jadaptive.api.wizards;
+package com.jadaptive.api.ui.wizards;
 
 import java.io.FileNotFoundException;
 

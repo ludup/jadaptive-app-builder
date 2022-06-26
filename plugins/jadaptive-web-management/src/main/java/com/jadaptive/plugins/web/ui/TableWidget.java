@@ -11,6 +11,7 @@ import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.pages.TemplatePage;
 
 @Extension
 @PageDependencies(extensions = { "bootstrapTable"})

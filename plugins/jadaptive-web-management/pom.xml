@@ -18,13 +18,19 @@
 		<plugin.version>${project.version}</plugin.version>
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.projectUrl>https://github.com/ludup/jadpative-app/builder/plugins</plugin.projectUrl>
-		<plugin.dependencies></plugin.dependencies>
+		<plugin.dependencies>jadaptive-email</plugin.dependencies>
 	</properties>
 
 	<dependencies>		
 		<dependency>
 			<groupId>com.jadaptive</groupId>
 			<artifactId>jadaptive-api</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.jadaptive</groupId>
+			<artifactId>jadaptive-email</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>

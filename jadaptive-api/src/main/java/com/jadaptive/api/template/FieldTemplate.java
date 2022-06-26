@@ -18,29 +18,34 @@ public class FieldTemplate extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "objectFields";
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String resourceKey;
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String parentKey;
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String parentField;
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String formVariable;
 	
 	@ObjectField(type = FieldType.TEXT)
 	String defaultValue;
 	
-	@ObjectField(type = FieldType.ENUM, required = true)
+	@ObjectField(type = FieldType.ENUM)
+	@Validator(type = ValidationType.REQUIRED)
 	FieldType fieldType; 
 	
 	@ObjectField(type = FieldType.BOOL)
 	boolean collection;
 	
-	@ObjectField(type = FieldType.BOOL)
-	boolean required;
+//	@ObjectField(type = FieldType.BOOL)
+//	boolean required;
 	
 	@ObjectField(type = FieldType.BOOL)
 	boolean manuallyEncrypted;
@@ -110,9 +115,9 @@ public class FieldTemplate extends AbstractUUIDEntity {
 		this.fieldType = propertyType;
 	}
 
-	public void setRequired(boolean required) {
-		this.required = required;
-	}
+//	public void setRequired(boolean required) {
+//		this.required = required;
+//	}
 
 	public Collection<FieldValidator> getValidators() {
 		return validators;
@@ -140,7 +145,12 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	}
 
 	public boolean isRequired() {
-		return required;
+		for(FieldValidator v : validators) {
+			if(v.getType() == ValidationType.REQUIRED) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean isManuallyEncrypted() {

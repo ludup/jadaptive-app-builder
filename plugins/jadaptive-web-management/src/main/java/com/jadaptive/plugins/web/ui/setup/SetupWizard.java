@@ -21,8 +21,8 @@ import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
-import com.jadaptive.api.wizards.AbstractWizard;
-import com.jadaptive.api.wizards.WizardState;
+import com.jadaptive.api.ui.wizards.AbstractWizard;
+import com.jadaptive.api.ui.wizards.WizardState;
 
 @Extension
 public class SetupWizard extends AbstractWizard implements FormHandler {
@@ -96,7 +96,7 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	@Override
 	protected void assertPermissions(WizardState state) throws AccessDeniedException {
 		
-		if(!state.isFinished() && !tenantService.isSetupMode()) {
+		if(!state.isFinished() && (state.getFlow().getClass().equals(SetupWizard.class) && !tenantService.isSetupMode())) {
 			throw new AccessDeniedException("Setup wizard can only be run in setup mode!");
 		}
 	}

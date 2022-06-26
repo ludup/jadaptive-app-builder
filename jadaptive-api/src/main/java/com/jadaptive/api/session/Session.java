@@ -7,6 +7,8 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 
@@ -17,13 +19,16 @@ public class Session extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "sessions";
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String remoteAddress;
 	
-	@ObjectField(type = FieldType.TIMESTAMP, required = true)
+	@ObjectField(type = FieldType.TIMESTAMP)
+	@Validator(type = ValidationType.REQUIRED)
 	Date lastUpdated;
 	
-	@ObjectField(type = FieldType.TIMESTAMP, required = true)
+	@ObjectField(type = FieldType.TIMESTAMP)
+	@Validator(type = ValidationType.REQUIRED)
 	Date signedIn;
 	
 	@ObjectField(type = FieldType.TIMESTAMP)
@@ -32,16 +37,20 @@ public class Session extends AbstractUUIDEntity {
 	@ObjectField(type = FieldType.OBJECT_REFERENCE)
 	Tenant tenant;
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String userAgent;
 	
-	@ObjectField(type = FieldType.INTEGER, required = true)
+	@ObjectField(type = FieldType.INTEGER)
+	@Validator(type = ValidationType.REQUIRED)
 	Integer sessionTimeout;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, required = true)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE)
+	@Validator(type = ValidationType.REQUIRED)
 	User user;
 	
-	@ObjectField(type = FieldType.HIDDEN, required = true)
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	@Validator(type = ValidationType.REQUIRED)
 	String csrfToken; 
 	
 	public Session() {

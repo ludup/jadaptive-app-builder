@@ -36,6 +36,7 @@ import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.tenant.TenantController;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
 
@@ -71,6 +72,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	boolean setupMode = false;
 	boolean ready = false;
+	TenantController controller = null;
+	
 	@EventListener
 	public void onApplicationStartup(ApplicationReadyEvent evt) {
 		
@@ -123,6 +126,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 	
 	@Override
+	public void setTenantController(TenantController controller) {
+		this.controller = controller;
+	}
+	
+	@Override
 	public boolean isReady() {
 		return ready;
 	}
@@ -153,7 +161,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private Tenant initialiseTenant(Tenant tenant, boolean newSchema) {
+	public Tenant initialiseTenant(Tenant tenant, boolean newSchema) {
 		
 		setCurrentTenant(tenant);
 		
@@ -165,8 +173,6 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		}
 		
 		try {
-			
-			
 			
 			Collection<JsonTemplateEnabledService> templateServices
 				= ApplicationServiceImpl.getInstance().getBeans(
@@ -213,6 +219,14 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 	}
 	
+	@Override
+	public boolean supportsMultipleTenancy() {
+		if(Objects.nonNull(controller)) {
+			return controller.supportsMultipleTenancy();
+		}
+		return false;
+	}
+	
 	public Tenant getSystemTenant() throws RepositoryException, ObjectException {
 		return systemTenant;
 	}
@@ -229,6 +243,12 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	@Override
 	public Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, String... additionalDomains) throws RepositoryException, ObjectException {
+		
+		if(Objects.nonNull(controller)) {
+			if(!controller.supportsMultipleTenancy()) {
+				throw new RepositoryException("Multiple tenancy is not enabled!");
+			}
+ 		}
 		
 		if(tenantsByDomain.containsKey(primaryDomain)) {
 			throw new ObjectException(String.format("%s is already used by another tenant", primaryDomain));

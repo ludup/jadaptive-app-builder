@@ -9,6 +9,8 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = Usage.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 public class Usage extends AbstractUUIDEntity {
@@ -20,10 +22,12 @@ public class Usage extends AbstractUUIDEntity {
 	@ObjectField(type = FieldType.TIMESTAMP)
 	Date timestamp;
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	Collection<String> keys;
 	
-	@ObjectField(type = FieldType.LONG, required = true)
+	@ObjectField(type = FieldType.LONG)
+	@Validator(type = ValidationType.REQUIRED)
 	Long value;
 
 	public Date getTimestamp() {

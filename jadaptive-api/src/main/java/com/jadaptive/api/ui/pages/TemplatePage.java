@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.web.ui;
+package com.jadaptive.api.ui.pages;
 
 import java.io.FileNotFoundException;
 

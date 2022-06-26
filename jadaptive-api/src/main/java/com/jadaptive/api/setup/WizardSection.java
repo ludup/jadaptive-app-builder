@@ -8,7 +8,7 @@ import org.jsoup.nodes.Element;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
-import com.jadaptive.api.wizards.WizardState;
+import com.jadaptive.api.ui.wizards.WizardState;
 
 public abstract class WizardSection extends AbstractPageExtension {
 
@@ -53,5 +53,7 @@ public abstract class WizardSection extends AbstractPageExtension {
 		
 	}
 
-	public abstract boolean isSystem();
+	public boolean isSystem() {
+		return false;
+	}
 }

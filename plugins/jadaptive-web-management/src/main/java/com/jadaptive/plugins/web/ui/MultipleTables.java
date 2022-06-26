@@ -15,6 +15,7 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
+import com.jadaptive.api.ui.pages.TemplatePage;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 
 @Extension

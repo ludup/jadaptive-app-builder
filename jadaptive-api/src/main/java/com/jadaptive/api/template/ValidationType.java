@@ -7,7 +7,8 @@ public enum ValidationType {
 	REGEX(false),
 	OBJECT_TYPE(true),
 	RESOURCE_KEY(true),
-	URL(false);
+	URL(false),
+	REQUIRED(false);
 	
 	final boolean required;
 	

@@ -40,12 +40,13 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.stats.UsageService;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
 
 @WebFilter(urlPatterns = { "/*" }, dispatcherTypes = { DispatcherType.REQUEST })
-public class SessionFilter implements Filter {
+public class SessionFilter implements Filter, CountingOutputStreamListener {
 
 	static Logger log = LoggerFactory.getLogger(SessionFilter.class);
 	
@@ -72,6 +73,9 @@ public class SessionFilter implements Filter {
 	@Autowired
 	private TenantAwareObjectDatabase<Redirect> redirectDatabase;
 	
+	@Autowired
+	private UsageService usageService; 
+	
 	Map<String,String> cachedRedirects = new HashMap<>();
 	
 	@Override
@@ -79,8 +83,8 @@ public class SessionFilter implements Filter {
 			throws IOException, ServletException {
 		
 		HttpServletRequest req = (HttpServletRequest)request;
-		HttpServletResponse resp = (HttpServletResponse)response;
-		
+		HttpServletResponse resp = (HttpServletResponse)response; //new SessionServletResponseWrapper((HttpServletResponse)response);
+
 		if(log.isDebugEnabled()) {
 			log.debug(req.getMethod() + " " + req.getRequestURI().toString());
 		}
@@ -97,7 +101,7 @@ public class SessionFilter implements Filter {
 				return;
 			}
 			
-			chain.doFilter(request, response);
+			chain.doFilter(req, resp);
 
 			postHandle(req, resp);
 			
@@ -124,6 +128,21 @@ public class SessionFilter implements Filter {
 			log.error("Caught exception in SessionFilter postHandle",e);
 			throw new ServletException(e);
 		}
+		
+	}
+	
+
+	@Override
+	public void closed(long count) {
+		
+		tenantService.executeAs(tenantService.getCurrentTenant(), new Runnable() {
+
+			@Override
+			public void run() {
+				usageService.log(count, UsageService.HTTP_OUT);
+			}
+			
+		});
 		
 	}
 
@@ -284,4 +303,22 @@ public class SessionFilter implements Filter {
 	
 		return false;
 	}
+	
+//	class SessionServletResponseWrapper extends HttpServletResponseWrapper {
+//
+//		CountingOutputStream out;
+//		
+//		public SessionServletResponseWrapper(HttpServletResponse response) {
+//			super(response);
+//		}
+//
+//		@Override
+//		public ServletOutputStream getOutputStream() throws IOException {
+//			if(Objects.nonNull(out)) {
+//				return out;
+//			}
+//			return out = new CountingOutputStream(super.getOutputStream(), SessionFilter.this);
+//		}
+//		
+//	}
 }

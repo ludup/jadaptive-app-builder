@@ -33,7 +33,6 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 		FieldTemplate t1 = new FieldTemplate();
 		t1.setResourceKey("name");
 		t1.setDefaultValue("Default");
-		t1.setRequired(required);
 		t1.setFieldType(FieldType.TEXT);
 		t1.getValidators().addAll(Arrays.asList(validators));
 
@@ -69,7 +68,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		MongoEntity e = buildCompanyTemplate(true, new FieldValidator(ValidationType.LENGTH, "255")).readValue(json, MongoEntity.class);
+		MongoEntity e = buildCompanyTemplate(true, new FieldValidator(ValidationType.LENGTH, "255", "default")).readValue(json, MongoEntity.class);
 
 		assertEquals("JADAPTIVE", e.getValue("name"));
 
@@ -84,7 +83,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		buildCompanyTemplate(true, new FieldValidator(ValidationType.REGEX, "\\w+")).readValue(json, MongoEntity.class);
+		buildCompanyTemplate(true, new FieldValidator(ValidationType.REGEX, "\\w+", "default")).readValue(json, MongoEntity.class);
 
 	}
 	
@@ -97,7 +96,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		buildCompanyTemplate(true, new FieldValidator(ValidationType.LENGTH, "5")).readValue(json, MongoEntity.class);
+		buildCompanyTemplate(true, new FieldValidator(ValidationType.LENGTH, "5", "default")).readValue(json, MongoEntity.class);
 
 	}
 	
@@ -110,7 +109,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		buildCompanyTemplate(true, new FieldValidator(ValidationType.REGEX, "\\d+")).readValue(json, MongoEntity.class);
+		buildCompanyTemplate(true, new FieldValidator(ValidationType.REGEX, "\\d+", "default")).readValue(json, MongoEntity.class);
 
 	}
 	

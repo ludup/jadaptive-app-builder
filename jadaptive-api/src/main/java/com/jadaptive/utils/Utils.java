@@ -337,7 +337,10 @@ public class Utils {
 	public static String generateRandomAlphaNumericString(int length) {
 	    return new BigInteger(length * 8, random).toString(32).substring(0,  length);
 	}
-
+	
+	public static String generateRandomAlphaString(int length) {
+	    return new BigInteger(length * 8, random).toString(10).substring(0,  length);
+	}
 
 	public static <T> List<T> nullSafe(List<T> list){
 		if(list == null){

@@ -15,7 +15,7 @@ public enum FieldType {
 	INTEGER(ValidationType.RANGE),
 	DATE,
 	PERMISSION, 
-	HIDDEN,
+//	HIDDEN,
 	IMAGE,
 	FILE;
 	

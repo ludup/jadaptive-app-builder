@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.web.ui;
+package com.jadaptive.api.ui.wizards;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
@@ -24,10 +24,8 @@ import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.RequestPage;
-import com.jadaptive.api.wizards.WizardService;
-import com.jadaptive.api.wizards.WizardState;
 
-@Extension
+@Component
 @RequestPage(path="wizards/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "freemarker", "i18n"} )
@@ -161,7 +159,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	public AbstractObject getObject() {
 		try {
 			WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
-			UUIDEntity obj = state.getObject(state.getCurrentPage().getClass());
+			UUIDEntity obj = state.getObject(state.getCurrentPage());
 			if(Objects.isNull(obj)) {
 				return null;
 			}

@@ -1,6 +1,5 @@
-package com.jadaptive.api.wizards;
+package com.jadaptive.api.ui.wizards;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -55,7 +54,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 						
 			state.init(getStartSection(),
 					getFinishSection(), 
-					sections.toArray((WizardSection[]) Array.newInstance(getSectionClass(), 0))); 
+					sections.toArray((new WizardSection[0]))); 
 			request.getSession().setAttribute(getStateAttribute(), state);
 		}
 		
@@ -63,7 +62,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 		return state;
 	}
 	
-	protected abstract void assertPermissions(WizardState state);
+	protected void assertPermissions(WizardState state) { };
 
 	@Override
 	public void clearState(HttpServletRequest request) {

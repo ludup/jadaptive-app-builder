@@ -5,8 +5,8 @@
 </head>
 <body>
 <div class="bg-light p-5 rounded-lg m-3">
-  <h1 class="display-4" jad:bundle="createTenant" jad:i18n="createTenant.title"></h1>
-  <p class="lead" jad:bundle="createTenant" jad:i18n="tenant.setup.info"></p>
+  <h1 class="display-4" jad:bundle="setupTenant" jad:i18n="createTenant.title"></h1>
+  <p class="lead" jad:bundle="setupTenant" jad:i18n="tenant.setup.info"></p>
   <hr class="my-4">
   <p><span jad:bundle="vendor" jad:i18n="product.name"></span> <span jad:bundle="app" jad:i18n="version.text"></span><br/>
   <span jad:bundle="vendor" jad:i18n="product.copyright"></span></p>
@@ -15,7 +15,7 @@
 	$(function() {
 		$('#startButton').click(function(e) {
 			e.preventDefault();
-			Wizard.start('createTenant');
+			Wizard.start('setupTenant');
 		});
 	});
 </script>

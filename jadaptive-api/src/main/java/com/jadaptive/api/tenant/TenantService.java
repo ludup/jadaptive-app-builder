@@ -58,4 +58,10 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	boolean hasCurrentTenant();
 
+	boolean supportsMultipleTenancy();
+
+	void setTenantController(TenantController controller);
+
+	Tenant initialiseTenant(Tenant tenant, boolean newSchema);
+
 }

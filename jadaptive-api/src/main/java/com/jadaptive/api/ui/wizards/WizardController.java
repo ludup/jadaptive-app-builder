@@ -1,6 +1,7 @@
-package com.jadaptive.api.wizards;
+package com.jadaptive.api.ui.wizards;
 
 import java.io.FileNotFoundException;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,7 +44,11 @@ public class WizardController extends AuthenticatedController {
 			@PathVariable String resourceKey) throws AccessDeniedException,
 			UnauthorizedException, SessionTimeoutException, FileNotFoundException {
 
-			WizardState state = wizardService.getWizard(resourceKey).getState(request);
+			WizardFlow wizard = wizardService.getWizard(resourceKey);
+			if(Objects.isNull(wizard)) {
+				throw new FileNotFoundException();
+			}
+			WizardState state = wizard.getState(request);
 			state.start();
 			throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
 	}

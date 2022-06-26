@@ -5,11 +5,11 @@ import java.util.Collection;
 
 import org.pf4j.Extension;
 
-import com.jadaptive.api.config.ConfigurationPage;
+import com.jadaptive.api.config.ConfigurationPageItem;
 import com.jadaptive.api.session.SessionConfiguration;
 
 @Extension
-public class SessionConfigurationMenu implements ConfigurationPage {
+public class SessionConfigurationMenu implements ConfigurationPageItem {
 
 	@Override
 	public String getResourceKey() {

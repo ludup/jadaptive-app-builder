@@ -34,6 +34,7 @@ import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.ui.UserInterfaceService;
+import com.jadaptive.api.ui.pages.TemplatePage;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
 import com.jadaptive.plugins.web.ui.ServerSideTablePage.SearchForm;

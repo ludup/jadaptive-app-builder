@@ -11,8 +11,8 @@ import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
-import com.jadaptive.api.wizards.WizardService;
-import com.jadaptive.api.wizards.WizardState;
+import com.jadaptive.api.ui.wizards.WizardService;
+import com.jadaptive.api.ui.wizards.WizardState;
 
 @Extension
 @RequestPage(path="setup-complete")

@@ -11,6 +11,7 @@ import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UserInterfaceService;
+import com.jadaptive.api.ui.pages.ObjectTemplatePage;
 
 @Extension
 @RequestPage(path = "update/{resourceKey}/{uuid}")

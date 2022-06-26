@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -236,8 +238,6 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		case ENUM:
 			validateEnum(node, field);
 			return node.asText();
-		case HIDDEN:
-			return node.asText();
 		case PERMISSION:
 			validatePermission(node, field);
 			return node.asText();
@@ -365,9 +365,26 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		
 		String value = node.asText();
 		
+		/**
+		 * THIS IS DUPLICATED CODE.. SEE DocumentValidator
+		 */
 		if(!Objects.isNull(field.getValidators())) {
 			for(FieldValidator v : field.getValidators()) {
 				switch(v.getType()) {
+				case REQUIRED:
+				{
+					if(StringUtils.isBlank(value)) {
+						if(StringUtils.isBlank(v.getI18n())) {
+							throw new ValidationException(
+									I18N.getResource(Locale.getDefault(), "default", "default.required.error", 
+										I18N.getResource(Locale.getDefault(), v.getBundle(), String.format("%s.name", field.getResourceKey()))));
+						} else {
+							throw new ValidationException(I18N.getResource(
+								Locale.getDefault(), v.getBundle(), v.getI18n(), value));
+						}
+					}
+					break;
+				}
 				case LENGTH:
 					
 					int maxlength = Integer.parseInt(v.getValue());

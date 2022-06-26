@@ -13,6 +13,7 @@ import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
+import com.jadaptive.api.ui.pages.EmbeddedObjectPage;
 
 @Extension
 @RequestPage(path = "object-view/{resourceKey}/{uuid}/{fieldName}/{childUuid}")

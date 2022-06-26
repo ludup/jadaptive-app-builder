@@ -8,14 +8,20 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.stats.Counter;
 import com.jadaptive.api.stats.Usage;
 import com.jadaptive.api.stats.UsageService;
+import com.jadaptive.utils.Utils;
 
 @Service
 public class UsageServiceImpl implements UsageService {
 
 	@Autowired
 	private TenantAwareObjectDatabase<Usage> usageDatabase;
+	
+	@Autowired
+	private TenantAwareObjectDatabase<Counter> counterDatabase;
 	
 	@Override
 	public void log(long value, String... keys) {
@@ -25,6 +31,44 @@ public class UsageServiceImpl implements UsageService {
 		usage.setValue(value);
 		
 		usageDatabase.saveOrUpdate(usage);
+	}
+	
+	@Override
+	public void incrementDailyValue(String key) {
+		incrementDailyValue(key, 1L);
+	}
+	
+	@Override
+	public void incrementDailyValue(String key, long byValue) {
+		
+		Counter counter;
+		
+		try {
+			counter = counterDatabase.get(Counter.class,
+					SearchField.eq("date", Utils.today()),
+					SearchField.eq("key", key));
+		} catch(ObjectNotFoundException e) {
+			counter = new Counter();
+			counter.setDate(Utils.today());
+			counter.setValue(0);
+		}
+		
+		counter.setValue(counter.getValue() + byValue);
+		counterDatabase.saveOrUpdate(counter);
+		
+	}
+	
+	@Override
+	public long getDailyValue(String key) {
+		
+		try {
+			Counter counter = counterDatabase.get(Counter.class,
+					SearchField.eq("date", Utils.today()),
+					SearchField.eq("key", key));
+			return counter.getValue();
+		} catch(ObjectNotFoundException e) {
+			return 0L;
+		}
 	}
 	
 	@Override

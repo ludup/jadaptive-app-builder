@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import org.pf4j.ExtensionPoint;
 
-public interface ConfigurationPage extends ExtensionPoint {
+public interface ConfigurationPageItem extends ExtensionPoint {
 
 	String getResourceKey();
 
@@ -22,4 +22,6 @@ public interface ConfigurationPage extends ExtensionPoint {
 	default boolean isEnabled() { return true; }
 	
 	default boolean isVisible() { return true; }
+	
+	default boolean isSystem() { return false; }
 }

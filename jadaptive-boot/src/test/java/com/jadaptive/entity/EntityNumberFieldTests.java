@@ -33,7 +33,6 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 		FieldTemplate t1 = new FieldTemplate();
 		t1.setResourceKey("employees");
 		t1.setDefaultValue("1");
-		t1.setRequired(required);
 		t1.setFieldType(FieldType.LONG);
 		t1.getValidators().addAll(Arrays.asList(validators));
 
@@ -83,7 +82,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		MongoEntity e = getNumberField(true, new FieldValidator(ValidationType.RANGE, "0-9999999")).readValue(json, MongoEntity.class);
+		MongoEntity e = getNumberField(true, new FieldValidator(ValidationType.RANGE, "0-9999999", "default")).readValue(json, MongoEntity.class);
 
 		assertEquals(100L, e.getValue("employees"));
 
@@ -99,7 +98,7 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		getNumberField(true, new FieldValidator(ValidationType.RANGE, "0-9999999")).readValue(json, MongoEntity.class);
+		getNumberField(true, new FieldValidator(ValidationType.RANGE, "0-9999999", "default")).readValue(json, MongoEntity.class);
 
 	}
 	

@@ -10,36 +10,30 @@ import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
 @ObjectServiceBean(bean = UserService.class)
-@TableView(defaultColumns = { "username", "name"}, requiresUpdate = true,
-			actions = { @TableAction(bundle = "default", icon = "fa-key", 
-	resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}")})
+@TableView(defaultColumns = { "username", "name" }, requiresUpdate = true, actions = {
+		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}") })
 public abstract class User extends UUIDEntity implements NamedDocument {
 
 	public static final String RESOURCE_KEY = "users";
-	
+
 	private static final long serialVersionUID = 2210375165051752363L;
 
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT, 
-			unique = true)
+	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true)
+	@Validator(type = ValidationType.REQUIRED)
 	String username;
-	
-	@ObjectField(required = true,
-			searchable = true,
-			nameField = true,
-			type = FieldType.TEXT)
+
+	@ObjectField(searchable = true, nameField = true, type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String name;
-	
-	@ObjectField(required = false,
-			searchable = true,
-			nameField = false,
-			type = FieldType.TEXT)
+
+	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT)
 	String email;
-	
+
 	public String getUsername() {
 		return username;
 	}

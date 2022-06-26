@@ -212,8 +212,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				case OBJECT_EMBEDDED:
 				case OBJECT_REFERENCE:
 					if(!validatorPresent(t, ValidationType.OBJECT_TYPE)) {
-						log.error(String.format("Missing OBJECT_TYPE validator on field %s", t.getResourceKey()));
-						return false;
+						throw new IllegalStateException(String.format("Missing OBJECT_TYPE validator on field %s", t.getResourceKey()));
 					}
 					break;
 				default:

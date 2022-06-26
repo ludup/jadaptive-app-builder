@@ -41,8 +41,6 @@ public class DocumentValidator {
 		case ENUM:
 			validateEnum(value, field);
 			return value;
-		case HIDDEN:
-			return value;
 		case PERMISSION:
 			validatePermission(value, field);
 			return value;
@@ -170,6 +168,20 @@ public class DocumentValidator {
 		if (!Objects.isNull(field.getValidators())) {
 			for (FieldValidator v : field.getValidators()) {
 				switch (v.getType()) {
+				case REQUIRED:
+				{
+					if(StringUtils.isBlank(value)) {
+						if(StringUtils.isBlank(v.getI18n())) {
+							throw new ValidationException(
+									I18N.getResource(Locale.getDefault(), "default", "default.required.error", 
+										I18N.getResource(Locale.getDefault(), v.getBundle(), String.format("%s.name", field.getResourceKey()))));
+						} else {
+							throw new ValidationException(I18N.getResource(
+								Locale.getDefault(), v.getBundle(), v.getI18n(), value));
+						}
+					}
+					break;
+				}
 				case LENGTH:
 
 					int maxlength = Integer.parseInt(v.getValue());

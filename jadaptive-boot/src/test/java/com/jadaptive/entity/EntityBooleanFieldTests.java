@@ -32,7 +32,6 @@ public class EntityBooleanFieldTests extends AbstractDeserializerTest {
 		FieldTemplate t1 = new FieldTemplate();
 		t1.setResourceKey("confirmed");
 		t1.setDefaultValue("false");
-		t1.setRequired(required);
 		t1.setFieldType(FieldType.BOOL);
 		t1.getValidators().addAll(Arrays.asList(validators));
 

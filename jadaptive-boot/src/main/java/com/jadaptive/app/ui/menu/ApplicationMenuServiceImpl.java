@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.web;
+package com.jadaptive.app.ui.menu;
 
 import java.util.ArrayList;
 import java.util.Collection;

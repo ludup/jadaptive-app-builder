@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.ui.wizards.WizardState;
 import com.jadaptive.api.user.AdminUserDatabase;
-import com.jadaptive.api.wizards.WizardState;
 import com.jadaptive.plugins.web.objects.CreateAccount;
 import com.jadaptive.utils.ObjectUtils;
 import com.jadaptive.utils.Utils;
 
-class AdminSection extends SetupSection {
+public class AdminSection extends SetupSection {
 
 	@Autowired
 	private AdminUserDatabase adminDatabase;
@@ -41,7 +41,7 @@ class AdminSection extends SetupSection {
 	public void finish(WizardState state) {
 		
 		CreateAccount account = ObjectUtils.assertObject(
-				state.getObject(getClass()), 
+				state.getObject(this), 
 				CreateAccount.class);
 		
 		adminDatabase.createAdmin(account.getUsername(), 
@@ -54,7 +54,7 @@ class AdminSection extends SetupSection {
 	public void processReview(Document document, WizardState state) {
 
 		Element content = document.selectFirst("#setupStep");
-		CreateAccount account = ObjectUtils.assertObject(state.getObject(getClass()), CreateAccount.class);
+		CreateAccount account = ObjectUtils.assertObject(state.getObject(this), CreateAccount.class);
 		
 		content.appendChild(new Element("div")
 				.addClass("col-12 w-100 my-3")

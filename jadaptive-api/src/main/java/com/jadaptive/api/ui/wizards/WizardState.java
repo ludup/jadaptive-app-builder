@@ -1,4 +1,4 @@
-package com.jadaptive.api.wizards;
+package com.jadaptive.api.ui.wizards;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class WizardState {
 	WizardSection finishPage;
 	WizardFlow flow;
 
-	Map<Class<?>,UUIDEntity> stateObjects = new HashMap<>(); 
+	Map<WizardSection,UUIDEntity> stateObjects = new HashMap<>(); 
 	Map<String,Object> stateParameters = new HashMap<>();
 	UUIDEntity completedObject;
 	
@@ -108,23 +108,32 @@ public class WizardState {
 	}
 
 	public UUIDEntity getCurrentObject() {
-		return stateObjects.get(pages.get(getCurrentStep()-1).getClass());
+		return stateObjects.get(pages.get(getCurrentStep()-1));
 	}
 	
 	public void setCurrentObject(UUIDEntity obj) {
-		stateObjects.put(pages.get(getCurrentStep()-1).getClass(), obj);
+		stateObjects.put(pages.get(getCurrentStep()-1), obj);
 	}
 
 	public void saveObject(UUIDEntity object) {
-		stateObjects.put(pages.get(getCurrentStep()-1).getClass(), object);
+		stateObjects.put(pages.get(getCurrentStep()-1), object);
 	}
 
 	public Collection<WizardSection> getSections() {
 		return pages;
 	}
 
-	public UUIDEntity getObject(Class<? extends WizardSection> section) {
+	public UUIDEntity getObject(WizardSection section) {
 		return stateObjects.get(section);
+	}
+	
+	public UUIDEntity getObject(Class<?> type) {
+		for(UUIDEntity e : stateObjects.values()) {
+			if(e.getClass().equals(type)) {
+				return e;
+			}
+		}
+		throw new IllegalStateException("No object of type " + type.getSimpleName());
 	}
 
 	public void insertNextPage(WizardSection setupSection) {

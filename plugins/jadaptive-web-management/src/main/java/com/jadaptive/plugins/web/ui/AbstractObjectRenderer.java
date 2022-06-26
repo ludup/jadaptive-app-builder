@@ -406,8 +406,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case TEXT_AREA:
 			break;
-		case HIDDEN:
-			break;
 		case TIMESTAMP:
 			break;
 		case PERMISSION:
@@ -438,7 +436,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		FieldTemplate field = orderedField.getField();
 
 		switch(field.getFieldType()) {
-		case HIDDEN:
 		case TEXT:
 		{
 			switch(orderedField.getRenderer()) {

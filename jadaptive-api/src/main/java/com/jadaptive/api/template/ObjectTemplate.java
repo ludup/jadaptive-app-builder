@@ -28,10 +28,12 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.ENUM, defaultValue = "GLOBAL")
 	ObjectScope scope;
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String resourceKey;
 
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String bundle;
 	
 	@ObjectField(type = FieldType.TEXT)
@@ -55,19 +57,19 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	Collection<String> childTemplates = new ArrayList<>();
 	
-	@ObjectField(type = FieldType.HIDDEN)
+	@ObjectField(type = FieldType.BOOL, hidden = true)
 	Boolean creatable;
 	
-	@ObjectField(type = FieldType.HIDDEN)
+	@ObjectField(type = FieldType.BOOL, hidden = true)
 	Boolean updatable;
 	
-	@ObjectField(type = FieldType.HIDDEN)
+	@ObjectField(type = FieldType.BOOL, hidden = true)
 	Boolean deletable;
 	
-	@ObjectField(type = FieldType.HIDDEN)
+	@ObjectField(type = FieldType.BOOL, hidden = true)
 	Boolean permissionProtected;
 	
-	@ObjectField(type = FieldType.HIDDEN)
+	@ObjectField(type = FieldType.TEXT, hidden = true)
 	String nameField;
 	
 	public ObjectTemplate() {

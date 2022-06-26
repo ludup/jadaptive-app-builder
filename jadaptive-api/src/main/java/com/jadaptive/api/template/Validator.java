@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Repeatable(Validators.class)
 public @interface Validator {
 
-	String value(); 
+	String value() default ""; 
 	
 	ValidationType type();
 	
