@@ -17,7 +17,7 @@ public class CreateAccount extends UUIDEntity {
 	public static final String RESOURCE_KEY = "createAccount";
 
 	@ObjectField(type = FieldType.TEXT)
-	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9]{4,32}$", bundle = RESOURCE_KEY, i18n = "usernane.invalid")
+	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9]{4,32}$", bundle = RESOURCE_KEY, i18n = "username.invalid")
 	String username;
 
 	@ObjectField(type = FieldType.TEXT)

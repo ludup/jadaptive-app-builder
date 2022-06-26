@@ -35,15 +35,6 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	Tenant resolveTenantName(String username);
 
-	Tenant createTenant(String name, String domain, String... additionalDomains)
-			throws RepositoryException, ObjectException;
-
-	Tenant createTenant(String uuid, String name, String primaryDomain, String... additionalDomains)
-			throws RepositoryException, ObjectException;
-
-	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, String... additionalDomains)
-			throws RepositoryException, ObjectException;
-
 	Tenant getTenantByName(String name);
 
 	Tenant getTenantByUUID(String uuid);
@@ -63,5 +54,13 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	void setTenantController(TenantController controller);
 
 	Tenant initialiseTenant(Tenant tenant, boolean newSchema);
+
+	Tenant createTenant(String name, String ownerName, String ownerEmail, String primaryDomain,
+			boolean system, String... additionalDomains) throws RepositoryException, ObjectException;
+
+	Tenant createTenant(String uuid, String name, String ownerName, String ownerEmail, String primaryDomain,
+			boolean system, String... additionalDomains) throws RepositoryException, ObjectException;
+
+	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system);
 
 }

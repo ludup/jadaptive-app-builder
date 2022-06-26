@@ -33,7 +33,7 @@ public class ApplicationProperties {
 			log.warn("Could not load jadaptive.properties file [{}]", e.getMessage());
 		}
 
-		File confd = new File(confFolder, "conf.d");
+		File confd = new File("conf.d");
 		if(confd.exists()) {
 			for(File file : confd.listFiles()) {
 				if(file.isFile() && file.getName().endsWith(".properties")) {

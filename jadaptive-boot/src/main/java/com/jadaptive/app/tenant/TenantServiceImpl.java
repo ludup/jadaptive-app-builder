@@ -230,19 +230,19 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public Tenant getSystemTenant() throws RepositoryException, ObjectException {
 		return systemTenant;
 	}
-	
+
 	@Override
-	public Tenant createTenant(String name, String domain, String... additionalDomains) throws RepositoryException, ObjectException {
-		return createTenant(UUID.randomUUID().toString(), name, domain, additionalDomains);
+	public Tenant createTenant(String name, String ownerName, String ownerEmail, String primaryDomain, boolean system, String... additionalDomains) throws RepositoryException, ObjectException {
+		return createTenant(UUID.randomUUID().toString(), name, ownerName, ownerEmail, primaryDomain, system, additionalDomains);
 	}
 	
 	@Override
-	public Tenant createTenant(String uuid, String name, String primaryDomain, String... additionalDomains) throws RepositoryException, ObjectException {
-		return createTenant(uuid, name, primaryDomain, false);
+	public Tenant createTenant(String uuid, String name, String primaryDomain, boolean system) {
+		return createTenant(uuid, name, "", "", primaryDomain, system);
 	}
-	
+
 	@Override
-	public Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, String... additionalDomains) throws RepositoryException, ObjectException {
+	public Tenant createTenant(String uuid, String name, String ownerName, String ownerEmail, String primaryDomain, boolean system, String... additionalDomains) throws RepositoryException, ObjectException {
 		
 		if(Objects.nonNull(controller)) {
 			if(!controller.supportsMultipleTenancy()) {
@@ -263,6 +263,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		Tenant tenant = new Tenant(uuid, name, primaryDomain);
 		tenant.setSystem(system);
 		tenant.getAlternativeDomains().addAll(Arrays.asList(additionalDomains));
+		tenant.setOwnerEmail(ownerEmail);
+		tenant.setOwnerName(ownerName);
 		
 		try {
 			repository.saveTenant(tenant);

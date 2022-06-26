@@ -115,7 +115,11 @@ public class TenantWizard extends AbstractWizard implements FormHandler {
 		ConfigureDomain domain = ObjectUtils.assertObject(state.getObject(ConfigureDomain.class), ConfigureDomain.class);
 		TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
 		
-		Tenant tenant = tenantService.createTenant(acc.getCompany(), String.format("%s.%s", domain.getSubdomain(), config.getRootDomain()));
+		Tenant tenant = tenantService.createTenant(acc.getCompany(), 
+				acc.getName(),
+				acc.getEmailAddress(),
+				String.format("%s.%s", domain.getSubdomain(), config.getRootDomain()),
+				false);
 		
 		tenantService.executeAs(tenant, ()-> {
 			templateService.registerTenantIndexes();

@@ -10,6 +10,7 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.template.Validators;
 import com.jadaptive.plugins.web.ui.tenant.TenantWizard;
+import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = CreateTenant.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT, bundle = TenantWizard.RESOURCE_KEY)
 public class CreateTenant extends AbstractUUIDEntity {
@@ -18,7 +19,7 @@ public class CreateTenant extends AbstractUUIDEntity {
 
 	public static final String RESOURCE_KEY = "createTenant";
 	
-	public static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+	
 	
 	@ObjectField(type = FieldType.TEXT)
 	@Validator(type = ValidationType.REQUIRED)
@@ -30,7 +31,7 @@ public class CreateTenant extends AbstractUUIDEntity {
 	
 	@ObjectField(type = FieldType.TEXT)
 	@Validators({@Validator(type = ValidationType.REQUIRED),
-		@Validator(type = ValidationType.REGEX, value = EMAIL_PATTERN)})
+		@Validator(type = ValidationType.REGEX, value = Utils.EMAIL_PATTERN)})
 	String emailAddress;
 
 	public String getCompany() {

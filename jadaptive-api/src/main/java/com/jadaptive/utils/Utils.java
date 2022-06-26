@@ -47,6 +47,8 @@ public class Utils {
 	public static final int ONE_HOUR = ONE_MINUTE * 60;
 	public static final int ONE_DAY = ONE_HOUR * 24;
 
+	public static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+	
 	static Logger log = LoggerFactory.getLogger(Utils.class);
 
 	static SecureRandom random = new SecureRandom();
