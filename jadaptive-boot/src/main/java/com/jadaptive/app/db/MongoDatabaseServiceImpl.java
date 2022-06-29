@@ -12,10 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.repository.RepositoryException;
-import com.mongodb.ConnectionString;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mongodb.client.MongoClients;
 
 import de.flapdoodle.embed.mongo.MongodProcess;
 
