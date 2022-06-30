@@ -56,7 +56,7 @@ public class ValidateEmailSection extends TenantSection {
 		
 		try {
 			ValidateEmail obj = (ValidateEmail) object;
-			CreateTenant tenant = ObjectUtils.assertObject(Wizard.getCurrentState().getObject(CreateTenant.class), CreateTenant.class);
+			CreateTenant tenant = ObjectUtils.assertObject(state.getObject(CreateTenant.class), CreateTenant.class);
 			emailService.assertCode(tenant.getEmailAddress(), obj.getCode());
 		} finally {
 			permissionService.clearUserContext();

@@ -78,10 +78,14 @@ public class QuickSetupWidget implements DashboardWidget {
 	public boolean wantsDisplay() {
 		try {
 			permissionService.assertAdministrator();
-			return applicationService.getBeans(QuickSetupItem.class).size() > 0;
+			for(QuickSetupItem item : applicationService.getBeans(QuickSetupItem.class)) {
+				if(item.isEnabled()) {
+					return true;
+				}
+			}
 		} catch(AccessDeniedException e) {
-			return false;
 		}
+		return false;
 	}
 
 }

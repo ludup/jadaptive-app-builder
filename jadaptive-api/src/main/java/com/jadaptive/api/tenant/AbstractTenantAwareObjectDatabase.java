@@ -10,8 +10,6 @@ import com.jadaptive.api.template.SortOrder;
 
 public interface AbstractTenantAwareObjectDatabase<T extends UUIDDocument> {
 
-	
-
 	T get(String uuid) throws RepositoryException, ObjectException;
 	
 	T get(SearchField... fields) throws RepositoryException, ObjectException;

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -469,6 +470,18 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		setCurrentTenant(tenant);
 		try {
 			r.run();
+		} finally {
+			clearCurrentTenant();
+		}
+	}
+	
+	@Override
+	public <T> T executeAs(Tenant tenant, Callable<T> r) {
+		setCurrentTenant(tenant);
+		try {
+			return r.call();
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
 		} finally {
 			clearCurrentTenant();
 		}

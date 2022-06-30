@@ -9,4 +9,6 @@ public interface QuickSetupItem extends ExtensionPoint {
 	String getI18n();
 	
 	String getLink();
+	
+	boolean isEnabled();
 }

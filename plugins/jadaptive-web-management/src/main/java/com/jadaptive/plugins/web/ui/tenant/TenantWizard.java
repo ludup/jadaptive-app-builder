@@ -83,6 +83,7 @@ public class TenantWizard extends AbstractWizard implements FormHandler {
 		sections.add(applicationService.autowire(new ValidateEmailSection()));
 		sections.add(applicationService.autowire(new ConfigureDomainSection()));
 		sections.add(applicationService.autowire(new AdminSection()));
+//		sections.add(applicationService.autowire(new ConfigureKeySection()));
 		
 		for(WizardSection section : applicationService.getBeans(SetupSection.class)) {
 			if(section.isSystem()) {

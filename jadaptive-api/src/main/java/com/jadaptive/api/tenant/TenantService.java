@@ -1,5 +1,7 @@
 package com.jadaptive.api.tenant;
 
+import java.util.concurrent.Callable;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.jadaptive.api.entity.ObjectException;
@@ -46,6 +48,8 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	boolean isReady();
 
 	void executeAs(Tenant tenant, Runnable r);
+	
+	<T> T executeAs(Tenant tenant, Callable<T> r);
 
 	boolean hasCurrentTenant();
 

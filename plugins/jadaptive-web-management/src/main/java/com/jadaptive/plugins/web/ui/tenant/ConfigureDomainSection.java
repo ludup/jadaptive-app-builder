@@ -11,6 +11,8 @@ import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.wizards.Wizard;
+import com.jadaptive.api.ui.wizards.WizardState;
+import com.jadaptive.plugins.web.objects.ConfigureDomain;
 import com.jadaptive.plugins.web.objects.CreateTenant;
 import com.jadaptive.utils.ObjectUtils;
 
@@ -48,6 +50,72 @@ public class ConfigureDomainSection extends TenantSection {
 		document.selectFirst("#subdomain").val(buf.toString());
 	}
 	
+	
+	@Override
+	public void processReview(Document document, WizardState state) {
+		
+
+		Element content = document.selectFirst("#setupStep");
+		TenantConfiguration conf = tenantConfig.getObject(TenantConfiguration.class);
+		CreateTenant obj = ObjectUtils.assertObject(state.getObject(CreateTenant.class), CreateTenant.class);
+		ConfigureDomain domain = ObjectUtils.assertObject(state.getObject(ConfigureDomain.class), ConfigureDomain.class);
+		
+		content.appendChild(new Element("div")
+				.addClass("col-12 w-100 my-3")
+				.appendChild(new Element("h4")
+					.attr("jad:i18n", "review.tenant.header")
+					.attr("jad:bundle", TenantWizard.RESOURCE_KEY))
+				.appendChild(new Element("p")
+						.attr("jad:bundle", TenantWizard.RESOURCE_KEY)
+						.attr("jad:i18n", "review.tenant.desc"))
+				.appendChild(new Element("div")
+					.addClass("row")
+						.appendChild(new Element("div")
+								.addClass("col-3")
+								.appendChild(new Element("span")
+										.attr("jad:bundle", TenantWizard.RESOURCE_KEY)
+										.attr("jad:i18n", "company.name")))
+						.appendChild(new Element("div")
+									.addClass("col-9")
+									.appendChild(new Element("span")
+											.appendChild(new Element("strong")
+													.text(obj.getCompany()))))
+					.addClass("row")
+						.appendChild(new Element("div")
+								.addClass("col-3")
+								.appendChild(new Element("span")
+										.attr("jad:bundle", TenantWizard.RESOURCE_KEY)
+										.attr("jad:i18n", "name.name")))
+						.appendChild(new Element("div")
+									.addClass("col-9")
+									.appendChild(new Element("span")
+											.appendChild(new Element("strong")
+													.text(obj.getName()))))
+					.addClass("row")
+						.appendChild(new Element("div")
+								.addClass("col-3")
+								.appendChild(new Element("span")
+										.attr("jad:bundle", TenantWizard.RESOURCE_KEY)
+										.attr("jad:i18n", "domain.name")))
+						.appendChild(new Element("div")
+									.addClass("col-9")
+									.appendChild(new Element("span")
+											.appendChild(new Element("strong")
+													.text(String.format("%s.%s", domain.getSubdomain(), conf.getRootDomain())))))
+					.addClass("row")
+						.appendChild(new Element("div")
+								.addClass("col-3")
+								.appendChild(new Element("span")
+										.attr("jad:bundle", TenantWizard.RESOURCE_KEY)
+										.attr("jad:i18n", "emailAddress.name")))
+						.appendChild(new Element("div")
+									.addClass("col-9")
+									.appendChild(new Element("span")
+											.appendChild(new Element("strong")
+													.text(obj.getEmailAddress()))))));
+	
+	}
+
 	private boolean isNotCompanyType(String element) {
 
 		switch(element.trim().toLowerCase()) {

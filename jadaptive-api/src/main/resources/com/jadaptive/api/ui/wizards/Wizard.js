@@ -43,7 +43,30 @@ var Wizard = (function () {
 
 $(function() {
 	$('#nextButton').click( function() {
-		Wizard.next();
+		if($('.wizardForm').length > 0) {		
+			$.ajax({
+	           type: "POST",
+	           url: $('form').attr('action'),
+	           cache: false,
+	           contentType: false,
+	    	   processData: false,
+	           data: new FormData($("form")[0]),
+	           dataType: 'json',
+	           success: function(data)
+	           {
+	           	   	if(data.success) {
+						Wizard.next();
+	           	   	} else {
+	           	    	JadaptiveUtils.error($('#feedback'), data.message);
+	           	   	}
+	           },
+	           complete: function() {
+					cancel();
+	           }
+	      });
+		} else {
+			Wizard.next();
+		}
 	});
 	$('#backButton').click( function() {
 		Wizard.back();
