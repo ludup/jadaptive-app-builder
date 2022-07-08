@@ -486,4 +486,9 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			clearCurrentTenant();
 		}
 	}
+
+	@Override
+	public boolean isSystemTenant() {
+		return getCurrentTenant().isSystem();
+	}
 }

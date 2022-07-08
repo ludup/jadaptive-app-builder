@@ -67,4 +67,6 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system);
 
+	boolean isSystemTenant();
+
 }
