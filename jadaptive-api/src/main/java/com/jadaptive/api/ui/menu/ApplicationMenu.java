@@ -26,4 +26,6 @@ public interface ApplicationMenu extends ExtensionPoint {
 	default boolean isEnabled() { return true; }
 	
 	default boolean isVisible() { return true; }
+
+	default String getIconGroup() { return "fa-regular"; }
 }

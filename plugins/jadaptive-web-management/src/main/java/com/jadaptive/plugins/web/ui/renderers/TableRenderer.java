@@ -310,24 +310,29 @@ public class TableRenderer {
 		if(isDefault) {
 			if(canUpdate && !readOnly) {
 				if(Objects.isNull(parentObject)) {
-					return Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "underline").appendChild(renderText(field, obj, template));
+					return Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "underline").appendChild(processFieldValue(obj, template, field));
 				} else {
 					return Html.a("#", "underline", "stash")
 							.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
 							.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + this.field.getResourceKey() + "/" + obj.getUuid())
-							.appendChild(renderText(field, obj, template));
+							.appendChild(processFieldValue(obj, template, field));
 				}
 			} else {
 				if(Objects.isNull(parentObject)) {
-					return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").appendChild(renderText(field, obj, template));
+					return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").appendChild(processFieldValue(obj, template, field));
 				} else {
-					return Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)  + "/" + this.field.getResourceKey() + "/" + obj.getUuid(), "underline").appendChild(renderText(field, obj, template));
+					return Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)  + "/" + this.field.getResourceKey() + "/" + obj.getUuid(), "underline").appendChild(processFieldValue(obj, template, field));
 				}
 				
 			}
 			
 		}
 		
+		return processFieldValue(obj, template, field);
+		
+	}
+	
+	private Element processFieldValue(AbstractObject obj, ObjectTemplate template, FieldTemplate field) {
 		switch(field.getFieldType()) {
 		case BOOL:
 			return Html.i("far", Boolean.parseBoolean(obj.getValue(field).toString()) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
@@ -348,7 +353,6 @@ public class TableRenderer {
 		default:
 			return Html.span(StringUtils.defaultString(obj.getValue(field).toString()), "UTF-8");
 		}
-		
 	}
 
 	private Element renderText(FieldTemplate field, AbstractObject obj, ObjectTemplate template) {

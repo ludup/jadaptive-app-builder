@@ -19,11 +19,11 @@ public class Html {
 		return new Element("a").attr("href", href);
 	}
 	
-	public static Node i(String classes) {
+	public static Element i(String classes) {
 		return new Element("i").addClass(classes);
 	}
 	
-	public static Node i(String... classes) {
+	public static Element i(String... classes) {
 		return new Element("i").addClass(Utils.csv(" ", classes));
 	}
 	

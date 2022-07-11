@@ -7,6 +7,7 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
+import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -24,16 +25,13 @@ import com.jadaptive.utils.Utils;
 @ObjectViews({ 
 	@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)})
 @TableView(defaultColumns = { "name", "hostname" })
-public class Tenant extends AbstractUUIDEntity implements NamedDocument {
+public class Tenant extends NamedUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 1567817173441528990L;
 
 	public static final String RESOURCE_KEY = "tenant";
 	
 	public static final String DOMAINS_VIEW = "domains";
-	
-	@ObjectField(type = FieldType.TEXT)
-	String name;
 	
 	@ObjectField(type = FieldType.TEXT)
 	String hostname;
@@ -63,14 +61,6 @@ public class Tenant extends AbstractUUIDEntity implements NamedDocument {
 		this.setUuid(uuid);
 		this.name = name;
 		this.hostname = hostname;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getDomain() {

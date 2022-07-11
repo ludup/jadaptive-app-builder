@@ -110,7 +110,7 @@ public class Header extends AbstractPageExtension {
 							.addClass("dropdown-item me-3")
 							.attr("href", child.getPath())
 							.appendChild(new Element("i")
-									.addClass("nav-icon me-2 far fa-fw fa-" + child.getIcon()))
+									.addClass(String.format("nav-icon me-2 %s fa-fw fa-%s", child.getIconGroup(), child.getIcon())))
 							.appendChild(new Element("span")
 									.attr("jad:bundle", child.getBundle())
 										.attr("jad:i18n", child.getResourceKey())));
