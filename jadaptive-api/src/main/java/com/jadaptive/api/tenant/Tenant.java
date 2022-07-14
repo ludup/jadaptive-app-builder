@@ -5,7 +5,6 @@ import java.util.HashSet;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldType;

@@ -491,4 +491,16 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public boolean isSystemTenant() {
 		return getCurrentTenant().isSystem();
 	}
+
+	@Override
+	public <T> T asSystem(Callable<T> r) {
+		return executeAs(getSystemTenant(), r);
+	}
+
+	@Override
+	public void asSystem(Runnable r) {
+		executeAs(getSystemTenant(), r);
+	}
+	
+	
 }

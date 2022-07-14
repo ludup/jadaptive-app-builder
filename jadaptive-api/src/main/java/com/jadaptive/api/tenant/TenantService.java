@@ -69,4 +69,7 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	boolean isSystemTenant();
 
+	<T> T asSystem(Callable<T> r);
+
+	void asSystem(Runnable r);
 }

@@ -1,4 +1,4 @@
-package com.jadaptive.app.tenant;
+package com.jadaptive.app.db;
 
 import java.util.Collection;
 
@@ -14,8 +14,6 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
-import com.jadaptive.app.db.DocumentDatabase;
 
 @Repository
 public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity> 
