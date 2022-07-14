@@ -1,9 +1,0 @@
-[{
-    "uuid": "b76a4b67-ac70-45c2-95ca-9d7e14b3f695",
-	"resourceKey": "authenticationModule",
-	"authenticatorKey": "password",
-	"name": "Password",
-	"identityCapture": true,
-	"secretCapture": true,
-	"system": true
-}]
