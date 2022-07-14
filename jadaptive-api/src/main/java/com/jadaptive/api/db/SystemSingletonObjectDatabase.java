@@ -1,6 +1,6 @@
 package com.jadaptive.api.db;
 
-public interface SystemObjectDatabase<T> {
+public interface SystemSingletonObjectDatabase<T> {
 
 	void saveObject(T object);
 

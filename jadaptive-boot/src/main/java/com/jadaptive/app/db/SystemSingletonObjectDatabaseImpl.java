@@ -4,7 +4,7 @@ import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.api.db.SystemObjectDatabase;
+import com.jadaptive.api.db.SystemSingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.RepositoryException;
@@ -12,7 +12,7 @@ import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.tenant.TenantService;
 
 @Repository
-public class SystemObjectDatabaseImpl<T extends SingletonUUIDEntity> implements SystemObjectDatabase<T> {
+public class SystemSingletonObjectDatabaseImpl<T extends SingletonUUIDEntity> implements SystemSingletonObjectDatabase<T> {
 
 	@Autowired
 	private TenantAwareObjectDatabase<T> objectDatabase;

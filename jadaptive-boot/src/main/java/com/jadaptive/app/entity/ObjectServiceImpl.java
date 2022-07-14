@@ -120,7 +120,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 		ObjectTemplate template = templateService.get(resourceKey);
 
-		if(template.getPermissionProtected()) {
+		if(!template.isSystem() && template.getPermissionProtected()) {
 			permissionService.assertRead(resourceKey);
 		}
 		

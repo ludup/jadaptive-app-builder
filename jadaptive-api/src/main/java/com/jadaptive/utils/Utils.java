@@ -106,6 +106,10 @@ public class Utils {
 		return formatDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 	}
 	
+	public static String formatISODate(Date date) {
+		return formatDate(date, "yyyy-MM-dd");
+	}
+	
 	public static String formatShortDate(Date date) {
 		return formatDate(date, "EEE, d MMM yyyy");
 	}
