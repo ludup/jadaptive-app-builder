@@ -507,4 +507,31 @@ public class Utils {
 				
 		return buf.toString();
 	}
+	
+	public static Date getMonthEnd(Date timestamp) {
+		
+		Calendar date = Calendar.getInstance();
+		date.setTime(getMonthStart(timestamp));
+		date.add(Calendar.MONTH, 1);
+		date.add(Calendar.DAY_OF_MONTH, -1);
+		date.set(Calendar.HOUR_OF_DAY, 23);
+		date.set(Calendar.MINUTE, 59);
+		date.set(Calendar.SECOND, 59);
+		date.set(Calendar.MILLISECOND, 9999);
+		return date.getTime();
+		
+	}
+
+	public static Date getMonthStart(Date timestamp) {
+		
+		Calendar date = Calendar.getInstance();
+		date.setTime(timestamp);
+		date.set(Calendar.DAY_OF_MONTH, 0);
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+		
+		return date.getTime();
+	}
 }

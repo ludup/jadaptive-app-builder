@@ -8,8 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
@@ -93,5 +96,9 @@ public class AuthenticatedController extends ExceptionHandlingController {
 	
 	protected boolean isValidPermission(String permission) {
 		return permissionService.isValidPermission(permission);
+	}
+	
+	protected Session getCurrentSession() throws UnauthorizedException, SessionTimeoutException {
+		return sessionUtils.getSession(Request.get());
 	}
 }

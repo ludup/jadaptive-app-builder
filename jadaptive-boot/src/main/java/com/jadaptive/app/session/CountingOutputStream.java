@@ -1,20 +1,16 @@
 package com.jadaptive.app.session;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Objects;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
+public class CountingOutputStream extends OutputStream {
 
-public class CountingOutputStream extends ServletOutputStream {
-
-	CountingOutputStreamListener listener;
-	ServletOutputStream out;
+	OutputStream out;
 	long count = 0;
 	
-	public CountingOutputStream(ServletOutputStream out, CountingOutputStreamListener listener) {
+	public CountingOutputStream(OutputStream out) {
 		this.out = out;
-		this.listener = listener;
 	}
 	
 	@Override
@@ -22,8 +18,6 @@ public class CountingOutputStream extends ServletOutputStream {
 		checkOpen();
 		count+=len;
 		out.write(b, off, len);
-		
-		System.out.println("That's " + len + " more bytes");
 	}
 
 	@Override
@@ -38,30 +32,19 @@ public class CountingOutputStream extends ServletOutputStream {
 		out.flush();
 	}
 	
+	public void close() throws IOException {
+		if(Objects.nonNull(out)) {
+			out.close();
+			out = null;
+		}
+	}
 	private void checkOpen() throws IOException {
 		if(Objects.isNull(out)) {
 			throw new IOException("The outputstream is closed!");
 		}
 	}
 
-	@Override
-	public void close() throws IOException {
-		if(Objects.nonNull(out)) {
-			listener.closed(count);
-			out.close();
-			out = null;
-		}
+	public long getCount() {
+		return count;
 	}
-
-	@Override
-	public boolean isReady() {
-		return out.isReady();
-	}
-
-	@Override
-	public void setWriteListener(WriteListener listener) {
-		out.setWriteListener(listener);
-	}
-	
-	
 }

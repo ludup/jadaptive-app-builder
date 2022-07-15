@@ -117,13 +117,13 @@ public class UploadServlet extends HttpServlet {
 					    stream = new SessionStickyInputStream(
 					    		stream, 
 					    		session) {
-					    	protected void touchSession() {
+					    	protected void touchSession(Session session) throws IOException {
 								if((System.currentTimeMillis() - lastTouch) >  30000) {
 									try {
 										sessionUtils.touchSession(session);
 									} catch (SessionTimeoutException e) {
+										throw new IOException(e.getMessage(), e);
 									}
-									lastTouch = System.currentTimeMillis();
 								}
 							}
 					    };

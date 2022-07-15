@@ -76,8 +76,8 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 						c.setTime(session.getLastUpdated());
 						c.add(Calendar.MINUTE, session.getSessionTimeout());
 					}
-					if (log.isDebugEnabled()) {
-						log.debug("Checking session timeout currentTime="
+					if (log.isTraceEnabled()) {
+						log.trace("Checking session timeout currentTime="
 								+ currentTime.getTime() + " lastUpdated="
 								+ session.getLastUpdated() + " timeoutThreshold="
 								+ c.getTime());
@@ -113,7 +113,12 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Override
 	public void touch(Session session) {
 		if(session.isReadyForUpdate()) {
-			log.info("REMOVEME: Touching " + session.getId() + " " + (Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : "") + " timeout=" + session.getSessionTimeout());
+			if(log.isDebugEnabled()) {
+				log.debug("Touching " + session.getUser().getUsername() + "/"
+						+ session.getUuid() + " " + 
+							(Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : "") 
+								+ " timeout=" + session.getSessionTimeout());
+			}
 			session.setLastUpdated(new Date());
 			repository.saveOrUpdate(session);
 		}
@@ -122,7 +127,10 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Override
 	public void closeSession(Session session) {
 
-		log.info("REMOVEME: Closing " + session.getId() + " " + (Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : "") + " timeout=" + session.getSessionTimeout());
+		log.info("Closing session " + session.getUser().getUsername() + "/"
+				+ session.getUuid() + " " + 
+					(Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : "") 
+						+ " timeout=" + session.getSessionTimeout());
 		
 		if (session.getSignedOut() != null) {
 			log.error("Attempting to close a session which is already closed!");
