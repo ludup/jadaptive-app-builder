@@ -2,6 +2,7 @@ package com.jadaptive.api.tenant;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
@@ -105,5 +106,20 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
+	}
+
+	public boolean isValidHostname(String serverName) {
+		
+		if(serverName.equalsIgnoreCase(hostname)) {
+			return true;
+		}
+		if(Objects.nonNull(alternativeDomains)) {
+			for(String domain : alternativeDomains) {
+				if(serverName.equalsIgnoreCase(domain)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

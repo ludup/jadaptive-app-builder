@@ -48,6 +48,7 @@ public class Utils {
 	public static final int ONE_DAY = ONE_HOUR * 24;
 
 	public static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+	public static final String HTTP_URL_PATTERN = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$";
 	
 	static Logger log = LoggerFactory.getLogger(Utils.class);
 

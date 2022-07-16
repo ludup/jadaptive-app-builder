@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
@@ -23,7 +21,6 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.jadaptive.api.app.ApplicationServiceImpl;
-import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -34,6 +31,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.app.db.DocumentValidator;
 import com.jadaptive.utils.Utils;
 
 public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> {
@@ -365,44 +363,46 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		
 		String value = node.asText();
 		
+		DocumentValidator.validate(field, value);
+		
 		/**
 		 * THIS IS DUPLICATED CODE.. SEE DocumentValidator
 		 */
-		if(!Objects.isNull(field.getValidators())) {
-			for(FieldValidator v : field.getValidators()) {
-				switch(v.getType()) {
-				case REQUIRED:
-				{
-					if(StringUtils.isBlank(value)) {
-						if(StringUtils.isBlank(v.getI18n())) {
-							throw new ValidationException(
-									I18N.getResource(Locale.getDefault(), "default", "default.required.error", 
-										I18N.getResource(Locale.getDefault(), v.getBundle(), String.format("%s.name", field.getResourceKey()))));
-						} else {
-							throw new ValidationException(I18N.getResource(
-								Locale.getDefault(), v.getBundle(), v.getI18n(), value));
-						}
-					}
-					break;
-				}
-				case LENGTH:
-					
-					int maxlength = Integer.parseInt(v.getValue());
-					if(value.length() > maxlength) {
-						throw new ValidationException(String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
-					}
-					break;
-				case REGEX:
-					Pattern pattern = Pattern.compile(v.getValue());
-					if(!pattern.matcher(value).matches()) {
-						throw new ValidationException(String.format("%s does not conform to regex pattern %s", value, v.getValue()));
-					}
-					break;
-				default:
-					break;
-				}
-			}
-		}
+//		if(!Objects.isNull(field.getValidators())) {
+//			for(FieldValidator v : field.getValidators()) {
+//				switch(v.getType()) {
+//				case REQUIRED:
+//				{
+//					if(StringUtils.isBlank(value)) {
+//						if(StringUtils.isBlank(v.getI18n())) {
+//							throw new ValidationException(
+//									I18N.getResource(Locale.getDefault(), "default", "default.required.error", 
+//										I18N.getResource(Locale.getDefault(), v.getBundle(), String.format("%s.name", field.getResourceKey()))));
+//						} else {
+//							throw new ValidationException(I18N.getResource(
+//								Locale.getDefault(), v.getBundle(), v.getI18n(), value));
+//						}
+//					}
+//					break;
+//				}
+//				case LENGTH:
+//					
+//					int maxlength = Integer.parseInt(v.getValue());
+//					if(value.length() > maxlength) {
+//						throw new ValidationException(String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
+//					}
+//					break;
+//				case REGEX:
+//					Pattern pattern = Pattern.compile(v.getValue());
+//					if(!pattern.matcher(value).matches()) {
+//						throw new ValidationException(String.format("%s does not conform to regex pattern %s", value, v.getValue()));
+//					}
+//					break;
+//				default:
+//					break;
+//				}
+//			}
+//		}
 	}
 
 	private void setProperty(Object value, FieldTemplate t, AbstractObject e) {

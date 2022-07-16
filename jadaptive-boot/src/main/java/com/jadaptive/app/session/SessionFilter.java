@@ -30,6 +30,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.db.SystemSingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -41,6 +42,8 @@ import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.stats.UsageService;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
@@ -74,6 +77,9 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 	private TenantAwareObjectDatabase<Redirect> redirectDatabase;
 	
 	@Autowired
+	private SystemSingletonObjectDatabase<TenantConfiguration> tenantConfig;
+	
+	@Autowired
 	private UsageService usageService; 
 	
 	Map<String,String> cachedRedirects = new HashMap<>();
@@ -91,6 +97,16 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 		
 		tenantService.setCurrentTenant(req);
 		
+		Tenant tenant = tenantService.getCurrentTenant();
+		
+		if(!tenant.isValidHostname(request.getServerName())) {
+			TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
+			if(config.getRequireValidDomain()) {
+				resp.sendRedirect(config.getInvalidDomainRedirect());
+				return;
+			}
+			
+		}
 		try {
 
 			if(checkRedirects(req, resp)) {

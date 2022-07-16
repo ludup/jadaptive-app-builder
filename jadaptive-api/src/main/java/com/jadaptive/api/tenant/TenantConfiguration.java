@@ -8,6 +8,8 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = TenantConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON, system = true)
 @ObjectViews({@ObjectViewDefinition(value = TenantConfiguration.DOMAIN_VIEW, bundle = TenantConfiguration.RESOURCE_KEY)})
@@ -24,12 +26,38 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	@ObjectView(DOMAIN_VIEW)
 	String rootDomain = "";
 	
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
+	@ObjectView(DOMAIN_VIEW)
+	Boolean requireValidDomain;
+	
+	@ObjectField(type = FieldType.TEXT, defaultValue = "")
+	@Validator(type = ValidationType.URL)
+	@ObjectView(DOMAIN_VIEW)
+	String invalidDomainRedirect;
+	
+	
 	public String getRootDomain() {
 		return rootDomain;
 	}
 
 	public void setRootDomain(String rootDomain) {
 		this.rootDomain = rootDomain;
+	}
+
+	public Boolean getRequireValidDomain() {
+		return requireValidDomain;
+	}
+
+	public void setRequireValidDomain(Boolean requireValidDomain) {
+		this.requireValidDomain = requireValidDomain;
+	}
+
+	public String getInvalidDomainRedirect() {
+		return invalidDomainRedirect;
+	}
+
+	public void setInvalidDomainRedirect(String invalidDomainRedirect) {
+		this.invalidDomainRedirect = invalidDomainRedirect;
 	}
 
 	@Override

@@ -183,27 +183,39 @@ public class DocumentValidator {
 					break;
 				}
 				case LENGTH:
-
+				{
 					int maxlength = Integer.parseInt(v.getValue());
 					if (value.length() > maxlength) {
 						throw new ValidationException(
 								String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
 					}
 					break;
+				}
 				case REGEX:
-					Pattern pattern = Pattern.compile(v.getValue());
-					if (!pattern.matcher(value).matches()) {
-						if(StringUtils.isBlank(v.getI18n())) {
-							throw new ValidationException(String.format("%s is an invalid value", value));
-						} else {
-							throw new ValidationException(I18N.getResource(
-								Locale.getDefault(), v.getBundle(), v.getI18n(), value));
-						}
-					}
+				{
+					validateRegex(v.getValue(), value, v);
 					break;
+				}
+				case URL:
+				{
+					validateRegex(Utils.HTTP_URL_PATTERN, value, v);
+					break;
+				}
 				default:
 					break;
 				}
+			}
+		}
+	}
+	
+	private static void validateRegex(String regex, String value, FieldValidator v) {
+		Pattern pattern = Pattern.compile(regex);
+		if (!pattern.matcher(value).matches()) {
+			if(StringUtils.isBlank(v.getI18n())) {
+				throw new ValidationException(String.format("%s is an invalid URL", value));
+			} else {
+				throw new ValidationException(I18N.getResource(
+					Locale.getDefault(), v.getBundle(), v.getI18n(), value));
 			}
 		}
 	}
