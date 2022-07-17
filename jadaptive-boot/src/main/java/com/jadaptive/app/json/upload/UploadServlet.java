@@ -89,6 +89,8 @@ public class UploadServlet extends HttpServlet {
 		if(Objects.nonNull(session)) {
 			permissionService.setupUserContext(session.getUser());
 		}
+
+		Map<String,String> parameters = new HashMap<>();
 		
 		try {
 			// Create a new file upload handler
@@ -96,7 +98,7 @@ public class UploadServlet extends HttpServlet {
 
 			// Parse the request
 			FileItemIterator iter = upload.getItemIterator(req);
-			Map<String,String> parameters = new HashMap<>();
+			
 			
 			while (iter.hasNext()) {
 			    FileItemStream item = iter.next();
@@ -142,7 +144,7 @@ public class UploadServlet extends HttpServlet {
 
 		} catch (Throwable e) {
 			log.error("Upload failure", e);
-			handler.sendFailedResponse(resp, handlerName, uri, e);
+			handler.sendFailedResponse(resp, handlerName, uri, parameters, e);
 		} finally {
 			if(Objects.nonNull(session)) {
 				permissionService.clearUserContext();
