@@ -510,6 +510,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				builder.append(" = ");
 				builder.append(field.getValue()[0]);
 				break;
+			case ALL:
+				builder.append(field.getColumn());
+				builder.append(" ALL( ");
+				builder.append(Utils.csv(field.getValue()));
+				builder.append(" ) ");
+				break;
 			case IN:
 				builder.append(field.getColumn());
 				builder.append(" IN( ");
@@ -571,6 +577,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			switch(field.getSearchType()) {
 			case EQUALS:
 				tmp.add(Filters.eq(field.getColumn(), field.getValue()[0]));
+				break;
+			case ALL:
+				tmp.add(Filters.all(field.getColumn(), field.getValue()));
 				break;
 			case IN:
 				tmp.add(Filters.in(field.getColumn(), field.getValue()));

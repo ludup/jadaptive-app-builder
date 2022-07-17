@@ -105,8 +105,8 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 				resp.sendRedirect(config.getInvalidDomainRedirect());
 				return;
 			}
-			
 		}
+		
 		try {
 
 			if(checkRedirects(req, resp)) {

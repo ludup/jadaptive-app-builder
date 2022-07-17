@@ -301,6 +301,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				buf.append("=");
 				buf.append(field.getValue()[0]);
 				break;
+			case ALL:
+				buf.append(field.getColumn());
+				buf.append(" ALL(");
+				buf.append(Utils.csv(field.getValue()));
+				buf.append(")");
+				break;
 			case IN:
 				buf.append(field.getColumn());
 				buf.append(" IN(");
