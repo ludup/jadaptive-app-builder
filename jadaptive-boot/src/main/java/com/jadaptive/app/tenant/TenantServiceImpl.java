@@ -441,6 +441,14 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				templateService.registerTenantIndexes();
 				initialiseTenant(object, true);
 			}
+			
+			tenantsByUUID.put(object.getUuid(), object);
+			tenantsByDomain.put(object.getDomain(), object);
+			if(Objects.nonNull(object.getAlternativeDomains())) {
+				for(String domain : object.getAlternativeDomains()) {
+					tenantsByDomain.put(domain, object);
+				}
+			}
 			return object.getUuid();
 		} finally {
 			clearCurrentTenant();
