@@ -22,6 +22,7 @@ import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.user.FakeUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
 import com.jadaptive.api.user.UserDatabase;
@@ -101,7 +102,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public boolean verifyPassword(User user, char[] password) {
 		try {
-			return getDatabase(user).verifyPassword(user, password);
+			return !(user instanceof FakeUser) && getDatabase(user).verifyPassword(user, password);
 		} catch(ObjectNotFoundException e) {
 			return false;
 		}
@@ -243,7 +244,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	
 	@Override
 	public boolean supportsLogin(User user) {
-		return getDatabase(user).getCapabilities().contains(UserDatabaseCapabilities.LOGON);
+		return user instanceof FakeUser || getDatabase(user).getCapabilities().contains(UserDatabaseCapabilities.LOGON);
 	}
 
 	@Override

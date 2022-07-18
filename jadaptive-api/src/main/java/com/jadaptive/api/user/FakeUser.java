@@ -1,6 +1,4 @@
-package com.jadaptive.app.user;
-
-import com.jadaptive.api.user.User;
+package com.jadaptive.api.user;
 
 public class FakeUser extends User {
 
@@ -9,7 +7,7 @@ public class FakeUser extends User {
 	public static final String FAKE_USER_UUID = "";
 	
 	String username;
-	FakeUser(String username) {
+	public FakeUser(String username) {
 		this.username = username;
 	}
 	
