@@ -509,6 +509,24 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public void asSystem(Runnable r) {
 		executeAs(getSystemTenant(), r);
 	}
+
+	@Override
+	public String resolveUserName(String username) {
+		
+		if(username.contains("@")) {
+			return StringUtils.substringBefore(username, "@");
+		}
+		
+		if(username.contains("\\")) {
+			return StringUtils.substringBefore(username, "\\");
+		}
+		
+		if(username.contains("/")) {
+			return StringUtils.substringBefore(username, "/");
+		}
+		
+		return username;
+	}
 	
 	
 }
