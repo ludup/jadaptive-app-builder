@@ -30,6 +30,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemSingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -89,7 +90,7 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 			throws IOException, ServletException {
 		
 		HttpServletRequest req = (HttpServletRequest)request;
-		HttpServletResponse resp = (HttpServletResponse)response; //new SessionServletResponseWrapper((HttpServletResponse)response);
+		HttpServletResponse resp = (HttpServletResponse)response;
 
 		if(log.isDebugEnabled()) {
 			log.debug(req.getMethod() + " " + req.getRequestURI().toString());
@@ -173,7 +174,7 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 				session = sessionUtils.getSession(request);
 			} catch (UnauthorizedException | SessionTimeoutException e) {
 			}
-//			
+			
 			/**
 			 * Get the security.properties hierarchy from the web application
 			 */
@@ -281,10 +282,14 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 				return true;
 			} else {
 				
-				log.debug("Checking redirect {}", request.getRequestURI());
+				if(log.isDebugEnabled()) {
+					log.debug("Checking redirect {}", request.getRequestURL().toString());
+				}
 				
-				
-				for(Redirect redirect : redirectDatabase.list(Redirect.class)) {
+				for(Redirect redirect : redirectDatabase.list(Redirect.class, 
+						SearchField.or(SearchField.eq("hostname", request.getServerName()),
+								SearchField.eq("hostname", null),
+								SearchField.eq("hostname", "")))) {
 					Pattern pattern = Pattern.compile(redirect.getPath());
 					Matcher matcher = pattern.matcher(request.getRequestURI());
 					if(matcher.matches()) {
@@ -311,30 +316,12 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 		} catch(ObjectNotFoundException e) {
 		}
 		
-		if(request.getRequestURI().equals("/")) {
+		if(request.getRequestURI().equals("/")
+				|| request.getRequestURI().equals("/app")) {
 			response.sendRedirect("/app/ui/");
 			return true;
 		}
 		
-	
 		return false;
 	}
-	
-//	class SessionServletResponseWrapper extends HttpServletResponseWrapper {
-//
-//		CountingOutputStream out;
-//		
-//		public SessionServletResponseWrapper(HttpServletResponse response) {
-//			super(response);
-//		}
-//
-//		@Override
-//		public ServletOutputStream getOutputStream() throws IOException {
-//			if(Objects.nonNull(out)) {
-//				return out;
-//			}
-//			return out = new CountingOutputStream(super.getOutputStream(), SessionFilter.this);
-//		}
-//		
-//	}
 }
