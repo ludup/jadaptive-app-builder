@@ -275,7 +275,7 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 		
 		try {
 				
-			String location = cachedRedirects.get(request.getRequestURI());
+			String location = cachedRedirects.get(request.getRequestURL().toString());
 			
 			if(Objects.nonNull(location)) {
 				response.sendRedirect(location);
@@ -294,6 +294,12 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 					Matcher matcher = pattern.matcher(request.getRequestURI());
 					if(matcher.matches()) {
 						
+						if(StringUtils.isNotBlank(redirect.getHostname())) {
+							if(!request.getServerName().equals(redirect.getHostname())) {
+								continue;
+							}
+						}
+						
 						location = redirect.getLocation();
 						for(int i = 0; i <= matcher.groupCount(); i++) { 
 							location = location.replace("$" + i, matcher.group(i));
@@ -306,7 +312,11 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 						
 						
 						location = ReplacementUtils.processTokenReplacements(location, resolver);
-						cachedRedirects.put(request.getRequestURI(), location);
+						cachedRedirects.put(request.getRequestURL().toString(), location);
+						
+						if(log.isDebugEnabled()) {
+							log.debug("Redirecting {} to {}", request.getRequestURL().toString(), location);
+						}
 						response.sendRedirect(location);
 						return true;
 					}
@@ -317,7 +327,8 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 		}
 		
 		if(request.getRequestURI().equals("/")
-				|| request.getRequestURI().equals("/app")) {
+				|| request.getRequestURI().equals("/app")
+				|| request.getRequestURI().equals("/app/")) {
 			response.sendRedirect("/app/ui/");
 			return true;
 		}
