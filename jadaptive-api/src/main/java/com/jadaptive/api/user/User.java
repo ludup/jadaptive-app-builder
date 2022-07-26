@@ -1,5 +1,7 @@
 package com.jadaptive.api.user;
 
+import java.util.Date;
+
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -15,7 +17,7 @@ import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
 @ObjectServiceBean(bean = UserService.class)
-@TableView(defaultColumns = { "username", "name" }, requiresUpdate = true, actions = {
+@TableView(defaultColumns = { "username", "name", "lastLogin" }, requiresUpdate = true, actions = {
 		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}") })
 public abstract class User extends UUIDEntity implements NamedDocument {
 
@@ -33,6 +35,9 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 
 	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT)
 	String email;
+	
+	@ObjectField(type = FieldType.TIMESTAMP)
+	Date lastLogin;
 
 	public String getUsername() {
 		return username;
@@ -57,4 +62,13 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+
+	public Date getLastLogin() {
+		return lastLogin;
+	}
+
+	public void setLastLogin(Date lastLogin) {
+		this.lastLogin = lastLogin;
+	}
+	
 }

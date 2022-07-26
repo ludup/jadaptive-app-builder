@@ -15,6 +15,7 @@ import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.template.ViewType;
 import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.user.PasswordEnabledUser;
+import com.jadaptive.api.user.User;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, creatable = false)
@@ -105,6 +106,11 @@ public class AdminUser extends PasswordEnabledUser {
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
+	}
+	
+	@Override
+	public String getEventGroup() {
+		return User.RESOURCE_KEY;
 	}
 
 }

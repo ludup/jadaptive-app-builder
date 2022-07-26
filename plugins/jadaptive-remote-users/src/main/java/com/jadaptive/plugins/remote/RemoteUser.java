@@ -66,4 +66,9 @@ public class RemoteUser extends User {
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}
+	
+	@Override
+	public String getEventGroup() {
+		return User.RESOURCE_KEY;
+	}
 }

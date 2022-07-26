@@ -23,6 +23,7 @@ import com.jadaptive.api.session.events.SessionClosedEvent;
 import com.jadaptive.api.session.events.SessionOpenedEvent;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.Utils;
 
 @Service
@@ -39,6 +40,9 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Autowired
 	private EventService eventService; 
 	
+	@Autowired
+	private UserService userService; 
+	
 	@Override
 	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent) {
 		
@@ -54,6 +58,9 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		session.setCsrfToken(Utils.generateRandomAlphaNumericString(32));
 		
 		repository.saveOrUpdate(session);
+		
+		user.setLastLogin(Utils.now());
+		userService.saveOrUpdate(user);
 		
 		eventService.publishEvent(new SessionOpenedEvent(session));
 		return session;

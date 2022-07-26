@@ -527,7 +527,7 @@ public class Utils {
 		
 		Calendar date = Calendar.getInstance();
 		date.setTime(timestamp);
-		date.set(Calendar.DAY_OF_MONTH, 0);
+		date.set(Calendar.DAY_OF_MONTH, 1);
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);

@@ -13,6 +13,7 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.ViewType;
 import com.jadaptive.api.user.PasswordEnabledUser;
+import com.jadaptive.api.user.User;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(resourceKey = BuiltinUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
@@ -82,4 +83,11 @@ public class BuiltinUser extends PasswordEnabledUser {
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}
+
+	@Override
+	public String getEventGroup() {
+		return User.RESOURCE_KEY;
+	}
+	
+	
 }
