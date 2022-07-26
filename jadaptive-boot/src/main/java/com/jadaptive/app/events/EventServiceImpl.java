@@ -51,7 +51,7 @@ public class EventServiceImpl implements EventService {
 			}
 		}
 		
-		keyed = keyedListeners.get(evt.getResourceKey());
+		keyed = keyedListeners.get(evt.getEventKey());
 		if(Objects.nonNull(keyed)) {
 			for(EventListener listener : keyed) {
 				fireEvent(listener, evt);
