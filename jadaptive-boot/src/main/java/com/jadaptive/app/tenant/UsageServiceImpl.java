@@ -82,7 +82,7 @@ public class UsageServiceImpl implements UsageService {
 	@Override
 	public Long sum(Date from, Date to, String... keys) {
 		return usageDatabase.sum(Usage.class, "value", 
-				SearchField.all("keys", Arrays.asList(keys)), 
+				SearchField.in("keys", Arrays.asList(keys)), 
 				SearchField.gte("created", from),
 				SearchField.lt("created", to));
 	}

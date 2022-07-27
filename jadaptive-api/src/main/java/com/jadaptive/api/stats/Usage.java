@@ -9,10 +9,12 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = Usage.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@TableView(defaultColumns = { "timestamp",  "keys", "value" })
 public class Usage extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 2886275420185558997L;
