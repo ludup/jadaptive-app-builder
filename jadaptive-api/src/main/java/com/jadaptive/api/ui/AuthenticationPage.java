@@ -12,7 +12,10 @@ import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.user.UserService;
 
 public abstract class AuthenticationPage<T> extends HtmlPage implements FormProcessor<T> {
@@ -27,7 +30,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	protected UserService userService;
 	
 	@Autowired
-	private PageCache pageCache; 
+	private PageCache pageCache;  
 	
 	Class<T> formClass;
 	
@@ -40,8 +43,17 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	}
 	
 	@Override
-	protected void generateContent(Document doc) throws FileNotFoundException {
+	protected final void generateContent(Document doc) throws FileNotFoundException {
+		
+		try {
+			sessionUtils.getSession(Request.get());
+			throw new UriRedirect("/app/ui/dashboard");
+		} catch (UnauthorizedException | SessionTimeoutException e) {
+			doGenerateContent(doc);
+		}
 	}
+	
+	protected void doGenerateContent(Document doc) throws FileNotFoundException { }
 	
 	protected abstract boolean doForm(Document document, AuthenticationState state, T form) throws AccessDeniedException;
 	

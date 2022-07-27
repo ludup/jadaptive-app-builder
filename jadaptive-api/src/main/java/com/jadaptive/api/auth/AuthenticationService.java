@@ -37,7 +37,5 @@ public interface AuthenticationService {
 	Class<? extends Page> getAuthenticationPage(String authenticator);
 
 	void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy) throws FileNotFoundException;
-
-
 	
 }
