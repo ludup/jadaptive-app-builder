@@ -13,7 +13,7 @@ import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
-@ObjectDefinition(resourceKey = Usage.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = Usage.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, creatable = false, updatable = false, deletable = false)
 @TableView(defaultColumns = { "timestamp",  "keys", "value" })
 public class Usage extends AbstractUUIDEntity {
 
