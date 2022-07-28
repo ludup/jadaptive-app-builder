@@ -10,12 +10,16 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.db.AssignableObjectDatabase;
+import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.user.User;
 
 @Service
-public class AuthenticationPolicyServiceImpl implements AuthenticationPolicyService {
+public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImpl<AuthenticationPolicy> implements AuthenticationPolicyService {
 
+	@Autowired
+	private AuthenticationService authenticationService; 
 	
 	@Autowired
 	private AssignableObjectDatabase<AuthenticationPolicy> policyDatabase;
@@ -42,6 +46,17 @@ public class AuthenticationPolicyServiceImpl implements AuthenticationPolicyServ
 		}
 		
 		return results.get(0);
+	}
+
+	@Override
+	protected void validateSave(AuthenticationPolicy policy) {		
+		authenticationService.validateModules(policy);
+	}
+
+
+	@Override
+	protected Class<AuthenticationPolicy> getResourceClass() {
+		return AuthenticationPolicy.class;
 	}
 
 }

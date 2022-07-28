@@ -2,6 +2,7 @@ package com.jadaptive.api.entity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -19,6 +20,7 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 
 	@Override
 	public String saveOrUpdate(T object) {
+		validateSave(object);
 		objectDatabase.saveOrUpdate(object);
 		return object.getUuid();
 	}
@@ -36,6 +38,10 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 	@Override
 	public Iterable<T> allObjects() {
 		return objectDatabase.list(getResourceClass());
+	}
+	
+	protected void validateSave(T object) {
+		
 	}
 
 }

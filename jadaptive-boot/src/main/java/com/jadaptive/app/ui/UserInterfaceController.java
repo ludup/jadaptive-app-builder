@@ -14,6 +14,7 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,15 +26,19 @@ import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.ui.MessagePage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageExtension;
+import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
 
 @Controller
@@ -70,16 +75,32 @@ public class UserInterfaceController extends AuthenticatedController {
 		String uri = request.getRequestURI();
 		String resourceUri = uri.length() >= 8 ? uri.substring(8) : "";
 		
+		String referrer = Request.get().getHeader(HttpHeaders.REFERER);
+	
+	
 		try {
 			Page page = pageCache.resolvePage(resourceUri);
 			page.doGet(resourceUri, request, response);
 		} catch(Redirect e) {
 			log.info("Redirecting to {}", e.getUri());
 			response.sendRedirect(e.getUri());
+		} catch(AccessDeniedException e) {
+			
+			throw new PageRedirect(new MessagePage("userInterface",
+					"title.accessDenied", 
+					"message.accessDenied",
+					"fa-file-lock",
+					referrer));
+			
 		} catch(FileNotFoundException e) {
-			log.info("Cannot find {}", resourceUri);
-			response.sendError(HttpStatus.NOT_FOUND.value());
+		
 		}
+		
+		throw new PageRedirect(new MessagePage("userInterface",
+				"title.pageNotFound", 
+				"message.pageNotFound",
+				"fa-file-circle-exclamation",
+				referrer));
 	}
 	
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.POST)
@@ -87,15 +108,30 @@ public class UserInterfaceController extends AuthenticatedController {
 
 		String uri = request.getRequestURI();
 		String resourceUri = uri.length() >= 8 ? uri.substring(8) : "";
+		String referrer = Request.get().getHeader(HttpHeaders.REFERER);
 		
 		try {
 			Page page = pageCache.resolvePage(resourceUri);
 			page.doPost(resourceUri, request, response);
 		} catch(Redirect e) {
 			response.sendRedirect(e.getUri());
+		} catch(AccessDeniedException e) {
+			
+			throw new PageRedirect(new MessagePage("userInterface",
+					"title.accessDenied", 
+					"message.accessDenied",
+					"fa-file-lock",
+					referrer));
+			
 		} catch(FileNotFoundException e) {
-			response.sendError(HttpStatus.NOT_FOUND.value());
+		
 		}
+		
+		throw new PageRedirect(new MessagePage("userInterface",
+				"title.pageNotFound", 
+				"message.pageNotFound",
+				"fa-file-circle-exclamation",
+				referrer));
 	}
 	
 	@RequestMapping(value="/app/css/{name}", method = RequestMethod.GET)

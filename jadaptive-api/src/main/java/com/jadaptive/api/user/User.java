@@ -5,7 +5,9 @@ import java.util.Date;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
@@ -36,7 +38,8 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT)
 	String email;
 	
-	@ObjectField(type = FieldType.TIMESTAMP)
+	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true)
+	@ExcludeView(values =  { FieldView.CREATE })
 	Date lastLogin;
 
 	public String getUsername() {

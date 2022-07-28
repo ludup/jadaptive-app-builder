@@ -14,6 +14,9 @@ public class AuthenticationModule extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "authenticationModule";
 
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
+	Boolean enabled;
+	
 	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT)
 	String authenticatorKey;
 	
@@ -23,6 +26,14 @@ public class AuthenticationModule extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
 	boolean secretCapture;
 	
+	public Boolean getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+
 	public String getAuthenticatorKey() {
 		return authenticatorKey;
 	}

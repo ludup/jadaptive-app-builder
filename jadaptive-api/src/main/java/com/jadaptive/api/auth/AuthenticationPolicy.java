@@ -7,6 +7,7 @@ import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
@@ -15,6 +16,7 @@ import com.jadaptive.api.template.TableView;
 @ObjectDefinition(resourceKey = AuthenticationPolicy.RESOURCE_KEY, scope = ObjectScope.GLOBAL, defaultColumn = "name")
 @ObjectViews({ @ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "factors", weight = -9999)})
 @TableView(defaultColumns = "name", requiresCreate = false, requiresUpdate = true)
+@ObjectServiceBean(bean = AuthenticationPolicyService.class)
 public class AuthenticationPolicy extends AssignableUUIDEntity {
 
 	private static final long serialVersionUID = -4581883248747380399L;

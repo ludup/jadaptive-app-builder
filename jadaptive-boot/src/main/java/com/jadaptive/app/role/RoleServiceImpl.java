@@ -11,6 +11,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
@@ -74,6 +75,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		role.setAllUsers(true);
 		
 		role.setPermissions(Arrays.asList(UserServiceImpl.CHANGE_PASSWORD_PERMISSION));
+		role.setPermissions(Arrays.asList(AuthenticationService.USER_LOGIN_PERMISSION));
 		repository.saveOrUpdate(role);
 	}
 

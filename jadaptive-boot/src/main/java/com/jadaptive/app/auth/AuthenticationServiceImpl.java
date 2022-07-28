@@ -1,8 +1,10 @@
 package com.jadaptive.app.auth;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -255,18 +257,29 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		state.getAuthenticationPages().clear();
 		state.getAuthenticationPages().add(pageCache.resolvePage("login").getClass());
+		
+		validateModules(policy, state.getAuthenticationPages());
+	}
+	
+	@Override
+	public void validateModules(AuthenticationPolicy policy) {
+		validateModules(policy, new ArrayList<>());
+	}
+	
+	private void validateModules(AuthenticationPolicy policy, List<Class<? extends Page>> pages) {
 		boolean hasSecret = false;
+		
 		for(String authenticatorKey : policy.getRequiredAuthenticators()) {
 			AuthenticationModule module = moduleDatabase.get(authenticatorKey, AuthenticationModule.class);
 			hasSecret |= module.isSecretCapture();
-			state.getAuthenticationPages().add(getAuthenticationPage(module.getAuthenticatorKey()));
+			pages.add(getAuthenticationPage(module.getAuthenticatorKey()));
 		}
 		
 		if(!hasSecret) {
 			throw new IllegalStateException("Invalid authentication policy " + policy.getName() + "! No secret capture at any index");
 		}
 
-		if(state.getAuthenticationPages().isEmpty()) {
+		if(pages.isEmpty()) {
 			throw new IllegalStateException("Invalid authentication policy " + policy.getName() + "! No valid modules");
 		}
 	}

@@ -68,6 +68,7 @@ static Logger log = LoggerFactory.getLogger(ErrorPage.class);
 		document.selectFirst("#title")
 				.appendChild(Html.i18n(bundle, title));
 		document.selectFirst("#icon").appendChild(Html.i("far", icon));
+		document.selectFirst("#iconLarge").appendChild(Html.i("far fa-4x", icon));
 		document.selectFirst("#message").appendChild(Html.i18n(bundle, message));
 		
 		if(Objects.isNull(returnTo) || StringUtils.isBlank(returnTo.toString())) {

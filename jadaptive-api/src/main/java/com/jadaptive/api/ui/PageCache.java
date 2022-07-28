@@ -15,11 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.ReflectionUtils;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.utils.FileUtils;
 
 @Component
@@ -36,7 +39,7 @@ public class PageCache {
 	Map<Class<? extends Page>, Page> pageCache = new HashMap<>();
 	Class<? extends Page> homePage;
 	
-	public Page resolvePage(String resourceUri) throws FileNotFoundException {
+	public Page resolvePage(String resourceUri) throws FileNotFoundException, AccessDeniedException {
 		
 		String name = FileUtils.firstPathElement(resourceUri);
 		if(StringUtils.isBlank(name)) {
@@ -69,6 +72,7 @@ public class PageCache {
 		} catch(NoSuchBeanDefinitionException e) { }
 		
 		throw new FileNotFoundException();
+		
 	}
 	
 	public Class<?> resolvePageClass(String resourceUri) throws FileNotFoundException {

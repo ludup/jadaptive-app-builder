@@ -10,12 +10,14 @@ public interface UsageService {
 
 	Long sum(String key, Date from, Date to);
 	
-	Long sum(Date from, Date to, String... keys);
+	Long sumOr(Date from, Date to, String... keys);
 
 	void incrementDailyValue(String key, long byValue);
 	
 	void incrementDailyValue(String key);
 
 	long getDailyValue(String uuid);
+
+	Long sumAnd(Date from, Date to, String... keys);
 
 }

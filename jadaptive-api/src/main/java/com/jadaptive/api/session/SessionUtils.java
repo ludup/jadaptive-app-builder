@@ -342,4 +342,8 @@ public class SessionUtils {
 		}
 	}
 
+	public User getCurrentUser(HttpServletRequest request) throws UnauthorizedException, SessionTimeoutException {
+		return getSession(request).getUser();
+	}
+
 }
