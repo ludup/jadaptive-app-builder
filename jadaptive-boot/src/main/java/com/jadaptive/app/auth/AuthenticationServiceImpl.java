@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -239,7 +240,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		AuthenticationState state = (AuthenticationState) Request.get().getSession().getAttribute(AUTHENTICATION_STATE_ATTR);
 		if(Objects.isNull(state)) {
 			state = new AuthenticationState();
-			state.setRemoteAddress(Request.get().getRemoteAddr());
+			state.setRemoteAddress(getRemoteAddress());
 			state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
 			
 			try {
@@ -252,6 +253,15 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		return state;
 	}
+
+	private String getRemoteAddress() {
+		String xForwardedFor = Request.get().getHeader("X-Forwarded-For");
+		if(StringUtils.isNotBlank(xForwardedFor)) {
+			return xForwardedFor;
+		}
+		return Request.get().getRemoteAddr();
+	}
+
 
 	@Override
 	public void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy) throws FileNotFoundException {

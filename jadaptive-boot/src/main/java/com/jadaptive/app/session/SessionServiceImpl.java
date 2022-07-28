@@ -148,7 +148,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 			return;
 		}
 
-		session.setState(SessionState.INACTIVE);
+		session.setState(SessionState.EXPIRED);
 		session.setSignedOut(new Date());
 		repository.saveOrUpdate(session);
 		
@@ -172,7 +172,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 	@Override
 	public Iterable<Session> inactiveSessions() {
-		return repository.list(Session.class, SearchField.eq("state", SessionState.INACTIVE));
+		return repository.list(Session.class, SearchField.eq("state", SessionState.EXPIRED));
 	}
 
 	@Override
