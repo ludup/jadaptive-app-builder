@@ -11,10 +11,14 @@ public interface SessionService {
 
 	void touch(Session session);
 
-	Session createSession(Tenant S, User user, String remoteAddress, String userAgent);
-
 	Session getSession(String uuid) throws UnauthorizedException;
 
 	Iterable<Session> iterateSessions();
+
+	Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type);
+
+	Iterable<Session> inactiveSessions();
+
+	void deleteSession(Session session);
 
 }

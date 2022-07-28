@@ -7,21 +7,31 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 
-@ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL, requiresPermission = false)
+@ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL, requiresPermission = false, creatable = false, updatable = false)
+@TableView(defaultColumns = { "user", "signedIn", "remoteAddress", "type", "state", "userAgent"})
 public class Session extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -3842259533277443038L;
 
 	public static final String RESOURCE_KEY = "sessions";
 	
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
 	String remoteAddress;
+	
+	@ObjectField(type = FieldType.ENUM, searchable = true)
+	@Validator(type = ValidationType.REQUIRED)
+	SessionType type;
+	
+	@ObjectField(type = FieldType.ENUM, searchable = true)
+	@Validator(type = ValidationType.REQUIRED)
+	SessionState state;
 	
 	@ObjectField(type = FieldType.TIMESTAMP)
 	@Validator(type = ValidationType.REQUIRED)
@@ -31,13 +41,13 @@ public class Session extends AbstractUUIDEntity {
 	@Validator(type = ValidationType.REQUIRED)
 	Date signedIn;
 	
-	@ObjectField(type = FieldType.TIMESTAMP)
+	@ObjectField(type = FieldType.TIMESTAMP, searchable = true)
 	Date signedOut;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = Tenant.RESOURCE_KEY)
 	Tenant tenant;
 	
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
 	String userAgent;
 	
@@ -45,7 +55,7 @@ public class Session extends AbstractUUIDEntity {
 	@Validator(type = ValidationType.REQUIRED)
 	Integer sessionTimeout;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = User.RESOURCE_KEY, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
 	User user;
 	
@@ -68,6 +78,14 @@ public class Session extends AbstractUUIDEntity {
 		return RESOURCE_KEY;
 	}
 	
+	public SessionType getType() {
+		return type;
+	}
+
+	public void setType(SessionType type) {
+		this.type = type;
+	}
+
 	public String getRemoteAddress() {
 		return remoteAddress;
 	}
@@ -141,6 +159,14 @@ public class Session extends AbstractUUIDEntity {
 		this.csrfToken = csrfToken;
 	}
 	
+	public SessionState getState() {
+		return state;
+	}
+
+	public void setState(SessionState state) {
+		this.state = state;
+	}
+
 	@JsonIgnore
 	public boolean isReadyForUpdate() {
 		// We save our state every minute

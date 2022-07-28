@@ -27,9 +27,9 @@ static Logger log = LoggerFactory.getLogger(ErrorPage.class);
 	private static final String MESSAGE = "message";
 	private static final String ICON = "icon";
 	
+	private static String MESSAGE_URI = "/app/ui/message";
 	
 	public MessagePage() {
-		
 	}
 	
 	public MessagePage(String bundle, String title, String message, String icon) {
@@ -47,6 +47,25 @@ static Logger log = LoggerFactory.getLogger(ErrorPage.class);
 	public MessagePage(String bundle, String title, String message, String icon, Page returnTo) {
 		this(bundle, title, message, icon);
 		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
+	}
+	
+	public static final String generatePageNotFoundURI(String returnTo) {
+		Request.get().getSession().setAttribute(BUNDLE, "userInterface");
+		Request.get().getSession().setAttribute(TITLE, "title.pageNotFound");
+		Request.get().getSession().setAttribute(MESSAGE, "message.pageNotFound");
+		Request.get().getSession().setAttribute(ICON, "fa-file-circle-exclamation");	
+		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
+		return MESSAGE_URI;
+	}
+	
+	public static final String generateForbiddenURI(String returnTo) {
+		Request.get().getSession().setAttribute(BUNDLE, "userInterface");
+		Request.get().getSession().setAttribute(TITLE, "title.accessDenied");
+		Request.get().getSession().setAttribute(MESSAGE, "message.accessDenied");
+		Request.get().getSession().setAttribute(ICON, "fa-file-lock");	
+		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
+		
+		return MESSAGE_URI;
 	}
 
 	@Override

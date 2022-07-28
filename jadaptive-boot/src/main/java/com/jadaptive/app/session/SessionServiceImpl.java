@@ -18,6 +18,8 @@ import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionService;
+import com.jadaptive.api.session.SessionState;
+import com.jadaptive.api.session.SessionType;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.session.events.SessionClosedEvent;
 import com.jadaptive.api.session.events.SessionOpenedEvent;
@@ -44,17 +46,19 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	private UserService userService; 
 	
 	@Override
-	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent) {
+	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type) {
 		
 		SessionConfiguration sessionConfig = configService.getObject(SessionConfiguration.class);
 		
 		Session session = new Session();
 		session.setRemoteAddress(remoteAddress);
+		session.setType(type);
 		session.setSessionTimeout(sessionConfig.getTimeout());
 		session.setSignedIn(new Date());
 		session.setTenant(tenant);
 		session.setUserAgent(userAgent);
 		session.setUser(user);
+		session.setState(SessionState.ACTIVE);
 		session.setCsrfToken(Utils.generateRandomAlphaNumericString(32));
 		
 		repository.saveOrUpdate(session);
@@ -144,6 +148,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 			return;
 		}
 
+		session.setState(SessionState.INACTIVE);
 		session.setSignedOut(new Date());
 		repository.saveOrUpdate(session);
 		
@@ -163,6 +168,16 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Override
 	public Iterable<Session> iterateSessions() {
 		return repository.list(Session.class, SearchField.eq("signedOut", null));
+	}
+
+	@Override
+	public Iterable<Session> inactiveSessions() {
+		return repository.list(Session.class, SearchField.eq("state", SessionState.INACTIVE));
+	}
+
+	@Override
+	public void deleteSession(Session session) {
+		repository.delete(session);
 	}
 
 }

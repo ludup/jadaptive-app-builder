@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,12 +35,14 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.ui.ErrorPage;
 import com.jadaptive.api.ui.MessagePage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageExtension;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
+import com.jadaptive.api.ui.UriRedirect;
 
 @Controller
 public class UserInterfaceController extends AuthenticatedController {
@@ -69,38 +72,36 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 	}
 	
+	@ExceptionHandler(AccessDeniedException.class)
+	public void onAccessDeniedException(AccessDeniedException e, HttpServletResponse response) throws IOException {
+	    response.sendRedirect(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER)));
+	}
+	
+	@ExceptionHandler(FileNotFoundException.class)
+	public void FileNotFoundException(FileNotFoundException e, HttpServletResponse response) throws IOException {
+	    response.sendRedirect(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER)));
+	}
+	
+	@ExceptionHandler(Throwable.class)
+	public void Throwable(Throwable e, HttpServletResponse response) throws IOException {
+	    response.sendRedirect(ErrorPage.generateErrorURI(e, Request.get().getHeader(HttpHeaders.REFERER)));
+	}
+	
+	@ExceptionHandler(Redirect.class)
+	public void Redirect(Redirect e, HttpServletResponse response) throws IOException {
+		log.info("Redirecting to {}", e.getUri());
+		response.sendRedirect(e.getUri());	
+	}
+
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.GET)
 	public void doPageGet(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
 		String uri = request.getRequestURI();
 		String resourceUri = uri.length() >= 8 ? uri.substring(8) : "";
 		
-		String referrer = Request.get().getHeader(HttpHeaders.REFERER);
-	
-	
-		try {
-			Page page = pageCache.resolvePage(resourceUri);
-			page.doGet(resourceUri, request, response);
-		} catch(Redirect e) {
-			log.info("Redirecting to {}", e.getUri());
-			response.sendRedirect(e.getUri());
-		} catch(AccessDeniedException e) {
-			
-			throw new PageRedirect(new MessagePage("userInterface",
-					"title.accessDenied", 
-					"message.accessDenied",
-					"fa-file-lock",
-					referrer));
-			
-		} catch(FileNotFoundException e) {
-		
-		}
-		
-		throw new PageRedirect(new MessagePage("userInterface",
-				"title.pageNotFound", 
-				"message.pageNotFound",
-				"fa-file-circle-exclamation",
-				referrer));
+		Page page = pageCache.resolvePage(resourceUri);
+		page.doGet(resourceUri, request, response);
+
 	}
 	
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.POST)
@@ -108,30 +109,10 @@ public class UserInterfaceController extends AuthenticatedController {
 
 		String uri = request.getRequestURI();
 		String resourceUri = uri.length() >= 8 ? uri.substring(8) : "";
-		String referrer = Request.get().getHeader(HttpHeaders.REFERER);
 		
-		try {
-			Page page = pageCache.resolvePage(resourceUri);
-			page.doPost(resourceUri, request, response);
-		} catch(Redirect e) {
-			response.sendRedirect(e.getUri());
-		} catch(AccessDeniedException e) {
-			
-			throw new PageRedirect(new MessagePage("userInterface",
-					"title.accessDenied", 
-					"message.accessDenied",
-					"fa-file-lock",
-					referrer));
-			
-		} catch(FileNotFoundException e) {
+		Page page = pageCache.resolvePage(resourceUri);
+		page.doPost(resourceUri, request, response);
 		
-		}
-		
-		throw new PageRedirect(new MessagePage("userInterface",
-				"title.pageNotFound", 
-				"message.pageNotFound",
-				"fa-file-circle-exclamation",
-				referrer));
 	}
 	
 	@RequestMapping(value="/app/css/{name}", method = RequestMethod.GET)

@@ -25,6 +25,8 @@ public class ErrorPage extends HtmlPage {
 	private static final String THROWABLE = "lastError";
 	private static final String RETURN_TO = "returnTo";
 	
+	private static final String ERROR_URI = "/app/ui/error";
+	
 	public ErrorPage() {
 		
 	}
@@ -42,6 +44,25 @@ public class ErrorPage extends HtmlPage {
 		Request.get().getSession().setAttribute(THROWABLE, e);
 		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
 	}
+	
+	public static String generateErrorURI(Throwable e, Page returnTo) {
+		Request.get().getSession().setAttribute(THROWABLE, e);
+		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
+		return ERROR_URI;
+	}
+	
+	public static String generateErrorURI(Throwable e, String returnTo) {
+		Request.get().getSession().setAttribute(THROWABLE, e);
+		Request.get().getSession().setAttribute(RETURN_TO, returnTo);
+		return ERROR_URI;
+	}
+	
+	public static String generateErrorURI(Throwable e) {
+		Request.get().getSession().setAttribute(THROWABLE, e);
+		return ERROR_URI;
+	}
+	
+	
 
 	@Override
 	public String getUri() {

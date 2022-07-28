@@ -30,6 +30,7 @@ import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
+import com.jadaptive.api.session.SessionType;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.ui.Page;
@@ -157,7 +158,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				}
 				
 				return sessionService.createSession(tenant, 
-						user, remoteAddress, userAgent);
+						user, remoteAddress, userAgent, SessionType.HTTPS);
 				
 			} finally {
 				clearUserContext();
@@ -220,7 +221,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				assertPermission(USER_LOGIN_PERMISSION);
 				
 				Session session = sessionService.createSession(getCurrentTenant(), 
-						state.getUser(), state.getRemoteAddress(), state.getUserAgent());
+						state.getUser(), state.getRemoteAddress(), state.getUserAgent(), SessionType.HTTPS);
 				sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
 				
 			} finally {
