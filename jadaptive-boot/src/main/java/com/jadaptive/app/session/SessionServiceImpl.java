@@ -75,7 +75,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		
 		session = repository.get(session.getUuid(), Session.class);
 		
-		setupUserContext(session.getUser());
+		setupSystemContext();
 		
 		try {
 			if (session.getSignedOut() == null) {

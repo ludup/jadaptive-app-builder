@@ -13,7 +13,7 @@ import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 
-@ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL, requiresPermission = false, creatable = false, updatable = false)
+@ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL, creatable = false, updatable = false)
 @TableView(defaultColumns = { "user", "signedIn", "remoteAddress", "type", "state", "userAgent"})
 public class Session extends AbstractUUIDEntity {
 

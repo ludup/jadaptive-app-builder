@@ -154,12 +154,10 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 	public void closed(long count) {
 		
 		tenantService.executeAs(tenantService.getCurrentTenant(), new Runnable() {
-
 			@Override
 			public void run() {
 				usageService.log(count, UsageService.HTTP_OUT);
 			}
-			
 		});
 		
 	}
