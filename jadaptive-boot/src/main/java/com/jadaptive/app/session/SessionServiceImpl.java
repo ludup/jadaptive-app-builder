@@ -73,11 +73,10 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Override
 	public boolean isLoggedOn(Session session, boolean touch) {
 		
-		session = repository.get(session.getUuid(), Session.class);
-		
 		setupSystemContext();
-		
+
 		try {
+			
 			if (session.getSignedOut() == null) {
 	
 				if(session.getSessionTimeout() > 0) {
@@ -116,6 +115,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 			} else {
 				return false;
 			}
+			
 		} finally {
 			clearUserContext();
 		}
@@ -177,6 +177,8 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 	@Override
 	public void deleteSession(Session session) {
+		
+		closeSession(session);
 		repository.delete(session);
 	}
 
