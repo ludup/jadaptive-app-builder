@@ -12,4 +12,6 @@ public interface ProductService {
 
 	String getProductName();
 
+	String getPoweredBy();
+
 }

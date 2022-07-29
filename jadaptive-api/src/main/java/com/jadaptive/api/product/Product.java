@@ -8,6 +8,8 @@ public interface Product extends ExtensionPoint {
 	
 	String getVersion();
 	
+	String getPoweredBy();
+	
 	default String getLogoResource() {
 		return "/app/content/images/jadaptive-logo.png";
 	}

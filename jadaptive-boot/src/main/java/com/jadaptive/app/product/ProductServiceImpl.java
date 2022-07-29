@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.product.Product;
+import com.jadaptive.api.product.ProductLogoSource;
 import com.jadaptive.api.product.ProductService;
 
 @Service
@@ -27,8 +28,13 @@ public class ProductServiceImpl implements ProductService {
 	
 	@Override
 	public String getLogoResource() {
-		Product product = appService.getBean(Product.class);
-		return product.getLogoResource();
+		try {
+			ProductLogoSource source = appService.getBean(ProductLogoSource.class);
+			return source.getProductLogo();
+		} catch(Throwable e) {
+			Product product = appService.getBean(Product.class);
+			return product.getLogoResource();
+		}
 	}
 	
 	@Override
@@ -42,4 +48,11 @@ public class ProductServiceImpl implements ProductService {
 		Product product = appService.getBean(Product.class);
 		return product.getName();	
 	}
+
+	@Override
+	public String getPoweredBy() {
+		Product product = appService.getBean(Product.class);
+		return product.getPoweredBy();
+	}
+
 }
