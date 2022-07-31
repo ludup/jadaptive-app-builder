@@ -107,6 +107,10 @@ public class Utils {
 		return formatDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 	}
 	
+	public static Date parseTimestamp(String date) {
+		return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+	}
+	
 	public static String formatISODate(Date date) {
 		return formatDate(date, "yyyy-MM-dd");
 	}

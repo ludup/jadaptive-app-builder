@@ -622,7 +622,11 @@ public class DocumentHelper {
 		} else if(type.equals(Date.class)) {
 			if(t==FieldType.TIMESTAMP) {
 				if(StringUtils.isNotBlank(value)) {
-					return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					try {
+						return Utils.parseTimestamp(value);
+					} catch (Throwable e) {
+						return Utils.parseDateTime(value);
+					}
 				} else {
 					return null;
 				}
@@ -682,7 +686,7 @@ public class DocumentHelper {
 			return DocumentValidator.validate(def,value);
 		case TIMESTAMP:
 			if(StringUtils.isNotBlank(value)) {
-				return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+				return Utils.parseTimestamp(value);
 			} else {
 				return null;
 			}
