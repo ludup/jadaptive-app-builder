@@ -23,6 +23,7 @@ import com.jadaptive.api.session.SessionType;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.session.events.SessionClosedEvent;
 import com.jadaptive.api.session.events.SessionOpenedEvent;
+import com.jadaptive.api.stats.UsageService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
@@ -44,6 +45,9 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	
 	@Autowired
 	private UserService userService; 
+	
+	@Autowired
+	private UsageService usageService;
 	
 	@Override
 	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type) {
@@ -151,7 +155,8 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		session.setState(SessionState.EXPIRED);
 		session.setSignedOut(new Date());
 		repository.saveOrUpdate(session);
-		
+		usageService.log(session.getSignedOut().getTime() - session.getSignedIn().getTime(),
+				SESSION_USAGE, session.getUser().getUuid());
 		eventService.publishEvent(new SessionClosedEvent(session));
 
 	}

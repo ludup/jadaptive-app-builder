@@ -5,6 +5,8 @@ import com.jadaptive.api.user.User;
 
 public interface SessionService {
 
+	public static final String SESSION_USAGE = "sessionTimeMs";
+	
 	boolean isLoggedOn(Session session, boolean touch);
 
 	void closeSession(Session session);
