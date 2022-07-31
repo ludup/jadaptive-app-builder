@@ -4,6 +4,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,7 +30,9 @@ public abstract class PasswordEnabledUserDatabaseImpl
 			
 			PasswordEnabledUser user = (PasswordEnabledUser)u;
 			
-			if(!new String(password).startsWith(ENCRYPTION_PREFIX)) {
+			if(Objects.nonNull(password) &&
+					password.length > 0 && 
+					!new String(password).startsWith(ENCRYPTION_PREFIX)) {
 				byte[] salt = PasswordUtils.generateSalt();
 				byte[] encodedPassword = PasswordUtils.getEncryptedPassword(
 						password, 

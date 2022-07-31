@@ -349,7 +349,7 @@ public class Utils {
 	    return new BigInteger(length * 8, random).toString(32).substring(0,  length);
 	}
 	
-	public static String generateRandomAlphaString(int length) {
+	public static String generateRandomNumericString(int length) {
 	    return new BigInteger(length * 8, random).toString(10).substring(0,  length);
 	}
 
