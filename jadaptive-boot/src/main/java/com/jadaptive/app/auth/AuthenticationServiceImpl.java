@@ -244,7 +244,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
 			
 			try {
-				state.getAuthenticationPages().add(pageCache.resolvePage("login").getClass());
+				state.getRequiredPages().add(pageCache.resolvePage("login").getClass());
 			} catch (FileNotFoundException e) {
 			}
 			
@@ -266,32 +266,47 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy) throws FileNotFoundException {
 		
-		state.getAuthenticationPages().clear();
-		state.getAuthenticationPages().add(pageCache.resolvePage("login").getClass());
+		state.getRequiredPages().clear();
+		state.getRequiredPages().add(pageCache.resolvePage("login").getClass());
 		
-		validateModules(policy, state.getAuthenticationPages());
+		state.getOptionalAuthentications().clear();
+		state.setOptionalCompleted(0);
+		state.setOptionalRequired(policy.getOptionalRequired());
+		state.setOptionalSelectionPage(pageCache.resolvePage("select2fa").getClass());
+		
+		validateModules(policy, state.getRequiredPages(), state.getOptionalAuthentications());
+		
 	}
 	
 	@Override
 	public void validateModules(AuthenticationPolicy policy) {
-		validateModules(policy, new ArrayList<>());
+		validateModules(policy, new ArrayList<>(), new ArrayList<>());
 	}
 	
-	private void validateModules(AuthenticationPolicy policy, List<Class<? extends Page>> pages) {
+	private void validateModules(AuthenticationPolicy policy, 
+			List<Class<? extends Page>> required,
+			List<String> optional) {
+		
 		boolean hasSecret = false;
 		
 		for(String authenticatorKey : policy.getRequiredAuthenticators()) {
 			AuthenticationModule module = moduleDatabase.get(authenticatorKey, AuthenticationModule.class);
 			hasSecret |= module.isSecretCapture();
-			pages.add(getAuthenticationPage(module.getAuthenticatorKey()));
+			required.add(getAuthenticationPage(module.getAuthenticatorKey()));
+		}
+		
+		optional.addAll(policy.getOptionalAuthenticators());
+		
+		if(optional.size() < policy.getOptionalRequired()) {
+			throw new IllegalStateException("Invalid authentication policy! Minumum number of optional factors exceeds available optional factors");
 		}
 		
 		if(!hasSecret) {
-			throw new IllegalStateException("Invalid authentication policy " + policy.getName() + "! No secret capture at any index");
+			throw new IllegalStateException("Invalid authentication policy! No secret capture at any index");
 		}
 
-		if(pages.isEmpty()) {
-			throw new IllegalStateException("Invalid authentication policy " + policy.getName() + "! No valid modules");
+		if(required.isEmpty()) {
+			throw new IllegalStateException("Invalid authentication policy! No valid modules");
 		}
 	}
 	
@@ -305,7 +320,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
 		AuthenticationState state = getCurrentState();
 		
-		state.getAuthenticationPages().addAll(Arrays.asList(additionalClasses));
+		state.getRequiredPages().addAll(Arrays.asList(additionalClasses));
 		return state.getCurrentPage();
 	}
 

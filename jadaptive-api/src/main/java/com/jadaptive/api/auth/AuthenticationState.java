@@ -16,7 +16,8 @@ import com.jadaptive.api.user.User;
 public class AuthenticationState {
 
 	User user;
-	List<Class<? extends Page>> authenticationPages = new ArrayList<>();
+	List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
+	List<String> optionalAuthentications = new ArrayList<>();
 	List<Class<? extends Page>> postAuthenticationPages = new ArrayList<>();
 	int currentPageIndex = 0;
 	String remoteAddress;
@@ -29,11 +30,24 @@ public class AuthenticationState {
 	int currentPostAuthenticationIndex = 0;
 	Redirect homePage = new UriRedirect("/app/ui/dashboard");
 	String attemptedUsername;
+	Class<? extends Page> optionalSelectionPage;
+	Class<? extends Page> selectedPage = null;
+	List<Class<? extends Page>> completedOptionsPages = new ArrayList<>();
+	
+	int optionalCompleted = 0;
+	int optionalRequired = 0;
 	
 	public Class<? extends Page> getCurrentPage() {
 		if(!isAuthenticationComplete()) {
-			return authenticationPages.get(currentPageIndex);
+			return requiredAuthenticationPages.get(currentPageIndex);
+		} if(!isOptionalComplete()) { 
+			if(Objects.nonNull(selectedPage)) {
+				return selectedPage;
+			} else {
+				return optionalSelectionPage;
+			}
 		} else {
+			
 			if(currentPostAuthenticationIndex >= postAuthenticationPages.size()) {
 				Request.get().getSession().setAttribute(AuthenticationService.AUTHENTICATION_STATE_ATTR, null);
 				if(Objects.nonNull(homePage)) {
@@ -46,20 +60,29 @@ public class AuthenticationState {
 	}
 	
 	public boolean isAuthenticationComplete() {
-		return currentPageIndex == authenticationPages.size();
+		return currentPageIndex >= requiredAuthenticationPages.size();
+	}
+	
+	public boolean isOptionalComplete() {
+		return optionalCompleted == optionalRequired;
 	}
 	
 	public boolean hasMorePages() {
-		return currentPageIndex < authenticationPages.size() - 1;
+		return currentPageIndex < requiredAuthenticationPages.size() - 1;
 	}
 	
 	public boolean completePage() {
-		if(isAuthenticationComplete()) {
+		if(isAuthenticationComplete() && isOptionalComplete()) {
 			currentPostAuthenticationIndex++;
 		} else {
 			currentPageIndex++;
 			if(isAuthenticationComplete()) {
-				return true;
+				if(Objects.nonNull(selectedPage)) {
+					optionalCompleted++;
+					completedOptionsPages.add(selectedPage);
+					selectedPage = null;
+				}
+				return isOptionalComplete();
 			}
 		}
 		return false;
@@ -75,23 +98,22 @@ public class AuthenticationState {
 	
 	public void clear() {
 		currentPageIndex = 0;
-		authenticationPages.clear();
+		requiredAuthenticationPages.clear();
+		optionalAuthentications.clear();
+		optionalCompleted = 0;
+		optionalRequired = 0;
 	}
 	
-	public List<Class<? extends Page>> getAuthenticationPages() {
-		return authenticationPages;
+	public List<Class<? extends Page>> getRequiredPages() {
+		return requiredAuthenticationPages;
 	}
 	
-	public void setAuthenticationPages(List<Class<? extends Page>> authenticationPages) {
-		this.authenticationPages = authenticationPages;
+	public List<String> getOptionalAuthentications() {
+		return optionalAuthentications;
 	}
 	
 	public List<Class<? extends Page>> getPostAuthenticationPages() {
 		return postAuthenticationPages;
-	}
-
-	public void setPostAuthenticationPages(List<Class<? extends Page>> postAuthenticationPages) {
-		this.postAuthenticationPages = postAuthenticationPages;
 	}
 
 	public String getRemoteAddress() {
@@ -182,5 +204,37 @@ public class AuthenticationState {
 
 	public void setAttemptedUsername(String username) {
 		this.attemptedUsername = username;
+	}
+
+	public int getOptionalCompleted() {
+		return optionalCompleted;
+	}
+
+	public void setOptionalCompleted(int optionalCompleted) {
+		this.optionalCompleted = optionalCompleted;
+	}
+
+	public int getOptionalRequired() {
+		return optionalRequired;
+	}
+
+	public void setOptionalRequired(int optionalRequired) {
+		this.optionalRequired = optionalRequired;
+	}
+
+	public Class<? extends Page> getOptionalSelectionPage() {
+		return optionalSelectionPage;
+	}
+
+	public void setOptionalSelectionPage(Class<? extends Page> optionalSelectionPage) {
+		this.optionalSelectionPage = optionalSelectionPage;
+	}
+	
+	public void setSelectedPagE(Class<? extends Page> selectedPage) {
+		this.selectedPage = selectedPage;
+	}
+
+	public boolean hasCompleted(Class<? extends Page> page) {
+		return completedOptionsPages.contains(page);
 	}
 }

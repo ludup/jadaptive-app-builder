@@ -53,6 +53,16 @@ public class Html {
 		return el;
 	}
 	
+	public static Element pi18n(String bundle, String i18n, Object... args) {
+		Element el = new Element("p").attr("jad:bundle", bundle).attr("jad:i18n", i18n);
+		for(int i=0;i<args.length;i++) {
+			if(args[i]!=null) {
+				el.attr(String.format("jad:arg%d",i), args[i].toString());
+			}
+		}
+		return el;
+	}
+	
 	public static Element span(String text, String classes) {
 		return span(text).addClass(classes);
 	}

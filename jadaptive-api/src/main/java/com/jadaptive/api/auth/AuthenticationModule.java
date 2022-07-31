@@ -26,6 +26,12 @@ public class AuthenticationModule extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
 	boolean secretCapture;
 	
+	@ObjectField(type = FieldType.TEXT)
+	String icon;
+	
+	@ObjectField(type = FieldType.TEXT)
+	String iconGroup;
+	
 	public Boolean getEnabled() {
 		return enabled;
 	}
@@ -63,5 +69,5 @@ public class AuthenticationModule extends NamedUUIDEntity {
 		return RESOURCE_KEY;
 	}
 	
-
+	
 }

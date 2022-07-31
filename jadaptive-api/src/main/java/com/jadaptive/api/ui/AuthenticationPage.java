@@ -12,7 +12,6 @@ import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
@@ -42,6 +41,14 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		return formClass;
 	}
 	
+	public String getIconGroup() {
+		return "fa-regular";
+	}
+	
+	public String getIcon() {
+		return "fa-key";
+	}
+	
 	@Override
 	protected final void generateContent(Document doc) throws FileNotFoundException {
 		
@@ -53,9 +60,11 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		}
 	}
 	
+	public abstract String getBundle();
+	
 	protected void doGenerateContent(Document doc) throws FileNotFoundException { }
 	
-	protected abstract boolean doForm(Document document, AuthenticationState state, T form) throws AccessDeniedException;
+	protected abstract boolean doForm(Document document, AuthenticationState state, T form) throws AccessDeniedException, FileNotFoundException;
 	
 	public final void processForm(Document document, T form) throws FileNotFoundException {
 		
@@ -80,10 +89,5 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
     		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
     		Feedback.error("userInterface","error.invalidCredentials");
     	}
-    	
-    	
-
 	}
-	
-
 }

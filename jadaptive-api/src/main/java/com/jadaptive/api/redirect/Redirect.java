@@ -3,7 +3,6 @@ package com.jadaptive.api.redirect;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;

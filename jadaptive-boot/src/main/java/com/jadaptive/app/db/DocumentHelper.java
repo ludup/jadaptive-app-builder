@@ -698,7 +698,7 @@ public class DocumentHelper {
 	}
 
 	private static Object buildStringCollection(ObjectField columnDefinition, List<?> list) {
-		Collection<String> v = new HashSet<>();
+		Collection<String> v = new ArrayList<>();
 		for(Object item : list) {
 			v.add(checkForAndPerformDecryption(columnDefinition, item.toString()));
 		}
@@ -716,7 +716,7 @@ public class DocumentHelper {
 	
 	private static Object buildEnumCollection(List<?> items, Class<?> type) {
 
-		Collection<Enum<?>> v = new HashSet<>();
+		Collection<Enum<?>> v = new ArrayList<>();
 		for(Object item : items) {
 			Enum<?>[] enumConstants = (Enum<?>[]) type.getEnumConstants();
 			if(NumberUtils.isNumber(item.toString())) {
@@ -736,7 +736,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Date> buildDateCollection(ObjectField columnDefinition, List<?> items) throws ParseException {
-		Collection<Date> v = new HashSet<>();
+		Collection<Date> v = new ArrayList<>();
 		for(Object item : items) {
 			v.add(Utils.parseDateTime(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
@@ -744,7 +744,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Double> buildDoubleCollection(ObjectField columnDefinition, List<?> items) {
-		Collection<Double> v = new HashSet<>();
+		Collection<Double> v = new ArrayList<>();
 		for(Object item : items) {
 			v.add(Double.parseDouble(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
@@ -752,7 +752,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Float> buildFloatCollection(ObjectField columnDefinition, List<?> items) {
-		Collection<Float> v = new HashSet<>();
+		Collection<Float> v = new ArrayList<>();
 		for(Object item : items) {
 			v.add(Float.parseFloat(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
@@ -760,7 +760,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Long> buildLongCollection(ObjectField columnDefinition, List<?> items) {
-		Collection<Long> v = new HashSet<>();
+		Collection<Long> v = new ArrayList<>();
 		for(Object item : items) {
 			v.add(Long.parseLong(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
@@ -768,7 +768,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Integer> buildIntegerCollection(ObjectField columnDefinition, List<?> items) {
-		Collection<Integer> v = new HashSet<>();
+		Collection<Integer> v = new ArrayList<>();
 		for(Object item : items) {
 			v.add(Integer.parseInt(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}
@@ -776,7 +776,7 @@ public class DocumentHelper {
 	}
 
 	private static Collection<Boolean> buildBooleanCollection(ObjectField columnDefinition, List<?> items) {
-		Collection<Boolean> v = new HashSet<>();
+		Collection<Boolean> v = new ArrayList<>();
 		for(Object item : items) {
 			v.add(Boolean.parseBoolean(checkForAndPerformDecryption(columnDefinition, item.toString())));
 		}

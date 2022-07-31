@@ -56,10 +56,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Autowired
 	private PropertyService propertyService;
 	
-//	Map<Tenant,Set<String>> tenantPermissions = new HashMap<>();
-//	Map<Tenant,Set<NamePairValue>> tenantPermissionObjects = new HashMap<>();
-//	Map<Tenant,Map<String,Set<String>>> tenantPermissionsAlias = new HashMap<>();
-//	
 	Set<String> systemPermissions = new TreeSet<>();
 	Set<NamePairValue> systemPermissionObjects = new TreeSet<>();
 	Map<String,Set<String>> systemPermissionsAlias = new HashMap<>();
@@ -182,27 +178,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		if(tenant.isSystem()) {
 			doRegisterPermission(systemPermissions, systemPermissionObjects, systemPermissionsAlias, permission, aliases);
 		} 
-//		else {	
-//			Set<String> allPermissions = tenantPermissions.get(tenant);
-//			Set<NamePairValue> objectPermissions = tenantPermissionObjects.get(tenant);
-//			
-//			if(Objects.isNull(allPermissions)) {
-//				allPermissions = new TreeSet<>();
-//				tenantPermissions.put(tenant, allPermissions);
-//				
-//				objectPermissions = new TreeSet<>();
-//				tenantPermissionObjects.put(tenant, objectPermissions);
-//			}
-//			
-//			Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);	
-//			
-//			if(Objects.isNull(aliasPermissions)) {
-//				aliasPermissions = new HashMap<>();
-//				tenantPermissionsAlias.put(tenant, aliasPermissions);
-//			}
-//			
-//			doRegisterPermission(allPermissions, objectPermissions, aliasPermissions, permission, aliases);
-//		}
 	}
 	
 	private synchronized void doRegisterPermission(Set<String> allPermissions, Set<NamePairValue> objectPermissions, Map<String,Set<String>> aliasPermissions, String permission, String... aliases) {
@@ -241,9 +216,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public Set<String> getAllPermissions(Tenant tenant) {
 		Set<String> tmp = new TreeSet<>();
 		tmp.addAll(systemPermissions);
-//		if(tenantPermissions.containsKey(tenant)) {
-//			tmp.addAll(tenantPermissions.get(tenant));
-//		}
 		return Collections.unmodifiableSet(tmp);
 	}
 	
@@ -265,7 +237,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Override
 	public Set<String> resolvePermissions(User user) {
 		
-		Tenant tenant = tenantService.getCurrentTenant();
 		Set<String> allPermissions = new TreeSet<>();
 		Collection<Role> roles = roleService.getRoles(user);
 		for(Role role : roles) {
@@ -277,9 +248,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 		Set<String> resolvedPermissions = new HashSet<>(allPermissions);
 		processAliases(systemPermissionsAlias, allPermissions, resolvedPermissions);
-//		if(!tenant.isSystem()) {
-//			processAliases(tenantPermissionsAlias.get(tenant), allPermissions, resolvedPermissions);
-//		}		
+	
 		return resolvedPermissions;
 	}
 	
@@ -452,9 +421,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 		List<NamePairValue> tmp = new ArrayList<>();
 		tmp.addAll(systemPermissionObjects);
-//		if(tenantPermissions.containsKey(tenantService.getCurrentTenant())) {
-//			tmp.addAll(tenantPermissionObjects.get(tenantService.getCurrentTenant()));
-//		}
+
 		Collections.sort(tmp, new Comparator<NamePairValue>() {
 
 			@Override

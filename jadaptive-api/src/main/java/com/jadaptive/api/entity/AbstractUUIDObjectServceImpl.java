@@ -2,7 +2,6 @@ package com.jadaptive.api.entity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.UUIDEntity;

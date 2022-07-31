@@ -74,6 +74,19 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 					));
 		}
 	}
+	
+	@Override
+	public Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields) {
+		
+		Collection<Role> userRoles = roleService.getRolesByUser(user);
+		return objectDatabase.searchObjects(resourceClass, 
+				SearchField.add(fields,
+				SearchField.or(
+						SearchField.in("users", user.getUuid()),
+						SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))
+				));
+		
+	}
 
 
 	@Override

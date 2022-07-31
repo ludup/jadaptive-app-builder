@@ -46,7 +46,6 @@ import com.jadaptive.api.stats.UsageService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.api.ui.ErrorPage;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
 
