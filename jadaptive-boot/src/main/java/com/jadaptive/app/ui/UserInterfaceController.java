@@ -143,7 +143,7 @@ public class UserInterfaceController extends AuthenticatedController {
 	public void doScript(HttpServletRequest request, HttpServletResponse response, @PathVariable String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
 		try {
-			Page page = pageCache.resolvePage(name.replace(".js", ""));
+			Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".js", "")));
 			URL url = page.getClass().getResource(page.getJsResource());
 			response.setContentType("application/javascript");
 			response.setStatus(HttpStatus.OK.value());
