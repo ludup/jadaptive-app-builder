@@ -36,6 +36,10 @@ public class AuthenticationPolicy extends AssignableUUIDEntity {
 	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true)
 	String name;
 	
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
+	@ObjectView(value = "factors")
+	Boolean passwordOnFirstPage;
+	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY)
 	@ObjectView(value = "factors")
 	Collection<String> requiredAuthenticators;
@@ -67,6 +71,14 @@ public class AuthenticationPolicy extends AssignableUUIDEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Boolean getPasswordOnFirstPage() {
+		return passwordOnFirstPage;
+	}
+
+	public void setPasswordOnFirstPage(Boolean passwordOnFirstPage) {
+		this.passwordOnFirstPage = passwordOnFirstPage;
 	}
 
 	public Collection<String> getRequiredAuthenticators() {

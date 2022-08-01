@@ -17,6 +17,7 @@ import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.db.AssignableObjectDatabase;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
@@ -129,6 +130,11 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	protected Class<AuthenticationPolicy> getResourceClass() {
 		return AuthenticationPolicy.class;
+	}
+
+	@Override
+	public AuthenticationPolicy getDefaultPolicy() {
+		return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true));
 	}
 
 }
