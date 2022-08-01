@@ -118,7 +118,7 @@ public class UserInterfaceController extends AuthenticatedController {
 
 		try {
 			Page page = pageCache.resolvePage(name.replace(".css", ""));
-			URL url = page.getClass().getResource(String.format("%s.css", page.getClass().getSimpleName()));
+			URL url = page.getClass().getResource(page.getCssResource());
 			response.setContentType("text/css");
 			response.setStatus(HttpStatus.OK.value());
 			try(InputStream in = url.openStream()) {
@@ -127,7 +127,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		} catch(FileNotFoundException e) {
 			try {
 				PageExtension page = pageCache.resolveExtension(name.replace(".css", ""));
-				URL url = page.getClass().getResource(String.format("%s.css", page.getClass().getSimpleName()));
+				URL url = page.getClass().getResource(page.getCssResource());
 				response.setContentType("text/css");
 				response.setStatus(HttpStatus.OK.value());
 				try(InputStream in = url.openStream()) {
@@ -143,8 +143,8 @@ public class UserInterfaceController extends AuthenticatedController {
 	public void doScript(HttpServletRequest request, HttpServletResponse response, @PathVariable String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
 		try {
-			Class<?> page = pageCache.resolvePageClass(name.replace(".js", ""));
-			URL url = page.getResource(String.format("%s.js", page.getSimpleName()));
+			Page page = pageCache.resolvePage(name.replace(".js", ""));
+			URL url = page.getClass().getResource(page.getJsResource());
 			response.setContentType("application/javascript");
 			response.setStatus(HttpStatus.OK.value());
 			try(InputStream in = url.openStream()) {
@@ -153,7 +153,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		} catch(FileNotFoundException e) {
 			try {
 				PageExtension page = pageCache.resolveExtension(name.replace(".js", ""));
-				URL url = page.getClass().getResource(String.format("%s.js", page.getClass().getSimpleName()));
+				URL url = page.getClass().getResource(page.getJsResource());
 				response.setContentType("text/javascript");
 				response.setStatus(HttpStatus.OK.value());
 				try(InputStream in = url.openStream()) {

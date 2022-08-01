@@ -39,7 +39,7 @@ public abstract class HtmlPage implements Page {
 		return resourcePath;
 	}
 		
-	public String getResource() {
+	public String getHtmlResource() {
 		return String.format("%s.html", getClass().getSimpleName());
 	}
 	
@@ -94,8 +94,8 @@ public abstract class HtmlPage implements Page {
 		
 		processDocumentExtensions(document);
 		
-		resolveScript(getUri(), document, getClass());
-		resolveStylesheet(getUri(), document, getClass());
+		resolveScript(getUri(), document, this);
+		resolveStylesheet(getUri(), document, this);
 
 		processPageProcessors(document);
 	}
@@ -298,35 +298,43 @@ public abstract class HtmlPage implements Page {
 				PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "link", node);
 			}
 			
-			resolveScript(ext.getName(), document, ext.getClass());
-			resolveStylesheet(ext.getName(), document, ext.getClass());
+			resolveScript(ext.getName(), document, ext);
+			resolveStylesheet(ext.getName(), document, ext);
 			
 			processChildExtensions(document, element);
 //		}
 	}
 
-	private void resolveStylesheet(String uri, Document document, Class<?> clz) {
-		URL url = clz.getResource(String.format("%s.css", clz.getSimpleName()));
+	private void resolveStylesheet(String uri, Document document, PageResources ext) {
+		URL url = ext.getClass().getResource(ext.getCssResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendStylesheet(document, "/app/css/" + uri + ".css");
 		} 
 	}
 	
-	private void resolveScript(String uri, Document document, Class<?> clz) {
-		URL url = clz.getResource(String.format("%s.js", clz.getSimpleName()));
+	public String getCssResource() {
+		return String.format("%s.css", getClass().getSimpleName());
+	}
+
+	private void resolveScript(String uri, Document document, PageResources ext) {
+		URL url = ext.getClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendScript(document, "/app/js/" + uri + ".js");
 		} 
 	}
 
+	public String getJsResource() {
+		return String.format("%s.js", getClass().getSimpleName());
+	}
+
 	protected void generateContent(Document document) throws IOException { };
 
 	protected Document resolveDocument(Page page) throws IOException {
-		return resolveDocument(page.getClass(), page.getResource());
+		return resolveDocument(page.getClass(), page.getHtmlResource());
 	}
 	
 	protected Document resolveDocument(PageExtension ext) throws IOException {
-		return resolveDocument(ext.getClass(), ext.getResource());
+		return resolveDocument(ext.getClass(), ext.getHtmlResource());
 	}
 	
 	protected Class<?> getResourceClass() {

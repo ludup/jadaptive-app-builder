@@ -73,7 +73,7 @@ public class PageCache {
 		
 	}
 	
-	public Class<?> resolvePageClass(String resourceUri) throws FileNotFoundException {
+	public Class<? extends Page> resolvePageClass(String resourceUri) throws FileNotFoundException {
 		
 		String name = FileUtils.firstPathElement(resourceUri);
 		if(StringUtils.isBlank(name)) {

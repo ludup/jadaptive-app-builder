@@ -6,12 +6,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.ExtensionPoint;
 
-public interface PageExtension extends ExtensionPoint {
+public interface PageExtension extends PageResources, ExtensionPoint {
 
 	void process(Document document, Element extensionElement, Page page) throws IOException;
 
 	String getName();
-	
-	String getResource();
+
 
 }

@@ -13,8 +13,18 @@ public abstract class AbstractPageExtension implements PageExtension {
 	}
 	
 	@Override
-	public String getResource() {
+	public String getHtmlResource() {
 		return String.format("%s.html", getClass().getSimpleName());
+	}
+	
+	@Override
+	public String getCssResource() {
+		return String.format("%s.css", getClass().getSimpleName());
+	}
+	
+	@Override
+	public String getJsResource() {
+		return String.format("%s.js", getClass().getSimpleName());
 	}
 
 }

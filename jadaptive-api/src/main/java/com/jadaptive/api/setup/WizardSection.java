@@ -28,7 +28,7 @@ public abstract class WizardSection extends AbstractPageExtension {
 	}
 	
 	@Override
-	public String getResource() {
+	public String getHtmlResource() {
 		return resource;
 	}
 	@Override

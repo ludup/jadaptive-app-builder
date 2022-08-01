@@ -56,6 +56,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			sessionUtils.getSession(Request.get());
 			throw new UriRedirect("/app/ui/dashboard");
 		} catch (UnauthorizedException | SessionTimeoutException e) {
+			
 			doGenerateContent(doc);
 		}
 	}
@@ -79,15 +80,11 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			authenticationService.reportAuthenticationFailure(state);
     	
     	} catch(AccessDeniedException e) {
-    		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-    		if(StringUtils.isNotBlank(e.getMessage())) {
-    			Feedback.error(e.getMessage());
-    		} else {
-        		Feedback.error("userInterface","error.accessDenied");
-    		}
-    	} catch(ObjectNotFoundException e) {
-    		Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-    		Feedback.error("userInterface","error.invalidCredentials");
+    	} catch(ObjectNotFoundException e) {	
     	}
+		
+		Feedback.error("userInterface","error.invalidCredentials");
+		throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentState().getCurrentPage()));
 	}
+	
 }

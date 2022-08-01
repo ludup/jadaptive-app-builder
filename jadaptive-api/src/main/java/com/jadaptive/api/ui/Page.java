@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.pf4j.ExtensionPoint;
 
-public interface Page extends ExtensionPoint {
+public interface Page extends PageResources, ExtensionPoint {
 
 	default void doGet(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		throw new UnsupportedOperationException();
@@ -19,8 +19,6 @@ public interface Page extends ExtensionPoint {
 	}
 
 	String getUri();
-
-	String getResource();
 	
 	String getResourcePath();
 
