@@ -1,5 +1,6 @@
 package com.jadaptive.api.ui.renderers.form;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
@@ -26,7 +27,7 @@ public class TimestampFormInput extends FieldInputRender {
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
 				.appendChild(new Element("input")
 						.addClass("form-control")
-						.attr("value", Utils.parseTimestamp(value).toString())
+						.attr("value", StringUtils.isNotBlank(value) ? Utils.parseTimestamp(value).toString() : "")
 						.attr("autocomplete", "off")
 						.attr("type", "text"))
 				.appendChild(new Element("small")
