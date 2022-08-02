@@ -77,9 +77,8 @@ public abstract class PasswordEnabledUserDatabaseImpl
 	}
 
 	public String saveOrUpdate(User u) {
-		PasswordEnabledUser user = (PasswordEnabledUser)u;
-		setPassword(user, user.getEncodedPassword().toCharArray(), user.getPasswordChangeRequired());
-		return user.getUuid();
+		objectDatabase.saveOrUpdate(u);
+		return u.getUuid();
 	}
 	
 	@Override

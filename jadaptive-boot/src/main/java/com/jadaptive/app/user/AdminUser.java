@@ -21,7 +21,7 @@ import com.jadaptive.utils.PasswordEncryptionType;
 @ObjectDefinition(resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, creatable = false)
 @ObjectServiceBean(bean = AdminUserDatabase.class)
 @ObjectViews({ 
-	@ObjectViewDefinition(type = ViewType.ACCORDION, bundle = "users", value = "passwordOptions")})
+	@ObjectViewDefinition(bundle = "users", value = "passwordOptions")})
 public class AdminUser extends PasswordEnabledUser {
 
 	private static final long serialVersionUID = -4995333149629598100L;
