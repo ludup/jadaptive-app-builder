@@ -82,6 +82,7 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@ExceptionHandler(Throwable.class)
 	public void Throwable(Throwable e, HttpServletResponse response) throws IOException {
+		log.error("Captured error", e);
 	    response.sendRedirect(ErrorPage.generateErrorURI(e, Request.get().getHeader(HttpHeaders.REFERER)));
 	}
 	

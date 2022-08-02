@@ -17,7 +17,8 @@ public enum FieldType {
 	PERMISSION, 
 //	HIDDEN,
 	IMAGE,
-	FILE;
+	FILE,
+	COUNTRY;
 	
 	ValidationType[] options;
 	

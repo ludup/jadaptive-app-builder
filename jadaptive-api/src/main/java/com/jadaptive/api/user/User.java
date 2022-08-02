@@ -11,6 +11,9 @@ import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
+import com.jadaptive.api.template.ObjectView;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
@@ -19,6 +22,7 @@ import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
 @ObjectServiceBean(bean = UserService.class)
+@ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "contact") })
 @TableView(defaultColumns = { "username", "name", "lastLogin" }, requiresUpdate = true, actions = {
 		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}") })
 public abstract class User extends UUIDEntity implements NamedDocument {
@@ -36,7 +40,12 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 	String name;
 
 	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT)
+	@ObjectView("contact")
 	String email;
+
+	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT)
+	@ObjectView("contact")
+	String mobilePhone;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true)
 	@ExcludeView(values =  { FieldView.CREATE })
@@ -72,6 +81,14 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 
 	public void setLastLogin(Date lastLogin) {
 		this.lastLogin = lastLogin;
+	}
+
+	public String getMobilePhone() {
+		return mobilePhone;
+	}
+
+	public void setMobilePhone(String mobilePhone) {
+		this.mobilePhone = mobilePhone;
 	}
 	
 }
