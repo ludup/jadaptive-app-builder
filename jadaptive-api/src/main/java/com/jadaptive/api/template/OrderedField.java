@@ -74,6 +74,6 @@ public class OrderedField {
 		if(field.getFieldType()==FieldType.PASSWORD) {
 			return false;
 		}
-		return field.isManuallyEncrypted();
+		return field.isManuallyEncrypted() || field.isAutomaticallyEncrypted();
 	}
 }

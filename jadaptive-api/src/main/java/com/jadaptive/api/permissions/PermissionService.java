@@ -2,7 +2,9 @@ package com.jadaptive.api.permissions;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
+import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.ui.NamePairValue;
 import com.jadaptive.api.user.User;
@@ -51,5 +53,11 @@ public interface PermissionService {
 	boolean isAdministrator(User user);
 
 	void assertAdministrator();
+
+	void assertAssignment(AssignableUUIDEntity obj);
+
+	<T> T as(User user, Callable<T> call);
+
+	<T> T asSystem(Callable<T> call);
 
 }

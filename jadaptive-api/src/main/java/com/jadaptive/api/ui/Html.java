@@ -114,4 +114,8 @@ public class Html {
 	public static Element tbody() {
 		return new Element("tbody");
 	}
+
+	public static Element input(String type, String name, String value) {
+		return new Element("input").attr("type", type).attr("name", name).val(value);
+	}
 }

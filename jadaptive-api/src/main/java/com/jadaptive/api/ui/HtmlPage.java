@@ -167,6 +167,7 @@ public abstract class HtmlPage implements Page {
 					}
 				});
 				
+				beforeForm(doc, request, response);
 				m.invoke(this, doc, formProxy);
 				
 			} else {
@@ -194,6 +195,10 @@ public abstract class HtmlPage implements Page {
 		}
 	}
 	
+	protected void beforeForm(Document doc, HttpServletRequest request, HttpServletResponse response) {
+		
+	}
+
 	private void injectFeedback(Document doc, HttpServletRequest request) {
 		Feedback feedback = (Feedback) request.getSession().getAttribute("feedback");
 //		if(Objects.isNull(feedback)) {

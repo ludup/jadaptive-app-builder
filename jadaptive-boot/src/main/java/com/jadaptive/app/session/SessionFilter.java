@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
@@ -178,29 +179,10 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 			 */
 			Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 			
-			/**
-			 * Check if we have a valid CORS request
-			 */
-			@SuppressWarnings("unused")
-			boolean validCORS = sessionUtils.isValidCORSRequest(request, response, properties);		
-					
 			if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))
 					&& Objects.nonNull(request.getHeader(HttpHeaders.AUTHORIZATION))) {
 				session = performBasicAuthentication(request, response);
 			}
-			
-			/**
-			 * If the request is not a valid CORS then check we have valid CSRF token in the request.
-			 * 
-			 * THIS IS CURRENTLY DISABLED AS THE UI IS INCOMPLETE
-			 */
-			/**
-			if(Objects.nonNull(session) && !validCORS 
-					&& (ApplicationProperties.getValue("security.enableCSRFProtection", true) || 
-							Boolean.parseBoolean(properties.getProperty("security.enableCSRFProtection", "true")))) {
-				sessionUtils.verifySameSiteRequest(request, response, session);
-			}**/
-			
 			
 			if(Objects.isNull(session) && Boolean.parseBoolean(properties.getProperty("authentication.allowAnonymous", "false"))) {
 				permissionService.setupSystemContext();

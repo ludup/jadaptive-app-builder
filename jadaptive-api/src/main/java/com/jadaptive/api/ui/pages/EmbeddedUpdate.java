@@ -32,8 +32,7 @@ public class EmbeddedUpdate extends EmbeddedObjectPage {
 	}
 	
 	@Override
-	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
-		super.generateAuthenticatedContent(document);
+	protected void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException {
 		
 		Element element = document.selectFirst("#saveButton");
 		if(Objects.nonNull(element)) {
