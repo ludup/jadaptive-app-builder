@@ -1,16 +1,30 @@
 package com.jadaptive.api.ui.pages;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Objects;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionConfiguration;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticatedPage;
+import com.jadaptive.api.ui.Html;
+import com.jadaptive.api.ui.Page;
 
 public abstract class TemplatePage extends AuthenticatedPage {
 
@@ -19,6 +33,9 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	
 	@Autowired
 	private TenantService tenantService; 
+	
+	@Autowired
+	private SingletonObjectDatabase<SessionConfiguration> sessionConfig;
 	
 	protected String resourceKey;
 	
@@ -52,6 +69,53 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		}
 	
 	}
+	
+	protected void beforeForm(Document document, HttpServletRequest request, HttpServletResponse response) {
+		
+		String token = request.getParameter(SessionUtils.CSRF_TOKEN_INPUT_NAME);
+		Session session = getCurrentSession();
+		
+		SessionConfiguration config = sessionConfig.getObject(SessionConfiguration.class);
+		
+		if(config.getEnableCsrf()) {
+			if(StringUtils.isNotBlank(token)) {
+				if(!session.getCsrfToken().equals(token)) {
+					throw new IllegalStateException("Unexpected CSRF token value in form submission");
+				}
+			} else {
+				throw new IllegalStateException("Missing CSRF token in form submission");
+			}
+		}
+	}
+	
+	protected Document resolveDocument(Page page) throws IOException {
+		Document document = super.resolveDocument(page);
+		Element form = document.selectFirst("form");
+		
+		if(Objects.nonNull(form)) {
+			form.appendChild(Html.input("hidden", SessionUtils.CSRF_TOKEN_INPUT_NAME, getCurrentSession().getCsrfToken()));
+		}
+		
+		return document;
+	}
+	
+	@Override
+	protected final void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
+
+		beforeGenerateContent(document);
+		doGenerateTemplateContent(document);
+		afterGenerateContent(document);
+	}
+	
+	protected void beforeGenerateContent(Document document) {
+
+	}
+	
+	protected void afterGenerateContent(Document document) {
+
+	}
+
+	protected abstract void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException;
 	
 	public abstract FieldView getScope();
 	

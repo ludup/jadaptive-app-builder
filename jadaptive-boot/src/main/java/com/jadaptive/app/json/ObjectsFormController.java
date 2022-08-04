@@ -28,6 +28,7 @@ import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
@@ -48,6 +49,9 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	@Autowired
 	private ObjectService objectService; 
+	
+	@Autowired
+	private SessionUtils sessionUtils;
 	
 	@ExceptionHandler(AccessDeniedException.class)
 	public void handleException(HttpServletRequest request, 
@@ -74,6 +78,9 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	public RequestStatus saveFormAsObject(HttpServletRequest request, @PathVariable String resourceKey)  {
 
 		try {
+			
+			sessionUtils.verifySameSiteRequest(request, sessionUtils.getSession(request));
+			
 			ObjectTemplate template = templateService.get(resourceKey);
 			request.getSession().removeAttribute(resourceKey);
 			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
@@ -102,6 +109,9 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	public RequestStatus saveFormAsObjectMultipart(HttpServletRequest request, @PathVariable String resourceKey)  {
 
 		try {
+			
+			sessionUtils.verifySameSiteRequest(request, sessionUtils.getSession(request));
+			
 			ObjectTemplate template = templateService.get(resourceKey);
 			request.getSession().removeAttribute(resourceKey);
 			
@@ -225,7 +235,6 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			@PathVariable String resourceKey)  {
 
 		try {
-			
 			ObjectTemplate template = templateService.get(resourceKey);
 			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
 			objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
@@ -248,14 +257,16 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	public void copyObject(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey,
 			@PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-			   AbstractObject obj = objectService.get(resourceKey, uuid);
-			   obj.setUuid(null);
-			   obj.getDocument().remove("_id");
-			   obj.getDocument().remove("uuid");
-			   request.getSession().setAttribute(resourceKey, obj);
-			  
-			   response.sendRedirect(String.format("/app/ui/create/%s", resourceKey));
-			   
+			sessionUtils.verifySameSiteRequest(request, sessionUtils.getSession(request));
+			
+		    AbstractObject obj = objectService.get(resourceKey, uuid);
+		    obj.setUuid(null);
+		    obj.getDocument().remove("_id");
+		    obj.getDocument().remove("uuid");
+		    request.getSession().setAttribute(resourceKey, obj);
+		  
+		    response.sendRedirect(String.format("/app/ui/create/%s", resourceKey));
+		   
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/objects/{}/copy", resourceKey, e);

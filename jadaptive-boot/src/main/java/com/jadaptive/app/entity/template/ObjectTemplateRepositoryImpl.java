@@ -1,8 +1,11 @@
 package com.jadaptive.app.entity.template;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,41 +52,94 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 		db.createUniqueIndex(template.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fieldNames);
 	}
 
+	private String getIndexName(String type, String... fieldNames) {
+		return type + "_" + StringUtils.join(fieldNames, "_");
+	}
+	
 	@Override
 	public void createIndexes(ObjectTemplate template, Index[] nonUnique, UniqueIndex[] unique) {
 			
-		if(Objects.nonNull(nonUnique)) {
-			for(Index idx : nonUnique) {
-				if(log.isInfoEnabled()) {
-					log.info("Creating index on {} for fields {}", template.getName(), Utils.csv(idx.columns()));
+		if(calculateIndexes(template, nonUnique, unique)) {
+		
+			db.dropIndexes(template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+		
+			if(Objects.nonNull(nonUnique)) {
+				for(Index idx : nonUnique) {
+					if(log.isInfoEnabled()) {
+						log.info("Creating index on {} for fields {}", template.getName(), Utils.csv(idx.columns()));
+					}
+					createIndex(template, idx.columns());
 				}
-				createIndex(template, idx.columns());
+			}
+			
+			if(Objects.nonNull(unique)) {
+				for(UniqueIndex idx : unique) {
+					if(log.isInfoEnabled()) {
+						log.info("Creating unique index on {} for fields {}", template.getName(), Utils.csv(idx.columns()));
+					}
+					createUniqueIndex(template, idx.columns());
+				}
+			}
+			
+			FieldTemplate textIndexField = null;
+			for(FieldTemplate field : template.getFields()) {
+				if(!field.getResourceKey().equalsIgnoreCase("uuid")) {
+					if(field.isUnique()) {
+						if(log.isInfoEnabled()) {
+							log.info("Creating unique index on {} for field {}", template.getName(), field.getResourceKey());
+						}
+						createUniqueIndex(template, field.getResourceKey());
+					} else {
+						if(field.isSearchable() && !field.isTextIndex()) {
+							if(log.isInfoEnabled()) {
+								log.info("Creating index on {} for field {}", template.getName(), field.getResourceKey());
+							}
+							createIndex(template, field.getResourceKey());
+						} else if(field.isTextIndex()) {
+							if(Objects.nonNull(textIndexField)) {
+								throw new IllegalStateException(
+										String.format("Invalid index specification; multiple text index fields declared on %s",
+												template.getName()));
+							}
+							textIndexField = field;
+						}
+					}
+					
+				}
+			}
+			if(Objects.nonNull(textIndexField)) {
+				if(log.isInfoEnabled()) {
+					log.info("Creating text index on {} for field {}", template.getName(), textIndexField.getResourceKey());
+				}
+				createTextIndex(template, textIndexField.getResourceKey());
 			}
 		}
+	}
+
+	private boolean calculateIndexes(ObjectTemplate template, Index[] nonUnique, UniqueIndex[] unique) {
+
+		Set<String> indexNames = db.getIndexNames(template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
 		
-		if(Objects.nonNull(unique)) {
-			for(UniqueIndex idx : unique) {
-				if(log.isInfoEnabled()) {
-					log.info("Creating unique index on {} for fields {}", template.getName(), Utils.csv(idx.columns()));
-				}
-				createUniqueIndex(template, idx.columns());
-			}
+		for(Index idx : nonUnique) {
+			String name = getIndexName("index", idx.columns());
+			indexNames.remove(name);
+		}
+		
+		for(UniqueIndex idx : unique) {
+			String name = getIndexName("unique", idx.columns());
+			indexNames.remove(name);
 		}
 		
 		FieldTemplate textIndexField = null;
 		for(FieldTemplate field : template.getFields()) {
 			if(!field.getResourceKey().equalsIgnoreCase("uuid")) {
 				if(field.isUnique()) {
-					if(log.isInfoEnabled()) {
-						log.info("Creating unique index on {} for field {}", template.getName(), field.getResourceKey());
-					}
-					createUniqueIndex(template, field.getResourceKey());
+					String name = getIndexName("unique", field.getResourceKey());
+					indexNames.remove(name);
 				} else {
 					if(field.isSearchable() && !field.isTextIndex()) {
-						if(log.isInfoEnabled()) {
-							log.info("Creating index on {} for field {}", template.getName(), field.getResourceKey());
-						}
-						createIndex(template, field.getResourceKey());
+						String name = getIndexName("index",field.getResourceKey());
+						indexNames.remove(name);
 					} else if(field.isTextIndex()) {
 						if(Objects.nonNull(textIndexField)) {
 							throw new IllegalStateException(
@@ -97,11 +153,11 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 			}
 		}
 		if(Objects.nonNull(textIndexField)) {
-			if(log.isInfoEnabled()) {
-				log.info("Creating text index on {} for field {}", template.getName(), textIndexField.getResourceKey());
-			}
-			createTextIndex(template, textIndexField.getResourceKey());
+			String name = getIndexName("text", textIndexField.getResourceKey());
+			indexNames.remove(name);
 		}
+		
+		return !indexNames.isEmpty();
 	}
 
 	@Override

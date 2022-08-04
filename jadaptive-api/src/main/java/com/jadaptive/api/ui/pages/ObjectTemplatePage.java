@@ -49,10 +49,7 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 	}
 	
 	@Override
-	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
-		
-		beforeGenerateContent(document);
-		super.generateAuthenticatedContent(document);
+	protected void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException {
 		
 		Element element = document.selectFirst("#searchBreadcrumb");
 		if(Objects.nonNull(element)) {
@@ -66,18 +63,9 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		if(Objects.nonNull(element)) {
 			element.attr("href", String.format("/app/api/form/cancel/%s", template.getCollectionKey()));
 		}
-		
-		afterGenerateContent(document);
-	}
-	
-	protected void beforeGenerateContent(Document document) {
 
 	}
 	
-	protected void afterGenerateContent(Document document) {
-
-	}
-
 	public void onCreate() throws FileNotFoundException {
 
 		super.onCreate();

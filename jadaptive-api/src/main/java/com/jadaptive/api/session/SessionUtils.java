@@ -2,6 +2,7 @@ package com.jadaptive.api.session;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
@@ -39,6 +40,8 @@ public class SessionUtils {
 	public static final String USER_LOCALE = "userLocale";
 	public static final String LOCALE_COOKIE = "JADAPTIVE_LOCALE";
 
+	public static final String CSRF_TOKEN_INPUT_NAME = "__token__";
+
 	static ThreadLocal<User> threadUsers = new ThreadLocal<>();
 	
 	@Autowired
@@ -62,7 +65,7 @@ public class SessionUtils {
 			if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
 				session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
 				if(sessionService.isLoggedOn(session, true)) {
-					return verifySameSiteRequest(request, session);
+					return session;
 				}
 			}
 			
@@ -70,7 +73,7 @@ public class SessionUtils {
 				session = (Session) request.getSession().getAttribute(
 						AUTHENTICATED_SESSION);
 				if(sessionService.isLoggedOn(session, true)) {
-					return verifySameSiteRequest(request, session);
+					return session;
 				}
 			}
 			
@@ -81,7 +84,7 @@ public class SessionUtils {
 			}
 			
 			if (session != null && sessionService.isLoggedOn(session, true)) {
-				return verifySameSiteRequest(request, session);
+				return session;
 			}
 			
 			if(Objects.nonNull(request.getCookies())) {
@@ -89,7 +92,7 @@ public class SessionUtils {
 					if (c.getName().equals(SESSION_COOKIE)) {
 						session = sessionService.getSession(c.getValue());
 						if (session != null && sessionService.isLoggedOn(session, true)) {
-							return verifySameSiteRequest(request, session);
+							return session;
 						}
 					}
 				}
@@ -167,21 +170,25 @@ public class SessionUtils {
 	
 	public Session verifySameSiteRequest(HttpServletRequest request, Session session) {
 		
-//		String requestToken = request.getHeader("X-Csrf-Token");
-//		if(requestToken==null) {
-//			requestToken = request.getParameter("token");
-//			if(requestToken==null) {
-//				log.warn(String.format("CSRF token missing from %s", request.getRemoteAddr()));
-//				debugRequest(request);
-//				return null;
-//			}
-//		}
-//		
-//		if(!session.getCsrfToken().equals(requestToken)) {
-//			log.warn(String.format("CSRF token mistmatch from %s", request.getRemoteAddr()));
-//			debugRequest(request);
-//			return null;
-//		}
+		if(Objects.isNull(session)) {
+			return session;
+		}
+		
+		String requestToken = request.getHeader("X-Csrf-Token");
+		if(requestToken==null) {
+			requestToken = request.getParameter("__token__");
+			if(requestToken==null) {
+				log.warn(String.format("CSRF token missing from %s", request.getRequestURI()));
+				debugRequest(request);
+				return null;
+			}
+		}
+		
+		if(!session.getCsrfToken().equals(requestToken)) {
+			log.warn(String.format("CSRF token mistmatch from %s", request.getRequestURI()));
+			debugRequest(request);
+			return null;
+		}
 		
 		touchSession(request, Request.response(), session);
 

@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.PluginManager;
@@ -25,6 +26,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.permissions.PermissionUtils;
 import com.jadaptive.api.permissions.Permissions;
+import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
@@ -169,6 +171,30 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public <T> T as(User user, Callable<T> call) {
+		setupUserContext(user);
+		try {
+			return call.call();
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			clearUserContext();
+		}
+	}
+	
+	@Override
+	public <T> T asSystem(Callable<T> call) {
+		setupUserContext(SYSTEM_USER);
+		try {
+			return call.call();
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			clearUserContext();
+		}
 	}
 	
 	private synchronized void registerPermission(String permission, String... aliases) {
@@ -431,5 +457,17 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		});
 		
 		return Collections.unmodifiableCollection(tmp);
+	}
+
+	@Override
+	public void assertAssignment(AssignableUUIDEntity obj) {
+		
+		if(obj.getUsers().contains(getCurrentUser().getUuid())) {
+			return;
+		}
+		if(roleService.hasRole(getCurrentUser(), roleService.getRolesByUUID(obj.getRoles()))) {
+			return;
+		}
+		throw new AccessDeniedException(String.format("Current user is not assigned to object " + obj.getUuid()));
 	}
 }
