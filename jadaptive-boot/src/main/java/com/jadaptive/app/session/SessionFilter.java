@@ -258,7 +258,7 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 						username, 
 						password, 
 						tenantService.getCurrentTenant(), 
-						request.getRemoteAddr(), 
+						Request.getRemoteAddress(), 
 						request.getHeader(HttpHeaders.USER_AGENT));
 				
 				sessionUtils.addSessionCookies(request, response, session);

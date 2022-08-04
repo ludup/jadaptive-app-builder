@@ -119,7 +119,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			state.incrementFailedAttempts();
 			
 			assertLoginThreshold(state.getAttemptedUsername());
-			assertLoginThreshold(Request.get().getRemoteAddr());
+			assertLoginThreshold(Request.getRemoteAddress());
 		
 		} finally {
 			permissionService.clearUserContext();
@@ -240,7 +240,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		AuthenticationState state = (AuthenticationState) Request.get().getSession().getAttribute(AUTHENTICATION_STATE_ATTR);
 		if(Objects.isNull(state)) {
 			state = new AuthenticationState();
-			state.setRemoteAddress(getRemoteAddress());
+			state.setRemoteAddress(Request.getRemoteAddress());
 			state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
 			
 			try {
@@ -253,15 +253,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		return state;
 	}
-
-	private String getRemoteAddress() {
-		String xForwardedFor = Request.get().getHeader("X-Forwarded-For");
-		if(StringUtils.isNotBlank(xForwardedFor)) {
-			return xForwardedFor;
-		}
-		return Request.get().getRemoteAddr();
-	}
-
 
 	@Override
 	public void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy) throws FileNotFoundException {

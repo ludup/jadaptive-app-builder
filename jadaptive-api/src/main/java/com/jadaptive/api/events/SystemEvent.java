@@ -73,7 +73,7 @@ public class SystemEvent extends UUIDEvent {
 		this.timestamp = timestamp;
 		this.eventKey = eventKey;
 		this.eventGroup = eventGroup;
-		this.ipAddress = Request.isAvailable() ? Request.get().getRemoteAddr() : null;
+		this.ipAddress = Request.isAvailable() ? Request.getRemoteAddress() : null;
 		setSystem(true);
 	}
 	
