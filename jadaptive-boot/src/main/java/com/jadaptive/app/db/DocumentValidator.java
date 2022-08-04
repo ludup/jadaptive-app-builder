@@ -198,7 +198,9 @@ public class DocumentValidator {
 				}
 				case URL:
 				{
-					validateRegex(Utils.HTTP_URL_PATTERN, value, v);
+					if(StringUtils.isNotBlank(value)) {
+						validateRegex(Utils.HTTP_URL_PATTERN, value, v);
+					}
 					break;
 				}
 				default:

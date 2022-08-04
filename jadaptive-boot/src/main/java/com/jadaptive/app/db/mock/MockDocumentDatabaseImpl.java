@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -192,6 +193,18 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	public Long sum(String table, String database, String groupBy, SearchField... fields) {
 		// TODO Auto-generated method stub
 		return 0L;
+	}
+
+	@Override
+	public void dropIndexes(String table, String database) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Set<String> getIndexNames(String table, String database) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

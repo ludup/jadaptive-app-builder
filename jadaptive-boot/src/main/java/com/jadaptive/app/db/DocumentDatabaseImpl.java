@@ -6,8 +6,10 @@ import static com.mongodb.client.model.Sorts.descending;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -104,7 +106,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void createTextIndex(String fieldName, String table, String database) {
 		String indexName = "text_" + fieldName;
 		MongoCollection<Document> collection = getCollection(table, database);
-		
+
 		ClientSession session = currentSession.get();
 		if(Objects.nonNull(session)) {
 			collection.createIndex(session, Indexes.text(fieldName), new IndexOptions().name(indexName));
@@ -117,12 +119,24 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void createIndex(String table, String database, String... fieldNames) {
 		String indexName = "index_" + StringUtils.join(fieldNames, "_");
 		MongoCollection<Document> collection = getCollection(table, database);
-		
+
 		ClientSession session = currentSession.get();
 		if(Objects.nonNull(session)) {
 			collection.createIndex(session, Indexes.ascending(fieldNames), new IndexOptions().name(indexName));
 		} else {
 			collection.createIndex(Indexes.ascending(fieldNames), new IndexOptions().name(indexName));		
+		}
+	}
+	
+	@Override
+	public void dropIndexes(String table, String database) {
+		MongoCollection<Document> collection = getCollection(table, database);
+
+		ClientSession session = currentSession.get();
+		if(Objects.nonNull(session)) {
+			collection.dropIndexes(session);
+		} else {
+			collection.dropIndexes();	
 		}
 	}
 	
@@ -623,6 +637,20 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		}
 		
 		return tmp.get(0);
+	}
+
+	@Override
+	public Set<String> getIndexNames(String table, String database) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		Set<String> results = new HashSet<>();
+		for(Document index : collection.listIndexes()) {
+			if(!index.getString("name").equals("_id_")) {
+				results.add(index.getString("name"));
+			}
+			System.out.println(index.toString());
+		}
+		return results;
 	}
 
 

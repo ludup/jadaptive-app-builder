@@ -1,5 +1,7 @@
 package com.jadaptive.app.db;
 
+import java.util.Set;
+
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
@@ -56,6 +58,10 @@ public interface DocumentDatabase {
 	void doInTransaction(Runnable r);
 
 	Long sum(String table, String database, String groupBy, SearchField... fields);
+
+	void dropIndexes(String table, String database);
+
+	Set<String> getIndexNames(String table, String database);
 
 	
 

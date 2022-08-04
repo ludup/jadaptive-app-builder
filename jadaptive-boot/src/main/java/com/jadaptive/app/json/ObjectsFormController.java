@@ -235,7 +235,6 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			@PathVariable String resourceKey)  {
 
 		try {
-			
 			ObjectTemplate template = templateService.get(resourceKey);
 			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
 			objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
