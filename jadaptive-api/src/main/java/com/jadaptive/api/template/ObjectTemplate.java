@@ -3,8 +3,10 @@ package com.jadaptive.api.template;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -55,7 +57,7 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	String parentTemplate;
 
 	@ObjectField(type = FieldType.TEXT)
-	Collection<String> childTemplates = new ArrayList<>();
+	Collection<String> childTemplates = new TreeSet<>();
 	
 	@ObjectField(type = FieldType.BOOL, hidden = true)
 	Boolean creatable;
@@ -194,7 +196,7 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	}
 	
 	public Collection<String> getChildTemplates() {
-		return childTemplates;
+		return new HashSet<>(childTemplates);
 	}
 
 	public boolean hasParent() {
@@ -244,5 +246,9 @@ public class ObjectTemplate extends NamedUUIDEntity {
 
 	public void setDeletable(Boolean deletable) {
 		this.deletable = deletable;
+	}
+
+	public boolean isSingleton() {
+		return type == ObjectType.SINGLETON;
 	}
 }

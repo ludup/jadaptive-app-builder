@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
@@ -86,8 +87,14 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
 			String uuid = objectService.saveOrUpdate(obj);
 			
-			
-			Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+			if(template.isSingleton()) {
+				Feedback.success("default", "object.saved", I18N.getResource(
+						sessionUtils.getLocale(request), 
+						template.getBundle(),
+						template.getResourceKey() + ".name"));
+			} else {
+				Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+			}
 			
 			return new UUIDStatus(uuid);
 		}  catch(ValidationException ex) { 
@@ -118,7 +125,14 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
 			String uuid = objectService.saveOrUpdate(obj);
 			
-			Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+			if(template.isSingleton()) {
+				Feedback.success("default", "object.saved", I18N.getResource(
+						sessionUtils.getLocale(request), 
+						template.getBundle(),
+						template.getResourceKey() + ".name"));
+			} else {
+				Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+			}
 			
 			return new UUIDStatus(uuid);
 		}  catch(ValidationException ex) { 

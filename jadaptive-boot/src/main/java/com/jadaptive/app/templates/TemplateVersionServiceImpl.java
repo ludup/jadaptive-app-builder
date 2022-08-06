@@ -452,7 +452,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				}
 				template.setParentTemplate(parent.resourceKey());
 				ObjectTemplate parentTemplate = templateRepository.get(parent.resourceKey());
-				parentTemplate.addChildTemplate(e.resourceKey());
+				if(!parentTemplate.getChildTemplates().contains(e.resourceKey())) {
+					parentTemplate.addChildTemplate(e.resourceKey());
+				}
+				
 				templateRepository.saveOrUpdate(parentTemplate);
 			}
 			

@@ -292,8 +292,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			throw new IllegalStateException("Invalid authentication policy! Minumum number of optional factors exceeds available optional factors");
 		}
 		
-		if(!hasSecret) {
-			throw new IllegalStateException("Invalid authentication policy! No secret capture at any index");
+		if(!hasSecret && policy.getOptionalRequired() == 0) {
+			throw new IllegalStateException("Invalid authentication policy! No secret capture modules are configured");
 		}
 
 		if(required.isEmpty()) {
