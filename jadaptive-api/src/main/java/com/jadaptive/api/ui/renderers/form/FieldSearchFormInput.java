@@ -66,6 +66,7 @@ public class FieldSearchFormInput {
 								.attr("class", "fas fa-search")))
 					.appendChild(new Element("div")
 							.addClass(readOnly ? "disabled-dropdown" : "dropdown-menu")
+							.attr("style", "max-height: 300px; overflow-y: scroll;")
 							.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))))
 				.appendChild(new Element("small")
 						.addClass("text-muted")

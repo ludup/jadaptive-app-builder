@@ -128,16 +128,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
 			obj.setUuid(document.getString("_id"));
 			
-//			if(Boolean.getBoolean("jadaptive.cache")) {
-//				/**
-//				 * Perform caching which will also inform us whether event
-//				 */
-//				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
-//				
-//				T prevObject = cachedObjects.get(obj.getUuid());
-//				cachedObjects.put(obj.getUuid(), obj);
-//				onObjectUpdated(prevObject, obj);
-//			}
+			if(Boolean.getBoolean("jadaptive.cache")) {
+				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+				cachedObjects.put(obj.getUuid(), obj);
+			}
 			
 			if(!isEvent) {
 				if(Objects.isNull(previous)) {

@@ -68,6 +68,7 @@ public class DropdownFormInput extends FieldInputRender {
 		if(!readOnly) {
 			dropdownInput.appendChild(dropdownMenu = new Element("div")
 					.addClass("dropdown-menu")
+					.attr("style", "max-height: 300px; overflow-y: scroll;")
 					.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey())));
 			
 		}

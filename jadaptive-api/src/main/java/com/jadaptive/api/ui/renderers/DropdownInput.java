@@ -67,7 +67,7 @@ public class DropdownInput extends InputRender {
 						.appendChild(new Element("i")
 								.attr("class", "fas fa-chevron-down")))
 					.appendChild(dropdownMenu = new Element("div")
-							.attr("style", "max-height: 280px; overflow-y: auto;")
+							.attr("style", "max-height: 300px; overflow-y: scroll;")
 							.attr("class", "dropdown-menu" + (dark ? " dropdown-menu-dark" : ""))
 							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
 	}

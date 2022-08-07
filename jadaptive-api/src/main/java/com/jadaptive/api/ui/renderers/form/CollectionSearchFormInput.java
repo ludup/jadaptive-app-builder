@@ -64,6 +64,7 @@ public class CollectionSearchFormInput {
 								.attr("class", "fas fa-search")))
 					.appendChild(new Element("div")
 							.addClass("dropdown-menu")
+							.attr("style", "max-height: 300px; overflow-y: scroll;")
 							.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))))
 				.appendChild(new Element("div")
 						.addClass("row mt-3")

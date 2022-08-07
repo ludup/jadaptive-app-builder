@@ -120,9 +120,10 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	protected void validateSave(AuthenticationPolicy policy) {		
 		authenticationService.validateModules(policy);
-		
-		if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy))) {
-			throw new IllegalStateException("The policy is invalid because it would lock the current user out from this location");
+		if(Request.isAvailable()) {
+			if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy))) {
+				throw new IllegalStateException("The policy is invalid because it would lock the current user out from this location");
+			}
 		}
 	}
 

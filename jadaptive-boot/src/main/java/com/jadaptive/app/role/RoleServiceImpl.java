@@ -74,8 +74,9 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		role.setSystem(true);
 		role.setAllUsers(true);
 		
-		role.setPermissions(Arrays.asList(UserServiceImpl.CHANGE_PASSWORD_PERMISSION));
-		role.setPermissions(Arrays.asList(AuthenticationService.USER_LOGIN_PERMISSION));
+		role.setPermissions(new HashSet<>(Arrays.asList(
+				UserServiceImpl.CHANGE_PASSWORD_PERMISSION,
+				AuthenticationService.USER_LOGIN_PERMISSION)));
 		repository.saveOrUpdate(role);
 	}
 
