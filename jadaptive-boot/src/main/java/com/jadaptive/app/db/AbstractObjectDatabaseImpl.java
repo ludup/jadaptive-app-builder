@@ -150,7 +150,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends UUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, ObjectException {
 		try {
 			
-			if(Boolean.getBoolean("jadaptive.cache")) {
+			if(Objects.nonNull(uuid) && Boolean.getBoolean("jadaptive.cache")) {
 				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
