@@ -39,11 +39,11 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 	@Validator(type = ValidationType.REQUIRED)
 	String name;
 
-	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT)
+	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT, automaticEncryption = true)
 	@ObjectView("contact")
 	String email;
 
-	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT)
+	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT, automaticEncryption = true)
 	@ObjectView("contact")
 	String mobilePhone;
 	
