@@ -26,6 +26,7 @@ public class TimestampFormInput extends FieldInputRender {
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
 				.appendChild(new Element("input")
+						.attr("id", field.getFormVariable())
 						.addClass("form-control")
 						.attr("value", StringUtils.isNotBlank(value) ? Utils.parseTimestamp(value).toString() : "")
 						.attr("autocomplete", "off")
@@ -38,7 +39,6 @@ public class TimestampFormInput extends FieldInputRender {
 		
 
 		rootElement.appendChild(new Element("input")
-				.attr("id", field.getFormVariable())
 				.attr("name", field.getFormVariable())
 				.addClass("form-control")
 				.attr("value", value)

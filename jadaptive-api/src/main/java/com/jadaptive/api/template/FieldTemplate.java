@@ -265,4 +265,12 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	public void setParentField(String parentField) {
 		this.parentField = parentField;
 	}
+
+	public int getValidationValueInt(ValidationType val, int defaultValue) {
+		try {
+			return Integer.parseInt(getValidationValue(val));
+		} catch(Throwable e) {
+			return defaultValue;
+		}
+	}
 }

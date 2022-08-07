@@ -177,13 +177,11 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 	@Override
 	public Iterable<Session> inactiveSessions() {
-		return repository.list(Session.class, SearchField.eq("state", SessionState.EXPIRED));
+		return repository.list(Session.class, SearchField.eq("state", SessionState.EXPIRED.name()));
 	}
 
 	@Override
-	public void deleteSession(Session session) {
-		
-		closeSession(session);
+	public void deleteSession(Session session) {	
 		repository.delete(session);
 	}
 

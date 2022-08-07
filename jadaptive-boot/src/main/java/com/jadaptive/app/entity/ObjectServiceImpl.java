@@ -259,7 +259,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			
 			if(classService.hasTemplateClass(template)) {
 				Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
-				ObjectServiceBean annotation = clz.getAnnotation(ObjectServiceBean.class);
+				ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
 				if(Objects.nonNull(annotation)) {
 					UUIDObjectService<?> bean = appService.getBean(annotation.bean());
 					

@@ -39,7 +39,7 @@ public class UsageServiceImpl implements UsageService {
 	}
 	
 	@Override
-	public void incrementDailyValue(String key, long byValue) {
+	public synchronized void incrementDailyValue(String key, long byValue) {
 		
 		Counter counter;
 		
@@ -51,6 +51,7 @@ public class UsageServiceImpl implements UsageService {
 			counter = new Counter();
 			counter.setDate(Utils.today());
 			counter.setValue(0);
+			counter.setKey(key);
 		}
 		
 		counter.setValue(counter.getValue() + byValue);
@@ -59,7 +60,7 @@ public class UsageServiceImpl implements UsageService {
 	}
 	
 	@Override
-	public long getDailyValue(String key) {
+	public synchronized long getDailyValue(String key) {
 		
 		try {
 			Counter counter = counterDatabase.get(Counter.class,

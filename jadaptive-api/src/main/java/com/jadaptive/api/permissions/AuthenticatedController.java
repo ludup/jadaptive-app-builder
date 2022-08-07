@@ -48,7 +48,12 @@ public class AuthenticatedController extends ExceptionHandlingController {
 			if(Objects.isNull(user)) {
 				Session session = sessionUtils.getActiveSession(request);
 				if(Objects.isNull(session)) {
-					log.info(request.getMethod() + " " + request.getRequestURI().toString());
+					log.warn("Unauthencated acccess from "
+						+ Request.getRemoteAddress() 
+						+ " to "
+						+ request.getMethod() 
+						+ " " 
+						+ request.getRequestURI().toString());
 					throw new AccessDeniedException();
 				}
 				user = session.getUser();

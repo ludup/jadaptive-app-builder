@@ -1,5 +1,7 @@
 package com.jadaptive.app.db;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -25,6 +27,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
@@ -291,9 +294,36 @@ public class DocumentHelper {
 					throw new IllegalStateException("Multiple file parts for single value!");
 				}
 				MultipartFile f = file.get(0);
-				if(StringUtils.isNotBlank(f.getOriginalFilename()) && f.getSize() > 0) {
-					return String.format("data:%s;base64, %s", f.getContentType(), Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream())));
+				
+				String encoded = Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
+				if(StringUtils.isBlank(encoded)) {
+					return null;
 				}
+				try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
+					BufferedImage bimg = ImageIO.read(in);
+					if(Objects.isNull(bimg)) {
+						throw new ValidationException(String.format("The file %s does not appear to contain an image!", f.getOriginalFilename()));
+					}
+					
+					int width          = bimg.getWidth();
+					int height         = bimg.getHeight();
+					
+					int maxHeight = field.getValidationValueInt(ValidationType.IMAGE_HEIGHT, -1);
+					int maxWidth = field.getValidationValueInt(ValidationType.IMAGE_WIDTH, -1);
+					
+					if(maxWidth > -1 && maxWidth < width) {
+						throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+					}
+					
+					if(maxHeight > -1 && maxHeight < height) {
+						throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+					}
+					
+					if(StringUtils.isNotBlank(f.getOriginalFilename()) && f.getSize() > 0) {
+						return String.format("data:%s;base64, %s", f.getContentType(), encoded);
+					}
+				}
+				
 			}
 			return request.getParameter(field.getFormVariable() + "_previous");
 		case FILE:
