@@ -2,6 +2,7 @@ package com.jadaptive.api.session;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 public abstract class SessionStickyInputStream extends InputStream {
 		
@@ -28,9 +29,11 @@ public abstract class SessionStickyInputStream extends InputStream {
 		}
 		
 		protected void checkSession() throws IOException {
-			if(lastTouch == 0 || System.currentTimeMillis() - lastTouch > 30000L) {
-				lastTouch = System.currentTimeMillis();
-				touchSession(session);
+			if(Objects.nonNull(session)) {
+				if(lastTouch == 0 || System.currentTimeMillis() - lastTouch > 30000L) {
+					lastTouch = System.currentTimeMillis();
+					touchSession(session);
+				}
 			}
 		}
 

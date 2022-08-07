@@ -2,7 +2,6 @@ package com.jadaptive.api.session;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;

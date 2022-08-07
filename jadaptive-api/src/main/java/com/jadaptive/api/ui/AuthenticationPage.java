@@ -2,10 +2,8 @@ package com.jadaptive.api.ui;
 
 import java.io.FileNotFoundException;
 
-import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;

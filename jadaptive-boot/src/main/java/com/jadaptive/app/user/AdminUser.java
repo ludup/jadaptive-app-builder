@@ -12,7 +12,6 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
-import com.jadaptive.api.template.ViewType;
 import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;

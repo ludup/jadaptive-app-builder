@@ -43,7 +43,7 @@ public class CollectionTextFormInput {
 							.attr("autocomplete", "off")
 							.attr("type", "text"))
 					.appendChild(new Element("span")
-							.attr("class", "input-group-text")
+							.addClass("input-group-text collectionTextAdd")
 						.appendChild(new Element("i")
 								.attr("class", "fas fa-plus")))
 					.appendChild(new Element("div")

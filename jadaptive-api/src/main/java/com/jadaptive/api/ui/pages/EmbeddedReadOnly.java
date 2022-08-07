@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.pf4j.Extension;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.template.FieldView;
@@ -15,35 +16,28 @@ import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
 
 @Component
-@RequestPage(path = "object-update/{resourceKey}/{uuid}/{fieldName}/{childUuid}")
+@RequestPage(path = "object-view/{resourceKey}/{uuid}/{fieldName}/{childUuid}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = {"freemarker", "i18n"})
+@PageProcessors(extensions = { "freemarker", "i18n"} )
 @ModalPage
-public class EmbeddedUpdate extends EmbeddedObjectPage {
+public class EmbeddedReadOnly extends EmbeddedObjectPage {
 	
 	@Override
 	public FieldView getScope() {
-		return FieldView.UPDATE;
+		return FieldView.READ;
 	}
 
 	@Override
 	public String getUri() {
-		return "object-update";
+		return "object-view";
 	}
 	
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException {
 		
-		Element element = document.selectFirst("#saveButton");
+		Element element = document.selectFirst("#cancelButton");
 		if(Objects.nonNull(element)) {
-			element.attr("data-url", String.format("/app/ui/update/%s/%s", template.getResourceKey(), getUuid()))
-				.attr("data-action", String.format("/app/api/form/stash/%s/%s/%s", template.getResourceKey(), childResourceKey, fieldName));
-		}
-		
-		element = document.selectFirst("#cancelButton");
-		
-		if(Objects.nonNull(element)) {
-			element.attr("href", String.format("/app/ui/update/%s/%s", template.getResourceKey(), getUuid()));
+			element.attr("href", String.format("/app/ui/view/%s/%s", template.getResourceKey(), getUuid()));
 		}
 	}
 }

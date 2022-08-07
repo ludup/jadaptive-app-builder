@@ -1,6 +1,5 @@
 package com.jadaptive.app.entity.template;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;

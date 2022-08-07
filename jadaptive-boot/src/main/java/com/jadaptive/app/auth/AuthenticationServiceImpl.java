@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -296,7 +295,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			throw new IllegalStateException("Invalid authentication policy! No secret capture modules are configured");
 		}
 
-		if(required.isEmpty()) {
+		if(required.isEmpty() && (optional.isEmpty() || policy.getOptionalRequired() == 0)) {
 			throw new IllegalStateException("Invalid authentication policy! No valid modules");
 		}
 	}

@@ -478,20 +478,21 @@ public class DocumentHelper {
 						m.invoke(obj, convertDocumentToObject(UUIDEntity.class, (Document) doc, classLoader));
 					} else {
 						String objectUUID =  document.getString(name);
-						ObjectServiceBean service = parameter.getType().getAnnotation(ObjectServiceBean.class);
-						if(Objects.nonNull(service)) {
-							if(Objects.nonNull(objectUUID)) {
+						if(StringUtils.isNotBlank(objectUUID)) {
+							ObjectServiceBean service = parameter.getType().getAnnotation(ObjectServiceBean.class);
+							if(Objects.nonNull(service)) {
+								
 								UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
 								Object ref = bean.getObjectByUUID(objectUUID);
 								m.invoke(obj, ref);
-							}
-						} else {
-							String resourceKey = getTemplateResourceKey(parameter.getType());
-							
-							if(StringUtils.isNotBlank(objectUUID)) {
+								
+							} else {
+								String resourceKey = getTemplateResourceKey(parameter.getType());
+
 								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, objectUUID);
 								Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
 								m.invoke(obj, ref);
+								
 							}
 						}
 					}

@@ -41,7 +41,7 @@ public class SessionCleanupTask implements ScheduledTask {
 
 	@Override
 	public String cron() {
-		return EVERY_MINUTE;
+		return AT_MIDNIGHT;
 	}
 
 }
