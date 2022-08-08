@@ -73,6 +73,61 @@ public class UsageServiceImpl implements UsageService {
 	}
 	
 	@Override
+	public synchronized long getMonthlyValue(String key, Date date) {
+		
+		try {
+			Counter counter = counterDatabase.get(Counter.class,
+					SearchField.eq("date", Utils.getMonthEnd(date)),
+					SearchField.eq("key", key));
+			return counter.getValue();
+		} catch(ObjectNotFoundException e) {
+			return 0L;
+		}
+	}
+	
+	@Override
+	public synchronized void setMonthlyValue(String key, Date date, long byValue) {
+		
+		Counter counter;
+		
+		try {
+			counter = counterDatabase.get(Counter.class,
+					SearchField.eq("date", Utils.getMonthEnd(date)),
+					SearchField.eq("key", key));
+		} catch(ObjectNotFoundException e) {
+			counter = new Counter();
+			counter.setDate(Utils.today());
+			counter.setValue(0);
+			counter.setKey(key);
+		}
+		
+		counter.setValue(byValue);
+		counterDatabase.saveOrUpdate(counter);
+		
+	}
+	
+	@Override
+	public synchronized void setDailyValue(String key, long byValue) {
+		
+		Counter counter;
+		
+		try {
+			counter = counterDatabase.get(Counter.class,
+					SearchField.eq("date", Utils.today()),
+					SearchField.eq("key", key));
+		} catch(ObjectNotFoundException e) {
+			counter = new Counter();
+			counter.setDate(Utils.today());
+			counter.setValue(0);
+			counter.setKey(key);
+		}
+		
+		counter.setValue(byValue);
+		counterDatabase.saveOrUpdate(counter);
+		
+	}
+	
+	@Override
 	public Long sum(String key, Date from, Date to) {
 		return usageDatabase.sum(Usage.class, "value", 
 				SearchField.in("keys", key), 

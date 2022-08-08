@@ -20,4 +20,10 @@ public interface UsageService {
 
 	Long sumAnd(Date from, Date to, String... keys);
 
+	void setMonthlyValue(String key, Date date, long byValue);
+
+	long getMonthlyValue(String key, Date date);
+
+	void setDailyValue(String key, long byValue);
+
 }

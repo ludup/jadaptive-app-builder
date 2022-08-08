@@ -72,6 +72,13 @@ public abstract class HtmlPage implements Page {
 		}
 		
 		generateContent(document);
+		
+		if(Objects.nonNull(extenders)) {
+			for(HtmlPageExtender extender : extenders) {
+				extender.generateContent(document, this);
+			}
+		}
+		
 		injectFeedback(document, request);
 		processPageExtensions(uri, document);
 		documentComplete(document);
