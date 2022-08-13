@@ -173,6 +173,7 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 			} catch (UnauthorizedException | SessionTimeoutException e) {
 			}
 			
+			sessionUtils.populateSecurityHeaders(response);
 			/**
 			 * Get the security.properties hierarchy from the web application
 			 */

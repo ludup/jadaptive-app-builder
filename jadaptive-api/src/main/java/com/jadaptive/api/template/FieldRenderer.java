@@ -8,5 +8,6 @@ public enum FieldRenderer {
 	I18N,
 	BOOTSTRAP_BADGE,
 	OPTIONAL, 
-	CSS_EDITOR;
+	CSS_EDITOR, 
+	COUNTRY;
 }

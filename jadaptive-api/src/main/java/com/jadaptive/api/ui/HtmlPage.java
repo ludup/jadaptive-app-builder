@@ -23,11 +23,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.SessionUtils;
 
 public abstract class HtmlPage implements Page {
 	
 	@Autowired
 	private PageCache pageCache; 
+	
+	@Autowired
+	private SessionUtils sessionUtils;
 	
 	@Autowired
 	private ApplicationService applicationService; 
@@ -56,6 +60,10 @@ public abstract class HtmlPage implements Page {
 		extenders = applicationService.getBean(UserInterfaceService.class).getExtenders(this);
 		onCreated();
 	}
+	
+	protected boolean isCacheable() { return false; }
+	
+	protected int getMaxAge() { return 3600; }
 	
 	public void onCreated() throws FileNotFoundException { }
 	
@@ -87,6 +95,12 @@ public abstract class HtmlPage implements Page {
 			for(HtmlPageExtender extender : extenders) {
 				extender.processEnd(document, this);
 			}
+		}
+		
+		if(!isCacheable()) {
+			sessionUtils.setDoNotCache(response);
+		} else {
+			sessionUtils.setCachable(response, getMaxAge());
 		}
 		
 		afterProcess(uri, request, response);

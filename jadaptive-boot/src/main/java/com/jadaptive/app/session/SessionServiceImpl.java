@@ -63,7 +63,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		session.setUserAgent(userAgent);
 		session.setUser(user);
 		session.setState(SessionState.ACTIVE);
-		session.setCsrfToken(Utils.generateRandomAlphaNumericString(32));
+		session.setCsrfToken(Utils.generateRandomAlphaNumericString(64));
 		
 		repository.saveOrUpdate(session);
 		

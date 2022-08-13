@@ -72,7 +72,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	
 	protected void beforeForm(Document document, HttpServletRequest request, HttpServletResponse response) {
 		
-		String token = request.getParameter(SessionUtils.CSRF_TOKEN_INPUT_NAME);
+		String token = request.getParameter(SessionUtils.CSRF_TOKEN_ATTRIBUTE);
 		Session session = getCurrentSession();
 		
 		SessionConfiguration config = sessionConfig.getObject(SessionConfiguration.class);
@@ -93,7 +93,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		Element form = document.selectFirst("form");
 		
 		if(Objects.nonNull(form)) {
-			form.appendChild(Html.input("hidden", SessionUtils.CSRF_TOKEN_INPUT_NAME, getCurrentSession().getCsrfToken()));
+			form.appendChild(Html.input("hidden", SessionUtils.CSRF_TOKEN_ATTRIBUTE, getCurrentSession().getCsrfToken()));
 		}
 		
 		return document;

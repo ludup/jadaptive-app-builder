@@ -1,8 +1,12 @@
 package com.jadaptive.api.ui;
 
 import java.io.FileNotFoundException;
+import java.util.Objects;
 
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.auth.AuthenticationService;
@@ -17,6 +21,8 @@ import com.jadaptive.api.user.UserService;
 
 public abstract class AuthenticationPage<T> extends HtmlPage implements FormProcessor<T> {
 
+	static Logger log = LoggerFactory.getLogger(AuthenticationPage.class);
+	
 	@Autowired
 	protected SessionUtils sessionUtils;
 
@@ -57,6 +63,13 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			
 			doGenerateContent(doc);
 		}
+		
+		Element form = doc.selectFirst("form");
+		if(Objects.nonNull(form)) {
+			form.appendChild(Html.input("hidden", 
+					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
+						sessionUtils.setupCSRFToken(Request.get().getSession())));
+		}
 	}
 	
 	public abstract String getBundle();
@@ -69,6 +82,8 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 		try {
 			
+			sessionUtils.verifySameSiteRequest(Request.get());
+			
 			AuthenticationState state = authenticationService.getCurrentState();
 			
 			if(doForm(document, state, form)) {
@@ -79,7 +94,9 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
     	
     	} catch(AccessDeniedException e) {
     	} catch(ObjectNotFoundException e) {	
-    	}
+    	} catch (UnauthorizedException e) {
+			log.error("Invalid CSRF token");
+		}
 		
 		Feedback.error("userInterface","error.invalidCredentials");
 		throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentState().getCurrentPage()));

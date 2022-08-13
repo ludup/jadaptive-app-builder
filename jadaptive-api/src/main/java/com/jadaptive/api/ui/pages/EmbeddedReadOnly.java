@@ -6,7 +6,6 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.pf4j.Extension;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.template.FieldView;

@@ -12,6 +12,7 @@ import java.util.Properties;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +35,11 @@ public class SessionUtils {
 
 	public static final String AUTHENTICATED_SESSION = "authenticatedSession";
 	public static final String SESSION_COOKIE = "JADAPTIVE_SESSION";
-	public static final String CSRF_TOKEN = "JADAPTIVE_CSRF_TOKEN";
-
+	
 	public static final String USER_LOCALE = "userLocale";
 	public static final String LOCALE_COOKIE = "JADAPTIVE_LOCALE";
 
-	public static final String CSRF_TOKEN_INPUT_NAME = "__token__";
+	public static final String CSRF_TOKEN_ATTRIBUTE = "__token__";
 
 	static ThreadLocal<User> threadUsers = new ThreadLocal<>();
 	
@@ -166,16 +166,34 @@ public class SessionUtils {
 		throw new UnauthorizedException();
 	}
 
+	public Session verifySameSiteRequest(HttpServletRequest request) throws UnauthorizedException {
+		return verifySameSiteRequest(request, null);	
+	}
 	
-	public Session verifySameSiteRequest(HttpServletRequest request, Session session) {
+	public Session verifySameSiteRequest(HttpServletRequest request, Session session) throws UnauthorizedException {
+		
+		String requestToken = request.getParameter(CSRF_TOKEN_ATTRIBUTE);
 		
 		if(Objects.isNull(session)) {
-			return session;
+		
+			String csrf = (String)request.getSession().getAttribute(CSRF_TOKEN_ATTRIBUTE);
+			if(Objects.isNull(csrf)) {
+				throw new UnauthorizedException("No CSRF token in session!");
+			}
+			if(Objects.isNull(requestToken)) {
+				throw new UnauthorizedException("No CSRF token in form!");
+			}
+			if(!requestToken.equals(csrf)) {
+				log.warn(String.format("CSRF token mistmatch from %s", request.getRequestURI()));
+				debugRequest(request);
+				throw new UnauthorizedException(String.format("CSRF token mistmatch from %s", 
+						request.getRequestURI()));
+			}
+			return null;
 		}
 		
-		String requestToken = request.getHeader("X-Csrf-Token");
 		if(requestToken==null) {
-			requestToken = request.getParameter("__token__");
+			requestToken = request.getHeader("X-Csrf-Token");
 			if(requestToken==null) {
 				log.warn(String.format("CSRF token missing from %s", request.getRequestURI()));
 				debugRequest(request);
@@ -277,18 +295,8 @@ public class SessionUtils {
 		
 		Cookie cookie = new Cookie(SESSION_COOKIE, session.getUuid());
 		cookie.setMaxAge((session.getSessionTimeout() > 0 ? 60 * session.getSessionTimeout() : Integer.MAX_VALUE));
-		if(request.getProtocol().equalsIgnoreCase("https")) {
-			cookie.setSecure(true);
-		} else {
-			cookie.setSecure(false);
-			cookie.setHttpOnly(true);
-		}
-		cookie.setPath("/");
-		response.addCookie(cookie);
-		
-		cookie = new Cookie(CSRF_TOKEN, session.getCsrfToken());
-		cookie.setMaxAge((session.getSessionTimeout() > 0 ? 60 * session.getSessionTimeout() : Integer.MAX_VALUE));
 		cookie.setSecure(request.getProtocol().equalsIgnoreCase("https"));
+		cookie.setHttpOnly(true);
 		cookie.setPath("/");
 		response.addCookie(cookie);
 		
@@ -350,6 +358,28 @@ public class SessionUtils {
 
 	public User getCurrentUser(HttpServletRequest request) throws UnauthorizedException, SessionTimeoutException {
 		return getSession(request).getUser();
+	}
+
+	public String setupCSRFToken(HttpSession session) {
+		String token = (String) session.getAttribute(CSRF_TOKEN_ATTRIBUTE);
+		if(Objects.isNull(token)) {
+			session.setAttribute(CSRF_TOKEN_ATTRIBUTE, token = Utils.generateRandomAlphaNumericString(64));
+		}
+		return token;
+	}
+
+	public void populateSecurityHeaders(HttpServletResponse response) {
+		response.setHeader("X-Content-Type-Options", "nosniff");
+		response.setHeader("Content-Security-Policy", 
+				"default-src 'none'; font-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';");
+	}
+
+	public void setDoNotCache(HttpServletResponse response) {
+		response.setHeader("Cache-Control", "no-store");
+	}
+	
+	public void setCachable(HttpServletResponse response, int age) {
+		response.setHeader("Cache-Control", "max-age=" + age + ", must-revalidate");
 	}
 
 }

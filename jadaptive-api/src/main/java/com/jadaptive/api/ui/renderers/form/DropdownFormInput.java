@@ -114,10 +114,22 @@ public class DropdownFormInput extends FieldInputRender {
 		return name.replace('_', ' ');
 	}
 	
-	private void addInputValue(String key, String value) {
-		dropdownMenu.appendChild(PageHelper.createAnchor("#", value)
-				.attr("data-resourcekey", key)
+	public void addInputValue(String value, String name) {
+		
+		if(Objects.isNull(dropdownMenu)) {
+			dropdownInput.appendChild(dropdownMenu = new Element("div")
+					.addClass("dropdown-menu")
+					.attr("style", "max-height: 300px; overflow-y: scroll;")
+					.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey())));
+		}
+		dropdownMenu.appendChild(PageHelper.createAnchor("#", name)
+				.attr("data-resourcekey", value)
 				.addClass("jdropdown-item dropdown-item"));
+	}
+	
+	public void setSelectedValue(String value, String name) {
+		nameElement.val(name);
+		valueElement.val(value);
 	}
 
 	
