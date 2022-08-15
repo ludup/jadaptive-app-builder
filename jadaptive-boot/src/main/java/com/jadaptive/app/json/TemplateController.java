@@ -21,8 +21,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.json.EntityResultsStatus;
+import com.jadaptive.api.json.EntityStatus;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
+import com.jadaptive.api.json.TableStatus;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.ObjectTemplate;

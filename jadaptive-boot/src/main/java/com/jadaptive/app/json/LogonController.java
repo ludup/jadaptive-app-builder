@@ -23,6 +23,7 @@ import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
+import com.jadaptive.api.json.SessionStatus;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;

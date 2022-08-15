@@ -1,6 +1,4 @@
-package com.jadaptive.app.json;
-
-import com.jadaptive.api.json.RequestStatusImpl;
+package com.jadaptive.api.json;
 
 public class EntityStatus<T> extends RequestStatusImpl {
 

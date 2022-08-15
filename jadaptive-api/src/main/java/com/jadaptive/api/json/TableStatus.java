@@ -1,4 +1,4 @@
-package com.jadaptive.app.json;
+package com.jadaptive.api.json;
 
 import java.util.Collection;
 

@@ -27,6 +27,8 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.json.BootstrapTableController;
 import com.jadaptive.api.json.BootstrapTablePageProcessor;
 import com.jadaptive.api.json.BootstrapTableResult;
+import com.jadaptive.api.json.EntityResultsStatus;
+import com.jadaptive.api.json.EntityStatus;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;

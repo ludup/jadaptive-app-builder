@@ -174,6 +174,7 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 			}
 			
 			sessionUtils.populateSecurityHeaders(response);
+			
 			/**
 			 * Get the security.properties hierarchy from the web application
 			 */

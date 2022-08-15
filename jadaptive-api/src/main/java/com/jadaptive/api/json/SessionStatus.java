@@ -1,6 +1,5 @@
-package com.jadaptive.app.json;
+package com.jadaptive.api.json;
 
-import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.session.Session;
 
 public class SessionStatus extends RequestStatusImpl {

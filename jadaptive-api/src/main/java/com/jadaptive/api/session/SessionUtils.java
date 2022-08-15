@@ -2,6 +2,7 @@ package com.jadaptive.api.session;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
@@ -41,6 +42,8 @@ public class SessionUtils {
 
 	public static final String CSRF_TOKEN_ATTRIBUTE = "__token__";
 
+	public static final String PATTERN_RFC1036 = "EEE, dd-MMM-yy HH:mm:ss zzz";
+	 
 	static ThreadLocal<User> threadUsers = new ThreadLocal<>();
 	
 	@Autowired
@@ -295,13 +298,67 @@ public class SessionUtils {
 		
 		Cookie cookie = new Cookie(SESSION_COOKIE, session.getUuid());
 		cookie.setMaxAge((session.getSessionTimeout() > 0 ? 60 * session.getSessionTimeout() : Integer.MAX_VALUE));
-		cookie.setSecure(request.getProtocol().equalsIgnoreCase("https"));
+		cookie.setSecure(true);
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
-		response.addCookie(cookie);
+		addCookie(cookie, response);
 		
 		request.setAttribute("processedCookies", Boolean.TRUE);
 	
+	}
+	
+	public void addCookie(Cookie cookie, HttpServletResponse response) {
+
+		StringBuffer cookieHeader = new StringBuffer();
+
+		cookieHeader.append(cookie.getName());
+		cookieHeader.append("=");
+		
+		/**
+		 * Make sure we are not adding duplicate cookies
+		 */
+		for(String entry : response.getHeaderNames()) {
+			if(entry.equalsIgnoreCase("Set-Cookie") && response.getHeader(entry).startsWith(cookieHeader.toString())) {
+				return;
+			}
+		}
+		
+		cookieHeader.append(cookie.getValue());
+		if (cookie.getPath() != null) {
+			cookieHeader.append("; Path=");
+			cookieHeader.append(cookie.getPath());
+		}
+		if (cookie.getDomain() != null) {
+			cookieHeader.append("; Domain=");
+			cookieHeader.append(cookie.getDomain());
+		}
+		if (cookie.getMaxAge() > 0) {
+			cookieHeader.append("; Max-Age=");
+			cookieHeader.append(cookie.getMaxAge());
+			/**
+			 * This breaks IE when date of server and browser do not match
+			 */
+			cookieHeader.append("; Expires=");
+			if (cookie.getMaxAge() == 0) {
+				cookieHeader.append(Utils.formatDate(new Date(10000), PATTERN_RFC1036));
+			} else {
+				cookieHeader.append(Utils.formatDate(new Date(System
+						.currentTimeMillis() + cookie.getMaxAge() * 1000L), PATTERN_RFC1036));
+			}
+		}
+		
+		if (cookie.getSecure()) {
+			cookieHeader.append("; Secure");
+		}
+		
+		
+		if (cookie.isHttpOnly()) { 
+			cookieHeader.append("; HttpOnly"); 
+		}
+		cookieHeader.append("; SameSite=strict");
+
+		response.addHeader("Set-Cookie", cookieHeader.toString());
+		
 	}
 
 	public Locale getLocale(HttpServletRequest request) {
@@ -337,7 +394,7 @@ public class SessionUtils {
 			cookie.setHttpOnly(true);
 		}
 		cookie.setDomain(request.getServerName());
-		response.addCookie(cookie);
+		addCookie(cookie, response);
 
 	}
 

@@ -29,6 +29,7 @@ public class UsageServiceImpl implements UsageService {
 		Usage usage = new Usage();
 		usage.setKeys(Arrays.asList(keys));
 		usage.setValue(value);
+		usage.setTimestamp(Utils.now());
 		
 		usageDatabase.saveOrUpdate(usage);
 	}

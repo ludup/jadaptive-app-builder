@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.json.EntityResultsStatus;
+import com.jadaptive.api.json.EntityStatus;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
