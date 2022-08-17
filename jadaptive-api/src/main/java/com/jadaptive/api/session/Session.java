@@ -59,10 +59,6 @@ public class Session extends AbstractUUIDEntity {
 	@Validator(type = ValidationType.REQUIRED)
 	User user;
 	
-	@ObjectField(type = FieldType.TEXT, hidden = true)
-	@Validator(type = ValidationType.REQUIRED)
-	String csrfToken; 
-	
 	public Session() {
 
 	}
@@ -149,14 +145,6 @@ public class Session extends AbstractUUIDEntity {
 
 	public void setUser(User user) {
 		this.user = user;
-	}
-
-	public String getCsrfToken() {
-		return csrfToken;
-	}
-
-	public void setCsrfToken(String csrfToken) {
-		this.csrfToken = csrfToken;
 	}
 	
 	public SessionState getState() {

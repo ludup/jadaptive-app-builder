@@ -68,7 +68,8 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		if(Objects.nonNull(form)) {
 			form.appendChild(Html.input("hidden", 
 					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
-						sessionUtils.setupCSRFToken(Request.get().getSession())));
+						sessionUtils.setupCSRFToken(Request.get()))
+						.attr("id", "csrftoken"));
 		}
 	}
 	

@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
@@ -36,6 +38,9 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	
 	@Autowired
 	private SingletonObjectDatabase<SessionConfiguration> sessionConfig;
+	
+	@Autowired
+	private SessionUtils sessionUtils;
 	
 	protected String resourceKey;
 	
@@ -72,28 +77,23 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	
 	protected void beforeForm(Document document, HttpServletRequest request, HttpServletResponse response) {
 		
-		String token = request.getParameter(SessionUtils.CSRF_TOKEN_ATTRIBUTE);
-		Session session = getCurrentSession();
-		
-		SessionConfiguration config = sessionConfig.getObject(SessionConfiguration.class);
-		
-		if(config.getEnableCsrf()) {
-			if(StringUtils.isNotBlank(token)) {
-				if(!session.getCsrfToken().equals(token)) {
-					throw new IllegalStateException("Unexpected CSRF token value in form submission");
-				}
-			} else {
-				throw new IllegalStateException("Missing CSRF token in form submission");
-			}
+		try {
+			sessionUtils.verifySameSiteRequest(request);
+		} catch (UnauthorizedException e) {
+			throw new IllegalStateException(e.getMessage(), e);
 		}
+
 	}
 	
 	protected Document resolveDocument(Page page) throws IOException {
 		Document document = super.resolveDocument(page);
+
 		Element form = document.selectFirst("form");
-		
 		if(Objects.nonNull(form)) {
-			form.appendChild(Html.input("hidden", SessionUtils.CSRF_TOKEN_ATTRIBUTE, getCurrentSession().getCsrfToken()));
+			form.appendChild(Html.input("hidden", 
+					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
+						sessionUtils.setupCSRFToken(Request.get()))
+						.attr("id", "csrftoken"));
 		}
 		
 		return document;

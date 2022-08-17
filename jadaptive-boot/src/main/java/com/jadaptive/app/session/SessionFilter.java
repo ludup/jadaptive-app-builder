@@ -188,6 +188,7 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 			if(Objects.isNull(session) && Boolean.parseBoolean(properties.getProperty("authentication.allowAnonymous", "false"))) {
 				permissionService.setupSystemContext();
 			} else if(Objects.nonNull(session)) {
+				sessionUtils.touchSession(session);
 				tenantService.setCurrentTenant(session.getTenant());	
 				permissionService.setupUserContext(session.getUser());
 			} 

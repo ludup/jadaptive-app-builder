@@ -82,7 +82,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			
-			sessionUtils.verifySameSiteRequest(request, sessionUtils.getSession(request));
+			sessionUtils.verifySameSiteRequest(request);
 			
 			ObjectTemplate template = templateService.get(resourceKey);
 			request.getSession().removeAttribute(resourceKey);
@@ -119,7 +119,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			
-			sessionUtils.verifySameSiteRequest(request, sessionUtils.getSession(request));
+			sessionUtils.verifySameSiteRequest(request);
 			
 			ObjectTemplate template = templateService.get(resourceKey);
 			request.getSession().removeAttribute(resourceKey);
@@ -273,7 +273,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	public void copyObject(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey,
 			@PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-			sessionUtils.verifySameSiteRequest(request, sessionUtils.getSession(request));
+			sessionUtils.verifySameSiteRequest(request);
 			
 		    AbstractObject obj = objectService.get(resourceKey, uuid);
 		    obj.setUuid(null);
