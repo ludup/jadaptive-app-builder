@@ -2,6 +2,7 @@ package com.jadaptive.api.session;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -54,6 +55,10 @@ public class SessionUtils {
 	
 	@Autowired
 	private SingletonObjectDatabase<SessionConfiguration> sessionConfig; 
+	
+	public static final String SELF_UNSAFE_INLINE = "'self' 'unsafe-inline'";
+	public static final String SELF = "'self'";
+	public static final String UNSAFE_INLINE = "unsafe-inline";
 	
 	public User getCurrentUser() {
 		return permissionService.getCurrentUser();
@@ -405,9 +410,11 @@ public class SessionUtils {
 	}
 
 	public void populateSecurityHeaders(HttpServletResponse response) {
+		
 		response.setHeader("X-Content-Type-Options", "nosniff");
 		response.setHeader("Content-Security-Policy", 
-				"default-src 'none'; font-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';");
+				String.format("default-src 'none'; font-src 'self'; script-src %s; style-src %s; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; style-src 'self'; frame-ancestors 'self'; form-action 'self';",
+						SELF, SELF_UNSAFE_INLINE));
 	}
 
 	public void setDoNotCache(HttpServletResponse response) {
@@ -416,6 +423,31 @@ public class SessionUtils {
 	
 	public void setCachable(HttpServletResponse response, int age) {
 		response.setHeader("Cache-Control", "max-age=" + age + ", must-revalidate");
+	}
+
+	public void addContentSecurityPolicy(HttpServletResponse response, String policy, String additionalValue) {
+		Collection<String> csp = response.getHeaders("Content-Security-Policy");
+		if(csp.isEmpty()) {
+			populateSecurityHeaders(response);
+		}
+		String header = csp.iterator().next();
+		int idx = header.indexOf(policy);
+		if(idx > -1) {
+			int idx2 = header.indexOf(';', idx);
+			String tmp = header.substring(idx, idx2);
+			if(tmp.contains(String.format("'%s'", additionalValue))) {
+				return;
+			}
+			header = header.replace(policy, String.format("%s '%s'", policy, additionalValue));
+			
+		} else {
+			header = header + String.format(" %s '%s';", policy, additionalValue);
+		}
+		response.setHeader("Content-Security-Policy", header);
+	}
+	
+	public void addScriptNoncePolicy(HttpServletResponse response, String nonce) {
+		addContentSecurityPolicy(response, "script-src", String.format("nonce-%s", nonce));
 	}
 
 }
