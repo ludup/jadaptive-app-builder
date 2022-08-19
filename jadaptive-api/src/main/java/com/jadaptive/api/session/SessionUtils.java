@@ -390,6 +390,10 @@ public class SessionUtils {
 			throw new SessionTimeoutException();
 		}
 	}
+	
+	public void touch(Session session) {
+		sessionService.touch(session);
+	}
 
 	public boolean hasActiveSession(HttpServletRequest request) {
 		try {
