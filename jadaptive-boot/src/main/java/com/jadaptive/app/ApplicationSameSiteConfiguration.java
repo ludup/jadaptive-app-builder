@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationSameSiteConfiguration {
   @Bean
   public CookieSameSiteSupplier applicationCookieSameSiteSupplier() {
-  return CookieSameSiteSupplier.ofStrict();
+  return CookieSameSiteSupplier.ofLax();
   }
 }

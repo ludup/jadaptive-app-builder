@@ -341,7 +341,7 @@ public class SessionUtils {
 		if (cookie.isHttpOnly()) { 
 			cookieHeader.append("; HttpOnly"); 
 		}
-		cookieHeader.append("; SameSite=strict");
+		cookieHeader.append("; SameSite=Lax");
 
 		response.addHeader("Set-Cookie", cookieHeader.toString());
 		
