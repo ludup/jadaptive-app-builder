@@ -107,7 +107,7 @@ public abstract class HtmlPage implements Page {
 		ResponseHelper.sendContent(document.toString(), "text/html; charset=UTF-8;", request, response);
 	}
 
-	protected void documentComplete(Document document) { };
+	protected void documentComplete(Document document) throws FileNotFoundException, IOException { };
 	
 	private void processPageExtensions(String uri, Document document) throws IOException {
 		
@@ -290,48 +290,51 @@ public abstract class HtmlPage implements Page {
 			doProcessEmbeddedExtensions(document, element, ext);
 			
 	}
+	protected void injectHtmlSection(Document document, Element element, PageExtension ext) throws IOException {
+		
+		Document doc = resolveDocument(ext);
+		
+		PageDependencies deps = ext.getClass().getAnnotation(PageDependencies.class);
+		if(Objects.nonNull(deps) && Objects.nonNull(deps.extensions())) {
+			processPageLevelExtensions(document, deps.extensions());
+		}
+		
+		ext.process(doc, element, this);
+		
+		Elements children = doc.selectFirst("body").children();
+		if(Objects.nonNull(children)) {
+			for(Element e : children) {
+				e.appendTo(element);
+			}
+		}
+		
+		/**
+		 * The child document may have inserted CSS or Scripts into its document. We
+		 * have to move them to the parent document.
+		 */
+		for(Element node : doc.select("script")) {
+			PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "script", node);
+		}
+		
+		for(Element node : doc.select("link")) {
+			PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "link", node);
+		}
+		
+		processChildExtensions(document, element);
+	}
 	
 	protected void doProcessEmbeddedExtensions(Document document, Element element, PageExtension ext) throws IOException {
 			
 			// Stop this being processed again
 			element.removeAttr("jad:id"); 
 			
-			Document doc = resolveDocument(ext);
-			
-			ext.process(doc, element, this);
-			
-			PageDependencies deps = ext.getClass().getAnnotation(PageDependencies.class);
-			if(Objects.nonNull(deps) && Objects.nonNull(deps.extensions())) {
-				processPageLevelExtensions(document, deps.extensions());
-			}
-			
-			Elements children = doc.selectFirst("body").children();
-			if(Objects.nonNull(children)) {
-				for(Element e : children) {
-					e.appendTo(element);
-				}
-			}
-			
-			/**
-			 * The child document may have inserted CSS or Scripts into its document. We
-			 * have to move them to the parent document.
-			 */
-			for(Element node : doc.select("script")) {
-				PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "script", node);
-			}
-			
-			for(Element node : doc.select("link")) {
-				PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "link", node);
-			}
-			
+			injectHtmlSection(document, element, ext);
+
 			resolveScript(ext.getName(), document, ext);
 			resolveStylesheet(ext.getName(), document, ext);
-			
-			processChildExtensions(document, element);
-//		}
 	}
 
-	private void resolveStylesheet(String uri, Document document, PageResources ext) {
+	protected void resolveStylesheet(String uri, Document document, PageResources ext) {
 		URL url = ext.getClass().getResource(ext.getCssResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendStylesheet(document, "/app/css/" + uri + ".css");
@@ -342,7 +345,7 @@ public abstract class HtmlPage implements Page {
 		return String.format("%s.css", getClass().getSimpleName());
 	}
 
-	private void resolveScript(String uri, Document document, PageResources ext) {
+	protected void resolveScript(String uri, Document document, PageResources ext) {
 		URL url = ext.getClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendScript(document, "/app/js/" + uri + ".js");

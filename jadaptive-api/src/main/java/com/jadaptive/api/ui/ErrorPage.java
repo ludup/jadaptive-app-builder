@@ -90,8 +90,11 @@ public class ErrorPage extends HtmlPage {
 			
 		}
 		Throwable e = (Throwable) Request.get().getSession().getAttribute(THROWABLE);
-		document.selectFirst("#message").text(StringUtils.defaultString(e.getMessage()));
+		if(Objects.isNull(e)) {
+			throw new UriRedirect("dashboard");
+		}
 		
+		document.selectFirst("#message").text(StringUtils.defaultString(e.getMessage()));
 		try(StringWriter w = new StringWriter()) {
 			try(PrintWriter pw = new PrintWriter(w)) {
 				e.printStackTrace(pw);

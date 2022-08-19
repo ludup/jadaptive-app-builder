@@ -24,13 +24,25 @@ public abstract class WizardSection extends AbstractPageExtension {
 	
 	@Override
 	public void process(Document document, Element element, Page page) throws IOException {
-		super.process(document, element, page);
+		
+
 	}
 	
 	@Override
 	public String getHtmlResource() {
 		return resource;
 	}
+
+	@Override
+	public String getCssResource() {
+		return resource.replace(".html", ".css");
+	}
+
+	@Override
+	public String getJsResource() {
+		return resource.replace(".html", ".js");
+	}
+
 	@Override
 	public String getName() {
 		return name;

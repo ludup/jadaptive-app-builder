@@ -2,6 +2,7 @@ package com.jadaptive.api.ui.wizards;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.ObjectPage;
 import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.RequestPage;
@@ -73,13 +75,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		if(state.isFinished()) {
 			throw new PageRedirect(state.getCompletePage());
 		}
+		
 		WizardSection ext = state.getCurrentPage();
-	
-		Element el = document.selectFirst("#setupStep");
-		doProcessEmbeddedExtensions(document, el, ext);
+		Element el = document.selectFirst("#wizardContent");
+
+		injectHtmlSection(document, el, ext);
 		
 		Element actions = document.selectFirst("#actions");
-
 		Element content = document.selectFirst("#content");
 		if(!state.isStartPage()) {
 			Element h2;
@@ -147,6 +149,27 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			for(WizardSection section : state.getSections()) {
 				section.processReview(document, state);
 			}
+		}
+		
+	}
+	
+	protected void documentComplete(Document document) throws IOException {
+
+		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
+		WizardSection ext = state.getCurrentPage();
+
+		URL url = ext.getClass().getResource(ext.getJsResource());
+		if(Objects.nonNull(url)) {
+			PageHelper.appendScript(document, "/app/script/" 
+					+ ext.getClass().getPackageName().replace('.', '/') 
+					+ "/" + ext.getJsResource());
+		}
+		
+		url = ext.getClass().getResource(ext.getJsResource());
+		if(Objects.nonNull(url)) {
+			PageHelper.appendStylesheet(document, "/app/style/" 
+					+ ext.getClass().getPackageName().replace('.', '/') 
+					+ "/" + ext.getCssResource());
 		}
 	}
 	

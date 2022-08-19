@@ -140,6 +140,8 @@ public class UserInterfaceController extends AuthenticatedController {
 		}
 	}
 	
+	
+	
 	@RequestMapping(value="/app/js/{name}", method = RequestMethod.GET)
 	public void doScript(HttpServletRequest request, HttpServletResponse response, @PathVariable String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
@@ -175,6 +177,22 @@ public class UserInterfaceController extends AuthenticatedController {
 			throw new FileNotFoundException();
 		}
 		response.setContentType("application/javascript");
+		response.setStatus(HttpStatus.OK.value());
+		try(InputStream in = url.openStream()) {
+			IOUtils.copy(in, response.getOutputStream());
+		}
+
+	}
+	
+	@RequestMapping(value="/app/style/**", method = RequestMethod.GET)
+	public void doStyle(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
+
+		String name = request.getRequestURI().substring(12);
+		URL url = classLoader.getResource(name);
+		if(Objects.isNull(url)) {
+			throw new FileNotFoundException();
+		}
+		response.setContentType("text/css");
 		response.setStatus(HttpStatus.OK.value());
 		try(InputStream in = url.openStream()) {
 			IOUtils.copy(in, response.getOutputStream());
