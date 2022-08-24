@@ -59,7 +59,7 @@ public class SessionUtils {
 
 		try {
 			if (request.hasParameter(SESSION_COOKIE)) {
-				session = sessionService.getSession(request.getParameterOrFail(SESSION_COOKIE));
+				session = sessionService.getSession(request.parameterOrFail(SESSION_COOKIE));
 			} else if (request.hasHeader(SESSION_COOKIE)) {
 				session = sessionService.getSession(request.header(SESSION_COOKIE));
 			}
@@ -195,7 +195,7 @@ public class SessionUtils {
 		Session session = null;
 
 		if (request.hasParameter(SESSION_COOKIE)) {
-			session = sessionService.getSession(request.getParameterOrFail(SESSION_COOKIE));
+			session = sessionService.getSession(request.parameterOrFail(SESSION_COOKIE));
 		} else if (request.header(SESSION_COOKIE) != null) {
 			session = sessionService.getSession(request.header(SESSION_COOKIE));
 		}

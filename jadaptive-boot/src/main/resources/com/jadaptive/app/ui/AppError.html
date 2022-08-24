@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:webbits="http://webbits.org/webbits"
-	webbits:depends="Bootstrapify,FontAwesomeify">
+	webbits:depends="Bootstrapify,FontAwesomeify,Enablement">
 <body class="container">
 	<div class="jumbotron">
 		<h1>Oops</h1>
@@ -11,10 +11,12 @@
 		<h2>${code}</h2>
 		<hr />
 		<p>${error}</p>
-		<small><a href="/">Home</a></small>
-		<pre>
-			<code>${trace}</code>
-		</pre>
+		<div webbits:present="showStack"> 
+			<small><a href="/">Home</a></small>
+			<pre>
+				<code>${trace}</code>
+			</pre>
+		</div>
 	</div>
 </body>
 </html>

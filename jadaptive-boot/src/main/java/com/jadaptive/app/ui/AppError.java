@@ -1,6 +1,8 @@
 package com.jadaptive.app.ui;
 
+import com.codesmith.webbits.Bound;
 import com.codesmith.webbits.ClasspathResource;
+import com.codesmith.webbits.ComponentConfiguration;
 import com.codesmith.webbits.Created;
 import com.codesmith.webbits.ExceptionHandler;
 import com.codesmith.webbits.Page;
@@ -14,6 +16,10 @@ import com.codesmith.webbits.freemarker.FreeMarker;
 @ClasspathResource
 @ExceptionHandler
 public class AppError {
+	
+	@ComponentConfiguration
+	@Bound
+	boolean showStack;
 
 	@Created
 	void created(Exception exception) {

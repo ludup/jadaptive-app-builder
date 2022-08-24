@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.script.ScriptEngineManager;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -36,6 +34,7 @@ import com.codesmith.webbits.ViewManager;
 import com.codesmith.webbits.Widget;
 import com.codesmith.webbits.WidgetLocator;
 import com.codesmith.webbits.i18n.BundleResolver;
+import com.codesmith.webbits.scripting.ScriptService;
 
 import io.socket.engineio.server.EngineIoServer;
 
@@ -108,30 +107,6 @@ public class WebbitsPostProcessor implements BeanFactoryPostProcessor, Applicati
 	 * starts up
 	 */
 	beanFactory.registerSingleton("context", new Context() {
-	    @Override
-	    public void reload() {
-		context.reload();
-	    }
-
-	    @Override
-	    public void refreshByResource(String resource) {
-		context.refreshByResource(resource);
-	    }
-
-	    @Override
-	    public void refreshById(String id) {
-		context.refreshById(id);
-	    }
-
-	    @Override
-	    public void refreshByClassifier(String classifier) {
-		context.refreshByClassifier(classifier);
-	    }
-
-	    @Override
-	    public void refresh(Object widget) {
-		context.refresh(widget);
-	    }
 
 	    @Override
 	    public void redirect(String targetPath) {
@@ -154,8 +129,8 @@ public class WebbitsPostProcessor implements BeanFactoryPostProcessor, Applicati
 	    }
 	    
 	    @Override
-	    public ScriptEngineManager getScriptEngineManager() {
-		return context.getScriptEngineManager();
+	    public ScriptService getScriptService() {
+		return context.getScriptService();
 	    }
 
 	    @Override
