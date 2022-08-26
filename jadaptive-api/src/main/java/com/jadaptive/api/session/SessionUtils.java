@@ -24,7 +24,6 @@ import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 

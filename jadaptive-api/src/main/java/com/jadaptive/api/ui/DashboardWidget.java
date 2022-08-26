@@ -17,4 +17,8 @@ public interface DashboardWidget extends ExtensionPoint {
 	Integer weight();
 
 	boolean wantsDisplay();
+	
+	default boolean hasHelp() { 
+		return false;
+	}
 }

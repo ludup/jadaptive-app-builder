@@ -21,6 +21,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
@@ -35,6 +36,9 @@ public abstract class HtmlPage implements Page {
 	
 	@Autowired
 	private ApplicationService applicationService; 
+	
+	@Autowired
+	private ClassLoaderService classService; 
 	
 	private Collection<HtmlPageExtender> extenders = null;
 	protected String resourcePath;
@@ -290,7 +294,9 @@ public abstract class HtmlPage implements Page {
 			doProcessEmbeddedExtensions(document, element, ext);
 			
 	}
-	protected void injectHtmlSection(Document document, Element element, PageExtension ext) throws IOException {
+	
+	@Override
+	public void injectHtmlSection(Document document, Element element, PageExtension ext) throws IOException {
 		
 		Document doc = resolveDocument(ext);
 		
@@ -374,6 +380,9 @@ public abstract class HtmlPage implements Page {
 		URL url = clz.getResource(resource);
 		if(Objects.isNull(url)) {
 			url = getResourceClass().getResource(resource);
+		}
+		if(Objects.isNull(url)) {
+			url = classService.getResource(resource);
 		}
 		if(Objects.nonNull(url)) {
 			try(InputStream in = url.openStream()) {

@@ -6,6 +6,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.pf4j.ExtensionPoint;
 
 public interface Page extends PageResources, ExtensionPoint {
@@ -22,5 +24,7 @@ public interface Page extends PageResources, ExtensionPoint {
 	
 	String getResourcePath();
 
-	default void onCreate() throws FileNotFoundException { };
+	default void onCreate() throws FileNotFoundException { }
+
+	void injectHtmlSection(Document document, Element element, PageExtension ext) throws IOException;;
 }
