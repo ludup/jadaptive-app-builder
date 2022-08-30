@@ -10,7 +10,6 @@ import java.util.Map;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.ui.Page;
 
 public class WizardState {

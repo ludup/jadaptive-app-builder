@@ -2,6 +2,7 @@ package com.jadaptive.api.setup;
 
 import org.jsoup.nodes.Document;
 
+import com.jadaptive.api.ui.wizards.WizardSection;
 import com.jadaptive.api.ui.wizards.WizardState;
 
 public abstract class SetupSection extends WizardSection {

@@ -12,7 +12,6 @@ import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
-import com.jadaptive.api.ui.PageExtension;
 
 @Extension
 public class ContextHelp extends AbstractPageExtension {

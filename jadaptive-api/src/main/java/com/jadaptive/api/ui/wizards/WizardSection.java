@@ -1,4 +1,4 @@
-package com.jadaptive.api.setup;
+package com.jadaptive.api.ui.wizards;
 
 import java.io.IOException;
 
@@ -8,7 +8,8 @@ import org.jsoup.nodes.Element;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
-import com.jadaptive.api.ui.wizards.WizardState;
+import com.jadaptive.api.ui.PageHelper;
+import com.jadaptive.utils.FileUtils;
 
 public abstract class WizardSection extends AbstractPageExtension {
 
@@ -23,9 +24,8 @@ public abstract class WizardSection extends AbstractPageExtension {
 	}
 	
 	@Override
-	public void process(Document document, Element element, Page page) throws IOException {
-		
-
+	public final void process(Document document, Element element, Page page) throws IOException {
+		processSection(document, element, page);
 	}
 	
 	@Override
@@ -35,12 +35,12 @@ public abstract class WizardSection extends AbstractPageExtension {
 
 	@Override
 	public String getCssResource() {
-		return resource.replace(".html", ".css");
+		return FileUtils.checkStartsWithNoSlash(resource).replace(".html", ".css");
 	}
 
 	@Override
 	public String getJsResource() {
-		return resource.replace(".html", ".js");
+		return FileUtils.checkStartsWithNoSlash(resource).replace(".html", ".js");
 	}
 
 	@Override
@@ -62,6 +62,10 @@ public abstract class WizardSection extends AbstractPageExtension {
 	}
 
 	public void processReview(Document document, WizardState state) {
+		
+	}
+	
+	protected void processSection(Document document, Element element, Page page) throws IOException {
 		
 	}
 

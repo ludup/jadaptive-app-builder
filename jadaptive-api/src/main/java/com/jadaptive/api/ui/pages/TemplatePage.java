@@ -11,11 +11,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.FieldView;
@@ -33,9 +31,6 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	
 	@Autowired
 	private TenantService tenantService; 
-	
-	@Autowired
-	private SingletonObjectDatabase<SessionConfiguration> sessionConfig;
 	
 	@Autowired
 	private SessionUtils sessionUtils;

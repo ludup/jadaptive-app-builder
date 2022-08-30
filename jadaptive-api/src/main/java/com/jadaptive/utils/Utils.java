@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -49,6 +50,8 @@ public class Utils {
 
 	public static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 	public static final String HTTP_URL_PATTERN = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$";
+	
+	public static final String ALLOWED_CHARACTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	
 	static Logger log = LoggerFactory.getLogger(Utils.class);
 
@@ -346,11 +349,13 @@ public class Utils {
 	}
 	
 	public static String generateRandomAlphaNumericString(int length) {
-	    return new BigInteger(length * 8, random).toString(32).substring(0,  length);
+		return random.ints(0, ALLOWED_CHARACTERS.length())
+			    .limit(length).mapToObj(x -> ALLOWED_CHARACTERS.substring(x,x+1))
+			    .collect(Collectors.joining());
 	}
 	
 	public static String generateRandomNumericString(int length) {
-	    return new BigInteger(length * 8, random).toString(10).substring(0,  length);
+		return String.join("", random.ints(0, 10).limit(length).mapToObj(x -> String.valueOf(x)).collect(Collectors.toList()));
 	}
 
 	public static <T> List<T> nullSafe(List<T> list){
@@ -538,5 +543,12 @@ public class Utils {
 		date.set(Calendar.MILLISECOND, 0);
 		
 		return date.getTime();
+	}
+	
+	public static void main(String[] args) {
+		int c = 0;
+		for(int i=0;i<1000;i++) {
+			System.out.println(generateRandomAlphaNumericString(32));
+		}
 	}
 }

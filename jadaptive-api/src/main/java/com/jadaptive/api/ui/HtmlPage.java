@@ -345,6 +345,10 @@ public abstract class HtmlPage implements Page {
 		if(Objects.nonNull(url)) {
 			PageHelper.appendStylesheet(document, "/app/css/" + uri + ".css");
 		} 
+		url = classService.getResource(ext.getCssResource());
+		if(Objects.nonNull(url)) {
+			PageHelper.appendStylesheet(document, "/app/style/" + uri + ".css");
+		} 
 	}
 	
 	public String getCssResource() {

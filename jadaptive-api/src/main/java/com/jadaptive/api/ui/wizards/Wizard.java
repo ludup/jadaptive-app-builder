@@ -13,11 +13,11 @@ import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.ObjectPage;
@@ -39,6 +39,9 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	
 	@Autowired
 	private ObjectService objectService; 
+	
+	@Autowired
+	private ClassLoaderService classService; 
 	
 	String resourceKey;
 	WizardState state;
@@ -75,6 +78,8 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		if(state.isFinished()) {
 			throw new PageRedirect(state.getCompletePage());
 		}
+		
+		document.selectFirst("body").attr("jad:wizard", resourceKey);
 		
 		WizardSection ext = state.getCurrentPage();
 		Element el = document.selectFirst("#wizardContent");
@@ -158,14 +163,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
 		WizardSection ext = state.getCurrentPage();
 
-		URL url = ext.getClass().getResource(ext.getJsResource());
+		URL url = classService.getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendScript(document, "/app/script/" 
-					+ ext.getClass().getPackageName().replace('.', '/') 
-					+ "/" + ext.getJsResource());
+					+ ext.getJsResource());
 		}
 		
-		url = ext.getClass().getResource(ext.getJsResource());
+		url = classService.getResource(ext.getCssResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendStylesheet(document, "/app/style/" 
 					+ ext.getClass().getPackageName().replace('.', '/') 

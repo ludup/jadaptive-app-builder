@@ -15,7 +15,6 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.setup.WizardSection;
 import com.jadaptive.api.tenant.TenantService;
 
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
