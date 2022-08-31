@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
@@ -543,12 +542,5 @@ public class Utils {
 		date.set(Calendar.MILLISECOND, 0);
 		
 		return date.getTime();
-	}
-	
-	public static void main(String[] args) {
-		int c = 0;
-		for(int i=0;i<1000;i++) {
-			System.out.println(generateRandomAlphaNumericString(32));
-		}
 	}
 }

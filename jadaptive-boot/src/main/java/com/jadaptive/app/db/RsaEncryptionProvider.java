@@ -15,6 +15,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
@@ -24,6 +25,10 @@ import java.util.StringTokenizer;
 import javax.crypto.Cipher;
 
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import com.jadaptive.api.encrypt.EncryptionService;
+import com.jadaptive.app.encrypt.EncryptionServiceImpl;
 
 public class RsaEncryptionProvider {
 
@@ -43,6 +48,12 @@ public class RsaEncryptionProvider {
 		} catch(Exception e) {
 			generateKeys();
 		}
+	}
+	
+	public RsaEncryptionProvider(File prvFile, File pubFile) throws Exception {
+		this.prvFile = prvFile;
+		this.pubFile = pubFile;
+		loadKeys();
 	}
 	
 	private void generateKeys() throws Exception {
@@ -121,7 +132,7 @@ public class RsaEncryptionProvider {
 	
 	private String doEncrypt(String toEncrypt) throws Exception {
 
-		Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+		Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
 		c.init(Cipher.ENCRYPT_MODE, privateKey);
 		return Base64.getEncoder().encodeToString(c.doFinal(toEncrypt.getBytes("UTF-8")));
 		
@@ -143,26 +154,8 @@ public class RsaEncryptionProvider {
 	
 	private String doDecrypt(String toDecrypt) throws Exception {
 		
-		Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+		Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
 		c.init(Cipher.DECRYPT_MODE, publicKey);
 		return new String(c.doFinal(Base64.getDecoder().decode(toDecrypt)), "UTF-8");
-	}
-	
-	public static void main(String[] args) throws Exception {
-		
-		System.out.println(URLEncoder.encode("=", "UTF-8"));
-		
-		RsaEncryptionProvider tk = RsaEncryptionProvider.getInstance();
-		
-		StringBuffer buf = new StringBuffer();
-		for(int i=0;i<1000;i+=10) {
-			buf.append("0123456789");
-		}
-		String encryped = tk.encrypt(buf.toString());
-		System.out.println(encryped);
-		System.out.println(encryped.length());
-		String decrypted = tk.decrypt(encryped);
-		
-		System.out.print(decrypted);
 	}
 }

@@ -8,7 +8,6 @@ import org.jsoup.nodes.Element;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
-import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.utils.FileUtils;
 
 public abstract class WizardSection extends AbstractPageExtension {
