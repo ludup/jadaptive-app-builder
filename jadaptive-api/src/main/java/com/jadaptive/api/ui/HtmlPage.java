@@ -132,6 +132,12 @@ public abstract class HtmlPage implements Page {
 			processPageLevelExtensions(document, deps.extensions());
 		}
 		
+		afterPageDependencies(document);
+		
+	}
+	
+	protected void afterPageDependencies(Document document) {
+		
 	}
 	
 	private void processPageProcessors(Document document) throws IOException {
@@ -273,6 +279,12 @@ public abstract class HtmlPage implements Page {
 		for(Element embedded : embeddedElement) {
 			processEmbeddedExtensions(document, embedded);
 		}
+		
+		afterDocumentExtensions(document);
+	}
+	
+	protected void afterDocumentExtensions(Document document) {
+		
 	}
 	
 	private void processChildExtensions(Document document, Element element) throws IOException {
