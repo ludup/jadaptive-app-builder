@@ -122,6 +122,9 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 
 			postHandle(req, resp);
 			
+		} catch(Throwable e) { 
+			e.printStackTrace();
+			throw e;
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
@@ -152,11 +155,8 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 	@Override
 	public void closed(long count) {
 		
-		tenantService.executeAs(tenantService.getCurrentTenant(), new Runnable() {
-			@Override
-			public void run() {
-				usageService.log(count, UsageService.HTTP_OUT);
-			}
+		tenantService.executeAs(tenantService.getCurrentTenant(),()-> {
+			usageService.log(count, UsageService.HTTP_OUT);
 		});
 		
 	}

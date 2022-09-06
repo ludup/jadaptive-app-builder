@@ -33,6 +33,7 @@ import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
@@ -48,6 +49,9 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	
 	@Autowired
 	private ObjectService entityService; 
+	
+	@Autowired
+	private SessionUtils sessionUtils;
 	
 	@ExceptionHandler(AccessDeniedException.class)
 	public void handleException(HttpServletRequest request, 
@@ -127,6 +131,8 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 		setupUserContext(request);
 		
 		try {
+			sessionUtils.verifySameSiteRequest(request);
+		
 			entityService.delete(resourceKey, uuid);
 			return new RequestStatusImpl();
 		} catch (Throwable e) {

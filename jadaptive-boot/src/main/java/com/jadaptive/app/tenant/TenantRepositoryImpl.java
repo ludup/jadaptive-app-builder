@@ -42,6 +42,7 @@ public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenan
 	@Override
 	public void deleteTenant(Tenant tenant) throws RepositoryException, ObjectException {
 		deleteObject(tenant, TENANT_DATABASE);
+		db.dropDatabase(tenant.getUuid());
 	}
 	
 	@Override

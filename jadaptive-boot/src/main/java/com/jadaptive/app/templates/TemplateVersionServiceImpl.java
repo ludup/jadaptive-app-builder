@@ -268,6 +268,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				Files.list(path.getPath())
 				.filter(f -> f.getFileName().toString().endsWith(".json"))
 				.forEach(jsonFile -> {
+					if(log.isInfoEnabled()) {
+						log.info("Found {}", jsonFile.toString());
+					}
 					orderedTemplates.add(new PathInfo(jsonFile));
 				});
 			}

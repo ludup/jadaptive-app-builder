@@ -147,7 +147,8 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			if(log.isErrorEnabled()) {
 				log.error("POST api/objects/{}", resourceKey, e);
 			}
-			return handleException(e, "POST", resourceKey);
+			Feedback.error("default", "object.error", e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		}
 	}
 

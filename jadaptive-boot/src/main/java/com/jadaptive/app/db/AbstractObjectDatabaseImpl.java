@@ -339,7 +339,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			}
 		}
 		
-		log.info("Search {}", buf.toString());
+		if(log.isDebugEnabled()) {
+			log.debug("Search {}", buf.toString());
+		}
 		return buf.toString();
 	}
 

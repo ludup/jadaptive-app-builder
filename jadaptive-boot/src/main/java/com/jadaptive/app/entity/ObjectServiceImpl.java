@@ -365,19 +365,21 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		List<SearchField> fields = new ArrayList<>();
 		if(StringUtils.isNotNullOrEmpty(searchValue)) {
 			FieldTemplate f = template.getField(searchField);
-			switch(f.getFieldType()) {
-			case OBJECT_REFERENCE:
-				String resourceKey = f.getValidationValue(ValidationType.RESOURCE_KEY);
-				ObjectTemplate t = templateService.get(resourceKey);
-				Collection<String> uuids = new ArrayList<>();
-				for(AbstractObject obj : entityRepository.list(t, SearchField.like(t.getNameField(), searchValue))) {
-					uuids.add(obj.getUuid());
+			if(Objects.nonNull(f)) {
+				switch(f.getFieldType()) {
+				case OBJECT_REFERENCE:
+					String resourceKey = f.getValidationValue(ValidationType.RESOURCE_KEY);
+					ObjectTemplate t = templateService.get(resourceKey);
+					Collection<String> uuids = new ArrayList<>();
+					for(AbstractObject obj : entityRepository.list(t, SearchField.like(t.getNameField(), searchValue))) {
+						uuids.add(obj.getUuid());
+					}
+					fields.add(SearchField.in(searchField, uuids));
+					break;
+				default:
+					fields.add(SearchField.like(searchField, searchValue));
+					break;
 				}
-				fields.add(SearchField.in(searchField, uuids));
-				break;
-			default:
-				fields.add(SearchField.like(searchField, searchValue));
-				break;
 			}
 		}
 		fields.addAll(Arrays.asList(additional));

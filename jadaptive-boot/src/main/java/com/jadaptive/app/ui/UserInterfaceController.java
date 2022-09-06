@@ -40,6 +40,7 @@ import com.jadaptive.api.ui.MessagePage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageExtension;
+import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
 
 @Controller
@@ -72,7 +73,7 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@ExceptionHandler(AccessDeniedException.class)
 	public void onAccessDeniedException(AccessDeniedException e, HttpServletResponse response) throws IOException {
-	    response.sendRedirect(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER)));
+	    response.sendRedirect(new PageRedirect(pageCache.resolvePage("login")).getUri());
 	}
 	
 	@ExceptionHandler(FileNotFoundException.class)

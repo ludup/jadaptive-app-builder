@@ -27,8 +27,8 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 				Map<String,T> cachedObjects,
 				Map<String,UUIDList> cachedUUIDs,
 				String cacheName) {
-			if(log.isInfoEnabled()) {
-				log.info("Started cached iteration for {} ", clz.getSimpleName());
+			if(log.isDebugEnabled()) {
+				log.debug("Started cached iteration for {} ", clz.getSimpleName());
 			}
 			this.clz = clz;
 			this.iterator = iterator;
@@ -74,8 +74,8 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 				}
 				
 				if(!iterator.hasNext()) {
-					if(log.isInfoEnabled()) {
-						log.info("Finished uncached iteration for {} ", clz.getSimpleName());
+					if(log.isDebugEnabled()) {
+						log.debug("Finished uncached iteration for {} ", clz.getSimpleName());
 					}
 					/**
 					 * We have reached end of the iterator. Should we

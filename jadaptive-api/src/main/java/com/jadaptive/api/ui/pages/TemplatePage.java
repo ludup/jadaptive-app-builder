@@ -77,21 +77,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		}
 
 	}
-	
-	protected Document resolveDocument(Page page) throws IOException {
-		Document document = super.resolveDocument(page);
-
-		Element form = document.selectFirst("form");
-		if(Objects.nonNull(form)) {
-			form.appendChild(Html.input("hidden", 
-					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
-						sessionUtils.setupCSRFToken(Request.get()))
-						.attr("id", "csrftoken"));
-		}
 		
-		return document;
-	}
-	
 	@Override
 	protected final void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
 
@@ -100,12 +86,23 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		afterGenerateContent(document);
 	}
 	
+	protected void afterGenerateContent(Document document) {
+		
+	}
+
 	protected void beforeGenerateContent(Document document) {
 
 	}
 	
-	protected void afterGenerateContent(Document document) {
+	protected void documentComplete(Document document) {
 
+		Element form = document.selectFirst("form");
+		if(Objects.nonNull(form)) {
+			form.appendChild(Html.input("hidden", 
+					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
+						sessionUtils.setupCSRFToken(Request.get()))
+						.attr("id", "csrftoken"));
+		}
 	}
 
 	protected abstract void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException;

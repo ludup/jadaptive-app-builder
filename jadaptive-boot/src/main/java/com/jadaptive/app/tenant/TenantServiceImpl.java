@@ -40,6 +40,7 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantController;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.AdminUserDatabase;
 
 @Service
 public class TenantServiceImpl implements TenantService, JsonTemplateEnabledService<Tenant>, UUIDObjectService<Tenant> {
@@ -66,6 +67,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 
 	@Autowired
 	private SingletonObjectDatabase<SystemConfiguration> systemConfig;
+	
+	
 	Tenant systemTenant;
 	
 	Map<String,Tenant> tenantsByDomain = new HashMap<>();
@@ -329,6 +332,27 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		permissionService.assertReadWrite(TENANT_RESOURCE_KEY);
 		repository.deleteTenant(tenant);
+		
+		tenantsByDomain.remove(tenant.getDomain());
+		tenantsByUUID.remove(tenant.getUuid());
+		
+		for(String domain : tenant.getAlternativeDomains()) {
+			tenantsByDomain.remove(domain);
+		}
+		
+		List<TenantAware> awareServices = new ArrayList<>(applicationService.getBeans(TenantAware.class));
+		Collections.sort(awareServices, new Comparator<TenantAware>() {
+
+			@Override
+			public int compare(TenantAware o1, TenantAware o2) {
+				return o1.getOrder().compareTo(o2.getOrder());
+			}
+			
+		});
+		
+		for(TenantAware aware : awareServices) {
+			aware.deleteTenant(tenant);
+		}
 	}
 	
 	@Override
@@ -431,34 +455,32 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 
 	@Override
-	public String saveOrUpdate(Tenant object) {
-		repository.saveTenant(object);
+	public String saveOrUpdate(Tenant tenant) {
 		
-		setCurrentTenant(object);
+		repository.saveTenant(tenant);
 		
-		try {
-			if(!tenantsByUUID.containsKey(object.getUuid())) {
+		if(!tenantsByUUID.containsKey(tenant.getUuid())) {
+			executeAs(tenant, ()-> {
 				templateService.registerTenantIndexes();
-				initialiseTenant(object, true);
+				initialiseTenant(tenant, true);
+				
+			});
+		} 
+		
+		tenantsByUUID.put(tenant.getUuid(), tenant);
+		tenantsByDomain.put(tenant.getDomain(), tenant);
+		if(Objects.nonNull(tenant.getAlternativeDomains())) {
+			for(String domain : tenant.getAlternativeDomains()) {
+				tenantsByDomain.put(domain, tenant);
 			}
-			
-			tenantsByUUID.put(object.getUuid(), object);
-			tenantsByDomain.put(object.getDomain(), object);
-			if(Objects.nonNull(object.getAlternativeDomains())) {
-				for(String domain : object.getAlternativeDomains()) {
-					tenantsByDomain.put(domain, object);
-				}
-			}
-			return object.getUuid();
-		} finally {
-			clearCurrentTenant();
 		}
+		return tenant.getUuid();
+		
 	}
 
 	@Override
 	public void deleteObject(Tenant object) {
-		assertManageTenant();
-		repository.deleteTenant(object);
+		deleteTenant(object);
 	}
 
 	@Override
@@ -477,7 +499,12 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public void executeAs(Tenant tenant, Runnable r) {
 		setCurrentTenant(tenant);
 		try {
-			r.run();
+			permissionService.setupSystemContext();
+			try {
+				r.run();
+			} finally {
+				permissionService.clearUserContext();
+			}
 		} finally {
 			clearCurrentTenant();
 		}
@@ -487,7 +514,12 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public <T> T executeAs(Tenant tenant, Callable<T> r) {
 		setCurrentTenant(tenant);
 		try {
-			return r.call();
+			permissionService.setupSystemContext();
+			try {
+				return r.call();
+			} finally {
+				permissionService.clearUserContext();
+			}
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		} finally {

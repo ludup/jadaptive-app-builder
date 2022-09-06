@@ -26,6 +26,7 @@ import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.RequestPage;
+import com.jadaptive.utils.FileUtils;
 
 @Component
 @RequestPage(path="wizards/{resourceKey}")
@@ -163,17 +164,30 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
 		WizardSection ext = state.getCurrentPage();
 
-		URL url = classService.getResource(ext.getJsResource());
+		URL url = ext.getClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
-			PageHelper.appendScript(document, "/app/script/" 
-					+ ext.getJsResource());
+			PageHelper.appendScript(document, "/app/script/" +
+					ext.getClass().getPackageName().replace('.', '/') 
+						+ "/" + FileUtils.checkStartsWithNoSlash(ext.getJsResource()));
+		} else {
+			url = classService.getResource(ext.getJsResource());
+			if(Objects.nonNull(url)) {
+				PageHelper.appendScript(document, "/app/script/" +
+						FileUtils.checkStartsWithNoSlash(ext.getJsResource()));
+			}
 		}
 		
-		url = classService.getResource(ext.getCssResource());
+		url = ext.getClass().getResource(ext.getCssResource());
 		if(Objects.nonNull(url)) {
-			PageHelper.appendStylesheet(document, "/app/style/" 
-					+ ext.getClass().getPackageName().replace('.', '/') 
-					+ "/" + ext.getCssResource());
+			PageHelper.appendScript(document, "/app/style/" +
+					ext.getClass().getPackageName().replace('.', '/') 
+						+ "/" + FileUtils.checkStartsWithNoSlash(ext.getCssResource()));
+		} else {
+			url = classService.getResource(ext.getCssResource());
+			if(Objects.nonNull(url)) {
+				PageHelper.appendScript(document, "/app/style/" +
+						FileUtils.checkStartsWithNoSlash(ext.getCssResource()));
+			}
 		}
 	}
 	

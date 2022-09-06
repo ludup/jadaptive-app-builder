@@ -24,8 +24,8 @@ public class CachedIterable<T extends UUIDEntity> implements Iterable<T> {
 		public CachedIterable(Class<T> clz, 
 				Map<String,T> cachedObjects,
 				List<String> cachedUUIDs) {
-			if(log.isInfoEnabled()) {
-				log.info("Started cached iteration for {} ", clz.getSimpleName());
+			if(log.isDebugEnabled()) {
+				log.debug("Started cached iteration for {} ", clz.getSimpleName());
 			}
 			this.clz = clz;
 			this.cachedObjects = cachedObjects;
@@ -49,8 +49,8 @@ public class CachedIterable<T extends UUIDEntity> implements Iterable<T> {
 			public boolean hasNext() {
 				boolean next = iterator.hasNext();
 				if(!next) {
-					if(log.isInfoEnabled()) {
-						log.info("Finished cached iteration for {} ", clz.getSimpleName());
+					if(log.isDebugEnabled()) {
+						log.debug("Finished cached iteration for {} ", clz.getSimpleName());
 					}
 				}
 				return next;

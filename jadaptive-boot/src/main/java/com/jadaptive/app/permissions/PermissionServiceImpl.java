@@ -299,7 +299,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			log.debug(String.format("Asserting permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
 		}
 		
-		if(user.getUuid().equals(SYSTEM_USER_UUID) || user instanceof AdminUser) {
+		if(user.getUuid().equals(SYSTEM_USER_UUID) 
+				|| user instanceof AdminUser
+				|| isAdministrator(user)) {
 			return;
 		}
 
@@ -395,39 +397,36 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 	private void scanForPermissions(ClassLoader classloader, String name, boolean newSchema) {
 		
-		try {
-			try (ScanResult scanResult =
-                    new ClassGraph()                 
-                        .enableAllInfo()  
-                        .addClassLoader(classloader)
-                        .whitelistPackages(name)   
-                        .scan()) {                  
-                for (ClassInfo clz : scanResult.getClassesWithAnnotation(Permissions.class.getName())) {
-					if(log.isInfoEnabled()) {
-						log.info("Found annotated permissions {}", clz.getName());
-					}
-					Permissions perms = clz.loadClass().getAnnotation(Permissions.class);
-					for(String key : perms.keys()) {
-						registerCustomPermission(key);
-					}
-					
-					Role everyoneRole = roleService.getEveryoneRole();
-					
-					for(String permission : perms.defaultPermissions()) {
-						if(!propertyService.getBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), false)) {
-							if(!everyoneRole.getPermissions().contains(permission)) {
-								roleService.grantPermission(everyoneRole, permission);
-							}
-							propertyService.setBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), true);
+		
+		try (ScanResult scanResult =
+                new ClassGraph()                 
+                    .enableAllInfo()  
+                    .addClassLoader(classloader)
+                    .whitelistPackages(name)   
+                    .scan()) {                  
+            for (ClassInfo clz : scanResult.getClassesWithAnnotation(Permissions.class.getName())) {
+				if(log.isInfoEnabled()) {
+					log.info("Found annotated permissions {}", clz.getName());
+				}
+				Permissions perms = clz.loadClass().getAnnotation(Permissions.class);
+				for(String key : perms.keys()) {
+					registerCustomPermission(key);
+				}
+				
+				Role everyoneRole = roleService.getEveryoneRole();
+				
+				for(String permission : perms.defaultPermissions()) {
+					if(!propertyService.getBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), false)) {
+						if(!everyoneRole.getPermissions().contains(permission)) {
+							roleService.grantPermission(everyoneRole, permission);
 						}
+						propertyService.setBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), true);
 					}
-	
-                }
-            }
+				}
 
-		} catch (Exception e) {
-			log.error("Failed to process annotated templates", e);
-		}
+            }
+        }
+
 	}
 
 	@Override

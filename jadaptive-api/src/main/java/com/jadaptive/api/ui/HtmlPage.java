@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -185,11 +186,11 @@ public abstract class HtmlPage implements Page {
 						}
 						String value = Request.get().getParameter(name);
 						if(method.getReturnType().isAssignableFrom(int.class)) {
-							return Integer.parseInt(value);
+							return StringUtils.isBlank(value) ? 0 : Integer.parseInt(value);
 						} else if(method.getReturnType().isAssignableFrom(long.class)) {
-							return Long.parseLong(value);
+							return StringUtils.isBlank(value) ? 0 : Long.parseLong(value);
 						} else if(method.getReturnType().isAssignableFrom(boolean.class)) {
-							return Boolean.parseBoolean(value);
+							return StringUtils.isBlank(value) ? false : Boolean.parseBoolean(value);
 						} else {
 							return value;
 						}
@@ -208,12 +209,14 @@ public abstract class HtmlPage implements Page {
 			injectFeedback(doc, request);
 			processPageExtensions(uri, doc);
 			
+			documentComplete(doc);
+			
 			if(Objects.nonNull(extenders)) {
 				for(HtmlPageExtender extender : extenders) {
 					extender.processEnd(doc, this);
 				}
 			}
-			
+
 			ResponseHelper.sendContent(doc.toString(), "text/html; charset=UTF-8;", request, response);
 			
 			
