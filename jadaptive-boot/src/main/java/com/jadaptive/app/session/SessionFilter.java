@@ -42,7 +42,6 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
-import com.jadaptive.api.stats.UsageService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantService;
@@ -50,7 +49,7 @@ import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
 
 @WebFilter(urlPatterns = { "/*" }, dispatcherTypes = { DispatcherType.REQUEST })
-public class SessionFilter implements Filter, CountingOutputStreamListener {
+public class SessionFilter implements Filter {
 
 	static Logger log = LoggerFactory.getLogger(SessionFilter.class);
 	
@@ -79,9 +78,6 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 	
 	@Autowired
 	private SystemSingletonObjectDatabase<TenantConfiguration> tenantConfig;
-	
-	@Autowired
-	private UsageService usageService; 
 	
 	Map<String,String> cachedRedirects = new HashMap<>();
 	
@@ -152,14 +148,7 @@ public class SessionFilter implements Filter, CountingOutputStreamListener {
 	}
 	
 
-	@Override
-	public void closed(long count) {
-		
-		tenantService.executeAs(tenantService.getCurrentTenant(),()-> {
-			usageService.log(count, UsageService.HTTP_OUT);
-		});
-		
-	}
+
 
 	private boolean preHandle(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		

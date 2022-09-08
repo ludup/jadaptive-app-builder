@@ -40,7 +40,6 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantController;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.api.user.AdminUserDatabase;
 
 @Service
 public class TenantServiceImpl implements TenantService, JsonTemplateEnabledService<Tenant>, UUIDObjectService<Tenant> {

@@ -27,6 +27,8 @@ public @interface TableAction  {
 	
 	String icon();
 	
+	String iconGroup() default "fa-regular";
+	
 	boolean confirmationRequired() default false;
 
 

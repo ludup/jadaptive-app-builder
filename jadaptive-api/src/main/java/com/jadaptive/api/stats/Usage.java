@@ -24,11 +24,11 @@ public class Usage extends AbstractUUIDEntity {
 	@ObjectField(type = FieldType.TIMESTAMP)
 	Date timestamp;
 	
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
 	Collection<String> keys;
 	
-	@ObjectField(type = FieldType.LONG)
+	@ObjectField(type = FieldType.LONG, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
 	Long value;
 

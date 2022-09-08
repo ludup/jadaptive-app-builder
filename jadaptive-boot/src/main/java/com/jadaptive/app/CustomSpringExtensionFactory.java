@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
+
 /**
  * Basic implementation of a extension factory that uses Java reflection to
  * instantiate an object.
@@ -52,7 +54,7 @@ public class CustomSpringExtensionFactory implements ExtensionFactory {
         T extension = createWithoutSpring(extensionClass);
         if (autowire && extension != null) {
             // test for SpringBean
-            PluginWrapper pluginWrapper = pluginManager.whichPlugin(extensionClass);
+        	PluginWrapper pluginWrapper = pluginManager.whichPlugin(extensionClass);
             if (pluginWrapper != null) {
                 Plugin plugin = pluginWrapper.getPlugin();
                 if (plugin instanceof SpringPlugin) {

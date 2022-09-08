@@ -22,7 +22,6 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.Html;
-import com.jadaptive.api.ui.Page;
 
 public abstract class TemplatePage extends AuthenticatedPage {
 
@@ -96,13 +95,13 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	
 	protected void documentComplete(Document document) {
 
-		Element form = document.selectFirst("form");
-		if(Objects.nonNull(form)) {
-			form.appendChild(Html.input("hidden", 
-					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
-						sessionUtils.setupCSRFToken(Request.get()))
-						.attr("id", "csrftoken"));
-		}
+//		Element form = document.selectFirst("form");
+//		if(Objects.nonNull(form)) {
+//			form.appendChild(Html.input("hidden", 
+//					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
+//						sessionUtils.setupCSRFToken(Request.get()))
+//						.attr("id", "csrftoken"));
+//		}
 	}
 
 	protected abstract void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException;

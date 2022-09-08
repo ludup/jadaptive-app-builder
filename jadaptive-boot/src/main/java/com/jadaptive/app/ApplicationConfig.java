@@ -56,7 +56,7 @@ public class ApplicationConfig {
 
 			@Override
             protected ExtensionFactory createExtensionFactory() {
-                return new CustomSpringExtensionFactory(this);
+                return new CustomSpringExtensionFactory(this, true);
             }
         	
         	@Override
