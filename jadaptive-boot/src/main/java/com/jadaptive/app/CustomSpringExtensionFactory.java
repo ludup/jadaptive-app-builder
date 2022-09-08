@@ -24,8 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.jadaptive.api.app.ApplicationServiceImpl;
-
 /**
  * Basic implementation of a extension factory that uses Java reflection to
  * instantiate an object.

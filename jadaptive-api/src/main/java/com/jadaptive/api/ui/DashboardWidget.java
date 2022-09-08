@@ -8,6 +8,10 @@ public interface DashboardWidget extends ExtensionPoint {
 
 	String getIcon();
 	
+	default String getIconGroup() {
+		return "fa-regular";
+	}
+	
 	String getBundle();
 	
 	String getName();
@@ -20,5 +24,9 @@ public interface DashboardWidget extends ExtensionPoint {
 	
 	default boolean hasHelp() { 
 		return false;
+	}
+	
+	default DashboardType getType() {
+		return DashboardType.SERVER_INFORMATION;
 	}
 }

@@ -53,14 +53,42 @@ public class Html {
 		return el;
 	}
 	
-	public static Element pi18n(String bundle, String i18n, Object... args) {
-		Element el = new Element("p").attr("jad:bundle", bundle).attr("jad:i18n", i18n);
+	public static Element i18nTag(String tag, String bundle, String i18n, Object... args) {
+		Element el = new Element(tag).attr("jad:bundle", bundle).attr("jad:i18n", i18n);
 		for(int i=0;i<args.length;i++) {
 			if(args[i]!=null) {
 				el.attr(String.format("jad:arg%d",i), args[i].toString());
 			}
 		}
 		return el;
+	}
+	
+	public static Element p(String bundle, String i18n, Object... args) {
+		return i18nTag("p", bundle, i18n, args);
+	}
+	
+	public static Element h1(String bundle, String i18n, Object... args) {
+		return i18nTag("h1", bundle, i18n, args);
+	}
+	
+	public static Element h2(String bundle, String i18n, Object... args) {
+		return i18nTag("h2", bundle, i18n, args);
+	}
+	
+	public static Element h3(String bundle, String i18n, Object... args) {
+		return i18nTag("h3", bundle, i18n, args);
+	}
+	
+	public static Element h4(String bundle, String i18n, Object... args) {
+		return i18nTag("h4", bundle, i18n, args);
+	}
+	
+	public static Element h5(String bundle, String i18n, Object... args) {
+		return i18nTag("h5", bundle, i18n, args);
+	}
+	
+	public static Element h6(String bundle, String i18n, Object... args) {
+		return i18nTag("h6", bundle, i18n, args);
 	}
 	
 	public static Element span(String text, String classes) {
@@ -118,4 +146,9 @@ public class Html {
 	public static Element input(String type, String name, String value) {
 		return new Element("input").attr("type", type).attr("name", name).val(value);
 	}
+
+	public static Element p(String text) {
+		return new Element("p").text(text);
+	}
+
 }

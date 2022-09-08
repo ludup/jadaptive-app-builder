@@ -95,13 +95,17 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	
 	protected void documentComplete(Document document) {
 
-//		Element form = document.selectFirst("form");
-//		if(Objects.nonNull(form)) {
-//			form.appendChild(Html.input("hidden", 
-//					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
-//						sessionUtils.setupCSRFToken(Request.get()))
-//						.attr("id", "csrftoken"));
-//		}
+		Element form = document.selectFirst("form");
+		if(Objects.nonNull(form)) {
+			
+			Element e = form.selectFirst("#csrftoken");
+			if(Objects.isNull(e)) {
+				form.appendChild(Html.input("hidden", 
+						SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
+							sessionUtils.setupCSRFToken(Request.get()))
+							.attr("id", "csrftoken"));
+			}
+		}
 	}
 
 	protected abstract void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException;
