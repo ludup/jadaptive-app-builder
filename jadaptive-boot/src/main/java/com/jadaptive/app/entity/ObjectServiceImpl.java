@@ -186,8 +186,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 	private String saveViaObjectBean(AbstractObject entity, ObjectTemplate template) {
 		
-		permissionService.assertReadWrite(entity.getResourceKey());
-		
+		if(template.getPermissionProtected()) {
+			permissionService.assertReadWrite(entity.getResourceKey());
+		}
 		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
 
 		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
