@@ -359,11 +359,12 @@ public abstract class HtmlPage implements Page {
 		URL url = ext.getClass().getResource(ext.getCssResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendStylesheet(document, "/app/css/" + uri + ".css");
-		} 
-		url = classService.getResource(ext.getCssResource());
-		if(Objects.nonNull(url)) {
-			PageHelper.appendStylesheet(document, "/app/style/" + uri + ".css");
-		} 
+		} else {
+			url = classService.getResource(ext.getCssResource());
+			if(Objects.nonNull(url)) {
+				PageHelper.appendStylesheet(document, "/app/style/" + uri + ".css");
+			} 
+		}
 	}
 	
 	public String getCssResource() {
@@ -374,7 +375,12 @@ public abstract class HtmlPage implements Page {
 		URL url = ext.getClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendScript(document, "/app/js/" + uri + ".js");
-		} 
+		} else {
+			url = classService.getResource(ext.getJsResource());
+			if(Objects.nonNull(url)) {
+				PageHelper.appendScript(document, "/app/script/" + ext.getJsResource());
+			}
+		}
 	}
 
 	public String getJsResource() {

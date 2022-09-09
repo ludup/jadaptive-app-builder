@@ -160,9 +160,12 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public String saveOrUpdate(AbstractObject entity) throws RepositoryException, ObjectException {
 		
-		permissionService.assertReadWrite(entity.getResourceKey());
 		
 		ObjectTemplate template = templateService.get(entity.getResourceKey());
+		
+		if(template.getPermissionProtected()) {
+			permissionService.assertReadWrite(entity.getResourceKey());
+		}
 		
 		switch(template.getType()) {
 		case SINGLETON:

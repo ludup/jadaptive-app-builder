@@ -90,7 +90,9 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 			}
 
 			try {
-				assertPermissions();
+				if(template.getPermissionProtected()) {
+					assertPermissions();
+				}
 			} catch (AccessDeniedException e) {
 				switch (getScope()) {
 				case CREATE:
