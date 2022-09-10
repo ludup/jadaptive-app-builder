@@ -112,4 +112,10 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	public void deleteObjectByUUID(String uuid) {
 		deleteObject(getObjectByUUID(uuid));
 	}
+
+
+	@Override
+	public User getPrimaryAdministrator() {
+		return allObjects().iterator().next();
+	}
 }
