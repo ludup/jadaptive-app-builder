@@ -24,8 +24,10 @@ import com.jadaptive.api.entity.ObjectRepository;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -88,9 +90,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Override
 	public AbstractObject getSingleton(String resourceKey) throws RepositoryException, ObjectException, ValidationException {
-
-		
-		
+	
 		ObjectTemplate template = templateService.get(resourceKey);
 		
 		if(template.getPermissionProtected()) {
@@ -120,9 +120,12 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 		ObjectTemplate template = templateService.get(resourceKey);
 
-		if(!template.isSystem() && template.getPermissionProtected()) {
-			permissionService.assertRead(resourceKey);
-		}
+		/**
+		 * This creates a problem requiring normal users to have read for anything that's embedded in an object.
+		 */
+//		if(!template.isSystem() && template.getPermissionProtected()) {
+//			permissionService.assertRead(resourceKey);
+//		}
 		
 		AbstractObject e = entityRepository.getById(template, uuid);
 		if(!resourceKey.equals(e.getResourceKey()) && !template.getChildTemplates().contains(e.getResourceKey())) {
@@ -252,7 +255,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException {
 		
-		permissionService.assertReadWrite(resourceKey);
+		
 		
 		ObjectTemplate template = templateService.get(resourceKey);
 		if(template.getType()==ObjectType.SINGLETON) {	
@@ -271,6 +274,16 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 					if(obj.isSystem()) {
 						throw new ObjectException("You cannot delete a system object");
 					}
+
+					switch(template.getScope()) {
+					case PERSONAL:
+						permissionService.assertOwnership((PersonalUUIDEntity)obj);
+						break;
+					default:
+						permissionService.assertReadWrite(resourceKey);
+						break;
+					}
+					
 					bean.deleteObjectByUUID(uuid);
 					return;
 				}
@@ -278,6 +291,15 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			AbstractObject e = get(resourceKey, uuid);
 			if(e.isSystem()) {
 				throw new ObjectException("You cannot delete a system object");
+			}
+			
+			switch(template.getScope()) {
+			case PERSONAL:
+				permissionService.assertOwnership(e);
+				break;
+			default:
+				permissionService.assertReadWrite(resourceKey);
+				break;
 			}
 			entityRepository.deleteByUUIDOrAltId(template, uuid);
 
@@ -347,20 +369,28 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
 		ObjectTemplate template = templateService.get(resourceKey);
 		
-		switch(template.getScope()) {
-		case PERSONAL:
-			return entityRepository.table(template, offset, limit,
-						generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
-		case ASSIGNED:
-			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-			return entityRepository.table(template, offset, limit, 
-					generateSearchFields(searchField, searchValue, template, SearchField.or(
-							SearchField.in("users", getCurrentUser().getUuid()),
-							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
-		case GLOBAL:
-		default:
+		try {
+			
+			permissionService.assertRead(template.getResourceKey());
 			return entityRepository.table(template, offset, limit, 
 					generateSearchFields(searchField, searchValue, template));
+		
+		} catch(AccessDeniedException e) {
+			switch(template.getScope()) {
+			case PERSONAL:
+				return entityRepository.table(template, offset, limit,
+							generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+			case ASSIGNED:
+				Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+				return entityRepository.table(template, offset, limit, 
+						generateSearchFields(searchField, searchValue, template, SearchField.or(
+								SearchField.in("users", getCurrentUser().getUuid()),
+								SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
+			case GLOBAL:
+			default:
+				return entityRepository.table(template, offset, limit, 
+						generateSearchFields(searchField, searchValue, template));
+			}
 		}
 		
 	}
@@ -393,20 +423,26 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public long count(String resourceKey) {
 		ObjectTemplate template = templateService.get(resourceKey);
-		switch(template.getScope()) {
-		case PERSONAL:
-			return entityRepository.count(template,
-					SearchField.eq("ownerUUID", getCurrentUser().getUuid()));
-		case ASSIGNED:
-			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-			return entityRepository.count(template,
-					SearchField.or(
-							SearchField.in("users", getCurrentUser().getUuid()),
-							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
-					));			
-		case GLOBAL:
-		default:
+		
+		try {
+			permissionService.assertRead(template.getResourceKey());
 			return entityRepository.count(template);
+		} catch(AccessDeniedException e) {
+			switch(template.getScope()) {
+			case PERSONAL:
+				return entityRepository.count(template,
+						SearchField.eq("ownerUUID", getCurrentUser().getUuid()));
+			case ASSIGNED:
+				Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+				return entityRepository.count(template,
+						SearchField.or(
+								SearchField.in("users", getCurrentUser().getUuid()),
+								SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
+						));			
+			case GLOBAL:
+			default:
+				return entityRepository.count(template);
+			}
 		}
 		
 	}
@@ -415,19 +451,27 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	public long count(String resourceKey, String searchField, String searchValue) {
 		
 		ObjectTemplate template = templateService.get(resourceKey);
-		switch(template.getScope()) {
-		case PERSONAL:
-			return entityRepository.count(template,
-					generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));
-		case ASSIGNED:
-			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-			return entityRepository.count(template,
-					generateSearchFields(searchField, searchValue, template, SearchField.or(
-							SearchField.in("users", getCurrentUser().getUuid()),
-							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
-		case GLOBAL:
-		default:
+		
+		try {
+			
+			permissionService.assertRead(template.getResourceKey());
 			return entityRepository.count(template, generateSearchFields(searchField, searchValue, template));
+		
+		} catch(AccessDeniedException e) {
+			switch(template.getScope()) {
+			case PERSONAL:
+				return entityRepository.count(template,
+						generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));
+			case ASSIGNED:
+				Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+				return entityRepository.count(template,
+						generateSearchFields(searchField, searchValue, template, SearchField.or(
+								SearchField.in("users", getCurrentUser().getUuid()),
+								SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
+			case GLOBAL:
+			default:
+				return entityRepository.count(template, generateSearchFields(searchField, searchValue, template));
+			}
 		}
 	}
 

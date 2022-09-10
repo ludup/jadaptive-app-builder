@@ -22,11 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.PropertyService;
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.permissions.PermissionUtils;
 import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
+import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
@@ -468,5 +470,22 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			return;
 		}
 		throw new AccessDeniedException(String.format("Current user is not assigned to object " + obj.getUuid()));
+	}
+
+	@Override
+	public void assertOwnership(PersonalUUIDEntity obj) {
+		
+		if(Objects.isNull(obj.getOwnerUUID()) || !obj.getOwnerUUID().equals(getCurrentUser().getUuid())) {
+			throw new AccessDeniedException(String.format("Current user is not own the object " + obj.getUuid()));
+		}
+	}
+
+	@Override
+	public void assertOwnership(AbstractObject e) {
+		
+		String ownerUUID = e.getValue("ownerUUID").toString();
+		if(Objects.isNull(ownerUUID) || !ownerUUID.equals(getCurrentUser().getUuid())) {
+			throw new AccessDeniedException(String.format("Current user is not own the object " + e.getUuid()));
+		}	
 	}
 }

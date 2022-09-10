@@ -36,6 +36,7 @@ import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.ErrorPage;
+import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.MessagePage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
@@ -73,6 +74,8 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@ExceptionHandler(AccessDeniedException.class)
 	public void onAccessDeniedException(AccessDeniedException e, HttpServletResponse response) throws IOException {
+		Feedback.error("userInterface", "accessDenied.text");
+		e.printStackTrace();
 	    response.sendRedirect(new PageRedirect(pageCache.resolvePage("login")).getUri());
 	}
 	

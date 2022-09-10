@@ -20,9 +20,11 @@ public class Feedback {
 		this.args = args;
 	}
 	
-	public Feedback(String message) {
+	public Feedback(String icon, String message, String alert) {
 		super();
 		this.i18n = message;
+		this.icon = icon;
+		this.alert = alert;
 		this.rawText = true;
 	}
 	

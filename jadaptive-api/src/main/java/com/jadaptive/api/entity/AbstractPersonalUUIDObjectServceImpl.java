@@ -2,19 +2,19 @@ package com.jadaptive.api.entity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.db.PersonalObjectDatabase;
 import com.jadaptive.api.permissions.AuthenticatedService;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.PersonalUUIDEntity;
 
-public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends AuthenticatedService implements AbstractUUIDObjectService<T> {
+public abstract class AbstractPersonalUUIDObjectServceImpl<T extends PersonalUUIDEntity> extends AuthenticatedService implements AbstractUUIDObjectService<T> {
 
 	@Autowired
-	protected TenantAwareObjectDatabase<T> objectDatabase;
+	protected PersonalObjectDatabase<T> objectDatabase;
 	
 	protected abstract Class<T> getResourceClass();
 	@Override
 	public T getObjectByUUID(String uuid) {
-		return objectDatabase.get(uuid, getResourceClass());
+		return objectDatabase.getObjectByUUID(getResourceClass(), uuid);
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 	@Override
 	public void deleteObject(T object) {
 		validateDelete(object);
-		objectDatabase.delete(object);
+		objectDatabase.deletePersonalObject(object);
 	}
 
 	protected void validateDelete(T object) {
@@ -38,12 +38,12 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 	public void deleteObjectByUUID(String uuid) {
 		T object = getObjectByUUID(uuid);
 		validateDelete(object);
-		objectDatabase.delete(object);
+		objectDatabase.deletePersonalObject(object);
 	}
 
 	@Override
 	public Iterable<T> allObjects() {
-		return objectDatabase.list(getResourceClass());
+		return objectDatabase.allObjects(getResourceClass());
 	}
 	
 	protected void validateSave(T object) {

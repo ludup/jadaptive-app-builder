@@ -228,7 +228,7 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	}
 
 	public Boolean getPermissionProtected() {
-		return permissionProtected;
+		return permissionProtected && scope!=ObjectScope.PERSONAL;
 	}
 
 	public void setPermissionProtected(Boolean permissionProtected) {

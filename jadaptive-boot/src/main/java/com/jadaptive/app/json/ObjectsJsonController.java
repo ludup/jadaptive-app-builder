@@ -37,6 +37,7 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.app.entity.MongoEntity;
 
 @Controller
@@ -139,6 +140,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 			if(log.isErrorEnabled()) {
 				log.error("DELETE api/objects/{}", resourceKey, e);
 			}
+			Feedback.error(e.getMessage());
 			return handleException(e, "DELETE", resourceKey);
 		}
 	}

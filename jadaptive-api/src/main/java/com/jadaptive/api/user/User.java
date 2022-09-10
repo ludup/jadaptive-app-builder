@@ -24,7 +24,7 @@ import com.jadaptive.api.template.Validator;
 @ObjectServiceBean(bean = UserService.class)
 @ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "contact") })
 @TableView(defaultColumns = { "username", "name", "lastLogin" }, requiresUpdate = true, actions = {
-		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}") })
+		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}", writeAction = true) })
 public abstract class User extends UUIDEntity implements NamedDocument {
 
 	public static final String RESOURCE_KEY = "users";
