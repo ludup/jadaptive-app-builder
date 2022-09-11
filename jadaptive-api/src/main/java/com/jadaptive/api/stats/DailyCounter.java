@@ -10,9 +10,9 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.TableView;
 
-@ObjectDefinition(resourceKey = Counter.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = DailyCounter.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, creatable = false, updatable = false, deletable = false)
 @TableView(defaultColumns = { "date",  "key", "value" })
-public class Counter extends AbstractUUIDEntity {
+public class DailyCounter extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -8552673621693434319L;
 	
@@ -25,7 +25,7 @@ public class Counter extends AbstractUUIDEntity {
 	@ObjectField(type = FieldType.LONG)
 	long value;
 	
-	public static final String RESOURCE_KEY = "counter";
+	public static final String RESOURCE_KEY = "dailyCounter";
 	
 	@Override
 	public String getResourceKey() {

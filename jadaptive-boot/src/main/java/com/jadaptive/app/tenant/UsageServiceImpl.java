@@ -9,7 +9,8 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
-import com.jadaptive.api.stats.Counter;
+import com.jadaptive.api.stats.DailyCounter;
+import com.jadaptive.api.stats.MonthlyCounter;
 import com.jadaptive.api.stats.Usage;
 import com.jadaptive.api.stats.UsageService;
 import com.jadaptive.utils.Utils;
@@ -21,7 +22,10 @@ public class UsageServiceImpl implements UsageService {
 	private TenantAwareObjectDatabase<Usage> usageDatabase;
 	
 	@Autowired
-	private TenantAwareObjectDatabase<Counter> counterDatabase;
+	private TenantAwareObjectDatabase<DailyCounter> dailyDatabase;
+	
+	@Autowired
+	private TenantAwareObjectDatabase<MonthlyCounter> monthlyDatabase;
 	
 	@Override
 	public void log(long value, String... keys) {
@@ -42,21 +46,21 @@ public class UsageServiceImpl implements UsageService {
 	@Override
 	public synchronized void incrementDailyValue(String key, long byValue) {
 		
-		Counter counter;
+		DailyCounter counter;
 		
 		try {
-			counter = counterDatabase.get(Counter.class,
+			counter = dailyDatabase.get(DailyCounter.class,
 					SearchField.eq("date", Utils.today()),
 					SearchField.eq("key", key));
 		} catch(ObjectNotFoundException e) {
-			counter = new Counter();
+			counter = new DailyCounter();
 			counter.setDate(Utils.today());
 			counter.setValue(0);
 			counter.setKey(key);
 		}
 		
 		counter.setValue(counter.getValue() + byValue);
-		counterDatabase.saveOrUpdate(counter);
+		dailyDatabase.saveOrUpdate(counter);
 		
 	}
 	
@@ -64,7 +68,7 @@ public class UsageServiceImpl implements UsageService {
 	public synchronized long getDailyValue(String key) {
 		
 		try {
-			Counter counter = counterDatabase.get(Counter.class,
+			DailyCounter counter = dailyDatabase.get(DailyCounter.class,
 					SearchField.eq("date", Utils.today()),
 					SearchField.eq("key", key));
 			return counter.getValue();
@@ -77,7 +81,7 @@ public class UsageServiceImpl implements UsageService {
 	public synchronized long getMonthlyValue(String key, Date date) {
 		
 		try {
-			Counter counter = counterDatabase.get(Counter.class,
+			MonthlyCounter counter = monthlyDatabase.get(MonthlyCounter.class,
 					SearchField.eq("date", Utils.getMonthEnd(date)),
 					SearchField.eq("key", key));
 			return counter.getValue();
@@ -89,21 +93,21 @@ public class UsageServiceImpl implements UsageService {
 	@Override
 	public synchronized void setMonthlyValue(String key, Date date, long byValue) {
 		
-		Counter counter;
+		MonthlyCounter counter;
 		Date monthEnd = Utils.getMonthEnd(date);
 		try {
-			counter = counterDatabase.get(Counter.class,
+			counter = monthlyDatabase.get(MonthlyCounter.class,
 					SearchField.eq("date",monthEnd),
 					SearchField.eq("key", key));
 		} catch(ObjectNotFoundException e) {
-			counter = new Counter();
+			counter = new MonthlyCounter();
 			counter.setDate(monthEnd);
 			counter.setValue(0);
 			counter.setKey(key);
 		}
 		
 		counter.setValue(byValue);
-		counterDatabase.saveOrUpdate(counter);
+		monthlyDatabase.saveOrUpdate(counter);
 		
 	}
 	
@@ -115,21 +119,21 @@ public class UsageServiceImpl implements UsageService {
 	@Override
 	public synchronized void setDailyValue(String key, Date date, long byValue) {
 		
-		Counter counter;
+		DailyCounter counter;
 		
 		try {
-			counter = counterDatabase.get(Counter.class,
+			counter = dailyDatabase.get(DailyCounter.class,
 					SearchField.eq("date", date),
 					SearchField.eq("key", key));
 		} catch(ObjectNotFoundException e) {
-			counter = new Counter();
+			counter = new DailyCounter();
 			counter.setDate(Utils.today());
 			counter.setValue(0);
 			counter.setKey(key);
 		}
 		
 		counter.setValue(byValue);
-		counterDatabase.saveOrUpdate(counter);
+		dailyDatabase.saveOrUpdate(counter);
 		
 	}
 	
