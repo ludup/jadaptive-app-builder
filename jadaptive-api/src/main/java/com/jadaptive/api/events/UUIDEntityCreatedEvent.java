@@ -9,7 +9,7 @@ public class UUIDEntityCreatedEvent<T extends UUIDEntity> extends ObjectEvent<T>
 	T object;
 	
 	public UUIDEntityCreatedEvent(T object) {
-		super(Events.created(object.getResourceKey()), object.getResourceKey());
+		super(Events.created(object.getEventGroup()), object.getEventGroup());
 		this.object = object;
 	}
 

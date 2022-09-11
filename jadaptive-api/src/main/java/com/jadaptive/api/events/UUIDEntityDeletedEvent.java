@@ -9,7 +9,7 @@ public class UUIDEntityDeletedEvent<T extends UUIDEntity> extends ObjectEvent<T>
 	T object;
 	
 	public UUIDEntityDeletedEvent(T object) {
-		super(Events.deleted(object.getResourceKey()), object.getResourceKey());
+		super(Events.deleted(object.getEventGroup()), object.getEventGroup());
 		this.object = object;
 	}
 
