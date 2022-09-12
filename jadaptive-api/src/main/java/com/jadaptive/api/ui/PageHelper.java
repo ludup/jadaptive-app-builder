@@ -6,6 +6,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.utils.Utils;
+
 public class PageHelper {
 	
 	public static void appendLast(Element parent, String lastOfTag, Element node) {
@@ -59,7 +64,16 @@ public class PageHelper {
 						.attr("id", "inlineJavascript")
 						.attr("type", "text/javascript"));
 		}
-		scriptTag.appendText(script);
+		
+		String nonce = Utils.generateRandomAlphaNumericString(32);
+		
+		
+		scriptTag.appendChild(new Element("script")
+							.attr("nonce", nonce)
+							.attr("type", "application/javascript")
+							.text(script));
+		
+		ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).addScriptNoncePolicy(Request.response(), nonce);
 	}
 
 }

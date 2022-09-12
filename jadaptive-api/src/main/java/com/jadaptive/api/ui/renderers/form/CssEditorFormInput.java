@@ -5,15 +5,11 @@ import java.io.IOException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.app.ApplicationServiceImpl;
-import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.OrderedField;
 import com.jadaptive.api.template.OrderedView;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
-import com.jadaptive.utils.Utils;
 
 @PageDependencies(extensions = {"codemirror"})
 public class CssEditorFormInput extends FieldInputRender {
@@ -57,8 +53,7 @@ public class CssEditorFormInput extends FieldInputRender {
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
 
-		String nonce = Utils.generateRandomAlphaNumericString(32);
-		String script = "var " + field.getFormVariable() + "Editor = CodeMirror.fromTextArea(document.getElementById('" + field.getResourceKey() + "'), {\r\n"
+		String script = "$(function() {\nvar " + field.getFormVariable() + "Editor = CodeMirror.fromTextArea(document.getElementById('" + field.getResourceKey() + "'), {\r\n"
 				+ "    lineNumbers: true,\r\n"
 				+ "    autoRefresh:true,\r\n"
 				+ "    lineWrapping: true,\r\n"
@@ -69,13 +64,9 @@ public class CssEditorFormInput extends FieldInputRender {
 				+ field.getFormVariable() + "Editor.on('change', function(e) {\r\n"
 				+ "  const text = e.doc.getValue();\r\n"
 				+ "  $('#"  +field.getFormVariable() + "').val(text);\r\n"
-				+ "});\r\n";
+				+ "});\r\n});";
 		
-		rootElement.appendChild(new Element("script")
-							.attr("nonce", nonce)
-							.attr("type", "application/javascript")
-							.text(script));
+		PageHelper.appendScriptSnippet(document, script);
 		
-		ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).addScriptNoncePolicy(Request.response(), nonce);
 	}
 }

@@ -57,9 +57,7 @@ public class HtmlEditorFormInput extends FieldInputRender {
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
 
-		rootElement.appendChild(new Element("script")
-							.attr("type", "application/javascript")
-							.text("$('#" + field.getResourceKey() + "').val(window.atob($('#" + field.getResourceKey() + "').val()));\r\n"
+		String script = "$(function() {\n$('#" + field.getResourceKey() + "').val(window.atob($('#" + field.getResourceKey() + "').val()));\r\n"
 								+ "var " + field.getFormVariable() + "Editor = CodeMirror.fromTextArea(document.getElementById('" + field.getResourceKey() + "'), {\r\n"
 								+ "    lineNumbers: true,\r\n"
 								+ "    lineWrapping: true,\r\n"
@@ -70,7 +68,9 @@ public class HtmlEditorFormInput extends FieldInputRender {
 								+ field.getFormVariable() + "Editor.on('change', function(e) {\r\n"
 								+ "  const text = e.doc.getValue();\r\n"
 								+ "  $('#"  +field.getFormVariable() + "').val(text);\r\n"
-								+ "});\r\n"));
+								+ "});\r\n});";
+		
+		PageHelper.appendScriptSnippet(document, script);
 	}
 
 }
