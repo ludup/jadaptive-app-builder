@@ -330,15 +330,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public void deleteTenant(Tenant tenant) {
 		
 		permissionService.assertReadWrite(TENANT_RESOURCE_KEY);
-		repository.deleteTenant(tenant);
-		
-		tenantsByDomain.remove(tenant.getDomain());
-		tenantsByUUID.remove(tenant.getUuid());
-		
-		for(String domain : tenant.getAlternativeDomains()) {
-			tenantsByDomain.remove(domain);
-		}
-		
+
 		List<TenantAware> awareServices = new ArrayList<>(applicationService.getBeans(TenantAware.class));
 		Collections.sort(awareServices, new Comparator<TenantAware>() {
 
@@ -352,6 +344,17 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		for(TenantAware aware : awareServices) {
 			aware.deleteTenant(tenant);
 		}
+		
+		repository.deleteTenant(tenant);
+		
+		tenantsByDomain.remove(tenant.getDomain());
+		tenantsByUUID.remove(tenant.getUuid());
+		
+		for(String domain : tenant.getAlternativeDomains()) {
+			tenantsByDomain.remove(domain);
+		}
+		
+
 	}
 	
 	@Override
