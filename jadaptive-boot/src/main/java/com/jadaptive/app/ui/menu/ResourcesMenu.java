@@ -33,7 +33,7 @@ public class ResourcesMenu implements ApplicationMenu {
 
 	@Override
 	public String getIcon() {
-		return "toolbox";
+		return "fa-toolbox";
 	}
 
 	@Override

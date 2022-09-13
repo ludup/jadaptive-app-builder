@@ -33,7 +33,7 @@ public class HomeMenu implements ApplicationMenu {
 
 	@Override
 	public String getIcon() {
-		return "home";
+		return "fa-home";
 	}
 
 	@Override

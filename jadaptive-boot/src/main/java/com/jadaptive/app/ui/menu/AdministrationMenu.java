@@ -38,7 +38,7 @@ public class AdministrationMenu implements ApplicationMenu {
 
 	@Override
 	public String getIcon() {
-		return "lock";
+		return "fa-lock";
 	}
 
 	@Override

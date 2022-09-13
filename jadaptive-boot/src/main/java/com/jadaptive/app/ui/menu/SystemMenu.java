@@ -48,7 +48,7 @@ public class SystemMenu implements ApplicationMenu {
 
 	@Override
 	public String getIcon() {
-		return "wrench";
+		return "fa-wrench";
 	}
 
 	@Override

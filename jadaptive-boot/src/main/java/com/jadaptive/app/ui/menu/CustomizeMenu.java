@@ -38,7 +38,7 @@ public class CustomizeMenu implements ApplicationMenu {
 
 	@Override
 	public String getIcon() {
-		return "palette";
+		return "fa-palette";
 	}
 
 	@Override
