@@ -2,9 +2,9 @@ $(function() {
 	$('#toggleStack').click(function(e) {
 		e.preventDefault();
 		if($('#stack').is(':visible')) {
-			$('#stack').hide();
+			$('#stack').addClass('d-none');
 		} else {
-			$('#stack').show();
+			$('#stack').removeClass('d-none');
 		}
 	})
 });

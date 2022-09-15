@@ -35,9 +35,7 @@ public class DropdownFormInput extends FieldInputRender {
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
 				.appendChild(dropdownInput = new Element("div")
 						.attr("id", String.format("%sDropdown", field.getResourceKey()))
-						.attr("style", "position: relative")
-						.addClass("input-group")
-						.addClass("dropdown")
+						.addClass("input-group position-relative dropdown")
 					.appendChild(valueElement = new Element("input")
 							.attr("id", field.getFormVariable())
 							.attr("name", field.getFormVariable())
@@ -67,8 +65,7 @@ public class DropdownFormInput extends FieldInputRender {
 		
 		if(!readOnly) {
 			dropdownInput.appendChild(dropdownMenu = new Element("div")
-					.addClass("dropdown-menu")
-					.attr("style", "max-height: 300px; overflow-y: scroll;")
+					.addClass("dropdown-menu dropdown-size")
 					.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey())));
 			
 		}
@@ -118,8 +115,7 @@ public class DropdownFormInput extends FieldInputRender {
 		
 		if(Objects.isNull(dropdownMenu)) {
 			dropdownInput.appendChild(dropdownMenu = new Element("div")
-					.addClass("dropdown-menu")
-					.attr("style", "max-height: 300px; overflow-y: scroll;")
+					.addClass("dropdown-menu dropdown-size")
 					.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey())));
 		}
 		dropdownMenu.appendChild(PageHelper.createAnchor("#", name)

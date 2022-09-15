@@ -425,7 +425,7 @@ public class SessionUtils {
 		response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 		response.setHeader("Content-Security-Policy", 
 				String.format("default-src 'none'; font-src 'self'; script-src %s; style-src %s; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self'; form-action 'self';",
-						SELF, SELF_UNSAFE_INLINE));
+						SELF, SELF));
 	}
 
 	public void setDoNotCache(HttpServletResponse response) {

@@ -56,23 +56,13 @@ public class PageHelper {
 	}
 	
 	public static void appendScriptSnippet(Document document, String script) {
-		Element scriptTag = document.selectFirst("#inlineJavascript");
-		if(Objects.isNull(scriptTag)) {
-			Element body = document.selectFirst("body");
-			body.appendChild(
-					scriptTag = new Element("script")
-						.attr("id", "inlineJavascript")
-						.attr("type", "text/javascript"));
-		}
-		
+
 		String nonce = Utils.generateRandomAlphaNumericString(32);
-		
-		
-		scriptTag.appendChild(new Element("script")
-							.attr("nonce", nonce)
-							.attr("type", "application/javascript")
-							.text(script));
-		
+		document.selectFirst("body").appendChild(new Element("script")
+				.attr("nonce", nonce)
+				.attr("type", "application/javascript")
+				.text(script));
+
 		ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).addScriptNoncePolicy(Request.response(), nonce);
 	}
 

@@ -44,9 +44,7 @@ public class DropdownInput extends InputRender {
 		return new Element("div").attr("class", "row")
 				.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", resourceKey))
-						.attr("style", "position: relative")
-						.addClass("input-group")
-						.addClass("dropdown" + (up ? " dropup" : ""))
+						.addClass("input-group position-relative dropdown" + (up ? " dropup" : ""))
 					.appendChild(valueElement = new Element("input")
 							.attr("id", resourceKey)
 							.attr("name", resourceKey)
@@ -62,13 +60,12 @@ public class DropdownInput extends InputRender {
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false"))
 					.appendChild(new Element("a")
-							.attr("style", "text-decoration: none;")
-							.attr("class", "jdropdown input-group-text")
+							.attr("role", "button")
+							.attr("class", "jdropdown input-group-text text-decoration-none")
 						.appendChild(new Element("i")
 								.attr("class", "fas fa-chevron-down")))
 					.appendChild(dropdownMenu = new Element("div")
-							.attr("style", "max-height: 300px; overflow-y: scroll;")
-							.attr("class", "dropdown-menu" + (dark ? " dropdown-menu-dark" : ""))
+							.addClass("dropdown-menu dropdown-size" + (dark ? " dropdown-menu-dark" : ""))
 							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
 	}
 
