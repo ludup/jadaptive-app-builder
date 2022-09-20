@@ -40,8 +40,8 @@ import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.TemplateService;
@@ -279,7 +279,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	}
 
 	@Override
-	public List<OrderedView> getViews(ObjectTemplate template, boolean disableViews) {
+	public List<TemplateView> getViews(ObjectTemplate template, boolean disableViews) {
 		
 		if(StringUtils.isNotBlank(template.getTemplateClass())) {
 			return getAnnotatedViews(template, disableViews);
@@ -287,17 +287,17 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		return getDynamicViews(template);
 	}
 
-	private List<OrderedView> getDynamicViews(ObjectTemplate template) {
+	private List<TemplateView> getDynamicViews(ObjectTemplate template) {
 		return null;
 	}
 
-	private List<OrderedView> getAnnotatedViews(ObjectTemplate template, boolean disableViews) {
+	private List<TemplateView> getAnnotatedViews(ObjectTemplate template, boolean disableViews) {
 		try {
 			Class<?> clz = classService.findClass(template.getTemplateClass());
 				
-			Map<String, OrderedView> views = new HashMap<>();
+			Map<String, TemplateView> views = new HashMap<>();
 			Map<String,String> childViews = new HashMap<>();
-			views.put(null, new OrderedView(template.getBundle()));
+			views.put(null, new TemplateView(template.getBundle()));
 		
 			if(!disableViews) {
 				Class<?> tmp = clz;
@@ -307,7 +307,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 					if(Objects.nonNull(annonatedViews)) {
 						for(ObjectViewDefinition def : annonatedViews.value()) {
-							views.put(def.value(), new OrderedView(def));
+							views.put(def.value(), new TemplateView(def));
 						}
 					}
 					
@@ -320,14 +320,14 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			processFields(null,template, clz, views, new LinkedList<>(), disableViews); 
 
 			for(String child : childViews.keySet()) {
-				OrderedView view = views.remove(child);
+				TemplateView view = views.remove(child);
 				views.get(view.getParent()).addChildView(view);
 			}
 			
-			List<OrderedView> results = new ArrayList<>(views.values());
-			Collections.sort(results, new Comparator<OrderedView>() {
+			List<TemplateView> results = new ArrayList<>(views.values());
+			Collections.sort(results, new Comparator<TemplateView>() {
 				@Override
-				public int compare(OrderedView o1, OrderedView o2) {
+				public int compare(TemplateView o1, TemplateView o2) {
 					return o1.getWeight().compareTo(o2.getWeight());
 				}
 			});
@@ -378,7 +378,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		return FieldRenderer.DEFAULT;
 	}
 	
-	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, OrderedView> views, LinkedList<FieldTemplate> objectPath, boolean disableViews) throws NoSuchFieldException, ClassNotFoundException {
+	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, TemplateView> views, LinkedList<FieldTemplate> objectPath, boolean disableViews) throws NoSuchFieldException, ClassNotFoundException {
 		
 		for(FieldTemplate field : template.getFields()) {
 			
@@ -400,26 +400,26 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			}
 			
 			if(Objects.isNull(v)) { 
-				OrderedView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
+				TemplateView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
 				if(Objects.isNull(o)) {
 					throw new IllegalStateException(
 							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", field.getResourceKey()));
 				}
-				o.addField(new OrderedField(null, o, field, objectPath));				
+				o.addField(new TemplateViewField(null, o, field, objectPath));				
 			} else if(StringUtils.isBlank(v.value())) {
-				OrderedView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
+				TemplateView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
 				if(Objects.isNull(o)) {
 					throw new IllegalStateException(
 							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
 				}
-				o.addField(new OrderedField(v, o, field, objectPath));
+				o.addField(new TemplateViewField(v, o, field, objectPath));
 			} else {
-				OrderedView o = views.get(disableViews ? null : v.value());
+				TemplateView o = views.get(disableViews ? null : v.value());
 				if(Objects.isNull(o)) {
 					throw new IllegalStateException(
 							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
 				}
-				o.addField(new OrderedField(v, o, field, objectPath));
+				o.addField(new TemplateViewField(v, o, field, objectPath));
 			}
 		}
 	}

@@ -488,7 +488,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			List<Field> fields = new ArrayList<>();
 			resolveFields(clz, fields, e.recurse());
 			
-			
 			for(Field field :fields) {
 				
 				ObjectField objectAnnotation = field.getAnnotation(ObjectField.class);

@@ -4,17 +4,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.utils.Utils;
 
 public class TimestampFormInput extends FieldInputRender {
 
-	public TimestampFormInput(ObjectTemplate template, OrderedField field) {
+	public TimestampFormInput(ObjectTemplate template, TemplateViewField field) {
 		super(template, field);
 	}
 
-	public final void renderInput(OrderedView panel, Element rootElement, String value) {
+	public final void renderInput(TemplateView panel, Element rootElement, String value) {
 		
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")

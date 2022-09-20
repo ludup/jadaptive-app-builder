@@ -3,8 +3,8 @@ package com.jadaptive.api.ui.renderers.form;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 
 public class FieldSearchFormInput {
 
@@ -13,9 +13,9 @@ public class FieldSearchFormInput {
 	String searchField;
 	String idField;
 	protected ObjectTemplate template;
-	protected OrderedField field;
+	protected TemplateViewField field;
 	
-	public FieldSearchFormInput(ObjectTemplate template, OrderedField field, String url, String searchField, String idField) {
+	public FieldSearchFormInput(ObjectTemplate template, TemplateViewField field, String url, String searchField, String idField) {
 		this.template = template;
 		this.field = field;
 		this.url = url;
@@ -23,7 +23,7 @@ public class FieldSearchFormInput {
 		this.idField = idField;
 	}
 
-	public void renderInput(OrderedView panel, Element rootElement, 
+	public void renderInput(TemplateView panel, Element rootElement, 
 			String value, String name,
 			boolean nameIsResourceKey,
 			boolean readOnly) {

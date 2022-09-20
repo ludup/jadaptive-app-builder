@@ -5,21 +5,21 @@ import java.util.Collection;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 
 public class MultipleTextFormInput {
 
 	Element selected;
 	protected ObjectTemplate template;
-	protected OrderedField field;
+	protected TemplateViewField field;
 	
 //	public MultipleTextFormInput(ObjectTemplate template, OrderedField field) {
 //		this.template = template;
 //		this.field = field;
 //	}
 
-	public void renderInput(OrderedView panel, Element rootElement, 
+	public void renderInput(TemplateView panel, Element rootElement, 
 			Collection<String> selectedValues) {
 		
 		rootElement.appendChild(new Element("div").addClass("row mb-3 multipleTextInput")

@@ -6,8 +6,8 @@ import java.util.Objects;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.ui.PageHelper;
 
 public class DropdownFormInput extends FieldInputRender {
@@ -17,12 +17,12 @@ public class DropdownFormInput extends FieldInputRender {
 	Element nameElement;
 	Element valueElement;
 	
-	public DropdownFormInput(ObjectTemplate template, OrderedField field) {
+	public DropdownFormInput(ObjectTemplate template, TemplateViewField field) {
 		super(template, field);
 	}
 
 	@Override
-	public void renderInput(OrderedView panel, Element rootElement, String defaultValue) {
+	public void renderInput(TemplateView panel, Element rootElement, String defaultValue) {
 
 		rootElement.appendChild(new Element("div").addClass("row mb-3")
 				.appendChild(new Element("div")

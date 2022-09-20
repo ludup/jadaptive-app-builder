@@ -3,16 +3,16 @@ package com.jadaptive.api.ui.renderers.form;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 
 public class BootstrapBadgeRender extends FieldInputRender {
 	
-	public BootstrapBadgeRender(ObjectTemplate template, OrderedField field) {
+	public BootstrapBadgeRender(ObjectTemplate template, TemplateViewField field) {
 		super(template, field);
 	}
 	
-	public final void renderInput(OrderedView panel, Element rootElement, String value) {
+	public final void renderInput(TemplateView panel, Element rootElement, String value) {
 		
 
 		rootElement.appendChild(new Element("div")

@@ -5,8 +5,8 @@ import java.util.Collection;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.NamePairValue;
 
@@ -17,9 +17,9 @@ public class CollectionSearchFormInput {
 	String searchField;
 	String idField;
 	protected ObjectTemplate template;
-	protected OrderedField field;
+	protected TemplateViewField field;
 	
-	public CollectionSearchFormInput(ObjectTemplate template, OrderedField field, String url, String searchField, String idField) {
+	public CollectionSearchFormInput(ObjectTemplate template, TemplateViewField field, String url, String searchField, String idField) {
 		this.template = template;
 		this.field = field;
 		this.url = url;
@@ -27,7 +27,7 @@ public class CollectionSearchFormInput {
 		this.idField = idField;
 	}
 
-	public void renderInput(OrderedView panel, Element rootElement, 
+	public void renderInput(TemplateView panel, Element rootElement, 
 			Collection<NamePairValue> selectedValues,
 			boolean nameIsResourceKey,
 			boolean readOnly) {

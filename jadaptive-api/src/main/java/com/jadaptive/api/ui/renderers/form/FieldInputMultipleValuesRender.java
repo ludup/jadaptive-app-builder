@@ -5,20 +5,20 @@ import java.util.Collection;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 
 public abstract class FieldInputMultipleValuesRender {
 
 	protected ObjectTemplate template;
-	protected OrderedField field;
+	protected TemplateViewField field;
 	
-	public FieldInputMultipleValuesRender(ObjectTemplate template, OrderedField field) {
+	public FieldInputMultipleValuesRender(ObjectTemplate template, TemplateViewField field) {
 		this.template = template;
 		this.field = field;
 	}
 	
-	public abstract void renderInput(OrderedView panel, Element rootElement, 
+	public abstract void renderInput(TemplateView panel, Element rootElement, 
 			Collection<String> availableValues, 
 			Collection<String> selectedValues,
 			boolean valueIsResourceKey);

@@ -35,7 +35,7 @@ public interface TemplateService {
 
 	void registerObjectDependency(String resourceKey, ObjectTemplate template);
 
-	List<OrderedView> getViews(ObjectTemplate template, boolean singleView);
+	List<TemplateView> getViews(ObjectTemplate template, boolean singleView);
 
 	Iterable<ObjectTemplate> allCollectionTemplates();
 

@@ -15,7 +15,7 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.app.db.DocumentHelper;
@@ -80,7 +80,7 @@ public class MockEntityTemplateService implements TemplateService {
 		
 	}
 	@Override
-	public List<OrderedView> getViews(ObjectTemplate template, boolean singleView) {
+	public List<TemplateView> getViews(ObjectTemplate template, boolean singleView) {
 		// TODO Auto-generated method stub
 		return null;
 	}

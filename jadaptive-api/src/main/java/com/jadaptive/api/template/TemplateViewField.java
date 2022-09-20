@@ -7,23 +7,27 @@ import org.apache.commons.lang.StringUtils;
 
 import com.jadaptive.api.entity.AbstractObject;
 
-public class OrderedField {
+public class TemplateViewField {
 
-	ObjectView view;
 	FieldTemplate field;
-	OrderedView panel;
+	TemplateView panel;
 	LinkedList<FieldTemplate> objectPath;
+	int weight = 0;
+	String bundle = null;
+	FieldRenderer renderer = null;
 	
-	public OrderedField(ObjectView view, OrderedView panel, FieldTemplate field, LinkedList<FieldTemplate> objectPath) {
+	public TemplateViewField(ObjectView view, TemplateView panel, FieldTemplate field, LinkedList<FieldTemplate> objectPath) {
 		super();
-		this.view = view;
 		this.field = field;
 		this.panel = panel;
 		this.objectPath = objectPath;
+		this.weight = view != null ? view.weight() : 0;
+		this.bundle = Objects.nonNull(view) && StringUtils.isNotBlank(view.bundle()) ? view.bundle() : panel.getBundle();
+		this.renderer = view != null ? view.renderer() : FieldRenderer.DEFAULT;
 	}
 	
 	public Integer getWeight() {
-		return Integer.valueOf(view==null ? Integer.MIN_VALUE : view.weight());
+		return weight;
 	}
 	
 	public FieldTemplate getField() {
@@ -47,11 +51,11 @@ public class OrderedField {
 	}
 	
 	public String getBundle() {
-		return (Objects.nonNull(view) && StringUtils.isNotBlank(view.bundle())) ? view.bundle() : panel.getBundle();
+		return bundle;
 	}
 
 	public FieldRenderer getRenderer() {
-		return Objects.nonNull(view) ? view.renderer() : FieldRenderer.DEFAULT;
+		return renderer;
 	}
 	
 	public String getFieldValue(AbstractObject obj) {

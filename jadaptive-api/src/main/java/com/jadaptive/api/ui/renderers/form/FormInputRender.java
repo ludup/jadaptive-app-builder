@@ -3,16 +3,16 @@ package com.jadaptive.api.ui.renderers.form;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 
 public abstract class FormInputRender extends FieldInputRender {
 	
-	public FormInputRender(ObjectTemplate template, OrderedField field) {
+	public FormInputRender(ObjectTemplate template, TemplateViewField field) {
 		super(template, field);
 	}
 	
-	public final void renderInput(OrderedView panel, Element rootElement, String value) {
+	public final void renderInput(TemplateView panel, Element rootElement, String value) {
 		
 		Element myElement;
 		rootElement.appendChild(myElement = new Element("div")
@@ -41,7 +41,7 @@ public abstract class FormInputRender extends FieldInputRender {
 
 	}
 
-	protected void onRender(OrderedView panel, Element rootElement, String value) { }
+	protected void onRender(TemplateView panel, Element rootElement, String value) { }
 	
 	public abstract String getInputType();
 }

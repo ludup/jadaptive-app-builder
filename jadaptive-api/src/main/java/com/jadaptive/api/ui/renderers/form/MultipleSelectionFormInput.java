@@ -5,19 +5,19 @@ import java.util.Collection;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.OrderedField;
-import com.jadaptive.api.template.OrderedView;
+import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.TemplateView;
 
 public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 
 	Element available;
 	Element selected;
-	public MultipleSelectionFormInput(ObjectTemplate template, OrderedField field) {
+	public MultipleSelectionFormInput(ObjectTemplate template, TemplateViewField field) {
 		super(template, field);
 	}
 
 	@Override
-	public void renderInput(OrderedView panel, Element rootElement, 
+	public void renderInput(TemplateView panel, Element rootElement, 
 			Collection<String> availableValues, 
 			Collection<String> selectedValues,
 			boolean valueIsResourceKey) {
