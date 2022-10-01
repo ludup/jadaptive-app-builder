@@ -78,6 +78,8 @@ public abstract class HtmlPage implements Page {
 		
 		Document document = resolveDocument(this);
 		
+		processPageDependencies(document);
+		
 		if(Objects.nonNull(extenders)) {
 			for(HtmlPageExtender extender : extenders) {
 				extender.processStart(document, this);
@@ -109,14 +111,12 @@ public abstract class HtmlPage implements Page {
 		}
 		
 		afterProcess(uri, request, response);
-		ResponseHelper.sendContent(document.toString(), "text/html; charset=UTF-8;", request, response);
+		ResponseHelper.sendContent(document.toString(), "text/html;charset=UTF-8;", request, response);
 	}
 
 	protected void documentComplete(Document document) throws FileNotFoundException, IOException { };
 	
 	private void processPageExtensions(String uri, Document document) throws IOException {
-		
-		processPageDependencies(document);
 		
 		processDocumentExtensions(document);
 		
@@ -157,6 +157,8 @@ public abstract class HtmlPage implements Page {
 		try {
 
 			Document doc = resolveDocument(this);
+			
+			processPageDependencies(doc);
 			
 			if(Objects.nonNull(extenders)) {
 				for(HtmlPageExtender extender : extenders) {

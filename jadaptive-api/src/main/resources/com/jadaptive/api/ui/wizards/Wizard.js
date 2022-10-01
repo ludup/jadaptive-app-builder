@@ -10,8 +10,8 @@ var Wizard = (function () {
 			window.location = "/app/api/wizard/start/" + $('body').attr('jad:wizard');
 		},
 		next: function() {
+			JadaptiveUtils.startAwesomeSpin($('.nextButton i'));
 			if(onNext) {
-				JadaptiveUtils.startAwesomeSpin($('.nextButton i'));
 				onNext(function() {
 					window.location = "/app/api/wizard/next/" + $('body').attr('jad:wizard');
 				}, function() {
@@ -25,6 +25,7 @@ var Wizard = (function () {
 			}
 		},
 		back: function() {
+			JadaptiveUtils.startAwesomeSpin($('.backButton i'));
 			window.location = "/app/api/wizard/back/" + $('body').attr('jad:wizard');
 		},
 		finish: function() {
@@ -57,6 +58,7 @@ var Wizard = (function () {
 		           				window.location = "/app/api/wizard/next/" + $('body').attr('jad:wizard');
 		           	   	} else {
 		           	    	JadaptiveUtils.error($('#feedback'), data.message);
+							JadaptiveUtils.stopAwesomeSpin($('.nextButton i'));
 		           	   	}
 		           },
 		           complete: function() {
@@ -70,11 +72,42 @@ var Wizard = (function () {
 
 $(function() {
 	
-	$('#nextButton').click( function() {
-		Wizard.next();
-	});
+	if($('.wizardNext').length > 0) {
+		$('.wizardNext').click( function(e) {
+			e.preventDefault();
+			Wizard.next();
+		});
+	} else {
+		$('#nextButton').click( function(e) {
+			e.preventDefault();
+			Wizard.next();
+		});
+	}
 	
-	$('#backButton').click( function() {
-		Wizard.back();
-	});
+	if($('.wizardBack').length > 0) {
+		$('.wizardBack').click( function(e) {
+			e.preventDefault();
+			Wizard.back();
+		});
+	} else {
+		$('#backButton').click( function(e) {
+			e.preventDefault();
+			Wizard.back();
+		});
+	}
+	
+	if($('.wizardFinish').length > 0) {
+		$('.wizardFinish').click( function(e) {
+			e.preventDefault();
+			Wizard.finish();
+		});
+	}
+	
+	if($('.wizardStart').length > 0) {
+		$('.wizardStart').click( function(e) {
+			e.preventDefault();
+			Wizard.start();
+		});
+	}
+	
 });

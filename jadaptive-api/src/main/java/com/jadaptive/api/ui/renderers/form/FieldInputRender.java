@@ -18,6 +18,16 @@ public abstract class FieldInputRender {
 		this.field = field;
 	}
 	
+	protected String getFormVariable() {
+		return field.getFormVariable();
+	}
+	protected String getBundle() {
+		return field.getBundle();
+	}
+	protected String getResourceKey() {
+		return field.getResourceKey();
+	}
+	
 	public abstract void renderInput(TemplateView panel, Element rootElement, String value) throws IOException;
 
 }

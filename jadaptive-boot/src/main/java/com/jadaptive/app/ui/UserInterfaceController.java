@@ -188,15 +188,15 @@ public class UserInterfaceController extends AuthenticatedController {
 
 	}
 	
-	@RequestMapping(value="/app/style/**", method = RequestMethod.GET)
+	@RequestMapping(value="/app/style/**", method = RequestMethod.GET, produces = { "text/css"})
 	public void doStyle(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
-		String name = request.getRequestURI().substring(12);
+		String name = request.getRequestURI().substring(11);
 		URL url = classLoader.getResource(name);
 		if(Objects.isNull(url)) {
 			throw new FileNotFoundException();
 		}
-		response.setContentType("text/css");
+		response.setContentType("text/css;charset=UTF-8");
 		response.setStatus(HttpStatus.OK.value());
 		try(InputStream in = url.openStream()) {
 			IOUtils.copy(in, response.getOutputStream());

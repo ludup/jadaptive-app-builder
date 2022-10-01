@@ -106,10 +106,10 @@ public class Wizard extends HtmlPage implements ObjectPage {
 					.appendChild(new Element("span")
 							.addClass("ms-1")
 							.attr("jad:bundle", state.getCurrentPage().getBundle())
-							.attr("jad:i18n", state.getCurrentPage().getName() + ".setup.name"));
+							.attr("jad:i18n", state.getCurrentPage().getName() + ".stepName"));
 			} else {
 				h2.appendChild(new Element("span")
-						.attr("jad:bundle", state.getResourceKey())
+						.attr("jad:bundle", state.getCurrentPage().getBundle())
 						.attr("jad:i18n", "finish.name"));
 			}
 		}
@@ -118,14 +118,14 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			content.prependChild(new Element("div")
 					.addClass("col-12")
 					.appendChild(new Element("h1")
-							.attr("jad:bundle", state.getResourceKey())
+							.attr("jad:bundle", state.getBundle())
 							.attr("jad:i18n", "wizard.name")));
-		}
+		} 
      
 		if(state.hasBackButton()) {
 			actions.appendChild(new Element("a")
 					.attr("id", "backButton")
-					.addClass("btn btn-danger float-start")
+					.addClass("btn btn-danger float-start wizardBack")
 					.appendChild(new Element("i")
 						.addClass("far fa-arrow-circle-left me-1"))
 					.appendChild(new Element("span")
@@ -136,7 +136,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		if(state.hasNextButton()) {
 			actions.appendChild(new Element("a")
 						.attr("id", "nextButton")
-						.addClass("btn btn-success float-end nextButton")
+						.addClass("btn btn-success float-end wizardNext")
 						.appendChild(new Element("i")
 							.addClass("far fa-arrow-circle-right me-1"))
 						.appendChild(new Element("span")
@@ -145,7 +145,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		} else if(state.isFinishPage()) {
 			actions.appendChild(new Element("a")
 						.attr("id", "finishButton")
-						.addClass("btn btn-primary float-end nextButton")
+						.addClass("btn btn-primary float-end wizardFinish")
 					.appendChild(new Element("i")
 						.addClass("far fa-rocket me-1"))
 					.appendChild(new Element("span")
@@ -179,13 +179,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		
 		url = ext.getClass().getResource(ext.getCssResource());
 		if(Objects.nonNull(url)) {
-			PageHelper.appendScript(document, "/app/style/" +
+			PageHelper.appendStylesheet(document, "/app/style/" +
 					ext.getClass().getPackageName().replace('.', '/') 
 						+ "/" + FileUtils.checkStartsWithNoSlash(ext.getCssResource()));
 		} else {
 			url = classService.getResource(ext.getCssResource());
 			if(Objects.nonNull(url)) {
-				PageHelper.appendScript(document, "/app/style/" +
+				PageHelper.appendStylesheet(document, "/app/style/" +
 						FileUtils.checkStartsWithNoSlash(ext.getCssResource()));
 			}
 		}

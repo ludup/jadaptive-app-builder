@@ -149,15 +149,15 @@ public class DropdownInput extends InputRender {
 		dropdownMenu.appendChild(el);
 	}
 
-	private void renderValues(Iterable<? extends NamedUUIDEntity> fields, boolean i18n) {
+	private void renderValues(Iterable<? extends NamedUUIDEntity> fields, String defaultValue, boolean i18n) {
 		NamedUUIDEntity selected = null;
 		for(NamedUUIDEntity field : fields) {
 			if(Objects.isNull(selected)) {
 				selected = field;
 			}
 
-			addInputValue(field.getResourceKey(), field.getName(), i18n);
-			if(field.getResourceKey().equals(defaultValue)) {
+			addInputValue(field.getUuid(), field.getName(), i18n);
+			if(field.getUuid().equals(defaultValue)) {
 				selected = field;
 			}
 			
@@ -165,23 +165,23 @@ public class DropdownInput extends InputRender {
 		
 		if(Objects.nonNull(selected)) {
 			nameElement.val(selected.getName());
-			valueElement.val(selected.getResourceKey());
+			valueElement.val(selected.getUuid());
 		}
 	}
 
-	public Element renderInputWithValues(Iterable<? extends NamedUUIDEntity> children, boolean i18n) {
+	public Element renderInputWithValues(Iterable<? extends NamedUUIDEntity> children, String defaultValue, boolean i18n) {
 		Element el = renderInput();
-		renderValues(children, i18n);
+		renderValues(children, defaultValue, i18n);
 		return el;
 	}
 	
-	public Element renderInputWithTemplateFields(Collection<FieldTemplate> fields) {
+	public Element renderInputWithTemplateFields(Collection<FieldTemplate> fields, String defaultValue) {
 		Element el = renderInput();
-		renderTemplateFields(fields);
+		renderTemplateFields(fields, defaultValue);
 		return el;
 	}
 	
-	private void renderTemplateFields(Collection<FieldTemplate> fields) {
+	private void renderTemplateFields(Collection<FieldTemplate> fields, String defaultValue) {
 		
 		FieldTemplate selected = null;
 		for(FieldTemplate field : fields) {

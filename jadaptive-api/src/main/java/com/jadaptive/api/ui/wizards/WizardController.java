@@ -63,6 +63,7 @@ public class WizardController extends AuthenticatedController {
 
 			WizardState state = wizardService.getWizard(resourceKey).getState(request);
 			if(state.isFinished()) {
+				wizardService.clearState(resourceKey, request);
 				throw new PageRedirect(state.getCompletePage());
 			}
 			state.moveNext();
@@ -94,9 +95,7 @@ public class WizardController extends AuthenticatedController {
 		
 		try {
 			WizardState state = wizardService.getWizard(resourceKey).getState(request);
-			
 			state.finish();
-			
 			return new RequestStatusImpl(true);
 			
 		} catch(Throwable e) {

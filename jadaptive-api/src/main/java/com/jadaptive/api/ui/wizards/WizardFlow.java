@@ -12,6 +12,8 @@ public interface WizardFlow extends ExtensionPoint {
 
 	String getResourceKey();
 
+	default String getBundle() { return getResourceKey(); };
+	
 	WizardState getState(HttpServletRequest request) throws FileNotFoundException;
 
 	void clearState(HttpServletRequest request);
@@ -19,6 +21,8 @@ public interface WizardFlow extends ExtensionPoint {
 	Page getCompletePage() throws FileNotFoundException;
 
 	void finish(WizardState wizardState);
+
+	
 	
 	
 }

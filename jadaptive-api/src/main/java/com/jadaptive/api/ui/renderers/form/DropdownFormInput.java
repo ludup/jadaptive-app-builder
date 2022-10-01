@@ -29,19 +29,19 @@ public class DropdownFormInput extends FieldInputRender {
 						.addClass("col-12")
 						.addClass("dropdownInput")
 				.appendChild(new Element("label")
-						.attr("for", field.getFormVariable())
+						.attr("for", getFormVariable())
 						.addClass("form-label")
-						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
+						.attr("jad:bundle", getBundle())
+						.attr("jad:i18n", String.format("%s.name", getResourceKey())))
 				.appendChild(dropdownInput = new Element("div")
-						.attr("id", String.format("%sDropdown", field.getResourceKey()))
+						.attr("id", String.format("%sDropdown", getResourceKey()))
 						.addClass("input-group position-relative dropdown")
 					.appendChild(valueElement = new Element("input")
-							.attr("id", field.getFormVariable())
-							.attr("name", field.getFormVariable())
+							.attr("id", getFormVariable())
+							.attr("name", getFormVariable())
 							.attr("type", "hidden"))
 					.appendChild(nameElement = new Element("input")
-							.attr("id", String.format("%sText", field.getResourceKey()))
+							.attr("id", String.format("%sText", getResourceKey()))
 							.attr("data-display", "static")
 							.addClass("form-control")
 							.addClass("dropdown-toggle")
@@ -56,8 +56,8 @@ public class DropdownFormInput extends FieldInputRender {
 				.appendChild(new Element("small")
 							.addClass("form-text")
 							.addClass("text-muted")
-							.attr("jad:bundle", field.getBundle())
-							.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
+							.attr("jad:bundle", getBundle())
+							.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
 
 	}
 
@@ -66,7 +66,7 @@ public class DropdownFormInput extends FieldInputRender {
 		if(!readOnly) {
 			dropdownInput.appendChild(dropdownMenu = new Element("div")
 					.addClass("dropdown-menu dropdown-size")
-					.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey())));
+					.attr("aria-labelledby", String.format("%sDropdown", getResourceKey())));
 			
 		}
 		

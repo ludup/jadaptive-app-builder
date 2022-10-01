@@ -20,7 +20,7 @@ public class WizardState {
 	WizardSection finishPage;
 	WizardFlow flow;
 
-	Map<WizardSection,UUIDEntity> stateObjects = new HashMap<>(); 
+	Map<String,UUIDEntity> stateObjects = new HashMap<>(); 
 	Map<String,Object> stateParameters = new HashMap<>();
 	UUIDEntity completedObject;
 	
@@ -107,15 +107,15 @@ public class WizardState {
 	}
 
 	public UUIDEntity getCurrentObject() {
-		return stateObjects.get(pages.get(getCurrentStep()-1));
+		return stateObjects.get(pages.get(getCurrentStep()-1).getName());
 	}
 	
 	public void setCurrentObject(UUIDEntity obj) {
-		stateObjects.put(pages.get(getCurrentStep()-1), obj);
+		stateObjects.put(pages.get(getCurrentStep()-1).getName(), obj);
 	}
 
 	public void saveObject(UUIDEntity object) {
-		stateObjects.put(pages.get(getCurrentStep()-1), object);
+		stateObjects.put(pages.get(getCurrentStep()-1).getName(), object);
 	}
 
 	public Collection<WizardSection> getSections() {
@@ -123,7 +123,7 @@ public class WizardState {
 	}
 
 	public UUIDEntity getObject(WizardSection section) {
-		return stateObjects.get(section);
+		return stateObjects.get(section.getName());
 	}
 	
 	public UUIDEntity getObject(Class<?> type) {
@@ -137,6 +137,7 @@ public class WizardState {
 
 	public void insertNextPage(WizardSection setupSection) {
 
+		removePage(setupSection.getClass());
 		ApplicationServiceImpl.getInstance().autowire(setupSection);
 		pages.add(getCurrentStep(), setupSection);
 		
@@ -190,5 +191,9 @@ public class WizardState {
 	
 	public UUIDEntity getCompletedObject() {
 		return completedObject;
+	}
+
+	public String getBundle() {
+		return flow.getBundle();
 	}
 }

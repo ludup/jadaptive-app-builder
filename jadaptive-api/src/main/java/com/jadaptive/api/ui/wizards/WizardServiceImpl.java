@@ -3,6 +3,8 @@ package com.jadaptive.api.ui.wizards;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,5 +32,10 @@ public class WizardServiceImpl implements WizardService {
 				wizards.put(wizard.getResourceKey(), wizard);
 			}
 		}
+	}
+
+	@Override
+	public void clearState(String resourceKey, HttpServletRequest request) {
+		wizards.get(resourceKey).clearState(request);
 	}
 }

@@ -193,13 +193,13 @@ public class DocumentValidator {
 				}
 				case REGEX:
 				{
-					validateRegex(v.getValue(), value, v);
+					validateRegex(v.getValue(), value, v, field);
 					break;
 				}
 				case URL:
 				{
 					if(StringUtils.isNotBlank(value)) {
-						validateRegex(Utils.HTTP_URL_PATTERN, value, v);
+						validateRegex(Utils.HTTP_URL_PATTERN, value, v, field);
 					}
 					break;
 				}
@@ -210,11 +210,12 @@ public class DocumentValidator {
 		}
 	}
 	
-	private static void validateRegex(String regex, String value, FieldValidator v) {
+	private static void validateRegex(String regex, String value, FieldValidator v, FieldTemplate field) {
 		Pattern pattern = Pattern.compile(regex);
 		if (!pattern.matcher(value).matches()) {
 			if(StringUtils.isBlank(v.getI18n())) {
-				throw new ValidationException(String.format("%s is an invalid URL", value));
+				throw new ValidationException(String.format("%s is an invalid value for %s", value,
+						I18N.getResource(Locale.getDefault(), v.getBundle(), field.getResourceKey() + ".name")));
 			} else {
 				throw new ValidationException(I18N.getResource(
 					Locale.getDefault(), v.getBundle(), v.getI18n(), value));

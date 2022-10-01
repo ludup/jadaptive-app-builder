@@ -5,7 +5,7 @@ import org.jsoup.nodes.Element;
 public abstract class InputRender {
 
 	protected final String resourceKey;
-	protected String defaultValue;
+	//protected String defaultValue;
 	
 	public InputRender(String resourceKey) {
 		this.resourceKey = resourceKey;
