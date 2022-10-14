@@ -54,6 +54,17 @@ public abstract class PasswordEnabledUserDatabaseImpl
 	}
 	
 	@Override
+	public boolean hasEncryptedPassword(User u) {
+
+		PasswordEnabledUser user = (PasswordEnabledUser)u;
+		
+		return Objects.nonNull(user.getEncodedPassword()) &&
+				user.getEncodedPassword().length() > 0 && 
+				user.getEncodedPassword().startsWith(ENCRYPTION_PREFIX);
+			
+	}
+	
+	@Override
 	public boolean verifyPassword(User u, char[] password) {
 		
 		try {

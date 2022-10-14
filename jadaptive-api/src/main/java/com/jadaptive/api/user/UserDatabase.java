@@ -12,6 +12,8 @@ public interface UserDatabase extends ExtensionPoint {
 
 	boolean verifyPassword(User user, char[] password);
 
+	boolean hasEncryptedPassword(User u);
+	
 	ObjectTemplate getUserTemplate();
 
 	boolean isDatabaseUser(User user);

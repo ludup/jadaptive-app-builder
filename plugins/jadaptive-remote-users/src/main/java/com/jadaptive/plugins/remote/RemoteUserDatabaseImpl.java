@@ -205,5 +205,10 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	@Override
 	public Integer weight() {
 		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public boolean hasEncryptedPassword(User u) {
+		return true;
 	};
 }

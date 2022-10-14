@@ -3,8 +3,6 @@ package com.jadaptive.plugins.builtin;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.FieldView;
-import com.jadaptive.api.template.IncludeView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
@@ -13,10 +11,11 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(resourceKey = BuiltinUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
-@ObjectServiceBean(bean = BuiltinUserDatabase.class)
+@ObjectServiceBean(bean = UserService.class)
 @ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "passwordOptions") })
 public class BuiltinUser extends PasswordEnabledUser {
 
@@ -24,9 +23,7 @@ public class BuiltinUser extends PasswordEnabledUser {
 
 	public static final String RESOURCE_KEY = "builtinUsers";
 
-	@ObjectField(type = FieldType.PASSWORD)
-	@IncludeView(values = FieldView.CREATE)
-	@ObjectView(value = "passwordOptions")
+	@ObjectField(type = FieldType.PASSWORD, hidden = true)
 	String encodedPassword;
 
 	@ObjectField(hidden = true, type = FieldType.TEXT)

@@ -8,4 +8,5 @@ public interface PasswordEnabledUserDatabase extends UserDatabase, UUIDObjectSer
 
 	boolean verifyPassword(User user, char[] password);
 
+
 }

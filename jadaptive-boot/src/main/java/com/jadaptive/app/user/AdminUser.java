@@ -12,13 +12,13 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
-import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, creatable = false)
-@ObjectServiceBean(bean = AdminUserDatabase.class)
+@ObjectServiceBean(bean = UserService.class)
 @ObjectViews({ 
 	@ObjectViewDefinition(bundle = "users", value = "passwordOptions")})
 public class AdminUser extends PasswordEnabledUser {
@@ -27,10 +27,7 @@ public class AdminUser extends PasswordEnabledUser {
 
 	public static final String RESOURCE_KEY = "adminUser";
 	
-	@ObjectField(
-			hidden = true,
-			type = FieldType.PASSWORD)
-	@Validator(type = ValidationType.REQUIRED)
+	@ObjectField(hidden = true, type = FieldType.PASSWORD)
 	String encodedPassword;
 	
 	@ObjectField(

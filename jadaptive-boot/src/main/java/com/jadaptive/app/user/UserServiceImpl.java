@@ -22,7 +22,9 @@ import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.FakeUser;
+import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
 import com.jadaptive.api.user.UserDatabase;
@@ -42,7 +44,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	
 	@Autowired
 	private TenantAwareObjectDatabase<User> userRepository;
-	
+
 	@Override
 	public Integer getOrder() {
 		return 0;
@@ -262,6 +264,12 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public String saveOrUpdate(User user) {
 		UserDatabase db = getDatabase(user);
 		db.updateUser(user);
+		if(user instanceof PasswordEnabledUser) {
+			if(!db.hasEncryptedPassword(user)) {
+				throw new UriRedirect("/app/ui/set-password/" + user.getUuid());
+			}
+		}
+
 		return user.getUuid();
 	}
 	
