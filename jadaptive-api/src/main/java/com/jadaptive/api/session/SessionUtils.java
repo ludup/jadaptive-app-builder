@@ -188,7 +188,8 @@ public class SessionUtils {
 			}
 			String csrf = (String)request.getSession().getAttribute(CSRF_TOKEN_ATTRIBUTE);
 			if(Objects.isNull(csrf)) {
-				throw new UnauthorizedException("No CSRF token in session!");
+				log.warn("No CSRF token in session!");
+				return;
 			}
 			if(Objects.isNull(requestToken)) {
 				throw new UnauthorizedException("No CSRF token in form!");

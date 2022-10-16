@@ -48,6 +48,8 @@ import com.jadaptive.api.ui.Redirect;
 public class UserInterfaceController extends AuthenticatedController {
 
 	static Logger log = LoggerFactory.getLogger(UserInterfaceController.class);
+
+	public static final String BUNDLE = "userInterface";
 	
 	@Autowired
 	private PageCache pageCache; 
@@ -67,6 +69,7 @@ public class UserInterfaceController extends AuthenticatedController {
 			session = sessionUtils.getSession(request);
 			return new RequestStatusImpl(session!=null);
 		} catch (UnauthorizedException | SessionTimeoutException e) {
+			Feedback.error(BUNDLE, "sessionTimeout.text");
 			return new RequestStatusImpl(false);
 		}
 		

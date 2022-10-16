@@ -237,9 +237,6 @@ public abstract class HtmlPage implements Page {
 
 	private void injectFeedback(Document doc, HttpServletRequest request) {
 		Feedback feedback = (Feedback) request.getSession().getAttribute("feedback");
-//		if(Objects.isNull(feedback)) {
-//			feedback = uiService.getFeedback(request, this);
-//		}
 		if(Objects.nonNull(feedback)) {
 			request.getSession().removeAttribute("feedback");
 			Element element = doc.selectFirst("#feedback");
