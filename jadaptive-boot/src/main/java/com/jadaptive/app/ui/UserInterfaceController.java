@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
@@ -124,6 +125,8 @@ public class UserInterfaceController extends AuthenticatedController {
 	@RequestMapping(value="/app/css/{name}", method = RequestMethod.GET)
 	public void doStylesheet(HttpServletRequest request, HttpServletResponse response, @PathVariable String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
+		sessionUtils.setCachable(response, 600);
+		
 		try {
 			Page page = pageCache.resolvePage(name.replace(".css", ""));
 			URL url = page.getClass().getResource(page.getCssResource());
@@ -151,7 +154,9 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@RequestMapping(value="/app/js/{name}", method = RequestMethod.GET)
 	public void doScript(HttpServletRequest request, HttpServletResponse response, @PathVariable String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
-
+		
+		sessionUtils.setCachable(response, 600);
+		
 		try {
 			Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".js", "")));
 			URL url = page.getClass().getResource(page.getJsResource());
@@ -173,11 +178,14 @@ public class UserInterfaceController extends AuthenticatedController {
 				response.sendError(HttpStatus.NOT_FOUND.value());
 			}
 		}
+		
 	}
 	
 	@RequestMapping(value="/app/script/**", method = RequestMethod.GET)
 	public void doScript(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
+		sessionUtils.setCachable(response, 600);
+		
 		String name = request.getRequestURI().substring(12);
 		URL url = classLoader.getResource(name);
 		if(Objects.isNull(url)) {
@@ -194,6 +202,8 @@ public class UserInterfaceController extends AuthenticatedController {
 	@RequestMapping(value="/app/style/**", method = RequestMethod.GET, produces = { "text/css"})
 	public void doStyle(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
+		sessionUtils.setCachable(response, 600);
+		
 		String name = request.getRequestURI().substring(11);
 		URL url = classLoader.getResource(name);
 		if(Objects.isNull(url)) {

@@ -14,7 +14,7 @@ import com.jadaptive.api.servlet.Request;
 @Component
 @RequestPage(path = "message")
 @ModalPage
-@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "i18n"} )
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils" } )
 @PageProcessors(extensions = { "i18n"} )
 public class MessagePage extends HtmlPage {
 

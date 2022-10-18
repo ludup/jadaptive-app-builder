@@ -23,6 +23,15 @@ public class I18N extends AbstractPageExtension {
 	@Override
 	public void process(Document document, Element element, Page page) throws IOException {
 		
+		/**
+		 * Yes this does it twice, once to insert i18n from file, and
+		 * another to process any i18n inserted within the i18n itself.
+		 */
+		replaceAttributes(document, false);
+		replaceAttributes(document, true);
+	}
+
+	void replaceAttributes(Document document, boolean remove) {
 		for(Element e : document.getElementsByAttribute("jad:i18n")) {
 			String bundle = e.attr("jad:bundle");
 			List<Object> args = new ArrayList<>();
@@ -39,9 +48,13 @@ public class I18N extends AbstractPageExtension {
 				e.html(i18nService.format(bundle, Locale.getDefault(), e.attr("jad:i18n"), args.toArray(new Object[0])));
 				break;
 			}
+			
+			e.removeAttr("jad:i18n");
+			e.removeAttr("jad:bundle");
+			
 		}
 	}
-
+	
 	@Override
 	public String getName() {
 		return "i18n";

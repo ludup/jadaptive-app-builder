@@ -16,7 +16,7 @@ import com.jadaptive.api.servlet.Request;
 @Component
 @RequestPage(path = "error")
 @ModalPage
-@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "i18n"} )
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "i18n"} )
 public class ErrorPage extends HtmlPage {
 

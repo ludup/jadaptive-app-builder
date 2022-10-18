@@ -26,5 +26,7 @@ public interface Page extends PageResources, ExtensionPoint {
 
 	default void onCreate() throws FileNotFoundException { }
 
-	void injectHtmlSection(Document document, Element element, PageExtension ext) throws IOException;;
+	void injectHtmlSection(Document document, Element element, PageExtension ext) throws IOException;
+
+	void injectHtmlSection(Document document, Element element, Class<?> clz, String resource) throws IOException;;
 }

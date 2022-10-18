@@ -2,12 +2,14 @@ package com.jadaptive.app.ui;
 
 import java.io.IOException;
 
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
@@ -17,7 +19,10 @@ import com.jadaptive.api.ui.PageCache;
 public class ContextHelp extends AbstractPageExtension {
 
 	@Autowired
-	PageCache pageCache;
+	private PageCache pageCache;
+	
+	@Autowired
+	private TemplateService templateService;
 	
 	@Override
 	public void process(Document document, Element element, Page page) throws IOException {
@@ -25,8 +30,7 @@ public class ContextHelp extends AbstractPageExtension {
 		for(Element e : document.getElementsByAttribute("jad:help")) {
 			String id = e.attr("jad:help");
 			String bundle = e.attr("jad:bundle");
-			String html = e.attr("jad:html");
-			
+			String ctx = e.attr("jad:context");
 			e.removeAttr("jad:help");
 			e.removeAttr("jad:bundle");
 			
@@ -46,7 +50,7 @@ public class ContextHelp extends AbstractPageExtension {
 										.addClass("offcanvas-title")
 										.attr("id", id + "Label")
 										.appendChild(Html.i("far fa-books me-1"))
-										.appendChild(Html.i18n(bundle, id + ".name")))
+										.appendChild(Html.i18n(bundle, id + ".names")))
 								.appendChild(new Element("button")
 										.addClass("btn-close text-reset")
 										.attr("data-bs-dismiss", "offcanvas")
@@ -54,9 +58,17 @@ public class ContextHelp extends AbstractPageExtension {
 						.appendChild(body = Html.div("offcanvas-body")));
 
 			
-			page.injectHtmlSection(document, body, StringUtils.isBlank(html) ?
-					new StaticHtmlExtension(id) :
-					new StaticHtmlExtension(id, html));
+			Class<?> clz;
+			if("resource".equals(ctx)) {
+				clz = templateService.getTemplateClass(id);
+			} else {
+				clz = page.getClass();
+			}
+			try {
+				page.injectHtmlSection(document, body, clz, WordUtils.capitalize(id) + "Help.html");
+			} catch(IOException ex) {
+				e.remove();
+			}
 		}
 	}
 

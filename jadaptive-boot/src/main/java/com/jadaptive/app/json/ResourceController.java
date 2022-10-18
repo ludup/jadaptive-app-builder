@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
 import com.jadaptive.api.permissions.ExceptionHandlingController;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.ResponseHelper;
@@ -47,6 +48,9 @@ public class ResourceController extends ExceptionHandlingController {
 	
 	@Autowired
 	private ApplicationContext applicationContext;
+	
+	@Autowired
+	private SessionUtils sessionUtils;
 	
 	private MimeMappings mimeTypes = new MimeMappings(MimeMappings.DEFAULT);
 	
@@ -98,6 +102,8 @@ public class ResourceController extends ExceptionHandlingController {
 			if(log.isDebugEnabled()) {
 				log.debug("Returning content for {}", uri);
 			}
+			
+			sessionUtils.setCachable(response, 600);
 			
 			ResponseHelper.sendContent(resource, getContentType(resource), request, response);
 		

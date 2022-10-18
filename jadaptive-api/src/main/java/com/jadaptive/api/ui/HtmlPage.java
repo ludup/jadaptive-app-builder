@@ -310,6 +310,33 @@ public abstract class HtmlPage implements Page {
 	}
 	
 	@Override
+	public void injectHtmlSection(Document document, Element element, Class<?> clz, String resource) throws IOException {
+		
+		Document doc = resolveDocument(clz, resource);
+		
+		Elements children = doc.selectFirst("body").children();
+		if(Objects.nonNull(children)) {
+			for(Element e : children) {
+				e.appendTo(element);
+			}
+		}
+		
+		/**
+		 * The child document may have inserted CSS or Scripts into its document. We
+		 * have to move them to the parent document.
+		 */
+		for(Element node : doc.select("script")) {
+			PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "script", node);
+		}
+		
+		for(Element node : doc.select("link")) {
+			PageHelper.appendLast(PageHelper.getOrCreateTag(document, "head"), "link", node);
+		}
+		
+		processChildExtensions(document, element);
+	}
+	
+	@Override
 	public void injectHtmlSection(Document document, Element element, PageExtension ext) throws IOException {
 		
 		Document doc = resolveDocument(ext);
@@ -413,9 +440,10 @@ public abstract class HtmlPage implements Page {
 				return Jsoup.parse(IOUtils.toString(in, "UTF-8"));
 			}
 		} else {
-			Document doc = new Document(Request.get().getRequestURI());
-			doc.appendChild(new Element("body"));
-			return doc;
+			throw new IOException("Missing document for " + resource);
+//			Document doc = new Document(Request.get().getRequestURI());
+//			doc.appendChild(new Element("body"));
+//			return doc;
 		}
 	}
 
