@@ -98,6 +98,8 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		Element form = document.selectFirst("form");
 		if(Objects.nonNull(form)) {
 			
+			sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
+			
 			Element e = form.selectFirst("#csrftoken");
 			if(Objects.isNull(e)) {
 				form.appendChild(Html.input("hidden", 

@@ -128,9 +128,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 //		}
 		
 		AbstractObject e = entityRepository.getById(template, uuid);
-		if(!resourceKey.equals(e.getResourceKey()) && !template.getChildTemplates().contains(e.getResourceKey())) {
-			throw new IllegalStateException(String.format("Unexpected template %s", e.getResourceKey()));
-		}
+//		if(!resourceKey.equals(e.getResourceKey()) && !template.getChildTemplates().contains(e.getResourceKey())) {
+//			throw new IllegalStateException(String.format("Unexpected template %s", e.getResourceKey()));
+//		}
 		return e;
  	}
 

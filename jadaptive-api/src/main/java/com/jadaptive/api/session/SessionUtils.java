@@ -425,7 +425,7 @@ public class SessionUtils {
 		response.setHeader("X-Content-Type-Options", "nosniff");
 		response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 		response.setHeader("Content-Security-Policy", 
-				String.format("default-src 'none'; font-src 'self'; script-src %s; style-src %s; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self'; form-action 'self';",
+				String.format("default-src 'none'; font-src 'self'; script-src %s; style-src %s; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self';",
 						SELF, SELF));
 	}
 
@@ -436,8 +436,8 @@ public class SessionUtils {
 	public void setCachable(HttpServletResponse response, int age) {
 		response.setHeader("Cache-Control", "max-age=" + age + ", must-revalidate");
 	}
-
-	public void addContentSecurityPolicy(HttpServletResponse response, String policy, String additionalValue) {
+	
+	public void addContentSecurityPolicy(HttpServletResponse response, String policy, String value) {
 		Collection<String> csp = response.getHeaders("Content-Security-Policy");
 		if(csp.isEmpty()) {
 			populateSecurityHeaders(response);
@@ -447,13 +447,13 @@ public class SessionUtils {
 		if(idx > -1) {
 			int idx2 = header.indexOf(';', idx);
 			String tmp = header.substring(idx, idx2);
-			if(tmp.contains(String.format("'%s'", additionalValue))) {
+			if(tmp.contains(String.format("'%s'", value))) {
 				return;
 			}
-			header = header.replace(policy, String.format("%s '%s'", policy, additionalValue));
+			header = header.replace(policy, String.format("%s '%s'", policy, value));
 			
 		} else {
-			header = header + String.format(" %s '%s';", policy, additionalValue);
+			header = header + String.format(" %s '%s';", policy, value);
 		}
 		response.setHeader("Content-Security-Policy", header);
 	}

@@ -310,9 +310,9 @@ public abstract class HtmlPage implements Page {
 	}
 	
 	@Override
-	public void injectHtmlSection(Document document, Element element, Class<?> clz, String resource) throws IOException {
+	public void injectHtmlSection(Document document, Element element, Class<?> clz, String resource, boolean canFail) throws IOException {
 		
-		Document doc = resolveDocument(clz, resource);
+		Document doc = resolveDocument(clz, resource, canFail);
 		
 		Elements children = doc.selectFirst("body").children();
 		if(Objects.nonNull(children)) {
@@ -416,18 +416,18 @@ public abstract class HtmlPage implements Page {
 	protected void generateContent(Document document) throws IOException { };
 
 	protected Document resolveDocument(Page page) throws IOException {
-		return resolveDocument(page.getClass(), page.getHtmlResource());
+		return resolveDocument(page.getClass(), page.getHtmlResource(), false);
 	}
 	
 	protected Document resolveDocument(PageExtension ext) throws IOException {
-		return resolveDocument(ext.getClass(), ext.getHtmlResource());
+		return resolveDocument(ext.getClass(), ext.getHtmlResource(), false);
 	}
 	
 	protected Class<?> getResourceClass() {
 		return getClass();
 	}
 	
-	protected Document resolveDocument(Class<?> clz, String resource) throws IOException {
+	protected Document resolveDocument(Class<?> clz, String resource, boolean canFail) throws IOException {
 		URL url = clz.getResource(resource);
 		if(Objects.isNull(url)) {
 			url = getResourceClass().getResource(resource);
@@ -440,10 +440,12 @@ public abstract class HtmlPage implements Page {
 				return Jsoup.parse(IOUtils.toString(in, "UTF-8"));
 			}
 		} else {
-			throw new IOException("Missing document for " + resource);
-//			Document doc = new Document(Request.get().getRequestURI());
-//			doc.appendChild(new Element("body"));
-//			return doc;
+			if(canFail) {
+				throw new IOException("Missing document for " + resource);
+			}
+			Document doc = new Document(Request.get().getRequestURI());
+			doc.appendChild(new Element("body"));
+			return doc;
 		}
 	}
 

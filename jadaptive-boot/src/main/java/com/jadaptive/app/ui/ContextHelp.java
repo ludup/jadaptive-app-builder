@@ -3,7 +3,6 @@ package com.jadaptive.app.ui;
 import java.io.IOException;
 
 import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
@@ -13,13 +12,9 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
-import com.jadaptive.api.ui.PageCache;
 
 @Extension
 public class ContextHelp extends AbstractPageExtension {
-
-	@Autowired
-	private PageCache pageCache;
 	
 	@Autowired
 	private TemplateService templateService;
@@ -55,7 +50,7 @@ public class ContextHelp extends AbstractPageExtension {
 										.addClass("btn-close text-reset")
 										.attr("data-bs-dismiss", "offcanvas")
 										.attr("aria-label", "Close")))
-						.appendChild(body = Html.div("offcanvas-body")));
+						.appendChild(body = Html.div("offcanvas-body", "small")));
 
 			
 			Class<?> clz;
@@ -65,7 +60,7 @@ public class ContextHelp extends AbstractPageExtension {
 				clz = page.getClass();
 			}
 			try {
-				page.injectHtmlSection(document, body, clz, WordUtils.capitalize(id) + "Help.html");
+				page.injectHtmlSection(document, body, clz, WordUtils.capitalize(id) + "Help.html", true);
 			} catch(IOException ex) {
 				e.remove();
 			}

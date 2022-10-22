@@ -36,7 +36,7 @@ public class AuthenticationPolicy extends AssignableUUIDEntity {
 	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true)
 	String name;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
 	@ObjectView(value = "factors")
 	Boolean passwordOnFirstPage;
 	

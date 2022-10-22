@@ -141,7 +141,7 @@
 			<artifactId>byte-buddy</artifactId>
 			<version>1.12.1</version> <!--$NO-MVN-MAN-VER$-->
 		</dependency>
-
+		
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>

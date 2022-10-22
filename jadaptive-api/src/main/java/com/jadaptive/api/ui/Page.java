@@ -28,5 +28,6 @@ public interface Page extends PageResources, ExtensionPoint {
 
 	void injectHtmlSection(Document document, Element element, PageExtension ext) throws IOException;
 
-	void injectHtmlSection(Document document, Element element, Class<?> clz, String resource) throws IOException;;
+	void injectHtmlSection(Document document, Element element, Class<?> clz, String resource, boolean canFail)
+			throws IOException;;
 }

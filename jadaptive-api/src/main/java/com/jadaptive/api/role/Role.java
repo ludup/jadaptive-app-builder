@@ -6,6 +6,7 @@ import java.util.HashSet;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.AuditedObject;
+import com.jadaptive.api.events.Events;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;

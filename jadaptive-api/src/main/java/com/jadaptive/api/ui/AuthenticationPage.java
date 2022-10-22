@@ -66,6 +66,10 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 		Element form = doc.selectFirst("form");
 		if(Objects.nonNull(form)) {
+			
+			if(!isAllowFormExternalRedirect()) {
+				sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
+			}
 			form.appendChild(Html.input("hidden", 
 					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
 						sessionUtils.setupCSRFToken(Request.get()))
@@ -73,6 +77,10 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		}
 	}
 	
+	protected boolean isAllowFormExternalRedirect() {
+		return false;
+	}
+
 	public abstract String getBundle();
 	
 	protected void doGenerateContent(Document doc) throws FileNotFoundException { }
