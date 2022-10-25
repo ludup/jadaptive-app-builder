@@ -32,28 +32,5 @@ $(document).ready(function() {
            }
          });
     });
-    
-    $('.checkExit').click(function(e) {
-        e.preventDefault();
-        var _self = $(this);
-    	bootbox.confirm({
-    		message: "Are you sure you want to exit?",
-		    buttons: {
-		        confirm: {
-		            label: 'Yes',
-		            className: 'btn-success'
-		        },
-		        cancel: {
-		            label: 'No',
-		            className: 'btn-danger'
-		        }
-		    },
-		    callback: function (result) {
-		        if(result)
-		        {
-		        	window.location = _self.attr('href');
-		        }
-		    }
-		});
-    });
+  
 });

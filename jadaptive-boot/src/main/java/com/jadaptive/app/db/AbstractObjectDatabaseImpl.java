@@ -1,5 +1,6 @@
 package com.jadaptive.app.db;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,6 +20,8 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.events.Events;
+import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.UUIDEntityCreatedEvent;
 import com.jadaptive.api.events.UUIDEntityDeletedEvent;
 import com.jadaptive.api.events.UUIDEntityUpdatedEvent;
@@ -29,6 +32,7 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.utils.Utils;
 import com.mongodb.MongoWriteException;
 
@@ -48,6 +52,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	@Autowired
 	private EventService eventService; 
+	
+	@Autowired
+	private TemplateVersionService templateService;
 	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
@@ -133,7 +140,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				cachedObjects.put(obj.getUuid(), obj);
 			}
 			
-			if(!isEvent) {
+			if(!isEvent && !(obj instanceof ObjectTemplate)) {
 				if(Objects.isNull(previous)) {
 					onObjectCreated(obj);
 				} else {
@@ -385,14 +392,50 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 	protected <T extends UUIDEntity> void onObjectDeleted(T obj) {
+		
+		String eventKey = Events.deleted(obj.getResourceKey());
+		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
+		if(Objects.nonNull(eventClz)) {
+			try {
+				eventService.publishEvent(eventClz.getConstructor(obj.getClass()).newInstance(obj));
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
+			}
+		}
+		
 		eventService.publishEvent(new UUIDEntityDeletedEvent<T>(obj));		
 	}
 
 	protected <T extends UUIDEntity> void onObjectCreated(T obj) { 
+		
+		String eventKey = Events.created(obj.getResourceKey());
+		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
+		if(Objects.nonNull(eventClz)) {
+			try {
+				eventService.publishEvent(eventClz.getConstructor(obj.getClass()).newInstance(obj));
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
+			}
+		}
+		
 		eventService.publishEvent(new UUIDEntityCreatedEvent<T>(obj));
 	}
 	
 	protected <T extends UUIDEntity> void onObjectUpdated(T obj, T previousObject) {
+		
+		String eventKey = Events.updated(obj.getResourceKey());
+		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
+		if(Objects.nonNull(eventClz)) {
+			try {
+				eventService.publishEvent(eventClz.getConstructor(obj.getClass()).newInstance(obj));
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
+			}
+		}
+		
 		eventService.publishEvent(new UUIDEntityUpdatedEvent<T>(obj, previousObject));
 	}
 	

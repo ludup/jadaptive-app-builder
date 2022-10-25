@@ -3,9 +3,7 @@ package com.jadaptive.api.events;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 

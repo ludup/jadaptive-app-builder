@@ -21,6 +21,7 @@ import com.jadaptive.api.events.UUIDEntityDeletedEvent;
 import com.jadaptive.api.events.UUIDEntityUpdatedEvent;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.tenant.TenantService;
 
 @Service
 public class EventServiceImpl implements EventService { 
@@ -35,6 +36,9 @@ public class EventServiceImpl implements EventService {
 	
 	@Autowired
 	private TemplateService templateService; 
+	
+	@Autowired
+	private TenantService tenantService; 
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -68,7 +72,8 @@ public class EventServiceImpl implements EventService {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void fireEvent(EventListener listener, SystemEvent evt) {
 		if(evt.async()) {
-			eventExecutor.execute(() -> listener.onEvent(evt));
+			eventExecutor.execute(()-> tenantService.execute(() -> listener.onEvent(evt)));
+
 		} else {
 			/**
 			 * Non async events can throw exceptions back up the chain

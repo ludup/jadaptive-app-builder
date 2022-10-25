@@ -74,4 +74,8 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	void asSystem(Runnable r);
 
 	String resolveUserName(String username);
+
+	void execute(Runnable r);
+
+	<T> T execute(Callable<T> r);
 }

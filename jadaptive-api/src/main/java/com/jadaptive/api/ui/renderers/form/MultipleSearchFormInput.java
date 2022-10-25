@@ -28,7 +28,7 @@ public class MultipleSearchFormInput {
 
 	public void renderInput(TemplateView panel, Element rootElement, 
 			Collection<NamePairValue> selectedValues,
-			boolean nameIsResourceKey) {
+			boolean nameIsResourceKey, boolean readOnly) {
 		
 		rootElement.appendChild(new Element("div").addClass("row mb-3 multipleSearchInput")
 				.appendChild(new Element("div")

@@ -7,10 +7,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -40,11 +42,11 @@ import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
-import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.TemplateView;
+import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
@@ -293,28 +295,17 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 
 	private List<TemplateView> getAnnotatedViews(ObjectTemplate template, boolean disableViews) {
 		try {
-			Class<?> clz = classService.findClass(template.getTemplateClass());
-				
+
+			Class<?> clz = templateClazzes.get(template.getResourceKey());
+			if(Objects.isNull(clz)) {
+				clz = classService.findClass(template.getTemplateClass());
+			}
 			Map<String, TemplateView> views = new HashMap<>();
 			Map<String,String> childViews = new HashMap<>();
 			views.put(null, new TemplateView(template.getBundle()));
 		
 			if(!disableViews) {
-				Class<?> tmp = clz;
-				
-				do {
-					ObjectViews annonatedViews = tmp.getAnnotation(ObjectViews.class);
-	
-					if(Objects.nonNull(annonatedViews)) {
-						for(ObjectViewDefinition def : annonatedViews.value()) {
-							views.put(def.value(), new TemplateView(def));
-						}
-					}
-					
-					tmp = tmp.getSuperclass();
-				
-				} while(Objects.nonNull(tmp));
-			
+				iterateClassHeirarchy(clz, views, new HashSet<>());
 			}
 			
 			processFields(null,template, clz, views, new LinkedList<>(), disableViews); 
@@ -335,6 +326,39 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
+	}
+	
+	private void iterateClassHeirarchy(Class<?> clz, Map<String, TemplateView> views, Set<Class<?>> processed) {
+		
+		Class<?> tmp = clz;
+		
+		do {
+			
+			if(processed.contains(tmp)) {
+				tmp = tmp.getSuperclass();
+				continue;
+			}
+			
+			ObjectViews annonatedViews = tmp.getAnnotation(ObjectViews.class);
+
+			if(Objects.nonNull(annonatedViews)) {
+				for(ObjectViewDefinition def : annonatedViews.value()) {
+					views.put(def.value(), new TemplateView(def));
+				}
+			}
+			
+			processed.add(tmp);
+			
+			for(Field field : tmp.getDeclaredFields()) {
+				if(UUIDEntity.class.isAssignableFrom(field.getType())) {
+					iterateClassHeirarchy(field.getType(), views, processed);
+				}
+			}
+
+			tmp = tmp.getSuperclass();
+		
+		} while(Objects.nonNull(tmp));
+	
 	}
 
 	@Override

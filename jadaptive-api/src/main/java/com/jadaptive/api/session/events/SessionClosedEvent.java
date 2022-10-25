@@ -14,7 +14,9 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
 @AuditedObject
-@ObjectDefinition(resourceKey = SessionClosedEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT, bundle = Session.RESOURCE_KEY)
+@ObjectDefinition(resourceKey = SessionClosedEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, 
+		type = ObjectType.OBJECT, bundle = Session.RESOURCE_KEY,
+			creatable = false, updatable = false, deletable = false)
 @ObjectViews({@ObjectViewDefinition(bundle = Session.RESOURCE_KEY, value = ObjectEvent.OBJECT_VIEW)})
 public class SessionClosedEvent extends SystemEvent {
 

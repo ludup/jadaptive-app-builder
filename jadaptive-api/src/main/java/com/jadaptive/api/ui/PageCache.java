@@ -116,7 +116,9 @@ public class PageCache {
 	private void postCreation(Page page) throws FileNotFoundException {
 		try {
 			Method m = ReflectionUtils.getMethod(page.getClass(), "created");
-			log.info("Calling created on " + page.getClass().getName());
+			if(log.isDebugEnabled()) {
+				log.debug("Calling created on " + page.getClass().getName());
+			}
 			m.invoke(page);
 		} catch (NoSuchMethodException e) {
 		} catch (IllegalArgumentException | IllegalAccessException e) {

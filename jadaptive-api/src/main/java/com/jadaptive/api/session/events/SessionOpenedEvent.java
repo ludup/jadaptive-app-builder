@@ -11,7 +11,9 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectView;
 
 @AuditedObject
-@ObjectDefinition(resourceKey = SessionOpenedEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT, bundle = Session.RESOURCE_KEY)
+@ObjectDefinition(resourceKey = SessionOpenedEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, 
+		type = ObjectType.OBJECT, bundle = Session.RESOURCE_KEY,
+			creatable = false, updatable = false, deletable = false)
 public class SessionOpenedEvent extends SystemEvent {
 
 	private static final long serialVersionUID = -6350681450369361249L;

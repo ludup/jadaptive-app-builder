@@ -159,8 +159,10 @@ public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 	@SuppressWarnings("unchecked")
 	public Collection<AbstractObject> getObjectCollection(String fieldName) {
 		List<AbstractObject> tmp = new ArrayList<>();
-		for(Map<String,Object> child : document.getList(fieldName, Map.class)) {
-			tmp.add(new MongoEntity((String)child.get("resourceKey"), child));
+		if(document.containsKey(fieldName)) {
+			for(Map<String,Object> child :document.getList(fieldName, Map.class) ) {
+				tmp.add(new MongoEntity((String)child.get("resourceKey"), child));
+			}
 		}
 		return tmp;
 	}

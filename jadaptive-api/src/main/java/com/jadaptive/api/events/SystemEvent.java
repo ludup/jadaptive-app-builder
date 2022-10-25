@@ -19,13 +19,17 @@ import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.template.TableAction;
+import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = SystemEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
      creatable = false, updatable = false, defaultColumn = "eventKey")
-@ObjectViews({@ObjectViewDefinition(value = "event", bundle = SystemEvent.RESOURCE_KEY)})
-@TableView(defaultColumns = { "state", "timestamp", "eventKey", "eventGroup", "ipAddress"}, sortOrder = SortOrder.DESC, sortField = "timestamp")
+@ObjectViews({@ObjectViewDefinition(value = "event", bundle = SystemEvent.RESOURCE_KEY, weight = Integer.MIN_VALUE)})
+@TableView(defaultColumns = { "state", "timestamp", "eventKey", "eventGroup", "ipAddress"}, 
+				sortOrder = SortOrder.DESC, sortField = "timestamp", requiresView = false,
+				actions = { @TableAction(bundle = SystemEvent.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/event/{resourceKey}/{uuid}" )})
 public class SystemEvent extends UUIDEvent {
 
 	private static final long serialVersionUID = 4068966863055480029L;
@@ -56,7 +60,7 @@ public class SystemEvent extends UUIDEvent {
 	String extendedInformation;
 	
 	@ObjectField(type = FieldType.ENUM)
-	@ObjectView(value = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.BOOTSTRAP_BADGE, weight = 0)
+	@ObjectView(value = "", renderer = FieldRenderer.BOOTSTRAP_BADGE, weight = Integer.MIN_VALUE)
 	EventState state = EventState.SUCCESS;
 	
 	public SystemEvent(String resourceKey, String eventGroup) {

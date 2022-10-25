@@ -12,14 +12,14 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
 @ObjectViews({ 
-	@ObjectViewDefinition(value = AssignableUUIDEntity.USERS_VIEW, bundle = "users"),
-	@ObjectViewDefinition(value = AssignableUUIDEntity.ROLES_VIEW, bundle = "roles", weight = 50)})
+	@ObjectViewDefinition(value = AssignableUUIDEntity.USERS_VIEW, bundle = "users", weight = Integer.MAX_VALUE-1),
+	@ObjectViewDefinition(value = AssignableUUIDEntity.ROLES_VIEW, bundle = "roles", weight = Integer.MAX_VALUE)})
 public abstract class AssignableUUIDEntity extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -5734236381558890213L;
 	
-	public static final String USERS_VIEW = "users";
-	public static final String ROLES_VIEW = "roles";
+	public static final String USERS_VIEW = "userTab";
+	public static final String ROLES_VIEW = "roleTab";
 	
 	@ObjectField(defaultValue = "false", 
 			type = FieldType.OBJECT_REFERENCE,

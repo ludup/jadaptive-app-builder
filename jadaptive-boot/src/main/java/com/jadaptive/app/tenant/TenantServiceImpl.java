@@ -498,6 +498,16 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 	
 	@Override
+	public void execute(Runnable r) {
+		executeAs(getCurrentTenant(), r);
+	}
+	
+	@Override
+	public <T> T execute(Callable<T> r) {
+		return executeAs(getCurrentTenant(), r);
+	}
+	
+	@Override
 	public void executeAs(Tenant tenant, Runnable r) {
 		setCurrentTenant(tenant);
 		try {

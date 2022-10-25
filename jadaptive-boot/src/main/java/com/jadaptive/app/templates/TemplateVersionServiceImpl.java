@@ -2,6 +2,7 @@ package com.jadaptive.app.templates;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.net.URI;
@@ -34,8 +35,13 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.AuditedObject;
+import com.jadaptive.api.events.GenerateEventTemplates;
+import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
@@ -52,7 +58,10 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
@@ -70,6 +79,14 @@ import com.jadaptive.utils.Version;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.description.annotation.AnnotationDescription;
+import net.bytebuddy.description.modifier.Visibility;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.description.type.TypeDescription.Generic;
+import net.bytebuddy.dynamic.scaffold.subclass.ConstructorStrategy;
+import net.bytebuddy.implementation.FieldAccessor;
+import net.bytebuddy.implementation.MethodCall;
 
 @Service
 public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl implements TemplateVersionService  {
@@ -95,7 +112,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	@Autowired
 	private TenantService tenantService; 
 	
+	@Autowired
+	private ClassLoaderService classService;
+	
 	private Map<String,ObjectTemplate> loadedTemplates = new HashMap<>();
+	private Map<String,Class<? extends ObjectEvent<?>>> eventClasses = new HashMap<>();
 	
 	@Override
 	public Iterable<TemplateVersion> list() throws RepositoryException, ObjectException {
@@ -448,6 +469,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			ObjectDefinition parent = getParentTemplate(clz);
 			boolean auditObject = ReflectionUtils.hasAnnotation(clz, AuditedObject.class);
+			boolean generateEventTemplates = ReflectionUtils.hasAnnotation(clz, GenerateEventTemplates.class);
 			
 			if(Objects.nonNull(parent)) {
 				if(log.isInfoEnabled()) {
@@ -519,12 +541,80 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			registerIndexes(template, clz);
 			
+			if(generateEventTemplates) {
+				generateEventTemplates(template, clz, clz.getAnnotation(GenerateEventTemplates.class).value());
+			}
+			
 		} catch(RepositoryException | ObjectException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
 			System.exit(0);
 		}
 	}
 	
+	@Override
+	public Class<? extends ObjectEvent<?>> getEventClass(String resourceKey) {
+		return eventClasses.get(resourceKey);
+	}
+	
+	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, String group) {
+	
+		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Created", template.getResourceKey(), template.getBundle(), group, clz, String.format("%s.created", template.getResourceKey()));
+		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Updated", template.getResourceKey(), template.getBundle(), group, clz, String.format("%s.updated", template.getResourceKey()));
+		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Deleted", template.getResourceKey(), template.getBundle(), group, clz, String.format("%s.deleted", template.getResourceKey()));
+		
+	}
+	
+	private void generateEventTemplate(String className, String resourceKey, String bundle, String group, Class<?> clz, String eventKey) {
+		
+		Generic genericType = TypeDescription.Generic.Builder.parameterizedType(ObjectEvent.class, clz).build();
+		
+		if(log.isInfoEnabled()) {
+			log.info("Generating event templates and class for {}", clz.getSimpleName());
+		}
+		try {
+			@SuppressWarnings("unchecked")
+			Class<? extends ObjectEvent<?>> dynamicType = (Class<? extends ObjectEvent<?>>) new ByteBuddy()
+					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+					  .name(String.format("com.jadaptive.events.%s", className))
+					  .annotateType(AnnotationDescription.Builder.ofType(ObjectDefinition.class)
+			                  .define("resourceKey", eventKey)
+			                  .define("scope", ObjectScope.GLOBAL)
+			                  .define("type", ObjectType.OBJECT)
+			                  .define("updatable", false)
+			                  .define("deletable", false)
+			                  .define("creatable", false)
+			                  .define("bundle", bundle)
+			                  .build())
+					  .annotateType(AnnotationDescription.Builder.ofType(AuditedObject.class).build())
+					  .annotateType(clz.getAnnotation(ObjectViews.class))
+					  .defineConstructor(Visibility.PUBLIC)
+					  .withParameters(clz)
+					  .intercept(MethodCall
+					               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class))
+					               .onSuper().with(eventKey, group)
+					               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)))
+					  .defineField("object", clz, Visibility.PRIVATE)
+					  .annotateField(AnnotationDescription.Builder.ofType(ObjectField.class)
+							  .define("type", FieldType.OBJECT_EMBEDDED).build())
+					  .annotateField(AnnotationDescription.Builder.ofType(Validator.class)
+							  .define("type", ValidationType.RESOURCE_KEY)
+							  .define("value", resourceKey).build())
+					  .defineMethod("getObject", clz, Visibility.PUBLIC)
+			          .intercept(FieldAccessor.ofField("object"))
+					  .make()
+					  .load(classService.getClassLoader())
+					  .getLoaded();
+			
+			eventClasses.put(eventKey, dynamicType);
+			registerAnnotatedTemplate(dynamicType);
+			
+		} catch (NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
 	@Override
 	public void registerTenantIndexes() {
 		

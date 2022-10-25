@@ -22,13 +22,16 @@ import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
 @ObjectServiceBean(bean = UserService.class)
-@ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "contact") })
+@ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "contact", weight=100),
+	@ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)})
 @TableView(defaultColumns = { "username", "name", "lastLogin" }, requiresUpdate = true, actions = {
 		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}", writeAction = true) })
 public abstract class User extends UUIDEntity implements NamedDocument {
 
 	public static final String RESOURCE_KEY = "users";
 
+	public static final String DETAILS_VIEW = "details";
+	
 	private static final long serialVersionUID = 2210375165051752363L;
 
 	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true)
@@ -37,6 +40,7 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 
 	@ObjectField(searchable = true, nameField = true, type = FieldType.TEXT)
 	@Validator(type = ValidationType.REQUIRED)
+	@ObjectView(DETAILS_VIEW)
 	String name;
 
 	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT, automaticEncryption = true)
@@ -49,6 +53,7 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 	
 	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true)
 	@ExcludeView(values =  { FieldView.CREATE })
+	@ObjectView(DETAILS_VIEW)
 	Date lastLogin;
 
 	public String getUsername() {
