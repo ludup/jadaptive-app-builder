@@ -26,6 +26,7 @@ import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.utils.FileUtils;
 
 public abstract class HtmlPage implements Page {
 	
@@ -434,6 +435,10 @@ public abstract class HtmlPage implements Page {
 		}
 		if(Objects.isNull(url)) {
 			url = classService.getResource(resource);
+		}
+		if(resource.startsWith("/")) {
+			resource = FileUtils.checkStartsWithNoSlash(resource);
+			return resolveDocument(clz, resource, canFail);
 		}
 		if(Objects.nonNull(url)) {
 			try(InputStream in = url.openStream()) {
