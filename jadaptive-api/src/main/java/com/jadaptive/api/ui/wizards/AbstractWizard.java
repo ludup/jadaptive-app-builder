@@ -61,6 +61,11 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 		return state;
 	}
 	
+	protected WizardSection getFinishSection() {
+		return new DefaultWizardSection(getResourceKey(), "finishWizard", "/com/jadaptive/plugins/web/ui/FinishWizard.html");
+	}
+
+	
 	protected void assertPermissions(WizardState state) { };
 
 	@Override
@@ -80,8 +85,6 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	
 		return object.getUuid();
 	}
-
-	protected abstract WizardSection getFinishSection();
 
 	protected abstract WizardSection getStartSection();
 
