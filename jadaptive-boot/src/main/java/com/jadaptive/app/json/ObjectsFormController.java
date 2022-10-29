@@ -2,6 +2,7 @@ package com.jadaptive.app.json;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
@@ -209,13 +210,17 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			}
 			if(fieldTemplate.getCollection()) {
 				AbstractObject existing = null;
-				for(AbstractObject child : parentObject.getObjectCollection(fieldName)) {
-					if(child.getUuid().equalsIgnoreCase(childObject.getUuid())) {
-						existing = child;
+				if(parentObject.hasValue(fieldName)) {
+					for(AbstractObject child : parentObject.getObjectCollection(fieldName)) {
+						if(child.getUuid().equalsIgnoreCase(childObject.getUuid())) {
+							existing = child;
+						}
 					}
 				}
 				if(Objects.nonNull(existing)) {
 					parentObject.removeCollectionObject(fieldName, existing);
+				} else {
+					childObject.setUuid(UUID.randomUUID().toString());
 				}
 				parentObject.addCollectionObject(fieldName, childObject);
 			} else {

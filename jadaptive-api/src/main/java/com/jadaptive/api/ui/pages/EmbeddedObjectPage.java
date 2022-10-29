@@ -42,13 +42,20 @@ public abstract class EmbeddedObjectPage extends ObjectTemplatePage {
 		permissionService.assertReadWrite(template.getResourceKey());
 	}
 	
+	@Override
+	public ObjectTemplate getTemplate() {
+		return childTemplate;
+	}
+	
 	public void onCreate() throws FileNotFoundException {
 
 		super.onCreate();
 
 		try {
 			FieldTemplate field = template.getField(fieldName);
-			childResourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+			if(Objects.isNull(childResourceKey)) {
+				childResourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+			}
 			childTemplate = templateService.get(childResourceKey);
 			childClazz = templateService.getTemplateClass(childResourceKey);
 		} catch (RepositoryException e) {
@@ -59,16 +66,18 @@ public abstract class EmbeddedObjectPage extends ObjectTemplatePage {
 			throw new FileNotFoundException(String.format("%s not found", resourceKey));
 		}
 		
-		FieldTemplate field = template.getField(fieldName);
-		if(field.getCollection()) {
-			for(AbstractObject o : object.getObjectCollection(fieldName)) {
-				if(o.getUuid().equals(childUuid)) {
-					childObject = o;
-					break;
-				}
- 			}
-		} else {
-			childObject = object.getChild(field);
+		if(Objects.nonNull(childUuid)) {
+			FieldTemplate field = template.getField(fieldName);
+			if(field.getCollection()) {
+				for(AbstractObject o : object.getObjectCollection(fieldName)) {
+					if(o.getUuid().equals(childUuid)) {
+						childObject = o;
+						break;
+					}
+	 			}
+			} else {
+				childObject = object.getChild(field);
+			}
 		}
 	}
 

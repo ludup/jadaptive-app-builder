@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<body>
+<div class="wrapper">
+<header jad:id="header"></header>
+<main class="container mt-3">
+   <div id="content" class="row my-1">
+   		 <div class="col-12" jad:id="objectRenderer"></div>
+   </div>
+   <div class="row my-3">
+         <div class="col-12">
+         	<a id="cancelButton" class="btn btn-danger float-start checkExit" href="#">
+         	<i class="fas fa-ban"></i>&nbsp;<span jad:bundle="default" jad:i18n="cancel.name">[Cancel]</span></a>
+         	<a id="saveButton" class="btn btn-success float-end" href="#">
+        	<i class="fas fa-save"></i>&nbsp;<span jad:bundle="default" jad:i18n="save.name">[Save]</span></a>
+         </div>
+   </div>
+</main>
+</div>
+<footer jad:id="footer"></footer>
+</body>
+</html>
