@@ -33,6 +33,12 @@ public class UUIDEntityUpdatedEvent<T extends UUIDEntity> extends ObjectEvent<T>
 		this.previousObject = previousObject;
 	}
 	
+	public UUIDEntityUpdatedEvent(T object, T previousObject, Throwable t) {
+		super(Events.updated(object.getEventGroup()), object.getEventGroup(), t);
+		this.object = object;
+		this.previousObject = previousObject;
+	}
+	
 	public T getPreviousObject() {
 		return previousObject;
 	}

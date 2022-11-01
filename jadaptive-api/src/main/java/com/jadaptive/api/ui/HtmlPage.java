@@ -83,7 +83,7 @@ public abstract class HtmlPage implements Page {
 		
 		if(Objects.nonNull(extenders)) {
 			for(HtmlPageExtender extender : extenders) {
-				extender.processStart(document, this);
+				extender.processStart(document, uri, this);
 			}
 		}
 		
@@ -101,7 +101,7 @@ public abstract class HtmlPage implements Page {
 		
 		if(Objects.nonNull(extenders)) {
 			for(HtmlPageExtender extender : extenders) {
-				extender.processEnd(document, this);
+				extender.processEnd(document, uri, this);
 			}
 		}
 		
@@ -163,7 +163,7 @@ public abstract class HtmlPage implements Page {
 			
 			if(Objects.nonNull(extenders)) {
 				for(HtmlPageExtender extender : extenders) {
-					extender.processStart(doc, this);
+					extender.processStart(doc, uri, this);
 				}
 			}
 			
@@ -216,7 +216,7 @@ public abstract class HtmlPage implements Page {
 			
 			if(Objects.nonNull(extenders)) {
 				for(HtmlPageExtender extender : extenders) {
-					extender.processEnd(doc, this);
+					extender.processEnd(doc, uri, this);
 				}
 			}
 

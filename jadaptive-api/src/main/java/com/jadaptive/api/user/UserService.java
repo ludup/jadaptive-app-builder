@@ -46,5 +46,7 @@ public interface UserService extends UUIDObjectService<User> {
 
 	Collection<User> getUsersByUUID(Collection<String> users);
 
+	long countUsers();
+
 
 }

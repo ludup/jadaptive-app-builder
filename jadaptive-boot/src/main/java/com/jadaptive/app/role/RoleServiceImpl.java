@@ -29,11 +29,6 @@ import com.jadaptive.app.user.UserServiceImpl;
 @Service
 public class RoleServiceImpl extends AuthenticatedService implements RoleService, TenantAware, UserAware {
 
-	private static final String ADMINISTRATOR_UUID = "1bfbaf16-e5af-4825-8f8a-83ce2f5bf81f";
-	private static final String EVERYONE_UUID = "c4b54f49-c478-46cc-8cfa-aaebaa4ea50f";
-	private static final String EVERYONE = "Everyone";
-	private static final String ADMINISTRATION = "Administration";
-	
 	@Autowired
 	private TenantAwareObjectDatabase<Role> repository; 
 

@@ -92,6 +92,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				log.debug("Aborting transaction");
 			}
 			currentSession.get().abortTransaction();
+			if(t instanceof RepositoryException) {
+				throw t;
+			}
 			throw new IllegalStateException("Transaction failed with " + t.getMessage(), t);
 		} finally {
 			if(log.isDebugEnabled()) {
@@ -651,6 +654,15 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			System.out.println(index.toString());
 		}
 		return results;
+	}
+
+	@Override
+	public boolean isTransactionActive() {
+		ClientSession session = currentSession.get();
+		if(Objects.nonNull(session)) {
+			return session.hasActiveTransaction();
+		}
+		return false;
 	}
 
 

@@ -308,4 +308,9 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		return tmp;
 	}
 
+	@Override
+	public long countUsers() {
+		return userRepository.count(User.class);
+	}
+
 }

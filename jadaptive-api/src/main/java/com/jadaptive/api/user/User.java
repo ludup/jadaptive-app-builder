@@ -2,6 +2,7 @@ package com.jadaptive.api.user;
 
 import java.util.Date;
 
+import com.jadaptive.api.db.Transactional;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -26,6 +27,7 @@ import com.jadaptive.api.template.Validator;
 	@ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)})
 @TableView(defaultColumns = { "username", "name", "lastLogin" }, requiresUpdate = true, actions = {
 		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}", writeAction = true) })
+@Transactional
 public abstract class User extends UUIDEntity implements NamedDocument {
 
 	public static final String RESOURCE_KEY = "users";

@@ -29,6 +29,11 @@ public class UUIDEntityCreatedEvent<T extends UUIDEntity> extends ObjectEvent<T>
 		super(Events.created(object.getEventGroup()), object.getEventGroup());
 		this.object = object;
 	}
+	
+	public UUIDEntityCreatedEvent(T object, Throwable e) {
+		super(Events.created(object.getEventGroup()), object.getEventGroup(), e);
+		this.object = object;
+	}
 
 	@Override
 	public T getObject() {
