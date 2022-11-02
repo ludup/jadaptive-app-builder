@@ -38,6 +38,29 @@ public class I18nBundleResolver implements I18nService {
 	}
 	
 	@Override
+	public String formatNoDefault(String bundle, Locale locale, String key, Object... args) {
+		switch(bundle) {
+		case "app":
+		case "vendor":
+		{
+			ProductService service = ApplicationServiceImpl.getInstance().getBean(ProductService.class);
+			switch(key) {
+			case "version.text":
+			case "product.version":
+				return service.getVersion();
+			case "product.copyright":
+				return service.getCopyright();
+			default:
+				return I18N.getResourceNoDefault(locale, bundle, key, args);
+			}
+		}
+		default:
+			return I18N.getResourceNoDefault(locale, bundle, key, args);
+		}
+		
+	}
+	
+	@Override
 	public String getFieldName(ObjectTemplate template, FieldTemplate field) {
 		return getFieldName(template, field, Locale.getDefault());
 		

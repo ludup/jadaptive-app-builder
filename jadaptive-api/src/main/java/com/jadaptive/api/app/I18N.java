@@ -141,6 +141,15 @@ public class I18N {
 		}
 	}
 	
+	public static String getResourceNoDefault(Locale locale, String resourceBundle,
+			String key, Object... arguments) {
+		try {
+			return getResourceOrException(locale, resourceBundle, key, arguments);
+		} catch (MissingResourceException mre) {
+			return "";
+		}
+	}
+	
 	public static String getResourceNoOveride(Locale locale, String resourceBundle,
 			String key, Object... arguments) {
 		if (key == null) {
