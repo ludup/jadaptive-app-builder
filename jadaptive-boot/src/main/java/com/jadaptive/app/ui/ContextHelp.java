@@ -61,7 +61,12 @@ public class ContextHelp extends AbstractPageExtension {
 				clz = page.getClass();
 			}
 			try {
-				page.injectHtmlSection(document, body, clz, WordUtils.capitalize(id) + "Help.html", true);
+				if(e.hasAttr("jad:html")) {
+					page.injectHtmlSection(document, body, clz, e.attr("jad:html"), true);
+					e.removeAttr("jad:html");
+				} else {
+					page.injectHtmlSection(document, body, clz, WordUtils.capitalize(id) + "Help.html", true);
+				}
 			} catch(IOException ex) {
 				e.remove();
 			}

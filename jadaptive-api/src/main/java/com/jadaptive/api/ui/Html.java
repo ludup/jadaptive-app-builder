@@ -148,7 +148,7 @@ public class Html {
 	}
 
 	public static Element p(String text) {
-		return new Element("p").text(text);
+		return new Element("p").html(text);
 	}
 
 }

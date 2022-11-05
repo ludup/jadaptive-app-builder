@@ -16,6 +16,9 @@ public class IStackLocation {
 	String zip;
 	String latitude;
 	String longitude;
+	
+	IStackCurrency currency;
+	
 	public String getIp() {
 		return ip;
 	}
@@ -81,6 +84,12 @@ public class IStackLocation {
 	}
 	public void setLongitude(String longitude) {
 		this.longitude = longitude;
+	}
+	public IStackCurrency getCurrency() {
+		return currency;
+	}
+	public void setCurrency(IStackCurrency currency) {
+		this.currency = currency;
 	}
 	
 	

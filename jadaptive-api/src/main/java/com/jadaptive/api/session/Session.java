@@ -65,7 +65,7 @@ public class Session extends AbstractUUIDEntity {
 
 	public String getId() {
 		/**
-		 * For compatibility with Hypersocket
+		 * For compatibility with Hypersocket. Do we need this?
 		 */
 		return getUuid();
 	}
@@ -157,11 +157,11 @@ public class Session extends AbstractUUIDEntity {
 
 	@JsonIgnore
 	public boolean isReadyForUpdate() {
-		// We save our state every minute
+		// We save our state every 10 seconds
 		if(lastUpdated==null) {
 			return true;
 		}
-		return System.currentTimeMillis() - lastUpdated.getTime() > 60000L;
+		return System.currentTimeMillis() - lastUpdated.getTime() > 10000L;
 	}
 
 	public boolean isClosed() {
