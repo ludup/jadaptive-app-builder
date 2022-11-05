@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.auth.AuthenticationPolicy;
+import com.jadaptive.api.auth.AuthenticationPolicyResolver;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.db.AssignableObjectDatabase;
@@ -37,6 +38,8 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 
 	@Autowired
 	private RoleService roleService; 
+	
+	private AuthenticationPolicyResolver resolver;
 	
 	@Override
 	public AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, AuthenticationPolicy... additionalPolicies) {
@@ -75,6 +78,10 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 				return o1.getWeight().compareTo(o2.getWeight());
 			}
 		});
+		
+		if(Objects.nonNull(resolver)) {
+			results = resolver.resolveUserPolicy(user, results);
+		}
 		
 		if(results.isEmpty()) {
 			return null;
@@ -138,4 +145,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true));
 	}
 
+	public void setResolver(AuthenticationPolicyResolver resolver) {
+		this.resolver = resolver;
+	}
 }
