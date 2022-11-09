@@ -67,6 +67,10 @@ public abstract class WizardSection extends AbstractPageExtension {
 	protected void processSection(Document document, Element element, Page page) throws IOException {
 		
 	}
+	
+	public void finish(WizardState state) {
+		
+	}
 
 	public boolean isSystem() {
 		return false;

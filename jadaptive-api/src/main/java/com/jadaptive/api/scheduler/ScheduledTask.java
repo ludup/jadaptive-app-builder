@@ -1,8 +1,6 @@
 package com.jadaptive.api.scheduler;
 
-import org.pf4j.ExtensionPoint;
-
-public interface ScheduledTask extends Runnable, ExtensionPoint {
+public interface ScheduledTask extends TenantTask {
 
 	static final String AT_MIDNIGHT =  "0 0 0 * * *";
 	static final String EVERY_HOUR =   "0 0 */1 * * *";

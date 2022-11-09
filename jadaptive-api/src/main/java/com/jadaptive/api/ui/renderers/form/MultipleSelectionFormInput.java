@@ -6,6 +6,7 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.template.TemplateView;
 
 public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
@@ -22,6 +23,7 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 			Collection<String> selectedValues,
 			boolean valueIsResourceKey) {
 		
+		Element inputs;
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")
 				.appendChild(new Element("div")
@@ -31,7 +33,7 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 						.addClass("form-label")
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
-				.appendChild(new Element("div")
+				.appendChild(inputs = new Element("div")
 						.addClass("row")
 					.appendChild(new Element("div")
 							.attr("id", String.format("%sAvailable", field.getResourceKey()))
@@ -45,19 +47,18 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 							.addClass("col-1")
 							.appendChild(new Element("a")
 									.attr("href", "#")
-									.addClass("btn btn-primary multipleSelectAdd")
+									.addClass("btn btn-primary mt-3 multipleSelectAdd")
 									.appendChild(new Element("i")
 											.addClass("far fa-chevron-right")))
 							.appendChild(new Element("a")
 									.attr("href", "#")
-									.addClass("btn btn-primary mt-1 multipleSelectRemove")
+									.addClass("btn btn-primary mt-3 multipleSelectRemove")
 									.appendChild(new Element("i")
 											.addClass("far fa-chevron-left"))))
 					.appendChild(new Element("div")
 							.attr("id", String.format("%sSelected", field.getResourceKey()))
 							.addClass("col-5")
 							.appendChild(selected = new Element("select")
-										.attr("name", field.getFormVariable())
 										.attr("id", field.getFormVariable())
 										.attr("size", "10")
 										.attr("multiple", "mulitple")
@@ -70,7 +71,7 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 				available.appendChild(new Element("option")
 								.val(value)
 								.appendChild(displayName = new Element("span").text(value)));
-													
+								
 				if(valueIsResourceKey) {
 					displayName.attr("jad:bundle", field.getBundle())
 								.attr("jad:i18n", value);
@@ -83,7 +84,7 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 			selected.appendChild(new Element("option")
 							.val(value)
 							.appendChild(displayName = new Element("span").text(value)));
-												
+			inputs.appendChild(Html.input("text", field.getFormVariable(), value).addClass("d-none"));		
 			if(valueIsResourceKey) {
 				displayName.attr("jad:bundle", field.getBundle())
 							.attr("jad:i18n", value);

@@ -2,7 +2,7 @@ package com.jadaptive.api.jobs;
 
 import org.pf4j.ExtensionPoint;
 
-public interface JobRunnerContext extends ExtensionPoint {
+public interface TaskRunnerContext extends ExtensionPoint {
 
 	void clearContext();
 

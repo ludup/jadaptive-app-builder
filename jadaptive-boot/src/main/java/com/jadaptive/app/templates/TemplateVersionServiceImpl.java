@@ -685,7 +685,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {
 				Class<?> clz = f.getType();
-				if(Collections.class.isAssignableFrom(clz)) {
+				if(Collection.class.isAssignableFrom(clz)) {
 					clz = (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
 				}
 				resourceKey = clz.getName();
