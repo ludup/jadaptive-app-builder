@@ -24,7 +24,7 @@ public class CssEditorFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(TemplateView panel, Element rootElement, String value) throws IOException {
+	public void renderInput(Element rootElement, String value) throws IOException {
 
 		PageHelper.appendScript(document, "/app/content/codemirror/lib/codemirror.js");
 		PageHelper.appendScript(document, "/app/content/codemirror/addon/display/autorefresh.js");

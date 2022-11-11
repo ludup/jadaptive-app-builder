@@ -12,7 +12,7 @@ public abstract class FormInputRender extends FieldInputRender {
 		super(template, field);
 	}
 	
-	public final void renderInput(TemplateView panel, Element rootElement, String value) {
+	public final void renderInput(Element rootElement, String value) {
 		
 		Element myElement;
 		rootElement.appendChild(myElement = new Element("div")
@@ -37,11 +37,11 @@ public abstract class FormInputRender extends FieldInputRender {
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
 		
-		onRender(panel, myElement, value);
+		onRender(myElement, value);
 
 	}
 
-	protected void onRender(TemplateView panel, Element rootElement, String value) { }
+	protected void onRender(Element rootElement, String value) { }
 	
 	public abstract String getInputType();
 }

@@ -12,7 +12,7 @@ public class HiddenFormInput extends FieldInputRender {
 		super(template, field);
 	}
 	
-	public final void renderInput(TemplateView panel, Element rootElement, String value) {
+	public final void renderInput(Element rootElement, String value) {
 	
 		rootElement.appendChild(new Element("input")
 						.attr("id", field.getFormVariable())

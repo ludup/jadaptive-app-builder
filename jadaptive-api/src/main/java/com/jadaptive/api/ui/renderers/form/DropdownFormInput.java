@@ -22,7 +22,7 @@ public class DropdownFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(TemplateView panel, Element rootElement, String defaultValue) {
+	public void renderInput(Element rootElement, String defaultValue) {
 
 		rootElement.appendChild(new Element("div").addClass("row mb-3")
 				.appendChild(new Element("div")

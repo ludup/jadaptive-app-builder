@@ -14,7 +14,7 @@ public class TimestampFormInput extends FieldInputRender {
 		super(template, field);
 	}
 
-	public final void renderInput(TemplateView panel, Element rootElement, String value) {
+	public final void renderInput(Element rootElement, String value) {
 		
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")

@@ -13,7 +13,7 @@ public class TextAreaFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(TemplateView panel, Element rootElement, String value) {
+	public void renderInput(Element rootElement, String value) {
 
 		
 		rootElement.appendChild(new Element("div")
