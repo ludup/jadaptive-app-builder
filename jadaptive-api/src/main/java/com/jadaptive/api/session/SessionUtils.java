@@ -68,21 +68,6 @@ public class SessionUtils {
 		permissionService.setupSystemContext();
 		
 		try {
-
-			if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
-				session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
-				if(sessionService.isLoggedOn(session, true)) {
-					return session;
-				}
-			}
-			
-			if (request.getSession().getAttribute(AUTHENTICATED_SESSION) != null) {
-				session = (Session) request.getSession().getAttribute(
-						AUTHENTICATED_SESSION);
-				if(sessionService.isLoggedOn(session, true)) {
-					return session;
-				}
-			}
 			
 			if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
 				session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
@@ -90,19 +75,19 @@ public class SessionUtils {
 				session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
 			}
 			
-			if (session != null && sessionService.isLoggedOn(session, true)) {
-				return session;
-			}
-			
 			if(Objects.nonNull(request.getCookies())) {
 				for (Cookie c : request.getCookies()) {
 					if (c.getName().equals(SESSION_COOKIE)) {
 						session = sessionService.getSession(c.getValue());
-						if (session != null && sessionService.isLoggedOn(session, true)) {
-							return session;
+						if (session != null) {
+							break;
 						}
 					}
 				}
+			}
+			
+			if (session != null && sessionService.isLoggedOn(session, true)) {
+				return session;
 			}
 			
 		} catch(UnauthorizedException | ObjectNotFoundException e) { 
