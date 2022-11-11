@@ -55,8 +55,6 @@ public class SessionUtils {
 	@Autowired
 	private SingletonObjectDatabase<SessionConfiguration> sessionConfig; 
 	
-	public static final String SELF_UNSAFE_INLINE = "'self' 'unsafe-inline'";
-	public static final String SELF = "'self'";
 	public static final String UNSAFE_INLINE = "unsafe-inline";
 	
 	public User getCurrentUser() {
@@ -425,8 +423,7 @@ public class SessionUtils {
 		response.setHeader("X-Content-Type-Options", "nosniff");
 		response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 		response.setHeader("Content-Security-Policy", 
-				String.format("default-src 'none'; font-src 'self'; script-src %s; style-src %s; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self';",
-						SELF, SELF));
+				"default-src 'none'; font-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self';");
 	}
 
 	public void setDoNotCache(HttpServletResponse response) {
