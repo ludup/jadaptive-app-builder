@@ -13,7 +13,7 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
 @ObjectDefinition(resourceKey = UserGeneratedEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT, creatable = false, updatable = false, deletable = false)
-@ObjectViews({@ObjectViewDefinition(value = UserGeneratedEvent.CURRENT_USER, bundle = SystemEvent.RESOURCE_KEY)})
+@ObjectViews({@ObjectViewDefinition(value = UserGeneratedEvent.CURRENT_USER, bundle = SystemEvent.RESOURCE_KEY, weight = Integer.MIN_VALUE+1)})
 public abstract class UserGeneratedEvent extends SystemEvent {
 
 	private static final long serialVersionUID = 6015292582999672923L;
