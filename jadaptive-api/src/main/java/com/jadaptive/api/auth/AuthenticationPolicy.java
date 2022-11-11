@@ -3,6 +3,7 @@ package com.jadaptive.api.auth;
 import java.util.Collection;
 
 import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -22,6 +23,7 @@ import com.jadaptive.api.template.Validator;
 	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "allowedIPs", weight = -6666)})
 @TableView(defaultColumns = "name", requiresCreate = false, requiresUpdate = true)
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
+@GenerateEventTemplates(AuthenticationPolicy.RESOURCE_KEY)
 public class AuthenticationPolicy extends AssignableUUIDEntity {
 
 	private static final long serialVersionUID = -4581883248747380399L;

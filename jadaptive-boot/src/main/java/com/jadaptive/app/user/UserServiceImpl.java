@@ -14,6 +14,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -39,6 +40,9 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	
 	@Autowired
 	private ApplicationService applicationService; 
+	
+	@Autowired
+	private EventService eventService; 
 	
 	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
 	
@@ -156,8 +160,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		permissionService.assertPermission(SET_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
-		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 		
+		try {
+			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+			eventService.publishEvent(new SetPasswordEvent(user));
+		} catch(Throwable e) {
+			eventService.publishEvent(new SetPasswordEvent(user, e));
+			throw e;
+		}
 	}
 	
 	@Override
@@ -165,8 +175,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
-		verifyPassword(user, oldPassword);
-		getDatabase(user).setPassword(user, newPassword, false);
+		
+		try {
+			verifyPassword(user, oldPassword);
+			getDatabase(user).setPassword(user, newPassword, false);
+			eventService.publishEvent(new ChangePasswordEvent());
+		} catch(Throwable e) {
+			eventService.publishEvent(new ChangePasswordEvent(e));
+		}
 		
 	}
 	
@@ -175,7 +191,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
-		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+		
+		try {
+			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+			eventService.publishEvent(new ChangePasswordEvent());
+		} catch(Throwable e) {
+			eventService.publishEvent(new ChangePasswordEvent(e));
+			throw e;
+		}
 		
 	}
 

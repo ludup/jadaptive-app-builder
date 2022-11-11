@@ -126,34 +126,17 @@ public class SessionUtils {
 			session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
 		}
 		
-		if (session != null && sessionService.isLoggedOn(session, false)) {
-			return session;
-		}
-		
-		if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
-			session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
-			if(sessionService.isLoggedOn(session, false)) {
-				return session;
-			}
-		}
-		
-		if (request.getSession().getAttribute(AUTHENTICATED_SESSION) != null) {
-			session = (Session) request.getSession().getAttribute(
-					AUTHENTICATED_SESSION);
-			if(sessionService.isLoggedOn(session, false)) {
-				return session;
-			}
-		}
-		
 		if(request.getCookies()!=null) {
 			for (Cookie c : request.getCookies()) {
 				if (c.getName().equals(SESSION_COOKIE)) {
 					session = sessionService.getSession(c.getValue());
-					if (session != null && sessionService.isLoggedOn(session, false)) {
-						return session;
-					}
+					break;
 				}
 			}
+		}
+		
+		if (session != null && sessionService.isLoggedOn(session, false)) {
+			return session;
 		}
 		
 		throw new UnauthorizedException();
