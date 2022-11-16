@@ -24,6 +24,7 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.user.UserServiceImpl;
 
 @Service
@@ -34,6 +35,9 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 
 	@Autowired
 	private TenantService tenantService;  
+	
+	@Autowired
+	private UserService userService; 
 	
 	@Override
 	public Integer getOrder() {
@@ -295,6 +299,48 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 			tmp.add(role);
 		}
 		return tmp;
+	}
+
+	@Override
+	public Collection<String> getUsersByRoles(Collection<String> roles) {
+		
+		Set<String> values = new HashSet<>();
+		Collection<Role> results = getRolesByUUID(roles);
+		for(Role role : results) {
+			if(role.getUuid().equals(EVERYONE_UUID) || role.isAllUsers()) {
+				userService.allObjects().forEach((val)-> {
+					values.add(val.getUuid());
+				});
+				return values;
+			}
+		}
+		
+		for(Role role : results) {
+			for(String uuid : role.getUsers()) {
+				values.add(uuid);
+			}
+		}
+		return values;
+	}
+
+	@Override
+	public void compareAssignments(AssignableUUIDEntity current, AssignableUUIDEntity previous,
+			Collection<String> assignments, Collection<String> unassignments) {
+		
+		Set<String> assignedNow = new HashSet<>();
+		assignedNow.addAll(current.getUsers());
+		assignedNow.addAll(getUsersByRoles(current.getRoles()));
+		
+		Set<String> assignedThen = new HashSet<>();
+		assignedNow.addAll(previous.getUsers());
+		assignedNow.addAll(getUsersByRoles(previous.getRoles()));
+		
+		assignments.addAll(assignedNow);
+		assignments.removeAll(assignedThen);
+		
+		unassignments.addAll(assignedThen);
+		unassignments.removeAll(assignedNow);
+		
 	}
 
 }

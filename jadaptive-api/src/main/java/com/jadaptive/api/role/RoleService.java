@@ -57,4 +57,11 @@ public interface RoleService {
 
 	Collection<Role> getRolesByUUID(Collection<String> roles);
 
+	Collection<String> getUsersByRoles(Collection<String> roles);
+
+	void compareAssignments(AssignableUUIDEntity current, 
+			AssignableUUIDEntity previous, 
+			Collection<String> assignments,
+			Collection<String> unassignments);
+
 }
