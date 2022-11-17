@@ -86,6 +86,11 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	}
 	
 	@Override
+	public Collection<Role> getAdministrationRoles() {
+		return repository.searchObjects(Role.class, SearchField.eq("allUsers", true));
+	}
+	
+	@Override
 	public Role getEveryoneRole() {
 		return repository.get(EVERYONE_UUID, Role.class);
 	}

@@ -1,10 +1,12 @@
 package com.jadaptive.api.role;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.jadaptive.api.permissions.PermissionUtils;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.user.User;
+import com.jadaptive.utils.ObjectUtils;
 
 public interface RoleService {
 
@@ -58,10 +60,16 @@ public interface RoleService {
 	Collection<Role> getRolesByUUID(Collection<String> roles);
 
 	Collection<String> getUsersByRoles(Collection<String> roles);
+	
+	default Collection<String> getUsersByRoles(Role... roles) { return ObjectUtils.entityToUUIDCollection(Arrays.asList(roles)); };
 
+	default Collection<String> getUsersByRoles(String... roles) { return getUsersByRoles(Arrays.asList(roles)); };
+	
 	void compareAssignments(AssignableUUIDEntity current, 
 			AssignableUUIDEntity previous, 
 			Collection<String> assignments,
 			Collection<String> unassignments);
+
+	Collection<Role> getAdministrationRoles();
 
 }
