@@ -77,33 +77,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		User user = userRepository.get(uuid, User.class);
 		
-//		for(UserDatabase userDatabase : getOrderedDatabases()) {
-//			try {
-//				user = userDatabase.getUserByUUID(uuid);
-//				if(Objects.nonNull(user)) {
-//					break;
-//				}
-//			} catch(ObjectNotFoundException e) { }
-//		}
-		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("User with id %s not found", uuid));
 		}
 		return user;
 	}
-
-//	private List<UserDatabase> getOrderedDatabases() {
-//		loadUserDatabases();
-//		List<UserDatabase> tmp = new ArrayList<>(userDatabases.values());
-//		Collections.sort(tmp, new Comparator<UserDatabase>() {
-//
-//			@Override
-//			public int compare(UserDatabase o1, UserDatabase o2) {
-//				return o1.weight().compareTo(o2.weight());
-//			}
-//		});
-//		return tmp;
-//	}
 
 	@Override
 	public boolean verifyPassword(User user, char[] password) {
@@ -120,15 +98,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 
 		User user = userRepository.get(User.class, SearchField.eq("username", username));
 		
-//		for(UserDatabase userDatabase : getOrderedDatabases()) {
-//			try {
-//				user = userDatabase.getUser(username);
-//				if(Objects.nonNull(user)) {
-//					break;
-//				}
-//			} catch(ObjectNotFoundException e) { }
-//		}
-		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("%s not found", username));
 		}
@@ -139,15 +108,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public User getUserByEmail(String email) {
 
 		User user = userRepository.get(User.class, SearchField.eq("email", email));
-		
-//		for(UserDatabase userDatabase : getOrderedDatabases()) {
-//			try {
-//				user = userDatabase.getUser(email);
-//				if(Objects.nonNull(user)) {
-//					break;
-//				}
-//			} catch(ObjectNotFoundException e) { }
-//		}
 		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("%s not found", email));
