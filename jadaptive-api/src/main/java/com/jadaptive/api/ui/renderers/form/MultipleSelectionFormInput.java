@@ -62,7 +62,15 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 										.attr("id", field.getFormVariable())
 										.attr("size", "10")
 										.attr("multiple", "mulitple")
-										.addClass("w-100 multipleSelectTarget jadaptive-select"))))));
+										.addClass("w-100 multipleSelectTarget jadaptive-select")))
+							.appendChild(new Element("div")
+									.addClass("row")
+								.appendChild(new Element("div")
+										.addClass("col-md-10")
+										.appendChild(new Element("small")
+												.addClass("text-muted")
+												.attr("jad:bundle", field.getBundle())
+												.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))))))));
 
 		
 		for(String value : availableValues) {
