@@ -13,7 +13,7 @@ public class SessionConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "sessionConfiguration";
 
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "15")
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "60")
 	Integer timeout;
 
 	@ObjectField(type = FieldType.BOOL, defaultValue = "true")

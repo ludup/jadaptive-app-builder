@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
 
