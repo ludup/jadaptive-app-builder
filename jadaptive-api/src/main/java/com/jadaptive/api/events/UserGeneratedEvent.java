@@ -2,7 +2,6 @@ package com.jadaptive.api.events;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
