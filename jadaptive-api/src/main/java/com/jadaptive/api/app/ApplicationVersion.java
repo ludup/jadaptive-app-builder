@@ -24,10 +24,8 @@ public class ApplicationVersion {
 	public static String getSerial() {
 		Preferences pref = Preferences.userNodeForPackage(ApplicationVersion.class);
 		
-		String jadaptiveId = System.getProperty("jadaptive.id", "jadaptive-unknown");
-		String serialId = String.format("jadaptive.serial.%s", jadaptiveId);
-		String serial = pref.get(serialId, UUID.randomUUID().toString());
-		pref.put(jadaptiveId, serial);
+		String serial = pref.get("jadaptive.serial", UUID.randomUUID().toString());
+		pref.put("jadaptive.serial", serial);
 		return serial;
 	}
 	
@@ -81,16 +79,4 @@ public class ApplicationVersion {
 	    return version;
 	}
 
-	public static String getProductId() {
-		return System.getProperty("jadaptive.id", "jadaptive-app-builder");
-	} 
-	
-	public static String getBrandId() {
-		String id = getProductId();
-		int idx = id.indexOf('-');
-		if(idx==-1) {
-			throw new IllegalStateException("Product id must consist of string formatted like <brand>-<product>");
-		}
-		return id.substring(0, idx);
-	} 
 }

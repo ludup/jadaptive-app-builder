@@ -6,7 +6,6 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.template.TemplateView;
 
 public abstract class FieldInputRender {
 
@@ -28,6 +27,6 @@ public abstract class FieldInputRender {
 		return field.getResourceKey();
 	}
 	
-	public abstract void renderInput(TemplateView panel, Element rootElement, String value) throws IOException;
+	public abstract void renderInput(Element rootElement, String value) throws IOException;
 
 }

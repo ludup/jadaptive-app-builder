@@ -50,7 +50,8 @@ public class ContextHelp extends AbstractPageExtension {
 										.addClass("btn-close text-reset")
 										.attr("data-bs-dismiss", "offcanvas")
 										.attr("aria-label", "Close")))
-						.appendChild(body = Html.div("offcanvas-body", "small")));
+						.appendChild(Html.div("offcanvas-body", "small").appendChild(body = Html.div())
+						.appendChild(Html.div().appendChild(Html.i18n("vendor", id + ".help").attr("jad:optional", true)))));
 
 			
 			Class<?> clz;
@@ -60,7 +61,12 @@ public class ContextHelp extends AbstractPageExtension {
 				clz = page.getClass();
 			}
 			try {
-				page.injectHtmlSection(document, body, clz, WordUtils.capitalize(id) + "Help.html", true);
+				if(e.hasAttr("jad:html")) {
+					page.injectHtmlSection(document, body, clz, e.attr("jad:html"), true);
+					e.removeAttr("jad:html");
+				} else {
+					page.injectHtmlSection(document, body, clz, WordUtils.capitalize(id) + "Help.html", true);
+				}
 			} catch(IOException ex) {
 				e.remove();
 			}

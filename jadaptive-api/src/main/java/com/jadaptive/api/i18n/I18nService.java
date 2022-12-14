@@ -16,4 +16,6 @@ public interface I18nService {
 	String getFieldName(ObjectTemplate template, FieldTemplate field, Locale locale);
 
 	String getFieldDesc(ObjectTemplate template, FieldTemplate field, Locale locale);
+
+	String formatNoDefault(String bundle, Locale locale, String key, Object... args);
 }

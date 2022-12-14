@@ -13,7 +13,6 @@ import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = TenantConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON, system = true)
 @ObjectViews({@ObjectViewDefinition(value = TenantConfiguration.DOMAIN_VIEW, bundle = TenantConfiguration.RESOURCE_KEY)})
-
 public class TenantConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = 4952852039617671471L;

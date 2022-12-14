@@ -5,7 +5,6 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.utils.Utils;
 
 public class TimestampFormInput extends FieldInputRender {
@@ -14,7 +13,7 @@ public class TimestampFormInput extends FieldInputRender {
 		super(template, field);
 	}
 
-	public final void renderInput(TemplateView panel, Element rootElement, String value) {
+	public final void renderInput(Element rootElement, String value) {
 		
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")

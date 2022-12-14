@@ -1,14 +1,18 @@
 package com.jadaptive.api.events;
 
 import java.util.Date;
+import java.util.Objects;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.UUIDEvent;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
@@ -60,7 +64,7 @@ public class SystemEvent extends UUIDEvent {
 	String extendedInformation;
 	
 	@ObjectField(type = FieldType.ENUM)
-	@ObjectView(value = "", renderer = FieldRenderer.BOOTSTRAP_BADGE, weight = Integer.MIN_VALUE)
+	@ObjectView(value = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.BOOTSTRAP_BADGE, weight = Integer.MIN_VALUE)
 	EventState state = EventState.SUCCESS;
 	
 	public SystemEvent(String resourceKey, String eventGroup) {
@@ -77,9 +81,21 @@ public class SystemEvent extends UUIDEvent {
 		this.timestamp = timestamp;
 		this.eventKey = eventKey;
 		this.eventGroup = eventGroup;
-		this.ipAddress = Request.isAvailable() ? Request.getRemoteAddress() : null;
+		attachSession();
 		setSystem(true);
 	}
+	
+	protected void attachSession() {
+		if(Request.isAvailable()) {
+			this.ipAddress = Request.isAvailable() ? Request.getRemoteAddress() : null;
+			Session session = ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).getActiveSession(Request.get());
+			if(Objects.nonNull(session)) {
+				onSessionAttach(session);
+			}
+		}
+	}
+	
+	protected void onSessionAttach(Session session) { }
 	
 	public String getResourceKey() {
 		return eventKey;

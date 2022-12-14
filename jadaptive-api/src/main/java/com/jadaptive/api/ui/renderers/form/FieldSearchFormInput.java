@@ -4,7 +4,6 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.template.TemplateView;
 
 public class FieldSearchFormInput {
 
@@ -23,25 +22,35 @@ public class FieldSearchFormInput {
 		this.idField = idField;
 	}
 
-	public void renderInput(TemplateView panel, Element rootElement, 
+	public void renderInput(Element rootElement, 
 			String value, String name,
 			boolean nameIsResourceKey,
 			boolean readOnly) {
-		
+		renderInput(rootElement, field.getBundle(), field.getResourceKey(), field.getFormVariable(),
+				value, name, nameIsResourceKey, readOnly);
+	}
+	
+	public void renderInput(Element rootElement, 
+			String bundle,
+			String resourceKey,
+			String variableName,
+			String value, String name,
+			boolean nameIsResourceKey,
+			boolean readOnly) {
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3 fieldSearchInput")
 				.appendChild(new Element("div")
 						.addClass("col-12")
 				.appendChild(new Element("label")
-						.attr("for", field.getFormVariable())
+						.attr("for", variableName)
 						.addClass("form-label")
-						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
+						.attr("jad:bundle", bundle)
+						.attr("jad:i18n", String.format("%s.name", resourceKey)))
 				.appendChild(new Element("div")
-						.attr("id", String.format("%sDropdown", field.getResourceKey()))
+						.attr("id", String.format("%sDropdown", resourceKey))
 						.addClass("input-group position-relative dropdown")
 					.appendChild(new Element("input")
-							.attr("id", String.format("%sText", field.getResourceKey()))
+							.attr("id", String.format("%sText", resourceKey))
 							.attr("data-display", "static")
 							.addClass("form-control jsearchText")
 							.attr("data-bs-toggle", "dropdown")
@@ -54,8 +63,8 @@ public class FieldSearchFormInput {
 							.attr("readOnly", readOnly)
 							.val(name))
 					.appendChild(new Element("input")
-							.attr("id", field.getFormVariable())
-							.attr("name", field.getFormVariable())
+							.attr("id", variableName)
+							.attr("name", variableName)
 							.attr("type", "hidden")
 							.val(value))
 					.appendChild(new Element("span")
@@ -64,11 +73,11 @@ public class FieldSearchFormInput {
 								.attr("class", "fas fa-search")))
 					.appendChild(new Element("div")
 							.addClass(readOnly ? "disabled-dropdown" : "dropdown-menu dropdown-size")
-							.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))))
+							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))))
 				.appendChild(new Element("small")
 						.addClass("text-muted")
-						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
+						.attr("jad:bundle", bundle)
+						.attr("jad:i18n", String.format("%s.desc", resourceKey)))));
 		
 	}
 

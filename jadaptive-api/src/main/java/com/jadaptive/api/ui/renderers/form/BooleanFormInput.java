@@ -4,7 +4,6 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.template.TemplateView;
 
 public class BooleanFormInput extends FieldInputRender {
 
@@ -15,7 +14,7 @@ public class BooleanFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(TemplateView panel, Element rootElement, String value) {
+	public void renderInput(Element rootElement, String value) {
 		
 
 		rootElement.appendChild(new Element("div")

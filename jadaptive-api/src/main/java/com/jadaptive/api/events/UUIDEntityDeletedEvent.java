@@ -12,6 +12,11 @@ public class UUIDEntityDeletedEvent<T extends UUIDEntity> extends ObjectEvent<T>
 		super(Events.deleted(object.getEventGroup()), object.getEventGroup());
 		this.object = object;
 	}
+	
+	public UUIDEntityDeletedEvent(T object, Throwable t) {
+		super(Events.deleted(object.getEventGroup()), object.getEventGroup(), t);
+		this.object = object;
+	}
 
 	@Override
 	public T getObject() {

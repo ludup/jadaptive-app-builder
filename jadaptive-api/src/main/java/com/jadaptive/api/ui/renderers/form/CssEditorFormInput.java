@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
 
@@ -24,7 +23,7 @@ public class CssEditorFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(TemplateView panel, Element rootElement, String value) throws IOException {
+	public void renderInput(Element rootElement, String value) throws IOException {
 
 		PageHelper.appendScript(document, "/app/content/codemirror/lib/codemirror.js");
 		PageHelper.appendScript(document, "/app/content/codemirror/addon/display/autorefresh.js");

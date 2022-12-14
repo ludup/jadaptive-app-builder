@@ -91,8 +91,8 @@ public class Html {
 		return i18nTag("h6", bundle, i18n, args);
 	}
 	
-	public static Element span(String text, String classes) {
-		return span(text).addClass(classes);
+	public static Element span(String text, String... classes) {
+		return span(text).addClass(Utils.csv(" ", classes));
 	}
 
 	public static Element li(String... classes) {
@@ -148,7 +148,7 @@ public class Html {
 	}
 
 	public static Element p(String text) {
-		return new Element("p").text(text);
+		return new Element("p").html(text);
 	}
 
 }

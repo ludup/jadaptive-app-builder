@@ -10,6 +10,7 @@ import org.springframework.scheduling.support.CronTrigger;
 
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.scheduler.ScheduledTask;
+import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 
@@ -23,17 +24,24 @@ public class TenantJobRunner implements Runnable {
 	@Autowired
 	private TaskScheduler taskScheduler;
 	
-	ScheduledTask task;
+	String taskUUID;
+	TenantTask task;
 	ScheduledFuture<?> future;
 	String tenantUUID;
 	
-	public TenantJobRunner(Tenant tenant) {
+	public TenantJobRunner(Tenant tenant, String taskUUID) {
 		this.tenantUUID = tenant.getUuid();
+		this.taskUUID = taskUUID;
 	}
 	
 	public void schedule(ScheduledTask task) {
 		this.task = task;
 		future = taskScheduler.schedule(this, new CronTrigger(task.cron()));
+	}
+	
+	public void schedule(TenantTask task, String expression) {
+		this.task = task;
+		future = taskScheduler.schedule(this, new CronTrigger(expression));
 	}
 	
 	@Override
@@ -56,6 +64,10 @@ public class TenantJobRunner implements Runnable {
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
+	}
+
+	public void cancel(boolean mayInterrupt) {
+		future.cancel(mayInterrupt);
 	}
 
 }

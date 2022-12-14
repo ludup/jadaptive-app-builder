@@ -63,6 +63,8 @@ public interface DocumentDatabase {
 
 	Set<String> getIndexNames(String table, String database);
 
+	boolean isTransactionActive();
+
 	
 
 	

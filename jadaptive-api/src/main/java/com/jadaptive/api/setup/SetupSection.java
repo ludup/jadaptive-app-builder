@@ -20,7 +20,5 @@ public abstract class SetupSection extends WizardSection {
 			
 	}
 	
-	public void finish(WizardState state) {
-		
-	}
+
 }

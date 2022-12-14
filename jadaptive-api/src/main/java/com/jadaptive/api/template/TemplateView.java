@@ -25,6 +25,15 @@ public class TemplateView {
 		this.parent = null;
 	}
 	
+	public TemplateView(String bundle, String resourceKey) {
+		this.rootView = false;
+		this.defaultBundle = bundle;
+		this.weight = 0;
+		this.type = ViewType.TAB;
+		this.resourceKey = resourceKey;
+		this.parent = null;
+	}
+	
 	public TemplateView(ObjectViewDefinition def) {
 		this.rootView = false;
 		this.resourceKey = def.value();

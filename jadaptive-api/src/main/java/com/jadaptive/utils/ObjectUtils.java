@@ -1,7 +1,10 @@
 package com.jadaptive.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ValidationException;
 
 public class ObjectUtils {
@@ -15,5 +18,13 @@ public class ObjectUtils {
 			throw new ValidationException(String.format("Cannot cast object to %s", clz.getName()));
 		}
 		return (T) object;
+	}
+
+	public static Collection<String> entityToUUIDCollection(Collection<? extends UUIDEntity> values) {
+		var results = new ArrayList<String>();
+		values.forEach((value)-> {
+			results.add(value.getUuid());
+		});
+		return results;
 	}
 }

@@ -34,6 +34,7 @@ public class I18N extends AbstractPageExtension {
 	void replaceAttributes(Document document, boolean remove) {
 		for(Element e : document.getElementsByAttribute("jad:i18n")) {
 			String bundle = e.attr("jad:bundle");
+			boolean optional = e.hasAttr("jad:optional");
 			List<Object> args = new ArrayList<>();
 			int arg = 0;
 			String attr;
@@ -42,16 +43,26 @@ public class I18N extends AbstractPageExtension {
 			}
 			switch(e.tag().getName()) {
 			case "input":
-				e.val(i18nService.format(bundle, Locale.getDefault(), e.attr("jad:i18n"), args.toArray(new Object[0])));
+				if(optional) {
+					e.val(i18nService.formatNoDefault(bundle, Locale.getDefault(), e.attr("jad:i18n"), args.toArray(new Object[0])));
+				} else {
+					e.val(i18nService.format(bundle, Locale.getDefault(), e.attr("jad:i18n"), args.toArray(new Object[0])));
+				}
 				break;
 			default:
-				e.html(i18nService.format(bundle, Locale.getDefault(), e.attr("jad:i18n"), args.toArray(new Object[0])));
+				if(optional) {
+					e.html(i18nService.formatNoDefault(bundle, Locale.getDefault(), e.attr("jad:i18n"), args.toArray(new Object[0])));
+				} else {
+					e.html(i18nService.format(bundle, Locale.getDefault(), e.attr("jad:i18n"), args.toArray(new Object[0])));
+				}
 				break;
 			}
 			
 			e.removeAttr("jad:i18n");
 			e.removeAttr("jad:bundle");
-			
+			if(optional) {
+				e.removeAttr("jad:optional");
+			}
 		}
 	}
 	

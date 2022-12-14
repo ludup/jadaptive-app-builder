@@ -65,5 +65,9 @@ public class PageHelper {
 
 		ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).addScriptNoncePolicy(Request.response(), nonce);
 	}
+	
+	public static void addContentSecurityPolicy(String policy, String value) {
+		ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).addContentSecurityPolicy(Request.response(), policy, value);
+	}
 
 }

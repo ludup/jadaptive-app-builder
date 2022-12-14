@@ -47,14 +47,14 @@ public class Role extends NamedUUIDEntity {
 	@ObjectView(OPTIONS_VIEW)
 	boolean allUsers;
 	
-	@ObjectField(defaultValue = "false", 
+	@ObjectField(
 			type = FieldType.PERMISSION,
 			searchable = true)
 	@ObjectView(PERMISSIONS_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
 	Collection<String> permissions = new HashSet<>();
 	
-	@ObjectField(defaultValue = "false", 
+	@ObjectField(
 			type = FieldType.OBJECT_REFERENCE,
 			searchable = true,
 			references = "users")

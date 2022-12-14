@@ -207,4 +207,10 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return null;
 	}
 
+	@Override
+	public boolean isTransactionActive() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

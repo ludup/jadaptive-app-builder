@@ -21,14 +21,14 @@ public abstract class AssignableUUIDEntity extends AbstractUUIDEntity {
 	public static final String USERS_VIEW = "userTab";
 	public static final String ROLES_VIEW = "roleTab";
 	
-	@ObjectField(defaultValue = "false", 
+	@ObjectField(
 			type = FieldType.OBJECT_REFERENCE,
 			references = "roles")
 	@ObjectView(ROLES_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
 	Collection<String> roles = new HashSet<>();
 	
-	@ObjectField(defaultValue = "false", 
+	@ObjectField(
 			type = FieldType.OBJECT_REFERENCE,
 			references = "users")
 	@ObjectView(USERS_VIEW)

@@ -17,4 +17,9 @@ public class TransactionServiceImpl implements TransactionService {
 	public void executeTransaction(Runnable r) {
 		db.doInTransaction(r);
 	}
+
+	@Override
+	public boolean isTransactionActive() {
+		return db.isTransactionActive();
+	}
 }

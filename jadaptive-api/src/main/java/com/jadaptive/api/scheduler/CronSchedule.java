@@ -3,11 +3,10 @@ package com.jadaptive.api.scheduler;
 import java.util.Date;
 
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.jobs.Job;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
 
 @ObjectDefinition(resourceKey = CronSchedule.RESOURCE_KEY, type = ObjectType.COLLECTION)
 public class CronSchedule extends AbstractUUIDEntity {
@@ -19,8 +18,8 @@ public class CronSchedule extends AbstractUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String expression;
 
-	@ObjectField(type = FieldType.OBJECT_REFERENCE)
-	Job job;
+//	@ObjectField(type = FieldType.OBJECT_REFERENCE)
+//	Job job;
 	
 	@ObjectField(type = FieldType.BOOL)
 	Boolean disabled;
@@ -43,13 +42,13 @@ public class CronSchedule extends AbstractUUIDEntity {
 		this.expression = expression;
 	}
 
-	public Job getJob() {
-		return job;
-	}
+//	public Job getJob() {
+//		return job;
+//	}
 
-	public void setJob(Job job) {
-		this.job = job;
-	}
+//	public void setJob(Job job) {
+//		this.job = job;
+//	}
 
 	public Boolean getDisabled() {
 		return disabled;

@@ -4,4 +4,6 @@ public interface TransactionService {
 
 	void executeTransaction(Runnable r);
 
+	boolean isTransactionActive();
+
 }

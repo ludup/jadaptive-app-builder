@@ -1,35 +1,39 @@
 package com.jadaptive.app.scheduler;
 
 import java.util.Date;
+import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
-import com.jadaptive.api.jobs.JobRunnerContext;
+import com.jadaptive.api.jobs.TaskRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.tasks.Task;
-import com.jadaptive.api.tasks.TaskService;
+import com.jadaptive.api.scheduler.CronSchedule;
+import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 
-public abstract class AbstractJobRunner implements Runnable {
+public class TaskJobRunner implements Runnable {
 
-	static Logger log = LoggerFactory.getLogger(AbstractJobRunner.class);
+	static Logger log = LoggerFactory.getLogger(TaskJobRunner.class);
 	
 	String tenantUUID;
-	
-	protected AbstractJobRunner(Tenant tenant) {
-		this.tenantUUID = tenant.getUuid();
-	}
+	String scheduleUUID;
+	TenantTask task;
+	ScheduledFuture<?> future;
 	
 	@Autowired
-	private TaskService taskService; 
+	private TaskScheduler taskExecutor;
 	
-//	@Autowired
-//	private EventService eventService; 
+	protected TaskJobRunner(Tenant tenant, TenantTask task) {
+		this.tenantUUID = tenant.getUuid();
+		this.task = task;
+	}
 	
 	@Autowired
 	private TenantService tenantService; 
@@ -40,26 +44,25 @@ public abstract class AbstractJobRunner implements Runnable {
 	@Autowired
 	private ApplicationService applicationService;
 	
-	public AbstractJobRunner() {
+	public TaskJobRunner() {
 	}
 	
-	protected abstract Task getTask();
+	protected TenantTask getTask() { return task; }
 	
 	@Override
 	public void run() {
 
-		setupJobContext();
+		setupContext();
 		
 		try {
 			
-			Task task = getTask();
+			TenantTask task = getTask();
 			
 			Date startedExecution = new Date();
 			
 			beforeJobStarts(startedExecution);
 			
-			/*TaskResult result = */taskService.getTaskImplementation(task).doTask(task);
-			//eventService.publishEvent(new TaskResultEvent(result));
+			task.run();
 
 			afterJobComplete(startedExecution, new Date(), task);
 			
@@ -67,21 +70,27 @@ public abstract class AbstractJobRunner implements Runnable {
 		} catch(Throwable t) {
 			log.error("Task execution failed", t);
 		} finally {
-			clearJobContext();
+			clearContext();
 		}
 	}
+	
+	public void schedule(CronSchedule schedule) {
+		this.scheduleUUID = schedule.getUuid();
+		this.future = taskExecutor.schedule(this, new CronTrigger(schedule.getExpression()));
+	}
+
 
 	protected void beforeJobStarts(Date startedExecution) { }
 
-	protected void afterJobComplete(Date startedExecution, Date finishedExecution, Task task) { }
+	protected void afterJobComplete(Date startedExecution, Date finishedExecution, TenantTask task) { }
 
 	protected void onClearContext() { }
 	
-	private void clearJobContext() {
+	private void clearContext() {
 		
 		onClearContext();
 		
-		for(JobRunnerContext ctx : applicationService.getBeans(JobRunnerContext.class)) {
+		for(TaskRunnerContext ctx : applicationService.getBeans(TaskRunnerContext.class)) {
 			ctx.clearContext();
 		}
 		
@@ -92,15 +101,17 @@ public abstract class AbstractJobRunner implements Runnable {
 
 	protected void onSetupContext() { }
 	
-	protected void cancel() { }
+	protected void cancel() {
+		future.cancel(false);
+	}
 	
-	private void setupJobContext() {
+	private void setupContext() {
 		
 		try {
 			tenantService.setCurrentTenant(tenantService.getTenantByUUID(tenantUUID));
 			permissionService.setupSystemContext();
 			
-			for(JobRunnerContext ctx : applicationService.getBeans(JobRunnerContext.class)) {
+			for(TaskRunnerContext ctx : applicationService.getBeans(TaskRunnerContext.class)) {
 				ctx.setupContext();
 			}
 			

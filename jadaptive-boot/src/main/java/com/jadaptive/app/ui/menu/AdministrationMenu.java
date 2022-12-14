@@ -13,7 +13,7 @@ public class AdministrationMenu implements ApplicationMenu {
 
 	@Override
 	public String getUuid() {
-		return ApplicationMenuService.ADMINISTRATION_MENU_UUID;
+		return ApplicationMenuService.SECURITY_MENU_UUID;
 	}
 	
 	@Override

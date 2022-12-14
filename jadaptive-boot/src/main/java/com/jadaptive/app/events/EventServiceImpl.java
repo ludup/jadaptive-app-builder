@@ -2,7 +2,10 @@ package com.jadaptive.app.events;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -26,8 +29,7 @@ import com.jadaptive.api.tenant.TenantService;
 @Service
 public class EventServiceImpl implements EventService { 
 
-	@SuppressWarnings("rawtypes")
-	Collection<EventListener> eventListeners = new ArrayList<>();
+	List<EventListener<?>> eventListeners = new ArrayList<>();
 	
 	@SuppressWarnings("rawtypes")
 	Map<String,Collection<EventListener>> keyedListeners = new HashMap<>();
@@ -67,6 +69,14 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public void registerListener(EventListener<?> listener) {
 		eventListeners.add(listener);
+		Collections.sort(eventListeners, new Comparator<EventListener<?>>() {
+
+			@Override
+			public int compare(EventListener<?> o1, EventListener<?> o2) {
+				return Integer.valueOf(o1.weight()).compareTo(o2.weight());
+			}
+			
+		});
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })

@@ -167,8 +167,11 @@ public class ReflectionUtils {
 	public static boolean hasAnnotation(Class<?> templateClazz, Class<? extends Annotation> annotationClazz) {
 		return templateClazz.getAnnotation(annotationClazz)!=null;
 	}
-
-
+	
+	public static boolean hasAnnotationRecursive(Class<?> templateClazz, Class<? extends Annotation> annotationClazz) {
+		return getAnnotation(templateClazz, annotationClazz)!=null;
+	}
+	
 	public static <T extends Annotation> T getAnnotation(Class<?> clz, Class<T> annotation) {
 		
 		do {

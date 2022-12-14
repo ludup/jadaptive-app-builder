@@ -4,7 +4,6 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.template.TemplateView;
 
 public class HiddenFormInput extends FieldInputRender {
 
@@ -12,7 +11,7 @@ public class HiddenFormInput extends FieldInputRender {
 		super(template, field);
 	}
 	
-	public final void renderInput(TemplateView panel, Element rootElement, String value) {
+	public final void renderInput(Element rootElement, String value) {
 	
 		rootElement.appendChild(new Element("input")
 						.attr("id", field.getFormVariable())

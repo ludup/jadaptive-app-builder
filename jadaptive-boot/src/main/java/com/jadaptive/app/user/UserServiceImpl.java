@@ -14,6 +14,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -39,6 +40,9 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	
 	@Autowired
 	private ApplicationService applicationService; 
+	
+	@Autowired
+	private EventService eventService; 
 	
 	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
 	
@@ -73,33 +77,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		User user = userRepository.get(uuid, User.class);
 		
-//		for(UserDatabase userDatabase : getOrderedDatabases()) {
-//			try {
-//				user = userDatabase.getUserByUUID(uuid);
-//				if(Objects.nonNull(user)) {
-//					break;
-//				}
-//			} catch(ObjectNotFoundException e) { }
-//		}
-		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("User with id %s not found", uuid));
 		}
 		return user;
 	}
-
-//	private List<UserDatabase> getOrderedDatabases() {
-//		loadUserDatabases();
-//		List<UserDatabase> tmp = new ArrayList<>(userDatabases.values());
-//		Collections.sort(tmp, new Comparator<UserDatabase>() {
-//
-//			@Override
-//			public int compare(UserDatabase o1, UserDatabase o2) {
-//				return o1.weight().compareTo(o2.weight());
-//			}
-//		});
-//		return tmp;
-//	}
 
 	@Override
 	public boolean verifyPassword(User user, char[] password) {
@@ -116,15 +98,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 
 		User user = userRepository.get(User.class, SearchField.eq("username", username));
 		
-//		for(UserDatabase userDatabase : getOrderedDatabases()) {
-//			try {
-//				user = userDatabase.getUser(username);
-//				if(Objects.nonNull(user)) {
-//					break;
-//				}
-//			} catch(ObjectNotFoundException e) { }
-//		}
-		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("%s not found", username));
 		}
@@ -135,15 +108,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	public User getUserByEmail(String email) {
 
 		User user = userRepository.get(User.class, SearchField.eq("email", email));
-		
-//		for(UserDatabase userDatabase : getOrderedDatabases()) {
-//			try {
-//				user = userDatabase.getUser(email);
-//				if(Objects.nonNull(user)) {
-//					break;
-//				}
-//			} catch(ObjectNotFoundException e) { }
-//		}
 		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("%s not found", email));
@@ -156,8 +120,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		permissionService.assertPermission(SET_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
-		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 		
+		try {
+			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+			eventService.publishEvent(new SetPasswordEvent(user));
+		} catch(Throwable e) {
+			eventService.publishEvent(new SetPasswordEvent(user, e));
+			throw e;
+		}
 	}
 	
 	@Override
@@ -165,8 +135,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
-		verifyPassword(user, oldPassword);
-		getDatabase(user).setPassword(user, newPassword, false);
+		
+		try {
+			verifyPassword(user, oldPassword);
+			getDatabase(user).setPassword(user, newPassword, false);
+			eventService.publishEvent(new ChangePasswordEvent());
+		} catch(Throwable e) {
+			eventService.publishEvent(new ChangePasswordEvent(e));
+		}
 		
 	}
 	
@@ -175,7 +151,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
-		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+		
+		try {
+			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+			eventService.publishEvent(new ChangePasswordEvent());
+		} catch(Throwable e) {
+			eventService.publishEvent(new ChangePasswordEvent(e));
+			throw e;
+		}
 		
 	}
 
@@ -306,6 +289,11 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 			tmp.add(user);
 		}
 		return tmp;
+	}
+
+	@Override
+	public long countUsers() {
+		return userRepository.count(User.class);
 	}
 
 }

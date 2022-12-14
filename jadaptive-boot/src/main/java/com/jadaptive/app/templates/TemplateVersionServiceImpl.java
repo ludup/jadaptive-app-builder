@@ -2,7 +2,6 @@ package com.jadaptive.app.templates;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.net.URI;
@@ -58,10 +57,8 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
-import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TemplateService;
-import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
@@ -601,6 +598,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 							  .define("value", resourceKey).build())
 					  .defineMethod("getObject", clz, Visibility.PUBLIC)
 			          .intercept(FieldAccessor.ofField("object"))
+			          .defineConstructor(Visibility.PUBLIC)
+					  .withParameters(clz, Throwable.class)
+					  .intercept(MethodCall
+					               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class, Throwable.class))
+					               .onSuper().with(eventKey, group).withArgument(1)
+					               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)))
 					  .make()
 					  .load(classService.getClassLoader())
 					  .getLoaded();
@@ -609,8 +612,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			registerAnnotatedTemplate(dynamicType);
 			
 		} catch (NoSuchMethodException | SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new IllegalStateException(e.getMessage(), e);
 		}
 
 	}
@@ -683,7 +685,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {
 				Class<?> clz = f.getType();
-				if(Collections.class.isAssignableFrom(clz)) {
+				if(Collection.class.isAssignableFrom(clz)) {
 					clz = (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
 				}
 				resourceKey = clz.getName();

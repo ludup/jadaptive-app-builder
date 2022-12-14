@@ -426,22 +426,22 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			if(Objects.isNull(v)) { 
 				TemplateView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
 				if(Objects.isNull(o)) {
-					throw new IllegalStateException(
-							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", field.getResourceKey()));
+					o = new TemplateView(template.getBundle(), currentView.value());
+					views.put(currentView.value(), o);
 				}
 				o.addField(new TemplateViewField(null, o, field, objectPath));				
 			} else if(StringUtils.isBlank(v.value())) {
 				TemplateView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
 				if(Objects.isNull(o)) {
-					throw new IllegalStateException(
-							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
+					o = new TemplateView(template.getBundle());
+					views.put(null, o);
 				}
 				o.addField(new TemplateViewField(v, o, field, objectPath));
 			} else {
 				TemplateView o = views.get(disableViews ? null : v.value());
 				if(Objects.isNull(o)) {
-					throw new IllegalStateException(
-							String.format("No view defined for %s. Did you forget an @ObjectViewDefinition?", v.value()));
+					o = new TemplateView(template.getBundle(), v.value());
+					views.put(v.value(), o);
 				}
 				o.addField(new TemplateViewField(v, o, field, objectPath));
 			}

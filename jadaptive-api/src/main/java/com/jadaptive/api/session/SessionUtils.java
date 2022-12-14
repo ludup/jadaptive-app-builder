@@ -55,8 +55,6 @@ public class SessionUtils {
 	@Autowired
 	private SingletonObjectDatabase<SessionConfiguration> sessionConfig; 
 	
-	public static final String SELF_UNSAFE_INLINE = "'self' 'unsafe-inline'";
-	public static final String SELF = "'self'";
 	public static final String UNSAFE_INLINE = "unsafe-inline";
 	
 	public User getCurrentUser() {
@@ -70,21 +68,6 @@ public class SessionUtils {
 		permissionService.setupSystemContext();
 		
 		try {
-
-			if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
-				session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
-				if(sessionService.isLoggedOn(session, true)) {
-					return session;
-				}
-			}
-			
-			if (request.getSession().getAttribute(AUTHENTICATED_SESSION) != null) {
-				session = (Session) request.getSession().getAttribute(
-						AUTHENTICATED_SESSION);
-				if(sessionService.isLoggedOn(session, true)) {
-					return session;
-				}
-			}
 			
 			if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
 				session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
@@ -92,19 +75,19 @@ public class SessionUtils {
 				session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
 			}
 			
-			if (session != null && sessionService.isLoggedOn(session, true)) {
-				return session;
-			}
-			
 			if(Objects.nonNull(request.getCookies())) {
 				for (Cookie c : request.getCookies()) {
 					if (c.getName().equals(SESSION_COOKIE)) {
 						session = sessionService.getSession(c.getValue());
-						if (session != null && sessionService.isLoggedOn(session, true)) {
-							return session;
+						if (session != null) {
+							break;
 						}
 					}
 				}
+			}
+			
+			if (session != null && sessionService.isLoggedOn(session, true)) {
+				return session;
 			}
 			
 		} catch(UnauthorizedException | ObjectNotFoundException e) { 
@@ -143,34 +126,17 @@ public class SessionUtils {
 			session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
 		}
 		
-		if (session != null && sessionService.isLoggedOn(session, false)) {
-			return session;
-		}
-		
-		if (request.getAttribute(AUTHENTICATED_SESSION) != null) {
-			session = (Session) request.getAttribute(AUTHENTICATED_SESSION);
-			if(sessionService.isLoggedOn(session, false)) {
-				return session;
-			}
-		}
-		
-		if (request.getSession().getAttribute(AUTHENTICATED_SESSION) != null) {
-			session = (Session) request.getSession().getAttribute(
-					AUTHENTICATED_SESSION);
-			if(sessionService.isLoggedOn(session, false)) {
-				return session;
-			}
-		}
-		
 		if(request.getCookies()!=null) {
 			for (Cookie c : request.getCookies()) {
 				if (c.getName().equals(SESSION_COOKIE)) {
 					session = sessionService.getSession(c.getValue());
-					if (session != null && sessionService.isLoggedOn(session, false)) {
-						return session;
-					}
+					break;
 				}
 			}
+		}
+		
+		if (session != null && sessionService.isLoggedOn(session, false)) {
+			return session;
 		}
 		
 		throw new UnauthorizedException();
@@ -425,8 +391,7 @@ public class SessionUtils {
 		response.setHeader("X-Content-Type-Options", "nosniff");
 		response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 		response.setHeader("Content-Security-Policy", 
-				String.format("default-src 'none'; font-src 'self'; script-src %s; style-src %s; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self';",
-						SELF, SELF));
+				"default-src 'none'; font-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self';");
 	}
 
 	public void setDoNotCache(HttpServletResponse response) {

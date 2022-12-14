@@ -101,18 +101,27 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 					}
 		
 					if (c.before(currentTime)) {
-						if (log.isDebugEnabled()) {
-							log.debug("Session has timed out");
+						
+						try {
+							session = getSession(session.getUuid());
+							
+							if (c.before(currentTime)) {
+								if (log.isDebugEnabled()) {
+									log.debug("Session has timed out");
+								}
+								closeSession(session);
+				
+								if (log.isDebugEnabled()) {
+									log.debug("Session "
+											+ session.getUser().getUsername() + "/"
+											+ session.getUuid() + " is now closed");
+								}
+								
+								return false;
+							}
+						} catch (UnauthorizedException e) {
+							return false;
 						}
-						closeSession(session);
-		
-						if (log.isDebugEnabled()) {
-							log.debug("Session "
-									+ session.getUser().getUsername() + "/"
-									+ session.getUuid() + " is now closed");
-						}
-		
-						return false;
 					}
 				}
 				if (touch) {

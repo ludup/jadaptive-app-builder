@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.AbstractObjectDatabase;
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TransactionService;
+import com.jadaptive.api.db.Transactional;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectType;
@@ -25,6 +27,7 @@ import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.UUIDEntityCreatedEvent;
 import com.jadaptive.api.events.UUIDEntityDeletedEvent;
 import com.jadaptive.api.events.UUIDEntityUpdatedEvent;
+import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDEvent;
@@ -55,6 +58,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	@Autowired
 	private TemplateVersionService templateService;
+	
+	@Autowired
+	private TransactionService transactionService; 
 	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
@@ -107,50 +113,76 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	@SuppressWarnings("unchecked")
 	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
 		try {
-
+			
 			T previous = null;
-			final boolean isEvent = obj instanceof UUIDEvent;
+			boolean isEvent = obj instanceof UUIDEvent;
 			
 			if(!isEvent && StringUtils.isNotBlank(obj.getUuid())) {
 				try {
 					previous = getObject(obj.getUuid(), database, (Class<T>) obj.getClass());
-				} catch(ObjectNotFoundException ex) {
+				} catch(ObjectNotFoundException e) {
 				}
 			}
 			
-			Document document = new Document();
-			document.put("resourceKey", obj.getResourceKey());
-			DocumentHelper.convertObjectToDocument(obj, document);
-			
-//			String contentHash = DocumentHelper.generateContentHash(templateRepository.get(obj.getResourceKey()), document);
-//			document.put("contentHash", contentHash);
-			
-//			if(Objects.nonNull(previous) && previous.getString("contentHash").equals(contentHash)) {
-//				if(log.isDebugEnabled()) {
-//					log.debug("Object {} with uuid {} has not been updated because it's new content hash is the same as the previous");
-//				}
-//				return;
-//			}
-			
-			db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
-			obj.setUuid(document.getString("_id"));
-			
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
-				cachedObjects.put(obj.getUuid(), obj);
-			}
-			
-			if(!isEvent && !(obj instanceof ObjectTemplate)) {
-				if(Objects.isNull(previous)) {
-					onObjectCreated(obj);
-				} else {
-					onObjectUpdated(obj, previous);
+			if(!transactionService.isTransactionActive()
+					&& ReflectionUtils.hasAnnotationRecursive(obj.getClass(), Transactional.class)) {
+				try {
+					final T previousObject = previous;
+					transactionService.executeTransaction(()->{
+						doSave(obj, database, previousObject, isEvent);
+					});
+				} catch(Throwable e) {
+					log.error("Failed to save object", e);
+					if(!isEvent && !(obj instanceof ObjectTemplate)) {
+						if(Objects.isNull(previous)) {
+							onCreatedError(obj, e);
+						} else {
+							onUpdateError(obj, previous, e);
+						}
+					}
+					throw e;
 				}
+			} else {
+				doSave(obj, database, previous, isEvent);
 			}
 			
 		} catch(Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: %s", obj.getClass().getSimpleName(), e.getMessage()), e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends UUIDEntity> void doSave(T obj, String database, T previous, boolean isEvent) {
+		
+		Document document = new Document();
+		document.put("resourceKey", obj.getResourceKey());
+		DocumentHelper.convertObjectToDocument(obj, document);
+		
+//		String contentHash = DocumentHelper.generateContentHash(templateRepository.get(obj.getResourceKey()), document);
+//		document.put("contentHash", contentHash);
+//		
+//		if(Objects.nonNull(previous) && previous.getString("contentHash").equals(contentHash)) {
+//			if(log.isDebugEnabled()) {
+//				log.debug("Object {} with uuid {} has not been updated because it's new content hash is the same as the previous");
+//			}
+//			return;
+//		}
+		
+		db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
+		obj.setUuid(document.getString("_id"));
+		
+		if(Boolean.getBoolean("jadaptive.cache")) {
+			Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+			cachedObjects.put(obj.getUuid(), obj);
+		}
+		
+		if(!isEvent && !(obj instanceof ObjectTemplate)) {
+			if(Objects.isNull(previous)) {
+				onObjectCreated(obj);
+			} else {
+				onObjectUpdated(obj, previous);
+			}
 		}
 	}
 	
@@ -421,6 +453,38 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 		
 		eventService.publishEvent(new UUIDEntityCreatedEvent<T>(obj));
+	}
+	
+	protected <T extends UUIDEntity> void onCreatedError(T obj, Throwable t) { 
+		
+		String eventKey = Events.created(obj.getResourceKey());
+		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
+		if(Objects.nonNull(eventClz)) {
+			try {
+				eventService.publishEvent(eventClz.getConstructor(obj.getClass(), Throwable.class).newInstance(obj, t));
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
+			}
+		}
+		
+		eventService.publishEvent(new UUIDEntityCreatedEvent<T>(obj, t));
+	}
+	
+	protected <T extends UUIDEntity> void onUpdateError(T obj, T previous, Throwable t) { 
+		
+		String eventKey = Events.updated(obj.getResourceKey());
+		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
+		if(Objects.nonNull(eventClz)) {
+			try {
+				eventService.publishEvent(eventClz.getConstructor(obj.getClass(), Throwable.class).newInstance(obj, t));
+			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
+			}
+		}
+		
+		eventService.publishEvent(new UUIDEntityUpdatedEvent<T>(obj, previous, t));
 	}
 	
 	protected <T extends UUIDEntity> void onObjectUpdated(T obj, T previousObject) {

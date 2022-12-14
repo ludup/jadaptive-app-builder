@@ -8,5 +8,7 @@ public interface AuthenticationPolicyService extends AbstractUUIDObjectService<A
 	AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, AuthenticationPolicy... additionalPolicies);
 
 	AuthenticationPolicy getDefaultPolicy();
+	
+	void setResolver(AuthenticationPolicyResolver resolver);
 
 }

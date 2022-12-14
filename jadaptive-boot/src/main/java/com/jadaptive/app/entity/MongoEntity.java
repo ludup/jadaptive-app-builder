@@ -130,7 +130,7 @@ public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 			throw new IllegalArgumentException("Use getChild to object embedded object");
 		default:
 			Object value = document.get(t.getResourceKey());
-			if(value==null) {
+			if(value==null && t.getFieldType().canDefault()) {
 				value = t.getDefaultValue();
 			}
 			return value;
