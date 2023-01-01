@@ -153,6 +153,10 @@ public class CollectionSearchFormInput {
 								.attr("jad:i18n", value.getName());
 				}
 			}
+		} else {
+			table.appendChild(Html.tr().appendChild(Html.td().attr("colspan", String.valueOf(2))
+					.addClass("text-center")
+					.appendChild(Html.i18n("default", "noResults.text"))));
 		}
 	}
 
