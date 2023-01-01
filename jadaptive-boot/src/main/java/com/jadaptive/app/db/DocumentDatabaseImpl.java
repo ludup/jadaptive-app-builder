@@ -602,7 +602,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				tmp.add(Filters.in(field.getColumn(), field.getValue()));
 				break;
 			case NOT:
-				tmp.add(Filters.ne(field.getColumn(), field.getValue()));
+				tmp.add(Filters.ne(field.getColumn(), field.getValue()[0]));
 				break;
 			case LIKE:
 				tmp.add(Filters.regex(field.getColumn(), field.getValue()[0].toString()));
