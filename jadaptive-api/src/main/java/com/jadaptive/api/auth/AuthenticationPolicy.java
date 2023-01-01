@@ -29,7 +29,8 @@ public class AuthenticationPolicy extends AssignableUUIDEntity {
 	private static final long serialVersionUID = -4581883248747380399L;
 
 	public static final String RESOURCE_KEY = "authenticationPolicy";
-
+	public static final String FEATURE_NAME = "Authentication Policies";
+	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
