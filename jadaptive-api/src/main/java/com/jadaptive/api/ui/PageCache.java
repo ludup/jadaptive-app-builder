@@ -217,6 +217,26 @@ public class PageCache {
 		throw new FileNotFoundException();
 	}
 	
+	public Page getPage(Class<? extends Page> clz) {
+		Page cachedPage = pageCache.get(clz);
+		if(Objects.nonNull(cachedPage)) {
+			return cachedPage;
+		}
+		try {
+			Collection<Page> pages = applicationService.getBeans(Page.class);
+			for(Page page : pages) {
+				if(page.getClass().equals(clz)) {
+					aliasCache.put(page.getUri(), page);
+					postCreation(page);
+					pageCache.put(page.getClass(), page);
+					return page;
+				}
+			}
+		} catch(NoSuchBeanDefinitionException | FileNotFoundException e) { }
+		
+		throw new IllegalStateException(String.format("Unknown page %s", clz.getSimpleName()));
+	}
+	
 	public PageExtension resolveExtension(String name) {
 		PageExtension cachedExtension = extensionsByName.get(name);
 		if(Objects.nonNull(cachedExtension)) {

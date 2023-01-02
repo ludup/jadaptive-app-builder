@@ -543,4 +543,11 @@ public class Utils {
 		
 		return date.getTime();
 	}
+
+	public static Long getLongOrDefault(String value, Long defaultValue) {
+		try {
+			return Long.parseLong(value);
+		} catch(NumberFormatException e) { }
+		return defaultValue;
+	}
 }
