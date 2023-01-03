@@ -14,4 +14,6 @@ public interface PropertyService {
 
 	void setString(String key, String value);
 
+	String getStringOrSaveDefault(String key, String defaultValue);
+
 }
