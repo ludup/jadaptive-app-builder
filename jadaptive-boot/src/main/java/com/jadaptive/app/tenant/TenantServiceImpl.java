@@ -233,6 +233,17 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public Tenant getSystemTenant() throws RepositoryException, ObjectException {
 		return systemTenant;
 	}
+	
+	@Override
+	public void setSystemOwner(String company, String name, String emailAddress) {
+		
+		Tenant tenant = getSystemTenant();
+		tenant.setName(company);
+		tenant.setOwnerName(name);
+		tenant.setOwnerEmail(emailAddress);
+		
+		repository.saveTenant(tenant);
+	}
 
 	@Override
 	public Tenant createTenant(String name, String ownerName, String ownerEmail, String primaryDomain, boolean system, String... additionalDomains) throws RepositoryException, ObjectException {

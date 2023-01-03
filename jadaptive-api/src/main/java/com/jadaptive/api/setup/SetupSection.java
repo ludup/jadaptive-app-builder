@@ -1,11 +1,15 @@
 package com.jadaptive.api.setup;
 
-import org.jsoup.nodes.Document;
+import java.io.IOException;
 
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.wizards.WizardSection;
 import com.jadaptive.api.ui.wizards.WizardState;
 
-public abstract class SetupSection extends WizardSection {
+public class SetupSection extends WizardSection {
 
 	public SetupSection(String bundle, String name, String resource) {
 		super(bundle, name, resource);
@@ -18,6 +22,10 @@ public abstract class SetupSection extends WizardSection {
 	@Override
 	public void processReview(Document document, WizardState state) {
 			
+	}
+	
+	@Override
+	protected void processSection(Document document, Element element, Page page) throws IOException {
 	}
 	
 
