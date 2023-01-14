@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.scheduler.ScheduledTask;
+import com.jadaptive.api.scheduler.TaskScope;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 
@@ -34,6 +35,11 @@ public class SessionReaperTask implements ScheduledTask {
 	@Override
 	public String cron() {
 		return EVERY_MINUTE;
+	}
+	
+	@Override
+	public TaskScope getScope() {
+		return TaskScope.NODE;
 	}
 
 }

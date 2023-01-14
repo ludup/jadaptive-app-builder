@@ -11,5 +11,7 @@ public interface ScheduledTask extends TenantTask {
 	
 	String cron();
 
+	TaskScope getScope();
+	
 	default boolean isSystemOnly() { return false; }
 }

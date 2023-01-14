@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.scheduler.ScheduledTask;
+import com.jadaptive.api.scheduler.TaskScope;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.utils.Utils;
@@ -42,6 +43,11 @@ public class SessionCleanupTask implements ScheduledTask {
 	@Override
 	public String cron() {
 		return AT_MIDNIGHT;
+	}
+	
+	@Override
+	public TaskScope getScope() {
+		return TaskScope.GLOBAL;
 	}
 
 }

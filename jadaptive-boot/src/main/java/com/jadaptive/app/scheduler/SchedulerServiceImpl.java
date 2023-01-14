@@ -1,15 +1,19 @@
 package com.jadaptive.app.scheduler;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.SingletonObjectDatabase;
+import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.SchedulerService;
@@ -20,6 +24,8 @@ import com.jadaptive.api.tenant.TenantAware;
 @Service
 public class SchedulerServiceImpl extends AuthenticatedService implements SchedulerService, TenantAware {
 
+	static Logger log = LoggerFactory.getLogger(SchedulerServiceImpl.class);
+	
 	@Autowired
 	private LockableTaskScheduler scheduler;
 	
@@ -29,6 +35,8 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	@Autowired
 	private ApplicationService applicationService; 
 	
+	@Autowired
+	private EventService eventService;
 	
 	Map<String,TenantJobRunner> scheduledJobs = new HashMap<>();
 	
@@ -41,6 +49,15 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	public void initializeSystem(boolean newSchema) {
 		initializeTenant(getCurrentTenant(), newSchema);
 		configureScheduler();
+		
+		eventService.deleted(Tenant.class, (evt)-> {
+			for(TenantJobRunner job : new ArrayList<>(scheduledJobs.values())) {
+				if(job.getTenantUUID().equals(evt.getObject().getUuid())) {
+					cancelTask(job.getTaskUUID(), true);
+					scheduledJobs.remove(job.getTaskUUID());
+				}
+			}
+		});
 	}
 
 	@Override
@@ -50,7 +67,15 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 			if(task.isSystemOnly() && !tenant.isSystem()) {
 				continue;
 			}
+			String scopes = System.getProperty("jadaptive.taskScopes", "NODE,GLOBAL");
 			
+			if(!scopes.contains(task.getScope().name())) {
+				if(log.isInfoEnabled()) {
+					log.info("Not scheduling task {} because it is {} scope and this node only supports {}",
+							task.getClass().getSimpleName(), task.getScope().name(), scopes);
+				}
+				continue;
+			}
 			TenantJobRunner job = new TenantJobRunner(tenant, UUID.randomUUID().toString());
 			applicationService.autowire(job);
 			job.schedule(task);

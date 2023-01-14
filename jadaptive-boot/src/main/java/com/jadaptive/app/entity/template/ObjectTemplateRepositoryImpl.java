@@ -3,6 +3,7 @@ package com.jadaptive.app.entity.template;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.UniqueIndex;
+import com.jadaptive.api.user.User;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.utils.Utils;
@@ -56,9 +58,9 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 	}
 	
 	@Override
-	public void createIndexes(ObjectTemplate template, Index[] nonUnique, UniqueIndex[] unique) {
+	public void createIndexes(ObjectTemplate template, Index[] nonUnique, UniqueIndex[] unique, boolean newSchema) {
 			
-		if(calculateIndexes(template, nonUnique, unique)) {
+		if(newSchema || calculateIndexes(template, nonUnique, unique)) {
 		
 			db.dropIndexes(template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
 		
@@ -117,28 +119,29 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 
 	private boolean calculateIndexes(ObjectTemplate template, Index[] nonUnique, UniqueIndex[] unique) {
 
-		Set<String> indexNames = db.getIndexNames(template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+		if(template.getResourceKey().equals(User.RESOURCE_KEY)) {
+			System.out.println();
+		}
+		
+		Set<String> indexNames = new TreeSet<>(db.getIndexNames(template.getResourceKey(), tenantService.getCurrentTenant().getUuid()));
+		Set<String> newIndexNames = new TreeSet<>();
 		
 		for(Index idx : nonUnique) {
-			String name = getIndexName("index", idx.columns());
-			indexNames.remove(name);
+			newIndexNames.add(getIndexName("index", idx.columns()));
 		}
 		
 		for(UniqueIndex idx : unique) {
-			String name = getIndexName("unique", idx.columns());
-			indexNames.remove(name);
+			newIndexNames.add(getIndexName("unique", idx.columns()));
 		}
 		
 		FieldTemplate textIndexField = null;
 		for(FieldTemplate field : template.getFields()) {
 			if(!field.getResourceKey().equalsIgnoreCase("uuid")) {
 				if(field.isUnique()) {
-					String name = getIndexName("unique", field.getResourceKey());
-					indexNames.remove(name);
+					newIndexNames.add(getIndexName("unique", field.getResourceKey()));
 				} else {
 					if(field.isSearchable() && !field.isTextIndex()) {
-						String name = getIndexName("index",field.getResourceKey());
-						indexNames.remove(name);
+						newIndexNames.add(getIndexName("index", field.getResourceKey()));
 					} else if(field.isTextIndex()) {
 						if(Objects.nonNull(textIndexField)) {
 							throw new IllegalStateException(
@@ -152,11 +155,18 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 			}
 		}
 		if(Objects.nonNull(textIndexField)) {
-			String name = getIndexName("text", textIndexField.getResourceKey());
-			indexNames.remove(name);
+			newIndexNames.add(getIndexName("text", textIndexField.getResourceKey()));
 		}
 		
-		return !indexNames.isEmpty();
+		if(newIndexNames.size()!= indexNames.size()) {
+			return true;
+		}
+		
+		Set<String> compare = new TreeSet<>(indexNames);
+		
+		indexNames.removeAll(newIndexNames);
+		newIndexNames.removeAll(compare);
+		return !(indexNames.isEmpty() && newIndexNames.isEmpty());
 	}
 
 	@Override

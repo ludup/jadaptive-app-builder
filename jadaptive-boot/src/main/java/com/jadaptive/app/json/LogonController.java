@@ -28,7 +28,6 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
-import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.TenantService;
@@ -113,7 +112,7 @@ public class LogonController {
 			sessionService.closeSession(session);
 			
 			return new RequestStatusImpl(true, "Session closed");
-		} catch(UnauthorizedException | SessionTimeoutException e) {
+		} catch(UnauthorizedException e) {
 			return new RequestStatusImpl(false, e.getMessage());
 		}
 	}

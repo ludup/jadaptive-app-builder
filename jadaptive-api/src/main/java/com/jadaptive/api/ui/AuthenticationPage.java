@@ -14,7 +14,6 @@ import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.user.UserService;
@@ -59,7 +58,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		try {
 			sessionUtils.getSession(Request.get());
 			throw new UriRedirect("/app/ui/dashboard");
-		} catch (UnauthorizedException | SessionTimeoutException e) {
+		} catch (UnauthorizedException e) {
 			
 			doGenerateContent(doc);
 		}

@@ -92,7 +92,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				systemTenant = repository.getSystemTenant();
 			}
 			
-			templateService.registerAnnotatedTemplates();
+			templateService.registerAnnotatedTemplates(newSchema);
 			
 			initialiseTenant(systemTenant, newSchema);
 			
@@ -100,7 +100,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				if(!tenant.isSystem()) {
 					setCurrentTenant(tenant);
 					try {
-						templateService.registerTenantIndexes();
+						templateService.registerTenantIndexes(newSchema);
 						initialiseTenant(tenant, false);
 					} finally {
 						clearCurrentTenant();
@@ -474,7 +474,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		if(!tenantsByUUID.containsKey(tenant.getUuid())) {
 			executeAs(tenant, ()-> {
-				templateService.registerTenantIndexes();
+				templateService.registerTenantIndexes(true);
 				initialiseTenant(tenant, true);
 				
 			});

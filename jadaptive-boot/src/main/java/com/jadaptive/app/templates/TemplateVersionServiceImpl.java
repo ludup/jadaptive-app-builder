@@ -375,7 +375,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 	@Override
-	public void registerAnnotatedTemplates() {
+	public void registerAnnotatedTemplates(boolean newSchema) {
 			
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
@@ -401,7 +401,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                         if(log.isInfoEnabled()) {
     						log.info("Found template {}", classInfo.getName());
     					}
-                    	registerAnnotatedTemplate(classInfo.loadClass());
+                    	registerAnnotatedTemplate(classInfo.loadClass(), newSchema);
                     }
                 }
             }
@@ -417,13 +417,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                 if(log.isInfoEnabled()) {
 					log.info("Found template {}", classInfo.getName());
 				}
-                registerAnnotatedTemplate(classInfo.loadClass());
+                registerAnnotatedTemplate(classInfo.loadClass(), newSchema);
             }
         }
 	}
 
 	@Override
-	public void registerAnnotatedTemplate(Class<?> clz) {
+	public void registerAnnotatedTemplate(Class<?> clz, boolean newSchema) {
 		
 		try {
 			
@@ -446,7 +446,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(!parents.isEmpty()) {
 				Collections.reverse(parents);
 				for(Class<?> parent : parents) {
-					registerAnnotatedTemplate(parent);
+					registerAnnotatedTemplate(parent, newSchema);
 				}
 			}
 			
@@ -536,10 +536,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				// Embedded objects do not have direct permissions
 			}
 			
-			registerIndexes(template, clz);
+			registerIndexes(template, clz, newSchema);
 			
 			if(generateEventTemplates) {
-				generateEventTemplates(template, clz, clz.getAnnotation(GenerateEventTemplates.class).value());
+				generateEventTemplates(template, clz, clz.getAnnotation(GenerateEventTemplates.class).value(), newSchema);
 			}
 			
 		} catch(RepositoryException | ObjectException e) {
@@ -553,15 +553,15 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return eventClasses.get(resourceKey);
 	}
 	
-	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, String group) {
+	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, String group, boolean newSchema) {
 	
-		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Created", template.getResourceKey(), template.getBundle(), group, clz, String.format("%s.created", template.getResourceKey()));
-		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Updated", template.getResourceKey(), template.getBundle(), group, clz, String.format("%s.updated", template.getResourceKey()));
-		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Deleted", template.getResourceKey(), template.getBundle(), group, clz, String.format("%s.deleted", template.getResourceKey()));
+		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Created", template.getResourceKey(), template.getBundle(), group, clz, String.format("%s.created", template.getResourceKey()), newSchema);
+		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Updated", template.getResourceKey(), template.getBundle(), group, clz, String.format("%s.updated", template.getResourceKey()), newSchema);
+		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Deleted", template.getResourceKey(), template.getBundle(), group, clz, String.format("%s.deleted", template.getResourceKey()), newSchema);
 		
 	}
 	
-	private void generateEventTemplate(String className, String resourceKey, String bundle, String group, Class<?> clz, String eventKey) {
+	private void generateEventTemplate(String className, String resourceKey, String bundle, String group, Class<?> clz, String eventKey, boolean newSchema) {
 		
 		Generic genericType = TypeDescription.Generic.Builder.parameterizedType(ObjectEvent.class, clz).build();
 		
@@ -609,7 +609,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					  .getLoaded();
 			
 			eventClasses.put(eventKey, dynamicType);
-			registerAnnotatedTemplate(dynamicType);
+			registerAnnotatedTemplate(dynamicType, newSchema);
 			
 		} catch (NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException(e.getMessage(), e);
@@ -618,16 +618,16 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 	@Override
-	public void registerTenantIndexes() {
+	public void registerTenantIndexes(boolean newSchema) {
 		
 		for(ObjectTemplate template : loadedTemplates.values()) {
 			if(!template.isSystem()) {
-				registerIndexes(template, templateService.getTemplateClass(template.getResourceKey()));
+				registerIndexes(template, templateService.getTemplateClass(template.getResourceKey()), newSchema);
 			}
 		}
  	}
 	
-	private void registerIndexes(ObjectTemplate template, Class<?> clz) {
+	private void registerIndexes(ObjectTemplate template, Class<?> clz, boolean newSchema) {
 		
 		Index[] nonUnique = clz.getAnnotationsByType(Index.class);
 		UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);
@@ -636,7 +636,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		case COLLECTION:
 		case SINGLETON:
 			if(!template.hasParent()) {
-				templateRepository.createIndexes(template, nonUnique, unique);
+				templateRepository.createIndexes(template, nonUnique, unique, newSchema);
 			}
 			break;
 		default:

@@ -12,12 +12,12 @@ public interface TemplateVersionService {
 
 	<E extends AbstractUUIDEntity>  void processTemplates(Tenant tenant, JsonTemplateEnabledService<E> repository);
 
-	void registerAnnotatedTemplates();
-
-	void registerAnnotatedTemplate(Class<?> clz);
-
-	void registerTenantIndexes();
+	void registerAnnotatedTemplates(boolean newSchema);
 
 	Class<? extends ObjectEvent<?>> getEventClass(String resourceKey);
+
+	void registerAnnotatedTemplate(Class<?> clz, boolean newSchema);
+
+	void registerTenantIndexes(boolean newSchema);
 
 }

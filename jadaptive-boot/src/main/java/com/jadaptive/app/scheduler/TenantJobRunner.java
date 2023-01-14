@@ -70,4 +70,12 @@ public class TenantJobRunner implements Runnable {
 		future.cancel(mayInterrupt);
 	}
 
+	public String getTenantUUID() {
+		return tenantUUID;
+	}
+	
+	public String getTaskUUID() {
+		return taskUUID;
+	}
+
 }

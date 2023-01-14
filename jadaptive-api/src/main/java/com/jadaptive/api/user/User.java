@@ -45,11 +45,11 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 	@ObjectView(DETAILS_VIEW)
 	String name;
 
-	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
 	@ObjectView("contact")
 	String email;
 
-	@ObjectField(searchable = true, nameField = false, type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
 	@ObjectView("contact")
 	String mobilePhone;
 	

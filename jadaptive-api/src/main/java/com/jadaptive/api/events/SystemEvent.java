@@ -88,7 +88,7 @@ public class SystemEvent extends UUIDEvent {
 	protected void attachSession() {
 		if(Request.isAvailable()) {
 			this.ipAddress = Request.isAvailable() ? Request.getRemoteAddress() : null;
-			Session session = ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).getActiveSession(Request.get());
+			Session session = ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).getActiveSession(Request.get(), false);
 			if(Objects.nonNull(session)) {
 				onSessionAttach(session);
 			}

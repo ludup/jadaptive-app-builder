@@ -62,6 +62,10 @@ public class SessionUtils {
 	}
 	
 	public Session getActiveSession(HttpServletRequest request) {
+		return getActiveSession(request, true);
+	}
+	
+	public Session getActiveSession(HttpServletRequest request, boolean touchSession) {
 		
 		Session session = null;
 		
@@ -85,9 +89,10 @@ public class SessionUtils {
 					}
 				}
 			}
-			
-			if (session != null && sessionService.isLoggedOn(session, true)) {
-				return session;
+			if(touchSession && session!=null) {
+				if(!sessionService.isLoggedOn(session, true)) {
+					session = null;
+				}
 			}
 			
 		} catch(UnauthorizedException | ObjectNotFoundException e) { 
@@ -96,7 +101,7 @@ public class SessionUtils {
 			permissionService.clearUserContext();
 		}
 
-		return null;
+		return session;
 	}
 
 	public Session touchSession(HttpServletRequest request,
@@ -113,7 +118,7 @@ public class SessionUtils {
 	}
 
 	public Session getSession(HttpServletRequest request)
-			throws UnauthorizedException, SessionTimeoutException {
+			throws UnauthorizedException {
 
 		/**
 		 * This method SHOULD NOT touch the session.

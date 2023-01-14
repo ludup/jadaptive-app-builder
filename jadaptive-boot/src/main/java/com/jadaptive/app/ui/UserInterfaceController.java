@@ -32,7 +32,6 @@ import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.ErrorPage;
@@ -68,7 +67,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		try {
 			session = sessionUtils.getSession(request);
 			return new RequestStatusImpl(session!=null);
-		} catch (UnauthorizedException | SessionTimeoutException e) {
+		} catch (UnauthorizedException e) {
 			Feedback.error(BUNDLE, "sessionTimeout.text");
 			return new RequestStatusImpl(false);
 		}
