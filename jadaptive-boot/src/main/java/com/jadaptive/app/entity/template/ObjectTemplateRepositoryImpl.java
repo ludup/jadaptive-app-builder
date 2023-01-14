@@ -118,10 +118,6 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 	}
 
 	private boolean calculateIndexes(ObjectTemplate template, Index[] nonUnique, UniqueIndex[] unique) {
-
-		if(template.getResourceKey().equals(User.RESOURCE_KEY)) {
-			System.out.println();
-		}
 		
 		Set<String> indexNames = new TreeSet<>(db.getIndexNames(template.getResourceKey(), tenantService.getCurrentTenant().getUuid()));
 		Set<String> newIndexNames = new TreeSet<>();
