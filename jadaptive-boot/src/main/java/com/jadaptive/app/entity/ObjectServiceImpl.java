@@ -368,29 +368,25 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
 		ObjectTemplate template = templateService.get(resourceKey);
-		
-		try {
-			
-			permissionService.assertRead(template.getResourceKey());
-			return entityRepository.table(template, offset, limit, 
-					generateSearchFields(searchField, searchValue, template));
-		
-		} catch(AccessDeniedException e) {
-			switch(template.getScope()) {
-			case PERSONAL:
-				return entityRepository.table(template, offset, limit,
-							generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
-			case ASSIGNED:
-				Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-				return entityRepository.table(template, offset, limit, 
-						generateSearchFields(searchField, searchValue, template, SearchField.or(
-								SearchField.in("users", getCurrentUser().getUuid()),
-								SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
-			case GLOBAL:
-			default:
+
+		switch(template.getScope()) {
+		case PERSONAL:
+			return entityRepository.table(template, offset, limit,
+						generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+		case ASSIGNED:
+			if(permissionService.isAdministrator(getCurrentUser())) {
 				return entityRepository.table(template, offset, limit, 
 						generateSearchFields(searchField, searchValue, template));
 			}
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return entityRepository.table(template, offset, limit, 
+					generateSearchFields(searchField, searchValue, template, SearchField.or(
+							SearchField.in("users", getCurrentUser().getUuid()),
+							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
+		case GLOBAL:
+		default:
+			return entityRepository.table(template, offset, limit, 
+					generateSearchFields(searchField, searchValue, template));
 		}
 		
 	}
@@ -424,26 +420,25 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	public long count(String resourceKey) {
 		ObjectTemplate template = templateService.get(resourceKey);
 		
-		try {
-			permissionService.assertRead(template.getResourceKey());
-			return entityRepository.count(template);
-		} catch(AccessDeniedException e) {
-			switch(template.getScope()) {
-			case PERSONAL:
-				return entityRepository.count(template,
-						SearchField.eq("ownerUUID", getCurrentUser().getUuid()));
-			case ASSIGNED:
-				Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-				return entityRepository.count(template,
-						SearchField.or(
-								SearchField.in("users", getCurrentUser().getUuid()),
-								SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
-						));			
-			case GLOBAL:
-			default:
+		switch(template.getScope()) {
+		case PERSONAL:
+			return entityRepository.count(template,
+					SearchField.eq("ownerUUID", getCurrentUser().getUuid()));
+		case ASSIGNED:
+			if(permissionService.isAdministrator(getCurrentUser())) {
 				return entityRepository.count(template);
 			}
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return entityRepository.count(template,
+					SearchField.or(
+							SearchField.in("users", getCurrentUser().getUuid()),
+							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
+					));			
+		case GLOBAL:
+		default:
+			return entityRepository.count(template);
 		}
+		
 		
 	}
 	

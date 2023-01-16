@@ -18,7 +18,6 @@ import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.UniqueIndex;
-import com.jadaptive.api.user.User;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.utils.Utils;
