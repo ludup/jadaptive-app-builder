@@ -51,6 +51,7 @@ public class Utils {
 	public static final String HTTP_URL_PATTERN = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$";
 	
 	public static final String ALLOWED_CHARACTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	public static final String PHONE_PATTERN = "^[+]*[()-\\s\\./0-9]*$";
 	
 	static Logger log = LoggerFactory.getLogger(Utils.class);
 

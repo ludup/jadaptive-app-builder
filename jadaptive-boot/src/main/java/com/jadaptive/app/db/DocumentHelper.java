@@ -288,7 +288,7 @@ public class DocumentHelper {
 			if(request instanceof StandardMultipartHttpServletRequest) {
 				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
 				if(file.isEmpty()) {
-					return null;
+					return request.getParameter(field.getFormVariable() + "_previous");
 				}
 				if(file.size() > 1) {
 					throw new IllegalStateException("Multiple file parts for single value!");
@@ -297,7 +297,7 @@ public class DocumentHelper {
 				
 				String encoded = Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
 				if(StringUtils.isBlank(encoded)) {
-					return null;
+					return request.getParameter(field.getFormVariable() + "_previous");
 				}
 				try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
 					BufferedImage bimg = ImageIO.read(in);

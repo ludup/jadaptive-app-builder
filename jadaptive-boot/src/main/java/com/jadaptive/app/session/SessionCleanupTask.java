@@ -30,7 +30,7 @@ public class SessionCleanupTask implements ScheduledTask {
 		try {
 			for(Session session : sessionService.inactiveSessions()) {
 				
-				Date threshold = DateUtils.addDays(session.getSignedOut(), 1);
+				Date threshold = DateUtils.addMinutes(session.getSignedOut(), 5);
 				if(threshold.before(Utils.now())) {
 					sessionService.deleteSession(session);
 				}

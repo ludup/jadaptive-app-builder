@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -246,9 +247,10 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public String saveOrUpdate(User user) {
 		UserDatabase db = getDatabase(user);
+		boolean isNew = StringUtils.isBlank(user.getUuid());
 		db.updateUser(user);
 		if(user instanceof PasswordEnabledUser) {
-			if(!db.hasEncryptedPassword(user)) {
+			if(isNew || !db.hasEncryptedPassword(user)) {
 				throw new UriRedirect("/app/ui/set-password/" + user.getUuid());
 			}
 		}

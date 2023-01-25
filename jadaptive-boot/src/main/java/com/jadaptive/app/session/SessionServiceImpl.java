@@ -155,7 +155,8 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	public void closeSession(Session session) {
 
 		log.info("Closing session " + session.getUser().getUsername() + "/"
-				+ session.getUuid() + " " + 
+				+ session.getUuid() 
+				+ " lastUpdated=" + 
 					(Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : "") 
 						+ " timeout=" + session.getSessionTimeout());
 		

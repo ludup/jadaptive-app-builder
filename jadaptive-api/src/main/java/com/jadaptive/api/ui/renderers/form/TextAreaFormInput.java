@@ -27,6 +27,7 @@ public class TextAreaFormInput extends FieldInputRender {
 				.appendChild(new Element("textarea")
 						.attr("id", field.getFormVariable())
 						.attr("name", field.getFormVariable())
+						.attr("rows", "15")
 						.addClass("form-control")
 						.val(value))
 				.appendChild(new Element("small")

@@ -31,7 +31,7 @@ import com.jadaptive.utils.Utils;
 @ObjectDefinition(resourceKey = SystemEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
      creatable = false, updatable = false, defaultColumn = "eventKey")
 @ObjectViews({@ObjectViewDefinition(value = "event", bundle = SystemEvent.RESOURCE_KEY, weight = Integer.MIN_VALUE)})
-@TableView(defaultColumns = { "state", "timestamp", "eventKey", "eventGroup", "ipAddress"}, 
+@TableView(defaultColumns = { "state", "timestamp", "username", "eventKey", "eventGroup", "ipAddress"}, 
 				sortOrder = SortOrder.DESC, sortField = "timestamp", requiresView = false,
 				actions = { @TableAction(bundle = SystemEvent.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/event/{resourceKey}/{uuid}" )})
 public class SystemEvent extends UUIDEvent {
@@ -39,6 +39,7 @@ public class SystemEvent extends UUIDEvent {
 	private static final long serialVersionUID = 4068966863055480029L;
 
 	public static final String RESOURCE_KEY = "systemEvent";
+	
 	public static final String EVENT_VIEW = "event";
 	
 	@ObjectField(type = FieldType.TIMESTAMP)
@@ -64,8 +65,16 @@ public class SystemEvent extends UUIDEvent {
 	String extendedInformation;
 	
 	@ObjectField(type = FieldType.ENUM)
-	@ObjectView(value = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.BOOTSTRAP_BADGE, weight = Integer.MIN_VALUE)
+	@ObjectView(value = "", renderer = FieldRenderer.BOOTSTRAP_BADGE, weight = Integer.MIN_VALUE)
 	EventState state = EventState.SUCCESS;
+	
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(value = EVENT_VIEW, weight = 9997, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
+	String username;
+	
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(value = EVENT_VIEW, weight = 9998, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
+	String name;
 	
 	public SystemEvent(String resourceKey, String eventGroup) {
 		this(resourceKey, eventGroup, Utils.now());
@@ -137,4 +146,20 @@ public class SystemEvent extends UUIDEvent {
 	
 	@JadaptiveIgnore
 	public boolean async() { return true; };
+	
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	};
 }

@@ -404,7 +404,9 @@ public class SessionUtils {
 	}
 	
 	public void setCachable(HttpServletResponse response, int age) {
-		response.setHeader("Cache-Control", "max-age=" + age + ", must-revalidate");
+		if(!Boolean.getBoolean("jadaptive.development")) {
+			response.setHeader("Cache-Control", "max-age=" + age + ", must-revalidate");
+		}
 	}
 	
 	public void addContentSecurityPolicy(HttpServletResponse response, String policy, String value) {

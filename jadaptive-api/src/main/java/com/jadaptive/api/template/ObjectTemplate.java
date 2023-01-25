@@ -151,6 +151,9 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	}
 
 	public String getDefaultColumn() {
+		if(StringUtils.isNotBlank(nameField)) {
+			return nameField;
+		}
 		return StringUtils.isBlank(defaultColumn) ? "uuid" : defaultColumn;
 	}
 

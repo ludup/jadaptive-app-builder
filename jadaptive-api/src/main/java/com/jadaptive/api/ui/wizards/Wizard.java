@@ -161,6 +161,8 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	
 	protected void documentComplete(Document document) throws IOException {
 
+		super.documentComplete(document);
+		
 		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
 		WizardSection ext = state.getCurrentPage();
 

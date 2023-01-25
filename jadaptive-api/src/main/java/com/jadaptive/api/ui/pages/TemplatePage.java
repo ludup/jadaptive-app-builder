@@ -93,8 +93,10 @@ public abstract class TemplatePage extends AuthenticatedPage {
 
 	}
 	
-	protected void documentComplete(Document document) {
+	protected void documentComplete(Document document) throws IOException {
 
+		super.documentComplete(document);
+		
 		Element form = document.selectFirst("form");
 		if(Objects.nonNull(form)) {
 			

@@ -383,7 +383,11 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		if(Objects.nonNull(view)) {
 			return view.sortField();
 		}
-		return "_id";
+		String val = template.getNameField();
+		if(val.equals("uuid")) {
+			return "_id";
+		}
+		return val;
 		
 	}
 	

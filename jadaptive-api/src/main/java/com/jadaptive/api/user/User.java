@@ -17,6 +17,7 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
+import com.jadaptive.utils.Utils;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
@@ -25,7 +26,8 @@ import com.jadaptive.api.template.Validator;
 @ObjectServiceBean(bean = UserService.class)
 @ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "contact", weight=100),
 	@ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)})
-@TableView(defaultColumns = { "username", "name", "lastLogin" }, requiresUpdate = true, actions = {
+@TableView(defaultColumns = { "username", "name", "lastLogin" },
+	requiresUpdate = true, sortField = "username", actions = {
 		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}", writeAction = true) })
 @Transactional
 public abstract class User extends UUIDEntity implements NamedDocument {
@@ -36,21 +38,24 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 	
 	private static final long serialVersionUID = 2210375165051752363L;
 
-	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true)
+	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true, nameField = true)
+	@ObjectView(DETAILS_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
 	String username;
 
-	@ObjectField(searchable = true, nameField = true, type = FieldType.TEXT)
+	@ObjectField(searchable = true, type = FieldType.TEXT)
 	@Validator(type = ValidationType.REQUIRED)
 	@ObjectView(DETAILS_VIEW)
 	String name;
 
 	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
+	@Validator(type = ValidationType.REGEX, value = Utils.EMAIL_PATTERN)
 	@ObjectView("contact")
 	String email;
 
 	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
 	@ObjectView("contact")
+	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN)
 	String mobilePhone;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true)

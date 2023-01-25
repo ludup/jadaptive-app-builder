@@ -21,7 +21,7 @@ import com.jadaptive.api.template.Validator;
 	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "optional", weight = -8888),
 	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "blockedIPs", weight = -7777),
 	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "allowedIPs", weight = -6666)})
-@TableView(defaultColumns = "name", requiresCreate = false, requiresUpdate = true)
+@TableView(defaultColumns = "name", requiresCreate = false, requiresUpdate = true, sortField = "weight")
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
 @GenerateEventTemplates(AuthenticationPolicy.RESOURCE_KEY)
 public class AuthenticationPolicy extends AssignableUUIDEntity {
