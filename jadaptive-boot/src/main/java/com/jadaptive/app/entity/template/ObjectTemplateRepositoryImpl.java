@@ -59,7 +59,7 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 	@Override
 	public void createIndexes(ObjectTemplate template, Index[] nonUnique, UniqueIndex[] unique, boolean newSchema) {
 			
-		if(newSchema || calculateIndexes(template, nonUnique, unique)) {
+		if(Boolean.getBoolean("jadaptive.rebuildIndexes") || newSchema || calculateIndexes(template, nonUnique, unique)) {
 		
 			db.dropIndexes(template.getResourceKey(), tenantService.getCurrentTenant().getUuid());
 		

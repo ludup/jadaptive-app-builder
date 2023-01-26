@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -36,6 +37,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
 import com.mongodb.client.model.Aggregates;
+import com.mongodb.client.model.Collation;
+import com.mongodb.client.model.CollationStrength;
+import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
@@ -109,25 +113,36 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void createTextIndex(String fieldName, String table, String database) {
 		String indexName = "text_" + fieldName;
 		MongoCollection<Document> collection = getCollection(table, database);
-
+		IndexOptions indexOptions = new IndexOptions()
+				.collation(getCollation())
+				.name(indexName);
 		ClientSession session = currentSession.get();
 		if(Objects.nonNull(session)) {
-			collection.createIndex(session, Indexes.text(fieldName), new IndexOptions().name(indexName));
+			collection.createIndex(session, Indexes.text(fieldName), indexOptions);
 		} else {
-			collection.createIndex(Indexes.text(fieldName), new IndexOptions().name(indexName));		
+			collection.createIndex(Indexes.text(fieldName), indexOptions);		
 		}
 	}
 	
+	private Collation getCollation() {
+		return Collation.builder().collationStrength(CollationStrength.PRIMARY)
+				.locale(Locale.getDefault().getLanguage())
+				.build();
+	}
+
 	@Override
 	public void createIndex(String table, String database, String... fieldNames) {
 		String indexName = "index_" + StringUtils.join(fieldNames, "_");
 		MongoCollection<Document> collection = getCollection(table, database);
-
+		IndexOptions indexOptions = new IndexOptions()
+				.collation(getCollation())
+				.name(indexName);
+		
 		ClientSession session = currentSession.get();
 		if(Objects.nonNull(session)) {
-			collection.createIndex(session, Indexes.ascending(fieldNames), new IndexOptions().name(indexName));
+			collection.createIndex(session, Indexes.ascending(fieldNames), indexOptions);
 		} else {
-			collection.createIndex(Indexes.ascending(fieldNames), new IndexOptions().name(indexName));		
+			collection.createIndex(Indexes.ascending(fieldNames), indexOptions);		
 		}
 	}
 	
@@ -147,7 +162,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void createUniqueIndex(String table, String database, String...fieldNames) {
 		String indexName = "unique_" + StringUtils.join(fieldNames, "_");
 		MongoCollection<Document> collection = getCollection(table, database);
-		IndexOptions indexOptions = new IndexOptions().unique(true).name(indexName);
+		IndexOptions indexOptions = new IndexOptions()
+				.collation(Collation.builder().collationStrength(CollationStrength.PRIMARY)
+						.locale(Locale.getDefault().getLanguage())
+						.caseLevel(false).build())
+				.unique(true)
+				.name(indexName);
 		
 		ClientSession session = currentSession.get();
 		if(Objects.nonNull(session)) {
@@ -251,7 +271,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document get(String table, String database, SearchField... fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		FindIterable<Document> result = collection.find(buildFilter(fields));
+		FindIterable<Document> result = collection.find(buildFilter(fields))
+				.collation(getCollation());
 		if(!result.cursor().hasNext()) {
 			throw new ObjectNotFoundException(String.format("Collection %s does not contain an object for search %s", table, buildSearchString(fields)));
 		}
@@ -319,7 +340,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document find(String field, String value, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		FindIterable<Document> result = collection.find(Filters.eq(field, value));
+		FindIterable<Document> result = collection.find(Filters.eq(field, value))
+												.collation(getCollation());
 		if(!result.cursor().hasNext()) {
 			throw new ObjectNotFoundException(String.format("%s %s for entity %s was not found", field, value, table));
 		}
@@ -365,7 +387,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		if(fields.length == 0) {
 			return collection.find();
 		} else {
-			return collection.find(buildFilter(fields));
+			return collection.find(buildFilter(fields))
+					.collation(getCollation());
 		}
 	}
 	
@@ -376,7 +399,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		if(fields.length == 0) {
 			return collection.find();
 		} else {
-			return collection.find(buildFilter(fields));
+			return collection.find(buildFilter(fields))
+					.collation(getCollation());
 		}
 	}
 	
@@ -387,7 +411,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		if(fields.length == 0) {
 			return collection.find().sort(getOrder(order, sortField));
 		} else {
-			return collection.find(buildFilter(fields)).sort(getOrder(order, sortField));
+			return collection.find(buildFilter(fields))
+					.collation(getCollation())
+					.sort(getOrder(order, sortField));
 		}
 	}
 	
@@ -398,7 +424,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		if(fields.length == 0) {
 			return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
 		} else {
-			return collection.find(buildFilter(fields)).sort(getOrder(order, sortField)).skip(start).limit(length);
+			return collection.find(buildFilter(fields))
+					.collation(getCollation())
+					.sort(getOrder(order, sortField)).skip(start).limit(length);
 		}
 	}
 		
@@ -418,7 +446,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		if(fields.length == 0) {
 			return collection.countDocuments();
 		} else {
-			return collection.countDocuments(buildFilter(fields));
+			CountOptions options = new CountOptions();
+			options.collation(getCollation());
+			return collection.countDocuments(buildFilter(fields), options);
 		}
 	}
 	
@@ -438,7 +468,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Long count(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		if(fields.length > 0) {
-			return collection.countDocuments(buildFilter(fields));
+			CountOptions options = new CountOptions();
+			options.collation(getCollation());
+			return collection.countDocuments(buildFilter(fields), options);
 		} else {
 			return collection.countDocuments();
 		}
@@ -605,7 +637,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				tmp.add(Filters.ne(field.getColumn(), field.getValue()[0]));
 				break;
 			case LIKE:
-				tmp.add(Filters.regex(field.getColumn(), field.getValue()[0].toString()));
+				tmp.add(Filters.regex(field.getColumn(), field.getValue()[0].toString(), "i"));
 				break;
 			case GT:
 				tmp.add(Filters.gt(field.getColumn(), field.getValue()[0]));
