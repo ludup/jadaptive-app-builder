@@ -55,7 +55,7 @@ public abstract class User extends UUIDEntity implements NamedDocument {
 
 	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
 	@ObjectView("contact")
-	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN)
+	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	String mobilePhone;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true)
