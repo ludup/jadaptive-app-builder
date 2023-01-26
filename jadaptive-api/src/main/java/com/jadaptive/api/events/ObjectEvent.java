@@ -3,7 +3,6 @@ package com.jadaptive.api.events;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
@@ -25,12 +24,6 @@ public abstract class ObjectEvent<T extends UUIDEntity> extends UserGeneratedEve
 	
 	public ObjectEvent(String resourceKey, String group, Throwable e) {
 		super(resourceKey, group, e);
-	}
-	
-	protected void onSessionAttach(Session session) {
-		super.onSessionAttach(session);
-		this.name = session.getUser().getName();
-		this.username = session.getUser().getUsername();
 	}
 
 	public abstract T getObject();

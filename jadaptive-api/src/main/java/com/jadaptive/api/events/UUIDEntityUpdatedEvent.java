@@ -2,6 +2,7 @@ package com.jadaptive.api.events;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -30,12 +31,18 @@ public class UUIDEntityUpdatedEvent<T extends UUIDEntity> extends ObjectEvent<T>
 	public UUIDEntityUpdatedEvent(T object, T previousObject) {
 		super(Events.updated(object.getEventGroup()), object.getEventGroup());
 		this.object = object;
+		if(object instanceof NamedUUIDEntity) {
+			setEventDescription(((NamedUUIDEntity)object).getName());
+		}
 		this.previousObject = previousObject;
 	}
 	
 	public UUIDEntityUpdatedEvent(T object, T previousObject, Throwable t) {
 		super(Events.updated(object.getEventGroup()), object.getEventGroup(), t);
 		this.object = object;
+		if(object instanceof NamedUUIDEntity) {
+			setEventDescription(((NamedUUIDEntity)object).getName());
+		}
 		this.previousObject = previousObject;
 	}
 	

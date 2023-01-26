@@ -8,6 +8,7 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.UUIDEvent;
 import com.jadaptive.api.servlet.Request;
@@ -26,12 +27,13 @@ import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
+import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = SystemEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
      creatable = false, updatable = false, defaultColumn = "eventKey")
 @ObjectViews({@ObjectViewDefinition(value = "event", bundle = SystemEvent.RESOURCE_KEY, weight = Integer.MIN_VALUE)})
-@TableView(defaultColumns = { "state", "timestamp", "username", "eventKey", "eventGroup", "ipAddress"}, 
+@TableView(defaultColumns = { "state", "timestamp", "username", "eventKey", "eventDescription", "ipAddress"}, 
 				sortOrder = SortOrder.DESC, sortField = "timestamp", requiresView = false,
 				actions = { @TableAction(bundle = SystemEvent.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/event/{resourceKey}/{uuid}" )})
 public class SystemEvent extends UUIDEvent {
@@ -76,6 +78,10 @@ public class SystemEvent extends UUIDEvent {
 	@ObjectView(value = EVENT_VIEW, weight = 9998, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
 	String name;
 	
+	@ObjectField(type = FieldType.TEXT)
+	@ObjectView(value = EVENT_VIEW, weight = 9998, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
+	String eventDescription;
+	
 	public SystemEvent(String resourceKey, String eventGroup) {
 		this(resourceKey, eventGroup, Utils.now());
 	}
@@ -94,18 +100,33 @@ public class SystemEvent extends UUIDEvent {
 		setSystem(true);
 	}
 	
-	protected void attachSession() {
+	public void setEventDescription(String objectName) {
+		this.eventDescription = objectName;
+	}
+	
+	public String getEventDescription() {
+		return eventDescription;
+	}
+	
+	private void attachSession() {
 		if(Request.isAvailable()) {
 			this.ipAddress = Request.isAvailable() ? Request.getRemoteAddress() : null;
 			Session session = ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).getActiveSession(Request.get(), false);
 			if(Objects.nonNull(session)) {
-				onSessionAttach(session);
+				this.name = session.getUser().getName();
+				this.username = session.getUser().getUsername();
+			} else {
+				PermissionService permissionService = ApplicationServiceImpl.getInstance().getBean(PermissionService.class);
+				if(permissionService.hasUserContext()) {
+					User user = permissionService.getCurrentUser();
+					this.name = user.getName();
+					this.username = user.getUsername();
+				}
+				
 			}
 		}
 	}
-	
-	protected void onSessionAttach(Session session) { }
-	
+
 	public String getResourceKey() {
 		return eventKey;
 	}

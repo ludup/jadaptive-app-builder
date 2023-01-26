@@ -1,5 +1,6 @@
 package com.jadaptive.api.events;
 
+import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.repository.UUIDEntity;
 
 public class UUIDEntityDeletedEvent<T extends UUIDEntity> extends ObjectEvent<T> {
@@ -11,11 +12,17 @@ public class UUIDEntityDeletedEvent<T extends UUIDEntity> extends ObjectEvent<T>
 	public UUIDEntityDeletedEvent(T object) {
 		super(Events.deleted(object.getEventGroup()), object.getEventGroup());
 		this.object = object;
+		if(object instanceof NamedUUIDEntity) {
+			setEventDescription(((NamedUUIDEntity)object).getName());
+		}
 	}
 	
 	public UUIDEntityDeletedEvent(T object, Throwable t) {
 		super(Events.deleted(object.getEventGroup()), object.getEventGroup(), t);
 		this.object = object;
+		if(object instanceof NamedUUIDEntity) {
+			setEventDescription(((NamedUUIDEntity)object).getName());
+		}
 	}
 
 	@Override
