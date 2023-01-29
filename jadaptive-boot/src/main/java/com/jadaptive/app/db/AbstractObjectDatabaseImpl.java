@@ -493,7 +493,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
 		if(Objects.nonNull(eventClz)) {
 			try {
-				eventService.publishEvent(eventClz.getConstructor(obj.getClass()).newInstance(obj));
+				eventService.publishEvent(eventClz.getConstructor(obj.getClass(), obj.getClass()).newInstance(obj, previousObject));
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);

@@ -11,6 +11,8 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,8 @@ import com.jadaptive.api.tenant.TenantService;
 @Service
 public class EventServiceImpl implements EventService { 
 
+	static Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
+	
 	List<EventListener<?>> eventListeners = new ArrayList<>();
 	
 	@SuppressWarnings("rawtypes")
@@ -41,6 +45,8 @@ public class EventServiceImpl implements EventService {
 	
 	@Autowired
 	private TenantService tenantService; 
+	
+	List<Runnable> preRegistrations = new ArrayList<>();
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -64,6 +70,24 @@ public class EventServiceImpl implements EventService {
 			}
 		}
 
+	}
+	
+	@Override
+	public void preRegisterEventHandler(Runnable runnable) {
+		preRegistrations.add(runnable);
+	}
+	
+	@Override 
+	public void executePreRegistrations() {
+		for(Runnable r : preRegistrations) {
+			try {
+				r.run();
+			} catch(Throwable e) {
+				log.error("Error in event pre-registration handler", e);
+			}
+		}
+		preRegistrations.clear();
+		preRegistrations = null;
 	}
 
 	@Override

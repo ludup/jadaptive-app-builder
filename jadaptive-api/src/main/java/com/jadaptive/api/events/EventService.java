@@ -15,6 +15,10 @@ public interface EventService {
 
 	void registerListener(EventListener<?> listener);
 
+	void preRegisterEventHandler(Runnable runnable);
+
+	void executePreRegistrations();
+
 	
 
 }

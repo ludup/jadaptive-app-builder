@@ -29,6 +29,7 @@ import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -65,6 +66,9 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	private ApplicationService applicationService; 
 
 	@Autowired
+	private EventService eventService; 
+	
+	@Autowired
 	private SingletonObjectDatabase<SystemConfiguration> systemConfig;
 	
 	
@@ -92,7 +96,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				systemTenant = repository.getSystemTenant();
 			}
 			
+			
+			
 			templateService.registerAnnotatedTemplates(newSchema);
+			
+			eventService.executePreRegistrations();
 			
 			initialiseTenant(systemTenant, newSchema);
 			
