@@ -1,5 +1,6 @@
 package com.jadaptive.app.entity.template;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -12,12 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.cache.CacheService;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.UniqueIndex;
+import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.utils.Utils;
@@ -38,6 +41,12 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 	@Override
 	public Class<ObjectTemplate> getResourceClass() {
 		return ObjectTemplate.class;
+	}
+	
+	@Override
+	public Collection<ObjectTemplate> findReferences(ObjectTemplate template) {
+		return searchObjects(SearchField.all("fields.validators.type", ValidationType.RESOURCE_KEY.name()),
+			SearchField.all("fields.validators.value", template.getResourceKey()));
 	}
 
 	private void createTextIndex(ObjectTemplate template, String fieldName) {

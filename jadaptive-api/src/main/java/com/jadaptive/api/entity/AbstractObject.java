@@ -41,4 +41,6 @@ public interface AbstractObject extends UUIDDocument {
 	void removeCollectionObject(String fieldName, AbstractObject existing);
 
 	void addCollectionObject(String fieldName, AbstractObject e);
+
+	boolean isNew();
 }

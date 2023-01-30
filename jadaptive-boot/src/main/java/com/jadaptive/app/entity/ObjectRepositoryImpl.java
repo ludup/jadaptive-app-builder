@@ -102,6 +102,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 
 	@Override
 	public void deleteAll(ObjectTemplate def) throws RepositoryException, ObjectException {
+		
 		db.dropCollection(def.getCollectionKey(), getDatabase(def));
 	}
 	

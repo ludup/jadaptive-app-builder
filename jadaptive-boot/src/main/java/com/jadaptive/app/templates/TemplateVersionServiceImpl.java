@@ -554,8 +554,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return eventClasses.get(resourceKey);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, String group, boolean newSchema) {
 	
+		if(log.isInfoEnabled()) {
+			log.info("Generating events for {}", template.getResourceKey());
+		}
 		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Created",
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				String.format("%s.created", template.getResourceKey()), newSchema,
@@ -677,7 +681,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			break;
 		}
 		case ENUM:
-		case OBJECT_REFERENCE:
 		{
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {
@@ -687,18 +690,41 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				}
 				resourceKey = clz.getName();
 			}
+			t.getValidators().add(new FieldValidator(
+					ValidationType.OBJECT_TYPE, 
+					f.getType().getName(),
+					ObjectTemplate.RESOURCE_KEY,
+					"objectType.invalid"));
+			t.getValidators().add(new FieldValidator(
+					ValidationType.RESOURCE_KEY, 
+					resourceKey,
+					ObjectTemplate.RESOURCE_KEY,
+					"resourceKey.invalid"));
+			break;
+		}
+		case OBJECT_REFERENCE:
+		{
+//			String resourceKey = field.references();
+//			if(StringUtils.isBlank(resourceKey)) {
+//				Class<?> clz = f.getType();
+//				if(Collection.class.isAssignableFrom(clz)) {
+//					clz = (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
+//				}
+//				resourceKey = clz.getName();
+//			}
 			if(StringUtils.isBlank(field.references())) {
-				t.getValidators().add(new FieldValidator(
-						ValidationType.OBJECT_TYPE, 
-						f.getType().getName(),
-						ObjectTemplate.RESOURCE_KEY,
-						"objectType.invalid"));
-				t.getValidators().add(new FieldValidator(
-						ValidationType.RESOURCE_KEY, 
-						resourceKey,
-						ObjectTemplate.RESOURCE_KEY,
-						"resourceKey.invalid"));
-				templateService.registerObjectDependency(resourceKey, template);
+//				t.getValidators().add(new FieldValidator(
+//						ValidationType.OBJECT_TYPE, 
+//						f.getType().getName(),
+//						ObjectTemplate.RESOURCE_KEY,
+//						"objectType.invalid"));
+//				t.getValidators().add(new FieldValidator(
+//						ValidationType.RESOURCE_KEY, 
+//						resourceKey,
+//						ObjectTemplate.RESOURCE_KEY,
+//						"resourceKey.invalid"));
+//				templateService.registerObjectDependency(resourceKey, template);
+				throw new IllegalStateException("Missing references attribute from OBJECT_REFERENCE typed @ObjectField annotation");
 			} else {
 				t.getValidators().add(new FieldValidator(
 						ValidationType.OBJECT_TYPE, 
@@ -710,7 +736,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 						field.references(),
 						ObjectTemplate.RESOURCE_KEY,
 						"resourceKey.invalid"));
-				templateService.registerObjectDependency(field.references(), template);
+//				templateService.registerObjectDependency(field.references(), template);
 			}
 			break;
 		}

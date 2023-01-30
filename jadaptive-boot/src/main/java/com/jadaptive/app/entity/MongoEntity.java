@@ -45,6 +45,11 @@ public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 		}
 	}
 	
+	@Override
+	public boolean isNew() {
+		return Objects.isNull(document.getOrDefault("_id", null));
+	}
+	
 	@SuppressWarnings("unchecked")
 	public MongoEntity(AbstractObject parent, String resourceKey, Map<String,Object> document) {
 		this.parent = parent;

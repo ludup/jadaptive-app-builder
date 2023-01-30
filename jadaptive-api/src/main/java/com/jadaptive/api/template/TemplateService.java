@@ -33,7 +33,7 @@ public interface TemplateService {
 
 	Iterable<ObjectTemplate> getTemplatesWithScope(ObjectScope personal);
 
-	void registerObjectDependency(String resourceKey, ObjectTemplate template);
+//	void registerObjectDependency(String resourceKey, ObjectTemplate template);
 
 	List<TemplateView> getViews(ObjectTemplate template, boolean singleView);
 

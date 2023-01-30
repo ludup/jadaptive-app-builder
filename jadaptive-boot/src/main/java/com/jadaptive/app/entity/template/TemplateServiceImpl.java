@@ -71,8 +71,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Autowired
 	private ClassLoaderService classService;
 	
-	Map<String,List<ObjectTemplate>> objectForwardDependencies = new HashMap<>();
-	Map<String,List<String>> objectReverseDependencies = new HashMap<>();
+//	Map<String,List<ObjectTemplate>> objectForwardDependencies = new HashMap<>();
+//	Map<String,List<String>> objectReverseDependencies = new HashMap<>();
 	Map<String,Class<?>> templateClazzes = new HashMap<>();
 	Map<Class<?>,String> templateResourceKeys = new HashMap<>();
 	
@@ -85,24 +85,24 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		templateResourceKeys.put(templateClazz, resourceKey);
 	}
 	
-	@Override
-	public void registerObjectDependency(String resourceKey, ObjectTemplate template) {
-		if(!objectForwardDependencies.containsKey(resourceKey)) {
-			objectForwardDependencies.put(resourceKey, new ArrayList<>());
-		}
-		List<ObjectTemplate> depends = objectForwardDependencies.get(resourceKey);
-		depends.add(template);
-		registerReverseDependency(template.getResourceKey(), resourceKey);
-	}
-	
-	private void registerReverseDependency(String resourceKey, String template) {
-		if(!objectReverseDependencies.containsKey(resourceKey)) {
-			objectReverseDependencies.put(resourceKey, new ArrayList<>());
-		}
-		List<String> depends = objectReverseDependencies.get(resourceKey);
-		depends.add(template);
-	}
-	
+//	@Override
+//	public void registerObjectDependency(String resourceKey, ObjectTemplate template) {
+//		if(!objectForwardDependencies.containsKey(resourceKey)) {
+//			objectForwardDependencies.put(resourceKey, new ArrayList<>());
+//		}
+//		List<ObjectTemplate> depends = objectForwardDependencies.get(resourceKey);
+//		depends.add(template);
+//		registerReverseDependency(template.getResourceKey(), resourceKey);
+//	}
+//	
+//	private void registerReverseDependency(String resourceKey, String template) {
+//		if(!objectReverseDependencies.containsKey(resourceKey)) {
+//			objectReverseDependencies.put(resourceKey, new ArrayList<>());
+//		}
+//		List<String> depends = objectReverseDependencies.get(resourceKey);
+//		depends.add(template);
+//	}
+//	
 	
 	@Override
 	public ObjectTemplate get(String resourceKey) throws RepositoryException, ObjectException {

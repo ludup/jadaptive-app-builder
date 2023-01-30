@@ -74,11 +74,7 @@ public class MockEntityTemplateService implements TemplateService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	@Override
-	public void registerObjectDependency(String resourceKey, ObjectTemplate template) {
-		// TODO Auto-generated method stub
-		
-	}
+
 	@Override
 	public List<TemplateView> getViews(ObjectTemplate template, boolean singleView) {
 		// TODO Auto-generated method stub

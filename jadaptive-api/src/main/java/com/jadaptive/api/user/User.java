@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.jadaptive.api.db.Transactional;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
@@ -17,10 +18,10 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
-import com.jadaptive.utils.Utils;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
+import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
 @ObjectServiceBean(bean = UserService.class)
@@ -30,6 +31,7 @@ import com.jadaptive.api.template.Validator;
 	requiresUpdate = true, sortField = "username", actions = {
 		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}", writeAction = true) })
 @Transactional
+@GenerateEventTemplates(User.RESOURCE_KEY)
 public abstract class User extends UUIDEntity implements NamedDocument {
 
 	public static final String RESOURCE_KEY = "users";

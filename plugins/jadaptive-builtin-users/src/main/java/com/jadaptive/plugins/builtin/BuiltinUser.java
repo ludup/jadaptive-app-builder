@@ -18,7 +18,6 @@ import com.jadaptive.utils.PasswordEncryptionType;
 @ObjectDefinition(resourceKey = BuiltinUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 @ObjectServiceBean(bean = UserService.class)
 @ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "passwordOptions", weight=300) })
-@GenerateEventTemplates(BuiltinUser.RESOURCE_KEY)
 public class BuiltinUser extends PasswordEnabledUser {
 
 	private static final long serialVersionUID = -4186606233520076592L;

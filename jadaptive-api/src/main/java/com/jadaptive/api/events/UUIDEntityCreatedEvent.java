@@ -2,6 +2,7 @@ package com.jadaptive.api.events;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldType;
@@ -29,16 +30,16 @@ public class UUIDEntityCreatedEvent<T extends UUIDEntity> extends ObjectEvent<T>
 	public UUIDEntityCreatedEvent(T object) {
 		super(Events.created(object.getEventGroup()), object.getEventGroup());
 		this.object = object;
-		if(object instanceof NamedUUIDEntity) {
-			setEventDescription(((NamedUUIDEntity)object).getName());
+		if(object instanceof NamedDocument) {
+			setEventDescription(((NamedDocument)object).getName());
 		}
 	}
 	
 	public UUIDEntityCreatedEvent(T object, Throwable e) {
 		super(Events.created(object.getEventGroup()), object.getEventGroup(), e);
 		this.object = object;
-		if(object instanceof NamedUUIDEntity) {
-			setEventDescription(((NamedUUIDEntity)object).getName());
+		if(object instanceof NamedDocument) {
+			setEventDescription(((NamedDocument)object).getName());
 		}
 	}
 
