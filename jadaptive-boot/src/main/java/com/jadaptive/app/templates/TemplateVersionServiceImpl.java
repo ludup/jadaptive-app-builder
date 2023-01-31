@@ -563,22 +563,22 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Created",
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				String.format("%s.created", template.getResourceKey()), newSchema,
-				(Class<? extends ObjectEvent<? extends UUIDEntity>>) UUIDEntityCreatedEvent.class);
+				UUIDEntityCreatedEvent.class);
 		
 		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Updated", 
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				String.format("%s.updated", template.getResourceKey()), newSchema,
-				(Class<? extends ObjectEvent<? extends UUIDEntity>>) UUIDEntityUpdatedEvent.class);
+				UUIDEntityUpdatedEvent.class);
 		
 		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Deleted",
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				String.format("%s.deleted", template.getResourceKey()), newSchema,
-				(Class<? extends ObjectEvent<? extends UUIDEntity>>) UUIDEntityDeletedEvent.class);
+				UUIDEntityDeletedEvent.class);
 		
 	}
 	
 	private void generateEventTemplate(String className, String resourceKey, String bundle, String group, Class<?> clz, 
-			String eventKey, boolean newSchema, Class<? extends ObjectEvent<?>> extendingEvent) {
+			String eventKey, boolean newSchema, Class<?> extendingEvent) {
 		
 		Generic genericType = TypeDescription.Generic.Builder.parameterizedType(extendingEvent, clz).build();
 		
