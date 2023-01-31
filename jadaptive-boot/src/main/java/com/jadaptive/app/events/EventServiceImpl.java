@@ -21,9 +21,7 @@ import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.Events;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.SystemEvent;
-import com.jadaptive.api.events.UUIDEntityCreatedEvent;
-import com.jadaptive.api.events.UUIDEntityDeletedEvent;
-import com.jadaptive.api.events.UUIDEntityUpdatedEvent;
+import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.tenant.TenantService;
@@ -52,6 +50,12 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public void publishEvent(SystemEvent evt) {
 	
+		if(evt instanceof ObjectEvent) {
+			ObjectEvent<?> oevt = (ObjectEvent<?>)evt;
+			if(oevt.getObject() instanceof NamedDocument) {
+				oevt.setEventDescription(((NamedDocument)oevt.getObject()).getName());
+			}
+		}
 		for(EventListener listener : eventListeners) {
 			fireEvent(listener, evt);
 		}
@@ -134,17 +138,17 @@ public class EventServiceImpl implements EventService {
 	}
 	
 	@Override
-	public <T extends UUIDEntity> void created(Class<T> clz, EventListener<UUIDEntityCreatedEvent<T>> handler) {
+	public <T extends UUIDEntity> void created(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
 		on(Events.created(templateService.getTemplateResourceKey(clz)), handler);
 	}
 
 	@Override
-	public <T extends UUIDEntity> void updated(Class<T> clz, EventListener<UUIDEntityUpdatedEvent<T>> handler) {
+	public <T extends UUIDEntity> void updated(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
 		on(Events.updated(templateService.getTemplateResourceKey(clz)), handler);
 	}
 
 	@Override
-	public <T extends UUIDEntity> void deleted(Class<T> clz, EventListener<UUIDEntityDeletedEvent<T>> handler) {
+	public <T extends UUIDEntity> void deleted(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
 		on(Events.deleted(templateService.getTemplateResourceKey(clz)), handler);
 	}
 }

@@ -1,5 +1,6 @@
 package com.jadaptive.app.db;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,9 +25,7 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.Events;
 import com.jadaptive.api.events.ObjectEvent;
-import com.jadaptive.api.events.UUIDEntityCreatedEvent;
-import com.jadaptive.api.events.UUIDEntityDeletedEvent;
-import com.jadaptive.api.events.UUIDEntityUpdatedEvent;
+import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -423,57 +422,91 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> void onObjectDeleted(T obj) {
+	protected <T extends UUIDEntity> void fireEvent(String eventKey, T obj) {
 		
-		String eventKey = Events.deleted(obj.getResourceKey());
 		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
+		
 		if(Objects.nonNull(eventClz)) {
 			try {
-				eventService.publishEvent(eventClz.getConstructor(obj.getClass()).newInstance(obj));
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
+				eventService.publishEvent(createSuccessEvent(eventClz, obj));
+			} catch(Throwable e) {
+				log.error(e.getMessage(), e);
 			}
 		}
-		
-		eventService.publishEvent(new UUIDEntityDeletedEvent<T>(obj));		
 	}
+	
+	protected <T extends UUIDEntity> void fireEvent(String eventKey, T obj, Throwable t) {
+		
+		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
+		
+		if(Objects.nonNull(eventClz)) {
+			try {
+				eventService.publishEvent(createErrorEvent(eventClz, obj, t));
+			} catch(Throwable e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+	}
+	
+	protected <T extends UUIDEntity> SystemEvent createSuccessEvent(Class<? extends ObjectEvent<?>> eventClz, T obj) {
+		
+		try {
+			for(Constructor<?> c : eventClz.getConstructors()) {
+				if(c.getParameterCount()==1) {
+					if(c.getParameterTypes()[0].isAssignableFrom(obj.getClass())) {
+						return (SystemEvent) c.newInstance(obj);
+					}
+				}
+			}
+			
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException | SecurityException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+		
+		throw new IllegalStateException("No such constructor for event " + eventClz.getName() + " and object " + obj.getClass().getName());
+	}
+	
+	protected <T extends UUIDEntity> SystemEvent createErrorEvent(Class<? extends ObjectEvent<?>> eventClz, T obj, Throwable t) {
+		
+		try {
+			for(Constructor<?> c : eventClz.getConstructors()) {
+				if(c.getParameterCount()==2) {
+					if(c.getParameterTypes()[0].isAssignableFrom(obj.getClass())
+							&& c.getParameterTypes()[1].isAssignableFrom(Throwable.class)) {
+						return (SystemEvent) c.newInstance(obj, t);
+					}
+				}
+			}
+			
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException | SecurityException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+		
+		throw new IllegalStateException("No such constructor for event " + eventClz.getName() + " and object " + obj.getClass().getName());
+	}
+
+	protected <T extends UUIDEntity> void onObjectDeleted(T obj) {
+		
+		fireEvent(Events.deleted(obj.getEventGroup()), obj);
+		
+	}
+	
 
 	protected <T extends UUIDEntity> void onObjectCreated(T obj) { 
 		
-		String eventKey = Events.created(obj.getResourceKey());
-		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
-		if(Objects.nonNull(eventClz)) {
-			try {
-				eventService.publishEvent(eventClz.getConstructor(obj.getClass()).newInstance(obj));
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
-			}
-		}
-		
-		eventService.publishEvent(new UUIDEntityCreatedEvent<T>(obj));
+		fireEvent(Events.created(obj.getEventGroup()), obj);
 	}
-	
+
 	protected <T extends UUIDEntity> void onCreatedError(T obj, Throwable t) { 
 		
-		String eventKey = Events.created(obj.getResourceKey());
-		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
-		if(Objects.nonNull(eventClz)) {
-			try {
-				eventService.publishEvent(eventClz.getConstructor(obj.getClass(), Throwable.class).newInstance(obj, t));
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
-			}
-		}
 		
-		eventService.publishEvent(new UUIDEntityCreatedEvent<T>(obj, t));
 	}
 	
 	protected <T extends UUIDEntity> void onUpdateError(T obj, T previous, Throwable t) { 
 		
-		String eventKey = Events.updated(obj.getResourceKey());
+		String eventKey = Events.updated(obj.getEventGroup());
 		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
 		if(Objects.nonNull(eventClz)) {
 			try {
@@ -483,24 +516,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
 			}
 		}
-		
-		eventService.publishEvent(new UUIDEntityUpdatedEvent<T>(obj, previous, t));
 	}
 	
 	protected <T extends UUIDEntity> void onObjectUpdated(T obj, T previousObject) {
 		
-		String eventKey = Events.updated(obj.getResourceKey());
-		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
-		if(Objects.nonNull(eventClz)) {
-			try {
-				eventService.publishEvent(eventClz.getConstructor(obj.getClass(), obj.getClass()).newInstance(obj, previousObject));
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
-			}
-		}
-		
-		eventService.publishEvent(new UUIDEntityUpdatedEvent<T>(obj, previousObject));
+		fireEvent(Events.updated(obj.getEventGroup()), obj);
 	}
 	
 	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {
