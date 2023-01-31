@@ -49,6 +49,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
@@ -554,7 +555,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return eventClasses.get(resourceKey);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, String group, boolean newSchema) {
 	
 		if(log.isInfoEnabled()) {
@@ -563,17 +563,17 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Created",
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				String.format("%s.created", template.getResourceKey()), newSchema,
-				(Class<? extends ObjectEvent<?>>) UUIDEntityCreatedEvent.class);
+				(Class<? extends ObjectEvent<? extends UUIDEntity>>) UUIDEntityCreatedEvent.class);
 		
 		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Updated", 
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				String.format("%s.updated", template.getResourceKey()), newSchema,
-				(Class<? extends ObjectEvent<?>>) UUIDEntityUpdatedEvent.class);
+				(Class<? extends ObjectEvent<? extends UUIDEntity>>) UUIDEntityUpdatedEvent.class);
 		
 		generateEventTemplate(StringUtils.capitalize(template.getResourceKey()) + "Deleted",
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				String.format("%s.deleted", template.getResourceKey()), newSchema,
-				(Class<? extends ObjectEvent<?>>) UUIDEntityDeletedEvent.class);
+				(Class<? extends ObjectEvent<? extends UUIDEntity>>) UUIDEntityDeletedEvent.class);
 		
 	}
 	
