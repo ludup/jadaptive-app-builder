@@ -395,7 +395,12 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	public FieldRenderer getRenderer(FieldTemplate field, ObjectTemplate template) {
 		
 		try {
-			Field f = ReflectionUtils.getField(getTemplateClass(template.getResourceKey()), field.getResourceKey());
+			Class<?> clz = getTemplateClass(template.getResourceKey());
+			if(Objects.isNull(clz)) {
+				log.warn("Template class for {} appears to be missing", template.getResourceKey());
+				return FieldRenderer.DEFAULT;
+			}
+			Field f = ReflectionUtils.getField(clz, field.getResourceKey());
 			ObjectView v = f.getAnnotation(ObjectView.class);
 			if(Objects.nonNull(v)) {
 				return v.renderer() == null ? FieldRenderer.DEFAULT : v.renderer();
