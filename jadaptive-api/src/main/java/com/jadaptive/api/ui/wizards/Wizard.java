@@ -169,7 +169,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		URL url = ext.getClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendScript(document, "/app/script/" +
-					ext.getClass().getPackageName().replace('.', '/') 
+					ext.getClass().getPackage().getName().replace('.', '/') 
 						+ "/" + FileUtils.checkStartsWithNoSlash(ext.getJsResource()));
 		} else {
 			url = classService.getResource(ext.getJsResource());
@@ -182,7 +182,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		url = ext.getClass().getResource(ext.getCssResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendStylesheet(document, "/app/style/" +
-					ext.getClass().getPackageName().replace('.', '/') 
+					ext.getClass().getPackage().getName().replace('.', '/') 
 						+ "/" + FileUtils.checkStartsWithNoSlash(ext.getCssResource()));
 		} else {
 			url = classService.getResource(ext.getCssResource());

@@ -458,8 +458,12 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				case OBJECT_REFERENCE:
 					String resourceKey = f.getValidationValue(ValidationType.RESOURCE_KEY);
 					ObjectTemplate t = templateService.get(resourceKey);
-					
-					fields.add(SearchField.all(searchField, searchValue));
+					FieldTemplate field = t.getField(searchField);
+					if(field.getCollection()) {
+						fields.add(SearchField.all(searchField, searchValue));
+					} else {
+						fields.add(SearchField.eq(searchField, searchValue));
+					}
 					break;
 				default:
 					fields.add(SearchField.like(searchField, searchValue));
