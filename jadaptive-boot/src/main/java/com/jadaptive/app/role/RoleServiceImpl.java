@@ -81,6 +81,11 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 
 
 	@Override
+	public <T extends AssignableUUIDEntity> boolean hasEveryoneRole(T obj) {
+		return obj.getRoles().contains(EVERYONE_UUID);
+	}
+	
+	@Override
 	public Role getAdministrationRole() {
 		return repository.get(ADMINISTRATOR_UUID, Role.class);
 	}

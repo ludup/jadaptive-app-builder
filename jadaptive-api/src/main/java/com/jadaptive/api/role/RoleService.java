@@ -72,4 +72,6 @@ public interface RoleService {
 
 	Collection<Role> getAdministrationRoles();
 
+	<T extends AssignableUUIDEntity> boolean hasEveryoneRole(T obj);
+
 }
