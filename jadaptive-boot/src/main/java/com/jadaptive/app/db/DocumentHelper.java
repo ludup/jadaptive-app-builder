@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,6 +37,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Hex;
 import org.bson.Document;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -219,6 +221,27 @@ public class DocumentHelper {
 	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document) throws ObjectException, ValidationException {
 		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
 	}
+	
+	private static String getParameter(HttpServletRequest request, FieldTemplate field) {
+		return getParameter(request, field.getFormVariable());
+	}
+	
+	private static String getParameter(HttpServletRequest request, String formVariable) {
+//		switch(field.getFieldType()) {
+//		case TEXT:
+//			return Encode.forJava(request.getParameter(formVariable));
+//			break;
+//		case TEXT_AREA:
+//			return Encode.forJava(request.getParameter(formVariable))
+//		default:
+//			try {
+//				return URLDecoder.decode(request.getParameter(formVariable), "UTF-8");
+//			} catch (UnsupportedEncodingException e) {
+//				return "";
+//			}
+//		}
+		return request.getParameter(formVariable);
+	}
 
 	public static AbstractObject buildObject(HttpServletRequest request, String fieldName, ObjectTemplate template) throws IOException, ValidationException {
 
@@ -264,7 +287,7 @@ public class DocumentHelper {
 		
 		String fieldName = field.getFormVariable();
 		
-		String value = request.getParameter(fieldName);
+		String value = getParameter(request, field);
 
 		switch(field.getFieldType()) {
 		case OBJECT_EMBEDDED:
@@ -288,7 +311,7 @@ public class DocumentHelper {
 			if(request instanceof StandardMultipartHttpServletRequest) {
 				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
 				if(file.isEmpty()) {
-					return request.getParameter(field.getFormVariable() + "_previous");
+					return getParameter(request, field.getFormVariable() + "_previous");
 				}
 				if(file.size() > 1) {
 					throw new IllegalStateException("Multiple file parts for single value!");
@@ -297,7 +320,7 @@ public class DocumentHelper {
 				
 				String encoded = Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
 				if(StringUtils.isBlank(encoded)) {
-					return request.getParameter(field.getFormVariable() + "_previous");
+					return getParameter(request, field.getFormVariable() + "_previous");
 				}
 				try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
 					BufferedImage bimg = ImageIO.read(in);
@@ -325,7 +348,7 @@ public class DocumentHelper {
 				}
 				
 			}
-			return request.getParameter(field.getFormVariable() + "_previous");
+			return getParameter(request, field.getFormVariable() + "_previous");
 		case FILE:
 			if(request instanceof StandardMultipartHttpServletRequest) {
 				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
@@ -340,7 +363,7 @@ public class DocumentHelper {
 					return Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
 				}
 			}
-			return request.getParameter(field.getFormVariable() + "_previous");
+			return getParameter(request, field.getFormVariable() + "_previous");
 		default:
 			if(Objects.isNull(value)) {
 				
