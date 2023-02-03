@@ -227,7 +227,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			}
 			case OBJECT_EMBEDDED:
 			{
-				validateReference(reference, foreignType, foreignKey, generateFieldName(parentField, field));
+				validateReference(templateRepository.get(field.getValidationValue(ValidationType.RESOURCE_KEY)), 
+						foreignType, foreignKey, generateFieldName(parentField, field));
 				break;
 			}
 			default:

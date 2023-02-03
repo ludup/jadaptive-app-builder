@@ -16,6 +16,7 @@ import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
@@ -45,7 +46,9 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 	
 	@Override
 	public Collection<ObjectTemplate> findReferences(ObjectTemplate template) {
-		return searchObjects(SearchField.all("fields.validators.type", ValidationType.RESOURCE_KEY.name()),
+		return searchObjects(
+				SearchField.all("fields.fieldType", FieldType.OBJECT_REFERENCE.name()),
+				SearchField.all("fields.validators.type", ValidationType.RESOURCE_KEY.name()),
 			SearchField.all("fields.validators.value", template.getResourceKey()));
 	}
 
