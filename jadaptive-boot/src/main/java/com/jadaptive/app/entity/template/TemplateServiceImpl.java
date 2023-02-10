@@ -25,7 +25,6 @@ import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectScope;
-import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -61,10 +60,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 	@Autowired
 	private ObjectTemplateRepository repository; 
-	
-	@Autowired
-	private ObjectService entityService;
-	
+
 	@Autowired
 	private PermissionService permissionService; 
 	
@@ -126,6 +122,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		return repository.list();
 	}
 	
+	
+	
 	@Override
 	public Iterable<ObjectTemplate> children(String uuid) {
 		return repository.list(SearchField.eq("parentTemplate", uuid));
@@ -156,16 +154,6 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		permissionService.assertReadWrite(ObjectTemplate.RESOURCE_KEY);
 		
 		repository.saveOrUpdate(template);
-		
-	}
-
-	@Override
-	public void delete(String uuid) throws ObjectException {
-		
-		permissionService.assertReadWrite(ObjectTemplate.RESOURCE_KEY);
-		
-		entityService.deleteAll(uuid);
-		repository.delete(uuid);
 		
 	}
 	
@@ -478,6 +466,18 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			return getTemplateResourceKey(classService.getClassLoader().loadClass(clz));
 		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(String.format("Missing template for class %s", clz));
+		}
+	}
+
+	@Override
+	public void delete(ObjectTemplate objectTemplate) {
+		
+		repository.delete(objectTemplate);
+		templateClazzes.remove(objectTemplate.getResourceKey());
+		try {
+			templateResourceKeys.remove(classService.getClassLoader().loadClass(objectTemplate.getTemplateClass()));
+		} catch (ClassNotFoundException e) {
+			throw new IllegalStateException(String.format("Missing template for class %s", objectTemplate.getTemplateClass()));
 		}
 	}
 }

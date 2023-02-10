@@ -11,7 +11,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +36,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.util.encoders.Hex;
 import org.bson.Document;
-import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
@@ -284,8 +282,6 @@ public class DocumentHelper {
 	}
 	
 	private static Object convertValue(FieldTemplate field, HttpServletRequest request) throws IOException, ValidationException {
-		
-		String fieldName = field.getFormVariable();
 		
 		String value = getParameter(request, field);
 

@@ -79,7 +79,7 @@ public class SystemEvent extends UUIDEvent {
 	String name;
 	
 	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(value = EVENT_VIEW, weight = 9998, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
+	@ObjectView(value = EVENT_VIEW, weight = 9998, renderer = FieldRenderer.OPTIONAL)
 	String eventDescription;
 	
 	public SystemEvent(String resourceKey, String eventGroup) {

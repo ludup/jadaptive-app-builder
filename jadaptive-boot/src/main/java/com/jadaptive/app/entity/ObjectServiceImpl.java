@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
-import org.pf4j.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +26,10 @@ import com.jadaptive.api.entity.ObjectRepository;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -88,7 +88,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Autowired
 	private DocumentDatabase documentDatabase;
-	
+
 	Map<String,FormHandler> formHandlers = new HashMap<>();
 	
 	@Override
@@ -127,7 +127,11 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	public AbstractObject get(String resourceKey, String uuid) throws RepositoryException, ObjectException, ValidationException {
 
 		ObjectTemplate template = templateService.get(resourceKey);
-
+		return get(template, uuid);
+	}
+	
+	@Override
+	public AbstractObject get(ObjectTemplate template, String uuid) throws RepositoryException, ObjectException, ValidationException {
 		/**
 		 * This creates a problem requiring normal users to have read for anything that's embedded in an object.
 		 */
@@ -178,6 +182,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			permissionService.assertReadWrite(entity.getResourceKey());
 		}
 		
+		assertReferencesExist(template, entity);
+		
 		switch(template.getType()) {
 		case SINGLETON:
 			if(!entity.getUuid().equals(entity.getResourceKey())) {	
@@ -195,7 +201,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 	}
 	
-	private void assertReferences(ObjectTemplate template, String uuid) {
+	private void assertForiegnReferences(ObjectTemplate template, String uuid) {
 		
 		while(template.hasParent()) {
 			template = templateRepository.get(template.getParentTemplate());
@@ -206,12 +212,14 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				log.info("Found foreign reference to {} in {}", template.getResourceKey(),
 						reference.getResourceKey());
 			}
+		}
+		for(ObjectTemplate reference : templateRepository.findReferences(template)) {
+			validateCollectionReference(reference, template.getResourceKey(), uuid, "");
 			
-			validateReference(reference, template.getResourceKey(), uuid, "");
 		}
 	}
 
-	private void validateReference(ObjectTemplate reference, String foreignType, String foreignKey, String parentField) {
+	private void validateCollectionReference(ObjectTemplate reference, String foreignType, String foreignKey, String parentField) {
 		for(FieldTemplate field : reference.getFields()) {
 			switch(field.getFieldType())  {
 			case OBJECT_REFERENCE:
@@ -222,12 +230,13 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 						throw new ObjectException(String.format("Cannot delete this object because it is still referenced by %s",
 								reference.getResourceKey()));
 					}
+					validateEventReference(reference, foreignType, foreignKey, generateFieldName(parentField, field));
 				}
 				break;
 			}
 			case OBJECT_EMBEDDED:
 			{
-				validateReference(templateRepository.get(field.getValidationValue(ValidationType.RESOURCE_KEY)), 
+				validateCollectionReference(templateRepository.get(field.getValidationValue(ValidationType.RESOURCE_KEY)), 
 						foreignType, foreignKey, generateFieldName(parentField, field));
 				break;
 			}
@@ -239,8 +248,60 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 	}
 	
+	private void validateEventReference(ObjectTemplate reference, String foreignType, String foreignKey, String parentField) {
+		
+		if(objectRepository.count(templateService.get(SystemEvent.RESOURCE_KEY), 
+				SearchField.eq("object.resourceKey", reference.getResourceKey()),
+				SearchField.all(String.format("object.%s", parentField), foreignKey)) > 0) {
+			throw new ObjectException(String.format("Cannot delete this object because it is still referenced by events for %s",
+					reference.getResourceKey()));
+		}
+	}
+	
+	private void assertReferencesExist(ObjectTemplate template, AbstractObject entity) {
+		validateReferences(template.getFields(), entity);
+	}
+
+	private void validateReferences(Collection<FieldTemplate> fields, AbstractObject entity) {
+		if(!Objects.isNull(fields)) {
+			for(FieldTemplate t : fields) {
+				switch(t.getFieldType()) {
+				case OBJECT_REFERENCE:
+					if(t.getCollection()) {
+						@SuppressWarnings("unchecked")
+						Collection<String> values = (Collection<String>)entity.getValue(t);
+						if(Objects.nonNull(values)) {
+							for(String value : values) {
+								validateEntityExists(value, templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+							}
+						}
+					} else {
+						if(StringUtils.isNotBlank((String)entity.getValue(t))) {
+							validateEntityExists((String)entity.getValue(t), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+						}
+					}
+					break;
+				case OBJECT_EMBEDDED:
+					AbstractObject child = entity.getChild(t);
+					if(Objects.nonNull(child)) {
+						assertReferencesExist(templateRepository.get(
+								t.getValidationValue(ValidationType.RESOURCE_KEY)), 
+								child);
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
+	
+	private void validateEntityExists(String uuid, ObjectTemplate def) {
+		get(def, uuid);
+	}
+		
 	private String generateFieldName(String parent, FieldTemplate field) {
-		if(StringUtils.isNullOrEmpty(parent)) {
+		if(StringUtils.isBlank(parent)) {
 			return field.getResourceKey();
 		} else {
 			return parent + "." + field.getResourceKey();
@@ -262,6 +323,24 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		} else { 
 			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
 			return db.saveOrUpdate(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
+		}
+	}
+	
+	private void deleteViaObjectBean(AbstractObject entity, ObjectTemplate template) {
+		
+		if(template.getPermissionProtected()) {
+			permissionService.assertReadWrite(entity.getResourceKey());
+		}
+		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
+
+		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+		
+		if(Objects.nonNull(annotation)) {
+			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+			bean.deleteObject(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
+		} else { 
+			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
+			db.delete(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
 		}
 	}
 	
@@ -319,55 +398,19 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new ObjectException("You cannot delete a Singleton Entity");
 		}
 		
-		assertReferences(template, uuid);
+		assertForiegnReferences(template, uuid);
 		
-		try {
-			
-			if(classService.hasTemplateClass(template)) {
-				Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
-				ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
-				if(Objects.nonNull(annotation)) {
-					UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-					
-					UUIDDocument obj = bean.getObjectByUUID(uuid);
-					if(obj.isSystem()) {
-						throw new ObjectException("You cannot delete a system object");
-					}
-
-					switch(template.getScope()) {
-					case PERSONAL:
-						permissionService.assertOwnership((PersonalUUIDEntity)obj);
-						break;
-					default:
-						permissionService.assertReadWrite(resourceKey);
-						break;
-					}
-					
-					bean.deleteObjectByUUID(uuid);
-					return;
-				}
-			} 
-			AbstractObject e = get(resourceKey, uuid);
-			if(e.isSystem()) {
-				throw new ObjectException("You cannot delete a system object");
-			}
-			
-			switch(template.getScope()) {
-			case PERSONAL:
-				permissionService.assertOwnership(e);
-				break;
-			default:
-				permissionService.assertReadWrite(resourceKey);
-				break;
-			}
-			objectRepository.deleteByUUIDOrAltId(template, uuid);
-
-		} catch(RepositoryException | ObjectException ex) {
-			throw ex;
-		} catch(Throwable ex) {
-			// 
-			throw new ObjectException(ex.getMessage(), ex);
+		AbstractObject e = get(resourceKey, uuid);
+		if(e.isSystem()) {
+			throw new ObjectException("You cannot delete a system object");
 		}
+		
+		if(Objects.nonNull(template.getTemplateClass())) {
+			deleteViaObjectBean(e, template);
+		} else {
+			objectRepository.delete(e);
+		}
+		
 	}
 
 	@Override
@@ -452,7 +495,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 	private SearchField[] generateSearchFields(String searchField, String searchValue, ObjectTemplate template, SearchField... additional) {
 		List<SearchField> fields = new ArrayList<>();
-		if(StringUtils.isNotNullOrEmpty(searchValue)) {
+		if(StringUtils.isNotBlank(searchValue)) {
 			FieldTemplate f = template.getField(searchField);
 			if(Objects.nonNull(f)) {
 				switch(f.getFieldType()) {
@@ -541,7 +584,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		FormHandler objectHandler = formHandlers.get(handler);
 		if(Objects.isNull(objectHandler)) {
-			throw new IllegalStateException(StringUtils.format("%s is not a known form handler", handler));
+			throw new IllegalStateException(String.format("%s is not a known form handler", handler));
 		}
 		return objectHandler;
 	}

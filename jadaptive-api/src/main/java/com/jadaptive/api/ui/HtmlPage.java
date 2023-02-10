@@ -209,6 +209,11 @@ public abstract class HtmlPage implements Page {
 				processPost(doc, uri, request, response);
 			}
 			
+			if(Objects.nonNull(extenders)) {
+				for(HtmlPageExtender extender : extenders) {
+					extender.processPost(doc, this);
+				}
+			}
 			injectFeedback(doc, request);
 			processPageExtensions(uri, doc);
 			

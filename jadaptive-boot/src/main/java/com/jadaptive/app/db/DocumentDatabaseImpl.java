@@ -96,7 +96,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				log.debug("Aborting transaction");
 			}
 			currentSession.get().abortTransaction();
-			if(t instanceof RepositoryException) {
+			if(t instanceof RepositoryException || t instanceof ObjectException) {
 				throw t;
 			}
 			throw new IllegalStateException("Transaction failed with " + t.getMessage(), t);
@@ -184,13 +184,13 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 		Date now = new Date();
 		document.put("lastModified", now);
+
+		assertUniqueConstraints(collection, document, document.getString("_id"));
 		
 		if(StringUtils.isBlank(document.getString("_id"))) {
 			
 			document.put("created", now);
 			document.put("_id", UUID.randomUUID().toString());
-			
-			assertUniqueConstraints(collection, document);
 			
 //			String contentHash = DocumentHelper.generateContentHash(document);
 //			document.put("contentHash", contentHash);
@@ -238,15 +238,16 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			// Updated Event
 		}
 	}
-
-	private void assertUniqueConstraints(MongoCollection<Document> collection, Document document) {
-		
+	
+	private void assertUniqueConstraints(MongoCollection<Document> collection, Document document, String existingUUID) {
 		for(Document index : collection.listIndexes()) {
 			if(index.getBoolean("unique", false)) {
 				Document key = (Document) index.get("key");
 				if(key.size()==1) {
 					String field = key.keySet().iterator().next();
-					if(collection.countDocuments(Filters.eq(field, document.get(field))) > 0L) {
+					if(collection.countDocuments(
+							Filters.and(Filters.eq(field, document.get(field)),
+									Filters.not(Filters.eq("_id", existingUUID)))) > 0L) {
 						throw new RepositoryException(String.format("An object already exists with the same %s value!", 
 								WordUtils.capitalize(field)));
 					}

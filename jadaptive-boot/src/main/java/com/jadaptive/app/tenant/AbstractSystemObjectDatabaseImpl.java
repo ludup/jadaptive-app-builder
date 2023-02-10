@@ -76,12 +76,7 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 
 	@Override
 	public void delete(T obj) throws RepositoryException, ObjectException {
-		delete(obj.getUuid());
-	}
-	
-	@Override
-	public void delete(String uuid) throws RepositoryException, ObjectException {
-		deleteObject(get(uuid), TenantService.SYSTEM_UUID);
+		deleteObject(obj, TenantService.SYSTEM_UUID);
 	}
 
 	@Override

@@ -478,6 +478,18 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Override
 	public String saveOrUpdate(Tenant tenant) {
 		
+		if(StringUtils.isNotBlank(tenant.getUuid())) {
+			Tenant previous = repository.getTenant(tenant.getUuid());
+			if(!previous.getDomain().equals(tenant.getDomain())) {
+				tenantsByDomain.remove(previous.getDomain());
+			}
+			if(Objects.nonNull(previous.getAlternativeDomains())) {
+				for(String domain : previous.getAlternativeDomains()) {
+					tenantsByDomain.remove(domain);
+				}
+			}
+		}
+		
 		repository.saveTenant(tenant);
 		
 		if(!tenantsByUUID.containsKey(tenant.getUuid())) {

@@ -138,16 +138,13 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			
 			return new UUIDStatus(uuid);
 		}  catch(ValidationException ex) { 
-			Feedback.error("default", "object.error", ex.getMessage());
 			return new RequestStatusImpl(false, ex.getMessage());
 		} catch (UriRedirect e) {
 			return new RedirectStatus(e.getUri());
 		} catch (Throwable e) {
-			Feedback.error("default", "object.error", e.getMessage());
 			if(log.isErrorEnabled()) {
 				log.error("POST api/objects/{}", resourceKey, e);
 			}
-			Feedback.error("default", "object.error", e.getMessage());
 			return new RequestStatusImpl(false, e.getMessage());
 		}
 	}

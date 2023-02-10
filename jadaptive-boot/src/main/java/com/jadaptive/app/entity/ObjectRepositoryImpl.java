@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -26,7 +25,6 @@ import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
-import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
@@ -124,48 +122,21 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		
 		ObjectTemplate template = templateRepository.get(SearchField.eq("resourceKey", entity.getResourceKey()));
 		
-		validateReferences(template, entity);
+		//validateReferences(template, entity);
 
 		Document document = new Document(entity.getDocument());
 		db.insertOrUpdate(document, template.getCollectionKey(), getDatabase(template));
 		return document.getString("_id");
 	}
-
-	private void validateReferences(ObjectTemplate template, AbstractObject entity) {
-		validateReferences(template.getFields(), entity);
-	}
-
-	private void validateReferences(Collection<FieldTemplate> fields, AbstractObject entity) {
-		if(!Objects.isNull(fields)) {
-			for(FieldTemplate t : fields) {
-				switch(t.getFieldType()) {
-				case OBJECT_REFERENCE:
-					if(t.getCollection()) {
-						@SuppressWarnings("unchecked")
-						Collection<String> values = (Collection<String>)entity.getValue(t);
-						for(String value : values) {
-							validateEntityExists(value, templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
-						}
-					} else {
-						if(StringUtils.isNotBlank((String)entity.getValue(t))) {
-							validateEntityExists((String)entity.getValue(t), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
-						}
-					}
-					break;
-				case OBJECT_EMBEDDED:
-					validateReferences(templateRepository.get(
-							t.getValidationValue(ValidationType.RESOURCE_KEY)), 
-							entity.getChild(t));
-					break;
-				default:
-					break;
-				}
-			}
-		}
-	}
 	
-	private void validateEntityExists(String uuid, ObjectTemplate def) {
-		db.getFirst(uuid, def.getCollectionKey(), getDatabase(def));
+	@Override
+	public void delete(AbstractObject entity) throws RepositoryException, ObjectException {
+		
+		ObjectTemplate def = templateRepository.get(SearchField.eq("resourceKey", entity.getResourceKey()));
+		
+		db.delete(def.getCollectionKey(), getDatabase(def), 
+				SearchField.eq("_id", entity.getUuid()));
+
 	}
 
 	@Override

@@ -111,41 +111,44 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	@SuppressWarnings("unchecked")
 	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
+		
+		T previous = null;
+		boolean isEvent = obj instanceof UUIDEvent;
+		
 		try {
 			
-			T previous = null;
-			boolean isEvent = obj instanceof UUIDEvent;
-			
-			if(!isEvent && StringUtils.isNotBlank(obj.getUuid())) {
-				try {
-					previous = getObject(obj.getUuid(), database, (Class<T>) obj.getClass());
-				} catch(ObjectNotFoundException e) {
+			if(!isEvent) {
+				if(StringUtils.isNotBlank(obj.getUuid())) {
+					try {
+						previous = getObject(obj.getUuid(), database, (Class<T>) obj.getClass());
+						onObjectUpdating(obj, previous);
+					} catch(ObjectNotFoundException e) {
+					}
+				}
+				if(Objects.isNull(previous)) {
+					onObjectCreating(obj);
 				}
 			}
 			
 			if(!transactionService.isTransactionActive()
 					&& ReflectionUtils.hasAnnotationRecursive(obj.getClass(), Transactional.class)) {
-				try {
-					final T previousObject = previous;
-					transactionService.executeTransaction(()->{
-						doSave(obj, database, previousObject, isEvent);
-					});
-				} catch(Throwable e) {
-					log.error("Failed to save object", e);
-					if(!isEvent && !(obj instanceof ObjectTemplate)) {
-						if(Objects.isNull(previous)) {
-							onCreatedError(obj, e);
-						} else {
-							onUpdateError(obj, previous, e);
-						}
-					}
-					throw e;
-				}
+				final T previousObject = previous;
+				transactionService.executeTransaction(()->{
+					doSave(obj, database, previousObject, isEvent);
+				});	
 			} else {
 				doSave(obj, database, previous, isEvent);
 			}
 			
 		} catch(Throwable e) {
+			log.error("Failed to save object", e);
+			if(!isEvent && !(obj instanceof ObjectTemplate)) {
+				if(Objects.isNull(previous)) {
+					onCreatedError(obj, e);
+				} else {
+					onUpdateError(obj, previous, e);
+				}
+			}
 			checkException(e);
 			throw new RepositoryException(String.format("%s: %s", obj.getClass().getSimpleName(), e.getMessage()), e);
 		}
@@ -167,22 +170,27 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 //			}
 //			return;
 //		}
+		try {
+			db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
+			obj.setUuid(document.getString("_id"));
 		
-		db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
-		obj.setUuid(document.getString("_id"));
-		
-		if(Boolean.getBoolean("jadaptive.cache")) {
-			Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
-			cachedObjects.put(obj.getUuid(), obj);
-		}
-		
-		if(!isEvent && !(obj instanceof ObjectTemplate)) {
-			if(Objects.isNull(previous)) {
-				onObjectCreated(obj);
-			} else {
-				onObjectUpdated(obj, previous);
+			if(Boolean.getBoolean("jadaptive.cache")) {
+				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+				cachedObjects.put(obj.getUuid(), obj);
 			}
+		
+			if(!isEvent && !(obj instanceof ObjectTemplate)) {
+				if(Objects.isNull(previous)) {
+					onObjectCreated(obj);
+				} else {
+					onObjectUpdated(obj, previous);
+				}
+			}
+		} catch(Throwable e) {
+			checkException(e);
+			log.error("Captured error in object event", e);
 		}
+
 	}
 	
 	protected <T extends UUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, ObjectException {
@@ -394,7 +402,8 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			MongoWriteException mwe = (MongoWriteException)e;
 			switch(mwe.getCode()) {
 			case 11000:
-				throw new RepositoryException("The object could not be created because of a unique constraint violation");
+			case -3:
+				throw new RepositoryException("The object could not be saved because of a unique constraint violation");
 			default:
 				throw new RepositoryException(mwe.getError().getMessage().split(":")[0]);
 			}
@@ -404,10 +413,15 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 	protected <T extends UUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, ObjectException {
+		
+		if(obj.isSystem()) {
+			throw new ObjectException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
+		}
+		
 		try {
-			if(obj.isSystem()) {
-				throw new ObjectException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
-			}
+		
+			onObjectDeleting(obj);
+			
 			db.deleteByUUID(obj.getUuid(), getCollectionName(obj.getClass()), database);
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
@@ -417,12 +431,18 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			}
 			onObjectDeleted(obj);
 		} catch(Throwable e) {
+			onDeletingError(obj, e);
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", obj.getClass().getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
-	protected <T extends UUIDEntity> void fireEvent(String eventKey, T obj) {
+	protected <T extends UUIDEntity> void onDeletingError(T obj, Throwable e) {
+		
+		fireEvent(Events.deleted(obj.getEventGroup()), obj, e);
+	}
+
+	protected <T extends UUIDEntity> void fireEvent(String eventKey, T obj, boolean ignoreErrors) {
 		
 		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
 		
@@ -431,6 +451,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				eventService.publishEvent(createSuccessEvent(eventClz, obj));
 			} catch(Throwable e) {
 				log.error(e.getMessage(), e);
+				if(!ignoreErrors) {
+					throw e;
+				}
 			}
 		}
 	}
@@ -489,38 +512,44 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 	protected <T extends UUIDEntity> void onObjectDeleted(T obj) {
 		
-		fireEvent(Events.deleted(obj.getEventGroup()), obj);
+		fireEvent(Events.deleted(obj.getEventGroup()), obj, true);
 		
 	}
 	
+	protected <T extends UUIDEntity> void onObjectDeleting(T obj) {
+		
+		fireEvent(Events.deleting(obj.getEventGroup()), obj, false);
+		
+	}
+	
+	protected <T extends UUIDEntity> void onObjectCreating(T obj) { 
+		
+		fireEvent(Events.creating(obj.getEventGroup()), obj, false);
+	}
 
 	protected <T extends UUIDEntity> void onObjectCreated(T obj) { 
 		
-		fireEvent(Events.created(obj.getEventGroup()), obj);
+		fireEvent(Events.created(obj.getEventGroup()), obj, true);
 	}
 
 	protected <T extends UUIDEntity> void onCreatedError(T obj, Throwable t) { 
 		
-		
+		fireEvent(Events.created(obj.getEventGroup()), obj, t);
 	}
 	
 	protected <T extends UUIDEntity> void onUpdateError(T obj, T previous, Throwable t) { 
 		
-		String eventKey = Events.updated(obj.getEventGroup());
-		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
-		if(Objects.nonNull(eventClz)) {
-			try {
-				eventService.publishEvent(eventClz.getConstructor(obj.getClass(), Throwable.class).newInstance(obj, t));
-			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				log.error("Failed to publish event for dynamically generated event {}", eventKey, e);
-			}
-		}
+		fireEvent(Events.updated(obj.getEventGroup()), obj, t);
 	}
 	
 	protected <T extends UUIDEntity> void onObjectUpdated(T obj, T previousObject) {
 		
-		fireEvent(Events.updated(obj.getEventGroup()), obj);
+		fireEvent(Events.updated(obj.getEventGroup()), obj, true);
+	}
+	
+	protected <T extends UUIDEntity> void onObjectUpdating(T obj, T previousObject) {
+		
+		fireEvent(Events.updating(obj.getEventGroup()), obj, false);
 	}
 	
 	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {

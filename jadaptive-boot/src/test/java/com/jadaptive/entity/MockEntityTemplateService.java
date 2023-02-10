@@ -43,10 +43,6 @@ public class MockEntityTemplateService implements TemplateService {
 	}
 
 	@Override
-	public void delete(String uuid) throws ObjectException {
-
-	}
-	@Override
 	public Collection<ObjectTemplate> table(String searchField, String searchValue,  int start, int length, SortOrder order, String sortField) throws RepositoryException, ObjectException {
 		return new ArrayList<>(templates.values()).subList(start, Math.min(start + length, templates.values().size()-1));
 	}
@@ -119,6 +115,11 @@ public class MockEntityTemplateService implements TemplateService {
 	public String getTableSortField(ObjectTemplate def) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	@Override
+	public void delete(ObjectTemplate objectTemplate) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

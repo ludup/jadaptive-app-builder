@@ -16,8 +16,8 @@ public interface TemplateVersionService {
 
 	Class<? extends ObjectEvent<?>> getEventClass(String resourceKey);
 
-	void registerAnnotatedTemplate(Class<?> clz, boolean newSchema);
-
 	void registerTenantIndexes(boolean newSchema);
+
+	void registerAnnotatedTemplate(Class<?> clz, boolean newSchema, boolean isEvent);
 
 }

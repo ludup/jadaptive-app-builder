@@ -34,5 +34,8 @@ public interface ObjectService {
 	FormHandler getFormHandler(String handler);
 
 	AbstractObject convert(UUIDEntity object);
+
+	AbstractObject get(ObjectTemplate template, String uuid)
+			throws RepositoryException, ObjectException, ValidationException;
 	
 }

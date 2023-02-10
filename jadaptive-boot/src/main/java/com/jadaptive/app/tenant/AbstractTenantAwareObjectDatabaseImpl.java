@@ -60,14 +60,9 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 
 	@Override
 	public void delete(T obj) throws RepositoryException, ObjectException {
-		delete(obj.getUuid());
+		deleteObject(obj, tenantService.getCurrentTenant().getUuid());
 	}
 	
-	@Override
-	public void delete(String uuid) throws RepositoryException, ObjectException {
-		deleteObject(get(uuid), tenantService.getCurrentTenant().getUuid());
-	}
-
 	@Override
 	public String saveOrUpdate(T obj) throws RepositoryException, ObjectException {
 		saveObject(obj, tenantService.getCurrentTenant().getUuid());

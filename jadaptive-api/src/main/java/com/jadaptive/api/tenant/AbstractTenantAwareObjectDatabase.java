@@ -14,7 +14,7 @@ public interface AbstractTenantAwareObjectDatabase<T extends UUIDDocument> {
 	
 	T get(SearchField... fields) throws RepositoryException, ObjectException;
 
-	void delete(String uuid) throws RepositoryException, ObjectException;
+//	void delete(String uuid) throws RepositoryException, ObjectException;
 
 	String saveOrUpdate(T obj) throws RepositoryException, ObjectException;
 

@@ -65,9 +65,4 @@ public interface DocumentDatabase {
 
 	boolean isTransactionActive();
 
-	
-
-	
-	
-
 }

@@ -131,7 +131,25 @@ public class EventServiceImpl implements EventService {
 		keyedListeners.get(resourceKey).add(handler);
 		
 	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void on(EventListener handler, String... resourceKeys) {
+		
+		for(String resourceKey : resourceKeys) {
+			on(resourceKey, handler);
+		}
+		
+	}
 
+	@Override
+	public <T extends UUIDEntity> void changed(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+		
+		String resourceKey = templateService.getTemplateResourceKey(clz);
+		on(handler, Events.updated(resourceKey), Events.deleted(resourceKey));
+		
+	}
+	
 	@Override
 	public <T extends UUIDEntity> void any(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
 		on(templateService.getTemplateResourceKey(clz), handler);
@@ -150,5 +168,20 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public <T extends UUIDEntity> void deleted(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
 		on(Events.deleted(templateService.getTemplateResourceKey(clz)), handler);
+	}
+	
+	@Override
+	public <T extends UUIDEntity> void creating(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+		on(Events.creating(templateService.getTemplateResourceKey(clz)), handler);
+	}
+
+	@Override
+	public <T extends UUIDEntity> void updating(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+		on(Events.updating(templateService.getTemplateResourceKey(clz)), handler);
+	}
+
+	@Override
+	public <T extends UUIDEntity> void deleting(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+		on(Events.deleting(templateService.getTemplateResourceKey(clz)), handler);
 	}
 }

@@ -402,7 +402,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                         if(log.isInfoEnabled()) {
     						log.info("Found template {}", classInfo.getName());
     					}
-                    	registerAnnotatedTemplate(classInfo.loadClass(), newSchema);
+                    	registerAnnotatedTemplate(classInfo.loadClass(), newSchema, false);
                     }
                 }
             }
@@ -418,13 +418,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                 if(log.isInfoEnabled()) {
 					log.info("Found template {}", classInfo.getName());
 				}
-                registerAnnotatedTemplate(classInfo.loadClass(), newSchema);
+                registerAnnotatedTemplate(classInfo.loadClass(), newSchema, false);
             }
         }
 	}
 
 	@Override
-	public void registerAnnotatedTemplate(Class<?> clz, boolean newSchema) {
+	public void registerAnnotatedTemplate(Class<?> clz, boolean newSchema, boolean isEvent) {
 		
 		try {
 			
@@ -447,11 +447,17 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(!parents.isEmpty()) {
 				Collections.reverse(parents);
 				for(Class<?> parent : parents) {
-					registerAnnotatedTemplate(parent, newSchema);
+					registerAnnotatedTemplate(parent, newSchema, isEvent);
 				}
 			}
 			
 			ObjectDefinition e = clz.getAnnotation(ObjectDefinition.class);
+			
+			if(Objects.isNull(e.resourceKey())) {
+				log.error("{} requires resource key in ObjectDefinition annotation!", clz.getSimpleName());
+				System.exit(1);
+				return;
+			}
 			
 			ObjectTemplate template = loadedTemplates.get(e.resourceKey());
 			if(Objects.nonNull(template)) {
@@ -513,7 +519,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				ObjectField objectAnnotation = field.getAnnotation(ObjectField.class);
 				
 				if(Objects.nonNull(objectAnnotation)) {
-					FieldTemplate t = processFieldAnnotations(objectAnnotation, field, /*i18n,*/ template);
+					FieldTemplate t = processFieldAnnotations(objectAnnotation, field, /*i18n,*/ template, isEvent);
 					if(objectAnnotation.nameField()) {
 						nameField =t.getResourceKey();
 					}
@@ -561,20 +567,34 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 		generateEventTemplate(StringUtils.capitalize(group) + "Created",
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.created(template.getResourceKey()), newSchema);
+				Events.created(template.getResourceKey()), newSchema, true);
 		
 		generateEventTemplate(StringUtils.capitalize(group) + "Updated", 
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.updated(template.getResourceKey()), newSchema);
+				Events.updated(template.getResourceKey()), newSchema, true);
 		
 		generateEventTemplate(StringUtils.capitalize(group) + "Deleted",
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.deleted(template.getResourceKey()), newSchema);
+				Events.deleted(template.getResourceKey()), newSchema, true);
+		
+		
+		generateEventTemplate(StringUtils.capitalize(group) + "Creating",
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.creating(template.getResourceKey()), newSchema, false);
+		
+		generateEventTemplate(StringUtils.capitalize(group) + "Updating", 
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.updating(template.getResourceKey()), newSchema, false);
+		
+		generateEventTemplate(StringUtils.capitalize(group) + "Deleting",
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.deleting(template.getResourceKey()), newSchema, false);
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void generateEventTemplate(String className, String resourceKey, String bundle, String group, Class<?> clz, 
-			String eventKey, boolean newSchema) {
+			String eventKey, boolean newSchema, boolean audited) {
 		
 		Generic genericType = TypeDescription.Generic.Builder.parameterizedType(ObjectEvent.class, clz).build();
 		
@@ -582,47 +602,53 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			log.info("Generating event templates and class for {}", clz.getSimpleName());
 		}
 		try {
-			@SuppressWarnings("unchecked")
-			Class<? extends ObjectEvent<?>> dynamicType = (Class<? extends ObjectEvent<?>>) new ByteBuddy()
-					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
-					  .name(String.format("com.jadaptive.events.%s.%s", group, className))
-					  .annotateType(AnnotationDescription.Builder.ofType(ObjectDefinition.class)
-			                  .define("resourceKey", eventKey)
-			                  .define("scope", ObjectScope.GLOBAL)
-			                  .define("type", ObjectType.OBJECT)
-			                  .define("updatable", false)
-			                  .define("deletable", false)
-			                  .define("creatable", false)
-			                  .define("bundle", bundle)
-			                  .build())
-					  .annotateType(AnnotationDescription.Builder.ofType(AuditedObject.class).build())
-					  .annotateType(clz.getAnnotation(ObjectViews.class))
-					  .defineConstructor(Visibility.PUBLIC)
-					  .withParameters(clz)
-					  .intercept(MethodCall
-					               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class))
-					               .onSuper().with(eventKey, group)
-					               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)))
-					  .defineField("object", clz, Visibility.PRIVATE)
-					  .annotateField(AnnotationDescription.Builder.ofType(ObjectField.class)
-							  .define("type", FieldType.OBJECT_EMBEDDED).build())
-					  .annotateField(AnnotationDescription.Builder.ofType(Validator.class)
-							  .define("type", ValidationType.RESOURCE_KEY)
-							  .define("value", resourceKey).build())
-					  .defineMethod("getObject", clz, Visibility.PUBLIC)
-			          .intercept(FieldAccessor.ofField("object"))
-			          .defineConstructor(Visibility.PUBLIC)
-					  .withParameters(clz, Throwable.class)
-					  .intercept(MethodCall
-					               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class, Throwable.class))
-					               .onSuper().with(eventKey, group).withArgument(1)
-					               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)))
-					  .make()
+			
+			var b = new ByteBuddy().subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+					  .name(String.format("com.jadaptive.events.%s.%s", group, className));
+			
+			
+			 b = b.annotateType(AnnotationDescription.Builder.ofType(ObjectDefinition.class)
+	                  .define("resourceKey", eventKey)
+	                  .define("scope", ObjectScope.GLOBAL)
+	                  .define("type", ObjectType.OBJECT)
+	                  .define("updatable", false)
+	                  .define("deletable", false)
+	                  .define("creatable", false)
+	                  .define("bundle", bundle)
+	                  .build());
+			
+			 if(audited) {
+				 b = b.annotateType(AnnotationDescription.Builder.ofType(AuditedObject.class).build());
+			 }
+			 
+			 b = b.annotateType(clz.getAnnotation(ObjectViews.class))
+			  .defineConstructor(Visibility.PUBLIC)
+			  .withParameters(clz)
+			  .intercept(MethodCall
+			               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class))
+			               .onSuper().with(eventKey, group)
+			               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)))
+			  .defineField("object", clz, Visibility.PRIVATE)
+			  .annotateField(AnnotationDescription.Builder.ofType(ObjectField.class)
+					  .define("type", FieldType.OBJECT_EMBEDDED).build())
+			  .annotateField(AnnotationDescription.Builder.ofType(Validator.class)
+					  .define("type", ValidationType.RESOURCE_KEY)
+					  .define("value", resourceKey).build())
+			  .defineMethod("getObject", clz, Visibility.PUBLIC)
+	          .intercept(FieldAccessor.ofField("object"))
+	          .defineConstructor(Visibility.PUBLIC)
+			  .withParameters(clz, Throwable.class)
+			  .intercept(MethodCall
+			               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class, Throwable.class))
+			               .onSuper().with(eventKey, group).withArgument(1)
+			               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)));
+			 
+			var dynamicType = b.make()
 					  .load(classService.getClassLoader())
 					  .getLoaded();
 			
-			eventClasses.put(eventKey, dynamicType);
-			registerAnnotatedTemplate(dynamicType, newSchema);
+			eventClasses.put(eventKey, (Class<? extends ObjectEvent<?>>) dynamicType);
+			registerAnnotatedTemplate(dynamicType, newSchema, true);
 			
 		} catch (SecurityException | NoSuchMethodException e) {
 			throw new IllegalStateException(e.getMessage(), e);
@@ -658,7 +684,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 	}
 
-	private FieldTemplate processFieldAnnotations(ObjectField field, /*Field parentField,*/ Field f, /*Properties i18n,*/ ObjectTemplate template) {
+	private FieldTemplate processFieldAnnotations(ObjectField field, /*Field parentField,*/ Field f, /*Properties i18n,*/ ObjectTemplate template, boolean isEvent) {
 
 		FieldTemplate t = new FieldTemplate();
 		t.setResourceKey(f.getName());
@@ -716,40 +742,24 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 		case OBJECT_REFERENCE:
 		{
-//			String resourceKey = field.references();
-//			if(StringUtils.isBlank(resourceKey)) {
-//				Class<?> clz = f.getType();
-//				if(Collection.class.isAssignableFrom(clz)) {
-//					clz = (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
-//				}
-//				resourceKey = clz.getName();
+//			if(isEvent) {
+//				t.setFieldType(FieldType.TEXT);
+//			} else {
+				if(StringUtils.isBlank(field.references())) {
+					throw new IllegalStateException("Missing references attribute from OBJECT_REFERENCE typed @ObjectField annotation");
+				} else {
+					t.getValidators().add(new FieldValidator(
+							ValidationType.OBJECT_TYPE, 
+							field.references(), 
+							ObjectTemplate.RESOURCE_KEY,
+							"objectType.invalid"));
+					t.getValidators().add(new FieldValidator(
+							ValidationType.RESOURCE_KEY, 
+							field.references(),
+							ObjectTemplate.RESOURCE_KEY,
+							"resourceKey.invalid"));
+				}
 //			}
-			if(StringUtils.isBlank(field.references())) {
-//				t.getValidators().add(new FieldValidator(
-//						ValidationType.OBJECT_TYPE, 
-//						f.getType().getName(),
-//						ObjectTemplate.RESOURCE_KEY,
-//						"objectType.invalid"));
-//				t.getValidators().add(new FieldValidator(
-//						ValidationType.RESOURCE_KEY, 
-//						resourceKey,
-//						ObjectTemplate.RESOURCE_KEY,
-//						"resourceKey.invalid"));
-//				templateService.registerObjectDependency(resourceKey, template);
-				throw new IllegalStateException("Missing references attribute from OBJECT_REFERENCE typed @ObjectField annotation");
-			} else {
-				t.getValidators().add(new FieldValidator(
-						ValidationType.OBJECT_TYPE, 
-						field.references(), 
-						ObjectTemplate.RESOURCE_KEY,
-						"objectType.invalid"));
-				t.getValidators().add(new FieldValidator(
-						ValidationType.RESOURCE_KEY, 
-						field.references(),
-						ObjectTemplate.RESOURCE_KEY,
-						"resourceKey.invalid"));
-//				templateService.registerObjectDependency(field.references(), template);
-			}
 			break;
 		}
 		default:

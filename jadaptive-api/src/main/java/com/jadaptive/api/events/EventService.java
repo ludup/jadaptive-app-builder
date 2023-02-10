@@ -19,6 +19,16 @@ public interface EventService {
 
 	void executePreRegistrations();
 
+	<T extends UUIDEntity> void creating(Class<T> clz, EventListener<ObjectEvent<T>> handler);
+
+	<T extends UUIDEntity> void updating(Class<T> clz, EventListener<ObjectEvent<T>> handler);
+
+	<T extends UUIDEntity> void deleting(Class<T> clz, EventListener<ObjectEvent<T>> handler);
+
+	<T extends UUIDEntity> void on(EventListener<ObjectEvent<T>> handler, String... resourceKeys);
+
+	<T extends UUIDEntity> void changed(Class<T> clz, EventListener<ObjectEvent<T>> handler);
+
 	
 
 }

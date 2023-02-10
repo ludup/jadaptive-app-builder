@@ -89,7 +89,7 @@ public class TemplateController {
 	public RequestStatus deleteTemplate(@PathVariable String uuid, HttpServletRequest request) {
 
 		try {
-			templateService.delete(uuid);
+			templateService.delete(templateService.get(uuid));
 			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {

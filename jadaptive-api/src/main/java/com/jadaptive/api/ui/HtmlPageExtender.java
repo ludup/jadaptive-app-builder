@@ -11,7 +11,9 @@ public interface HtmlPageExtender extends ExtensionPoint {
 
 	default void processEnd(Document doc, String uri, Page page) throws FileNotFoundException { };
 
-	default void processStart(Document doc, String uri, Page page) throws FileNotFoundException { }
+	default void processStart(Document doc, String uri, Page page) throws FileNotFoundException { };
 
 	default void generateContent(Document document, Page htmlPage) throws FileNotFoundException { };
+
+	default void processPost(Document doc, Page htmlPage) throws FileNotFoundException { };
 }

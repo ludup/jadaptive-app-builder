@@ -23,7 +23,7 @@ public interface TemplateService {
 
 	void saveOrUpdate(ObjectTemplate template) throws RepositoryException, ObjectException;
 
-	void delete(String uuid) throws ObjectException;
+//	void delete(String uuid) throws ObjectException;
 
 	long count();
 
@@ -52,5 +52,7 @@ public interface TemplateService {
 	SortOrder getTableSortOrder(ObjectTemplate template);
 
 	String getTableSortField(ObjectTemplate def);
+
+	void delete(ObjectTemplate objectTemplate);
 
 }
