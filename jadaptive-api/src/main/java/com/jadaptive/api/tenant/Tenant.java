@@ -20,7 +20,9 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 import com.jadaptive.utils.Utils;
 
-@ObjectDefinition(resourceKey = Tenant.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, system = true, creatable = false)
+@ObjectDefinition(resourceKey = Tenant.RESOURCE_KEY, 
+	scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
+	system = true, creatable = false, defaultColumn = "name")
 @ObjectServiceBean(bean = TenantService.class)
 @ObjectViews({ 
 	@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)})
