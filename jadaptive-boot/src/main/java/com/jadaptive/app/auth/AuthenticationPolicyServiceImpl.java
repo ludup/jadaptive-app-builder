@@ -63,8 +63,8 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		}
 		
 		for(AuthenticationPolicy additional : additionalPolicies) {
-			if(additional.getUsers().contains(user.getUuid())
-					|| roleService.hasRole(user, roleService.getRolesByUUID(additional.getRoles()))) {
+			if(additional.getUsers().contains(user)
+					|| roleService.hasRole(user, additional.getRoles())) {
 				if(assertIPAddress(ipAddress, additional)) {
 					results.add(additional);
 				}

@@ -82,7 +82,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 
 	@Override
 	public <T extends AssignableUUIDEntity> boolean hasEveryoneRole(T obj) {
-		return obj.getRoles().contains(EVERYONE_UUID);
+		return obj.getRoles().contains(getEveryoneRole());
 	}
 	
 	@Override
@@ -147,12 +147,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 			throw new ObjectException("You cannot assign a user to the Everyone role");
 		}
 		
-		Set<String> uuids = new HashSet<>();
-		for(User user : users) {
-			uuids.add(user.getUuid());
-		}
-		
-		role.getUsers().addAll(uuids);
+		role.getUsers().addAll(Arrays.asList(users));
 		
 		repository.saveOrUpdate(role);
 	}
@@ -202,15 +197,11 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		
 		assertWrite(Role.RESOURCE_KEY);
 		
-		Set<String> uuids = new HashSet<>();
-		for(User user : users) {
-			uuids.add(user.getUuid());
-		}
 		
 		if(ADMINISTRATOR_UUID.equals(role.getUuid())) {
 			
-			Set<String> roleUuids = new HashSet<>(role.getUsers());
-			roleUuids.removeAll(uuids);
+			Set<User> roleUuids = new HashSet<>(role.getUsers());
+			roleUuids.removeAll(Arrays.asList(users));
 			if(roleUuids.isEmpty() && !tenantService.isSetupMode()) {
 				throw new ObjectException("This operation would remove the last user from the Administration role");
 			}
@@ -220,7 +211,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 			throw new ObjectException("You cannot unassign a user from the Everyone role");
 		}
 		
-		role.getUsers().removeAll(uuids);
+		role.getUsers().removeAll(Arrays.asList(users));
 		
 		repository.saveOrUpdate(role);
 	}
@@ -261,8 +252,8 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	public void onDeleteUser(User user) {
 		
 		for(Role role : repository.list(Role.class)) {
-			if(role.getUsers().contains(user.getUuid())) {
-				role.getUsers().remove(user.getUuid());
+			if(role.getUsers().contains(user)) {
+				role.getUsers().remove(user);
 				repository.saveOrUpdate(role);
 			}
 		}
@@ -289,12 +280,12 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	@Override
 	public boolean isAssigned(AssignableUUIDEntity obj, User user) {
 		
-		if(obj.getUsers().contains(user.getUuid())) {
+		if(obj.getUsers().contains(user)) {
 			return true;
 		}
 		
 		for(Role role : getRoles(user)) {
-			if(obj.getRoles().contains(role.getUuid())) {
+			if(obj.getRoles().contains(role)) {
 				return true;
 			}
 		}
@@ -312,21 +303,20 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	}
 
 	@Override
-	public Collection<String> getUsersByRoles(Collection<String> roles) {
+	public Collection<User> getUsersByRoles(Collection<Role> roles) {
 		
-		Set<String> values = new HashSet<>();
-		Collection<Role> results = getRolesByUUID(roles);
-		for(Role role : results) {
+		Set<User> values = new HashSet<>();
+		for(Role role : roles) {
 			if(role.getUuid().equals(EVERYONE_UUID) || role.isAllUsers()) {
 				userService.allObjects().forEach((val)-> {
-					values.add(val.getUuid());
+					values.add(val);
 				});
 				return values;
 			}
 		}
 		
-		for(Role role : results) {
-			for(String uuid : role.getUsers()) {
+		for(Role role : roles) {
+			for(User uuid : role.getUsers()) {
 				values.add(uuid);
 			}
 		}
@@ -335,13 +325,13 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 
 	@Override
 	public void compareAssignments(AssignableUUIDEntity current, AssignableUUIDEntity previous,
-			Collection<String> assignments, Collection<String> unassignments) {
+			Collection<User> assignments, Collection<User> unassignments) {
 		
-		Set<String> assignedNow = new HashSet<>();
+		Set<User> assignedNow = new HashSet<>();
 		assignedNow.addAll(current.getUsers());
 		assignedNow.addAll(getUsersByRoles(current.getRoles()));
 		
-		Set<String> assignedThen = new HashSet<>();
+		Set<User> assignedThen = new HashSet<>();
 		assignedNow.addAll(previous.getUsers());
 		assignedNow.addAll(getUsersByRoles(previous.getRoles()));
 		

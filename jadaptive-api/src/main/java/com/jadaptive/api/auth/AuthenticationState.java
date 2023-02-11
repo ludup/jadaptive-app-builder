@@ -17,7 +17,7 @@ public class AuthenticationState {
 
 	User user;
 	List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
-	List<String> optionalAuthentications = new ArrayList<>();
+	List<AuthenticationModule> optionalAuthentications = new ArrayList<>();
 	List<Class<? extends Page>> postAuthenticationPages = new ArrayList<>();
 	int currentPageIndex = 0;
 	String remoteAddress;
@@ -108,7 +108,7 @@ public class AuthenticationState {
 		return requiredAuthenticationPages;
 	}
 	
-	public List<String> getOptionalAuthentications() {
+	public List<AuthenticationModule> getOptionalAuthentications() {
 		return optionalAuthentications;
 	}
 	

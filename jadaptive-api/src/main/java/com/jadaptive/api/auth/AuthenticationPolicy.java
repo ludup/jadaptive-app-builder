@@ -45,7 +45,7 @@ public class AuthenticationPolicy extends AssignableUUIDEntity {
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY)
 	@ObjectView(value = "factors")
-	Collection<String> requiredAuthenticators;
+	Collection<AuthenticationModule> requiredAuthenticators;
 	
 	@ObjectField(type = FieldType.INTEGER)	
 	@ObjectView(value = "optional", weight = 0)
@@ -53,7 +53,7 @@ public class AuthenticationPolicy extends AssignableUUIDEntity {
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY)
 	@ObjectView(value = "optional", weight = 10)
-	Collection<String> optionalAuthenticators;
+	Collection<AuthenticationModule> optionalAuthenticators;
 
 	@ObjectField(type = FieldType.INTEGER, unique = true, defaultValue = "0")	
 	Integer weight;
@@ -84,11 +84,11 @@ public class AuthenticationPolicy extends AssignableUUIDEntity {
 		this.passwordOnFirstPage = passwordOnFirstPage;
 	}
 
-	public Collection<String> getRequiredAuthenticators() {
+	public Collection<AuthenticationModule> getRequiredAuthenticators() {
 		return requiredAuthenticators;
 	}
 
-	public void setRequiredAuthenticators(Collection<String> requiredAuthenticators) {
+	public void setRequiredAuthenticators(Collection<AuthenticationModule> requiredAuthenticators) {
 		this.requiredAuthenticators = requiredAuthenticators;
 	}
 
@@ -100,11 +100,11 @@ public class AuthenticationPolicy extends AssignableUUIDEntity {
 		this.optionalRequired = optionalRequired;
 	}
 
-	public Collection<String> getOptionalAuthenticators() {
+	public Collection<AuthenticationModule> getOptionalAuthenticators() {
 		return optionalAuthenticators;
 	}
 
-	public void setOptionalAuthenticators(Collection<String> optionalAuthenticators) {
+	public void setOptionalAuthenticators(Collection<AuthenticationModule> optionalAuthenticators) {
 		this.optionalAuthenticators = optionalAuthenticators;
 	}
 

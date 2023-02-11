@@ -16,6 +16,7 @@ import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TableView;
+import com.jadaptive.api.user.User;
 
 @ObjectDefinition(resourceKey = Role.RESOURCE_KEY, 
 					scope = ObjectScope.GLOBAL,
@@ -60,7 +61,7 @@ public class Role extends NamedUUIDEntity {
 			references = "users")
 	@ObjectView(USERS_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
-	Collection<String> users = new HashSet<>();
+	Collection<User> users = new HashSet<>();
 	
 	public String getResourceKey() {
 		return RESOURCE_KEY;
@@ -90,11 +91,11 @@ public class Role extends NamedUUIDEntity {
 		this.allUsers = allUsers;
 	}
 
-	public Collection<String> getUsers() {
+	public Collection<User> getUsers() {
 		return users;
 	}
 
-	public void setUsers(Collection<String> users) {
+	public void setUsers(Collection<User> users) {
 		this.users = users;
 	}
 	

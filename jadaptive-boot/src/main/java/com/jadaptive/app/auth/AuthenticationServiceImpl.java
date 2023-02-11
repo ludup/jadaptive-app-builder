@@ -22,7 +22,6 @@ import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.cache.CacheService;
-import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -62,9 +61,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	
 	@Autowired
 	private SessionUtils sessionUtils; 
-	
-	@Autowired
-	private TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
 	
 	@Autowired
 	private PageCache pageCache;
@@ -275,12 +271,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	
 	private void validateModules(AuthenticationPolicy policy, 
 			List<Class<? extends Page>> required,
-			List<String> optional) {
+			List<AuthenticationModule> optional) {
 		
 		boolean hasSecret = false;
 		
-		for(String authenticatorKey : policy.getRequiredAuthenticators()) {
-			AuthenticationModule module = moduleDatabase.get(authenticatorKey, AuthenticationModule.class);
+		for(AuthenticationModule module : policy.getRequiredAuthenticators()) {
 			hasSecret |= module.isSecretCapture();
 			required.add(getAuthenticationPage(module.getAuthenticatorKey()));
 		}

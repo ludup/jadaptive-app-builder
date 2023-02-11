@@ -46,7 +46,6 @@ import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
@@ -93,7 +92,7 @@ public class DocumentHelper {
 
 			document.put("_clz", obj.getClass().getName());
 			document.put("resourceKey", obj.getResourceKey());
-			
+			 
 			Map<String,Field> fields = ReflectionUtils.getFields(obj.getClass());
 			
 			for(Method m : ReflectionUtils.getGetters(obj.getClass())) {
@@ -191,7 +190,7 @@ public class DocumentHelper {
 //				list.add(((ObjectReference2)value).toMap());
 			} else if(UUIDEntity.class.isAssignableFrom(value.getClass())) {
 
-				AbstractUUIDEntity e = (AbstractUUIDEntity) value;
+				UUIDEntity e = (UUIDEntity) value;
 				if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 					Document embeddedDocument = new Document();
 					
@@ -543,7 +542,7 @@ public class DocumentHelper {
 						continue;
 					}
 					if(UUIDEntity.class.isAssignableFrom(type)) {
-						Collection<AbstractUUIDEntity> elements = new ArrayList<>();	
+						Collection<UUIDEntity> elements = new ArrayList<>();	
 						for(Object embedded : list) {
 							if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 								Document embeddedDocument = (Document) embedded;
@@ -551,7 +550,7 @@ public class DocumentHelper {
 							} else {
 								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(columnDefinition.references(), (String)embedded);
 								
-								AbstractUUIDEntity ref = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
+								UUIDEntity ref = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
 								elements.add(ref);
 							}
 						}

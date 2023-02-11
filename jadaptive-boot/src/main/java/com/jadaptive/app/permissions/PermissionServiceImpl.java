@@ -463,10 +463,10 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Override
 	public void assertAssignment(AssignableUUIDEntity obj) {
 		
-		if(obj.getUsers().contains(getCurrentUser().getUuid())) {
+		if(obj.getUsers().contains(getCurrentUser())) {
 			return;
 		}
-		if(roleService.hasRole(getCurrentUser(), roleService.getRolesByUUID(obj.getRoles()))) {
+		if(roleService.hasRole(getCurrentUser(), obj.getRoles())) {
 			return;
 		}
 		throw new AccessDeniedException(String.format("Current user is not assigned to object " + obj.getUuid()));

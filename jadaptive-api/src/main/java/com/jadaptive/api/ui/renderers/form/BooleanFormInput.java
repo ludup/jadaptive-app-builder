@@ -4,6 +4,7 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.ui.Html;
 
 public class BooleanFormInput extends FieldInputRender {
 
@@ -21,16 +22,25 @@ public class BooleanFormInput extends FieldInputRender {
 						.addClass("row mb-3")
 						.appendChild(new Element("div")
 								.addClass("col-12")
-				.appendChild(input = new Element("input")
-						.attr("id", field.getFormVariable())
-						.attr("name", field.getFormVariable())
-						.attr("type", "checkbox")
-						.val("true"))
+				
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("form-label")
 						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
+						.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))))
+						.appendChild(new Element("div")
+								.addClass("col-12")
+						.appendChild(new Element("div")
+								.addClass("col-12 form-check form-switch")
+				
+				.appendChild(input = new Element("input")
+					.attr("id", field.getFormVariable())
+					.attr("name", field.getFormVariable())
+					.attr("type", "checkbox")
+					.addClass("form-check-input")
+					.val("true")))
+						.appendChild(new Element("div")
+								.addClass("col-12"))
 				.appendChild(new Element("p")
 						.addClass("form-text")
 						.addClass("text-muted text-small")

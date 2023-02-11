@@ -24,7 +24,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
@@ -71,6 +74,7 @@ import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
+import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.json.ObjectMapperHolder;
 import com.jadaptive.utils.Version;
 
@@ -653,6 +657,58 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		} catch (SecurityException | NoSuchMethodException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
+
+	}
+	
+	public UUIDEntity extendWith(UUIDEntity baseObject, 
+			ObjectTemplate extensionTemplate,
+			String packageName,
+			String className) {
+		
+		Class<?> extension = templateService.getTemplateClass(extensionTemplate.getResourceKey());
+		ObjectTemplate baseTemplate = templateService.get(baseObject.getResourceKey());
+		
+		String getter = "get" + extension.getSimpleName();
+		String setter = "set" + extension.getSimpleName();
+		String field = WordUtils.uncapitalize(extension.getSimpleName());
+		String resourceKey = WordUtils.uncapitalize(className);
+		
+		var b = new ByteBuddy().subclass(baseObject.getClass(), ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+				  .name(String.format("%s.%s", packageName, className));
+		
+		 b = b.annotateType(AnnotationDescription.Builder.ofType(ObjectDefinition.class)
+                 .define("resourceKey", resourceKey)
+                 .define("scope", baseTemplate.getScope())
+                 .define("type", baseTemplate.getType())
+                 .define("updatable", baseTemplate.isUpdatable())
+                 .define("deletable", baseTemplate.isDeletable())
+                 .define("creatable", baseTemplate.isDeletable())
+                 .define("bundle", extensionTemplate.getBundle())
+                 .build());
+		 
+		b.defineField(field, extension, Visibility.PRIVATE)
+		  .annotateField(AnnotationDescription.Builder.ofType(ObjectField.class)
+				  .define("type", FieldType.OBJECT_EMBEDDED).build())
+		  .annotateField(AnnotationDescription.Builder.ofType(Validator.class)
+				  .define("type", ValidationType.RESOURCE_KEY)
+				  .define("value", templateService.getTemplateResourceKey(extension)).build())
+		  .defineMethod(setter, extension, Visibility.PUBLIC)
+		  	 .withParameters(extension)
+		  	 .intercept(FieldAccessor.ofField(field))
+		  .defineMethod(getter, extension, Visibility.PUBLIC)
+		  		.intercept(FieldAccessor.ofField(field));
+		
+		var type = b.make().load(classService.getClassLoader());
+		
+		var clz = type.getLoaded();
+		registerAnnotatedTemplate(clz, false, false);
+		
+		Document doc = new Document();
+		DocumentHelper.convertObjectToDocument(baseObject, doc);
+		doc.put("_clz", clz.getName());
+		doc.put("resourceKey", resourceKey);
+		
+		return DocumentHelper.convertDocumentToObject(clz, doc, classService.getClassLoader());
 
 	}
 

@@ -31,11 +31,11 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	protected void assign(T e, Collection<Role> roles, Collection<User> users) {
 		
 		for(Role role : roles) {
-			e.getRoles().add(role.getUuid());
+			e.getRoles().add(role);
 		}
 		
 		for(User user : users) {
-			e.getUsers().add(user.getUuid());
+			e.getUsers().add(user);
 		}
 		
 		objectDatabase.saveOrUpdate(e);
