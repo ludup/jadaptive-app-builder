@@ -5,8 +5,8 @@ import java.util.Date;
 import com.jadaptive.api.db.Transactional;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
-import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
@@ -32,7 +32,7 @@ import com.jadaptive.utils.Utils;
 		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}", writeAction = true) })
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
-public abstract class User extends UUIDEntity implements NamedDocument {
+public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	public static final String RESOURCE_KEY = "users";
 

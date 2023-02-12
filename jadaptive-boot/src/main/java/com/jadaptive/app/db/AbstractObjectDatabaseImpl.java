@@ -26,6 +26,7 @@ import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.Events;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.SystemEvent;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -414,7 +415,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	protected <T extends UUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, ObjectException {
 		
-		if(obj.isSystem()) {
+		if(obj instanceof AbstractUUIDEntity && ((AbstractUUIDEntity)obj).isSystem()) {
 			throw new ObjectException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
 		}
 		

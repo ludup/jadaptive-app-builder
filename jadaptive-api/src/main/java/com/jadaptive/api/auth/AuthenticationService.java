@@ -16,6 +16,8 @@ public interface AuthenticationService {
 	public static final String DEFAULT_AUTHENTICATION_FLOW = "defaultAuthentication";
 	public static final String PASSWORD = "password";
 	
+	public static final String PASSWORD_MODULE_UUID = "b76a4b67-ac70-45c2-95ca-9d7e14b3f695";
+	
 	Session logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent);
 
 	AuthenticationState getCurrentState() throws FileNotFoundException;

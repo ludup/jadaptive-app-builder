@@ -2,13 +2,13 @@ package com.jadaptive.app;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 
 @ObjectDefinition(resourceKey = Property.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
-public class Property extends UUIDEntity {
+public class Property extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -4021700778301136286L;
 

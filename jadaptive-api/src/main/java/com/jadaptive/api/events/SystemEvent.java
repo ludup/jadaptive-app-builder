@@ -97,7 +97,6 @@ public class SystemEvent extends UUIDEvent {
 		this.eventKey = eventKey;
 		this.eventGroup = eventGroup;
 		attachSession();
-		setSystem(true);
 	}
 	
 	public void setEventDescription(String objectName) {

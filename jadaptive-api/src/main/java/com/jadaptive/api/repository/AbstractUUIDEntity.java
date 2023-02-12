@@ -13,6 +13,9 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 
 	private static final long serialVersionUID = -1903178803319512374L;
 	
+	Boolean system;
+	Boolean hidden;
+	
 	@ObjectField(type = FieldType.TIMESTAMP, hidden = true)
 	@ExcludeView(values = FieldView.TABLE)
 	Date created;
@@ -35,6 +38,22 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
+	}
+	
+	public Boolean isSystem() {
+		return system==null ? Boolean.FALSE : system;
+	}
+
+	public void setSystem(Boolean system) {
+		this.system = system;
+	}
+
+	public Boolean isHidden() {
+		return hidden==null ? Boolean.FALSE : hidden;
+	}
+
+	public void setHidden(Boolean hidden) {
+		this.hidden = hidden;
 	}
 
 	@Override
