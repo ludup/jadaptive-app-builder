@@ -43,4 +43,5 @@ public interface AbstractObject extends UUIDDocument {
 	void addCollectionObject(String fieldName, AbstractObject e);
 
 	boolean isNew();
+
 }

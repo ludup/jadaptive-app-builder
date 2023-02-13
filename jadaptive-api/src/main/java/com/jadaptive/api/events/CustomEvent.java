@@ -5,13 +5,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Date;
 
-import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 
-@ObjectDefinition(resourceKey = "events", type = ObjectType.COLLECTION)
 public class CustomEvent extends UUIDEntity {
 
 	private static final long serialVersionUID = -5647655839475687686L;

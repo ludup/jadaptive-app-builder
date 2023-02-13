@@ -14,11 +14,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.JadaptiveIgnore;
-import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.repository.NamedDocument;
 
 @ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, system = true)
 @UniqueIndex(columns = {"resourceKey"})
-public class ObjectTemplate extends NamedUUIDEntity {
+public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = -8159475909799827150L;
 
@@ -74,6 +74,17 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.TEXT, hidden = true)
 	String nameField;
 	
+	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true)
+	@Validator(type = ValidationType.REQUIRED)
+	protected String name;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 	public ObjectTemplate() {
 		
 	}

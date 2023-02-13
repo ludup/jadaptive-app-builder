@@ -6,13 +6,12 @@ import java.util.Collection;
 import java.util.List;
 
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
 
 @ObjectDefinition(resourceKey = TestObjectCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
-public class TestObjectCollections extends AbstractUUIDEntity {
+public class TestObjectCollections extends TestUUIDEntity {
 
 	private static final long serialVersionUID = 6201675368007087525L;
 

@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
@@ -108,19 +109,9 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 				default:
 					if(t.getCollection()) {
 						gen.writeArrayFieldStart(t.getResourceKey());
-//						if(t.getFieldType()==FieldType.OBJECT_REFERENCE) {
-//							for(Object ref : value.getReferenceCollection(t.getResourceKey())) {
-//								Map<?,?> m = (Map<?,?>) ref;
-//								gen.writeStartObject();
-//								gen.writeStringField("uuid", (String) m.get("uuid"));
-//								gen.writeStringField("name", (String) m.get("name"));
-//								gen.writeEndObject();
-//							}
-//						} else {
 							for(Object v : value.getCollection(t.getResourceKey())) {
 								writeCollectionField(gen, t, v);
 							}
-//						}
 						gen.writeEndArray();
 					} else {
 						writeField(gen, t, value.getValue(t.getResourceKey()));
@@ -155,10 +146,19 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 			case TEXT:
 			case TEXT_AREA:
 			case PASSWORD:
-			case OBJECT_REFERENCE:
 			case PERMISSION:
 			case ENUM:
 				gen.writeStringField(t.getResourceKey(), value.toString());
+				break;
+			case OBJECT_REFERENCE:
+				if(value instanceof UUIDReference) {
+					gen.writeObjectFieldStart(t.getResourceKey());
+					gen.writeStringField("uuid", ((UUIDReference)value).getUuid());
+					gen.writeStringField("name", ((UUIDReference)value).getName());
+					gen.writeEndObject();
+				} else {
+					gen.writeStringField(t.getResourceKey(), value.toString());
+				}
 				break;
 			default:
 				throw new IllegalStateException(
@@ -168,14 +168,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		}
 		
 	}
-	
-//	private String checkNull(Object obj) {
-//		if(Objects.nonNull(obj)) {
-//			return obj.toString();
-//		}
-//		return "";
-//	}
-	
+
 	private void writeCollectionField(JsonGenerator gen, FieldTemplate t, Object value) throws IOException {
 		
 		switch (t.getFieldType()) {
@@ -197,10 +190,19 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		case TEXT:
 		case TEXT_AREA:
 		case PASSWORD:
-		case OBJECT_REFERENCE:
 		case PERMISSION:
 		case ENUM:
 			gen.writeString(value.toString());
+			break;
+		case OBJECT_REFERENCE:
+			if(value instanceof UUIDReference) {
+				gen.writeStartObject();
+				gen.writeStringField("uuid", ((UUIDReference)value).getUuid());
+				gen.writeStringField("name", ((UUIDReference)value).getName());
+				gen.writeEndObject();
+			} else {
+				gen.writeStringField(t.getResourceKey(), value.toString());
+			}
 			break;
 		default:
 			throw new IllegalStateException(

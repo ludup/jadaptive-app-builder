@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
+import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -24,7 +25,7 @@ import com.jadaptive.api.template.Validator;
 @TableView(defaultColumns = "name", requiresCreate = false, requiresUpdate = true, sortField = "weight")
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
 @GenerateEventTemplates(AuthenticationPolicy.RESOURCE_KEY)
-public class AuthenticationPolicy extends AssignableUUIDEntity {
+public class AuthenticationPolicy extends AssignableUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = -4581883248747380399L;
 

@@ -3,13 +3,12 @@ package com.jadaptive.db;
 import java.util.Date;
 
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
 
 @ObjectDefinition(resourceKey = TestFieldTypesObject.RESOURCE_KEY, type = ObjectType.COLLECTION)
-public class TestFieldTypesObject extends AbstractUUIDEntity {
+public class TestFieldTypesObject extends TestUUIDEntity {
 
 	private static final long serialVersionUID = 5425265865918464536L;
 

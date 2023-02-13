@@ -30,7 +30,7 @@ public class SystemSingletonObjectDatabaseImpl<T extends SingletonUUIDEntity> im
 				return objectDatabase.get(tmp.getResourceKey(), resourceClass);
 			} catch(ObjectNotFoundException e) {
 				Document doc = new Document();
-				DocumentHelper.buildDocument(tmp.getResourceKey(), tmp, resourceClass, doc);
+				DocumentHelper.buildDocument(tmp.getResourceKey(), tmp, doc);
 				return DocumentHelper.convertDocumentToObject(resourceClass, doc);
 			}	
 		} catch(Throwable t) {

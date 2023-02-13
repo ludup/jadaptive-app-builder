@@ -36,6 +36,7 @@ import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.template.FieldTemplate;
@@ -230,7 +231,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 						throw new ObjectException(String.format("Cannot delete this object because it is still referenced by %s",
 								reference.getResourceKey()));
 					}
-					validateEventReference(reference, foreignType, foreignKey, generateFieldName(parentField, field));
+//					validateEventReference(reference, foreignType, foreignKey, generateFieldName(parentField, field));
 				}
 				break;
 			}
@@ -248,15 +249,15 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 	}
 	
-	private void validateEventReference(ObjectTemplate reference, String foreignType, String foreignKey, String parentField) {
-		
-		if(objectRepository.count(templateService.get(SystemEvent.RESOURCE_KEY), 
-				SearchField.eq("object.resourceKey", reference.getResourceKey()),
-				SearchField.all(String.format("object.%s", parentField), foreignKey)) > 0) {
-			throw new ObjectException(String.format("Cannot delete this object because it is still referenced by events for %s",
-					reference.getResourceKey()));
-		}
-	}
+//	private void validateEventReference(ObjectTemplate reference, String foreignType, String foreignKey, String parentField) {
+//		
+//		if(objectRepository.count(templateService.get(SystemEvent.RESOURCE_KEY), 
+//				SearchField.eq("object.resourceKey", reference.getResourceKey()),
+//				SearchField.all(String.format("object.%s", parentField), foreignKey)) > 0) {
+//			throw new ObjectException(String.format("Cannot delete this object because it is still referenced by events for %s",
+//					reference.getResourceKey()));
+//		}
+//	}
 	
 	private void assertReferencesExist(ObjectTemplate template, AbstractObject entity) {
 		validateReferences(template.getFields(), entity);
@@ -269,15 +270,16 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				case OBJECT_REFERENCE:
 					if(t.getCollection()) {
 						@SuppressWarnings("unchecked")
-						Collection<String> values = (Collection<String>)entity.getValue(t);
+						Collection<UUIDReference> values = (Collection<UUIDReference>)entity.getValue(t);
 						if(Objects.nonNull(values)) {
-							for(String value : values) {
-								validateEntityExists(value, templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+							for(UUIDReference value : values) {
+								validateEntityExists(value.getUuid(), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
 							}
 						}
 					} else {
-						if(StringUtils.isNotBlank((String)entity.getValue(t))) {
-							validateEntityExists((String)entity.getValue(t), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+						Document ref = (Document) entity.getValue(t);
+						if(StringUtils.isNotBlank(ref.getString("uuid"))) {
+							validateEntityExists(ref.getString("uuid"), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
 						}
 					}
 					break;

@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.ui.PageHelper;
 
@@ -149,9 +149,9 @@ public class DropdownInput extends InputRender {
 		dropdownMenu.appendChild(el);
 	}
 
-	private void renderValues(Iterable<? extends NamedUUIDEntity> fields, String defaultValue, boolean i18n) {
-		NamedUUIDEntity selected = null;
-		for(NamedUUIDEntity field : fields) {
+	private void renderValues(Iterable<? extends NamedDocument> fields, String defaultValue, boolean i18n) {
+		NamedDocument selected = null;
+		for(NamedDocument field : fields) {
 			if(Objects.isNull(selected)) {
 				selected = field;
 			}
@@ -169,7 +169,7 @@ public class DropdownInput extends InputRender {
 		}
 	}
 
-	public Element renderInputWithValues(Iterable<? extends NamedUUIDEntity> children, String defaultValue, boolean i18n) {
+	public Element renderInputWithValues(Iterable<? extends NamedDocument> children, String defaultValue, boolean i18n) {
 		Element el = renderInput();
 		renderValues(children, defaultValue, i18n);
 		return el;

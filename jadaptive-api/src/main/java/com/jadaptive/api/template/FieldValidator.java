@@ -2,10 +2,9 @@ package com.jadaptive.api.template;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 @ObjectDefinition(resourceKey = FieldValidator.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT)
-public class FieldValidator extends AbstractUUIDEntity {
+public class FieldValidator extends TemplateUUIDEntity {
 
 	private static final long serialVersionUID = 5940642806418577079L;
 

@@ -34,7 +34,8 @@ public class FieldSearchFormInput {
 			String bundle,
 			String resourceKey,
 			String variableName,
-			String value, String name,
+			String value, 
+			String name,
 			boolean nameIsResourceKey,
 			boolean readOnly) {
 		rootElement.appendChild(new Element("div")
@@ -51,6 +52,7 @@ public class FieldSearchFormInput {
 						.addClass("input-group position-relative dropdown")
 					.appendChild(new Element("input")
 							.attr("id", String.format("%sText", resourceKey))
+							.attr("name", String.format("%sText", variableName))
 							.attr("data-display", "static")
 							.addClass("form-control jsearchText")
 							.attr("data-bs-toggle", "dropdown")

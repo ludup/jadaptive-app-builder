@@ -24,6 +24,7 @@ import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
@@ -245,9 +246,9 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 			validateText(node, field);
 			return node.asText();
 		case OBJECT_REFERENCE:
-//			if(node.isObject()) {
-//				return validateReference(node, field);
-//			}
+			if(node.isObject()) {
+				return createReference(node, field);
+			}
 			return node.asText();
 		default:
 			throw new ValidationException(
@@ -258,10 +259,10 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 	}
 
 	
-//	private ObjectReference2 validateReference(JsonNode node, FieldTemplate field) {
-//		return new ObjectReference2(node.get("uuid").asText(), node.get("name").asText());
-//		
-//	}
+	private UUIDReference createReference(JsonNode node, FieldTemplate field) {
+		return new UUIDReference(node.get("uuid").asText(), node.get("name").asText());
+		
+	}
 
 	private void validatePermission(JsonNode node, FieldTemplate field) throws ValidationException {
 		

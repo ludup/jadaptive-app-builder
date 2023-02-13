@@ -9,10 +9,9 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 @ObjectDefinition(resourceKey = FieldTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT)
-public class FieldTemplate extends AbstractUUIDEntity {
+public class FieldTemplate extends TemplateUUIDEntity {
 
 	private static final long serialVersionUID = -9164781667373808388L;
 

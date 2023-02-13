@@ -61,6 +61,11 @@ public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 		String uuid = (String) document.getOrDefault("_id", null);
 		if(Objects.nonNull(uuid)) {
 			setUuid(uuid);
+		} else {
+			 uuid = (String) document.getOrDefault("uuid", null);
+			if(Objects.nonNull(uuid)) {
+				setUuid(uuid);
+			}
 		}
 		setSystem((Boolean)document.getOrDefault("system", Boolean.FALSE));
 		setHidden((Boolean)document.getOrDefault("hidden", Boolean.FALSE));

@@ -32,53 +32,20 @@ public class CollectionSearchFormInput {
 			boolean nameIsResourceKey,
 			boolean readOnly) {
 		
-		if(readOnly) {
+			Element div;
 			rootElement.appendChild(new Element("div").addClass("row mb-3 collectionSearchInput")
 					.attr("data-resourcekey", field.getResourceKey())
-					.appendChild(new Element("div")
+					.appendChild(div = new Element("div")
 							.addClass("col-12")
 					.appendChild(new Element("label")
 							.attr("for", field.getFormVariable())
 							.addClass("form-label")
 							.attr("jad:bundle", field.getBundle())
-							.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))
-						.appendChild(new Element("div")
-								.attr("id", field.getFormVariable())
-								.addClass("col-md-12")
-								.appendChild(new Element("table")
-										.addClass("w-100 collectionSearchTarget table table-sm table-striped")
-									.appendChild(new Element("thead")
-											.appendChild(new Element("tr")
-													.appendChild(new Element("td")
-															.attr("jad:bundle","default")
-															.attr("jad:i18n", "name.name"))
-													.appendChild(new Element("td")
-															.attr("jad:bundle","default")
-															.attr("jad:i18n", "actions.name"))
-											.appendChild(table = new Element("tbody"))))
-								)))
-						.appendChild(new Element("div")
-								.addClass("row")
-							.appendChild(new Element("div")
-									.addClass("col-md-10")
-									.appendChild(new Element("small")
-											.addClass("text-muted")
-											.attr("jad:bundle", field.getBundle())
-											.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))))	
-									)));
-		} else {
-			rootElement.appendChild(new Element("div").addClass("row mb-3 collectionSearchInput")
-					.attr("data-resourcekey", field.getResourceKey())
-					.appendChild(new Element("div")
-							.addClass("col-12")
-					.appendChild(new Element("label")
-							.attr("for", field.getFormVariable())
-							.addClass("form-label")
-							.attr("jad:bundle", field.getBundle())
-							.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
-					.appendChild(new Element("div")
+							.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))));
+			
+			div.appendChild(new Element("div")
 							.attr("id", String.format("%sDropdown", field.getResourceKey()))
-							.addClass("input-group position-relative dropdown")
+							.addClass("input-group position-relative dropdown" + (readOnly ? " d-none" : ""))
 						.appendChild(new Element("input")
 								.attr("id", String.format("%sText", field.getResourceKey()))
 								.attr("data-display", "static")
@@ -97,9 +64,10 @@ public class CollectionSearchFormInput {
 									.attr("class", "fas fa-search")))
 						.appendChild(new Element("div")
 								.addClass("dropdown-menu dropdown-size")
-								.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))))
-					.appendChild(new Element("div")
-							.addClass("row mt-3")
+								.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))));
+			
+			div.appendChild(new Element("div")
+						.addClass("row mt-3")
 						.appendChild(new Element("div")
 								.attr("id", field.getFormVariable())
 								.addClass("col-md-12")
@@ -111,20 +79,18 @@ public class CollectionSearchFormInput {
 															.attr("jad:bundle","default")
 															.attr("jad:i18n", "name.name"))
 													.appendChild(new Element("td")
-															.attr("jad:bundle","default")
-															.attr("jad:i18n", "actions.name"))
-											.appendChild(table = new Element("tbody"))))
-								)))
+															.appendChild(Html.i18n("default", "actions.name")
+															.addClass(readOnly ? "d-none" : "")))
+											.appendChild(table = new Element("tbody")))))))
 						.appendChild(new Element("div")
 								.addClass("row")
-							.appendChild(new Element("div")
+								.appendChild(new Element("div")
 									.addClass("col-md-10")
 									.appendChild(new Element("small")
 											.addClass("text-muted")
 											.attr("jad:bundle", field.getBundle())
-											.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))))	
-									)));
-		}
+											.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))))	);
+		
 		
 		if(selectedValues.size() > 0) {
 			for(NamePairValue value : selectedValues) {
@@ -133,8 +99,12 @@ public class CollectionSearchFormInput {
 				table.appendChild(row = new Element("tr")
 						.appendChild(new Element("input")
 								.attr("type", "hidden")
-								.attr("name", field.getResourceKey())
+								.attr("name", field.getFormVariable())
 								.attr("value", value.getValue()))
+						.appendChild(new Element("input")
+								.attr("type", "hidden")
+								.attr("name", String.format("%sText", field.getFormVariable()))
+								.attr("value", value.getName()))
 						.appendChild(new Element("td")
 								.appendChild(displayName = Html.span(value.getName(), "underline"))));
 				if(!readOnly) {

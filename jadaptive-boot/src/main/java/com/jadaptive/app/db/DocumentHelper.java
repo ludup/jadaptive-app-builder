@@ -46,11 +46,13 @@ import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -112,9 +114,13 @@ public class DocumentHelper {
 						document.put(name, ((Enum<?>)value).name());
 					} else if(UUIDDocument.class.isAssignableFrom(m.getReturnType())) {
 						if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
-							buildDocument(name, (UUIDDocument)value, m.getReturnType(), document);
+							buildDocument(name, (UUIDDocument)value, document);
 						} else if(Objects.nonNull(value)) {
-							document.put(name, ((UUIDDocument)value).getUuid());
+							if(value instanceof UUIDReference) {
+								buildDocument(name, (UUIDReference) value, document);
+							} else {
+								buildDocument(name, buildReference((UUIDEntity)value), document);
+							}
 						}
 					} else if(Collection.class.isAssignableFrom(m.getReturnType())) {
 						buildCollectionDocuments(name, columnDefinition, (Collection<?>)value, m.getReturnType(), document);
@@ -128,9 +134,17 @@ public class DocumentHelper {
 			log.error("Error converting document", e);
 			throw new RepositoryException(String.format("Unexpected error storing U%s", obj.getClass().getName()), e);		
 		}
-		
 	}
 
+	private static UUIDReference buildReference(UUIDEntity e) {
+		
+		if(e instanceof NamedDocument) {
+			return generateReference(e.getUuid(), ((NamedDocument)e).getName());
+		} else {
+			return generateReference(e.getUuid(), e.getUuid());
+		}
+	}
+	
 	private static boolean isSupportedPrimative(Class<?> returnType) {
 		if(returnType.equals(Integer.class)) {
 			return true;
@@ -186,19 +200,21 @@ public class DocumentHelper {
 				list.add(value);
 			} else if(value.getClass().isEnum()) {
 				list.add(((Enum<?>)value).name());
-//			} else if(value instanceof ObjectReference2) {
-//				list.add(((ObjectReference2)value).toMap());
 			} else if(UUIDEntity.class.isAssignableFrom(value.getClass())) {
 
 				UUIDEntity e = (UUIDEntity) value;
 				if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 					Document embeddedDocument = new Document();
-					
-					
 					convertObjectToDocument(e, embeddedDocument);
 					list.add(embeddedDocument);
+				} else if(e instanceof NamedDocument) {
+					Document embeddedDocument = new Document();
+					convertObjectToDocument(generateReference(e.getUuid(), ((NamedDocument)e).getName()), embeddedDocument);
+					list.add(embeddedDocument);
 				} else {
-					list.add(e.getUuid());
+					throw new IllegalStateException(
+							String.format("Referenced UUIDEntity %s MUST implement NamedDocument or extend NamedUUIDEntity!",
+									e.getClass().getSimpleName()));
 				}
 			} else {
 				list.add(checkForAndPerformEncryption(columnDefinition,value.toString()));
@@ -208,7 +224,7 @@ public class DocumentHelper {
 		document.put(name, list);
 	}
 
-	public static void buildDocument(String name, UUIDDocument object, Class<?> type, Document document) throws RepositoryException, ParseException, ObjectException {
+	public static void buildDocument(String name, UUIDDocument object, Document document) throws RepositoryException, ParseException, ObjectException {
 		
 		Document embedded = new Document();
 		convertObjectToDocument(object, embedded);
@@ -221,6 +237,10 @@ public class DocumentHelper {
 	
 	private static String getParameter(HttpServletRequest request, FieldTemplate field) {
 		return getParameter(request, field.getFormVariable());
+	}
+	
+	private static String getTextParameter(HttpServletRequest request, FieldTemplate field) {
+		return getParameter(request, String.format("%sText", field.getFormVariable()));
 	}
 	
 	private static String getParameter(HttpServletRequest request, String formVariable) {
@@ -286,16 +306,23 @@ public class DocumentHelper {
 
 		switch(field.getFieldType()) {
 		case OBJECT_EMBEDDED:
+		{
 			ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
 					.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
 			return buildObject(request, 
 					template.getResourceKey(),
 					template).getDocument();
+		}
 		case OBJECT_REFERENCE:
+		{	
 			if(log.isDebugEnabled()) {
 				log.debug("Returning {} as reference {}", field.getResourceKey(), value);
 			}
-			return value;
+
+			String name = getTextParameter(request, field);
+			
+			return generateReference(getParameter(request, field), name);
+		}
 		case BOOL:
 			if(Objects.isNull(value)) {
 				return false;
@@ -396,8 +423,9 @@ public class DocumentHelper {
 			break;
 		case OBJECT_REFERENCE:
 		{
-			for(String value : values) {
-				result.add(value);
+			String[] names = request.getParameterValues(String.format("%sText", field.getFormVariable()));
+			for(int i=0;i<values.length;i++) {
+				result.add(generateReference(values[i], names[i]));
 			}
 			break;
 		}
@@ -415,6 +443,11 @@ public class DocumentHelper {
 		}
 		
 		return result;
+	}
+
+
+	private static UUIDReference generateReference(String uuid, String name) {
+		return new UUIDReference(uuid, name);
 	}
 
 
@@ -495,24 +528,29 @@ public class DocumentHelper {
 						
 						m.invoke(obj, convertDocumentToObject(UUIDEntity.class, (Document) doc, classLoader));
 					} else {
-						String objectUUID =  document.getString(name);
-						if(StringUtils.isNotBlank(objectUUID)) {
+						Object objectUUID =  document.get(name);
+						if(objectUUID instanceof Document) {
+							objectUUID = document.get(name, Document.class).get("uuid");
+						} 
+						
+						if(StringUtils.isNotBlank((String)objectUUID)) {
 							ObjectServiceBean service = parameter.getType().getAnnotation(ObjectServiceBean.class);
 							if(Objects.nonNull(service)) {
 								
 								UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
-								Object ref = bean.getObjectByUUID(objectUUID);
+								Object ref = bean.getObjectByUUID((String)objectUUID);
 								m.invoke(obj, ref);
 								
 							} else {
 								String resourceKey = getTemplateResourceKey(parameter.getType());
 
-								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, objectUUID);
+								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, (String)objectUUID);
 								Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
 								m.invoke(obj, ref);
 								
 							}
 						}
+						
 					}
 				} else if(parameter.getType().isEnum()) { 
 					String v = (String) value;
@@ -547,10 +585,22 @@ public class DocumentHelper {
 							if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 								Document embeddedDocument = (Document) embedded;
 								elements.add(convertDocumentToObject(UUIDEntity.class, embeddedDocument, classLoader));
-							} else {
-								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(columnDefinition.references(), (String)embedded);
+							} else if(embedded instanceof UUIDReference) {
+								AbstractObject e = (AbstractObject) 
+										ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
+												columnDefinition.references(), ((UUIDReference)embedded).getUuid());
 								
 								UUIDEntity ref = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
+								elements.add(ref);
+							} else if(embedded instanceof String) {
+								AbstractObject e = (AbstractObject) 
+										ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
+												columnDefinition.references(), (String)embedded);
+								
+								UUIDEntity ref = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
+								elements.add(ref);
+							} else if(embedded instanceof Document) {
+								UUIDEntity ref = convertDocumentToObject(null, (Document)embedded, classLoader); 
 								elements.add(ref);
 							}
 						}
