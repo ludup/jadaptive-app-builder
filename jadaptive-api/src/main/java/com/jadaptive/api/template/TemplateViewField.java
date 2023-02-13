@@ -14,6 +14,7 @@ public class TemplateViewField {
 	LinkedList<FieldTemplate> objectPath;
 	int weight = 0;
 	String bundle = null;
+	boolean disableEncoding;
 	FieldRenderer renderer = null;
 	
 	public TemplateViewField(ObjectView view, TemplateView panel, FieldTemplate field, LinkedList<FieldTemplate> objectPath) {
@@ -22,6 +23,7 @@ public class TemplateViewField {
 		this.panel = panel;
 		this.objectPath = objectPath;
 		this.weight = view != null ? view.weight() : 0;
+		this.disableEncoding = Objects.nonNull(view) && view.disableEncoding();
 		this.bundle = Objects.nonNull(view) && StringUtils.isNotBlank(view.bundle()) ? view.bundle() : panel.getBundle();
 		this.renderer = view != null ? view.renderer() : FieldRenderer.DEFAULT;
 	}
@@ -42,6 +44,9 @@ public class TemplateViewField {
 		}
 	}
 
+	public boolean isDisableEncoding() {
+		return disableEncoding;
+	}
 	public String getFormVariable() {
 		return field.getFormVariable();
 	}
