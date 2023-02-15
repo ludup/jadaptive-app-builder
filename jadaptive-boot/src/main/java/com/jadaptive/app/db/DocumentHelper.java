@@ -485,6 +485,9 @@ public class DocumentHelper {
 			}
 			
 			String uuid = (String) document.get("_id");
+			if(Objects.isNull(uuid)) {
+				uuid = document.getString("uuid");
+			}
 			obj.setUuid(uuid);
 			
 			Map<String,Field> fields = ReflectionUtils.getFields(obj.getClass());
@@ -590,19 +593,6 @@ public class DocumentHelper {
 							if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 								Document embeddedDocument = (Document) embedded;
 								elements.add(convertDocumentToObject(UUIDEntity.class, embeddedDocument, classLoader));
-							} else if(embedded instanceof UUIDReference) {
-								AbstractObject e = (AbstractObject) 
-										ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
-												columnDefinition.references(), ((UUIDReference)embedded).getUuid());
-								
-								UUIDEntity ref = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
-								elements.add(ref);
-							} else if(embedded instanceof String) {
-								AbstractObject e = (AbstractObject) 
-										ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
-												columnDefinition.references(), (String)embedded);
-								UUIDEntity ref = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
-								elements.add(ref);
 							} else if(embedded instanceof Document) {
 								UUIDReference ref = DocumentHelper.convertDocumentToObject(UUIDReference.class, (Document) embedded);
 								AbstractObject e = (AbstractObject) 

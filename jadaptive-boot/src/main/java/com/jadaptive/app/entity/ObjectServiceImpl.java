@@ -282,21 +282,21 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				switch(t.getFieldType()) {
 				case OBJECT_REFERENCE:
 					if(t.getCollection()) {
-						Object tmp = entity.getValue(t.getResourceKey());
-						if(tmp instanceof List) {
-							Collection<?> values = (Collection<?>) entity.getValue(t.getResourceKey());
-							if(Objects.nonNull(values)) {
-								if(values.isEmpty()) {
-									continue;
-								}
-								if(values.iterator().next() instanceof String) {
-									for(String value : (Collection<String>)values) {
-										validateEntityExists(value, templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
-									}
-									continue;
-								} 
-							}
-						} 
+//						Object tmp = entity.getValue(t.getResourceKey());
+//						if(tmp instanceof List) {
+//							Collection<?> values = (Collection<?>) entity.getValue(t.getResourceKey());
+//							if(Objects.nonNull(values)) {
+//								if(values.isEmpty()) {
+//									continue;
+//								}
+//								if(values.iterator().next() instanceof String) {
+//									for(String value : (Collection<String>)values) {
+//										validateEntityExists(value, templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+//									}
+//									continue;
+//								} 
+//							}
+//						} 
 						
 						Collection<AbstractObject> values = (Collection<AbstractObject>)entity.getObjectCollection(t.getResourceKey());
 						if(Objects.nonNull(values)) {
@@ -306,12 +306,12 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 						}
 						
 					} else {
-						Object tmp = entity.getValue(getName());
-						if(tmp instanceof String) {
-							if(StringUtils.isNotBlank(tmp.toString())) {
-								validateEntityExists(tmp.toString(), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
-							}
-						} else {
+//						Object tmp = entity.getValue(getName());
+//						if(tmp instanceof String) {
+//							if(StringUtils.isNotBlank(tmp.toString())) {
+//								validateEntityExists(tmp.toString(), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+//							}
+//						} else {
 							AbstractObject ref = entity.getChild(t);
 							if(Objects.isNull(ref)) {
 								continue;
@@ -319,7 +319,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 							if(StringUtils.isNotBlank(ref.getUuid())) {
 								validateEntityExists(ref.getUuid(), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
 							}
-						}
+//						}
 					}
 					break;
 				case OBJECT_EMBEDDED:
