@@ -51,6 +51,13 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 				SearchField.all("fields.validators.type", ValidationType.RESOURCE_KEY.name()),
 			SearchField.all("fields.validators.value", template.getResourceKey()));
 	}
+	
+	@Override
+	public boolean hasReferences(ObjectTemplate template) {
+		return list(
+				SearchField.eq("_id", template.getResourceKey()),
+				SearchField.all("fields.fieldType", FieldType.OBJECT_REFERENCE.name())).iterator().hasNext();
+	}
 
 	private void createTextIndex(ObjectTemplate template, String fieldName) {
 		db.createTextIndex(fieldName, template.getResourceKey(), tenantService.getCurrentTenant().getUuid());

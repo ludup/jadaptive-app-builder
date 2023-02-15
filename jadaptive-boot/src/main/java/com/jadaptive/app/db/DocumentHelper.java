@@ -321,7 +321,9 @@ public class DocumentHelper {
 
 			String name = getTextParameter(request, field);
 			
-			return generateReference(getParameter(request, field), name);
+			Document doc = new Document();
+			convertObjectToDocument(generateReference(getParameter(request, field), name), doc);
+			return doc;
 		}
 		case BOOL:
 			if(Objects.isNull(value)) {
@@ -417,7 +419,8 @@ public class DocumentHelper {
 			ObjectMapper mapper = new ObjectMapper();
 
 			for(String value : values) {
-				result.add(mapper.readValue(Base64.getUrlDecoder().decode(value), MongoEntity.class).getDocument());
+				String json = new String(Base64.getUrlDecoder().decode(value), "UTF-8");
+				result.add(mapper.readValue(json, MongoEntity.class).getDocument());
 			}
 
 			break;
@@ -425,7 +428,9 @@ public class DocumentHelper {
 		{
 			String[] names = request.getParameterValues(String.format("%sText", field.getFormVariable()));
 			for(int i=0;i<values.length;i++) {
-				result.add(generateReference(values[i], names[i]));
+				Document doc = new Document();
+				convertObjectToDocument(generateReference(values[i], names[i]), doc);
+				result.add(doc);
 			}
 			break;
 		}
@@ -596,12 +601,15 @@ public class DocumentHelper {
 								AbstractObject e = (AbstractObject) 
 										ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
 												columnDefinition.references(), (String)embedded);
-								
 								UUIDEntity ref = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
 								elements.add(ref);
 							} else if(embedded instanceof Document) {
-								UUIDEntity ref = convertDocumentToObject(null, (Document)embedded, classLoader); 
-								elements.add(ref);
+								UUIDReference ref = DocumentHelper.convertDocumentToObject(UUIDReference.class, (Document) embedded);
+								AbstractObject e = (AbstractObject) 
+										ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
+												columnDefinition.references(), ref.getUuid());
+								UUIDEntity ue = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
+								elements.add(ue);
 							}
 						}
 

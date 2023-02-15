@@ -46,10 +46,16 @@ public class EventServiceImpl implements EventService {
 	
 	List<Runnable> preRegistrations = new ArrayList<>();
 	
+	ThreadLocal<Boolean> disableThreadEvents = new ThreadLocal<>();
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void publishEvent(SystemEvent evt) {
 	
+		if(!isFiring()) {
+			return;
+		}
+		
 		if(evt instanceof ObjectEvent) {
 			ObjectEvent<?> oevt = (ObjectEvent<?>)evt;
 			if(oevt.getObject() instanceof NamedDocument) {
@@ -76,6 +82,10 @@ public class EventServiceImpl implements EventService {
 
 	}
 	
+	private boolean isFiring() {
+		return disableThreadEvents.get() == null
+				&& disableThreadEvents.get() != Boolean.TRUE;
+	}
 	@Override
 	public void preRegisterEventHandler(Runnable runnable) {
 		preRegistrations.add(runnable);
@@ -183,5 +193,15 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public <T extends UUIDEntity> void deleting(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
 		on(Events.deleting(templateService.getTemplateResourceKey(clz)), handler);
+	}
+
+	@Override
+	public void haltEvents() {
+		disableThreadEvents.set(Boolean.TRUE);
+	}
+
+	@Override
+	public void resumeEvents() {
+		disableThreadEvents.remove();
 	}
 }

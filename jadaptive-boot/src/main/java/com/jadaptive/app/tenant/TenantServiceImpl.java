@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.app.PropertyService;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
@@ -71,6 +72,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Autowired
 	private SingletonObjectDatabase<SystemConfiguration> systemConfig;
 	
+	@Autowired
+	private PropertyService propertyService; 
 	
 	Tenant systemTenant;
 	
@@ -110,12 +113,13 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 					try {
 						templateService.registerTenantIndexes(newSchema);
 						initialiseTenant(tenant, false);
+							
 					} finally {
 						clearCurrentTenant();
 					}
 				}
 			}	
-			
+
 			this.ready = true;
 			
             List<StartupAware> startups = new ArrayList<>(applicationService.getBeans(StartupAware.class));

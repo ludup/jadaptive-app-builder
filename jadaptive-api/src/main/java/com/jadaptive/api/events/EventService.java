@@ -29,6 +29,8 @@ public interface EventService {
 
 	<T extends UUIDEntity> void changed(Class<T> clz, EventListener<ObjectEvent<T>> handler);
 
-	
+	void haltEvents();
+
+	void resumeEvents();
 
 }

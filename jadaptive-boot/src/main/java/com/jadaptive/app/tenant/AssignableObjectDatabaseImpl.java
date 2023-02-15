@@ -53,8 +53,8 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 					sortField,
 					SearchField.and(fields),
 					SearchField.or(
-							SearchField.in("users", user.getUuid()),
-							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
+							SearchField.all("users.uuid", user.getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))
 					));
 		}
 	}
@@ -69,8 +69,8 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 			return objectDatabase.searchObjects(resourceClass, 
 					SearchField.add(fields,
 					SearchField.or(
-							SearchField.in("users", user.getUuid()),
-							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))
+							SearchField.all("users.uuid", user.getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))
 					));
 		}
 	}
@@ -82,8 +82,8 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 		return objectDatabase.searchObjects(resourceClass, 
 				SearchField.add(fields,
 				SearchField.or(
-						SearchField.in("users", user.getUuid()),
-						SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))
+						SearchField.all("users.uuid", user.getUuid()),
+						SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))
 				));
 		
 	}
@@ -114,12 +114,12 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 			
 			if(fields.length > 0) {
 				return objectDatabase.get(resourceClass, SearchField.and(SearchField.and(fields), 
-						SearchField.or(SearchField.in("users", user.getUuid()),
-										SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));
+						SearchField.or(SearchField.all("users.uuid", user.getUuid()),
+										SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));
 			} else {
 				return objectDatabase.get(resourceClass, SearchField.or(
-					SearchField.in("users", user.getUuid()),
-					SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))));
+					SearchField.all("users.uuid", user.getUuid()),
+					SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))));
 			}
 		}
 	}

@@ -7,6 +7,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
@@ -14,6 +15,7 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 
 @ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL, creatable = false, updatable = false)
+@ObjectServiceBean(bean = SessionService.class)
 @TableView(defaultColumns = { "user", "signedIn", "remoteAddress", "type", "state", "userAgent"})
 public class Session extends AbstractUUIDEntity {
 

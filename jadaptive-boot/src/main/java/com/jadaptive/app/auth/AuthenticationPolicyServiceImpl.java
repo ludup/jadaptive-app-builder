@@ -20,6 +20,7 @@ import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.db.AssignableObjectDatabase;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.user.User;
@@ -38,6 +39,9 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 
 	@Autowired
 	private RoleService roleService; 
+	
+	@Autowired
+	private PermissionService permissionService;
 	
 	private AuthenticationPolicyResolver resolver;
 	
@@ -84,6 +88,9 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		}
 		
 		if(results.isEmpty()) {
+			if(permissionService.isAdministrator(user)) {
+				return getDefaultPolicy();
+			}
 			return null;
 		}
 		

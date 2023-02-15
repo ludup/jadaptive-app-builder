@@ -152,9 +152,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	public Iterable<AbstractObject> list(String resourceKey) throws RepositoryException, ObjectException {
 		
 		ObjectTemplate template = templateService.get(resourceKey);
-		if(template.getScope()==ObjectScope.PERSONAL) {
-			throw new ObjectException(String.format("%s is a personal scoped object. Use personal API", resourceKey));
-		}
+//		if(template.getScope()==ObjectScope.PERSONAL) {
+//			throw new ObjectException(String.format("%s is a personal scoped object. Use personal API", resourceKey));
+//		}
 		
 		if(template.getPermissionProtected()) {
 			permissionService.assertRead(resourceKey);
@@ -202,7 +202,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 	}
 	
-	private void assertForiegnReferences(ObjectTemplate template, String uuid) {
+	@Override
+	public void assertForiegnReferences(ObjectTemplate template, String uuid) {
 		
 		while(template.hasParent()) {
 			template = templateRepository.get(template.getParentTemplate());
@@ -217,6 +218,17 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		for(ObjectTemplate reference : templateRepository.findReferences(template)) {
 			validateCollectionReference(reference, template.getResourceKey(), uuid, "");
 			
+		}
+	}
+	
+	@Override
+	public void rebuildReferences(ObjectTemplate template) {
+		
+		if(templateRepository.hasReferences(template)) {
+			log.info("Rebuilding references for {}", template.getResourceKey());
+			for(AbstractObject obj : list(template.getResourceKey())) {
+				saveOrUpdate(obj);
+			}
 		}
 	}
 
@@ -263,23 +275,50 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		validateReferences(template.getFields(), entity);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void validateReferences(Collection<FieldTemplate> fields, AbstractObject entity) {
 		if(!Objects.isNull(fields)) {
 			for(FieldTemplate t : fields) {
 				switch(t.getFieldType()) {
 				case OBJECT_REFERENCE:
 					if(t.getCollection()) {
-						@SuppressWarnings("unchecked")
-						Collection<UUIDReference> values = (Collection<UUIDReference>)entity.getValue(t);
+						Object tmp = entity.getValue(t.getResourceKey());
+						if(tmp instanceof List) {
+							Collection<?> values = (Collection<?>) entity.getValue(t.getResourceKey());
+							if(Objects.nonNull(values)) {
+								if(values.isEmpty()) {
+									continue;
+								}
+								if(values.iterator().next() instanceof String) {
+									for(String value : (Collection<String>)values) {
+										validateEntityExists(value, templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+									}
+									continue;
+								} 
+							}
+						} 
+						
+						Collection<AbstractObject> values = (Collection<AbstractObject>)entity.getObjectCollection(t.getResourceKey());
 						if(Objects.nonNull(values)) {
-							for(UUIDReference value : values) {
+							for(AbstractObject value : values) {
 								validateEntityExists(value.getUuid(), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
 							}
 						}
+						
 					} else {
-						Document ref = (Document) entity.getValue(t);
-						if(StringUtils.isNotBlank(ref.getString("uuid"))) {
-							validateEntityExists(ref.getString("uuid"), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+						Object tmp = entity.getValue(getName());
+						if(tmp instanceof String) {
+							if(StringUtils.isNotBlank(tmp.toString())) {
+								validateEntityExists(tmp.toString(), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+							}
+						} else {
+							AbstractObject ref = entity.getChild(t);
+							if(Objects.isNull(ref)) {
+								continue;
+							}
+							if(StringUtils.isNotBlank(ref.getUuid())) {
+								validateEntityExists(ref.getUuid(), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
+							}
 						}
 					}
 					break;
@@ -485,8 +524,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return objectRepository.table(template, offset, limit, 
 					generateSearchFields(searchField, searchValue, template, SearchField.or(
-							SearchField.in("users", getCurrentUser().getUuid()),
-							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
+							SearchField.all("users.uuid", getCurrentUser().getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
 			return objectRepository.table(template, offset, limit, 
@@ -533,8 +572,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return objectRepository.count(template,
 					SearchField.or(
-							SearchField.in("users", getCurrentUser().getUuid()),
-							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
+							SearchField.all("users.uuid", getCurrentUser().getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))
 					));			
 		case GLOBAL:
 		default:
@@ -563,8 +602,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 				return objectRepository.count(template,
 						generateSearchFields(searchField, searchValue, template, SearchField.or(
-								SearchField.in("users", getCurrentUser().getUuid()),
-								SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));			
+								SearchField.all("users.uuid", getCurrentUser().getUuid()),
+								SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 			case GLOBAL:
 			default:
 				return objectRepository.count(template, generateSearchFields(searchField, searchValue, template));

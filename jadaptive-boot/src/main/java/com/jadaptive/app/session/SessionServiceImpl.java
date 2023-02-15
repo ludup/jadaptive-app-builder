@@ -1,17 +1,22 @@
 package com.jadaptive.app.session;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SingletonObjectDatabase;
-import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -35,8 +40,8 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 	static Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
 	
-	@Autowired
-	private TenantAwareObjectDatabase<Session> repository;
+//	@Autowired
+//	private TenantAwareObjectDatabase<Session> repository;
 	
 	@Autowired
 	private SingletonObjectDatabase<SessionConfiguration> configService;
@@ -53,12 +58,16 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Autowired
 	private TenantService tenantService; 
 	
+	@Autowired
+	private CacheService cacheService;
+	
 	@Override
 	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type) {
 		
 		SessionConfiguration sessionConfig = configService.getObject(SessionConfiguration.class);
 		
 		Session session = new Session();
+		session.setUuid(UUID.randomUUID().toString());
 		session.setRemoteAddress(remoteAddress);
 		session.setType(type);
 		session.setSessionTimeout(sessionConfig.getTimeout());
@@ -68,13 +77,20 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		session.setUser(user);
 		session.setState(SessionState.ACTIVE);
 
-		repository.saveOrUpdate(session);
+//		repository.saveOrUpdate(session);
+		getCache().put(session.getUuid(), session);
 		
 		user.setLastLogin(Utils.now());
+		eventService.haltEvents();
 		userService.saveOrUpdate(user);
+		eventService.resumeEvents();
 		
 		tenantService.executeAs(tenant, ()->eventService.publishEvent(new SessionOpenedEvent(session)));
 		return session;
+	}
+	
+	protected Map<String,Session> getCache() {
+		return cacheService.getCacheOrCreate("sessions", String.class, Session.class);
 	}
 
 	@Override
@@ -147,7 +163,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 								+ " timeout=" + session.getSessionTimeout());
 			}
 			session.setLastUpdated(new Date());
-			repository.saveOrUpdate(session);
+			getCache().put(session.getUuid(), session);
 		}
 	}
 
@@ -167,7 +183,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 		session.setState(SessionState.EXPIRED);
 		session.setSignedOut(new Date());
-		repository.saveOrUpdate(session);
+		getCache().put(session.getUuid(), session);
 		usageService.log(session.getSignedOut().getTime() - session.getSignedIn().getTime(),
 				SESSION_USAGE, session.getUser().getUuid());
 		
@@ -177,26 +193,68 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 	@Override
 	public Session getSession(String uuid) throws UnauthorizedException {
-		try {
-		return repository.get(uuid, Session.class);
-		} catch(ObjectNotFoundException e) {
+		
+		Session session = getCache().get(uuid);
+		if(Objects.isNull(session)) {
 			throw new UnauthorizedException();
 		}
+		return session;
 	}
 
 	@Override
 	public Iterable<Session> iterateSessions() {
-		return repository.list(Session.class, SearchField.eq("signedOut", null));
+		List<Session> activeSessions = new ArrayList<>();
+		for(Session session : getCache().values()) {
+			if(!session.isClosed()) {
+				activeSessions.add(session);
+			}
+		}
+		return activeSessions;
 	}
 
 	@Override
 	public Iterable<Session> inactiveSessions() {
-		return repository.list(Session.class, SearchField.eq("state", SessionState.EXPIRED.name()));
+		List<Session> inactiveSessions = new ArrayList<>();
+		for(Session session : getCache().values()) {
+			if(session.isClosed()) {
+				inactiveSessions.add(session);
+			}
+		}
+		return inactiveSessions;
 	}
 
 	@Override
 	public void deleteSession(Session session) {	
-		repository.delete(session);
+		getCache().remove(session.getUuid());
+	}
+
+	@Override
+	public Session getObjectByUUID(String uuid) {
+		Session session = getCache().get(uuid);
+		if(Objects.isNull(session)) {
+			throw new ObjectNotFoundException("No session with uuid " + uuid);
+		}
+		return session;
+	}
+
+	@Override
+	public String saveOrUpdate(Session object) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteObject(Session object) {
+		deleteSession(object);
+	}
+
+	@Override
+	public void deleteObjectByUUID(String uuid) {
+		deleteSession(getObjectByUUID(uuid));
+	}
+
+	@Override
+	public Iterable<Session> allObjects() {
+		return Collections.unmodifiableCollection(getCache().values());
 	}
 
 }

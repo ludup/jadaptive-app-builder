@@ -1,9 +1,10 @@
 package com.jadaptive.api.session;
 
+import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 
-public interface SessionService {
+public interface SessionService extends UUIDObjectService<Session> {
 
 	public static final String SESSION_USAGE = "sessionTimeMs";
 	

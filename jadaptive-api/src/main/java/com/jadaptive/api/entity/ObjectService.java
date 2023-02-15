@@ -37,5 +37,9 @@ public interface ObjectService {
 
 	AbstractObject get(ObjectTemplate template, String uuid)
 			throws RepositoryException, ObjectException, ValidationException;
+
+	void assertForiegnReferences(ObjectTemplate template, String uuid);
+
+	void rebuildReferences(ObjectTemplate template);
 	
 }

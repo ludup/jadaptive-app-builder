@@ -1,11 +1,18 @@
 package com.jadaptive.api.repository;
 
+import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
+
+@ObjectDefinition(resourceKey = UUIDReference.RESOURCE_KEY, type = ObjectType.OBJECT)
 public class UUIDReference extends UUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 8704359424299916453L;
 
 	public static final String RESOURCE_KEY = "uuidReference";
 
+	@ObjectField(type = FieldType.TEXT)
 	String name;
 
 	public UUIDReference() { }

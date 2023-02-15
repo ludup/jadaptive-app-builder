@@ -91,7 +91,14 @@ public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 
 	@Override
 	public AbstractObject getChild(FieldTemplate c) {
-		return children.get(c.getResourceKey());
+		AbstractObject obj = children.get(c.getResourceKey());
+		if(Objects.isNull(obj)) {
+			Document doc = (Document) document.get(c.getResourceKey());
+			if(Objects.nonNull(doc)) {
+				obj = new MongoEntity(this, (String)document.get("resourceKey"), doc);
+			}
+		}
+		return obj;
 	}
 
 	@Override
@@ -157,6 +164,9 @@ public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 	public void setValue(FieldTemplate t, Object value) {
 		if(value instanceof Map) {
 			new MongoEntity(this, t.getResourceKey(), (Map)value);
+		} else if(value instanceof MongoEntity){
+			MongoEntity e = (MongoEntity) value;
+			addChild(e.getResourceKey(), e);
 		} else {
 			document.put(t.getResourceKey(), value);
 		}

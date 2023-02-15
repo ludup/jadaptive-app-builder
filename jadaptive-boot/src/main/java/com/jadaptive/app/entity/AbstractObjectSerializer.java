@@ -25,16 +25,24 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 
 	static Logger log = LoggerFactory.getLogger(AbstractObjectSerializer.class);
 	
+	TemplateService templateService;
+	
 	public AbstractObjectSerializer() {
 		super(AbstractObject.class);
+	}
+	
+	private TemplateService getTemplateService() {
+		if(Objects.isNull(templateService)) {
+			templateService = ApplicationServiceImpl.getInstance().getBean(TemplateService.class);
+		}
+		return templateService;
 	}
 
 	@Override
 	public void serialize(AbstractObject value, JsonGenerator gen, SerializerProvider provider) throws IOException {
 
 		try {
-			ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(
-					TemplateService.class).get(value.getResourceKey());
+			ObjectTemplate template = getTemplateService().get(value.getResourceKey());
 
 			writeObject(value, template, gen);
 		} catch (Throwable e) {
@@ -83,6 +91,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 	
 	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, AbstractObject value) throws IOException {
 		
+		
 		if(!Objects.isNull(templates)) {
 			for (FieldTemplate t : templates) {
 
@@ -91,8 +100,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 					AbstractObject embedded = value.getChild(t);
 					if(Objects.nonNull(embedded)) {
 						String clz = (String) embedded.getValue("_clz");
-						TemplateService templateService = ApplicationServiceImpl.getInstance().getBean(TemplateService.class);
-						ObjectTemplate template = templateService.get(templateService.getTemplateResourceKey(clz));
+						ObjectTemplate template = getTemplateService().get(templateService.getTemplateResourceKey(clz));
 						if(t.getCollection()) {
 							gen.writeArrayFieldStart(t.getResourceKey());
 							for(AbstractObject child : value.getObjectCollection(t.getResourceKey())) {
@@ -104,6 +112,18 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 						}
 					} else {
 						gen.writeNullField(t.getResourceKey());
+					}
+					break;
+				case OBJECT_REFERENCE:
+					if(t.getCollection()) {
+						gen.writeArrayFieldStart(t.getResourceKey());
+							for(AbstractObject v : value.getObjectCollection(t.getResourceKey())) {
+								writeCollectionField(gen, t, v);
+							}
+						gen.writeEndArray();
+					} else {
+						AbstractObject child = value.getChild(t);
+						writeField(gen, t, child);
 					}
 					break;
 				default:
@@ -151,14 +171,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 				gen.writeStringField(t.getResourceKey(), value.toString());
 				break;
 			case OBJECT_REFERENCE:
-				if(value instanceof UUIDReference) {
-					gen.writeObjectFieldStart(t.getResourceKey());
-					gen.writeStringField("uuid", ((UUIDReference)value).getUuid());
-					gen.writeStringField("name", ((UUIDReference)value).getName());
-					gen.writeEndObject();
-				} else {
-					gen.writeStringField(t.getResourceKey(), value.toString());
-				}
+				gen.writeObjectField(t.getResourceKey(), value);
 				break;
 			default:
 				throw new IllegalStateException(
@@ -195,13 +208,13 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 			gen.writeString(value.toString());
 			break;
 		case OBJECT_REFERENCE:
-			if(value instanceof UUIDReference) {
+			if(value instanceof AbstractObject) {
 				gen.writeStartObject();
-				gen.writeStringField("uuid", ((UUIDReference)value).getUuid());
-				gen.writeStringField("name", ((UUIDReference)value).getName());
+				gen.writeStringField("uuid", ((AbstractObject)value).getUuid());
+				gen.writeStringField("name", (String)((AbstractObject)value).getValue("name"));
 				gen.writeEndObject();
 			} else {
-				gen.writeStringField(t.getResourceKey(), value.toString());
+				gen.writeString(value.toString());
 			}
 			break;
 		default:

@@ -20,4 +20,6 @@ public interface TemplateVersionService {
 
 	void registerAnnotatedTemplate(Class<?> clz, boolean newSchema, boolean isEvent);
 
+	void rebuildReferences();
+
 }

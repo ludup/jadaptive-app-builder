@@ -10,4 +10,6 @@ public interface ObjectTemplateRepository extends AbstractTenantAwareObjectDatab
 
 	Collection<ObjectTemplate> findReferences(ObjectTemplate template);
 
+	boolean hasReferences(ObjectTemplate template);
+
 }

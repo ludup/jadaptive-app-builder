@@ -32,6 +32,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.DocumentValidator;
 import com.jadaptive.utils.Utils;
 
@@ -156,6 +157,8 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 
 		if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
 			processEmbeddedObjects(field, node, e);
+		} else if(field.getFieldType()==FieldType.OBJECT_REFERENCE) {
+			processReferencedObjects(field, node, e);
 		} else {
 			processSimpleTypes(field, node, e);
 		}
@@ -179,6 +182,34 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
  				e.setValue(field, documents);
  			} else {
  				iterateType(node, template, new MongoEntity(e, field.getResourceKey(), new Document()), false);
+ 			}
+ 			
+ 		} catch(ObjectException ex) {
+ 			throw new ValidationException(String.format("%s object type template not found", type));
+ 		}	
+	}
+	
+	private void processReferencedObjects(FieldTemplate field, JsonNode node, AbstractObject e) throws ValidationException, IOException {
+		
+		String type = field.getValidationValue(ValidationType.RESOURCE_KEY);
+		
+		try {
+ 			if(node.isArray()) {
+ 				List<Document> documents = new ArrayList<>();
+ 				for(JsonNode element : node) {
+ 					Document doc = new Document();
+ 					doc.put("uuid", element.get("uuid").asText());
+ 					doc.put("name", element.get("name").asText());
+ 					doc.put("resourceKey", UUIDReference.RESOURCE_KEY);
+ 					documents.add(doc);
+ 				}
+ 				e.setValue(field, documents);
+ 			} else {
+ 				Document doc = new Document();
+					doc.put("uuid", node.get("uuid").asText());
+					doc.put("name", node.get("name").asText());
+					doc.put("resourceKey", UUIDReference.RESOURCE_KEY);
+				e.addChild(field.getResourceKey(), new MongoEntity(e, UUIDReference.RESOURCE_KEY, doc));
  			}
  			
  		} catch(ObjectException ex) {
@@ -246,10 +277,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 			validateText(node, field);
 			return node.asText();
 		case OBJECT_REFERENCE:
-			if(node.isObject()) {
-				return createReference(node, field);
-			}
-			return node.asText();
+			return createReference(node, field);
 		default:
 			throw new ValidationException(
 					String.format("Missing field type %s in validate method", 
@@ -259,9 +287,10 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 	}
 
 	
-	private UUIDReference createReference(JsonNode node, FieldTemplate field) {
-		return new UUIDReference(node.get("uuid").asText(), node.get("name").asText());
-		
+	private Document createReference(JsonNode node, FieldTemplate field) {
+		Document doc = new Document();;
+		DocumentHelper.convertObjectToDocument(new UUIDReference(node.get("uuid").asText(), node.get("name").asText()), doc);
+		return doc;
 	}
 
 	private void validatePermission(JsonNode node, FieldTemplate field) throws ValidationException {

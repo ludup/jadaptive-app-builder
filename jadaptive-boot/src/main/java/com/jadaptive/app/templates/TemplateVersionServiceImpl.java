@@ -39,6 +39,7 @@ import com.jadaptive.api.app.ResourcePackage;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.AuditedObject;
 import com.jadaptive.api.events.Events;
@@ -116,6 +117,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	@Autowired
 	private ClassLoaderService classService;
+	
+	@Autowired
+	private ObjectService objectService; 
 	
 	private Map<String,ObjectTemplate> loadedTemplates = new HashMap<>();
 	private Map<String,Class<? extends ObjectEvent<?>>> eventClasses = new HashMap<>();
@@ -913,5 +917,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 		
 		throw new IllegalStateException(String.format("Could not detemine field type of class %s", type.getSimpleName()));
+	}
+
+	@Override
+	public void rebuildReferences() {
+		
+		log.info("Rebuilding references for {}", tenantService.getCurrentTenant().getName());
+		Set<ObjectTemplate> processed = new HashSet<>();
+		for(ObjectTemplate template : templateService.allCollectionTemplates()) {
+			while(template.hasParent()) {
+				template = templateService.get(template.getParentTemplate());
+			}
+			if(!processed.contains(template)) {
+				objectService.rebuildReferences(template);
+			}
+			processed.add(template);
+		}
 	}
 }

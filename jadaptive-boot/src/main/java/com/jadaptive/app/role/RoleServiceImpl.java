@@ -263,7 +263,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	@Override
 	public Collection<Role> getRolesByUser(User user) {
 		List<Role> results = new ArrayList<>(getAllUserRoles());
-		results.addAll(repository.searchObjects(Role.class, SearchField.in("users", user.getUuid())));
+		results.addAll(repository.searchObjects(Role.class, SearchField.all("users.uuid", user.getUuid())));
 		return results;
 	}
 
