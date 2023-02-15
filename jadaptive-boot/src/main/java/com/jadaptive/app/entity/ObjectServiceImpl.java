@@ -323,11 +323,24 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 					}
 					break;
 				case OBJECT_EMBEDDED:
-					AbstractObject child = entity.getChild(t);
-					if(Objects.nonNull(child)) {
-						assertReferencesExist(templateRepository.get(
-								t.getValidationValue(ValidationType.RESOURCE_KEY)), 
-								child);
+					
+					ObjectTemplate template = templateRepository.get(
+							t.getValidationValue(ValidationType.RESOURCE_KEY));
+							
+					if(t.getCollection()) {
+						
+						Collection<AbstractObject> children = entity.getObjectCollection(t.getResourceKey());
+						if(Objects.nonNull(children)) {
+							for(AbstractObject child : children) {
+								assertReferencesExist(template,	child);
+							}
+						}
+					} else {
+						AbstractObject child = entity.getChild(t);
+						if(Objects.nonNull(child)) {
+							assertReferencesExist(template, 
+									child);
+						}
 					}
 					break;
 				default:
