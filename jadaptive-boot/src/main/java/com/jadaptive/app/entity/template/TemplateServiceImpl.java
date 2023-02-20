@@ -151,7 +151,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Override
 	public void saveOrUpdate(ObjectTemplate template) throws RepositoryException, ObjectException {
 		
-		permissionService.assertReadWrite(ObjectTemplate.RESOURCE_KEY);
+		permissionService.assertWrite(ObjectTemplate.RESOURCE_KEY);
 		
 		repository.saveOrUpdate(template);
 		
@@ -479,5 +479,13 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(String.format("Missing template for class %s", objectTemplate.getTemplateClass()));
 		}
+	}
+
+	@Override
+	public ObjectTemplate getParentTemplate(ObjectTemplate template) {
+		while(template.hasParent()) {
+			template = get(template.getParentTemplate());
+		}
+		return template;
 	}
 }

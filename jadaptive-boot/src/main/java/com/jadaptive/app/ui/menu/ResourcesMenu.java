@@ -12,7 +12,7 @@ import com.jadaptive.api.ui.menu.ApplicationMenuService;
 public class ResourcesMenu implements ApplicationMenu {
 
 	@Override
-	public String getResourceKey() {
+	public String getI18n() {
 		return "resources.name";
 	}
 

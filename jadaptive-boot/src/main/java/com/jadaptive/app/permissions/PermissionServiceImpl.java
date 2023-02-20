@@ -253,7 +253,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 
 	@Override 
-	public void assertReadWrite(String resourceKey) throws AccessDeniedException {
+	public void assertWrite(String resourceKey) throws AccessDeniedException {
 		assertAnyPermission(PermissionUtils.getReadWritePermission(resourceKey));
 	}
 	
@@ -488,4 +488,26 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			throw new AccessDeniedException(String.format("Current user is not own the object " + e.getUuid()));
 		}	
 	}
+
+//	@Override
+//	public void assertRead(ObjectTemplate template) {
+//		if(template.getPermissionProtected()) {
+//			if(template.hasParent()) {
+//				assertRead(templateService.getParentTemplate(template).getResourceKey());
+//			} else {
+//				assertRead(template.getResourceKey());
+//			}
+//		}
+//	}
+//	
+//	@Override
+//	public void assertWrite(ObjectTemplate template) {
+//		if(template.getPermissionProtected()) {
+//			if(template.hasParent()) {
+//				assertWrite(templateService.getParentTemplate(template).getResourceKey());
+//			} else {
+//				assertWrite(template.getResourceKey());
+//			}
+//		}
+//	}
 }

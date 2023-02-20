@@ -230,7 +230,7 @@ public class AuthenticationState {
 		this.optionalSelectionPage = optionalSelectionPage;
 	}
 	
-	public void setSelectedPagE(Class<? extends Page> selectedPage) {
+	public void setSelectedPage(Class<? extends Page> selectedPage) {
 		this.selectedPage = selectedPage;
 	}
 

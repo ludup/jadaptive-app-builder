@@ -18,7 +18,7 @@ public class ReportingMenu implements ApplicationMenu {
 	}
 	
 	@Override
-	public String getResourceKey() {
+	public String getI18n() {
 		return "reporting.name";
 	}
 

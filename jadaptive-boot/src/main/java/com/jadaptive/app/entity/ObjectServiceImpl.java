@@ -23,20 +23,16 @@ import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectRepository;
-import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
-import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
-import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.template.FieldTemplate;
@@ -82,9 +78,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	private ApplicationService appService; 
 	
 	@Autowired
-	private PermissionService permissionService; 
-	
-	@Autowired
 	private RoleService roleService; 
 	
 	@Autowired
@@ -102,9 +95,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 		ObjectTemplate template = templateService.get(resourceKey);
 		
-		if(template.getPermissionProtected()) {
-			permissionService.assertRead(resourceKey);
-		}
+		assertRead(resourceKey);
 		
 		if(template.getType()!=ObjectType.SINGLETON) {
 			throw new ObjectException(String.format("%s is not a singleton entity", resourceKey));
@@ -156,9 +147,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 //			throw new ObjectException(String.format("%s is a personal scoped object. Use personal API", resourceKey));
 //		}
 		
-		if(template.getPermissionProtected()) {
-			permissionService.assertRead(resourceKey);
-		}
+		assertRead(template);
 
 		return objectRepository.list(template);
 	}
@@ -179,9 +168,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		ObjectTemplate template = templateService.get(entity.getResourceKey());
 		
-		if(template.getPermissionProtected()) {
-			permissionService.assertReadWrite(entity.getResourceKey());
-		}
+		assertWrite(template);
 		
 		assertReferencesExist(template, entity);
 		
@@ -275,7 +262,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		validateReferences(template.getFields(), entity);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void validateReferences(Collection<FieldTemplate> fields, AbstractObject entity) {
 		if(!Objects.isNull(fields)) {
 			for(FieldTemplate t : fields) {
@@ -364,9 +350,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 	private String saveViaObjectBean(AbstractObject entity, ObjectTemplate template) {
 		
-		if(template.getPermissionProtected()) {
-			permissionService.assertReadWrite(entity.getResourceKey());
-		}
+		assertWrite(template);
+		
 		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
 
 		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
@@ -382,9 +367,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	private void deleteViaObjectBean(AbstractObject entity, ObjectTemplate template) {
 		
-		if(template.getPermissionProtected()) {
-			permissionService.assertReadWrite(entity.getResourceKey());
-		}
+		assertWrite(entity.getResourceKey());
+		
 		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
 
 		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
@@ -470,7 +454,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public void deleteAll(String resourceKey) throws ObjectException {
 		
-		permissionService.assertReadWrite(resourceKey);
+		assertWrite(resourceKey);
 		
 		ObjectTemplate template = templateService.get(resourceKey);
 		if(template.getType()==ObjectType.SINGLETON) {	
@@ -530,7 +514,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			return objectRepository.table(template, offset, limit,
 						generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
 		case ASSIGNED:
-			if(permissionService.isAdministrator(getCurrentUser())) {
+			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.table(template, offset, limit, 
 						generateSearchFields(searchField, searchValue, template));
 			}
@@ -579,7 +563,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			return objectRepository.count(template,
 					SearchField.eq("ownerUUID", getCurrentUser().getUuid()));
 		case ASSIGNED:
-			if(permissionService.isAdministrator(getCurrentUser())) {
+			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.count(template);
 			}
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
@@ -595,15 +579,14 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		
 	}
-	
+
 	@Override
 	public long count(String resourceKey, String searchField, String searchValue) {
 		
 		ObjectTemplate template = templateService.get(resourceKey);
 		
 		try {
-			
-			permissionService.assertRead(template.getResourceKey());
+			assertRead(template);
 			return objectRepository.count(template, generateSearchFields(searchField, searchValue, template));
 		
 		} catch(AccessDeniedException e) {

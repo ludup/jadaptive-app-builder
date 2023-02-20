@@ -27,7 +27,7 @@ public class SystemMenu implements ApplicationMenu {
 	}
 	
 	@Override
-	public String getResourceKey() {
+	public String getI18n() {
 		return "system.name";
 	}
 

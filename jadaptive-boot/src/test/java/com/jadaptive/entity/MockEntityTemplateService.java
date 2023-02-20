@@ -121,5 +121,10 @@ public class MockEntityTemplateService implements TemplateService {
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public ObjectTemplate getParentTemplate(ObjectTemplate template) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

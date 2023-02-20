@@ -7,7 +7,7 @@ import org.pf4j.ExtensionPoint;
 
 public interface ApplicationMenu extends ExtensionPoint {
 
-	String getResourceKey();
+	String getI18n();
 
 	String getBundle();
 

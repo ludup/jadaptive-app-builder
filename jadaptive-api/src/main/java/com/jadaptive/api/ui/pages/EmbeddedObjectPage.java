@@ -39,7 +39,7 @@ public abstract class EmbeddedObjectPage extends ObjectTemplatePage {
 	}
 	
 	protected void assertPermissions() {
-		permissionService.assertReadWrite(template.getResourceKey());
+		permissionService.assertWrite(template.getResourceKey());
 	}
 	
 	public void onCreate() throws FileNotFoundException {

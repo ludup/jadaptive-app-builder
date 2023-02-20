@@ -16,6 +16,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.ui.ObjectPage;
 
 public abstract class ObjectTemplatePage extends TemplatePage implements ObjectPage {
@@ -45,7 +46,13 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 	}
 	
 	protected void assertPermissions() {
-		permissionService.assertReadWrite(template.getResourceKey());
+		
+		if(template.hasParent()) {
+			ObjectTemplate parent = templateService.getParentTemplate(template);
+			permissionService.assertWrite(parent.getResourceKey());
+		} else {
+			permissionService.assertWrite(resourceKey);
+		}
 	}
 	
 	@Override

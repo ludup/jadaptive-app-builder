@@ -55,4 +55,6 @@ public interface TemplateService {
 
 	void delete(ObjectTemplate objectTemplate);
 
+	ObjectTemplate getParentTemplate(ObjectTemplate template);
+
 }

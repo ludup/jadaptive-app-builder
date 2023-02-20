@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SingletonObjectDatabase;
-import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;

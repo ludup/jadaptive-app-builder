@@ -84,7 +84,7 @@ public class AuthenticatedController extends ExceptionHandlingController {
 	}
 	
 	protected void assertWrite(String resourceKey) {
-		permissionService.assertReadWrite(resourceKey);
+		permissionService.assertWrite(resourceKey);
 	}
 	
 	protected void assertPermission(String permission) {

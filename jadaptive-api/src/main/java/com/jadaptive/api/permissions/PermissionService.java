@@ -21,8 +21,8 @@ public interface PermissionService {
 	void assertPermission(String permission) throws AccessDeniedException;
 
 	void assertRead(String resourceKey) throws AccessDeniedException;
-
-	void assertReadWrite(String resourceKey) throws AccessDeniedException;
+	
+//	void assertRead(ObjectTemplate resourceKey) throws AccessDeniedException;
 
 	void registerStandardPermissions(String resourceKey);
 
@@ -65,5 +65,9 @@ public interface PermissionService {
 	void assertOwnership(PersonalUUIDEntity obj);
 
 	void assertOwnership(AbstractObject e);
+
+//	void assertWrite(ObjectTemplate template);
+	
+	void assertWrite(String resourceKey);
 
 }

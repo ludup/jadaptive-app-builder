@@ -163,7 +163,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	@Override
 	public void assertManageTenant() {
-		permissionService.assertReadWrite(TENANT_RESOURCE_KEY);
+		permissionService.assertWrite(TENANT_RESOURCE_KEY);
 	}
 	
 	@Override
@@ -352,7 +352,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Override
 	public void deleteTenant(Tenant tenant) {
 		
-		permissionService.assertReadWrite(TENANT_RESOURCE_KEY);
+		permissionService.assertWrite(TENANT_RESOURCE_KEY);
 
 		List<TenantAware> awareServices = new ArrayList<>(applicationService.getBeans(TenantAware.class));
 		Collections.sort(awareServices, new Comparator<TenantAware>() {

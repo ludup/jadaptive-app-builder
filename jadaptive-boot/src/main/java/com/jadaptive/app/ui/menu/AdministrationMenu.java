@@ -17,7 +17,7 @@ public class AdministrationMenu implements ApplicationMenu {
 	}
 	
 	@Override
-	public String getResourceKey() {
+	public String getI18n() {
 		return "administration.name";
 	}
 
