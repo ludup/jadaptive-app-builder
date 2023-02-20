@@ -86,6 +86,7 @@ public class EventServiceImpl implements EventService {
 		return disableThreadEvents.get() == null
 				&& disableThreadEvents.get() != Boolean.TRUE;
 	}
+	
 	@Override
 	public void preRegisterEventHandler(Runnable runnable) {
 		preRegistrations.add(runnable);

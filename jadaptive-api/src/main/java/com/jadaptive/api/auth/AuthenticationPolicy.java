@@ -38,6 +38,7 @@ public class AuthenticationPolicy extends AssignableUUIDEntity implements NamedD
 	}
 
 	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true)
+	@Validator(type = ValidationType.REQUIRED)
 	String name;
 	
 	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
