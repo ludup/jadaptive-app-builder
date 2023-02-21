@@ -1,6 +1,7 @@
 package com.jadaptive.api.auth;
 
 import java.io.FileNotFoundException;
+import java.util.Collection;
 
 import org.jsoup.nodes.Document;
 
@@ -41,5 +42,9 @@ public interface AuthenticationService {
 	void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy) throws FileNotFoundException;
 
 	void validateModules(AuthenticationPolicy policy);
+
+	Iterable<AuthenticationModule> getAuthenticationModules();
+
+	AuthenticationModule getAuthenticationModule(String uuid);
 	
 }

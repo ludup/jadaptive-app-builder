@@ -22,6 +22,7 @@ import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.cache.CacheService;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -64,6 +65,9 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	
 	@Autowired
 	private PageCache pageCache;
+	
+	@Autowired
+	private TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
 	
 	Map<String,Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
 	
@@ -320,5 +324,16 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			return registeredAuthenticationPages.get(authenticator);
 		}
 		throw new IllegalStateException(String.format("%s is not an installed authenticator", authenticator));
+	}
+
+
+	@Override
+	public AuthenticationModule getAuthenticationModule(String uuid) {
+		return moduleDatabase.get(uuid, AuthenticationModule.class);
+	}
+	
+	@Override
+	public Iterable<AuthenticationModule> getAuthenticationModules() {
+		return moduleDatabase.list(AuthenticationModule.class);
 	}
 }
