@@ -132,7 +132,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	}
 
 	@Override
-	protected void validateSave(AuthenticationPolicy policy) {		
+	protected void beforeSave(AuthenticationPolicy policy) {		
 		authenticationService.validateModules(policy);
 		if(Request.isAvailable()) {
 			if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy))) {

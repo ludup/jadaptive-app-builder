@@ -2,6 +2,7 @@ package com.jadaptive.app.session;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -15,10 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.cache.CacheService;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionService;
@@ -28,6 +31,7 @@ import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.session.events.SessionClosedEvent;
 import com.jadaptive.api.session.events.SessionOpenedEvent;
 import com.jadaptive.api.stats.UsageService;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
@@ -39,9 +43,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 	static Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
 	
-//	@Autowired
-//	private TenantAwareObjectDatabase<Session> repository;
-	
+
 	@Autowired
 	private SingletonObjectDatabase<SessionConfiguration> configService;
 	
@@ -76,7 +78,6 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		session.setUser(user);
 		session.setState(SessionState.ACTIVE);
 
-//		repository.saveOrUpdate(session);
 		getCache().put(session.getUuid(), session);
 		
 		user.setLastLogin(Utils.now());
@@ -224,6 +225,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 	@Override
 	public void deleteSession(Session session) {	
+		closeSession(session);
 		getCache().remove(session.getUuid());
 	}
 
@@ -254,6 +256,28 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Override
 	public Iterable<Session> allObjects() {
 		return Collections.unmodifiableCollection(getCache().values());
+	}
+
+	@Override
+	public void deleteAll() {
+		
+		for(Session session : new ArrayList<>(getCache().values())) {
+			deleteSession(session);
+		}
+	}
+	
+	@Override
+	public Collection<? extends UUIDDocument> searchTable(int start, int length, SortOrder sort, String sortField, SearchField... fields) {
+		return filter(fields);
+	}
+	
+	@Override
+	public long countTable(SearchField... fields) {
+		return filter(fields).size();
+	}
+	
+	protected Collection<Session> filter(SearchField...fields) {
+		return new ArrayList<>(getCache().values());
 	}
 
 }

@@ -41,4 +41,6 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
 	Long sum(Class<T> resourceClass, String groupBy, SearchField... fields);
 
+	void deleteAll();
+
 }

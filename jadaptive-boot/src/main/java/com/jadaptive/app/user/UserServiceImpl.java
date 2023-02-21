@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
-import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.stats.ResourceService;
@@ -34,7 +34,7 @@ import com.jadaptive.api.user.UserDatabaseCapabilities;
 import com.jadaptive.api.user.UserService;
 
 @Service
-public class UserServiceImpl extends AuthenticatedService implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
+public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
 	
 	@Autowired
 	private PermissionService permissionService; 
@@ -179,11 +179,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	}
 
 	@Override
-	public Iterable<User> allObjects() {
-		return userRepository.list(User.class);
-	}
-
-	@Override
 	public Collection<ObjectTemplate> getCreateUserTemplates() {
 		
 		List<ObjectTemplate> templates = new ArrayList<>();
@@ -234,17 +229,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	}
 
 	@Override
-	public Map<String, String> getUserProperties(User user) {
-		// TODO Return from user database implementation
-		return new HashMap<>();
-	}
-
-	@Override
-	public User getObjectByUUID(String uuid) {
-		return getUserByUUID(uuid);
-	}
-
-	@Override
 	public String saveOrUpdate(User user) {
 		UserDatabase db = getDatabase(user);
 		boolean isNew = StringUtils.isBlank(user.getUuid());
@@ -257,11 +241,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 
 		return user.getUuid();
 	}
-	
-	@Override
-	public void deleteObject(User user) {
-		deleteUser(user);
-	}
 
 	@Override
 	public long getTotalResources() {
@@ -271,11 +250,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public String getResourceKey() {
 		return "users";
-	}
-	
-	@Override
-	public void deleteObjectByUUID(String uuid) {
-		deleteObject(getObjectByUUID(uuid));
 	}
 
 	@Override
@@ -296,6 +270,16 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public long countUsers() {
 		return userRepository.count(User.class);
+	}
+
+	@Override
+	protected Class<User> getResourceClass() {
+		return User.class;
+	}
+
+	@Override
+	public Map<String, String> getUserProperties(User user) {
+		return new HashMap<>();
 	}
 
 }

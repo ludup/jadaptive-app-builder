@@ -186,6 +186,11 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 	@Override
 	protected <T extends UUIDEntity> Map<String, T> getCache(Class<T> obj) {
 		return cacheService.getCacheOrCreate("objectTemplates.uuidCache", String.class, obj);
+	}
+
+	@Override
+	public void deleteAll() {
+		throw new UnsupportedOperationException();
 	}		
 }
 

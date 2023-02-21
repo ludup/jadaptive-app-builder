@@ -96,4 +96,9 @@ public abstract class PasswordEnabledUserDatabaseImpl
 	public void deleteObjectByUUID(String uuid) {
 		deleteObject(getObjectByUUID(uuid));
 	}
+	
+	@Override
+	public void deleteAll() {
+		throw new UnsupportedOperationException();
+	}
 }

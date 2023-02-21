@@ -22,10 +22,7 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public TenantAwareObjectDatabaseImpl(DocumentDatabase db) {
 		super(db);
 	}
-	
-	//protected String forcedTenantUUID;
-	//protected Class<T> resourceClass;
-	
+
 	@Autowired
 	protected TenantService tenantService;
 	
@@ -127,5 +124,10 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	@Override
 	public Long sum(Class<T> resourceClass, String groupBy, SearchField... fields) {
 		return sumObjects(getCurrentTenant().getUuid(), resourceClass, groupBy, fields);
+	}
+
+	@Override
+	public void deleteAll() {
+		throw new UnsupportedOperationException();
 	}
 }

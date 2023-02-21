@@ -94,5 +94,10 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 	public long count() {
 		return countObjects(TenantService.SYSTEM_UUID, getResourceClass());
 	}
+	
+	@Override
+	public void deleteAll() {
+		throw new UnsupportedOperationException();
+	}
 
 }

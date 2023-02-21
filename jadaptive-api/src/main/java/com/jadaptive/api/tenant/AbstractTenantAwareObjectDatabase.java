@@ -37,4 +37,6 @@ public interface AbstractTenantAwareObjectDatabase<T extends UUIDDocument> {
 	Collection<T> table(String searchField, String searchValue, int start, int length, SortOrder order,
 			String sortField);
 
+	void deleteAll();
+
 }

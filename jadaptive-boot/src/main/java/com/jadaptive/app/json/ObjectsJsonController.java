@@ -49,7 +49,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	private TemplateService templateService; 
 	
 	@Autowired
-	private ObjectService entityService; 
+	private ObjectService objectService; 
 	
 	@Autowired
 	private SessionUtils sessionUtils;
@@ -67,7 +67,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityStatus<AbstractObject> getEntity(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-		   return new EntityStatus<AbstractObject>(entityService.get(resourceKey, uuid));
+		   return new EntityStatus<AbstractObject>(objectService.get(resourceKey, uuid));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/objects/{}/{}", resourceKey, uuid, e);
@@ -86,7 +86,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 		}
 		
 		try {
-			   return new EntityStatus<AbstractObject>(entityService.getSingleton(resourceKey));
+			   return new EntityStatus<AbstractObject>(objectService.getSingleton(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/objects/{}", resourceKey, e);
@@ -113,7 +113,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	public RequestStatus saveObject(HttpServletRequest request, @PathVariable String resourceKey, @RequestBody MongoEntity entity)  {
 
 		try {
-			entityService.saveOrUpdate(entity);
+			objectService.saveOrUpdate(entity);
 			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
@@ -134,7 +134,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 		try {
 			sessionUtils.verifySameSiteRequest(request);
 		
-			entityService.delete(resourceKey, uuid);
+			objectService.delete(resourceKey, uuid);
 			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
@@ -153,7 +153,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 		setupUserContext(request);
 		
 		try {
-			entityService.delete(resourceKey, uuid);
+			objectService.delete(resourceKey, uuid);
 			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
@@ -168,7 +168,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	@ResponseStatus(value=HttpStatus.OK)
 	public EntityResultsStatus<AbstractObject> listObjects(HttpServletRequest request, @PathVariable String resourceKey) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
-			   return new EntityResultsStatus<AbstractObject>(entityService.list(resourceKey));
+			   return new EntityResultsStatus<AbstractObject>(objectService.list(resourceKey));
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/objects/{}/list", resourceKey, e);
@@ -213,14 +213,14 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 							int length, String sortBy)
 							throws UnauthorizedException,
 							AccessDeniedException {
- 						return entityService.table(resourceKey, searchColumn, searchPattern, offset, limit);
+ 						return objectService.table(resourceKey, searchColumn, searchPattern, offset, limit);
 					}
 
 					@Override
 					public Long getTotalCount(String searchColumn, String searchPattern)
 							throws UnauthorizedException,
 							AccessDeniedException {
-						return entityService.count(resourceKey, searchColumn, searchPattern);
+						return objectService.count(resourceKey, searchColumn, searchPattern);
 					}
 				});
 

@@ -3,7 +3,7 @@ package com.jadaptive.api.entity;
 import java.util.Collection;
 
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationException;
 
@@ -25,15 +25,9 @@ public interface ObjectService {
 
 	Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit);
 
-	long count(String resourceKey);
-
 	long count(String resourceKey, String searchField, String searchValue);
 
-//	Collection<AbstractObject> personal(String resourceKey) throws RepositoryException, ObjectException;
-
 	FormHandler getFormHandler(String handler);
-
-	AbstractObject convert(UUIDEntity object);
 
 	AbstractObject get(ObjectTemplate template, String uuid)
 			throws RepositoryException, ObjectException, ValidationException;
@@ -41,5 +35,7 @@ public interface ObjectService {
 	void assertForiegnReferences(ObjectTemplate template, String uuid);
 
 	void rebuildReferences(ObjectTemplate template);
+
+	AbstractObject convert(UUIDDocument obj);
 	
 }

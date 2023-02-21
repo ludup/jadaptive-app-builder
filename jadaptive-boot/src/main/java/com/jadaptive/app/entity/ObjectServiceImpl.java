@@ -25,13 +25,11 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectRepository;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
-import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
@@ -39,6 +37,7 @@ import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
@@ -103,7 +102,12 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		AbstractObject e;
 		
 		try {
-			e = objectRepository.getById(template, resourceKey);
+			if(Objects.nonNull(template.getTemplateClass())) {
+				e = getViaObjectBean(template, resourceKey);
+			} else {
+				e = objectRepository.getById(template, resourceKey);
+			}
+			
 			if(!resourceKey.equals(e.getResourceKey())) {
 				throw new IllegalStateException();
 			}
@@ -124,43 +128,23 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Override
 	public AbstractObject get(ObjectTemplate template, String uuid) throws RepositoryException, ObjectException, ValidationException {
-		/**
-		 * This creates a problem requiring normal users to have read for anything that's embedded in an object.
-		 */
-//		if(!template.isSystem() && template.getPermissionProtected()) {
-//			permissionService.assertRead(resourceKey);
-//		}
-		
-		AbstractObject e = objectRepository.getById(template, uuid);
-//		if(!resourceKey.equals(e.getResourceKey()) && !template.getChildTemplates().contains(e.getResourceKey())) {
-//			throw new IllegalStateException(String.format("Unexpected template %s", e.getResourceKey()));
-//		}
-		return e;
- 	}
 
+		if(Objects.nonNull(template.getTemplateClass())) {
+			return getViaObjectBean(template, uuid);
+		} else {
+			return objectRepository.getById(template, uuid);
+		}
+	}
 
 	@Override
 	public Iterable<AbstractObject> list(String resourceKey) throws RepositoryException, ObjectException {
 		
 		ObjectTemplate template = templateService.get(resourceKey);
-//		if(template.getScope()==ObjectScope.PERSONAL) {
-//			throw new ObjectException(String.format("%s is a personal scoped object. Use personal API", resourceKey));
-//		}
-		
+
 		assertRead(template);
 
 		return objectRepository.list(template);
 	}
-	
-//	@Override
-//	public Collection<AbstractObject> personal(String resourceKey) throws RepositoryException, ObjectException {
-//		
-//		ObjectTemplate template = templateService.get(resourceKey);
-//		if(template.getScope()!=ObjectScope.PERSONAL) {
-//			throw new ObjectException(String.format("%s is a not personal scoped object. Use list API", resourceKey));
-//		}
-//		return entityRepository.personal(template, getCurrentUser());
-//	}
 
 	@Override
 	public String saveOrUpdate(AbstractObject entity) throws RepositoryException, ObjectException {
@@ -230,7 +214,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 						throw new ObjectException(String.format("Cannot delete this object because it is still referenced by %s",
 								reference.getResourceKey()));
 					}
-//					validateEventReference(reference, foreignType, foreignKey, generateFieldName(parentField, field));
 				}
 				break;
 			}
@@ -247,17 +230,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			}
 		}
 	}
-	
-//	private void validateEventReference(ObjectTemplate reference, String foreignType, String foreignKey, String parentField) {
-//		
-//		if(objectRepository.count(templateService.get(SystemEvent.RESOURCE_KEY), 
-//				SearchField.eq("object.resourceKey", reference.getResourceKey()),
-//				SearchField.all(String.format("object.%s", parentField), foreignKey)) > 0) {
-//			throw new ObjectException(String.format("Cannot delete this object because it is still referenced by events for %s",
-//					reference.getResourceKey()));
-//		}
-//	}
-	
+
 	private void assertReferencesExist(ObjectTemplate template, AbstractObject entity) {
 		validateReferences(template.getFields(), entity);
 	}
@@ -268,22 +241,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				switch(t.getFieldType()) {
 				case OBJECT_REFERENCE:
 					if(t.getCollection()) {
-//						Object tmp = entity.getValue(t.getResourceKey());
-//						if(tmp instanceof List) {
-//							Collection<?> values = (Collection<?>) entity.getValue(t.getResourceKey());
-//							if(Objects.nonNull(values)) {
-//								if(values.isEmpty()) {
-//									continue;
-//								}
-//								if(values.iterator().next() instanceof String) {
-//									for(String value : (Collection<String>)values) {
-//										validateEntityExists(value, templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
-//									}
-//									continue;
-//								} 
-//							}
-//						} 
-						
 						Collection<AbstractObject> values = (Collection<AbstractObject>)entity.getObjectCollection(t.getResourceKey());
 						if(Objects.nonNull(values)) {
 							for(AbstractObject value : values) {
@@ -292,12 +249,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 						}
 						
 					} else {
-//						Object tmp = entity.getValue(getName());
-//						if(tmp instanceof String) {
-//							if(StringUtils.isNotBlank(tmp.toString())) {
-//								validateEntityExists(tmp.toString(), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
-//							}
-//						} else {
 							AbstractObject ref = entity.getChild(t);
 							if(Objects.isNull(ref)) {
 								continue;
@@ -305,7 +256,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 							if(StringUtils.isNotBlank(ref.getUuid())) {
 								validateEntityExists(ref.getUuid(), templateRepository.get(t.getValidationValue(ValidationType.RESOURCE_KEY)));
 							}
-//						}
 					}
 					break;
 				case OBJECT_EMBEDDED:
@@ -382,6 +332,83 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 	}
 	
+	
+	private void deleteAllViaObjectBean(ObjectTemplate template) {
+		
+		assertWrite(template);
+		
+		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
+
+		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+		
+		if(Objects.nonNull(annotation)) {
+			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+			bean.deleteAll();
+		} else { 
+			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
+			db.deleteAll();
+		}
+	}
+	
+	private Collection<AbstractObject> tableViaObjectBean(ObjectTemplate template, int start, int length, SortOrder order, String sortField, SearchField... fields) {
+		
+		assertRead(template);
+		
+		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
+
+		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+		
+		if(Objects.nonNull(annotation)) {
+			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+			return convertObjects(bean.searchTable(start, length, order, sortField, fields));
+		} else { 
+			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
+			return convertObjects(db.searchTable(start, length, order, sortField, fields));
+		}
+	}
+	
+	private long countViaObjectBean(ObjectTemplate template, SearchField... fields) {
+		
+		assertRead(template);
+		
+		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
+
+		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+		
+		if(Objects.nonNull(annotation)) {
+			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+			return bean.countTable(fields);
+		} else { 
+			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
+			return db.searchCount(fields);
+		}
+	}
+	
+	private AbstractObject getViaObjectBean(ObjectTemplate template, String uuid) {
+		
+		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
+
+		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+		
+		if(Objects.nonNull(annotation)) {
+			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+			return convert(bean.getObjectByUUID(uuid));
+		} else { 
+			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
+			return convert(db.get(uuid));
+		}
+	}
+	
+	private Collection<AbstractObject> convertObjects(Collection<? extends UUIDDocument> objects) {
+		
+		List<AbstractObject> results = new ArrayList<>();
+		for(UUIDDocument obj : objects) {
+			results.add(convert(obj));
+		}
+		
+		return results;
+	}
+
 	private AbstractTenantAwareObjectDatabase<?> createService(Class<? extends UUIDDocument> clz, ObjectTemplate template) {
 	
 		if(template.isSystem()) {
@@ -413,8 +440,11 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	private AbstractTenantAwareObjectDatabase<?> createTenantAwareService(Class<? extends UUIDDocument> clz) {
 		try {
 			Generic genericType = TypeDescription.Generic.Builder.parameterizedType(AbstractTenantAwareObjectDatabaseImpl.class, clz).build();
+			Generic resourceClass = TypeDescription.Generic.Builder.parameterizedType(Class.class, clz).build();
+			
 			Class<?> subclass = new ByteBuddy()
 					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+					  .defineMethod("getResourceClass", resourceClass).intercept(FixedValue.value(clz))
 					  .make()
 					  .load(clz.getClassLoader())
 					  .getLoaded();
@@ -461,9 +491,14 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new ObjectException("You cannot delete a Singleton Entity");
 		}
 		
-		objectRepository.deleteAll(template);
+		if(Objects.nonNull(template.getTemplateClass())) {
+			deleteAllViaObjectBean(template);
+		} else {
+			objectRepository.deleteAll(template);
+		}
+		
 	}
-	
+
 	@Override
 	public Integer getTemplateOrder() {
 		return SystemTemplates.ENTITY.ordinal();
@@ -525,8 +560,41 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
-			return objectRepository.table(template, offset, limit, 
+			if(Objects.nonNull(template.getTemplateClass())) {
+				return tableViaObjectBean(template, offset, limit, SortOrder.ASC, searchField, generateSearchFields(searchField, searchValue, template));
+			} else {
+				return objectRepository.table(template, offset, limit, 
 					generateSearchFields(searchField, searchValue, template));
+			}
+		}
+		
+	}
+	
+	@Override
+	public long count(String resourceKey, String searchField, String searchValue) {
+		ObjectTemplate template = templateService.get(resourceKey);
+
+		switch(template.getScope()) {
+		case PERSONAL:
+			return objectRepository.count(template, 
+						generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+		case ASSIGNED:
+			if(isAdministrator(getCurrentUser())) {
+				return objectRepository.count(template,  
+						generateSearchFields(searchField, searchValue, template));
+			}
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return objectRepository.count(template, 
+					generateSearchFields(searchField, searchValue, template, SearchField.or(
+							SearchField.all("users.uuid", getCurrentUser().getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
+		case GLOBAL:
+		default:
+			if(Objects.nonNull(template.getTemplateClass())) {
+				return countViaObjectBean(template, generateSearchFields(searchField, searchValue, template));
+			} else {
+				return objectRepository.count(template, generateSearchFields(searchField, searchValue, template));
+			}
 		}
 		
 	}
@@ -553,59 +621,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		fields.addAll(Arrays.asList(additional));
 		return fields.toArray(new SearchField[0]);
 	}
-	
-	@Override
-	public long count(String resourceKey) {
-		ObjectTemplate template = templateService.get(resourceKey);
-		
-		switch(template.getScope()) {
-		case PERSONAL:
-			return objectRepository.count(template,
-					SearchField.eq("ownerUUID", getCurrentUser().getUuid()));
-		case ASSIGNED:
-			if(isAdministrator(getCurrentUser())) {
-				return objectRepository.count(template);
-			}
-			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-			return objectRepository.count(template,
-					SearchField.or(
-							SearchField.all("users.uuid", getCurrentUser().getUuid()),
-							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))
-					));			
-		case GLOBAL:
-		default:
-			return objectRepository.count(template);
-		}
-		
-		
-	}
-
-	@Override
-	public long count(String resourceKey, String searchField, String searchValue) {
-		
-		ObjectTemplate template = templateService.get(resourceKey);
-		
-		try {
-			assertRead(template);
-			return objectRepository.count(template, generateSearchFields(searchField, searchValue, template));
-		
-		} catch(AccessDeniedException e) {
-			switch(template.getScope()) {
-			case PERSONAL:
-				return objectRepository.count(template,
-						generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));
-			case ASSIGNED:
-				Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-				return objectRepository.count(template,
-						generateSearchFields(searchField, searchValue, template, SearchField.or(
-								SearchField.all("users.uuid", getCurrentUser().getUuid()),
-								SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
-			case GLOBAL:
-			default:
-				return objectRepository.count(template, generateSearchFields(searchField, searchValue, template));
-			}
-		}
-	}
 
 	private void buildFormHandlers() {
 		if(formHandlers.isEmpty()) {
@@ -627,7 +642,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 
 	@Override
-	public AbstractObject convert(UUIDEntity obj) {
+	public AbstractObject convert(UUIDDocument obj) {
 
 		Document doc = new Document();
 		DocumentHelper.convertObjectToDocument(obj, doc);		

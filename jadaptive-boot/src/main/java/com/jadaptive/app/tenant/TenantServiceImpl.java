@@ -25,8 +25,8 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
-import com.jadaptive.api.app.PropertyService;
 import com.jadaptive.api.app.StartupAware;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -34,7 +34,9 @@ import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
@@ -71,9 +73,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	@Autowired
 	private SingletonObjectDatabase<SystemConfiguration> systemConfig;
-	
-	@Autowired
-	private PropertyService propertyService; 
+
 	
 	Tenant systemTenant;
 	
@@ -607,5 +607,23 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		return username;
 	}
 	
+	@Override
+	public void deleteAll() {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public Collection<? extends UUIDDocument> searchTable(int start, int length, SortOrder sort, String sortField, SearchField... fields) {
+		return filter(fields);
+	}
+	
+	@Override
+	public long countTable(SearchField... fields) {
+		return filter(fields).size();
+	}
+	
+	protected Collection<Tenant> filter(SearchField...fields) {
+		return new ArrayList<>(tenantsByUUID.values());
+	}
 	
 }
