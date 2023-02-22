@@ -11,6 +11,9 @@ public abstract class UserGeneratedEvent extends SystemEvent {
 
 	public static final String RESOURCE_KEY = "objectEvent";
 
+	public UserGeneratedEvent() {
+	}
+	
 	public UserGeneratedEvent(String resourceKey, String group) {
 		super(resourceKey, group);
 	}

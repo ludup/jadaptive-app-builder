@@ -101,6 +101,12 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
 		
+		Class<?> clz = findLoadedClass(name);
+
+		if(clz!=null) {
+			return clz;
+		}
+		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 			try {
 				return w.getPluginClassLoader().loadClass(name);

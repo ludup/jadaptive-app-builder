@@ -102,11 +102,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		AbstractObject e;
 		
 		try {
-			if(Objects.nonNull(template.getTemplateClass())) {
-				e = getViaObjectBean(template, resourceKey);
-			} else {
-				e = objectRepository.getById(template, resourceKey);
-			}
+			e = getViaObjectBean(template, resourceKey);
 			
 			if(!resourceKey.equals(e.getResourceKey())) {
 				throw new IllegalStateException();
@@ -129,11 +125,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public AbstractObject get(ObjectTemplate template, String uuid) throws RepositoryException, ObjectException, ValidationException {
 
-		if(Objects.nonNull(template.getTemplateClass())) {
-			return getViaObjectBean(template, uuid);
-		} else {
-			return objectRepository.getById(template, uuid);
-		}
+		return getViaObjectBean(template, uuid);
+		
 	}
 
 	@Override
@@ -166,11 +159,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			break;
 		}
 		
-		if(Objects.nonNull(template.getTemplateClass())) {
-			return saveViaObjectBean(entity, template);
-		} else {
-			return objectRepository.save(entity);
-		}
+		return saveViaObjectBean(entity, template);
+		
 	}
 	
 	@Override
@@ -302,34 +292,38 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		assertWrite(template);
 		
-		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
-
-		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
-		
-		if(Objects.nonNull(annotation)) {
-			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-			return bean.saveOrUpdate(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
-		} else { 
-			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
-			return db.saveOrUpdate(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
+		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
+		if(Objects.nonNull(clz)) {
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				return bean.saveOrUpdate(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
+			} 
 		}
+		
+		return objectRepository.save(entity);
+		
 	}
 	
 	private void deleteViaObjectBean(AbstractObject entity, ObjectTemplate template) {
 		
 		assertWrite(entity.getResourceKey());
 		
-		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
+		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
 
-		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
-		
-		if(Objects.nonNull(annotation)) {
-			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-			bean.deleteObject(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
-		} else { 
-			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
-			db.delete(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
+		if(Objects.nonNull(clz)) {
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				bean.deleteObject(DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument())));
+				return;
+			}
 		}
+		
+		objectRepository.delete(entity);
+		
 	}
 	
 	
@@ -337,66 +331,79 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		assertWrite(template);
 		
-		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
+		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
 
-		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
-		
-		if(Objects.nonNull(annotation)) {
-			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-			bean.deleteAll();
-		} else { 
-			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
-			db.deleteAll();
+		if(Objects.nonNull(clz)) {
+			
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				bean.deleteAll();
+				return;
+			}
 		}
+		
+		objectRepository.deleteAll(template);
+		
 	}
 	
 	private Collection<AbstractObject> tableViaObjectBean(ObjectTemplate template, int start, int length, SortOrder order, String sortField, SearchField... fields) {
 		
 		assertRead(template);
 		
-		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
-
-		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
 		
-		if(Objects.nonNull(annotation)) {
-			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-			return convertObjects(bean.searchTable(start, length, order, sortField, fields));
-		} else { 
-			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
-			return convertObjects(db.searchTable(start, length, order, sortField, fields));
+		if(Objects.nonNull(clz)) {
+		
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				return convertObjects(bean.searchTable(start, length, order, sortField, fields));
+			}
 		}
+		
+		return objectRepository.table(template, start, length, fields);
+		
 	}
 	
 	private long countViaObjectBean(ObjectTemplate template, SearchField... fields) {
 		
 		assertRead(template);
 		
-		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
-
-		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
 		
-		if(Objects.nonNull(annotation)) {
-			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-			return bean.countTable(fields);
-		} else { 
-			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
-			return db.searchCount(fields);
-		}
+		if(Objects.nonNull(clz)) {
+			
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				return bean.countTable(fields);
+			} 
+		} 
+		
+		return objectRepository.count(template, fields);
+		
 	}
 	
 	private AbstractObject getViaObjectBean(ObjectTemplate template, String uuid) {
 		
-		Class<? extends UUIDDocument> clz = classService.getTemplateClass(template);
+		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
 
-		ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
-		
-		if(Objects.nonNull(annotation)) {
-			UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-			return convert(bean.getObjectByUUID(uuid));
-		} else { 
-			AbstractTenantAwareObjectDatabase<?> db = createService(clz, template);
-			return convert(db.get(uuid));
+		if(Objects.nonNull(clz)) {
+			
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				return convert(bean.getObjectByUUID(uuid));
+			} 
 		}
+		
+		return objectRepository.getById(template, uuid);
+		
 	}
 	
 	private Collection<AbstractObject> convertObjects(Collection<? extends UUIDDocument> objects) {
@@ -409,53 +416,53 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		return results;
 	}
 
-	private AbstractTenantAwareObjectDatabase<?> createService(Class<? extends UUIDDocument> clz, ObjectTemplate template) {
+//	private AbstractTenantAwareObjectDatabase<?> createService(Class<? extends UUIDDocument> clz, ObjectTemplate template) {
+//	
+//		if(template.isSystem()) {
+//			return createSystemService(clz);
+//		} else {
+//			return createTenantAwareService(clz);
+//		}
+//	}
 	
-		if(template.isSystem()) {
-			return createSystemService(clz);
-		} else {
-			return createTenantAwareService(clz);
-		}
-	}
+//	private AbstractTenantAwareObjectDatabase<?> createSystemService(Class<? extends UUIDDocument> clz) {
+//		try {
+//			Generic genericType = TypeDescription.Generic.Builder.parameterizedType(AbstractSystemObjectDatabaseImpl.class, clz).build();
+//			Generic resourceClass = TypeDescription.Generic.Builder.parameterizedType(Class.class, clz).build();
+//			Class<?> subclass = new ByteBuddy()
+//					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+//					  .defineMethod("getResourceClass", resourceClass).intercept(FixedValue.value(clz))
+//					  .make()
+//					  .load(clz.getClassLoader())
+//					  .getLoaded();
+//			AbstractTenantAwareObjectDatabase<?> obj = (AbstractTenantAwareObjectDatabase<?>) 
+//					subclass.getConstructor(DocumentDatabase.class).newInstance(documentDatabase);
+//			appService.autowire(obj);
+//			return obj;
+//		} catch (Throwable e) {
+//			throw new IllegalStateException(e.getMessage(), e);
+//		}
+//	}
 	
-	private AbstractTenantAwareObjectDatabase<?> createSystemService(Class<? extends UUIDDocument> clz) {
-		try {
-			Generic genericType = TypeDescription.Generic.Builder.parameterizedType(AbstractSystemObjectDatabaseImpl.class, clz).build();
-			Generic resourceClass = TypeDescription.Generic.Builder.parameterizedType(Class.class, clz).build();
-			Class<?> subclass = new ByteBuddy()
-					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
-					  .defineMethod("getResourceClass", resourceClass).intercept(FixedValue.value(clz))
-					  .make()
-					  .load(clz.getClassLoader())
-					  .getLoaded();
-			AbstractTenantAwareObjectDatabase<?> obj = (AbstractTenantAwareObjectDatabase<?>) 
-					subclass.getConstructor(DocumentDatabase.class).newInstance(documentDatabase);
-			appService.autowire(obj);
-			return obj;
-		} catch (Throwable e) {
-			throw new IllegalStateException(e.getMessage(), e);
-		}
-	}
-	
-	private AbstractTenantAwareObjectDatabase<?> createTenantAwareService(Class<? extends UUIDDocument> clz) {
-		try {
-			Generic genericType = TypeDescription.Generic.Builder.parameterizedType(AbstractTenantAwareObjectDatabaseImpl.class, clz).build();
-			Generic resourceClass = TypeDescription.Generic.Builder.parameterizedType(Class.class, clz).build();
-			
-			Class<?> subclass = new ByteBuddy()
-					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
-					  .defineMethod("getResourceClass", resourceClass).intercept(FixedValue.value(clz))
-					  .make()
-					  .load(clz.getClassLoader())
-					  .getLoaded();
-			AbstractTenantAwareObjectDatabase<?> obj = (AbstractTenantAwareObjectDatabase<?>) 
-					subclass.getConstructor(DocumentDatabase.class).newInstance(documentDatabase);
-			appService.autowire(obj);
-			return obj;
-		} catch (Throwable e) {
-			throw new IllegalStateException(e.getMessage(), e);
-		}
-	}
+//	private AbstractTenantAwareObjectDatabase<?> createTenantAwareService(Class<? extends UUIDDocument> clz) {
+//		try {
+//			Generic genericType = TypeDescription.Generic.Builder.parameterizedType(AbstractTenantAwareObjectDatabaseImpl.class, clz).build();
+//			Generic resourceClass = TypeDescription.Generic.Builder.parameterizedType(Class.class, clz).build();
+//			
+//			Class<?> subclass = new ByteBuddy()
+//					  .subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+//					  .defineMethod("getResourceClass", resourceClass).intercept(FixedValue.value(clz))
+//					  .make()
+//					  .load(clz.getClassLoader())
+//					  .getLoaded();
+//			AbstractTenantAwareObjectDatabase<?> obj = (AbstractTenantAwareObjectDatabase<?>) 
+//					subclass.getConstructor(DocumentDatabase.class).newInstance(documentDatabase);
+//			appService.autowire(obj);
+//			return obj;
+//		} catch (Throwable e) {
+//			throw new IllegalStateException(e.getMessage(), e);
+//		}
+//	}
 
 	@Override
 	public void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException {
@@ -473,11 +480,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new ObjectException("You cannot delete a system object");
 		}
 		
-		if(Objects.nonNull(template.getTemplateClass())) {
-			deleteViaObjectBean(e, template);
-		} else {
-			objectRepository.delete(e);
-		}
+		deleteViaObjectBean(e, template);
 		
 	}
 
@@ -491,11 +494,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new ObjectException("You cannot delete a Singleton Entity");
 		}
 		
-		if(Objects.nonNull(template.getTemplateClass())) {
-			deleteAllViaObjectBean(template);
-		} else {
-			objectRepository.deleteAll(template);
-		}
+		deleteAllViaObjectBean(template);
 		
 	}
 
@@ -560,12 +559,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
-			if(Objects.nonNull(template.getTemplateClass())) {
-				return tableViaObjectBean(template, offset, limit, SortOrder.ASC, searchField, generateSearchFields(searchField, searchValue, template));
-			} else {
-				return objectRepository.table(template, offset, limit, 
-					generateSearchFields(searchField, searchValue, template));
-			}
+			return tableViaObjectBean(template, offset, limit, SortOrder.ASC, searchField, generateSearchFields(searchField, searchValue, template));
 		}
 		
 	}
@@ -590,11 +584,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
-			if(Objects.nonNull(template.getTemplateClass())) {
-				return countViaObjectBean(template, generateSearchFields(searchField, searchValue, template));
-			} else {
-				return objectRepository.count(template, generateSearchFields(searchField, searchValue, template));
-			}
+			return countViaObjectBean(template, generateSearchFields(searchField, searchValue, template));
 		}
 		
 	}

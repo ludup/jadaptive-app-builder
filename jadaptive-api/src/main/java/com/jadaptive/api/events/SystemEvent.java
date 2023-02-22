@@ -82,6 +82,10 @@ public class SystemEvent extends UUIDEvent {
 	@ObjectView(value = EVENT_VIEW, weight = 9998, renderer = FieldRenderer.OPTIONAL)
 	String eventDescription;
 	
+	public SystemEvent() {
+		
+	}
+
 	public SystemEvent(String resourceKey, String eventGroup) {
 		this(resourceKey, eventGroup, Utils.now());
 	}
@@ -181,6 +185,30 @@ public class SystemEvent extends UUIDEvent {
 
 	public void setName(String name) {
 		this.name = name;
-	};
+	}
+	
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public void setEventKey(String eventKey) {
+		this.eventKey = eventKey;
+	}
+
+	public void setEventGroup(String eventGroup) {
+		this.eventGroup = eventGroup;
+	}
+
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+
+	public void setExtendedInformation(String extendedInformation) {
+		this.extendedInformation = extendedInformation;
+	}
+
+	public void setState(EventState state) {
+		this.state = state;
+	}
 
 }

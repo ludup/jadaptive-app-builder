@@ -6,6 +6,8 @@ public abstract class PasswordEvent extends UserGeneratedEvent {
 
 	private static final long serialVersionUID = -3313630376543682370L;
 	
+	public PasswordEvent() { }
+
 	public PasswordEvent(String resourceKey) {
 		super(resourceKey, "users");
 	}

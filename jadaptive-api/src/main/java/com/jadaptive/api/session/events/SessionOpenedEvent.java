@@ -25,6 +25,8 @@ public class SessionOpenedEvent extends UserGeneratedEvent {
 	@ObjectView(value = SystemEvent.EVENT_VIEW, weight = 9999, bundle = Session.RESOURCE_KEY)
 	String userAgent;
 	
+	public SessionOpenedEvent() { }
+	
 	public SessionOpenedEvent(Session object) {
 		super(RESOURCE_KEY, "sessions");
 		setUsername(object.getUser().getUsername());

@@ -611,7 +611,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 		try {
 			
-			var b = new ByteBuddy().subclass(genericType, ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+			var b = new ByteBuddy().subclass(genericType, ConstructorStrategy.Default.DEFAULT_CONSTRUCTOR)
 					  .name(String.format("com.jadaptive.events.%s.%s", group, className));
 			
 			

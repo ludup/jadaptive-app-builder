@@ -6,6 +6,8 @@ public abstract class TaskResultEvent<T extends TaskResult> extends ObjectEvent<
 
 	private static final long serialVersionUID = 1765194672002156166L;
 
+	public TaskResultEvent() { }
+	
 	public TaskResultEvent(TaskResult result) {
 		super(result.getResourceKey(), result.getEventGroup());
 	}

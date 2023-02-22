@@ -28,6 +28,8 @@ public class SessionClosedEvent extends UserGeneratedEvent {
 	@ObjectField(type = FieldType.TEXT)
 	@ObjectView(value = SystemEvent.EVENT_VIEW, weight = 9999, bundle = Session.RESOURCE_KEY)
 	String userAgent;
+
+	public SessionClosedEvent() { }
 	
 	public SessionClosedEvent(Session object) {
 		super(RESOURCE_KEY, "sessions");
