@@ -20,8 +20,4 @@ public interface SessionService extends UUIDObjectService<Session> {
 
 	Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type);
 
-	Iterable<Session> inactiveSessions();
-
-	void deleteSession(Session session);
-
 }

@@ -10,12 +10,10 @@ var Wizard = (function () {
 			window.location = "/app/api/wizard/start/" + $('body').attr('jad:wizard');
 		},
 		next: function() {
-			JadaptiveUtils.startAwesomeSpin($('.nextButton i'));
+			JadaptiveUtils.startAwesomeSpin($('#nextButton i'));
 			if(onNext) {
 				onNext(function() {
 					window.location = "/app/api/wizard/next/" + $('body').attr('jad:wizard');
-				}, function() {
-					JadaptiveUtils.stopAwesomeSpin($('.nextButton i'));
 				});
 				return;
 			} else if($("form").length > 0) {
@@ -25,7 +23,7 @@ var Wizard = (function () {
 			}
 		},
 		back: function() {
-			JadaptiveUtils.startAwesomeSpin($('.backButton i'));
+			JadaptiveUtils.startAwesomeSpin($('#backButton i'));
 			window.location = "/app/api/wizard/back/" + $('body').attr('jad:wizard');
 		},
 		finish: function() {
@@ -58,7 +56,7 @@ var Wizard = (function () {
 		           				window.location = "/app/api/wizard/next/" + $('body').attr('jad:wizard');
 		           	   	} else {
 		           	    	JadaptiveUtils.error($('#feedback'), data.message);
-							JadaptiveUtils.stopAwesomeSpin($('.nextButton i'));
+							JadaptiveUtils.stopAwesomeSpin($('#nextButton i'));
 		           	   	}
 		           },
 		           complete: function() {

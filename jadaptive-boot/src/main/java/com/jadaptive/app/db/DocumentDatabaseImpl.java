@@ -33,6 +33,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Accumulators;
@@ -240,7 +241,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	private void assertUniqueConstraints(MongoCollection<Document> collection, Document document, String existingUUID) {
-		for(Document index : collection.listIndexes()) {
+		
+		Iterable<Document> indexes;
+		
+		indexes = collection.listIndexes();
+			
+		for(Document index : indexes) {
 			if(index.getBoolean("unique", false)) {
 				Document key = (Document) index.get("key");
 				if(key.size()==1) {
@@ -252,7 +258,6 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 								WordUtils.capitalize(field)));
 					}
 				}
-
 			}
 		}
 	}
@@ -261,7 +266,16 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document getByUUID(String uuid, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		FindIterable<Document> result = collection.find(Filters.eq("_id", uuid));
+		
+		FindIterable<Document> result;
+		
+		ClientSession session= currentSession.get();
+		if(Objects.nonNull(session)) {
+			result = collection.find(session, Filters.eq("_id", uuid));
+		} else {
+			result = collection.find(Filters.eq("_id", uuid));
+		}
+
 		if(!result.cursor().hasNext()) {
 			throw new ObjectNotFoundException(String.format("Collection %s does not contain an object with id %s", table, uuid));
 		}
@@ -272,8 +286,18 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document get(String table, String database, SearchField... fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		FindIterable<Document> result = collection.find(buildFilter(fields))
-				.collation(getCollation());
+		
+		FindIterable<Document> result;
+		
+		ClientSession session= currentSession.get();
+		if(Objects.nonNull(session)) {
+			result = collection.find(session, buildFilter(fields))
+					.collation(getCollation());
+		} else {
+			result = collection.find(buildFilter(fields))
+					.collation(getCollation());
+		}
+
 		if(!result.cursor().hasNext()) {
 			throw new ObjectNotFoundException(String.format("Collection %s does not contain an object for search %s", table, buildSearchString(fields)));
 		}
@@ -290,7 +314,16 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document max(String table, String database, String field) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		FindIterable<Document> result = collection.find().sort(new BasicDBObject("field", -1));
+		
+		FindIterable<Document> result;
+		
+		ClientSession session= currentSession.get();
+		if(Objects.nonNull(session)) {
+			result = collection.find(session).sort(new BasicDBObject(field, -1));
+		} else {
+			result = collection.find().sort(new BasicDBObject(field, -1));
+		}
+		
 		if(!result.cursor().hasNext()) {
 			throw new ObjectNotFoundException(String.format("No entity %s was not found", table));
 		}
@@ -301,7 +334,16 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document min(String table, String database, String field) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		FindIterable<Document> result = collection.find().sort(new BasicDBObject("field", 1));
+		
+		FindIterable<Document> result;
+		
+		ClientSession session= currentSession.get();
+		if(Objects.nonNull(session)) {
+			result = collection.find(session).sort(new BasicDBObject(field, 1));
+		} else {
+			result = collection.find().sort(new BasicDBObject(field, 1));
+		}
+
 		if(!result.cursor().hasNext()) {
 			throw new ObjectNotFoundException(String.format("No entity %s was not found", table));
 		}
@@ -314,19 +356,37 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		AggregateIterable<Document> results;
 		
+		ClientSession session= currentSession.get();
+		
 		if(fields.length > 0) {
-			results = collection.aggregate(
-			    Arrays.asList(
-			        Aggregates.match(buildFilter(fields)),
-			        Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
-			    )
-			);
+		
+			if(Objects.nonNull(session)) {
+				results = collection.aggregate(session,
+					    Arrays.asList(
+					        Aggregates.match(buildFilter(fields)),
+					        Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+					    ));
+			} else {
+				results = collection.aggregate(
+					    Arrays.asList(
+					        Aggregates.match(buildFilter(fields)),
+					        Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+					    ));
+			}
+			
 		} else {
-			results = collection.aggregate(
-				    Arrays.asList(
-				    	Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
-				    )
-				);
+			if(Objects.nonNull(session)) {
+				results = collection.aggregate(session,
+					    Arrays.asList(
+					    	Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+					    ));
+			} else {
+				results = collection.aggregate(
+					    Arrays.asList(
+					    	Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+					    ));
+			}
+			
 		}
 		
 		if(!results.cursor().hasNext()) {
@@ -341,8 +401,18 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document find(String field, String value, String table, String database) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
-		FindIterable<Document> result = collection.find(Filters.eq(field, value))
-												.collation(getCollation());
+		
+		FindIterable<Document> result;
+		
+		ClientSession session= currentSession.get();
+		if(Objects.nonNull(session)) {
+			result = collection.find(session, Filters.eq(field, value))
+					.collation(getCollation());
+		} else {
+			result = collection.find(Filters.eq(field, value))
+					.collation(getCollation());
+		}
+
 		if(!result.cursor().hasNext()) {
 			throw new ObjectNotFoundException(String.format("%s %s for entity %s was not found", field, value, table));
 		}
@@ -385,11 +455,23 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Iterable<Document> list(String table, String database, SearchField... fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
+		
+		ClientSession session = currentSession.get();
+		
 		if(fields.length == 0) {
-			return collection.find();
+			if(Objects.nonNull(session)) {
+				return collection.find(session);
+			} else {
+				return collection.find();
+			}
 		} else {
-			return collection.find(buildFilter(fields))
+			if(Objects.nonNull(session)) {
+				return collection.find(session, buildFilter(fields))
 					.collation(getCollation());
+			} else {
+				return collection.find(buildFilter(fields))
+						.collation(getCollation());
+			}
 		}
 	}
 	
@@ -397,11 +479,23 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Iterable<Document> search(String table, String database, SearchField...fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
+
+		ClientSession session = currentSession.get();
+		
 		if(fields.length == 0) {
-			return collection.find();
+			if(Objects.nonNull(session)) {
+				return collection.find(session);
+			} else {
+				return collection.find();
+			}
 		} else {
-			return collection.find(buildFilter(fields))
+			if(Objects.nonNull(session)) {
+				return collection.find(session, buildFilter(fields))
 					.collation(getCollation());
+			} else {
+				return collection.find(buildFilter(fields))
+						.collation(getCollation());
+			}
 		}
 	}
 	
@@ -409,25 +503,55 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Iterable<Document> search(String table, String database, SortOrder order, String sortField, SearchField...fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
+		
+		ClientSession session = currentSession.get();
+		
 		if(fields.length == 0) {
-			return collection.find().sort(getOrder(order, sortField));
+			if(Objects.nonNull(session)) {
+				return collection.find(session)
+						.sort(getOrder(order, sortField));
+			} else {
+				return collection.find()
+						.sort(getOrder(order, sortField));
+			}
 		} else {
-			return collection.find(buildFilter(fields))
+			if(Objects.nonNull(session)) {
+				return collection.find(session, buildFilter(fields))
 					.collation(getCollation())
 					.sort(getOrder(order, sortField));
+			} else {
+				return collection.find(buildFilter(fields))
+						.collation(getCollation())
+						.sort(getOrder(order, sortField));
+			}
 		}
+
 	}
 	
 	@Override
 	public Iterable<Document> searchTable(String table, String database, int start, int length, SortOrder order, String sortField, SearchField...fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
+		
+		ClientSession session = currentSession.get();
+		
 		if(fields.length == 0) {
-			return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
+			if(Objects.nonNull(session)) {
+				return collection.find(session).sort(getOrder(order, sortField)).skip(start).limit(length);
+			} else {
+				return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
+			}
 		} else {
-			return collection.find(buildFilter(fields))
-					.collation(getCollation())
-					.sort(getOrder(order, sortField)).skip(start).limit(length);
+			if(Objects.nonNull(session)) {
+				return collection.find(session, buildFilter(fields))
+						.collation(getCollation())
+						.sort(getOrder(order, sortField)).skip(start).limit(length);
+			} else {
+				return collection.find(buildFilter(fields))
+						.collation(getCollation())
+						.sort(getOrder(order, sortField)).skip(start).limit(length);	
+			}
+			
 		}
 	}
 		
@@ -444,12 +568,25 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Override
 	public Long searchCount(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
+		
+		ClientSession session = currentSession.get();
+		
 		if(fields.length == 0) {
-			return collection.countDocuments();
+			if(Objects.nonNull(session)) {
+				return collection.countDocuments(session);
+			} else {
+				return collection.countDocuments();	
+			}
 		} else {
 			CountOptions options = new CountOptions();
 			options.collation(getCollation());
-			return collection.countDocuments(buildFilter(fields), options);
+			
+			if(Objects.nonNull(session)) {
+				return collection.countDocuments(session, buildFilter(fields), options);	
+			} else {
+				return collection.countDocuments(buildFilter(fields), options);
+			}
+			
 		}
 	}
 	
@@ -458,22 +595,50 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		searchField = configureSearch(searchField);
+		
+		ClientSession session = currentSession.get();
+		
 		if(StringUtils.isBlank(searchValue)) {
-			return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
+			if(Objects.nonNull(session)) {
+				return collection.find(session).sort(getOrder(order, sortField)).skip(start).limit(length);
+			} else {
+				return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
+			}
+			
 		} else {
-			return collection.find(Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);
+			if(Objects.nonNull(session)) {
+				return collection.find(session, Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);
+			} else {
+				return collection.find(Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);	
+			}
 		}
 	}
 
 	@Override
 	public Long count(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
+		
+		ClientSession session = currentSession.get();
+		
 		if(fields.length > 0) {
-			CountOptions options = new CountOptions();
-			options.collation(getCollation());
-			return collection.countDocuments(buildFilter(fields), options);
+		
+			if(Objects.nonNull(session)) {
+				CountOptions options = new CountOptions();
+				options.collation(getCollation());
+				return collection.countDocuments(session, buildFilter(fields), options);
+			} else {
+				CountOptions options = new CountOptions();
+				options.collation(getCollation());
+				return collection.countDocuments(buildFilter(fields), options);
+			}
+			
 		} else {
-			return collection.countDocuments();
+			if(Objects.nonNull(session)) {
+				return collection.countDocuments(session);
+			} else {
+				return collection.countDocuments();
+			}
+			
 		}
 		
 	}
@@ -482,10 +647,23 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Long count(String table, String searchField, String searchValue, String database) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		searchField = configureSearch(searchField);
+		
+		ClientSession session = currentSession.get();
+		
 		if(StringUtils.isBlank(searchValue)) {
-			return collection.countDocuments();
+			if(Objects.nonNull(session)) {
+				return collection.countDocuments(session);
+			} else {
+				return collection.countDocuments();	
+			}
+			
 		} else {
-			return collection.countDocuments(Filters.regex(searchField, searchValue));
+			if(Objects.nonNull(session)) {
+				return collection.countDocuments(session, Filters.regex(searchField, searchValue));
+			} else {
+				return collection.countDocuments(Filters.regex(searchField, searchValue));	
+			}
+			
 		}
 		
 	}
@@ -510,7 +688,17 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Override
 	public Document getFirst(String uuid, String table, String database) {
 		MongoCollection<Document> collection = getCollection(table, database);
-		FindIterable<Document> result = collection.find(Filters.eq("_id", uuid));
+		
+		ClientSession session = currentSession.get();
+		
+		FindIterable<Document> result;
+		
+		if(Objects.nonNull(session)) {
+			result = collection.find(session, Filters.eq("_id", uuid));
+		} else {
+			result = collection.find(Filters.eq("_id", uuid));
+		}
+		
 		if(!result.cursor().hasNext()) {
 			throw new ObjectNotFoundException(String.format("id %s for entity %s was not found", uuid, table));
 		}
@@ -680,7 +868,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		Set<String> results = new HashSet<>();
-		for(Document index : collection.listIndexes()) {
+		
+		ListIndexesIterable<Document> indexes;
+		
+		indexes = collection.listIndexes();
+		
+		for(Document index : indexes) {
 			if(!index.getString("name").equals("_id_")) {
 				results.add(index.getString("name"));
 			}

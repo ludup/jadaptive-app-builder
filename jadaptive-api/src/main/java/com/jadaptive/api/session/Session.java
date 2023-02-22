@@ -45,10 +45,7 @@ public class Session extends AbstractUUIDEntity {
 	
 	@ObjectField(type = FieldType.TIMESTAMP, searchable = true)
 	Date signedOut;
-	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = Tenant.RESOURCE_KEY)
-	Tenant tenant;
-	
+		
 	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
 	String userAgent;
@@ -61,17 +58,12 @@ public class Session extends AbstractUUIDEntity {
 	@Validator(type = ValidationType.REQUIRED)
 	User user;
 	
+	Tenant tenant;
+
 	public Session() {
 
 	}
 
-	public String getId() {
-		/**
-		 * For compatibility with Hypersocket. Do we need this?
-		 */
-		return getUuid();
-	}
-	
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}

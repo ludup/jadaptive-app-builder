@@ -78,7 +78,9 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		session.setUser(user);
 		session.setState(SessionState.ACTIVE);
 
-		getCache().put(session.getUuid(), session);
+		@SuppressWarnings("unchecked")
+		Map<String,Session> tenantSessions = getCache(tenant); 
+		tenantSessions.put(session.getUuid(), session);
 		
 		user.setLastLogin(Utils.now());
 		eventService.haltEvents();
@@ -89,8 +91,8 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		return session;
 	}
 	
-	protected Map<String,Session> getCache() {
-		return cacheService.getCacheOrCreate("sessions", String.class, Session.class);
+	protected Map<String,Session> getCache(Tenant tenant) {
+		return cacheService.getCacheOrCreate(String.format("%s-sessions", tenant.getUuid()), String.class, Session.class);
 	}
 
 	@Override
@@ -153,6 +155,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void touch(Session session) {
 		if(session.isReadyForUpdate()) {
@@ -163,7 +166,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 								+ " timeout=" + session.getSessionTimeout());
 			}
 			session.setLastUpdated(new Date());
-			getCache().put(session.getUuid(), session);
+			getCache(session.getTenant()).put(session.getUuid(), session);
 		}
 	}
 
@@ -183,18 +186,19 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 		session.setState(SessionState.EXPIRED);
 		session.setSignedOut(new Date());
-		getCache().put(session.getUuid(), session);
+
 		usageService.log(session.getSignedOut().getTime() - session.getSignedIn().getTime(),
 				SESSION_USAGE, session.getUser().getUuid());
 		
 		tenantService.executeAs(session.getTenant(), ()->eventService.publishEvent(new SessionClosedEvent(session)));
 
+		getCache(session.getTenant()).remove(session.getUuid());
 	}
 
 	@Override
 	public Session getSession(String uuid) throws UnauthorizedException {
 		
-		Session session = getCache().get(uuid);
+		Session session = getCache(getCurrentTenant()).get(uuid);
 		if(Objects.isNull(session)) {
 			throw new UnauthorizedException();
 		}
@@ -204,7 +208,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Override
 	public Iterable<Session> iterateSessions() {
 		List<Session> activeSessions = new ArrayList<>();
-		for(Session session : getCache().values()) {
+		for(Session session : getCache(getCurrentTenant()).values()) {
 			if(!session.isClosed()) {
 				activeSessions.add(session);
 			}
@@ -213,25 +217,8 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	}
 
 	@Override
-	public Iterable<Session> inactiveSessions() {
-		List<Session> inactiveSessions = new ArrayList<>();
-		for(Session session : getCache().values()) {
-			if(session.isClosed()) {
-				inactiveSessions.add(session);
-			}
-		}
-		return inactiveSessions;
-	}
-
-	@Override
-	public void deleteSession(Session session) {	
-		closeSession(session);
-		getCache().remove(session.getUuid());
-	}
-
-	@Override
 	public Session getObjectByUUID(String uuid) {
-		Session session = getCache().get(uuid);
+		Session session = getCache(getCurrentTenant()).get(uuid);
 		if(Objects.isNull(session)) {
 			throw new ObjectNotFoundException("No session with uuid " + uuid);
 		}
@@ -245,24 +232,24 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 	@Override
 	public void deleteObject(Session object) {
-		deleteSession(object);
+		closeSession(object);
 	}
 
 	@Override
 	public void deleteObjectByUUID(String uuid) {
-		deleteSession(getObjectByUUID(uuid));
+		closeSession(getObjectByUUID(uuid));
 	}
 
 	@Override
 	public Iterable<Session> allObjects() {
-		return Collections.unmodifiableCollection(getCache().values());
+		return Collections.unmodifiableCollection(getCache(getCurrentTenant()).values());
 	}
 
 	@Override
 	public void deleteAll() {
 		
-		for(Session session : new ArrayList<>(getCache().values())) {
-			deleteSession(session);
+		for(Session session : new ArrayList<>(getCache(getCurrentTenant()).values())) {
+			closeSession(session);
 		}
 	}
 	
@@ -277,7 +264,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	}
 	
 	protected Collection<Session> filter(SearchField...fields) {
-		return new ArrayList<>(getCache().values());
+		return new ArrayList<>(getCache(getCurrentTenant()).values());
 	}
 
 }

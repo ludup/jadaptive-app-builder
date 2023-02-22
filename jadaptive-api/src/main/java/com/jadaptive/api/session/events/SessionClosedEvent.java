@@ -35,6 +35,7 @@ public class SessionClosedEvent extends UserGeneratedEvent {
 		super(RESOURCE_KEY, "sessions");
 		setUsername(object.getUser().getUsername());
 		setName(object.getUser().getName());
+		setIpAddress(object.getRemoteAddress());
 		this.userAgent = object.getUserAgent();
 	}
 

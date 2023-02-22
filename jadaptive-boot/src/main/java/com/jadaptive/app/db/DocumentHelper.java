@@ -598,7 +598,10 @@ public class DocumentHelper {
 								AbstractObject e = (AbstractObject) 
 										ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
 												columnDefinition.references(), ref.getUuid());
-								UUIDEntity ue = convertDocumentToObject(null, new Document(e.getDocument()), classLoader); 
+								UUIDEntity ue = convertDocumentToObject(
+										ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(columnDefinition.references()),
+										new Document(e.getDocument()), 
+										classLoader); 
 								elements.add(ue);
 							}
 						}
