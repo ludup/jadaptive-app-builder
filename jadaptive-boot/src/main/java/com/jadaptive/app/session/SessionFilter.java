@@ -87,6 +87,8 @@ public class SessionFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest)request;
 		HttpServletResponse resp = (HttpServletResponse)response;
 
+		Request.setUp(req, resp);
+		
 		if(log.isDebugEnabled()) {
 			log.debug(req.getMethod() + " " + req.getRequestURI().toString());
 		}
@@ -98,8 +100,22 @@ public class SessionFilter implements Filter {
 		if(!tenant.isValidHostname(request.getServerName())) {
 			TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
 			if(config.getRequireValidDomain()) {
-				resp.sendRedirect(config.getInvalidDomainRedirect());
-				return;
+				if(req.getServerName().equalsIgnoreCase(config.getRegistrationDomain())) {
+					if(req.getRequestURI().equals("/")) {
+						if(req.getServerPort() != -1 && req.getServerPort() != 443) {
+							resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
+									config.getRegistrationDomain(),
+									request.getServerPort()));
+						} else {
+							resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
+						}	
+						return;
+					}
+					
+				} else {
+					resp.sendRedirect(config.getInvalidDomainRedirect());
+					return;
+				}
 			}
 		}
 		
@@ -152,7 +168,6 @@ public class SessionFilter implements Filter {
 	private boolean preHandle(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		
 		try {
-			Request.setUp(request, response);
 			
 			Session session = null;
 			

@@ -52,7 +52,7 @@ public class DropdownInput extends InputRender {
 					.appendChild(nameElement = new Element("input")
 							.attr("id", String.format("%sText", resourceKey))
 							.attr("data-display", "static")
-							.addClass("dropdown-toggle form-control" + (dark ? " text-light" : ""))
+							.addClass("dropdown-toggle filter-dropdown form-control" + (dark ? " text-light" : ""))
 							.attr("readonly", "readonly")
 							.attr("type", "text")
 							.attr("autocomplete", "off")

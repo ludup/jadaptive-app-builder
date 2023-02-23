@@ -25,6 +25,10 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	@ObjectView(DOMAIN_VIEW)
 	String rootDomain = "";
 	
+	@ObjectField(type = FieldType.TEXT, defaultValue = "")
+	@ObjectView(DOMAIN_VIEW)
+	String registrationDomain = "";
+	
 	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
 	@ObjectView(DOMAIN_VIEW)
 	Boolean requireValidDomain;
@@ -45,6 +49,14 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 
 	public Boolean getRequireValidDomain() {
 		return requireValidDomain;
+	}
+
+	public String getRegistrationDomain() {
+		return registrationDomain;
+	}
+
+	public void setRegistrationDomain(String registrationDomain) {
+		this.registrationDomain = registrationDomain;
 	}
 
 	public void setRequireValidDomain(Boolean requireValidDomain) {
