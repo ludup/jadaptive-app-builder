@@ -31,6 +31,7 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
@@ -69,11 +70,11 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 //	Map<String,List<ObjectTemplate>> objectForwardDependencies = new HashMap<>();
 //	Map<String,List<String>> objectReverseDependencies = new HashMap<>();
-	Map<String,Class<?>> templateClazzes = new HashMap<>();
+	Map<String,Class<? extends UUIDDocument>> templateClazzes = new HashMap<>();
 	Map<Class<?>,String> templateResourceKeys = new HashMap<>();
 	
 	@Override
-	public void registerTemplateClass(String resourceKey, Class<?> templateClazz, ObjectTemplate template) {
+	public void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template) {
 		for(String alias : template.getAliases()) {
 			templateClazzes.put(alias, templateClazz);
 		}
@@ -451,7 +452,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	}
 
 	@Override
-	public Class<?> getTemplateClass(String resourceKey) {
+	public Class<? extends UUIDDocument> getTemplateClass(String resourceKey) {
 		return templateClazzes.get(resourceKey);
 	}
 	

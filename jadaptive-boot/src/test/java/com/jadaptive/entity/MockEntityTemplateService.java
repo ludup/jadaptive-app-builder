@@ -11,13 +11,14 @@ import org.bson.Document;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.app.db.DocumentHelper;
 
 public class MockEntityTemplateService implements TemplateService {
@@ -82,12 +83,12 @@ public class MockEntityTemplateService implements TemplateService {
 		return null;
 	}
 	@Override
-	public Class<?> getTemplateClass(String resourceKey) {
+	public Class<? extends UUIDDocument> getTemplateClass(String resourceKey) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	@Override
-	public void registerTemplateClass(String resourceKey, Class<?> templateClazz, ObjectTemplate template) {
+	public void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template) {
 		// TODO Auto-generated method stub
 		
 	}

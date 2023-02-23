@@ -4,6 +4,7 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.tenant.Tenant;
 
 public interface TemplateVersionService {
@@ -18,8 +19,8 @@ public interface TemplateVersionService {
 
 	void registerTenantIndexes(boolean newSchema);
 
-	void registerAnnotatedTemplate(Class<?> clz, boolean newSchema, boolean isEvent);
-
 	void rebuildReferences();
+
+	void registerAnnotatedTemplate(Class<? extends UUIDDocument> clz, boolean newSchema, boolean isEvent);
 
 }

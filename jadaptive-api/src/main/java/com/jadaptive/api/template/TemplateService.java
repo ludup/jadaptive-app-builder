@@ -8,6 +8,7 @@ import java.util.Map;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 
 public interface TemplateService {
@@ -39,9 +40,9 @@ public interface TemplateService {
 
 	Iterable<ObjectTemplate> allCollectionTemplates();
 
-	Class<?> getTemplateClass(String resourceKey);
+	Class<? extends UUIDDocument> getTemplateClass(String resourceKey);
 
-	void registerTemplateClass(String resourceKey, Class<?> templateClazz, ObjectTemplate template);
+	void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template);
 
 	String getTemplateResourceKey(Class<?> clz);
 

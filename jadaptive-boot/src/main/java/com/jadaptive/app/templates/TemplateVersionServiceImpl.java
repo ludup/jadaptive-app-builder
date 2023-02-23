@@ -50,6 +50,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldTemplate;
@@ -383,6 +384,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void registerAnnotatedTemplates(boolean newSchema) {
 			
@@ -410,7 +412,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                         if(log.isInfoEnabled()) {
     						log.info("Found template {}", classInfo.getName());
     					}
-                    	registerAnnotatedTemplate(classInfo.loadClass(), newSchema, false);
+                    	registerAnnotatedTemplate((Class<? extends UUIDDocument>) classInfo.loadClass(), newSchema, false);
                     }
                 }
             }
@@ -426,13 +428,14 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                 if(log.isInfoEnabled()) {
 					log.info("Found template {}", classInfo.getName());
 				}
-                registerAnnotatedTemplate(classInfo.loadClass(), newSchema, false);
+                registerAnnotatedTemplate((Class<? extends UUIDDocument>) classInfo.loadClass(), newSchema, false);
             }
         }
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void registerAnnotatedTemplate(Class<?> clz, boolean newSchema, boolean isEvent) {
+	public void registerAnnotatedTemplate(Class<? extends UUIDDocument> clz, boolean newSchema, boolean isEvent) {
 		
 		try {
 			
@@ -455,7 +458,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(!parents.isEmpty()) {
 				Collections.reverse(parents);
 				for(Class<?> parent : parents) {
-					registerAnnotatedTemplate(parent, newSchema, isEvent);
+					registerAnnotatedTemplate((Class<? extends UUIDDocument>) parent, newSchema, isEvent);
 				}
 			}
 			
@@ -656,7 +659,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					  .getLoaded();
 			
 			eventClasses.put(eventKey, (Class<? extends ObjectEvent<?>>) dynamicType);
-			registerAnnotatedTemplate(dynamicType, newSchema, true);
+			registerAnnotatedTemplate((Class<? extends UUIDDocument>) dynamicType, newSchema, true);
 			
 		} catch (SecurityException | NoSuchMethodException e) {
 			throw new IllegalStateException(e.getMessage(), e);
