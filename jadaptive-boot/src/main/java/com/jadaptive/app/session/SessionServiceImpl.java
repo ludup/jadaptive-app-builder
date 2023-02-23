@@ -78,7 +78,6 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		session.setUser(user);
 		session.setState(SessionState.ACTIVE);
 
-		@SuppressWarnings("unchecked")
 		Map<String,Session> tenantSessions = getCache(tenant); 
 		tenantSessions.put(session.getUuid(), session);
 		
@@ -155,7 +154,6 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void touch(Session session) {
 		if(session.isReadyForUpdate()) {

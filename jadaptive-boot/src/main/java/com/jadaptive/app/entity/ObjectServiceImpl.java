@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.FormHandler;
@@ -70,9 +69,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Autowired
 	private TemplateService templateService; 
-	
-	@Autowired
-	private ClassLoaderService classService; 
 	
 	@Autowired
 	private ApplicationService appService; 

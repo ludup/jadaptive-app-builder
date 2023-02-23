@@ -1,7 +1,6 @@
 package com.jadaptive.api.auth;
 
 import java.io.FileNotFoundException;
-import java.util.Collection;
 
 import org.jsoup.nodes.Document;
 
