@@ -4,6 +4,7 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.template.ValidationType;
 
 public class ImageFormInput extends FormInputRender {
 
@@ -18,9 +19,14 @@ public class ImageFormInput extends FormInputRender {
 	
 	@Override
 	protected void onRender(Element rootElement, String value) {  
+		String classes = "col-12 my-3";
+		try {
+			classes += " " + field.getField().getValidationValue(ValidationType.CLASSES);
+		} catch(UnsupportedOperationException e) { }
 		
 		rootElement.selectFirst("small").after(
-				new Element("div").addClass("col-12 my-3").appendChild(
+				new Element("div").addClass(classes)
+								.appendChild(
 						new Element("img").attr("src", value)));
 		
 		rootElement.selectFirst("input").val("");

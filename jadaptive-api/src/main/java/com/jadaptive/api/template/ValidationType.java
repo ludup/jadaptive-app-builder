@@ -10,7 +10,8 @@ public enum ValidationType {
 	URL(false),
 	REQUIRED(false), 
 	IMAGE_HEIGHT(false),
-	IMAGE_WIDTH(false);
+	IMAGE_WIDTH(false),
+	CLASSES(false);
 	
 	final boolean required;
 	
