@@ -114,10 +114,6 @@ public class FieldTemplate extends TemplateUUIDEntity {
 		this.fieldType = propertyType;
 	}
 
-//	public void setRequired(boolean required) {
-//		this.required = required;
-//	}
-
 	public Collection<FieldValidator> getValidators() {
 		return validators;
 	}
@@ -206,7 +202,7 @@ public class FieldTemplate extends TemplateUUIDEntity {
 				return v.getValue();
 			}
 		}
-		throw new IllegalStateException(String.format("There is no validator for type %s on field %s", type.name(), getResourceKey()));
+		throw new UnsupportedOperationException(String.format("There is no validator for type %s on field %s", type.name(), getResourceKey()));
 	}
 
 	public boolean isReadOnly() {
