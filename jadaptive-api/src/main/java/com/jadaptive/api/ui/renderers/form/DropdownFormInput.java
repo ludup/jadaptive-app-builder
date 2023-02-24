@@ -76,7 +76,7 @@ public class DropdownFormInput extends FieldInputRender {
 			if(!readOnly) {
 				addInputValue(String.valueOf(value.ordinal()), processEnumName(value.name()));
 			}
-			if(value.name().equals(defaultValue)) {
+			if(value.name().equals(defaultValue) || String.valueOf(value.ordinal()).equals(defaultValue)) {
 				selected = value;
 			}
 		}
