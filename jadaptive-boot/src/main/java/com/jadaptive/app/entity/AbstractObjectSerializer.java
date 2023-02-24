@@ -148,16 +148,16 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		} else {
 			switch (t.getFieldType()) {
 			case BOOL:
-				gen.writeBooleanField(t.getResourceKey(), (Boolean) value);
+				gen.writeBooleanField(t.getResourceKey(), Boolean.valueOf(value.toString()));
 				break;
 			case DECIMAL:
-				gen.writeNumberField(t.getResourceKey(), (Double) value);
+				gen.writeNumberField(t.getResourceKey(), Double.valueOf(value.toString()));
 				break;
 			case LONG:
-				gen.writeNumberField(t.getResourceKey(), (Long) value);
+				gen.writeNumberField(t.getResourceKey(), Long.valueOf(value.toString()));
 				break;
 			case INTEGER:
-				gen.writeNumberField(t.getResourceKey(), (Integer) value);
+				gen.writeNumberField(t.getResourceKey(), Integer.valueOf(value.toString()));
 				break;
 			case TIMESTAMP:
 				gen.writeStringField(t.getResourceKey(), Utils.formatDate((Date)value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
