@@ -1,13 +1,15 @@
 package com.jadaptive.app.db;
 
+import java.util.Set;
+
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.SortOrder;
 
 public interface DocumentDatabase {
 
-	<E extends UUIDDocument> void insertOrUpdate(E obj, Document document, String table, String database);
+	void insertOrUpdate(Document document, String table, String database);
 
 	Document getByUUID(String uuid, String table, String database);
 	
@@ -17,7 +19,7 @@ public interface DocumentDatabase {
 	
 	void delete(String table, String database, SearchField... fields);
 
-	Long count(String name, String database, SearchField... fields);
+	Long count(String table, String database, SearchField... fields);
 
 	Long count(String table, String searchField, String searchValue, String database);
 	
@@ -27,15 +29,15 @@ public interface DocumentDatabase {
 
 	void dropDatabase(String uuid);
 
-	Iterable<Document> table(String table, String field, String value, String database, int start, int length);
-
 	Document find(String field, String value, String table, String database);
 
 	Iterable<Document> list(String table, String database, SearchField... fields);
 
 	Iterable<Document> search(String table, String database, SearchField... fields);
+	
+	Iterable<Document> search(String table, String database, SortOrder order, String sortField, SearchField... fields);
 
-	Iterable<Document> searchTable(String table, String database, int start, int length, SearchField... fields);
+	Iterable<Document> searchTable(String table, String database, int start, int length, SortOrder order, String sortField, SearchField... fields);
 
 	Long searchCount(String table, String database, SearchField... fields);
 
@@ -48,6 +50,19 @@ public interface DocumentDatabase {
 	Document max(String table, String database, String field);
 	
 	Document min(String table, String database, String field);
-	
+
+	void dropSchema();
+
+	Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField);
+
+	void doInTransaction(Runnable r);
+
+	Long sum(String table, String database, String groupBy, SearchField... fields);
+
+	void dropIndexes(String table, String database);
+
+	Set<String> getIndexNames(String table, String database);
+
+	boolean isTransactionActive();
 
 }

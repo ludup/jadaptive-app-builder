@@ -109,8 +109,8 @@ public class X509CertificateUtils {
 		X509Certificate lastCert = cert;
 
 		if (log.isInfoEnabled()) {
-			log.info("Certificate Subject: " + cert.getSubjectDN());
-			log.info("Issued By: " + cert.getIssuerDN());
+			log.info("Certificate Subject: " + cert.getSubjectX500Principal());
+			log.info("Issued By: " + cert.getIssuerX500Principal());
 			log.info("Validating chain");
 		}
 
@@ -120,8 +120,8 @@ public class X509CertificateUtils {
 				X509Certificate c = (X509Certificate) cc;
 				if (log.isInfoEnabled()) {
 					log.info("Checking validity of certificate "
-							+ c.getSubjectDN());
-					log.info("Issued By: " + c.getIssuerDN());
+							+ c.getSubjectX500Principal());
+					log.info("Issued By: " + c.getIssuerX500Principal());
 				}
 
 				c.checkValidity();

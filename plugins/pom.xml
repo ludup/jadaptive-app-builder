@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.jadaptive</groupId>
 		<artifactId>jadaptive</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.3.0</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -41,16 +41,9 @@
 	</build>
 
 	<modules>
-		<module>jadaptive-email</module>
 		<module>jadaptive-http</module>
 		<module>jadaptive-builtin-users</module>
 		<module>jadaptive-remote-users</module>
-		<module>jadaptive-icon-password</module>
-		<module>jadaptive-ua</module>
-		<module>jadaptive-ssh-keys</module>
-		<module>jadaptive-ssh-server</module>
-		<module>jadaptive-ssh-management</module>
-		<module>jadaptive-web-management</module>
 	</modules>
 
 	<dependencies>

@@ -14,8 +14,6 @@ public @interface ObjectField {
 		String defaultValue() default "";
 
 		boolean readOnly() default false;
-		
-		boolean required() default false;
 
 		boolean hidden() default false;
 
@@ -31,7 +29,10 @@ public @interface ObjectField {
 		
 		boolean alternativeId() default false;
 		
-		@Deprecated
+		boolean nameField() default false;
+		
+		String formVariable() default "";
+		
 		String references() default "";
 
 //		// USER INTERFACE PROPERTIES

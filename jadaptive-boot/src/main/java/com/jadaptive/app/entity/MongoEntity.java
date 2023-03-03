@@ -2,6 +2,7 @@ package com.jadaptive.app.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,17 +18,17 @@ import com.jadaptive.api.template.FieldTemplate;
 
 @JsonDeserialize(using=AbstractObjectDeserializer.class)
 @JsonSerialize(using=AbstractObjectSerializer.class)
-public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
+public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 
 	private static final long serialVersionUID = 7834313955696773158L;
-	
 	AbstractObject parent;
 	Map<String,AbstractObject> children = new HashMap<>();
-	String resourceKey;
 	Document document;
+	String contentHash;
+	String resourceKey;
 	
-	public MongoEntity() {	
-		this.document = new Document();
+	public MongoEntity(Map<String,Object> document) {	
+		this((String)document.get("resourceKey"), document);
 	}
 	
 	public MongoEntity(String resourceKey) {
@@ -44,35 +45,65 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 		}
 	}
 	
+	@Override
+	public boolean isNew() {
+		return Objects.isNull(document.getOrDefault("_id", null));
+	}
+	
+	@SuppressWarnings("unchecked")
 	public MongoEntity(AbstractObject parent, String resourceKey, Map<String,Object> document) {
 		this.parent = parent;
 		this.resourceKey = resourceKey;
 		this.document = new Document(document);
-		
+		if(!this.document.containsKey("resourceKey")) {
+			this.document.put("resourceKey", resourceKey);
+		}
+		String uuid = (String) document.getOrDefault("_id", null);
+		if(Objects.nonNull(uuid)) {
+			setUuid(uuid);
+		} else {
+			 uuid = (String) document.getOrDefault("uuid", null);
+			if(Objects.nonNull(uuid)) {
+				setUuid(uuid);
+			}
+		}
+		setSystem((Boolean)document.getOrDefault("system", Boolean.FALSE));
+		setHidden((Boolean)document.getOrDefault("hidden", Boolean.FALSE));
 		if(!Objects.isNull(parent)) {
-			parent.addChild(this);
+			parent.addChild(resourceKey, this);
+		}
+		for(Map.Entry<String,Object> entry : document.entrySet()) {
+			if(entry.getValue() instanceof Document) {
+				new MongoEntity(this, entry.getKey(), (Map<String,Object>)entry.getValue());
+			}
 		}
 	}
 	
+	public void setResourceKey(String resourceKey) {
+		this.resourceKey = resourceKey;
+	}
+
 	@Override
-	public void addChild(AbstractObject e) {
-		children.put(e.getResourceKey(), e);
-		document.put(e.getResourceKey(), e.getDocument());
+	public void addChild(String resourceKey, AbstractObject e) {
+		children.put(resourceKey, e);
+		document.put(resourceKey, e.getDocument());
 	}
 
 	@Override
 	public AbstractObject getChild(FieldTemplate c) {
-		return children.get(c.getResourceKey());
+		AbstractObject obj = children.get(c.getResourceKey());
+		if(Objects.isNull(obj)) {
+			Document doc = (Document) document.get(c.getResourceKey());
+			if(Objects.nonNull(doc)) {
+				obj = new MongoEntity(this, (String)document.get("resourceKey"), doc);
+			}
+		}
+		return obj;
 	}
 
 	@Override
 	public String getResourceKey() {
-		return resourceKey;
-	}
-
-	@Override
-	public void setResourceKey(String resourceKey) {
-		this.resourceKey = resourceKey;
+		return document.getString("resourceKey");
 	}
 
 	public Map<String,Object> getDocument() {
@@ -103,6 +134,9 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 
 	@Override
 	public Object getValue(String fieldName) {
+		if(fieldName.equals("uuid")) {
+			return getUuid();
+		}
 		return document.get(fieldName);
 	}
 	
@@ -113,7 +147,7 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 			throw new IllegalArgumentException("Use getChild to object embedded object");
 		default:
 			Object value = document.get(t.getResourceKey());
-			if(value==null) {
+			if(value==null && t.getFieldType().canDefault()) {
 				value = t.getDefaultValue();
 			}
 			return value;
@@ -121,16 +155,21 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	}
 	
 	public Collection<String> getCollection(String fieldName) {
-		return document.getList(fieldName, String.class);
+		Collection<String> results = document.getList(fieldName, String.class);
+		return Objects.nonNull(results) ? results : Collections.emptyList();
 	}
-	
-//	public Collection<?> getReferenceCollection(String fieldName) {
-//		return document.getList(fieldName, Map.class);
-//	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void setValue(FieldTemplate t, Object value) {
-		document.put(t.getResourceKey(), value);
+		if(value instanceof Map) {
+			new MongoEntity(this, t.getResourceKey(), (Map)value);
+		} else if(value instanceof MongoEntity){
+			MongoEntity e = (MongoEntity) value;
+			addChild(e.getResourceKey(), e);
+		} else {
+			document.put(t.getResourceKey(), value);
+		}
 	}
 
 	public void setValue(FieldTemplate t, List<Object> values) {
@@ -140,9 +179,30 @@ public class MongoEntity extends AbstractUUIDEntity implements AbstractObject {
 	@SuppressWarnings("unchecked")
 	public Collection<AbstractObject> getObjectCollection(String fieldName) {
 		List<AbstractObject> tmp = new ArrayList<>();
-		for(Map<String,Object> child : document.getList(fieldName, Map.class)) {
-			tmp.add(new MongoEntity(fieldName, child));
+		if(document.containsKey(fieldName)) {
+			for(Map<String,Object> child :document.getList(fieldName, Map.class) ) {
+				tmp.add(new MongoEntity((String)child.get("resourceKey"), child));
+			}
 		}
 		return tmp;
+	}
+	
+	@Override
+	public void removeCollectionObject(String fieldName, AbstractObject e) {
+		document.getList(fieldName, Map.class).removeIf(entries->entries.get("_id").equals(e.getUuid()));
+	}
+	
+	@Override
+	public void addCollectionObject(String fieldName, AbstractObject e) {
+		document.getList(fieldName, Map.class).add(e.getDocument());
+	}
+
+	public void setValue(String key, String value) {
+		document.put(key, value);
+	}
+
+	@Override
+	public Map<String,AbstractObject> getChildren() {
+		return Collections.unmodifiableMap(children);
 	}
 }

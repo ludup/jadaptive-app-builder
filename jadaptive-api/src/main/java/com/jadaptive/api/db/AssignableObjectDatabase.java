@@ -1,11 +1,14 @@
 package com.jadaptive.api.db;
 
 import com.jadaptive.api.repository.AssignableUUIDEntity;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.user.User;
 
 public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> {
 
-	Iterable<T> getAssignedObjects(Class<T> resourceClass, User user);
+	Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SearchField... fields);
+	
+	Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SortOrder order, String sortField, SearchField... fields);
 
 	T getObjectByUUID(Class<T> resourceClass, String uuid);
 
@@ -13,9 +16,13 @@ public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> {
 
 	void deleteObject(T virtualFolder);
 
-	T getObject(Class<T> resourceClass, User user, SearchField... fields);
+	T getAssignedObject(Class<T> resourceClass, User user, SearchField... fields);
 
 	Iterable<T> getObjects(Class<T> class1);
 
 	T getObject(Class<T> resourceClass, SearchField... fields);
+
+	long countObjects(Class<T> resourceClass);
+
+	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields);
 }

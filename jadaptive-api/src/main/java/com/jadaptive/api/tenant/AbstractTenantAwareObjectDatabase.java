@@ -4,22 +4,19 @@ import java.util.Collection;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.SortOrder;
 
-public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity> {
-
-	
+public interface AbstractTenantAwareObjectDatabase<T extends UUIDDocument> {
 
 	T get(String uuid) throws RepositoryException, ObjectException;
 	
 	T get(SearchField... fields) throws RepositoryException, ObjectException;
 
-	void delete(String uuid) throws RepositoryException, ObjectException;
+//	void delete(String uuid) throws RepositoryException, ObjectException;
 
-	void saveOrUpdate(T obj) throws RepositoryException, ObjectException;
-
-	Collection<T> table(String searchField, String searchValue, String order, int start, int length);
+	String saveOrUpdate(T obj) throws RepositoryException, ObjectException;
 
 	long count();
 
@@ -33,8 +30,13 @@ public interface AbstractTenantAwareObjectDatabase<T extends AbstractUUIDEntity>
 
 	Collection<T> searchObjects(SearchField... fields);
 
-	Collection<T> searchTable(int start, int length, SearchField... fields);
-
 	Long searchCount(SearchField... fields);
+
+	Collection<T> searchTable(int start, int length, SortOrder order, String sortField, SearchField... fields);
+
+	Collection<T> table(String searchField, String searchValue, int start, int length, SortOrder order,
+			String sortField);
+
+	void deleteAll();
 
 }

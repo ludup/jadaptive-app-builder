@@ -14,17 +14,29 @@ public @interface ObjectDefinition {
 		
 		String resourceKey();
 		
+		String bundle() default "";
+		
 		ObjectType type() default ObjectType.COLLECTION;
 		
 		ObjectScope scope() default ObjectScope.GLOBAL;
 
 		boolean hidden() default false;
 		
-		boolean system() default true;
+		boolean system() default false;
 		
 		boolean recurse() default true;
+		
+		boolean creatable() default true;
+		
+		boolean updatable() default true;
+		
+		boolean deletable() default true;
 		
 		String[] aliases() default { };
 		
 		String defaultFilter() default "";
+		
+		String defaultColumn() default "";
+
+		boolean requiresPermission() default true;
 }

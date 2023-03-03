@@ -6,8 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -20,7 +22,11 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
-import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.db.DocumentDatabase;
@@ -29,6 +35,8 @@ import com.jadaptive.app.db.DocumentHelper;
 @Repository
 public class ObjectRepositoryImpl implements ObjectRepository {
 
+	static Logger log = LoggerFactory.getLogger(ObjectRepositoryImpl.class);
+	
 	@Autowired
 	DocumentDatabase db;
 	
@@ -38,9 +46,12 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	@Autowired
 	ObjectTemplateRepository templateRepository; 
 	
+	@Autowired
+	TemplateService templateService;
+	
 	@Override
 	public Iterable<AbstractObject> list(ObjectTemplate def, SearchField... fields) throws RepositoryException, ObjectException {
-		return new ObjectIterable(def, db.list(def.getResourceKey(), tenantService.getCurrentTenant().getUuid(), fields));
+		return new ObjectIterable(def, db.list(def.getCollectionKey(), getDatabase(def), fields));
 	}
 	
 	@Override
@@ -48,7 +59,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		
 		List<AbstractObject> results = new ArrayList<>();
 		
-		for(Document document : db.list(def.getResourceKey(), tenantService.getCurrentTenant().getUuid(), SearchField.eq("ownerUUID", user.getUuid()))) {
+		for(Document document : db.list(def.getCollectionKey(), getDatabase(def), SearchField.eq("ownerUUID", user.getUuid()))) {
 			results.add(buildEntity(def, document));
 		}
 		
@@ -56,7 +67,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 
 	private AbstractObject buildEntity(ObjectTemplate def, Document document) {
-		MongoEntity e = new MongoEntity(def.getResourceKey(), document);
+		MongoEntity e = new MongoEntity(document);
 		e.setUuid(document.getString("_id"));
 		e.setHidden(document.getBoolean("hidden"));
 		e.setSystem(document.getBoolean("system"));
@@ -64,17 +75,17 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 	
 	@Override
-	public AbstractObject getById(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
+	public AbstractObject getById(ObjectTemplate def, String value) throws RepositoryException, ObjectException, ValidationException {
 		
 		List<SearchField> search = new ArrayList<>();
 		search.add(SearchField.eq("uuid", value));
 		for(FieldTemplate field : def.getFields()) {
-			if(field.isAlternativeId()) {
+			if(field.isAlternativeId() && NumberUtils.isCreatable(value)) {
 				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
 			}
 		}
-		Document document = db.get(def.getResourceKey(),
-				tenantService.getCurrentTenant().getUuid(), 
+		Document document = db.get(def.getCollectionKey(),
+				getDatabase(def), 
 				SearchField.or(search.toArray(new SearchField[0])));
 		if(Objects.isNull(document)) {
 			throw new ObjectNotFoundException(String.format("No document for resource %s with value %s", def.getResourceKey(), value));
@@ -84,16 +95,17 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 
 	@Override
 	public void deleteByUUID(ObjectTemplate def, String uuid) throws RepositoryException, ObjectException {
-		db.deleteByUUID(uuid, def.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+		db.deleteByUUID(uuid, def.getCollectionKey(), getDatabase(def));
 	}
 
 	@Override
 	public void deleteAll(ObjectTemplate def) throws RepositoryException, ObjectException {
-		db.dropCollection(def.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+		
+		db.dropCollection(def.getCollectionKey(), getDatabase(def));
 	}
 	
 	@Override
-	public void deleteByUUIDOrAltId(ObjectTemplate def, String value) throws RepositoryException, ObjectException {
+	public void deleteByUUIDOrAltId(ObjectTemplate def, String value) throws RepositoryException, ObjectException, ValidationException {
 		List<SearchField> search = new ArrayList<>();
 		search.add(SearchField.eq("uuid", value));
 		for(FieldTemplate field : def.getFields()) {
@@ -101,7 +113,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
 			}
 		}
-		db.delete(def.getResourceKey(), tenantService.getCurrentTenant().getUuid(), 
+		db.delete(def.getCollectionKey(), getDatabase(def), 
 				SearchField.or(search.toArray(new SearchField[0])));
 	}
 	
@@ -110,47 +122,29 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		
 		ObjectTemplate template = templateRepository.get(SearchField.eq("resourceKey", entity.getResourceKey()));
 		
-		validateReferences(template, entity);
-		
-		Document doc = new Document(entity.getDocument());
-		db.insertOrUpdate(entity, doc, entity.getResourceKey(), tenantService.getCurrentTenant().getUuid());
-		return doc.getString("_id");
-	}
+		//validateReferences(template, entity);
 
-	private void validateReferences(ObjectTemplate template, AbstractObject entity) {
-		validateReferences(template.getFields(), entity);
-	}
-
-	private void validateReferences(Collection<FieldTemplate> fields, AbstractObject entity) {
-		if(!Objects.isNull(fields)) {
-			for(FieldTemplate t : fields) {
-				switch(t.getFieldType()) {
-				case OBJECT_REFERENCE:
-					if(StringUtils.isNotBlank((String)entity.getValue(t))) {
-						validateEntityExists((String)entity.getValue(t), t.getValidationValue(ValidationType.OBJECT_TYPE));
-					}
-					break;
-				case OBJECT_EMBEDDED:
-					validateReferences(templateRepository.get(
-							t.getValidationValue(ValidationType.OBJECT_TYPE)), 
-							entity.getChild(t));
-					break;
-				default:
-					break;
-				}
-			}
-		}
+		Document document = new Document(entity.getDocument());
+		db.insertOrUpdate(document, template.getCollectionKey(), getDatabase(template));
+		return document.getString("_id");
 	}
 	
-	private void validateEntityExists(String uuid, String resourceKey) {
-		db.getFirst(uuid, resourceKey, tenantService.getCurrentTenant().getUuid());
+	@Override
+	public void delete(AbstractObject entity) throws RepositoryException, ObjectException {
+		
+		ObjectTemplate def = templateRepository.get(SearchField.eq("resourceKey", entity.getResourceKey()));
+		
+		db.delete(def.getCollectionKey(), getDatabase(def), 
+				SearchField.eq("_id", entity.getUuid()));
+
 	}
 
 	@Override
-	public Collection<AbstractObject> table(ObjectTemplate def, String field, String search, int offset, int limit) {
+	public Collection<AbstractObject> table(ObjectTemplate def, int offset, int limit, SearchField... fields) {
 		List<AbstractObject> results = new ArrayList<>();
-		
-		for(Document document : db.table(def.getResourceKey(), field, search, tenantService.getCurrentTenant().getUuid(), offset, limit)) {
+		SortOrder order = templateService.getTableSortOrder(def);
+		String sortField = templateService.getTableSortField(def);
+		for(Document document : db.searchTable(def.getCollectionKey(), getDatabase(def), offset, limit, order, sortField, fields)) {
 			results.add(buildEntity(def, document));
 		}
 		
@@ -158,13 +152,24 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 	
 	@Override
-	public long count(ObjectTemplate def) {
-		return db.count(def.getResourceKey(), tenantService.getCurrentTenant().getUuid());
+	public long count(ObjectTemplate def, SearchField... fields) {
+		return db.count(def.getCollectionKey(), getDatabase(def), fields);
 	}
 	
+	private String getDatabase(ObjectTemplate def) {
+		if(def.getResourceKey().equals(Tenant.RESOURCE_KEY)) {
+			return TenantRepository.TENANT_DATABASE;
+		}
+		if(def.isSystem()) {
+			return TenantService.SYSTEM_UUID;
+		} else {
+			return tenantService.getCurrentTenant().getUuid();
+		}
+	}
+
 	@Override
 	public long count(ObjectTemplate def, String searchField, String searchValue) {
-		return db.count(def.getResourceKey(), searchField, searchValue, tenantService.getCurrentTenant().getUuid());
+		return db.count(def.getCollectionKey(), searchField, searchValue, getDatabase(def));
 	}
 
 	

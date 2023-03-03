@@ -3,6 +3,8 @@ package com.jadaptive.api.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class Request {
 
 	private static ThreadLocal<HttpServletRequest> threadRequests = new ThreadLocal<HttpServletRequest>();
@@ -29,10 +31,19 @@ public class Request {
 		threadRequests.remove();
 		threadResponses.remove();
 	}
+	
+	public static String getRemoteAddress() {
+		String xForwardedFor = Request.get().getHeader("X-Forwarded-For");
+		if(StringUtils.isNotBlank(xForwardedFor)) {
+			String[] results = xForwardedFor.split(",");
+			return results[0];
+		}
+		return Request.get().getRemoteAddr();
+	}
 
 	public static String generateBaseUrl(HttpServletRequest request) {
 		StringBuffer b = new StringBuffer();
-		b.append(request.getProtocol());
+		b.append(request.getScheme());
 		b.append("://");
 		b.append(request.getHeader("Host"));
 		return b.toString();

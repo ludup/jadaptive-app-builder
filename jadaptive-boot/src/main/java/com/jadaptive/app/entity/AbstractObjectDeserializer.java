@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
@@ -21,8 +20,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
@@ -30,7 +32,8 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
-import com.jadaptive.app.ApplicationServiceImpl;
+import com.jadaptive.app.db.DocumentHelper;
+import com.jadaptive.app.db.DocumentValidator;
 import com.jadaptive.utils.Utils;
 
 public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> {
@@ -132,8 +135,8 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 	private void validateNode(JsonNode node, FieldTemplate field,
 			AbstractObject e) throws IOException, ValidationException {
 		
-		if(log.isInfoEnabled()) {
-			log.info("Validating node {}", field.getResourceKey());
+		if(log.isDebugEnabled()) {
+			log.debug("Validating node {}", field.getResourceKey());
 		}
 
 		node = node.findPath(field.getResourceKey());
@@ -154,6 +157,8 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 
 		if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
 			processEmbeddedObjects(field, node, e);
+		} else if(field.getFieldType()==FieldType.OBJECT_REFERENCE) {
+			processReferencedObjects(field, node, e);
 		} else {
 			processSimpleTypes(field, node, e);
 		}
@@ -162,7 +167,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 
 	private void processEmbeddedObjects(FieldTemplate field, JsonNode node, AbstractObject e) throws ValidationException, IOException {
 		
-		String type = field.getValidationValue(ValidationType.OBJECT_TYPE);
+		String type = field.getValidationValue(ValidationType.RESOURCE_KEY);
 		
 		try {
  			ObjectTemplate template = templateService.get(type);
@@ -170,13 +175,41 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
  			if(node.isArray()) {
  				List<Document> documents = new ArrayList<>();
  				for(JsonNode element : node) {
- 					MongoEntity child = new MongoEntity(e, field.getResourceKey(), new Document());
+ 					MongoEntity child = new MongoEntity(e, type, new Document());
  					iterateType(element, template, child, false);
  					documents.add(new Document(child.getDocument()));
  				}
  				e.setValue(field, documents);
  			} else {
  				iterateType(node, template, new MongoEntity(e, field.getResourceKey(), new Document()), false);
+ 			}
+ 			
+ 		} catch(ObjectException ex) {
+ 			throw new ValidationException(String.format("%s object type template not found", type));
+ 		}	
+	}
+	
+	private void processReferencedObjects(FieldTemplate field, JsonNode node, AbstractObject e) throws ValidationException, IOException {
+		
+		String type = field.getValidationValue(ValidationType.RESOURCE_KEY);
+		
+		try {
+ 			if(node.isArray()) {
+ 				List<Document> documents = new ArrayList<>();
+ 				for(JsonNode element : node) {
+ 					Document doc = new Document();
+ 					doc.put("uuid", element.get("uuid").asText());
+ 					doc.put("name", element.get("name").asText());
+ 					doc.put("resourceKey", UUIDReference.RESOURCE_KEY);
+ 					documents.add(doc);
+ 				}
+ 				e.setValue(field, documents);
+ 			} else {
+ 				Document doc = new Document();
+					doc.put("uuid", node.get("uuid").asText());
+					doc.put("name", node.get("name").asText());
+					doc.put("resourceKey", UUIDReference.RESOURCE_KEY);
+				e.addChild(field.getResourceKey(), new MongoEntity(e, UUIDReference.RESOURCE_KEY, doc));
  			}
  			
  		} catch(ObjectException ex) {
@@ -209,6 +242,10 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 
 	private Object validate(FieldTemplate field, JsonNode node, AbstractObject e) throws IOException, ValidationException {
 		
+		if(node.isNull()) {
+			return null;
+		}
+		
 		switch(field.getFieldType()) {
 		case BOOL:
 			validateBoolean(node, field);
@@ -225,8 +262,14 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		case TIMESTAMP:
 			validateDate(node, field);
 			return Utils.parseDate(node.asText(), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		case DATE:
+			validateDate(node, field);
+			return Utils.parseDate(node.asText(), "yyyy-MM-dd");
 		case ENUM:
 			validateEnum(node, field);
+			return node.asText();
+		case PERMISSION:
+			validatePermission(node, field);
 			return node.asText();
 		case TEXT:
 		case TEXT_AREA:
@@ -234,10 +277,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 			validateText(node, field);
 			return node.asText();
 		case OBJECT_REFERENCE:
-//			if(node.isObject()) {
-//				return validateReference(node, field);
-//			}
-			return node.asText();
+			return createReference(node, field);
 		default:
 			throw new ValidationException(
 					String.format("Missing field type %s in validate method", 
@@ -247,10 +287,19 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 	}
 
 	
-//	private ObjectReference2 validateReference(JsonNode node, FieldTemplate field) {
-//		return new ObjectReference2(node.get("uuid").asText(), node.get("name").asText());
-//		
-//	}
+	private Document createReference(JsonNode node, FieldTemplate field) {
+		Document doc = new Document();;
+		DocumentHelper.convertObjectToDocument(new UUIDReference(node.get("uuid").asText(), node.get("name").asText()), doc);
+		return doc;
+	}
+
+	private void validatePermission(JsonNode node, FieldTemplate field) throws ValidationException {
+		
+		PermissionService service = ApplicationServiceImpl.getInstance().getBean(PermissionService.class);
+		if(!service.isValidPermission(node.asText())) {
+			throw new ValidationException(String.format("%s is not a valid permission", node.asText()));
+		}
+	}
 
 	private void validateDate(JsonNode node, FieldTemplate field) {
 		
@@ -268,7 +317,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 				for(FieldValidator v : field.getValidators()) {
 					switch(v.getType()) {
 					case RANGE:
-						String[] range = v.getValue().split(",");
+						String[] range = v.getValue().split("-");
 						if(range.length != 2) {
 							throw new ValidationException(String.format("Invalid range %s value in validator use \"<min>,<max>\" format", v.getValue()));
 						}
@@ -344,27 +393,46 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		
 		String value = node.asText();
 		
-		if(!Objects.isNull(field.getValidators())) {
-			for(FieldValidator v : field.getValidators()) {
-				switch(v.getType()) {
-				case LENGTH:
-					
-					int maxlength = Integer.parseInt(v.getValue());
-					if(value.length() > maxlength) {
-						throw new ValidationException(String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
-					}
-					break;
-				case REGEX:
-					Pattern pattern = Pattern.compile(v.getValue());
-					if(!pattern.matcher(value).matches()) {
-						throw new ValidationException(String.format("%s does not conform to regex pattern %s", value, v.getValue()));
-					}
-					break;
-				default:
-					break;
-				}
-			}
-		}
+		DocumentValidator.validate(field, value);
+		
+		/**
+		 * THIS IS DUPLICATED CODE.. SEE DocumentValidator
+		 */
+//		if(!Objects.isNull(field.getValidators())) {
+//			for(FieldValidator v : field.getValidators()) {
+//				switch(v.getType()) {
+//				case REQUIRED:
+//				{
+//					if(StringUtils.isBlank(value)) {
+//						if(StringUtils.isBlank(v.getI18n())) {
+//							throw new ValidationException(
+//									I18N.getResource(Locale.getDefault(), "default", "default.required.error", 
+//										I18N.getResource(Locale.getDefault(), v.getBundle(), String.format("%s.name", field.getResourceKey()))));
+//						} else {
+//							throw new ValidationException(I18N.getResource(
+//								Locale.getDefault(), v.getBundle(), v.getI18n(), value));
+//						}
+//					}
+//					break;
+//				}
+//				case LENGTH:
+//					
+//					int maxlength = Integer.parseInt(v.getValue());
+//					if(value.length() > maxlength) {
+//						throw new ValidationException(String.format("%s must be less than %d characters", field.getResourceKey(), maxlength));
+//					}
+//					break;
+//				case REGEX:
+//					Pattern pattern = Pattern.compile(v.getValue());
+//					if(!pattern.matcher(value).matches()) {
+//						throw new ValidationException(String.format("%s does not conform to regex pattern %s", value, v.getValue()));
+//					}
+//					break;
+//				default:
+//					break;
+//				}
+//			}
+//		}
 	}
 
 	private void setProperty(Object value, FieldTemplate t, AbstractObject e) {

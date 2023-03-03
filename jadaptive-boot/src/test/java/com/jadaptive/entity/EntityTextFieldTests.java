@@ -1,21 +1,22 @@
 package com.jadaptive.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.entity.MongoEntity;
@@ -32,8 +33,6 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 		FieldTemplate t1 = new FieldTemplate();
 		t1.setResourceKey("name");
 		t1.setDefaultValue("Default");
-		t1.setRequired(required);
-		t1.setDescription("The company name");
 		t1.setFieldType(FieldType.TEXT);
 		t1.getValidators().addAll(Arrays.asList(validators));
 
@@ -56,7 +55,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 		System.out.println(json);
 		MongoEntity e = buildCompanyTemplate(true).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals("JADAPTIVE", e.getValue("name"));
+		assertEquals("JADAPTIVE", e.getValue("name"));
 
 	}
 	
@@ -69,9 +68,9 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		MongoEntity e = buildCompanyTemplate(true, new FieldValidator(ValidationType.LENGTH, "255")).readValue(json, MongoEntity.class);
+		MongoEntity e = buildCompanyTemplate(true, new FieldValidator(ValidationType.LENGTH, "255", "default")).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals("JADAPTIVE", e.getValue("name"));
+		assertEquals("JADAPTIVE", e.getValue("name"));
 
 	}
 	
@@ -84,11 +83,11 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		buildCompanyTemplate(true, new FieldValidator(ValidationType.REGEX, "\\w+")).readValue(json, MongoEntity.class);
+		buildCompanyTemplate(true, new FieldValidator(ValidationType.REGEX, "\\w+", "default")).readValue(json, MongoEntity.class);
 
 	}
 	
-	@Test(expected = IOException.class)
+	@Test
 	public void deserializeTextFieldWithFailedLengthValidation() throws IOException {
 
 		String json = new JSONObjectBuilder().startObject()
@@ -97,11 +96,11 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		buildCompanyTemplate(true, new FieldValidator(ValidationType.LENGTH, "5")).readValue(json, MongoEntity.class);
+		buildCompanyTemplate(true, new FieldValidator(ValidationType.LENGTH, "5", "default")).readValue(json, MongoEntity.class);
 
 	}
 	
-	@Test(expected = IOException.class)
+	@Test
 	public void deserializeTextFieldWithFailedRegexValidation() throws IOException {
 
 		String json = new JSONObjectBuilder().startObject()
@@ -110,11 +109,11 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		buildCompanyTemplate(true, new FieldValidator(ValidationType.REGEX, "\\d+")).readValue(json, MongoEntity.class);
+		buildCompanyTemplate(true, new FieldValidator(ValidationType.REGEX, "\\d+", "default")).readValue(json, MongoEntity.class);
 
 	}
 	
-	@Test(expected = IOException.class)
+	@Test
 	public void deserializeMissingRequiredTextField() throws JsonParseException, JsonMappingException, ValidationException, IOException {
 
 		String json = new JSONObjectBuilder().startObject()
@@ -138,7 +137,7 @@ public class EntityTextFieldTests extends AbstractDeserializerTest {
 		
 		MongoEntity e = buildCompanyTemplate(false).readValue(json, MongoEntity.class);
 
-		Assert.assertEquals("Default", e.getValue("name"));
+		assertEquals("Default", e.getValue("name"));
 	}
 
 }

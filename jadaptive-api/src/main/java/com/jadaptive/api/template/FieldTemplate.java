@@ -9,35 +9,48 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
 
 @ObjectDefinition(resourceKey = FieldTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT)
-public class FieldTemplate extends AbstractUUIDEntity {
+public class FieldTemplate extends TemplateUUIDEntity {
 
 	private static final long serialVersionUID = -9164781667373808388L;
 
 	public static final String RESOURCE_KEY = "objectFields";
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String resourceKey;
+	
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
+	String parentKey;
+	
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
+	String parentField;
+	
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
+	String formVariable;
 	
 	@ObjectField(type = FieldType.TEXT)
 	String defaultValue;
 	
-	@ObjectField(type = FieldType.TEXT)
-	String description;
-	
-	@ObjectField(type = FieldType.ENUM, required = true)
+	@ObjectField(type = FieldType.ENUM)
+	@Validator(type = ValidationType.REQUIRED)
 	FieldType fieldType; 
 	
 	@ObjectField(type = FieldType.BOOL)
 	boolean collection;
 	
-	@ObjectField(type = FieldType.BOOL)
-	boolean required;
+//	@ObjectField(type = FieldType.BOOL)
+//	boolean required;
 	
 	@ObjectField(type = FieldType.BOOL)
-	boolean encrypted;
+	boolean manuallyEncrypted;
+	
+	@ObjectField(type = FieldType.BOOL)
+	boolean automaticallyEncrypted;
 	
 	@ObjectField(type = FieldType.BOOL)
 	boolean searchable;
@@ -77,6 +90,14 @@ public class FieldTemplate extends AbstractUUIDEntity {
 		this.resourceKey = resourceKey;
 	}
 
+	public String getFormVariable() {
+		return formVariable;
+	}
+
+	public void setFormVariable(String formVariable) {
+		this.formVariable = formVariable;
+	}
+
 	public String getDefaultValue() {
 		return StringUtils.defaultString(defaultValue);
 	}
@@ -85,24 +106,12 @@ public class FieldTemplate extends AbstractUUIDEntity {
 		this.defaultValue = defaultValue;
 	}
 
-	public String getDescription() {
-		return StringUtils.defaultString(description);
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public FieldType getFieldType() {
 		return fieldType;
 	}
 
 	public void setFieldType(FieldType propertyType) {
 		this.fieldType = propertyType;
-	}
-
-	public void setRequired(boolean required) {
-		this.required = required;
 	}
 
 	public Collection<FieldValidator> getValidators() {
@@ -131,15 +140,28 @@ public class FieldTemplate extends AbstractUUIDEntity {
 	}
 
 	public boolean isRequired() {
-		return required;
+		for(FieldValidator v : validators) {
+			if(v.getType() == ValidationType.REQUIRED) {
+				return true;
+			}
+		}
+		return false;
 	}
 
-	public boolean getEncrypted() {
-		return encrypted;
+	public boolean isManuallyEncrypted() {
+		return manuallyEncrypted;
 	}
 
-	public void setEncrypted(boolean encrypted) {
-		this.encrypted = encrypted;
+	public void setManuallyEncrypted(boolean manuallyEncrypted) {
+		this.manuallyEncrypted = manuallyEncrypted;
+	}
+
+	public boolean isAutomaticallyEncrypted() {
+		return automaticallyEncrypted;
+	}
+
+	public void setAutomaticallyEncrypted(boolean automaticallyEncrypted) {
+		this.automaticallyEncrypted = automaticallyEncrypted;
 	}
 
 	public boolean getCollection() {
@@ -180,7 +202,7 @@ public class FieldTemplate extends AbstractUUIDEntity {
 				return v.getValue();
 			}
 		}
-		throw new IllegalStateException(String.format("There is no validator for type %s on field %s", type.name(), getResourceKey()));
+		throw new UnsupportedOperationException(String.format("There is no validator for type %s on field %s", type.name(), getResourceKey()));
 	}
 
 	public boolean isReadOnly() {
@@ -221,5 +243,29 @@ public class FieldTemplate extends AbstractUUIDEntity {
 
 	public void setRequireAllPermissions(boolean requireAllPermissions) {
 		this.requireAllPermissions = requireAllPermissions;
+	}
+
+	public String getParentKey() {
+		return parentKey;
+	}
+
+	public void setParentKey(String parentKey) {
+		this.parentKey = parentKey;
+	}
+
+	public String getParentField() {
+		return parentField;
+	}
+
+	public void setParentField(String parentField) {
+		this.parentField = parentField;
+	}
+
+	public int getValidationValueInt(ValidationType val, int defaultValue) {
+		try {
+			return Integer.parseInt(getValidationValue(val));
+		} catch(Throwable e) {
+			return defaultValue;
+		}
 	}
 }

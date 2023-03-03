@@ -1,15 +1,19 @@
 package com.jadaptive.app.permissions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.PluginManager;
@@ -18,15 +22,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.PropertyService;
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.permissions.PermissionUtils;
 import com.jadaptive.api.permissions.Permissions;
+import com.jadaptive.api.repository.AssignableUUIDEntity;
+import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.NamePairValue;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.app.user.AdminUser;
@@ -52,10 +60,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Autowired
 	private PropertyService propertyService;
 	
-	Map<Tenant,Set<String>> tenantPermissions = new HashMap<>();
-	Map<Tenant,Map<String,Set<String>>> tenantPermissionsAlias = new HashMap<>();
-	
 	Set<String> systemPermissions = new TreeSet<>();
+	Set<NamePairValue> systemPermissionObjects = new TreeSet<>();
 	Map<String,Set<String>> systemPermissionsAlias = new HashMap<>();
 	
 	ThreadLocal<Stack<User>> currentUser = new ThreadLocal<>();
@@ -95,10 +101,10 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		public Boolean isHidden() {
 			return true;
 		}
-
+		
 		@Override
-		public String getSystemName() {
-			return getUsername();
+		public String getResourceKey() {
+			return "user";
 		}
 
 	};
@@ -129,6 +135,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public User getCurrentUser() {
 		Stack<User> userStack = currentUser.get();
 		if(Objects.isNull(userStack) || userStack.isEmpty()) {
+			if(log.isErrorEnabled()) {
+				log.error("Calling getCurrentUser without having previously setup a user context on the current thread!!!!");
+			}
 			throw new AccessDeniedException("There is no user context setup on this thread!");
 		}
 		return userStack.peek();
@@ -144,6 +153,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		Stack<User> userStack = currentUser.get();
 		if(Objects.isNull(userStack) || userStack.isEmpty()) {
+			if(log.isErrorEnabled()) {
+				log.error("Calling clearUserContext without having previously setup a user context on the current thread!!!!");
+			}
 			throw new IllegalStateException("There is no user context to clear on this thread!");
 		}
 		User user = userStack.pop();
@@ -163,32 +175,40 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		return false;
 	}
 	
+	@Override
+	public <T> T as(User user, Callable<T> call) {
+		setupUserContext(user);
+		try {
+			return call.call();
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			clearUserContext();
+		}
+	}
+	
+	@Override
+	public <T> T asSystem(Callable<T> call) {
+		setupUserContext(SYSTEM_USER);
+		try {
+			return call.call();
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			clearUserContext();
+		}
+	}
+	
 	private synchronized void registerPermission(String permission, String... aliases) {
 		
 		Tenant tenant = tenantService.getCurrentTenant();	
 		
 		if(tenant.isSystem()) {
-			doRegisterPermission(systemPermissions, systemPermissionsAlias, permission, aliases);
-		} else {
-			
-			Set<String> allPermissions = tenantPermissions.get(tenant);
-			if(Objects.isNull(allPermissions)) {
-				allPermissions = new TreeSet<>();
-				tenantPermissions.put(tenant, allPermissions);
-			}
-			
-			Map<String,Set<String>> aliasPermissions = tenantPermissionsAlias.get(tenant);	
-			
-			if(Objects.isNull(aliasPermissions)) {
-				aliasPermissions = new HashMap<>();
-				tenantPermissionsAlias.put(tenant, aliasPermissions);
-			}
-			
-			doRegisterPermission(allPermissions, aliasPermissions, permission, aliases);
-		}
+			doRegisterPermission(systemPermissions, systemPermissionObjects, systemPermissionsAlias, permission, aliases);
+		} 
 	}
 	
-	private synchronized void doRegisterPermission(Set<String> allPermissions, Map<String,Set<String>> aliasPermissions, String permission, String... aliases) {
+	private synchronized void doRegisterPermission(Set<String> allPermissions, Set<NamePairValue> objectPermissions, Map<String,Set<String>> aliasPermissions, String permission, String... aliases) {
 		
 		
 		if(log.isInfoEnabled()) {
@@ -200,6 +220,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		}
 		
 		allPermissions.add(permission);
+		objectPermissions.add(new NamePairValue(permission, permission));
 		
 		if(aliases.length > 0) {
 			if(!aliasPermissions.containsKey(permission)) {
@@ -223,9 +244,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public Set<String> getAllPermissions(Tenant tenant) {
 		Set<String> tmp = new TreeSet<>();
 		tmp.addAll(systemPermissions);
-		if(tenantPermissions.containsKey(tenant)) {
-			tmp.addAll(tenantPermissions.get(tenant));
-		}
 		return Collections.unmodifiableSet(tmp);
 	}
 	
@@ -235,7 +253,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 
 	@Override 
-	public void assertReadWrite(String resourceKey) throws AccessDeniedException {
+	public void assertWrite(String resourceKey) throws AccessDeniedException {
 		assertAnyPermission(PermissionUtils.getReadWritePermission(resourceKey));
 	}
 	
@@ -247,7 +265,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Override
 	public Set<String> resolvePermissions(User user) {
 		
-		Tenant tenant = tenantService.getCurrentTenant();
 		Set<String> allPermissions = new TreeSet<>();
 		Collection<Role> roles = roleService.getRoles(user);
 		for(Role role : roles) {
@@ -259,9 +276,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 		Set<String> resolvedPermissions = new HashSet<>(allPermissions);
 		processAliases(systemPermissionsAlias, allPermissions, resolvedPermissions);
-		if(!tenant.isSystem()) {
-			processAliases(tenantPermissionsAlias.get(tenant), allPermissions, resolvedPermissions);
-		}		
+	
 		return resolvedPermissions;
 	}
 	
@@ -286,7 +301,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			log.debug(String.format("Asserting permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
 		}
 		
-		if(user.getUuid().equals(SYSTEM_USER_UUID) || user instanceof AdminUser) {
+		if(user.getUuid().equals(SYSTEM_USER_UUID) 
+				|| user instanceof AdminUser
+				|| isAdministrator(user)) {
 			return;
 		}
 
@@ -299,7 +316,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			return;
 		}
 		
-		if(log.isDebugEnabled()) {
+		if(log.isWarnEnabled()) {
 			log.debug("User {} denied permission from permission set {}", 
 					user.getUsername(), 
 					StringUtils.defaultIfBlank(Utils.csv(resolvedPermissions), "<empty>"));
@@ -324,8 +341,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		for(String permission : permissions) {
 			if(!resolvedPermissions.contains(permission)) {
-				if(log.isInfoEnabled()) {
-					log.info("User {} denied permission from permission set {}", 
+				if(log.isWarnEnabled()) {
+					log.warn("User {} denied permission from permission set {}", 
 							user.getUsername(), 
 							Utils.csv(resolvedPermissions));
 				}
@@ -360,12 +377,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
-	
-	}
-	
-	@Override
-	public void initializeSystem(boolean newSchema) {
-			
+		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
 			if(log.isInfoEnabled()) {
@@ -378,51 +390,124 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		}
 		
 		scanForPermissions(getClass().getClassLoader(), "com.jadaptive.app", newSchema);
-		
+	}
+	
+	@Override
+	public void initializeSystem(boolean newSchema) {
+		initializeTenant(tenantService.getSystemTenant(), newSchema);
 	}
 
 	private void scanForPermissions(ClassLoader classloader, String name, boolean newSchema) {
 		
-		try {
-			try (ScanResult scanResult =
-                    new ClassGraph()                 
-                        .enableAllInfo()  
-                        .addClassLoader(classloader)
-                        .whitelistPackages(name)   
-                        .scan()) {                  
-                for (ClassInfo clz : scanResult.getClassesWithAnnotation(Permissions.class.getName())) {
-					if(log.isInfoEnabled()) {
-						log.info("Found annotated permissions {}", clz.getName());
-					}
-					Permissions perms = clz.loadClass().getAnnotation(Permissions.class);
-					for(String key : perms.keys()) {
-						registerCustomPermission(key);
-					}
-					
-					Role everyoneRole = roleService.getEveryoneRole();
-					
-					for(String permission : perms.defaultPermissions()) {
-						if(!propertyService.getBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), false)) {
-							if(!everyoneRole.getPermissions().contains(permission)) {
-								roleService.grantPermission(everyoneRole, permission);
-							}
-							propertyService.setBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), true);
+		
+		try (ScanResult scanResult =
+                new ClassGraph()                 
+                    .enableAllInfo()  
+                    .addClassLoader(classloader)
+                    .whitelistPackages(name)   
+                    .scan()) {                  
+            for (ClassInfo clz : scanResult.getClassesWithAnnotation(Permissions.class.getName())) {
+				if(log.isInfoEnabled()) {
+					log.info("Found annotated permissions {}", clz.getName());
+				}
+				Permissions perms = clz.loadClass().getAnnotation(Permissions.class);
+				for(String key : perms.keys()) {
+					registerCustomPermission(key);
+				}
+				
+				Role everyoneRole = roleService.getEveryoneRole();
+				
+				for(String permission : perms.defaultPermissions()) {
+					if(!propertyService.getBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), false)) {
+						if(!everyoneRole.getPermissions().contains(permission)) {
+							roleService.grantPermission(everyoneRole, permission);
 						}
+						propertyService.setBoolean(String.format("defaultPermission.%s.%s", clz.getName(), permission), true);
 					}
-	
-                }
-            }
+				}
 
-		} catch (Exception e) {
-			log.error("Failed to process annotated templates", e);
-		}
+            }
+        }
+
 	}
 
 	@Override
 	public void assertAdministrator() {
 		if(!isAdministrator(getCurrentUser())) {
+			if(log.isWarnEnabled()) {
+				log.warn("User {} denied administrative access", 
+						getCurrentUser().getUsername());
+			}
 			throw new AccessDeniedException(String.format("%s is not an Administrator", 
 					getCurrentUser().getName()));
 		}
 	}
+
+	@Override
+	public Collection<NamePairValue> getPermissions() {
+
+		List<NamePairValue> tmp = new ArrayList<>();
+		tmp.addAll(systemPermissionObjects);
+
+		Collections.sort(tmp, new Comparator<NamePairValue>() {
+
+			@Override
+			public int compare(NamePairValue o1, NamePairValue o2) {
+				return	o1.getName().compareTo(o2.getName());
+			}
+		});
+		
+		return Collections.unmodifiableCollection(tmp);
+	}
+
+	@Override
+	public void assertAssignment(AssignableUUIDEntity obj) {
+		
+		if(obj.getUsers().contains(getCurrentUser())) {
+			return;
+		}
+		if(roleService.hasRole(getCurrentUser(), obj.getRoles())) {
+			return;
+		}
+		throw new AccessDeniedException(String.format("Current user is not assigned to object " + obj.getUuid()));
+	}
+
+	@Override
+	public void assertOwnership(PersonalUUIDEntity obj) {
+		
+		if(Objects.isNull(obj.getOwnerUUID()) || !obj.getOwnerUUID().equals(getCurrentUser().getUuid())) {
+			throw new AccessDeniedException(String.format("Current user is not own the object " + obj.getUuid()));
+		}
+	}
+
+	@Override
+	public void assertOwnership(AbstractObject e) {
+		
+		String ownerUUID = e.getValue("ownerUUID").toString();
+		if(Objects.isNull(ownerUUID) || !ownerUUID.equals(getCurrentUser().getUuid())) {
+			throw new AccessDeniedException(String.format("Current user is not own the object " + e.getUuid()));
+		}	
+	}
+
+//	@Override
+//	public void assertRead(ObjectTemplate template) {
+//		if(template.getPermissionProtected()) {
+//			if(template.hasParent()) {
+//				assertRead(templateService.getParentTemplate(template).getResourceKey());
+//			} else {
+//				assertRead(template.getResourceKey());
+//			}
+//		}
+//	}
+//	
+//	@Override
+//	public void assertWrite(ObjectTemplate template) {
+//		if(template.getPermissionProtected()) {
+//			if(template.hasParent()) {
+//				assertWrite(templateService.getParentTemplate(template).getResourceKey());
+//			} else {
+//				assertWrite(template.getResourceKey());
+//			}
+//		}
+//	}
 }

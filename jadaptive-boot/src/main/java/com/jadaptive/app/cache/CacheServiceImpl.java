@@ -1,53 +1,99 @@
 package com.jadaptive.app.cache;
 
-import javax.annotation.PostConstruct;
-import javax.cache.Cache;
-import javax.cache.CacheManager;
-import javax.cache.configuration.CompleteConfiguration;
-import javax.cache.configuration.Factory;
-import javax.cache.configuration.MutableConfiguration;
-import javax.cache.expiry.ExpiryPolicy;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.cache.CacheService;
 
 @Service
 public class CacheServiceImpl implements CacheService {
+	
+	Map<String,Map<?,?>> caches = new HashMap<>();
+	
+	public <K,V> Map<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value){
+		return cache(name, key, value, 60000 * 60 * 24); // One day
+	}
+	
+	public <K,V> Map<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value,long expiryTime){
+		return cache(name, key, value, expiryTime);
+	}
+	
+	public <K,V> Map<K, V> getCacheIfExists(String name, Class<K> key, Class<V> value){
+		return null;
+	}
+	
+	private <K,V> Map<K, V> cache(String name, Class<K> key, Class<V> value, long exiryTime){
+		@SuppressWarnings("unchecked")
+		Map<K, V> cache = (Map<K, V>) caches.get(name);
+		if(cache==null) {
+			cache = new ExpiringConcurrentHashMap<K, V>(exiryTime);
+			caches.put(name, cache);
+		}
+		return cache;
+	}
+	
+	class ExpiringConcurrentHashMap<K,V> extends ConcurrentHashMap<K,V> {
 
-	@Autowired
-	private CacheManager cacheManager;
-	
-	
-	@PostConstruct
-	private void postConstruct() {
-		System.out.println();
+		private static final long serialVersionUID = 4825825094828550762L;
+
+		private Map<K, Long> entryTime = new ConcurrentHashMap<K, Long>();
+		
+	    private long expiryInMillis;
+	    
+	    public ExpiringConcurrentHashMap(long expiryInMillis) {
+	    	this.expiryInMillis = expiryInMillis;
+	    }
+
+	    @Override
+	    public V put(K key, V value) {
+	        purgeEntries();
+	        return doPut(key, value);
+	    }
+
+	    private V doPut(K key, V value) {
+	    	Long date = entryTime.getOrDefault(key, Long.valueOf(System.currentTimeMillis()));
+	        entryTime.put(key, date);
+	        V returnVal = super.put(key, value);
+	        return returnVal;
+		}
+
+		@Override
+	    public void putAll(Map<? extends K, ? extends V> m) {
+			purgeEntries();
+	        for (K key : m.keySet()) {
+	            doPut(key, m.get(key));
+	        }
+	    }
+
+	    @Override
+	    public V putIfAbsent(K key, V value) {
+	    	purgeEntries();
+	        if (!containsKey(key)) {
+	            return doPut(key, value);
+	        } else {
+	            return get(key);
+	        }
+	    }
+	    
+	    @Override
+		public V get(Object key) {
+	    	purgeEntries();
+			return super.get(key);
+		}
+
+		private void purgeEntries() {
+	        long currentTime = new Date().getTime();
+	        for (K key : entryTime.keySet()) {
+	        	long expiry = (entryTime.get(key) + expiryInMillis);
+	            if (currentTime > expiry) {
+	                remove(key);
+	                entryTime.remove(key);
+	            }
+	        }
+	    }
 	}
-	
-	public <K,V> Cache<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value){
-		return cache(name, key, value, baseConfiguration(key, value));
-	}
-	
-	public <K,V> Cache<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value,Factory<? extends ExpiryPolicy> expiryPolicyFactory){
-		return cache(name, key, value, ((MutableConfiguration<K, V>)baseConfiguration(key, value)).setExpiryPolicyFactory(expiryPolicyFactory));
-	}
-	
-	public <K,V> Cache<K, V> getCacheIfExists(String name, Class<K> key, Class<V> value){
-		return cacheManager.getCache(name,key,value);
-	}
-	
-	public CacheManager getCacheManager(){
-		return this.cacheManager;
-	}
-	
-	private <K,V> CompleteConfiguration<K, V> baseConfiguration(Class<K> key, Class<V> value){
-		return new MutableConfiguration<K, V>().setReadThrough(true).setWriteThrough(true).setTypes(key, value);
-	} 
-	
-	private <K,V> Cache<K, V> cache(String name, Class<K> key, Class<V> value, CompleteConfiguration<K, V> config){
-		Cache<K, V> cache = cacheManager.getCache(name,key,value);
-		return cache == null ? cacheManager.createCache(name, config) : cache;
-	}
-	
 }

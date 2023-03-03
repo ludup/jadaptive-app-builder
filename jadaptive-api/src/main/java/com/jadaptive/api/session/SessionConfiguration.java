@@ -13,10 +13,12 @@ public class SessionConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "sessionConfiguration";
 
-	@ObjectField(type = FieldType.INTEGER, 
-			defaultValue = "15")
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "60")
 	Integer timeout;
 
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
+	Boolean enableCsrf = Boolean.TRUE;
+	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
@@ -26,13 +28,16 @@ public class SessionConfiguration extends SingletonUUIDEntity {
 		return timeout;
 	}
 
-
 	public void setTimeout(Integer timeout) {
 		this.timeout = timeout;
 	}
 
+	public Boolean getEnableCsrf() {
+		return enableCsrf == null?  Boolean.TRUE : enableCsrf;
+	}
 
-
-
+	public void setEnableCsrf(Boolean enableCsrf) {
+		this.enableCsrf = enableCsrf;
+	}
 
 }

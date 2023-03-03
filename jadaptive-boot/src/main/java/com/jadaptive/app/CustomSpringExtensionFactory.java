@@ -52,7 +52,7 @@ public class CustomSpringExtensionFactory implements ExtensionFactory {
         T extension = createWithoutSpring(extensionClass);
         if (autowire && extension != null) {
             // test for SpringBean
-            PluginWrapper pluginWrapper = pluginManager.whichPlugin(extensionClass);
+        	PluginWrapper pluginWrapper = pluginManager.whichPlugin(extensionClass);
             if (pluginWrapper != null) {
                 Plugin plugin = pluginWrapper.getPlugin();
                 if (plugin instanceof SpringPlugin) {
@@ -71,7 +71,7 @@ public class CustomSpringExtensionFactory implements ExtensionFactory {
     @SuppressWarnings("unchecked")
     protected <T> T createWithoutSpring(Class<?> extensionClass) {
         try {
-            return (T) extensionClass.newInstance();
+            return (T) extensionClass.getConstructor().newInstance();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

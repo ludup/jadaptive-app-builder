@@ -2,6 +2,7 @@ package com.jadaptive.api.repository;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
@@ -11,11 +12,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang.WordUtils;
+
+
+
 public class ReflectionUtils {
 
 
 	static Map<Class<?>, Set<Method>> setterCache = new HashMap<>();
-	static Map<Class<?>, Set<Method>> getterCache = new HashMap<>();
+	static Map<Class<?>, Map<String,Method>> getterCache = new HashMap<>();
 	static Map<Class<?>, Map<String,Field>> fieldCache = new HashMap<>();
 	
 	
@@ -75,6 +82,18 @@ public class ReflectionUtils {
 		
 	}
 
+	public static Method getMethod(Class<?> clz, String name, Class<?>... args) throws NoSuchMethodException, SecurityException {
+		
+		try {
+			return clz.getMethod(name, args);
+		} catch (NoSuchMethodException | SecurityException e) {
+			clz = clz.getSuperclass();
+			if(Objects.nonNull(clz)) {
+				return getMethod(clz, name, args);
+			}
+			throw e;
+		}
+	}
 
 	public static Set<Method> getSetters(Class<?> clz) {
 		
@@ -95,12 +114,18 @@ public class ReflectionUtils {
 		return results;
 	}
 	
-	
-	public static Set<Method> getGetters(Class<?> clz) {
+	public static Method getGetter(Class<?> clz, Field field) {
 		
-		Set<Method> results = getterCache.get(clz);
+		String name = "get" + WordUtils.capitalize(field.getName());
+		Map<String,Method> results = getGettersMap(clz);
+		return results.get(name);
+	}
+	
+	public static Map<String,Method> getGettersMap(Class<?> clz) {
+		
+		Map<String,Method> results = getterCache.get(clz);
 		if(Objects.isNull(results)) {
-			results = new HashSet<>();
+			results = new HashMap<>();
 			for(Method m : clz.getMethods()) {
 				if(m.getName().equals("getClass")) {
 					continue;
@@ -110,11 +135,11 @@ public class ReflectionUtils {
 					continue;
 				}
 				if(m.getName().startsWith("get") && m.getName().length() > 3 && m.getParameterCount()==0) {
-					results.add(m);
+					results.put(m.getName(), m);
 				}
 				if(m.getName().startsWith("is") && m.getName().length() > 3 && m.getParameterCount()==0
 						&& (m.getReturnType().equals(boolean.class) || m.getReturnType().equals(Boolean.class))) {
-					results.add(m);
+					results.put(m.getName(), m);
 				}
 			}
 		
@@ -122,6 +147,12 @@ public class ReflectionUtils {
 		}
 		
 		return results;
+		
+	}
+	
+	
+	public static Set<Method> getGetters(Class<?> clz) {
+		return new HashSet<>(getGettersMap(clz).values());
 	}
 	
 	public static String calculateFieldName(Method m) {
@@ -152,6 +183,65 @@ public class ReflectionUtils {
 	public static boolean hasAnnotation(Class<?> templateClazz, Class<? extends Annotation> annotationClazz) {
 		return templateClazz.getAnnotation(annotationClazz)!=null;
 	}
-
 	
+	public static boolean hasAnnotationRecursive(Class<?> templateClazz, Class<? extends Annotation> annotationClazz) {
+		return getAnnotation(templateClazz, annotationClazz)!=null;
+	}
+	
+	public static <T extends Annotation> T getAnnotation(Class<?> clz, Class<T> annotation) {
+		
+		do {
+			T res = clz.getAnnotation(annotation);
+			if(Objects.nonNull(res)) {
+				return res;
+			}
+			clz = clz.getSuperclass();
+		} while(!clz.equals(Object.class));
+		
+		return null;
+	}
+
+
+	public static void executeAnnotatedMethods(Object obj, Class<PostConstruct> class1) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		
+		Class<?> parent = obj.getClass();
+		do {
+			for(Method m : obj.getClass().getDeclaredMethods()) {
+				if(m.isAnnotationPresent(PostConstruct.class)) {
+					m.setAccessible(true);
+					m.invoke(obj);
+				}
+			}
+			parent = parent.getSuperclass();
+		} while(parent!=null);
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getAnnotatedFieldValue(Object obj,
+			Class<T> fieldType,
+			Class<? extends Annotation> annotationClz) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		Field field = getFieldWithAnnotation(obj.getClass(), fieldType, annotationClz);
+		if(Objects.nonNull(field)) {
+			Method get = ReflectionUtils.getGetter(obj.getClass(), field);
+			if(Objects.nonNull(get)) {
+				return (T) get.invoke(obj);
+			}
+		}
+		return null;
+	}
+	
+	public static Field getFieldWithAnnotation(Class<?> clz, 
+			Class<?> fieldType,
+			Class<? extends Annotation> annotationClz) {
+		
+		Map<String,Field> fields = getFields(clz);
+		for(Field field : fields.values()) {
+			if(field.getType().isAssignableFrom(fieldType)
+					&& field.isAnnotationPresent(annotationClz)) {
+				return field;
+			}
+		}
+		return null;
+	}
 }

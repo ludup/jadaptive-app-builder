@@ -16,12 +16,13 @@ public interface WebSocketClient extends Closeable {
 
 	void sendBinaryMessage(ByteBuffer payload) throws IOException;
 	
-	void close() throws IOException;
+	void close();
 
 	List<String> getParameters(String name);
 
 	String getParameter(String name);
 
+	void setAttachment(WebSocketOutput channel);
 	
-
+	WebSocketOutput getAttachment();
 }

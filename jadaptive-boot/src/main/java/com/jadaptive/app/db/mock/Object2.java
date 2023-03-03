@@ -2,10 +2,9 @@ package com.jadaptive.app.db.mock;
 
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 
-@ObjectDefinition(resourceKey = Object2.RESOURCE_KEY)
+//@ObjectDefinition(resourceKey = Object2.RESOURCE_KEY)
 public class Object2 extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -1022570617998580427L;

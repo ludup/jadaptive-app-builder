@@ -1,12 +1,15 @@
 package com.jadaptive.api.db;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.util.StringUtils;
 
 public class SearchField {
 
-	public enum Type { EQUALS, LIKE, IN, NOT, OR, AND }
+	public enum Type { EQUALS, LIKE, IN, NOT, OR, AND, GT, LT, GTE, LTE, ALL }
 	
 	String searchField;
 	Object[] searchValue;
@@ -68,6 +71,14 @@ public class SearchField {
 		return new SearchField(Type.IN, searchField, searchValue.toArray(new Object[0]));
 	}
 	
+	public static SearchField all(String searchField, Object... searchValue) {
+		return new SearchField(Type.ALL, searchField, searchValue);
+	}
+	
+	public static SearchField all(String searchField, Collection<String> searchValue) {
+		return new SearchField(Type.ALL, searchField, searchValue.toArray(new Object[0]));
+	}
+	
 	public static SearchField like(String searchField, Object searchValue) {
 		return new SearchField(Type.LIKE, searchField, searchValue);
 	}
@@ -86,5 +97,29 @@ public class SearchField {
 	
 	public static SearchField and(SearchField...fields) {
 		return new SearchField(Type.AND, fields);
+	}
+	
+	public static SearchField gt(String searchField, Object searchValue) {
+		return new SearchField(Type.GT, searchField, searchValue);
+	}
+	
+	public static SearchField gte(String searchField, Object searchValue) {
+		return new SearchField(Type.GTE, searchField, searchValue);
+	}
+	
+	public static SearchField lt(String searchField, Object searchValue) {
+		return new SearchField(Type.LT, searchField, searchValue);
+	}
+	
+	public static SearchField lte(String searchField, Object searchValue) {
+		return new SearchField(Type.LTE, searchField, searchValue);
+	}
+
+	public static SearchField[] add(SearchField[] fields, SearchField... field) {
+		List<SearchField> tmp = new ArrayList<>();
+		tmp.addAll(Arrays.asList(fields));
+		tmp.addAll(Arrays.asList(field));
+		return tmp.toArray(new SearchField[0]);
+		
 	}
 }

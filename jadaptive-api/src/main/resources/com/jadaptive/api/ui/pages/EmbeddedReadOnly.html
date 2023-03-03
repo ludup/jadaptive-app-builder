@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:jad="https://jadaptive.com/jadaptive">
+<head>
+	<title>View ${page.childTemplate.resourceKey}</title>
+	<meta charset="UTF-8">
+</head>
+<body>
+<div class="wrapper">
+<header jad:id="header"></header>
+<main class="container mt-3">
+   <div class="row my-1">
+   		 <div class="col-12" jad:id="objectRenderer"></div>
+   </div>
+   <div class="row my-1">
+         <div class="col-12">
+         	<a id="cancelButton" class="btn btn-danger float-start" href="#">
+         	<i class="fas fa-step-backward"></i>&nbsp;<span jad:bundle="default" jad:i18n="back.name">[Back]</span></a>
+         </div>
+   </div>
+</main>
+</div>
+<footer jad:id="footer"></footer>
+</body>
+</html>

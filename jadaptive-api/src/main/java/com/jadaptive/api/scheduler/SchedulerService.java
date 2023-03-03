@@ -1,26 +1,25 @@
 package com.jadaptive.api.scheduler;
 
-import java.time.Instant;
-
-import com.jadaptive.api.jobs.Job;
-
 public interface SchedulerService {
 
-	void schedule(Job job, String expression);
+//	String schedule(Job job, String expression);
+	
+	void schedule(TenantTask job, String expression, String taskUuid);
 
-	CronSchedule getSchedule(String uuid);
+	void cancelTask(String uuid, boolean mayInterrupt);
 
-	void saveSchedule(CronSchedule schedule);
+//	CronSchedule getSchedule(String uuid);
+//
+//	void saveSchedule(CronSchedule schedule);
+//
+//	void cancelSchedule(CronSchedule schedule);
 
-	void cancelSchedule(CronSchedule schedule);
+//	Iterable<CronSchedule> getJobSchedules(Job job);
 
-	Iterable<CronSchedule> getJobSchedules(Job job);
+//	void runNow(Job job);
 
-	void runNow(Job job);
+//	void run(Job job, Instant startTime);
 
-	void run(Job job, Instant startTime);
-
-	long getJobSchedulesCount(Job job);
-
+//	long getJobSchedulesCount(Job job);
 
 }

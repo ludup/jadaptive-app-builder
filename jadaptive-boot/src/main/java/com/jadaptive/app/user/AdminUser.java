@@ -7,45 +7,50 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.user.EmailEnabledUser;
+import com.jadaptive.api.template.ObjectView;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.user.PasswordEnabledUser;
+import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.PasswordEncryptionType;
 
-@ObjectDefinition(resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = AdminUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, creatable = false)
 @ObjectServiceBean(bean = UserService.class)
-public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
+@ObjectViews({ 
+	@ObjectViewDefinition(bundle = "users", value = "passwordOptions")})
+public class AdminUser extends PasswordEnabledUser {
 
 	private static final long serialVersionUID = -4995333149629598100L;
 
 	public static final String RESOURCE_KEY = "adminUser";
 	
+	@ObjectField(hidden = true, type = FieldType.PASSWORD)
 	String encodedPassword;
+	
+	@ObjectField(
+			hidden = true,
+			type = FieldType.PASSWORD)
+	@Validator(type = ValidationType.REQUIRED)
 	String salt;
+	
+	@ObjectField(
+			defaultValue = "PBKDF2_SHA512_50000",
+			type = FieldType.ENUM,
+			hidden = true)
+	@Validator(type = ValidationType.REQUIRED)
+	@ObjectView(value = "passwordOptions")
 	PasswordEncryptionType encodingType;
+	
+	@ObjectField(
+			defaultValue = "false",
+			type = FieldType.BOOL)
+	@ObjectView(value = "passwordOptions")
+	@Validator(type = ValidationType.REQUIRED)
 	boolean passwordChangeRequired;
 	
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT, 
-			unique = true)
-	String username;
-	
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT)
-	String name;
-	
-	@ObjectField(required = false,
-			searchable = true,
-			type = FieldType.TEXT)
-	String email;
-	
-	@Override
-	public String getUsername() {
-		return "admin";
-	}
-
 	@Override
 	public String getName() {
 		return "Administrator";
@@ -59,21 +64,6 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	@Override
 	public void setPasswordChangeRequired(boolean change) {
 		this.passwordChangeRequired = change;
-	}
-
-	@Override
-	public String getEmail() {
-		return email;
-	}
-
-	@Override
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	@Override
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	@Override
@@ -115,8 +105,8 @@ public class AdminUser extends PasswordEnabledUser implements EmailEnabledUser {
 	}
 	
 	@Override
-	public String getSystemName() {
-		return getUsername();
+	public String getEventGroup() {
+		return User.RESOURCE_KEY;
 	}
 
 }

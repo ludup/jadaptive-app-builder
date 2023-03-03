@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jadaptive-boot</artifactId>
 	<name>JADAPTIVE - Dynamic REST API Bootstrap</name>
@@ -8,7 +6,7 @@
 	<parent>
 		<groupId>com.jadaptive</groupId>
 		<artifactId>jadaptive</artifactId>
-		<version>0.0.3-SNAPSHOT</version>
+		<version>0.3.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 
@@ -38,19 +36,6 @@
 			<groupId>de.flapdoodle.embed</groupId>
 			<artifactId>de.flapdoodle.embed.mongo</artifactId>
 		</dependency>
-
-		<!-- while this provides a spring factory bean for the embedded mongodb -->
-		<!-- <dependency> -->
-		<!-- <groupId>cz.jirutka.spring</groupId> -->
-		<!-- <artifactId>embedmongo-spring</artifactId> -->
-		<!-- <version>RELEASE</version> -->
-		<!-- </dependency> -->
-
-		<!-- finally this one is the spring-boot starter for mongodb -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.springframework.boot</groupId> -->
-		<!-- <artifactId>spring-boot-starter-data-mongodb</artifactId> -->
-		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>io.github.classgraph</groupId>
@@ -87,26 +72,26 @@
 		</dependency>
 
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.6</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.mongodb</groupId>
 			<artifactId>mongo-java-driver</artifactId>
+			<version>3.12.10</version>
 		</dependency>
 
 		<dependency>
 			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
-			<version>5.3.1</version><!--$NO-MVN-MAN-VER$ -->
+			<version>5.3.1</version> <!--$NO-MVN-MAN-VER$ -->
 		</dependency>
 
 		<dependency>
 			<groupId>com.jadaptive</groupId>
 			<artifactId>jadaptive-api</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
 		</dependency>
 
 		<dependency>
@@ -119,19 +104,19 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.64</version>
+			<version>1.70</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcmail-jdk15on</artifactId>
-			<version>1.64</version>
+			<version>1.70</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>1.64</version>
+			<version>1.70</version>
 		</dependency>
 
 		<dependency>
@@ -144,31 +129,34 @@
 			<groupId>com.hazelcast</groupId>
 			<artifactId>hazelcast</artifactId>
 		</dependency>
-		
+
 		<dependency>
-			<groupId>com.codesmith</groupId>
-			<artifactId>webbits-bootstrap</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.codesmith</groupId>
-			<artifactId>webbits-bootswatch</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.codesmith</groupId>
-			<artifactId>webbits-fontawesome</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.codesmith</groupId>
-			<artifactId>webbits-jquery</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.12.1</version> <!--$NO-MVN-MAN-VER$-->
+		</dependency>
+		
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-suite</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 
@@ -187,7 +175,7 @@
 			<plugin>
 				<groupId>com.sshtools</groupId>
 				<artifactId>pf4j-plugin-generator</artifactId>
-				<version>0.0.4</version>
+				<version>0.0.5</version>
 				<configuration>
 					<artifactIsPlugin>true</artifactIsPlugin>
 					<copyDependencies>false</copyDependencies>
@@ -205,7 +193,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>2.2.2.RELEASE</version>
+				<version>2.7.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -247,7 +235,7 @@
 				<!-- Import dependency management from Spring Boot -->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>2.2.2.RELEASE</version>
+				<version>2.7.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

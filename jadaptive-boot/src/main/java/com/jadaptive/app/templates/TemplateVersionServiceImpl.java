@@ -24,7 +24,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +36,22 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.events.AuditedObject;
+import com.jadaptive.api.events.Events;
+import com.jadaptive.api.events.GenerateEventTemplates;
+import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
+import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
@@ -51,6 +63,7 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.api.template.ValidationType;
@@ -61,13 +74,23 @@ import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
+import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.json.ObjectMapperHolder;
 import com.jadaptive.utils.Version;
 
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.description.annotation.AnnotationDescription;
+import net.bytebuddy.description.modifier.Visibility;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.description.type.TypeDescription.Generic;
+import net.bytebuddy.dynamic.scaffold.subclass.ConstructorStrategy;
+import net.bytebuddy.implementation.FieldAccessor;
+import net.bytebuddy.implementation.MethodCall;
 
 @Service
 public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl implements TemplateVersionService  {
@@ -90,6 +113,18 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	@Autowired
 	private TemplateService templateService; 
 	
+	@Autowired
+	private TenantService tenantService; 
+	
+	@Autowired
+	private ClassLoaderService classService;
+	
+	@Autowired
+	private ObjectService objectService; 
+	
+	private Map<String,ObjectTemplate> loadedTemplates = new HashMap<>();
+	private Map<String,Class<? extends ObjectEvent<?>>> eventClasses = new HashMap<>();
+	
 	@Override
 	public Iterable<TemplateVersion> list() throws RepositoryException, ObjectException {
 		return versionRepository.list();
@@ -99,7 +134,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	public <E extends AbstractUUIDEntity> void processTemplates(Tenant tenant, JsonTemplateEnabledService<E> templateEnabledService) {
 		
 		if(log.isInfoEnabled()) {
-			log.info("Processing templates for {}", templateEnabledService.getResourceKey());
+			log.info("Processing templates for {} in {}", 
+					templateEnabledService.getResourceKey(),
+					tenant.getName());
 		}
 		
 		try {
@@ -113,7 +150,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				String filename = template.path.getFileName().toString().substring(0, template.path.getFileName().toString().length()-5);
 				String[] elements = filename.split("_");
 				if(elements.length != 2) {
-					throw new IOException("Template json file should be named <id>_<version>.json");
+					throw new IOException("Template json file should be named <resourceKey>_<version>.json");
 				}
 				Version version = new Version(elements[1]);
 				String templateResourceKey = elements[0];
@@ -259,6 +296,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				Files.list(path.getPath())
 				.filter(f -> f.getFileName().toString().endsWith(".json"))
 				.forEach(jsonFile -> {
+					if(log.isInfoEnabled()) {
+						log.info("Found {}", jsonFile.toString());
+					}
 					orderedTemplates.add(new PathInfo(jsonFile));
 				});
 			}
@@ -281,7 +321,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		try {
 			
 			if(log.isInfoEnabled()) {
-				log.info("Processing template {} resource {}", resourceKey, version.toString());
+				log.info("Processing template {} resource {} on tenant {}", 
+						resourceKey, version.toString(),
+						tenantService.getCurrentTenant().getName());
 			}
 			
 			List<E> objects = objectMapper.getObjectMapper().readValue(
@@ -307,6 +349,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 
 		} catch (Throwable e) {
 			log.error(String.format("Failed to process template %s", resourceKey), e);
+			System.exit(0);
 		}
 	}
 	
@@ -341,8 +384,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void registerAnnotatedTemplates() {
+	public void registerAnnotatedTemplates(boolean newSchema) {
 			
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
@@ -368,7 +412,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                         if(log.isInfoEnabled()) {
     						log.info("Found template {}", classInfo.getName());
     					}
-                    	registerAnnotatedTemplate(classInfo.loadClass());
+                    	registerAnnotatedTemplate((Class<? extends UUIDDocument>) classInfo.loadClass(), newSchema, false);
                     }
                 }
             }
@@ -384,12 +428,14 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                 if(log.isInfoEnabled()) {
 					log.info("Found template {}", classInfo.getName());
 				}
-                registerAnnotatedTemplate(classInfo.loadClass());
+                registerAnnotatedTemplate((Class<? extends UUIDDocument>) classInfo.loadClass(), newSchema, false);
             }
         }
 	}
 
-	private void registerAnnotatedTemplate(Class<?> clz) {
+	@SuppressWarnings("unchecked")
+	@Override
+	public void registerAnnotatedTemplate(Class<? extends UUIDDocument> clz, boolean newSchema, boolean isEvent) {
 		
 		try {
 			
@@ -397,9 +443,38 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				log.info("Registering template from annotations on class {}", clz.getSimpleName());
 			}
 			
+			List<Class<?>> parents = new ArrayList<>();
+			Class<?> c = clz.getSuperclass();
+			while(Objects.nonNull(c)) {
+				
+				ObjectDefinition e = c.getAnnotation(ObjectDefinition.class);
+				
+				if(Objects.nonNull(e)) {
+					parents.add(c);
+				}
+				c = c.getSuperclass();
+			}
+			
+			if(!parents.isEmpty()) {
+				Collections.reverse(parents);
+				for(Class<?> parent : parents) {
+					registerAnnotatedTemplate((Class<? extends UUIDDocument>) parent, newSchema, isEvent);
+				}
+			}
+			
 			ObjectDefinition e = clz.getAnnotation(ObjectDefinition.class);
 			
-			ObjectTemplate template;
+			if(Objects.isNull(e.resourceKey())) {
+				log.error("{} requires resource key in ObjectDefinition annotation!", clz.getSimpleName());
+				System.exit(1);
+				return;
+			}
+			
+			ObjectTemplate template = loadedTemplates.get(e.resourceKey());
+			if(Objects.nonNull(template)) {
+				return;
+			}
+			
 			try {
 				template = templateRepository.get(e.resourceKey());
 			} catch (ObjectException ee) {
@@ -408,20 +483,27 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			ObjectDefinition parent = getParentTemplate(clz);
+			boolean auditObject = ReflectionUtils.hasAnnotation(clz, AuditedObject.class);
+			boolean generateEventTemplates = ReflectionUtils.hasAnnotation(clz, GenerateEventTemplates.class);
+			
 			if(Objects.nonNull(parent)) {
 				if(log.isInfoEnabled()) {
 					log.info("{} template has {} as parent", e.resourceKey(), parent.resourceKey());
 				}
 				template.setParentTemplate(parent.resourceKey());
+				ObjectTemplate parentTemplate = templateRepository.get(parent.resourceKey());
+				if(!parentTemplate.getChildTemplates().contains(e.resourceKey())) {
+					parentTemplate.addChildTemplate(e.resourceKey());
+				}
+				
+				templateRepository.saveOrUpdate(parentTemplate);
 			}
 			
-//			Properties i18n = new Properties();
-//			i18n.setProperty(String.format("%s.name", template.getResourceKey()), e.name());
-			
 			template.setResourceKey(e.resourceKey());
+			template.setBundle(StringUtils.isBlank(e.bundle()) ? e.resourceKey() : e.bundle());
 			template.setName(e.resourceKey());
 			template.setHidden(e.hidden());
-			template.setSystem(e.system());
+			template.setSystem(!auditObject && e.system());
 			template.setType(e.type());
 			template.setScope(e.scope());
 			template.getFields().clear();
@@ -429,78 +511,251 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.getAliases().clear();
 			template.getAliases().addAll(Arrays.asList(e.aliases()));
 			template.setDefaultFilter(e.defaultFilter());
+			template.setDefaultColumn(e.defaultColumn());
 			template.setName(e.resourceKey());
 			
-			Index[] nonUnique = clz.getAnnotationsByType(Index.class);
-			UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);
+			template.setCreatable(e.creatable());
+			template.setUpdatable(e.updatable());
+			template.setDeletable(e.deletable());
+			template.setPermissionProtected(e.requiresPermission());
+			
+			String nameField = "uuid";
+			
 			
 			List<Field> fields = new ArrayList<>();
 			resolveFields(clz, fields, e.recurse());
-			
 			
 			for(Field field :fields) {
 				
 				ObjectField objectAnnotation = field.getAnnotation(ObjectField.class);
 				
 				if(Objects.nonNull(objectAnnotation)) {
-					
-					FieldTemplate t = processFieldAnnotations(objectAnnotation, field, /*i18n,*/ template);
+					FieldTemplate t = processFieldAnnotations(objectAnnotation, field, /*i18n,*/ template, isEvent);
+					if(objectAnnotation.nameField()) {
+						nameField =t.getResourceKey();
+					}
 					template.getFields().add(t);
 				}
 			}
 
+			template.setNameField(nameField);
 			templateRepository.saveOrUpdate(template);
-			templateService.registerTemplateClass(e.resourceKey(), clz);
-//			File i18nFolder = new File("i18n");
-//			
-//			if(clz.getClassLoader() instanceof PluginClassLoader) {
-//				try {
-//					Field desc = PluginClassLoader.class.getDeclaredField("pluginDescriptor");
-//					desc.setAccessible(true);
-//					PluginDescriptor d = (PluginDescriptor) desc.get(clz.getClassLoader());
-//					i18nFolder = new File(i18nFolder, d.getPluginId());
-//				} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
-//
-//			} else {
-//				i18nFolder = new File(i18nFolder, "jadaptive-boot");
-//			}
-//			
-//			i18nFolder.mkdirs();
-//			try(OutputStream out = new FileOutputStream(new File(i18nFolder, 
-//					String.format("%s.properties", template.getResourceKey())))) {
-//				i18n.store(out, "# Generated by TemplateVersionServiceImpl");
-//			} catch (IOException e1) {
-//				log.error("Failed to create template i18n", e);
-//			}
+			loadedTemplates.put(e.resourceKey(), template);
+			templateService.registerTemplateClass(e.resourceKey(), clz, template);
 			
 			switch(template.getType()) {
 			case COLLECTION:
 			case SINGLETON:
-				templateRepository.createIndexes(template, nonUnique, unique);
-				permissionService.registerStandardPermissions(template.getResourceKey());
+				if(template.getPermissionProtected()) {
+					permissionService.registerStandardPermissions(template.getResourceKey());
+				}
 				break;
 			default:
 				// Embedded objects do not have direct permissions
 			}
 			
+			registerIndexes(template, clz, newSchema);
+			
+			if(generateEventTemplates) {
+				generateEventTemplates(template, clz, clz.getAnnotation(GenerateEventTemplates.class).value(), newSchema);
+			}
+			
 		} catch(RepositoryException | ObjectException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
+			System.exit(0);
 		}
 	}
 	
-	private FieldTemplate processFieldAnnotations(ObjectField field, Field f, /*Properties i18n,*/ ObjectTemplate template) {
-//		i18n.setProperty(String.format("%s.%s.name", template.getResourceKey(), f.getName()), field.name());
-//		i18n.setProperty(String.format("%s.%s.desc", template.getResourceKey(), f.getName()), field.description());
+	@Override
+	public Class<? extends ObjectEvent<?>> getEventClass(String resourceKey) {
+		return eventClasses.get(resourceKey);
+	}
+	
+	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, String group, boolean newSchema) {
+	
+		if(log.isInfoEnabled()) {
+			log.info("Generating events for {}", template.getResourceKey());
+		}
+		generateEventTemplate(StringUtils.capitalize(group) + "Created",
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.created(template.getResourceKey()), newSchema, true);
 		
+		generateEventTemplate(StringUtils.capitalize(group) + "Updated", 
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.updated(template.getResourceKey()), newSchema, true);
+		
+		generateEventTemplate(StringUtils.capitalize(group) + "Deleted",
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.deleted(template.getResourceKey()), newSchema, true);
+		
+		
+		generateEventTemplate(StringUtils.capitalize(group) + "Creating",
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.creating(template.getResourceKey()), newSchema, false);
+		
+		generateEventTemplate(StringUtils.capitalize(group) + "Updating", 
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.updating(template.getResourceKey()), newSchema, false);
+		
+		generateEventTemplate(StringUtils.capitalize(group) + "Deleting",
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.deleting(template.getResourceKey()), newSchema, false);
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void generateEventTemplate(String className, String resourceKey, String bundle, String group, Class<?> clz, 
+			String eventKey, boolean newSchema, boolean audited) {
+		
+		Generic genericType = TypeDescription.Generic.Builder.parameterizedType(ObjectEvent.class, clz).build();
+		
+		if(log.isInfoEnabled()) {
+			log.info("Generating event templates and class for {}", clz.getSimpleName());
+		}
+		try {
+			
+			var b = new ByteBuddy().subclass(genericType, ConstructorStrategy.Default.DEFAULT_CONSTRUCTOR)
+					  .name(String.format("com.jadaptive.events.%s.%s", group, className));
+			
+			
+			 b = b.annotateType(AnnotationDescription.Builder.ofType(ObjectDefinition.class)
+	                  .define("resourceKey", eventKey)
+	                  .define("scope", ObjectScope.GLOBAL)
+	                  .define("type", ObjectType.OBJECT)
+	                  .define("updatable", false)
+	                  .define("deletable", false)
+	                  .define("creatable", false)
+	                  .define("bundle", bundle)
+	                  .build());
+			
+			 if(audited) {
+				 b = b.annotateType(AnnotationDescription.Builder.ofType(AuditedObject.class).build());
+			 }
+			 
+			 b = b.annotateType(clz.getAnnotation(ObjectViews.class))
+			  .defineConstructor(Visibility.PUBLIC)
+			  .withParameters(clz)
+			  .intercept(MethodCall
+			               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class))
+			               .onSuper().with(eventKey, group)
+			               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)))
+			  .defineField("object", clz, Visibility.PRIVATE)
+			  .annotateField(AnnotationDescription.Builder.ofType(ObjectField.class)
+					  .define("type", FieldType.OBJECT_EMBEDDED).build())
+			  .annotateField(AnnotationDescription.Builder.ofType(Validator.class)
+					  .define("type", ValidationType.RESOURCE_KEY)
+					  .define("value", resourceKey).build())
+			  .defineMethod("getObject", clz, Visibility.PUBLIC)
+	          .intercept(FieldAccessor.ofField("object"))
+	          .defineConstructor(Visibility.PUBLIC)
+			  .withParameters(clz, Throwable.class)
+			  .intercept(MethodCall
+			               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class, Throwable.class))
+			               .onSuper().with(eventKey, group).withArgument(1)
+			               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)));
+			 
+			var dynamicType = b.make()
+					  .load(classService.getClassLoader())
+					  .getLoaded();
+			
+			eventClasses.put(eventKey, (Class<? extends ObjectEvent<?>>) dynamicType);
+			registerAnnotatedTemplate((Class<? extends UUIDDocument>) dynamicType, newSchema, true);
+			
+		} catch (SecurityException | NoSuchMethodException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+
+	}
+	
+	public UUIDEntity extendWith(UUIDEntity baseObject, 
+			ObjectTemplate extensionTemplate,
+			String packageName,
+			String className) {
+		
+		Class<?> extension = templateService.getTemplateClass(extensionTemplate.getResourceKey());
+		ObjectTemplate baseTemplate = templateService.get(baseObject.getResourceKey());
+		
+		String getter = "get" + extension.getSimpleName();
+		String setter = "set" + extension.getSimpleName();
+		String field = WordUtils.uncapitalize(extension.getSimpleName());
+		String resourceKey = WordUtils.uncapitalize(className);
+		
+		var b = new ByteBuddy().subclass(baseObject.getClass(), ConstructorStrategy.Default.IMITATE_SUPER_CLASS)
+				  .name(String.format("%s.%s", packageName, className));
+		
+		 b = b.annotateType(AnnotationDescription.Builder.ofType(ObjectDefinition.class)
+                 .define("resourceKey", resourceKey)
+                 .define("scope", baseTemplate.getScope())
+                 .define("type", baseTemplate.getType())
+                 .define("updatable", baseTemplate.isUpdatable())
+                 .define("deletable", baseTemplate.isDeletable())
+                 .define("creatable", baseTemplate.isDeletable())
+                 .define("bundle", extensionTemplate.getBundle())
+                 .build());
+		 
+		b.defineField(field, extension, Visibility.PRIVATE)
+		  .annotateField(AnnotationDescription.Builder.ofType(ObjectField.class)
+				  .define("type", FieldType.OBJECT_EMBEDDED).build())
+		  .annotateField(AnnotationDescription.Builder.ofType(Validator.class)
+				  .define("type", ValidationType.RESOURCE_KEY)
+				  .define("value", templateService.getTemplateResourceKey(extension)).build())
+		  .defineMethod(setter, extension, Visibility.PUBLIC)
+		  	 .withParameters(extension)
+		  	 .intercept(FieldAccessor.ofField(field))
+		  .defineMethod(getter, extension, Visibility.PUBLIC)
+		  		.intercept(FieldAccessor.ofField(field));
+		
+		var type = b.make().load(classService.getClassLoader());
+		
+		var clz = type.getLoaded();
+		registerAnnotatedTemplate(clz, false, false);
+		
+		Document doc = new Document();
+		DocumentHelper.convertObjectToDocument(baseObject, doc);
+		doc.put("_clz", clz.getName());
+		doc.put("resourceKey", resourceKey);
+		
+		return DocumentHelper.convertDocumentToObject(clz, doc, classService.getClassLoader());
+
+	}
+
+	@Override
+	public void registerTenantIndexes(boolean newSchema) {
+		
+		for(ObjectTemplate template : loadedTemplates.values()) {
+			if(!template.isSystem()) {
+				registerIndexes(template, templateService.getTemplateClass(template.getResourceKey()), newSchema);
+			}
+		}
+ 	}
+	
+	private void registerIndexes(ObjectTemplate template, Class<?> clz, boolean newSchema) {
+		
+		Index[] nonUnique = clz.getAnnotationsByType(Index.class);
+		UniqueIndex[] unique = clz.getAnnotationsByType(UniqueIndex.class);
+		
+		switch(template.getType()) {
+		case COLLECTION:
+		case SINGLETON:
+			if(!template.hasParent()) {
+				templateRepository.createIndexes(template, nonUnique, unique, newSchema);
+			}
+			break;
+		default:
+			// Embedded objects do not have direct permissions
+		}
+		
+	}
+
+	private FieldTemplate processFieldAnnotations(ObjectField field, /*Field parentField,*/ Field f, /*Properties i18n,*/ ObjectTemplate template, boolean isEvent) {
+
 		FieldTemplate t = new FieldTemplate();
 		t.setResourceKey(f.getName());
+		t.setParentKey(template.getUuid());
+		t.setFormVariable(StringUtils.isNotBlank(field.formVariable()) ? field.formVariable() : f.getName());
 		t.setDefaultValue(field.defaultValue());
 		t.setFieldType(selectFieldType(f.getType(), field.type()));
 		t.setHidden(field.hidden());
-		t.setRequired(field.required());
 		t.setSystem(false);
 		t.setSearchable(field.searchable());
 		t.setTextIndex(field.textIndex());
@@ -508,10 +763,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		t.setCollection(f.getType().isAssignableFrom(Collection.class));
 		t.setReadOnly(field.readOnly());
 		t.setAlternativeId(field.alternativeId());
-		
-//		t.setDescription(field.description());
-//		t.setName(field.name());
-		
+		t.setManuallyEncrypted(field.manualEncryption());
+		t.setAutomaticallyEncrypted(field.automaticEncryption());
 		
 		switch(field.type()) {
 		case OBJECT_EMBEDDED:
@@ -521,41 +774,55 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(Objects.nonNull(objd)) {
 				t.getValidators().add(new FieldValidator(
 						ValidationType.RESOURCE_KEY, 
-						objd.resourceKey()));
+						objd.resourceKey(), ObjectTemplate.RESOURCE_KEY, "resourceKey.invalid"));
 			}
 			t.getValidators().add(new FieldValidator(
 					ValidationType.OBJECT_TYPE, 
-					f.getType().getName()));
+					f.getType().getName(), ObjectTemplate.RESOURCE_KEY, "objectType.invalid"));
 			break;
 		}
 		case ENUM:
-		case OBJECT_REFERENCE:
 		{
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {
 				Class<?> clz = f.getType();
-				if(Collections.class.isAssignableFrom(clz)) {
+				if(Collection.class.isAssignableFrom(clz)) {
 					clz = (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
 				}
 				resourceKey = clz.getName();
 			}
-			if(StringUtils.isBlank(field.references())) {
-				t.getValidators().add(new FieldValidator(
-						ValidationType.OBJECT_TYPE, 
-						f.getType().getName()));
-				t.getValidators().add(new FieldValidator(
-						ValidationType.RESOURCE_KEY, 
-						resourceKey));
-				templateService.registerObjectDependency(resourceKey, template);
-			} else {
-				t.getValidators().add(new FieldValidator(
-						ValidationType.OBJECT_TYPE, 
-						field.references()));
-				t.getValidators().add(new FieldValidator(
-						ValidationType.RESOURCE_KEY, 
-						field.references()));
-				templateService.registerObjectDependency(field.references(), template);
-			}
+			t.getValidators().add(new FieldValidator(
+					ValidationType.OBJECT_TYPE, 
+					f.getType().getName(),
+					ObjectTemplate.RESOURCE_KEY,
+					"objectType.invalid"));
+			t.getValidators().add(new FieldValidator(
+					ValidationType.RESOURCE_KEY, 
+					resourceKey,
+					ObjectTemplate.RESOURCE_KEY,
+					"resourceKey.invalid"));
+			break;
+		}
+		case OBJECT_REFERENCE:
+		{
+//			if(isEvent) {
+//				t.setFieldType(FieldType.TEXT);
+//			} else {
+				if(StringUtils.isBlank(field.references())) {
+					throw new IllegalStateException("Missing references attribute from OBJECT_REFERENCE typed @ObjectField annotation");
+				} else {
+					t.getValidators().add(new FieldValidator(
+							ValidationType.OBJECT_TYPE, 
+							field.references(), 
+							ObjectTemplate.RESOURCE_KEY,
+							"objectType.invalid"));
+					t.getValidators().add(new FieldValidator(
+							ValidationType.RESOURCE_KEY, 
+							field.references(),
+							ObjectTemplate.RESOURCE_KEY,
+							"resourceKey.invalid"));
+				}
+//			}
 			break;
 		}
 		default:
@@ -565,7 +832,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		Validator[] validators = f.getAnnotationsByType(Validator.class);
 		if(Objects.nonNull(validators)) {
 			for(Validator validator : validators) {
-				t.getValidators().add(new FieldValidator(validator.type(), validator.value()));
+				t.getValidators().add(new FieldValidator(validator.type(), validator.value(), 
+						StringUtils.firstNonBlank(validator.bundle(), template.getBundle()), validator.i18n()));
 			}
 		}
 
@@ -590,6 +858,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return t;
 	}
 
+	@SuppressWarnings("unused")
 	private Collection<String> verifyColumnNames(ObjectTemplate template, Collection<String> columns) {
 		Map<String,FieldTemplate> definedColumns = template.toMap();
 		for(String column : columns) {
@@ -618,13 +887,14 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 
 	private void resolveFields(Class<?> clz, List<Field> fields, boolean recurse) {
 		
-		for(Field field : clz.getDeclaredFields()) {
-			fields.add(field);
-		}
 		if(recurse) {
 			if(!clz.getSuperclass().equals(Object.class)) {
 				resolveFields(clz.getSuperclass(), fields, true);
 			}
+		}
+		
+		for(Field field : clz.getDeclaredFields()) {
+			fields.add(field);
 		}
 	}
 
@@ -650,5 +920,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 		
 		throw new IllegalStateException(String.format("Could not detemine field type of class %s", type.getSimpleName()));
+	}
+
+	@Override
+	public void rebuildReferences() {
+		
+		log.info("Rebuilding references for {}", tenantService.getCurrentTenant().getName());
+		Set<ObjectTemplate> processed = new HashSet<>();
+		for(ObjectTemplate template : templateService.allCollectionTemplates()) {
+			while(template.hasParent()) {
+				template = templateService.get(template.getParentTemplate());
+			}
+			if(!processed.contains(template)) {
+				objectService.rebuildReferences(template);
+			}
+			processed.add(template);
+		}
 	}
 }

@@ -5,6 +5,6 @@ import com.jadaptive.api.events.SystemEvent;
 public interface TriggerService {
 
 
-	void onAuditEvent(SystemEvent<?> evt);
+	void onAuditEvent(SystemEvent evt);
 
 }

@@ -1,14 +1,17 @@
 package com.jadaptive.api.repository;
 
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 
-public abstract class NamedUUIDEntity extends AbstractUUIDEntity {
+public abstract class NamedUUIDEntity extends AbstractUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 2690511827179922811L;
 
-	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT)
-	String name;
+	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true)
+	@Validator(type = ValidationType.REQUIRED)
+	protected String name;
 
 	public String getName() {
 		return name;

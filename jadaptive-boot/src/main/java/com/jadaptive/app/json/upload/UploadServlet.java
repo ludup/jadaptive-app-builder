@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.FileItemIterator;
 import org.apache.tomcat.util.http.fileupload.FileItemStream;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
@@ -27,9 +28,9 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionStickyInputStream;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.ui.ResponseHelper;
 import com.jadaptive.api.upload.UploadHandler;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.app.json.ResponseHelper;
 import com.jadaptive.utils.FileUtils;
 
 @WebServlet(name="uploadServlet", description="Servlet for handing file uploads", urlPatterns = { "/upload/*" })
@@ -74,6 +75,10 @@ public class UploadServlet extends HttpServlet {
 
 		UploadHandler handler = getUploadHandler(handlerName);
 		
+		if(Objects.isNull(handler)) {
+			ResponseHelper.send404NotFound(uri, req, resp);
+			return;
+		}
 		Session session = sessionUtils.getActiveSession(req);
 		
 		if(handler.isSessionRequired() && Objects.isNull(session)) {
@@ -84,6 +89,8 @@ public class UploadServlet extends HttpServlet {
 		if(Objects.nonNull(session)) {
 			permissionService.setupUserContext(session.getUser());
 		}
+
+		Map<String,String> parameters = new HashMap<>();
 		
 		try {
 			// Create a new file upload handler
@@ -91,7 +98,8 @@ public class UploadServlet extends HttpServlet {
 
 			// Parse the request
 			FileItemIterator iter = upload.getItemIterator(req);
-			Map<String,String> parameters = new HashMap<>();
+			
+			
 			while (iter.hasNext()) {
 			    FileItemStream item = iter.next();
 
@@ -100,9 +108,8 @@ public class UploadServlet extends HttpServlet {
 			        String value = IOUtils.toString(item.openStream(), "UTF-8");
 			        parameters.put(name, value);
 			    } else {
-			     
-				    if(Objects.isNull(handler)) {
-				    	log.warn("Missing upload handler for {}", handlerName);
+				    
+				    if(StringUtils.isBlank(item.getName())) {
 				    	continue;
 				    }
 				    
@@ -112,13 +119,13 @@ public class UploadServlet extends HttpServlet {
 					    stream = new SessionStickyInputStream(
 					    		stream, 
 					    		session) {
-					    	protected void touchSession() {
+					    	protected void touchSession(Session session) throws IOException {
 								if((System.currentTimeMillis() - lastTouch) >  30000) {
 									try {
 										sessionUtils.touchSession(session);
 									} catch (SessionTimeoutException e) {
+										throw new IOException(e.getMessage(), e);
 									}
-									lastTouch = System.currentTimeMillis();
 								}
 							}
 					    };
@@ -133,11 +140,11 @@ public class UploadServlet extends HttpServlet {
 			    
 			}
 		
-			handler.sendSuccessfulResponse(resp, handlerName, uri);
+			handler.sendSuccessfulResponse(resp, handlerName, uri, parameters);
 
 		} catch (Throwable e) {
 			log.error("Upload failure", e);
-			handler.sendFailedResponse(resp, handlerName, uri, e);
+			handler.sendFailedResponse(resp, handlerName, uri, parameters, e);
 		} finally {
 			if(Objects.nonNull(session)) {
 				permissionService.clearUserContext();

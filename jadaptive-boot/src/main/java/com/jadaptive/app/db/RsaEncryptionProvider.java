@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
@@ -43,6 +42,12 @@ public class RsaEncryptionProvider {
 		} catch(Exception e) {
 			generateKeys();
 		}
+	}
+	
+	public RsaEncryptionProvider(File prvFile, File pubFile) throws Exception {
+		this.prvFile = prvFile;
+		this.pubFile = pubFile;
+		loadKeys();
 	}
 	
 	private void generateKeys() throws Exception {
@@ -121,7 +126,7 @@ public class RsaEncryptionProvider {
 	
 	private String doEncrypt(String toEncrypt) throws Exception {
 
-		Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+		Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
 		c.init(Cipher.ENCRYPT_MODE, privateKey);
 		return Base64.getEncoder().encodeToString(c.doFinal(toEncrypt.getBytes("UTF-8")));
 		
@@ -143,26 +148,8 @@ public class RsaEncryptionProvider {
 	
 	private String doDecrypt(String toDecrypt) throws Exception {
 		
-		Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+		Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
 		c.init(Cipher.DECRYPT_MODE, publicKey);
 		return new String(c.doFinal(Base64.getDecoder().decode(toDecrypt)), "UTF-8");
-	}
-	
-	public static void main(String[] args) throws Exception {
-		
-		System.out.println(URLEncoder.encode("=", "UTF-8"));
-		
-		RsaEncryptionProvider tk = RsaEncryptionProvider.getInstance();
-		
-		StringBuffer buf = new StringBuffer();
-		for(int i=0;i<1000;i+=10) {
-			buf.append("0123456789");
-		}
-		String encryped = tk.encrypt(buf.toString());
-		System.out.println(encryped);
-		System.out.println(encryped.length());
-		String decrypted = tk.decrypt(encryped);
-		
-		System.out.print(decrypted);
 	}
 }

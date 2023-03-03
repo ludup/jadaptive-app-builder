@@ -8,13 +8,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 
-public class AuthenticatedController {
+public class AuthenticatedController extends ExceptionHandlingController {
 
 	public static final String SESSION_SCOPE_USER = "com.jadaptive.sessionScopeUser";
 	
@@ -45,7 +48,12 @@ public class AuthenticatedController {
 			if(Objects.isNull(user)) {
 				Session session = sessionUtils.getActiveSession(request);
 				if(Objects.isNull(session)) {
-					log.info(request.getMethod() + " " + request.getRequestURI().toString());
+					log.warn("Unauthencated acccess from "
+						+ Request.getRemoteAddress() 
+						+ " to "
+						+ request.getMethod() 
+						+ " " 
+						+ request.getRequestURI().toString());
 					throw new AccessDeniedException();
 				}
 				user = session.getUser();
@@ -76,7 +84,7 @@ public class AuthenticatedController {
 	}
 	
 	protected void assertWrite(String resourceKey) {
-		permissionService.assertReadWrite(resourceKey);
+		permissionService.assertWrite(resourceKey);
 	}
 	
 	protected void assertPermission(String permission) {
@@ -93,5 +101,9 @@ public class AuthenticatedController {
 	
 	protected boolean isValidPermission(String permission) {
 		return permissionService.isValidPermission(permission);
+	}
+	
+	protected Session getCurrentSession() throws UnauthorizedException, SessionTimeoutException {
+		return sessionUtils.getSession(Request.get());
 	}
 }

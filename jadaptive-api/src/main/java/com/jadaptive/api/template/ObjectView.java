@@ -12,4 +12,11 @@ public @interface ObjectView {
 	String value();
 
 	int weight() default 0;
+	
+	FieldRenderer renderer() default FieldRenderer.DEFAULT;
+
+	String bundle() default "";
+
+	boolean disableEncoding() default false;
+	
 }

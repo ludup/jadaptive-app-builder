@@ -3,17 +3,22 @@ package com.jadaptive.api.template;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeSet;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.repository.JadaptiveIgnore;
+import com.jadaptive.api.repository.NamedDocument;
 
-@ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, system = true)
 @UniqueIndex(columns = {"resourceKey"})
-public class ObjectTemplate extends NamedUUIDEntity {
+public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = -8159475909799827150L;
 
@@ -25,11 +30,19 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.ENUM, defaultValue = "GLOBAL")
 	ObjectScope scope;
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	String resourceKey;
+
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
+	String bundle;
 	
 	@ObjectField(type = FieldType.TEXT)
 	String defaultFilter;
+	
+	@ObjectField(type = FieldType.TEXT)
+	String defaultColumn;
 	
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = FieldTemplate.RESOURCE_KEY)
 	Collection<FieldTemplate> fields = new ArrayList<>();
@@ -43,11 +56,47 @@ public class ObjectTemplate extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String parentTemplate;
 
+	@ObjectField(type = FieldType.TEXT)
+	Collection<String> childTemplates = new TreeSet<>();
 	
+	@ObjectField(type = FieldType.BOOL, hidden = true)
+	Boolean creatable;
+	
+	@ObjectField(type = FieldType.BOOL, hidden = true)
+	Boolean updatable;
+	
+	@ObjectField(type = FieldType.BOOL, hidden = true)
+	Boolean deletable;
+	
+	@ObjectField(type = FieldType.BOOL, hidden = true)
+	Boolean permissionProtected;
+	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String nameField;
+	
+	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true)
+	@Validator(type = ValidationType.REQUIRED)
+	protected String name;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 	public ObjectTemplate() {
 		
 	}
+
+	public String getBundle() {
+		return bundle;
+	}
 	
+	public void setBundle(String bundle) {
+		this.bundle = bundle;
+	}
+
 	public ObjectScope getScope() {
 		return scope;
 	}
@@ -76,8 +125,20 @@ public class ObjectTemplate extends NamedUUIDEntity {
 		return toMap().get(name);
 	}
 
+	public String getEventGroup() {
+		return RESOURCE_KEY;
+	}
+	
 	public String getResourceKey() {
 		return resourceKey;
+	}
+	
+	public String getCollectionKey() {
+		String parentKey = getParentTemplate();
+		if(StringUtils.isNotBlank(parentKey)) {
+			return parentKey;
+		}
+		return getResourceKey();
 	}
 
 	public void setResourceKey(String resourceKey) {
@@ -98,6 +159,17 @@ public class ObjectTemplate extends NamedUUIDEntity {
 
 	public void setDefaultFilter(String defaultFilter) {
 		this.defaultFilter = defaultFilter;
+	}
+
+	public String getDefaultColumn() {
+		if(StringUtils.isNotBlank(nameField)) {
+			return nameField;
+		}
+		return StringUtils.isBlank(defaultColumn) ? "uuid" : defaultColumn;
+	}
+
+	public void setDefaultColumn(String defaultColumn) {
+		this.defaultColumn = defaultColumn;
 	}
 
 	@JsonIgnore
@@ -129,4 +201,68 @@ public class ObjectTemplate extends NamedUUIDEntity {
 		this.parentTemplate = parentTemplate;
 	}
 	
+	public void addChildTemplate(String childTemplate) {
+		childTemplates.add(childTemplate);
+	}
+	
+	public void setChildTemplates(Collection<String> childTemplates) {
+		this.childTemplates = childTemplates;
+	}
+	
+	public Collection<String> getChildTemplates() {
+		return new HashSet<>(childTemplates);
+	}
+
+	public boolean hasParent() {
+		return StringUtils.isNotBlank(getParentTemplate());
+	}
+
+	public Boolean isCreatable() {
+		return creatable;
+	}
+
+	public void setCreatable(Boolean creatable) {
+		this.creatable = creatable;
+	}
+
+	public Boolean isUpdatable() {
+		return updatable;
+	}
+
+	public void setUpdatable(Boolean updatable) {
+		this.updatable = updatable;
+	}
+
+	public String getNameField() {
+		return nameField;
+	}
+
+	public void setNameField(String nameField) {
+		this.nameField = nameField;
+	}
+
+	public Boolean getPermissionProtected() {
+		return permissionProtected && scope!=ObjectScope.PERSONAL;
+	}
+
+	public void setPermissionProtected(Boolean permissionProtected) {
+		this.permissionProtected = permissionProtected;
+	}
+	
+	@JadaptiveIgnore
+	public String getCanonicalName() {
+		return "com.jadaptive.dynamic." + StringUtils.capitalize(resourceKey);
+	}
+
+	public Boolean isDeletable() {
+		return deletable;
+	}
+
+	public void setDeletable(Boolean deletable) {
+		this.deletable = deletable;
+	}
+
+	public boolean isSingleton() {
+		return type == ObjectType.SINGLETON;
+	}
 }

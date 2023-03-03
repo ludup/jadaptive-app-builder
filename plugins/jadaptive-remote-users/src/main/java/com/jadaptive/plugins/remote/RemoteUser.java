@@ -1,12 +1,10 @@
 package com.jadaptive.plugins.remote;
 
 import com.identity4j.connector.Media;
-import com.identity4j.connector.jndi.activedirectory.ActiveDirectoryConnector;
 import com.identity4j.connector.principal.Identity;
-import com.jadaptive.api.user.EmailEnabledUser;
 import com.jadaptive.api.user.User;
 
-public class RemoteUser implements User, EmailEnabledUser {
+public class RemoteUser extends User {
 
 	private static final long serialVersionUID = -6913894096452077318L;
 	
@@ -53,11 +51,6 @@ public class RemoteUser implements User, EmailEnabledUser {
 		
 		return guid;
 	}
-	
-	@Override
-	public String getSystemName() {
-		return identity.getAttribute(ActiveDirectoryConnector.USER_PRINCIPAL_NAME_ATTRIBUTE);
-	}
 
 	@Override
 	public String getEmail() {
@@ -67,5 +60,15 @@ public class RemoteUser implements User, EmailEnabledUser {
 	@Override
 	public void setEmail(String email) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getResourceKey() {
+		return RESOURCE_KEY;
+	}
+	
+	@Override
+	public String getEventGroup() {
+		return User.RESOURCE_KEY;
 	}
 }

@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
@@ -18,11 +17,13 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -36,6 +37,9 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriUtils;
+
+import com.jadaptive.api.repository.NamedDocument;
 
 public class Utils {
 
@@ -43,6 +47,12 @@ public class Utils {
 	public static final int ONE_HOUR = ONE_MINUTE * 60;
 	public static final int ONE_DAY = ONE_HOUR * 24;
 
+	public static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+	public static final String HTTP_URL_PATTERN = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$";
+	
+	public static final String ALLOWED_CHARACTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	public static final String PHONE_PATTERN = "^[+]*[-\\s\\.\\d()]*$";
+	
 	static Logger log = LoggerFactory.getLogger(Utils.class);
 
 	static SecureRandom random = new SecureRandom();
@@ -94,6 +104,18 @@ public class Utils {
 	
 	public static String formatDateTime(Date date) {
 		return formatDate(date, "EEE, d MMM yyyy HH:mm:ss.SSS Z");
+	}
+	
+	public static String formatTimestamp(Date date) {
+		return formatDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+	}
+	
+	public static Date parseTimestamp(String date) {
+		return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+	}
+	
+	public static String formatISODate(Date date) {
+		return formatDate(date, "yyyy-MM-dd");
 	}
 	
 	public static String formatShortDate(Date date) {
@@ -206,8 +228,8 @@ public class Utils {
 
 	public static String after(String value, String string) {
 		int idx = value.indexOf(string);
-		if(idx > -1) {
-			return value.substring(idx+1);
+		if(idx > -1 && idx+string.length() < value.length()) {
+			return value.substring(idx+string.length());
 		}
 		return "";
 	}
@@ -235,6 +257,14 @@ public class Utils {
 
 	public static byte[] base64Decode(String property) throws IOException {
 		return java.util.Base64.getDecoder().decode(property.getBytes("UTF-8"));
+	}
+	
+	public static String base64DecodeToString(String str) {
+		try {
+			return new String(base64Decode(str), "UTF-8");
+		} catch (IOException e) {
+			throw new IllegalStateException("System does not appear to support UTF-8!", e);
+		}
 	}
 
 	public static String format(Double d) {
@@ -319,9 +349,14 @@ public class Utils {
 	}
 	
 	public static String generateRandomAlphaNumericString(int length) {
-	    return new BigInteger(length * 8, random).toString(32).substring(0,  length);
+		return random.ints(0, ALLOWED_CHARACTERS.length())
+			    .limit(length).mapToObj(x -> ALLOWED_CHARACTERS.substring(x,x+1))
+			    .collect(Collectors.joining());
 	}
-
+	
+	public static String generateRandomNumericString(int length) {
+		return String.join("", random.ints(0, 10).limit(length).mapToObj(x -> String.valueOf(x)).collect(Collectors.toList()));
+	}
 
 	public static <T> List<T> nullSafe(List<T> list){
 		if(list == null){
@@ -354,7 +389,7 @@ public class Utils {
 			if(b.length() > 0) {
 				b.append(",");
 			}
-			b.append(i);
+			b.append(i.toString());
 		}
 		return b.toString();
 	}
@@ -369,16 +404,25 @@ public class Utils {
 			if(b.length() > 0) {
 				b.append(",");
 			}
-			b.append(i.toString());
+			if(Objects.nonNull(i)) {
+				b.append(i.toString());
+			} 
 		}
 		return b.toString();
 	}
-
-	public static String encodeURIPath(String url) {
-		return url.replace(" ", "%20");
+	
+	public static String getBaseURL(String url) {
+		String protocol = before(url, "//");
+		String tmp = after(url, "//");
+		
+		return protocol + "//" + before(tmp, "/");
 	}
 
-	public static Date thirtyDays() {
+	public static String encodeURIPath(String url) {
+		return UriUtils.encodePath(url, "UTF-8");
+	}
+
+	public static Calendar thirtyDaysCalendar() {
 		
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 0);
@@ -388,7 +432,30 @@ public class Utils {
 		
 		date.add(Calendar.DAY_OF_MONTH, 30);
 		
-		return date.getTime();
+		return date;
+		
+	}
+	
+	public static Date thirtyDays() {
+		return thirtyDaysCalendar().getTime();
+	}
+	
+	public static Calendar thirtyDaysAgoCalendar() {
+		
+		Calendar date = Calendar.getInstance();
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+		
+		date.add(Calendar.DAY_OF_MONTH, -30);
+		
+		return date;
+		
+	}
+	
+	public static Date thirtyDaysAgo() {
+		return thirtyDaysAgoCalendar().getTime();
 	}
 
 	public static byte[] getUTF8Bytes(String str) {
@@ -409,5 +476,79 @@ public class Utils {
 
 	public static List<String> fromCsv(String value) {
 		return new ArrayList<String>(Arrays.asList(value.split(",")));
+	}
+
+	public static int parseIntOrDefault(String value, int defaultValue) {
+		try {
+			return Integer.parseInt(value);
+		} catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	public static Date now() {
+		return new Date();
+	}
+	
+	public static Set<String> extractVariables(String str) {
+		Set<String> vars = new HashSet<>();
+		int idx = 0;
+		while((idx = str.indexOf('{', idx)) != -1) {
+			int start = idx+1;
+			idx = str.indexOf('}', start);
+			if(idx==-1) {
+				throw new IllegalArgumentException("Unterminated variable detected!");
+			}
+			vars.add(str.substring(start, idx));
+			idx++;
+		}
+		return vars;
+	}
+	
+	public static String getCommaSeparatedNames(Collection<? extends NamedDocument> values) {
+		
+		StringBuffer buf = new StringBuffer();
+		for(NamedDocument value : values) {
+			if(buf.length() > 0) {
+				buf.append(",");
+			}
+			buf.append(value.getName());
+		}
+				
+		return buf.toString();
+	}
+	
+	public static Date getMonthEnd(Date timestamp) {
+		
+		Calendar date = Calendar.getInstance();
+		date.setTime(getMonthStart(timestamp));
+		date.add(Calendar.MONTH, 1);
+		date.add(Calendar.DAY_OF_MONTH, -1);
+		date.set(Calendar.HOUR_OF_DAY, 23);
+		date.set(Calendar.MINUTE, 59);
+		date.set(Calendar.SECOND, 59);
+		date.set(Calendar.MILLISECOND, 9999);
+		return date.getTime();
+		
+	}
+
+	public static Date getMonthStart(Date timestamp) {
+		
+		Calendar date = Calendar.getInstance();
+		date.setTime(timestamp);
+		date.set(Calendar.DAY_OF_MONTH, 1);
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+		
+		return date.getTime();
+	}
+
+	public static Long getLongOrDefault(String value, Long defaultValue) {
+		try {
+			return Long.parseLong(value);
+		} catch(NumberFormatException e) { }
+		return defaultValue;
 	}
 }

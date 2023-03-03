@@ -1,4 +1,7 @@
 package com.jadaptive.api.spring;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPlugin;
@@ -35,6 +38,8 @@ public class AbstractSpringPlugin extends SpringPlugin {
 		
 		ApplicationContext parentContext = ((SpringPluginManager)getWrapper().getPluginManager()).getApplicationContext();
 		
+		List<ApplicationContext> parentContexts = new ArrayList<>();
+		
 		/**
 		 * Try to get a single Spring parent dependency context as parent instead
 		 */
@@ -52,14 +57,15 @@ public class AbstractSpringPlugin extends SpringPlugin {
 			
 			if(dependWrapper.getPlugin() instanceof SpringPlugin) {
 				if(log.isInfoEnabled()) {
-					log.info("Plugin {} has Spring parent context from {}",
+					log.info("Plugin {} has a Spring parent context from {}",
 							getWrapper().getPluginId(), 
 							dependWrapper.getPluginId());
 				}
-				parentContext = ((SpringPlugin)dependWrapper.getPlugin()).getApplicationContext();
+				parentContexts.add(parentContext = ((SpringPlugin)dependWrapper.getPlugin()).getApplicationContext());
 				break;
 			}
 		}
+		
 		AnnotationConfigApplicationContext pluginContext = new AnnotationConfigApplicationContext();
 		pluginContext.setParent(parentContext);
 		pluginContext.setClassLoader(getWrapper().getPluginClassLoader());

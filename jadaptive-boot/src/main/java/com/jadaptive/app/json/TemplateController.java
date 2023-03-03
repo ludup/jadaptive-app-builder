@@ -21,9 +21,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.json.EntityResultsStatus;
+import com.jadaptive.api.json.EntityStatus;
+import com.jadaptive.api.json.RequestStatus;
+import com.jadaptive.api.json.RequestStatusImpl;
+import com.jadaptive.api.json.TableStatus;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionService;
@@ -31,7 +37,7 @@ import com.jadaptive.api.templates.TemplateVersionService;
 @Controller
 public class TemplateController {
 
-	static Logger log = LoggerFactory.getLogger(ObjectController.class);
+	static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	@Autowired
 	private TemplateService templateService; 
@@ -68,12 +74,12 @@ public class TemplateController {
 
 		try {
 			templateService.saveOrUpdate(template);
-			return new RequestStatus();
+			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("POST api/template", e);
 			}
-			return new RequestStatus(false, e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		}
 	}
 	
@@ -83,13 +89,13 @@ public class TemplateController {
 	public RequestStatus deleteTemplate(@PathVariable String uuid, HttpServletRequest request) {
 
 		try {
-			templateService.delete(uuid);
-			return new RequestStatus();
+			templateService.delete(templateService.get(uuid));
+			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("DELETE api/template", e);
 			}
-			return new RequestStatus(false, e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		}
 	}
 	
@@ -148,7 +154,7 @@ public class TemplateController {
 			@RequestParam int limit) throws RepositoryException, UnknownEntityException, ObjectException {
 		try {
 
-		   return new TableStatus<ObjectTemplate>(templateService.table(searchField, searchValue, order, offset, limit), templateService.count());
+		   return new TableStatus<ObjectTemplate>(templateService.table(searchField, searchValue, offset, limit, SortOrder.ASC, "resourceKey"), templateService.count());
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/template/table", e);

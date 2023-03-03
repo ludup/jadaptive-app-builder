@@ -1,17 +1,13 @@
 package com.jadaptive.app.auth;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
-
-import javax.annotation.PostConstruct;
-import javax.cache.Cache;
-import javax.cache.expiry.CreatedExpiryPolicy;
-import javax.cache.expiry.Duration;
+import java.util.concurrent.TimeUnit;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,11 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationProperties;
-import com.jadaptive.api.app.ConfigHelper;
+import com.jadaptive.api.auth.AuthenticationModule;
+import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.cache.CacheService;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -33,25 +30,22 @@ import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
+import com.jadaptive.api.session.SessionType;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.app.ui.Dashboard;
-import com.jadaptive.app.ui.Login;
-import com.jadaptive.app.ui.SetIdentity;
 
 @Service
 @Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION }, defaultPermissions = { AuthenticationService.USER_LOGIN_PERMISSION } )
 public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService {
 
-	private static final String AUTHENTICATION_STATE_ATTR = "authenticationState";
 	
-	public static final String PASSWORD_RESOURCE_KEY = "password";
 	public static final String USERNAME_RESOURCE_KEY = "username";
-
-	private static final String DEFAULT_AUTHENTICATION_FLOW = "defaultAuthentication";
 	
+
 	static Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 	
 	@Autowired
@@ -69,19 +63,19 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Autowired
 	private SessionUtils sessionUtils; 
 	
-	Map<String,Class<?>> registeredAuthenticationPages = new HashMap<>();
+	@Autowired
+	private PageCache pageCache;
 	
+	@Autowired
+	private TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
 	
-	@PostConstruct
-	private void postConstruct() {
-		registerAuthenticationPage(PASSWORD_RESOURCE_KEY, Login.class);
-		registerAuthenticationPage(USERNAME_RESOURCE_KEY, SetIdentity.class);
-	}
+	Map<String,Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
 	
 	@Override
-	public void registerAuthenticationPage(String resourceKey, Class<?> page) {
+	public void registerAuthenticationPage(String resourceKey, Class<? extends Page> page) {
 		registeredAuthenticationPages.put(resourceKey, page);
 	}
+
 	
 	@Override
 	public void decorateAuthenticationPage(Document content) {
@@ -116,16 +110,15 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 	
 	@Override
-	public void reportAuthenticationFailure(String username) {
+	public void reportAuthenticationFailure(AuthenticationState state) {
 		permissionService.setupSystemContext();
 		
 		try {
-			
-			AuthenticationState state = getCurrentState();
+
 			state.incrementFailedAttempts();
 			
-			assertLoginThreshold(username);
-			assertLoginThreshold(Request.get().getRemoteAddr());
+			assertLoginThreshold(state.getAttemptedUsername());
+			assertLoginThreshold(Request.getRemoteAddress());
 		
 		} finally {
 			permissionService.clearUserContext();
@@ -165,7 +158,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				}
 				
 				return sessionService.createSession(tenant, 
-						user, remoteAddress, userAgent);
+						user, remoteAddress, userAgent, SessionType.HTTPS);
 				
 			} finally {
 				clearUserContext();
@@ -193,10 +186,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return 10;
 	}
 	
-	private Cache<String, Integer> getCache() {
+	private Map<String, Integer> getCache() {
 		return cacheService.getCacheOrCreate("failedLogings", 
 				String.class, Integer.class, 
-					CreatedExpiryPolicy.factoryOf(Duration.FIVE_MINUTES));
+					TimeUnit.MINUTES.toMillis(5));
 	}
 	
 	private String getCacheKey(String username) {
@@ -204,38 +197,23 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	private void flagFailedLogin(String username) {
-		Cache<String, Integer> cache = getCache();
+		Map<String, Integer> cache = getCache();
 		String cacheKey = getCacheKey(username);
 		Integer count = cache.get(cacheKey);
 		if(Objects.isNull(count)) {
-			count = new Integer(0);
+			count = Integer.valueOf(0);
 		}
 		cache.put(cacheKey, ++count);
 	}
 
 	@Override
-	public Class<?> completeAuthentication(User user) {
+	public Class<? extends Page> completeAuthentication(AuthenticationState state) {
 		
-		if(Objects.isNull(user) || !userService.supportsLogin(user)) {
-			throw new AccessDeniedException("Bad username or password");
+		if(Objects.isNull(state.getUser()) || !userService.supportsLogin(state.getUser())) {
+			throw new AccessDeniedException("Invalid credentials");
 		}
 		
-		AuthenticationState state = getCurrentState();	
-		if(Objects.nonNull(user)) {
-			if(!state.hasUser()) {
-				state.setUser(user);
-			} else {
-				state.verifyUser(user);
-			}
-		}
-		
-		state.completePage();
-		
-		/**
-		 * Check for outstanding authentication requirements and
-		 * throw a redirect
-		 */
-		if(state.isComplete()) {
+		if(state.completePage()) {
 			
 			setupUserContext(state.getUser());
 			
@@ -243,16 +221,16 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				assertPermission(USER_LOGIN_PERMISSION);
 				
 				Session session = sessionService.createSession(getCurrentTenant(), 
-						state.getUser(), state.getRemoteAddress(), state.getUserAgent());
+						state.getUser(), state.getRemoteAddress(), state.getUserAgent(), SessionType.HTTPS);
 				sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
-				Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, null);
-				return Dashboard.class;
+				
 			} finally {
 				clearUserContext();
 			}
-		} else {
-			return state.getCurrentPage();
 		}
+		
+		return state.getCurrentPage();
+		
 	}
 
 	@Override
@@ -261,10 +239,13 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		AuthenticationState state = (AuthenticationState) Request.get().getSession().getAttribute(AUTHENTICATION_STATE_ATTR);
 		if(Objects.isNull(state)) {
 			state = new AuthenticationState();
-			state.setRemoteAddress(Request.get().getRemoteAddr());
+			state.setRemoteAddress(Request.getRemoteAddress());
 			state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
 			
-			processRequiredAuthentication(state, DEFAULT_AUTHENTICATION_FLOW);
+			try {
+				state.getRequiredPages().add(pageCache.resolvePage("login").getClass());
+			} catch (FileNotFoundException e) {
+			}
 			
 			Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
 		}
@@ -272,45 +253,87 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return state;
 	}
 
-	private void processRequiredAuthentication(AuthenticationState state, String authenticationFlow) {
+	@Override
+	public void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy) throws FileNotFoundException {
 		
-		File authenticationProperties = new File(ConfigHelper.getConfFolder(), "authentication.properties");
-		state.getAuthenticationPages().clear();
-		try {
-			if(authenticationProperties.exists()) {
-				Properties properties = ApplicationProperties.loadPropertiesFile(authenticationProperties);
-				
-				String[] defaultAuthentications = properties.getProperty(authenticationFlow, PASSWORD_RESOURCE_KEY).split(",");
-				for(String authenticaiton :defaultAuthentications) {
-					state.getAuthenticationPages().add(registeredAuthenticationPages.get(authenticaiton));
-				}
-				
-				return;
-			} 
-		} catch(IOException e) {
-			log.error("Failed to load authenticaiton properties", e);
-		}
-			
-		state.getAuthenticationPages().add(Login.class);
+		state.getRequiredPages().clear();
+		state.getRequiredPages().add(pageCache.resolvePage("login").getClass());
+		
+		state.getOptionalAuthentications().clear();
+		state.setOptionalCompleted(0);
+		state.setOptionalRequired(policy.getOptionalRequired());
+		state.setOptionalSelectionPage(pageCache.resolvePage("select2fa").getClass());
+		
+		validateModules(policy, state.getRequiredPages(), state.getOptionalAuthentications());
 		
 	}
 	
 	@Override
-	public Class<?> resetAuthentication(Class<?>... additionalPages) {
+	public void validateModules(AuthenticationPolicy policy) {
+		validateModules(policy, new ArrayList<>(), new ArrayList<>());
+	}
+	
+	private void validateModules(AuthenticationPolicy policy, 
+			List<Class<? extends Page>> required,
+			List<AuthenticationModule> optional) {
+		
+		boolean hasSecret = false;
+		
+		for(AuthenticationModule module : policy.getRequiredAuthenticators()) {
+			hasSecret |= module.isSecretCapture();
+			required.add(getAuthenticationPage(module.getAuthenticatorKey()));
+		}
+		
+		optional.addAll(policy.getOptionalAuthenticators());
+		
+		if(optional.size() < policy.getOptionalRequired()) {
+			throw new IllegalStateException("Invalid authentication policy! Minumum number of optional factors exceeds available optional factors");
+		}
+		
+		if(!hasSecret && policy.getOptionalRequired() == 0) {
+			throw new IllegalStateException("Invalid authentication policy! No secret capture modules are configured");
+		}
+
+		if(required.isEmpty() && (optional.isEmpty() || policy.getOptionalRequired() == 0)) {
+			throw new IllegalStateException("Invalid authentication policy! No valid modules");
+		}
+	}
+	
+	@Override
+	public Class<? extends Page> resetAuthentication(@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages) {
 		return resetAuthentication(DEFAULT_AUTHENTICATION_FLOW, additionalPages);
 	}
 	@Override
-	public Class<?> resetAuthentication(String authenticationFlow, Class<?>... additionalClasses) {
+	public Class<? extends Page> resetAuthentication(String authenticationFlow, @SuppressWarnings("unchecked") Class<? extends Page>... additionalClasses) {
 		
 		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
 		AuthenticationState state = getCurrentState();
-		processRequiredAuthentication(state, authenticationFlow);
-		state.getAuthenticationPages().addAll(Arrays.asList(additionalClasses));
+		
+		state.getRequiredPages().addAll(Arrays.asList(additionalClasses));
 		return state.getCurrentPage();
 	}
 
 	@Override
 	public void clearAuthenticationState() {
 		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
+	}
+
+	@Override
+	public Class<? extends Page> getAuthenticationPage(String authenticator) {
+		if(registeredAuthenticationPages.containsKey(authenticator)) {
+			return registeredAuthenticationPages.get(authenticator);
+		}
+		throw new IllegalStateException(String.format("%s is not an installed authenticator", authenticator));
+	}
+
+
+	@Override
+	public AuthenticationModule getAuthenticationModule(String uuid) {
+		return moduleDatabase.get(uuid, AuthenticationModule.class);
+	}
+	
+	@Override
+	public Iterable<AuthenticationModule> getAuthenticationModules() {
+		return moduleDatabase.list(AuthenticationModule.class);
 	}
 }

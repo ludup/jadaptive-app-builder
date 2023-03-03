@@ -30,6 +30,8 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.SystemSingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -38,6 +40,9 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
@@ -70,6 +75,9 @@ public class SessionFilter implements Filter {
 	@Autowired
 	private TenantAwareObjectDatabase<Redirect> redirectDatabase;
 	
+	@Autowired
+	private SystemSingletonObjectDatabase<TenantConfiguration> tenantConfig;
+	
 	Map<String,String> cachedRedirects = new HashMap<>();
 	
 	@Override
@@ -78,12 +86,38 @@ public class SessionFilter implements Filter {
 		
 		HttpServletRequest req = (HttpServletRequest)request;
 		HttpServletResponse resp = (HttpServletResponse)response;
+
+		Request.setUp(req, resp);
 		
 		if(log.isDebugEnabled()) {
 			log.debug(req.getMethod() + " " + req.getRequestURI().toString());
 		}
 		
 		tenantService.setCurrentTenant(req);
+		
+		Tenant tenant = tenantService.getCurrentTenant();
+		
+		if(!tenant.isValidHostname(request.getServerName())) {
+			TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
+			if(config.getRequireValidDomain()) {
+				if(req.getServerName().equalsIgnoreCase(config.getRegistrationDomain())) {
+					if(req.getRequestURI().equals("/")) {
+						if(req.getServerPort() != -1 && req.getServerPort() != 443) {
+							resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
+									config.getRegistrationDomain(),
+									request.getServerPort()));
+						} else {
+							resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
+						}	
+						return;
+					}
+					
+				} else {
+					resp.sendRedirect(config.getInvalidDomainRedirect());
+					return;
+				}
+			}
+		}
 		
 		try {
 
@@ -95,10 +129,13 @@ public class SessionFilter implements Filter {
 				return;
 			}
 			
-			chain.doFilter(request, response);
-			
+			chain.doFilter(req, resp);
+
 			postHandle(req, resp);
 			
+		} catch(Throwable e) { 
+			e.printStackTrace();
+			throw e;
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
@@ -119,50 +156,42 @@ public class SessionFilter implements Filter {
 			Request.tearDown();
 		
 		} catch(Throwable e) {
+			log.error("Caught exception in SessionFilter postHandle",e);
 			throw new ServletException(e);
 		}
 		
 	}
+	
+
+
 
 	private boolean preHandle(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		
 		try {
-			Request.setUp(request, response);
 			
-			Session session = sessionUtils.getActiveSession(request);
+			Session session = null;
+			
+			try {
+				session = sessionUtils.getSession(request);
+			} catch (UnauthorizedException e) {
+			}
+			
+			sessionUtils.populateSecurityHeaders(response);
 			
 			/**
 			 * Get the security.properties hierarchy from the web application
 			 */
 			Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 			
-			/**
-			 * Check if we have a valid CORS request
-			 */
-			@SuppressWarnings("unused")
-			boolean validCORS = sessionUtils.isValidCORSRequest(request, response, properties);		
-					
 			if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))
 					&& Objects.nonNull(request.getHeader(HttpHeaders.AUTHORIZATION))) {
 				session = performBasicAuthentication(request, response);
 			}
 			
-			/**
-			 * If the request is not a valid CORS then check we have valid CSRF token in the request.
-			 * 
-			 * THIS IS CURRENTLY DISABLED AS THE UI IS INCOMPLETE
-			 */
-			/**
-			if(Objects.nonNull(session) && !validCORS 
-					&& (ApplicationProperties.getValue("security.enableCSRFProtection", true) || 
-							Boolean.parseBoolean(properties.getProperty("security.enableCSRFProtection", "true")))) {
-				sessionUtils.verifySameSiteRequest(request, response, session);
-			}**/
-			
-			
 			if(Objects.isNull(session) && Boolean.parseBoolean(properties.getProperty("authentication.allowAnonymous", "false"))) {
 				permissionService.setupSystemContext();
 			} else if(Objects.nonNull(session)) {
+				sessionUtils.touchSession(session);
 				tenantService.setCurrentTenant(session.getTenant());	
 				permissionService.setupUserContext(session.getUser());
 			} 
@@ -184,6 +213,7 @@ public class SessionFilter implements Filter {
 			
 			return true;
 		} catch(Throwable e) {
+			log.error("Caught exception in SessionFilter preHandle",e);
 			throw new ServletException(e);
 		}
 		
@@ -215,7 +245,7 @@ public class SessionFilter implements Filter {
 						username, 
 						password, 
 						tenantService.getCurrentTenant(), 
-						request.getRemoteAddr(), 
+						Request.getRemoteAddress(), 
 						request.getHeader(HttpHeaders.USER_AGENT));
 				
 				sessionUtils.addSessionCookies(request, response, session);
@@ -230,20 +260,30 @@ public class SessionFilter implements Filter {
 		
 		try {
 				
-			String location = cachedRedirects.get(request.getRequestURI());
+			String location = cachedRedirects.get(request.getRequestURL().toString());
 			
 			if(Objects.nonNull(location)) {
 				response.sendRedirect(location);
 				return true;
 			} else {
 				
-				log.debug("Checking redirect {}", request.getRequestURI());
+				if(log.isDebugEnabled()) {
+					log.debug("Checking redirect {}", request.getRequestURL().toString());
+				}
 				
-				
-				for(Redirect redirect : redirectDatabase.list(Redirect.class)) {
+				for(Redirect redirect : redirectDatabase.list(Redirect.class, 
+						SearchField.or(SearchField.eq("hostname", request.getServerName()),
+								SearchField.eq("hostname", null),
+								SearchField.eq("hostname", "")))) {
 					Pattern pattern = Pattern.compile(redirect.getPath());
 					Matcher matcher = pattern.matcher(request.getRequestURI());
 					if(matcher.matches()) {
+						
+						if(StringUtils.isNotBlank(redirect.getHostname())) {
+							if(!request.getServerName().equals(redirect.getHostname())) {
+								continue;
+							}
+						}
 						
 						location = redirect.getLocation();
 						for(int i = 0; i <= matcher.groupCount(); i++) { 
@@ -257,7 +297,11 @@ public class SessionFilter implements Filter {
 						
 						
 						location = ReplacementUtils.processTokenReplacements(location, resolver);
-						cachedRedirects.put(request.getRequestURI(), location);
+						cachedRedirects.put(request.getRequestURL().toString(), location);
+						
+						if(log.isDebugEnabled()) {
+							log.debug("Redirecting {} to {}", request.getRequestURL().toString(), location);
+						}
 						response.sendRedirect(location);
 						return true;
 					}
@@ -267,12 +311,13 @@ public class SessionFilter implements Filter {
 		} catch(ObjectNotFoundException e) {
 		}
 		
-		if(request.getRequestURI().equals("/")) {
+		if(request.getRequestURI().equals("/")
+				|| request.getRequestURI().equals("/app")
+				|| request.getRequestURI().equals("/app/")) {
 			response.sendRedirect("/app/ui/");
 			return true;
 		}
 		
-	
 		return false;
 	}
 }

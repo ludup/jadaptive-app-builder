@@ -11,6 +11,12 @@ public interface RoleService {
 	public static final String READ_PERMISSION = PermissionUtils.getReadPermission(Role.RESOURCE_KEY);
 	public static final String READ_WRITE_PERMISSION = PermissionUtils.getReadWritePermission(Role.RESOURCE_KEY);
 			
+	public static final String ADMINISTRATOR_UUID = "1bfbaf16-e5af-4825-8f8a-83ce2f5bf81f";
+	public static final String EVERYONE_UUID = "c4b54f49-c478-46cc-8cfa-aaebaa4ea50f";
+	public static final String EVERYONE = "Everyone";
+	public static final String ADMINISTRATION = "Administration";
+	
+	
 	Role getAdministrationRole();
 
 	Role getEveryoneRole();
@@ -48,4 +54,19 @@ public interface RoleService {
 	Collection<Role> getAllUserRoles();
 	
 	boolean isAssigned(AssignableUUIDEntity obj, User user);
+
+	Collection<Role> getRolesByUUID(Collection<String> roles);
+
+	Collection<User> getUsersByRoles(Collection<Role> roles);
+	
+	
+	void compareAssignments(AssignableUUIDEntity current, 
+			AssignableUUIDEntity previous, 
+			Collection<User> assignments,
+			Collection<User> unassignments);
+
+	Collection<Role> getAdministrationRoles();
+
+	<T extends AssignableUUIDEntity> boolean hasEveryoneRole(T obj);
+
 }

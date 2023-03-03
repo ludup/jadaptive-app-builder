@@ -28,7 +28,7 @@ public interface UserService extends UUIDObjectService<User> {
 
 	void changePassword(User user, char[] newPassword, boolean passwordChangeRequired);
 
-	Iterable<? extends User> allUsers();
+	Iterable<User> allObjects();
 
 	User getUserByEmail(String email);
 
@@ -43,6 +43,10 @@ public interface UserService extends UUIDObjectService<User> {
 	boolean supportsLogin(User user);
 
 	Map<String, String> getUserProperties(User user);
+
+	Collection<User> getUsersByUUID(Collection<String> users);
+
+	long countUsers();
 
 
 }

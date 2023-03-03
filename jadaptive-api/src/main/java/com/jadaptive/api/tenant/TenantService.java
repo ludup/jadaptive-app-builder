@@ -1,5 +1,7 @@
 package com.jadaptive.api.tenant;
 
+import java.util.concurrent.Callable;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.jadaptive.api.entity.ObjectException;
@@ -17,7 +19,7 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	void clearCurrentTenant();
 
-	Iterable<Tenant> listTenants();
+	Iterable<Tenant> allObjects();
 
 	Tenant getSystemTenant() throws RepositoryException, ObjectException;
 
@@ -35,17 +37,47 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	Tenant resolveTenantName(String username);
 
-	Tenant createTenant(String name, String domain, String... additionalDomains)
-			throws RepositoryException, ObjectException;
-
-	Tenant createTenant(String uuid, String name, String primaryDomain, String... additionalDomains)
-			throws RepositoryException, ObjectException;
-
-	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, String... additionalDomains)
-			throws RepositoryException, ObjectException;
-
 	Tenant getTenantByName(String name);
 
 	Tenant getTenantByUUID(String uuid);
 
+	boolean isSetupMode();
+
+	void completeSetup();
+
+	boolean isReady();
+
+	void executeAs(Tenant tenant, Runnable r);
+	
+	<T> T executeAs(Tenant tenant, Callable<T> r);
+
+	boolean hasCurrentTenant();
+
+	boolean supportsMultipleTenancy();
+
+	void setTenantController(TenantController controller);
+
+	Tenant initialiseTenant(Tenant tenant, boolean newSchema);
+
+	Tenant createTenant(String name, String ownerName, String ownerEmail, String primaryDomain,
+			boolean system, String... additionalDomains) throws RepositoryException, ObjectException;
+
+	Tenant createTenant(String uuid, String name, String ownerName, String ownerEmail, String primaryDomain,
+			boolean system, String... additionalDomains) throws RepositoryException, ObjectException;
+
+	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system);
+
+	boolean isSystemTenant();
+
+	<T> T asSystem(Callable<T> r);
+
+	void asSystem(Runnable r);
+
+	String resolveUserName(String username);
+
+	void execute(Runnable r);
+
+	<T> T execute(Callable<T> r);
+
+	void setSystemOwner(String company, String name, String emailAddress);
 }

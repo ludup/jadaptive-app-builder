@@ -36,4 +36,6 @@ public interface HttpUtilsImpl {
 	InputStream doHttpGetInputStream(String uri, boolean allowSelfSigned, Map<String, String> headers)
 			throws IOException;
 
+	String doHttpDelete(String uri, boolean allowSelfSigned, Map<String, String> headers) throws IOException;
+
 }

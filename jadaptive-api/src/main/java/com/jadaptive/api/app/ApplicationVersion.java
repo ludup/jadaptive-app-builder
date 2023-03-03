@@ -2,6 +2,8 @@ package com.jadaptive.api.app;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.prefs.Preferences;
@@ -13,7 +15,7 @@ import org.w3c.dom.Document;
 
 public class ApplicationVersion {
 
-	static String version;
+	static Map<String,String> versions = new HashMap<>();
 	
 	public static String getVersion() {
 		return getVersion("jadaptive-api");
@@ -22,10 +24,8 @@ public class ApplicationVersion {
 	public static String getSerial() {
 		Preferences pref = Preferences.userNodeForPackage(ApplicationVersion.class);
 		
-		String jadaptiveId = System.getProperty("jadaptive.id", "jadaptive-unknown");
-		String serialId = String.format("jadaptive.serial.%s", jadaptiveId);
-		String serial = pref.get(serialId, UUID.randomUUID().toString());
-		pref.put(jadaptiveId, serial);
+		String serial = pref.get("jadaptive.serial", UUID.randomUUID().toString());
+		pref.put("jadaptive.serial", serial);
 		return serial;
 	}
 	
@@ -34,6 +34,8 @@ public class ApplicationVersion {
 		if(fakeVersion != null) {
 			return fakeVersion;
 		}
+		
+		String version = versions.get(artifactId);
 		
 	    if (version != null) {
 	        return version;
@@ -71,22 +73,10 @@ public class ApplicationVersion {
 	    	} catch (Exception e) {
 				version = "DEV_VERSION";
 			} 
-	        
 	    }
 
+	    versions.put(artifactId, version);
 	    return version;
 	}
 
-	public static String getProductId() {
-		return System.getProperty("jadaptive.id", "jadaptive-basecamp");
-	} 
-	
-	public static String getBrandId() {
-		String id = getProductId();
-		int idx = id.indexOf('-');
-		if(idx==-1) {
-			throw new IllegalStateException("Product id must consist of string formatted like <brand>-<product>");
-		}
-		return id.substring(0, idx);
-	} 
 }

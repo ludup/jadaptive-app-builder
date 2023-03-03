@@ -12,8 +12,6 @@ public interface AbstractObject extends UUIDDocument {
 
 	String getResourceKey();
 
-	void setResourceKey(String resourceKey);
-
 	Object getValue(String fieldName);
 
 	Object getValue(FieldTemplate t);
@@ -32,10 +30,18 @@ public interface AbstractObject extends UUIDDocument {
 
 	Collection<String> getCollection(String resourceKey);
 
-	void addChild(AbstractObject e);
-
 	void setSystem(Boolean val);
 
 	void setHidden(Boolean val);
+
+	Map<String, AbstractObject> getChildren();
+
+	void addChild(String resourceKey, AbstractObject e);
+
+	void removeCollectionObject(String fieldName, AbstractObject existing);
+
+	void addCollectionObject(String fieldName, AbstractObject e);
+
+	boolean isNew();
 
 }

@@ -2,8 +2,13 @@ package com.jadaptive.api.permissions;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.repository.AssignableUUIDEntity;
+import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.ui.NamePairValue;
 import com.jadaptive.api.user.User;
 
 public interface PermissionService {
@@ -16,12 +21,14 @@ public interface PermissionService {
 	void assertPermission(String permission) throws AccessDeniedException;
 
 	void assertRead(String resourceKey) throws AccessDeniedException;
-
-	void assertReadWrite(String resourceKey) throws AccessDeniedException;
+	
+//	void assertRead(ObjectTemplate resourceKey) throws AccessDeniedException;
 
 	void registerStandardPermissions(String resourceKey);
 
 	Collection<String> getAllPermissions();
+	
+	Collection<NamePairValue> getPermissions();
 
 	Collection<String> getAllPermissions(Tenant tenant);
 
@@ -48,5 +55,19 @@ public interface PermissionService {
 	boolean isAdministrator(User user);
 
 	void assertAdministrator();
+
+	void assertAssignment(AssignableUUIDEntity obj);
+
+	<T> T as(User user, Callable<T> call);
+
+	<T> T asSystem(Callable<T> call);
+
+	void assertOwnership(PersonalUUIDEntity obj);
+
+	void assertOwnership(AbstractObject e);
+
+//	void assertWrite(ObjectTemplate template);
+	
+	void assertWrite(String resourceKey);
 
 }

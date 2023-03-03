@@ -10,8 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.PluginInterceptor;
-import com.jadaptive.app.json.ResponseHelper;
+import com.jadaptive.api.ui.ResponseHelper;
 
 @Extension
 public class QuotaInterceptor implements PluginInterceptor {
@@ -30,7 +31,7 @@ public class QuotaInterceptor implements PluginInterceptor {
 		if(Boolean.parseBoolean(properties.getProperty("quota.enabled", "false"))) {
 			try {
 				String group = properties.getProperty("quota.group", "defaultGroup");
-				String key = request.getRemoteAddr();
+				String key = Request.getRemoteAddress();
 				long quota = Long.parseLong(properties.getProperty("quota.threshold", "10000"));
 				long period = Long.parseLong(properties.getProperty("quota.period", "86400"));
 				

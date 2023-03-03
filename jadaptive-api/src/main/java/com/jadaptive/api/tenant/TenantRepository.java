@@ -5,6 +5,8 @@ import com.jadaptive.api.repository.RepositoryException;
 
 public interface TenantRepository {
 
+	static final String TENANT_DATABASE = "tenants";
+	
 	void saveTenant(Tenant tenant) throws RepositoryException, ObjectException;
 
 	void deleteTenant(Tenant tenant) throws RepositoryException, ObjectException;

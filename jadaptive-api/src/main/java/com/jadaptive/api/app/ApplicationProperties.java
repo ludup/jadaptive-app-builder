@@ -27,9 +27,24 @@ public class ApplicationProperties {
 		
 		confFolder = new File(System.getProperty("jadaptive.conf", "conf"));
 		try{
+			log.info("Loading properties file jadaptive.properties");
 			properties = loadPropertiesFile(new File(confFolder, "jadaptive.properties"));
 		} catch(IOException e) {
 			log.warn("Could not load jadaptive.properties file [{}]", e.getMessage());
+		}
+
+		File confd = new File("conf.d");
+		if(confd.exists()) {
+			for(File file : confd.listFiles()) {
+				if(file.isFile() && file.getName().endsWith(".properties")) {
+					log.info("Loading extended properties file {}", file.getName());
+					try {
+						properties.putAll(loadPropertiesFile(file));
+					} catch (IOException e) {
+						log.error("Faild to load properties file {}", file.getName(), e);
+					}
+				}
+			}
 		}
 		checkLoaded();
 	}
@@ -56,14 +71,24 @@ public class ApplicationProperties {
 	
 	public static String getValue(String name, String defaultValue) {
 		checkLoaded();
-		return properties.getProperty(name, defaultValue);
+		String val = properties.getProperty(name);
+		if(Objects.isNull(val)) {
+			val = System.getProperty(name);
+			if(Objects.isNull(val)) {
+				return defaultValue;
+			}
+		}
+		return val;
 	}
 	
 	public static boolean getValue(String name, boolean defaultValue) {
 		checkLoaded();
 		String val = properties.getProperty(name);
 		if(Objects.isNull(val)) {
-			return defaultValue;
+			val = System.getProperty(name);
+			if(Objects.isNull(val)) {
+				return defaultValue;
+			}
 		}
 		return Boolean.parseBoolean(val);
 	}
@@ -72,7 +97,10 @@ public class ApplicationProperties {
 		checkLoaded();
 		String val = properties.getProperty(name);
 		if(Objects.isNull(val)) {
-			return defaultValue;
+			val = System.getProperty(name);
+			if(Objects.isNull(val)) {
+				return defaultValue;
+			}
 		}
 		return Integer.parseInt(val);
 	}

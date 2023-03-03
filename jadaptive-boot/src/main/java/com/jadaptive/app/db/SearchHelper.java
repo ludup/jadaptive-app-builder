@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.user.UserUtils;
 
 @Component
 public class SearchHelper extends AuthenticatedService {
@@ -86,7 +85,7 @@ public class SearchHelper extends AuthenticatedService {
 			tmp.add(getCurrentUser().getUsername());
 			break;
 		case "currentUser.email":
-			tmp.add(UserUtils.getEmailAddress(getCurrentUser()));
+			tmp.add(getCurrentUser().getEmail());
 			break;
 		default:
 			break;

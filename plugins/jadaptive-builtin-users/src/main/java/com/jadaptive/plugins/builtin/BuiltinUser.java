@@ -2,55 +2,40 @@ package com.jadaptive.plugins.builtin;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
-import com.jadaptive.api.user.EmailEnabledUser;
+import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectServiceBean;
+import com.jadaptive.api.template.ObjectView;
+import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.user.PasswordEnabledUser;
+import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(resourceKey = BuiltinUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
-public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser {
+@ObjectServiceBean(bean = UserService.class)
+@ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "passwordOptions", weight=300) })
+public class BuiltinUser extends PasswordEnabledUser {
 
 	private static final long serialVersionUID = -4186606233520076592L;
 
 	public static final String RESOURCE_KEY = "builtinUsers";
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT, 
-			unique = true)
-	String username;
-	
-	@ObjectField(required = true,
-			searchable = true,
-			type = FieldType.TEXT)
-	String name;
-	
+
+	@ObjectField(type = FieldType.PASSWORD, hidden = true)
 	String encodedPassword;
+
+	@ObjectField(hidden = true, type = FieldType.TEXT)
 	String salt;
+
+	@ObjectField(defaultValue = "PBKDF2_SHA512_50000", type = FieldType.ENUM, hidden = true)
+	@ObjectView(value = "passwordOptions")
 	PasswordEncryptionType encodingType;
+
+	@ObjectField(defaultValue = "false", type = FieldType.BOOL)
+	@ObjectView(value = "passwordOptions")
 	boolean passwordChangeRequired;
-	
-	@ObjectField(required = false,
-			searchable = true,
-			type = FieldType.TEXT)
-	String email;
-	
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	@Override
 	public String getEncodedPassword() {
@@ -90,21 +75,15 @@ public class BuiltinUser extends PasswordEnabledUser implements EmailEnabledUser
 		this.passwordChangeRequired = passwordChangeRequired;
 	}
 
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}
-	
+
 	@Override
-	public String getSystemName() {
-		return getUsername();
+	public String getEventGroup() {
+		return User.RESOURCE_KEY;
 	}
+	
+	
 }

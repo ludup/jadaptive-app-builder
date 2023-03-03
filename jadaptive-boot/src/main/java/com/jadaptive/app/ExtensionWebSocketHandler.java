@@ -6,6 +6,8 @@ import java.nio.CharBuffer;
 import java.util.List;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -18,9 +20,12 @@ import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.PluginWebSocketHandler;
 import com.jadaptive.api.app.WebSocketClient;
+import com.jadaptive.api.app.WebSocketOutput;
 
 public class ExtensionWebSocketHandler implements WebSocketHandler {
 
+	static Logger log = LoggerFactory.getLogger(ExtensionWebSocketHandler.class);
+	
 	@Autowired
 	private ApplicationService applicationService; 
 	
@@ -33,8 +38,10 @@ public class ExtensionWebSocketHandler implements WebSocketHandler {
 
 		for(PluginWebSocketHandler wshandler : applicationService.getBeans(PluginWebSocketHandler.class)) {
 			if(wshandler.handles(handler)) {
+				PluginWebSocketClient client;
 				session.getAttributes().put("handler", wshandler);
-				wshandler.connectionOpened(new PluginWebSocketClient(s));
+				session.getAttributes().put("client", client = new PluginWebSocketClient(s));
+				wshandler.connectionOpened(client);
 			}
 		}
 		
@@ -44,13 +51,14 @@ public class ExtensionWebSocketHandler implements WebSocketHandler {
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
 		
 		PluginWebSocketHandler handler = (PluginWebSocketHandler) session.getAttributes().get("handler");
+		PluginWebSocketClient client = (PluginWebSocketClient) session.getAttributes().get("client");
 		if(Objects.nonNull(handler)) {
 			if(message instanceof BinaryMessage) {
 				BinaryMessage msg = (BinaryMessage) message;
-				handler.handleBinaryMessage(msg.getPayload(), message.getPayloadLength());
+				handler.handleBinaryMessage(client, msg.getPayload(), message.getPayloadLength());
 			} else if(message instanceof TextMessage) {
 				TextMessage msg = (TextMessage) message;
-				handler.handleTextMessage(msg.getPayload(), msg.getPayloadLength());
+				handler.handleTextMessage(client, msg.getPayload(), msg.getPayloadLength());
 			} else {
 				throw new IOException("Unsupported message type");
 			}	
@@ -61,8 +69,10 @@ public class ExtensionWebSocketHandler implements WebSocketHandler {
 	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
 		
 		PluginWebSocketHandler handler = (PluginWebSocketHandler) session.getAttributes().get("handler");
+		PluginWebSocketClient client = (PluginWebSocketClient) session.getAttributes().get("client");
+		
 		if(Objects.nonNull(handler)) {
-			handler.handleError(exception);
+			handler.handleError(client, exception);
 		}
 	}
 
@@ -70,8 +80,9 @@ public class ExtensionWebSocketHandler implements WebSocketHandler {
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
 		
 		PluginWebSocketHandler handler = (PluginWebSocketHandler) session.getAttributes().get("handler");
+		PluginWebSocketClient client = (PluginWebSocketClient) session.getAttributes().get("client");
 		if(Objects.nonNull(handler)) {
-			handler.connectionClosed(closeStatus.getReason());
+			handler.connectionClosed(client, closeStatus.getReason());
 		}
 	}
 
@@ -84,6 +95,7 @@ public class ExtensionWebSocketHandler implements WebSocketHandler {
 	class PluginWebSocketClient implements WebSocketClient {
 		
 		StandardWebSocketSession session;
+		WebSocketOutput attachment;
 		public PluginWebSocketClient(StandardWebSocketSession session) {
 			this.session = session;
 		}
@@ -123,8 +135,27 @@ public class ExtensionWebSocketHandler implements WebSocketHandler {
 		}
 		
 		@Override
-		public void close() throws IOException {
-			session.close();
+		public void close() {
+			if(log.isInfoEnabled()) {
+				log.info("Closing websocket");
+			}
+			try {
+				session.close();
+			} catch (IOException e) {
+			}
+			if(Objects.nonNull(attachment)) {
+				attachment.close();
+			}
+		}
+
+		@Override
+		public void setAttachment(WebSocketOutput attachment) {
+			this.attachment = attachment;
+		}
+
+		@Override
+		public WebSocketOutput getAttachment() {
+			return attachment;
 		}
 	}
 }

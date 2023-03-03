@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,22 +30,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
-import com.codesmith.webbits.bootstrap.Bootstrap;
-import com.codesmith.webbits.jquery.JQuery;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.x509.FileFormatException;
 import com.jadaptive.api.x509.InvalidPassphraseException;
 import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
-import com.jadaptive.app.ui.JadaptiveApp;
-import com.jadaptive.app.webbits.WebbitsComponentScan;
 
 @SpringBootApplication
-@WebbitsComponentScan(basePackageClasses = {
-	JadaptiveApp.class,
-	Bootstrap.class,
-	JQuery.class })
 public class Application {
 
 	static Logger log = LoggerFactory.getLogger(Application.class);
@@ -74,7 +67,23 @@ public class Application {
 		 
 		 PropertyConfigurator.configure("conf/app-logging.properties");
 		 
+		 System.setProperty("spring.main.allow-circular-references", "true");
+		 System.setProperty("spring.mongodb.embedded.version", "4.4.13");
+		 
+		 File pluginsFolder = new File("plugins");
 
+		 if(pluginsFolder.exists()) {
+			 File[] files = pluginsFolder.listFiles();
+			 if(files!=null) {
+			 for(File file : files) {
+				 if(file.isFile() && file.getName().endsWith(".zip")) {
+					 continue;
+				 }
+				 FileUtils.deleteQuietly(file);
+			 }
+			 }
+		 }
+		 
 		 try {
 			checkDefaultCertificate();
 		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException
@@ -114,8 +123,9 @@ public class Application {
 			 log.info("Application shutting down with exitCode={}", exitCode);
 			 exitCode = SpringApplication.exit(context, () -> exitCode);
 			 log.info("System exit being called with exitCode={}", exitCode);
-			 System.exit(exitCode);
-		 }
+
+			 System.exit(exitCode);	
+		}
 	}
 	
 	private static void checkDefaultCertificate() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, MismatchedCertificateException {

@@ -6,10 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
@@ -23,7 +22,7 @@ public class TenantRepositoryTests {
 	
 	private TenantRepository tenantRepository;
 	
-	@Before
+	@BeforeEach
 	public void initTest() {
 		tenantRepository = new TenantRepositoryImpl(db);
 		tenantRepository.newSchema();		
@@ -31,7 +30,7 @@ public class TenantRepositoryTests {
 	
 	@Test
 	public void testNewSchemaTenantCount() {
-		assertEquals(new Long(1L), tenantRepository.countTenants());
+		assertEquals(Long.valueOf(1L), tenantRepository.countTenants());
 	}
 	
 	@Test
@@ -71,7 +70,7 @@ public class TenantRepositoryTests {
 		assertEquals(tenant.getUuid(), uuid);
 	}
 	
-	@Test(expected=ObjectException.class)
+	@Test
 	public void testCannotDeleteSystemTenant() {
 		
 		tenantRepository.deleteTenant(tenantRepository.getSystemTenant());

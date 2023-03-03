@@ -1,6 +1,6 @@
 package com.jadaptive.app.templates;
 
-import javax.cache.Cache;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -12,12 +12,12 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
 import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.utils.Version;
 
 @Repository
-public class TemplateVersionRepositoryImpl extends AbstractObjectDatabaseImpl implements TemplateVersionRepository {
+public class TemplateVersionRepositoryImpl extends AbstractSystemObjectDatabaseImpl<TemplateVersion> implements TemplateVersionRepository {
 
 	@Autowired
 	private TenantService tenantService; 
@@ -68,7 +68,12 @@ public class TemplateVersionRepositoryImpl extends AbstractObjectDatabaseImpl im
 	}
 
 	@Override
-	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
+	protected <T extends UUIDEntity> Map<String, T> getCache(Class<T> obj) {
 		return cacheService.getCacheOrCreate("templateVersions.uuidCache", String.class, obj);
+	}
+
+	@Override
+	public Class<TemplateVersion> getResourceClass() {
+		return TemplateVersion.class;
 	}	
 }

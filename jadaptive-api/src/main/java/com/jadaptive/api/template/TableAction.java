@@ -7,11 +7,31 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface TableAction {
+public @interface TableAction  {
+	
+	enum Target { TABLE, ROW };
+	
+	enum Window { SELF, BLANK }
+	
+	Target target() default Target.TABLE;
+	
+	Window window() default Window.SELF;
+	
+	String bundle(); 
 	
 	String resourceKey();
 	
 	String url();
 
 	String buttonClass() default "primary";
+	
+	String icon();
+	
+	String iconGroup() default "fa-regular";
+	
+	boolean writeAction() default false;
+	
+	boolean confirmationRequired() default false;
+
+
 }

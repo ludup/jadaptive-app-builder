@@ -19,4 +19,7 @@ public @interface ObjectViewDefinition {
 	ViewType type() default ViewType.TAB;
 	
 	int weight() default 0;
+	
+	String bundle();
+	
 }

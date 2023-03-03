@@ -2,16 +2,12 @@ package com.jadaptive.app.db.mock;
 
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectView;
-import com.jadaptive.api.template.ObjectViewDefinition;
-import com.jadaptive.api.template.ObjectViews;
-import com.jadaptive.api.template.ViewType;
 
-@ObjectDefinition(resourceKey = AccordionRenderer.RESOURCE_KEY)
-@ObjectViews({ @ObjectViewDefinition(value = AccordionRenderer.VIEW_OBJECT1, type = ViewType.ACCORDION),
-	@ObjectViewDefinition(value = AccordionRenderer.VIEW_OBJECT2, type = ViewType.ACCORDION, weight = 100)})
+//@ObjectDefinition(resourceKey = AccordionRenderer.RESOURCE_KEY)
+//@ObjectViews({ @ObjectViewDefinition(value = AccordionRenderer.VIEW_OBJECT1, bundle = AccordionRenderer.RESOURCE_KEY, type = ViewType.ACCORDION),
+//	@ObjectViewDefinition(value = AccordionRenderer.VIEW_OBJECT2, bundle = AccordionRenderer.RESOURCE_KEY, type = ViewType.ACCORDION, weight = 100)})
 public class AccordionRenderer extends NamedUUIDEntity {
 
 	private static final long serialVersionUID = -4142337313881674158L;

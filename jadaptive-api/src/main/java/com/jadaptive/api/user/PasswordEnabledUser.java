@@ -2,7 +2,7 @@ package com.jadaptive.api.user;
 
 import com.jadaptive.utils.PasswordEncryptionType;
 
-public abstract class PasswordEnabledUser extends UserImpl {
+public abstract class PasswordEnabledUser extends User {
 
 	private static final long serialVersionUID = 8159475827968045376L;
 

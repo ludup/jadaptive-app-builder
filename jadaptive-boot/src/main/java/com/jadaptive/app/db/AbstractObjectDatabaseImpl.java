@@ -1,12 +1,14 @@
 package com.jadaptive.app.db;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-import javax.cache.Cache;
-
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +17,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.AbstractObjectDatabase;
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TransactionService;
+import com.jadaptive.api.db.Transactional;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.events.Events;
+import com.jadaptive.api.events.ObjectEvent;
+import com.jadaptive.api.events.SystemEvent;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDEvent;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.utils.Utils;
 import com.mongodb.MongoWriteException;
 
@@ -35,72 +50,155 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	@Autowired
 	private CacheService cacheService; 
 	
+	@Autowired
+	private ObjectTemplateRepository templateRepository;
+	
+	@Autowired
+	private EventService eventService; 
+	
+	@Autowired
+	private TemplateVersionService templateService;
+	
+	@Autowired
+	private TransactionService transactionService; 
+	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
 	}
 	
 	protected String getCollectionName(Class<?> clz) {
 		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
+		while(template==null || template.type() == ObjectType.OBJECT) {
+			clz = clz.getSuperclass();
+			template = clz.getAnnotation(ObjectDefinition.class);
+		} 
+		if(Objects.nonNull(template)) {
+			ObjectTemplate t = templateRepository.get(template.resourceKey());
+			return t.getCollectionKey();
+		}
+		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
+	}
+	
+	protected ObjectTemplate getObjectTemplate(Class<?> clz) {
+		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
 		while(template!=null && template.type() == ObjectType.OBJECT) {
 			clz = clz.getSuperclass();
 			template = clz.getAnnotation(ObjectDefinition.class);
 		} 
 		if(Objects.nonNull(template)) {
-			return template.resourceKey();
+			ObjectTemplate t = templateRepository.get(template.resourceKey());
+			return t;
 		}
-		return clz.getSimpleName();
+		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
 	}
 	
-	protected  <T extends UUIDEntity> Cache<String, T> getCache(Class<T> clz) {
+	protected  <T extends UUIDEntity> Map<String, T> getCache(Class<T> clz) {
 		return cacheService.getCacheOrCreate(String.format("%s.uuidCache", clz.getName()), String.class, clz);
 	}
 	
-	protected  <T extends UUIDEntity> Cache<String, UUIDList> getIteratorCache(Class<T> clz) {
+	protected  <T extends UUIDEntity> Map<String, UUIDList> getIteratorCache(Class<T> clz) {
 		return cacheService.getCacheOrCreate(String.format("%s.iterator", clz.getName()), String.class, UUIDList.class);
 	}
 	
-	protected  <T extends UUIDEntity> Cache<String,UUIDList> getIteratorCache(Class<T> clz, String cacheName) {
+	protected  <T extends UUIDEntity> Map<String,UUIDList> getIteratorCache(Class<T> clz, String cacheName) {
 		return cacheService.getCacheOrCreate(String.format("%s.searchCache",
 				clz.getName()), String.class, UUIDList.class);
 	}
 
 //	@SuppressWarnings("rawtypes")
-//	protected <T extends UUIDEntity> Cache<Class<T>, List> getIteratorCache(String name, Class<T> clz) {
+//	protected <T extends UUIDEntity> Map<Class<T>, List> getIteratorCache(String name, Class<T> clz) {
 //		return cacheService.getCacheOrCreate(String.format("iterator.%s.%s", clz.getSimpleName(), name), clz, List.class);
 //	}
 	
+	@SuppressWarnings("unchecked")
 	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
+		
+		T previous = null;
+		boolean isEvent = obj instanceof UUIDEvent;
+		
 		try {
-
-			Document document = new Document();
-			DocumentHelper.convertObjectToDocument(obj, document);
 			
-			db.insertOrUpdate(obj, document, getCollectionName(obj.getClass()), database);
-			
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				/**
-				 * Perform caching which will also inform us whether event
-				 */
-				@SuppressWarnings("unchecked")
-				Cache<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
-				
-				T prevObject = cachedObjects.getAndPut(obj.getUuid(), obj);
-				onObjectUpdated(prevObject, obj);
+			if(!isEvent) {
+				if(StringUtils.isNotBlank(obj.getUuid())) {
+					try {
+						previous = getObject(obj.getUuid(), database, (Class<T>) obj.getClass());
+						onObjectUpdating(obj, previous);
+					} catch(ObjectNotFoundException e) {
+					}
+				}
+				if(Objects.isNull(previous)) {
+					onObjectCreating(obj);
+				}
 			}
 			
-			onObjectUpdated(null, obj);
+			if(!transactionService.isTransactionActive()
+					&& ReflectionUtils.hasAnnotationRecursive(obj.getClass(), Transactional.class)) {
+				final T previousObject = previous;
+				transactionService.executeTransaction(()->{
+					doSave(obj, database, previousObject, isEvent);
+				});	
+			} else {
+				doSave(obj, database, previous, isEvent);
+			}
 			
 		} catch(Throwable e) {
+			log.error("Failed to save object", e);
+			if(!isEvent && !(obj instanceof ObjectTemplate)) {
+				if(Objects.isNull(previous)) {
+					onCreatedError(obj, e);
+				} else {
+					onUpdateError(obj, previous, e);
+				}
+			}
 			checkException(e);
 			throw new RepositoryException(String.format("%s: %s", obj.getClass().getSimpleName(), e.getMessage()), e);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T extends UUIDEntity> void doSave(T obj, String database, T previous, boolean isEvent) {
+		
+		Document document = new Document();
+		document.put("resourceKey", obj.getResourceKey());
+		DocumentHelper.convertObjectToDocument(obj, document);
+		
+//		String contentHash = DocumentHelper.generateContentHash(templateRepository.get(obj.getResourceKey()), document);
+//		document.put("contentHash", contentHash);
+//		
+//		if(Objects.nonNull(previous) && previous.getString("contentHash").equals(contentHash)) {
+//			if(log.isDebugEnabled()) {
+//				log.debug("Object {} with uuid {} has not been updated because it's new content hash is the same as the previous");
+//			}
+//			return;
+//		}
+		try {
+			db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
+			obj.setUuid(document.getString("_id"));
+		
+			if(Boolean.getBoolean("jadaptive.cache")) {
+				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+				cachedObjects.put(obj.getUuid(), obj);
+			}
+		
+			if(!isEvent && !(obj instanceof ObjectTemplate)) {
+				if(Objects.isNull(previous)) {
+					onObjectCreated(obj);
+				} else {
+					onObjectUpdated(obj, previous);
+				}
+			}
+		} catch(Throwable e) {
+			checkException(e);
+			log.error("Captured error in object event", e);
+		}
+
 	}
 	
 	protected <T extends UUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, ObjectException {
 		try {
 			
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				Cache<String,T> cachedObjects = getCache(clz);
+			if(Objects.nonNull(uuid) && Boolean.getBoolean("jadaptive.cache")) {
+				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
 					return result;
@@ -139,7 +237,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				}
 				
 				T result = DocumentHelper.convertDocumentToObject(clz, document);
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				cachedObjects.put(result.getUuid(), result);
 				return result;
 			} else {
@@ -171,7 +269,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				String uuid = document.getString("_id");
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
 					return result;
@@ -203,7 +301,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				String uuid = document.getString("_id");
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
 					return result;
@@ -244,6 +342,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				buf.append("=");
 				buf.append(field.getValue()[0]);
 				break;
+			case ALL:
+				buf.append(field.getColumn());
+				buf.append(" ALL(");
+				buf.append(Utils.csv(field.getValue()));
+				buf.append(")");
+				break;
 			case IN:
 				buf.append(field.getColumn());
 				buf.append(" IN(");
@@ -255,6 +359,26 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				buf.append(" IS NOT ");
 				buf.append(field.getValue()[0]);
 				break;
+			case GT:
+				buf.append(field.getColumn());
+				buf.append(">");
+				buf.append(field.getValue());
+				break;
+			case GTE:
+				buf.append(field.getColumn());
+				buf.append(">=");
+				buf.append(field.getValue());
+				break;
+			case LT:
+				buf.append(field.getColumn());
+				buf.append("<");
+				buf.append(field.getValue());
+				break;
+			case LTE:
+				buf.append(field.getColumn());
+				buf.append("<=");
+				buf.append(field.getValue());
+				break;
 			}
 			
 			if(i < fields.length-1) {
@@ -262,7 +386,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			}
 		}
 		
-		log.info("Search {}", buf.toString());
+		if(log.isDebugEnabled()) {
+			log.debug("Search {}", buf.toString());
+		}
 		return buf.toString();
 	}
 
@@ -277,7 +403,8 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			MongoWriteException mwe = (MongoWriteException)e;
 			switch(mwe.getCode()) {
 			case 11000:
-				throw new RepositoryException("The object could not be created because of a unique constraint violation");
+			case -3:
+				throw new RepositoryException("The object could not be saved because of a unique constraint violation");
 			default:
 				throw new RepositoryException(mwe.getError().getMessage().split(":")[0]);
 			}
@@ -287,37 +414,152 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 	protected <T extends UUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, ObjectException {
+		
+		if(obj instanceof AbstractUUIDEntity && ((AbstractUUIDEntity)obj).isSystem()) {
+			throw new ObjectException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
+		}
+		
 		try {
-			if(obj.isSystem()) {
-				throw new ObjectException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
-			}
+		
+			onObjectDeleting(obj);
+			
 			db.deleteByUUID(obj.getUuid(), getCollectionName(obj.getClass()), database);
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				@SuppressWarnings("unchecked")
-				Cache<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
+				Map<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
 				cachedObjects.remove(obj.getUuid());
 			}
 			onObjectDeleted(obj);
 		} catch(Throwable e) {
+			onDeletingError(obj, e);
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", obj.getClass().getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
-	protected <T extends UUIDEntity> void onObjectDeleted(T obj) { }
+	protected <T extends UUIDEntity> void onDeletingError(T obj, Throwable e) {
+		
+		fireEvent(Events.deleted(obj.getEventGroup()), obj, e);
+	}
 
-	protected <T extends UUIDEntity> void onObjectCreated(T obj) { }
+	protected <T extends UUIDEntity> void fireEvent(String eventKey, T obj, boolean ignoreErrors) {
+		
+		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
+		
+		if(Objects.nonNull(eventClz)) {
+			try {
+				eventService.publishEvent(createSuccessEvent(eventClz, obj));
+			} catch(Throwable e) {
+				log.error(e.getMessage(), e);
+				if(!ignoreErrors) {
+					throw e;
+				}
+			}
+		}
+	}
 	
-	protected <T extends UUIDEntity> void onObjectUpdated(T previousObject, T obj) { }
+	protected <T extends UUIDEntity> void fireEvent(String eventKey, T obj, Throwable t) {
+		
+		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
+		
+		if(Objects.nonNull(eventClz)) {
+			try {
+				eventService.publishEvent(createErrorEvent(eventClz, obj, t));
+			} catch(Throwable e) {
+				log.error(e.getMessage(), e);
+			}
+		}
+	}
+	
+	protected <T extends UUIDEntity> SystemEvent createSuccessEvent(Class<? extends ObjectEvent<?>> eventClz, T obj) {
+		
+		try {
+			for(Constructor<?> c : eventClz.getConstructors()) {
+				if(c.getParameterCount()==1) {
+					if(c.getParameterTypes()[0].isAssignableFrom(obj.getClass())) {
+						return (SystemEvent) c.newInstance(obj);
+					}
+				}
+			}
+			
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException | SecurityException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+		
+		throw new IllegalStateException("No such constructor for event " + eventClz.getName() + " and object " + obj.getClass().getName());
+	}
+	
+	protected <T extends UUIDEntity> SystemEvent createErrorEvent(Class<? extends ObjectEvent<?>> eventClz, T obj, Throwable t) {
+		
+		try {
+			for(Constructor<?> c : eventClz.getConstructors()) {
+				if(c.getParameterCount()==2) {
+					if(c.getParameterTypes()[0].isAssignableFrom(obj.getClass())
+							&& c.getParameterTypes()[1].isAssignableFrom(Throwable.class)) {
+						return (SystemEvent) c.newInstance(obj, t);
+					}
+				}
+			}
+			
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException | SecurityException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+		
+		throw new IllegalStateException("No such constructor for event " + eventClz.getName() + " and object " + obj.getClass().getName());
+	}
+
+	protected <T extends UUIDEntity> void onObjectDeleted(T obj) {
+		
+		fireEvent(Events.deleted(obj.getEventGroup()), obj, true);
+		
+	}
+	
+	protected <T extends UUIDEntity> void onObjectDeleting(T obj) {
+		
+		fireEvent(Events.deleting(obj.getEventGroup()), obj, false);
+		
+	}
+	
+	protected <T extends UUIDEntity> void onObjectCreating(T obj) { 
+		
+		fireEvent(Events.creating(obj.getEventGroup()), obj, false);
+	}
+
+	protected <T extends UUIDEntity> void onObjectCreated(T obj) { 
+		
+		fireEvent(Events.created(obj.getEventGroup()), obj, true);
+	}
+
+	protected <T extends UUIDEntity> void onCreatedError(T obj, Throwable t) { 
+		
+		fireEvent(Events.created(obj.getEventGroup()), obj, t);
+	}
+	
+	protected <T extends UUIDEntity> void onUpdateError(T obj, T previous, Throwable t) { 
+		
+		fireEvent(Events.updated(obj.getEventGroup()), obj, t);
+	}
+	
+	protected <T extends UUIDEntity> void onObjectUpdated(T obj, T previousObject) {
+		
+		fireEvent(Events.updated(obj.getEventGroup()), obj, true);
+	}
+	
+	protected <T extends UUIDEntity> void onObjectUpdating(T obj, T previousObject) {
+		
+		fireEvent(Events.updating(obj.getEventGroup()), obj, false);
+	}
 	
 	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {
 		
 		try {
 			
 			if(Boolean.getBoolean("jadaptive.cache")) {
-				Cache<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				
 				List<String> uuids = cachedUUIDs.get(DEFAULT_ITERATOR);
 				
@@ -347,8 +589,8 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		try {
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				String cacheName = getSearchFieldsText(fields, "AND");
-				Cache<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
-				Cache<String,T> cachedObjects = getCache(clz);
+				Map<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
+				Map<String,T> cachedObjects = getCache(clz);
 				
 				UUIDList uuids = cachedUUIDs.get(cacheName);
 				if(Objects.nonNull(uuids) && uuids.size() > 0) {
@@ -384,15 +626,31 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 		} catch (Throwable e) {
 			checkException(e);
-			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
+			throw new RepositoryException(String.format("%s: %s", clz.getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
-	protected <T extends UUIDEntity> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> Collection<T> searchObjects(String database, Class<T> clz, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, fields)) {
+			for(Document document : db.search(getCollectionName(clz), database, order, sortField, fields)) {
+				results.add(DocumentHelper.convertDocumentToObject(clz, document));
+			}
+			
+			return results;
+			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(String.format("%s: %s", clz.getSimpleName(), e.getMessage()), e);
+		}
+	}
+	
+	protected <T extends UUIDEntity> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
+		try {
+
+			List<T> results = new ArrayList<>();
+			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, order, sortField, fields)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -415,12 +673,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 
-	protected <T extends UUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, String searchField, String searchValue, int start, int length) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, String searchField, String searchValue, int start, int length, SortOrder order, String sortField) throws RepositoryException, ObjectException {
 		
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.table(getCollectionName(clz), searchField, searchValue, database, start, length)) {
+			for(Document document : db.table(getCollectionName(clz), searchField, searchValue, database, start, length, order, sortField)) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -442,5 +700,14 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	
+	protected <T extends UUIDEntity> Long sumObjects(String database, Class<T> clz, String groupBy, SearchField... fields) throws RepositoryException, ObjectException {
+		try {
+			return db.sum(getCollectionName(clz), database, groupBy, fields);
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
+		}		
+	}
 	
 }

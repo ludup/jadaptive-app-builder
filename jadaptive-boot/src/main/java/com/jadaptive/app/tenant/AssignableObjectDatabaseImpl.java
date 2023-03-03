@@ -12,6 +12,7 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.UUIDObjectUtils;
 
@@ -30,30 +31,63 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	protected void assign(T e, Collection<Role> roles, Collection<User> users) {
 		
 		for(Role role : roles) {
-			e.getRoles().add(role.getUuid());
+			e.getRoles().add(role);
 		}
 		
 		for(User user : users) {
-			e.getUsers().add(user.getUuid());
+			e.getUsers().add(user);
 		}
 		
 		objectDatabase.saveOrUpdate(e);
 	}
 	
 	@Override
-	public Iterable<T> getAssignedObjects(Class<T> resourceClass, User user) {
+	public Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SortOrder order, String sortField, SearchField... fields) {
 		
 		if(permissionService.isAdministrator(user)) {
 			 return getObjects(resourceClass);
 		} else {
 			Collection<Role> userRoles = roleService.getRolesByUser(user);
 			return objectDatabase.searchObjects(resourceClass, 
+					order,
+					sortField,
+					SearchField.and(fields),
 					SearchField.or(
-							SearchField.in("users", user.getUuid()),
-							SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))
+							SearchField.all("users.uuid", user.getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))
 					));
 		}
 	}
+	
+	@Override
+	public Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SearchField... fields) {
+		
+		if(permissionService.isAdministrator(user)) {
+			 return getObjects(resourceClass);
+		} else {
+			Collection<Role> userRoles = roleService.getRolesByUser(user);
+			return objectDatabase.searchObjects(resourceClass, 
+					SearchField.add(fields,
+					SearchField.or(
+							SearchField.all("users.uuid", user.getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))
+					));
+		}
+	}
+	
+	@Override
+	public Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields) {
+		
+		Collection<Role> userRoles = roleService.getRolesByUser(user);
+		return objectDatabase.searchObjects(resourceClass, 
+				SearchField.add(fields,
+				SearchField.or(
+						SearchField.all("users.uuid", user.getUuid()),
+						SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))
+				));
+		
+	}
+
 
 	@Override
 	public T getObjectByUUID(Class<T> resourceClass, String uuid) {
@@ -71,7 +105,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	}
 
 	@Override
-	public T getObject(Class<T> resourceClass, User user, SearchField... fields) {
+	public T getAssignedObject(Class<T> resourceClass, User user, SearchField... fields) {
 		
 		if(permissionService.isAdministrator(user)) {
 			 return getObject(resourceClass, fields);
@@ -80,12 +114,12 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 			
 			if(fields.length > 0) {
 				return objectDatabase.get(resourceClass, SearchField.and(SearchField.and(fields), 
-						SearchField.or(SearchField.in("users", user.getUuid()),
-										SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles)))));
+						SearchField.or(SearchField.all("users.uuid", user.getUuid()),
+										SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));
 			} else {
 				return objectDatabase.get(resourceClass, SearchField.or(
-					SearchField.in("users", user.getUuid()),
-					SearchField.in("roles", UUIDObjectUtils.getUUIDs(userRoles))));
+					SearchField.all("users.uuid", user.getUuid()),
+					SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))));
 			}
 		}
 	}
@@ -98,6 +132,11 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	@Override
 	public T getObject(Class<T> resourceClass, SearchField... fields) {
 		return objectDatabase.get(resourceClass, fields);
+	}
+
+	@Override
+	public long countObjects(Class<T> resourceClass) {
+		return objectDatabase.count(resourceClass);
 	}
 	
 }

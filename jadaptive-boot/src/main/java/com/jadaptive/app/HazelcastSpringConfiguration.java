@@ -21,18 +21,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 
 import com.hazelcast.cache.HazelcastCachingProvider;
 import com.hazelcast.config.AwsConfig;
 import com.hazelcast.config.Config;
-import com.hazelcast.config.EvictionPolicy;
 import com.hazelcast.config.JoinConfig;
-import com.hazelcast.config.MapConfig;
-import com.hazelcast.config.MaxSizeConfig;
-import com.hazelcast.config.MaxSizeConfig.MaxSizePolicy;
 import com.hazelcast.config.MulticastConfig;
 import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.config.TcpIpConfig;
@@ -41,7 +36,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.jadaptive.api.db.ClassLoaderService;
 //import com.hazelcast.hibernate.HazelcastCacheRegionFactory;
 
-@Configuration
+//@Configuration
 public class HazelcastSpringConfiguration {
 
 	static Logger log = LoggerFactory.getLogger(HazelcastSpringConfiguration.class);
@@ -58,26 +53,26 @@ public class HazelcastSpringConfiguration {
 	@Value("${user.dir}")
 	private String userDir;
 
-	@Bean
-	Config config(NetworkConfig networkConfig) {
-		Config config = new Config();
-		config.setInstanceName(applicationContext.getId());
-		config.setNetworkConfig(networkConfig);
-		config.setProperty("hazelcast.logging.type", "log4j");
-
-		/* For synchronization only */
-		MapConfig mapConfig = new MapConfig("com.hypersocket.synchronize.*");
-		mapConfig.setBackupCount(1);
-		mapConfig.setTimeToLiveSeconds(3600);
-		mapConfig.setMaxIdleSeconds(600);
-		mapConfig.setEvictionPolicy(EvictionPolicy.LRU);
-		mapConfig.setMaxSizeConfig(
-				new MaxSizeConfig(Integer.parseInt(System.getProperty("performance.maxSynchronizeCacheSize", "32")),
-						MaxSizePolicy.PER_NODE));
-		config.addMapConfig(mapConfig);
-		config.setClassLoader(classLoaderService.getClassLoader());
-		return config;
-	}
+//	@Bean
+//	Config config(NetworkConfig networkConfig) {
+//		Config config = new Config();
+//		config.setInstanceName(applicationContext.getId());
+//		config.setNetworkConfig(networkConfig);
+//		config.setProperty("hazelcast.logging.type", "log4j");
+//
+//		/* For synchronization only */
+//		MapConfig mapConfig = new MapConfig("com.hypersocket.synchronize.*");
+//		mapConfig.setBackupCount(1);
+//		mapConfig.setTimeToLiveSeconds(3600);
+//		mapConfig.setMaxIdleSeconds(600);
+//		mapConfig.setEvictionPolicy(EvictionPolicy.LRU);
+//		mapConfig.setMaxSizeConfig(
+//				new MaxSizeConfig(Integer.parseInt(System.getProperty("performance.maxSynchronizeCacheSize", "32")),
+//						MaxSizePolicy.PER_NODE));
+//		config.addMapConfig(mapConfig);
+//		config.setClassLoader(classLoaderService.getClassLoader());
+//		return config;
+//	}
 
 	@Bean(name = "hazelcastInstance", destroyMethod = "shutdown")
 	HazelcastInstance hazelcast(Config config) {

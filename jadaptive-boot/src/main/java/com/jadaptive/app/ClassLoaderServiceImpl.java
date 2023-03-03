@@ -60,6 +60,11 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 
 		return getClass().getClassLoader().getResource(name);
 	}
+	
+	@Override
+	public URL getResource(String name) {
+		return findResource(name);
+	}
 
 	@Override
 	protected Enumeration<URL> findResources(String name) throws IOException {
@@ -95,6 +100,12 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
+		
+		Class<?> clz = findLoadedClass(name);
+
+		if(clz!=null) {
+			return clz;
+		}
 		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 			try {
@@ -167,6 +178,16 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 			return (Class<? extends UUIDDocument>) findClass(template.getTemplateClass());
 		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public boolean hasTemplateClass(ObjectTemplate template) {
+		try {
+			findClass(template.getTemplateClass());
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
 		}
 	}
 }

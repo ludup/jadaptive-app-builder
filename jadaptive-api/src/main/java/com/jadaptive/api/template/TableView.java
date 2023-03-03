@@ -9,9 +9,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface TableView {
 				
-		String[] defaultColumns() default { };
-		
-		String[] optionalColumns() default { };
+		String[] defaultColumns();
 		
 		TableAction[] actions() default { };
+		
+		boolean requiresView() default true;
+		
+		boolean requiresUpdate() default false;
+		
+		boolean requiresCreate() default false;
+		
+		SortOrder sortOrder() default SortOrder.ASC;
+
+		String sortField() default "_id";
 }

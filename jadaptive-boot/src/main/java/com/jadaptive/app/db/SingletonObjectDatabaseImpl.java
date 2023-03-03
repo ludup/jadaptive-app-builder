@@ -1,5 +1,6 @@
 package com.jadaptive.app.db;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -19,11 +20,13 @@ public class SingletonObjectDatabaseImpl<T extends SingletonUUIDEntity> implemen
 	public T getObject(Class<T> resourceClass) {
 		
 		try {
-			T tmp = resourceClass.newInstance();
+			T tmp = resourceClass.getConstructor().newInstance();
 			try {
-				return objectDatabase.get(tmp.getUuid(), resourceClass);
+				return objectDatabase.get(tmp.getResourceKey(), resourceClass);
 			} catch(ObjectNotFoundException e) {
-				return tmp;
+				Document doc = new Document();
+				DocumentHelper.buildDocument(tmp.getResourceKey(), tmp, doc);
+				return DocumentHelper.convertDocumentToObject(resourceClass, doc);
 			}	
 		} catch(Throwable t) {
 			throw new RepositoryException(t.getMessage(), t);

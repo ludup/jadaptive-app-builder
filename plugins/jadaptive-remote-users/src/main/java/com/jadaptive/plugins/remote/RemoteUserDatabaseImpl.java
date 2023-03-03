@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -21,11 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.identity4j.connector.Connector;
 import com.identity4j.connector.ConnectorBuilder;
 import com.identity4j.connector.exception.ConnectorException;
-import com.identity4j.connector.exception.PrincipalNotFoundException;
 import com.identity4j.util.MultiMap;
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.db.ClassLoaderService;
-import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -58,8 +55,6 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	
 	@Override
 	public void setPassword(User user, char[] password, boolean passwordChangeRequired) {
-		
-
 		
 		File identity4jFile = getConnectorConfiguration();
 		
@@ -119,84 +114,6 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 		return false;
 	}
 
-	@Override
-	public User getUser(String username) {
-		
-		File identity4jFile = getConnectorConfiguration();
-		
-		if(identity4jFile.exists()) {
-			
-			return executeOnRemoteDatabase(new RemoteDatabaseTask<User>() {
-
-				@Override
-				public User executeOnRemote() {
-					try {
-						
-						if(log.isInfoEnabled()) {
-							log.info("Looking for remote user {}", username);
-						}
-						
-						Connector<?> con = createConnector(identity4jFile);
-						return new RemoteUser(con.getIdentityByName(username));
-						} catch(PrincipalNotFoundException e) {
-							throw new ObjectNotFoundException("Remote user with username " + username + " not found");
-						} catch(ConnectorException e) {
-							throw new ObjectNotFoundException("Remote user with username " + username + " not found");
-						}
-				}
-			});
-		}
-		
-		throw new ObjectNotFoundException("Remote user with username " + username + " not found");
-	}
-
-	@Override
-	public User getUserByUUID(String uuid) {
-		
-		File identity4jFile = getConnectorConfiguration();
-		
-		if(identity4jFile.exists()) {
-			
-			return executeOnRemoteDatabase(new RemoteDatabaseTask<User>() {
-
-				@Override
-				public User executeOnRemote() {
-					try {
-						
-						if(log.isInfoEnabled()) {
-							log.info("Looing for remote user by GUID {}", uuid);
-						}
-						
-						Connector<?> con = createConnector(identity4jFile);
-						return new RemoteUser(con.getIdentityByGuid(uuid));
-						} catch(PrincipalNotFoundException e) {
-							throw new ObjectNotFoundException("Remote user with guid " + uuid + " not found");
-						} catch(ConnectorException e) {
-							throw new ObjectNotFoundException("Remote user with guid " + uuid + " not found");
-						}
-				}
-			});
-		}
-		
-		throw new ObjectNotFoundException("Remote user with uuid " + uuid + " not found");
-	}
-
-	@Override
-	public Iterable<User> iterateUsers() {
-
-		File identity4jFile = getConnectorConfiguration();
-		
-		if(identity4jFile.exists()) {
-			
-			if(log.isInfoEnabled()) {
-				log.info("Iterating remote users");
-			}
-			
-			return new ConnectorIterable(createConnector(identity4jFile), this);
-		} else {
-			return Collections.emptyList();
-		}
-	}
 
 	private File getConnectorConfiguration() {
 		Tenant tenant = getCurrentTenant();
@@ -251,7 +168,7 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	}
 
 	@Override
-	public Class<? extends User> getUserClass() {
+	public Class<RemoteUser> getUserClass() {
 		return RemoteUser.class;
 	}
 
@@ -288,5 +205,10 @@ public class RemoteUserDatabaseImpl extends AuthenticatedService implements Remo
 	@Override
 	public Integer weight() {
 		return Integer.MAX_VALUE;
+	}
+
+	@Override
+	public boolean hasEncryptedPassword(User u) {
+		return true;
 	};
 }

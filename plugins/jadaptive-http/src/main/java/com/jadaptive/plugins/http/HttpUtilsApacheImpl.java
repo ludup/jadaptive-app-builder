@@ -14,6 +14,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -125,6 +126,32 @@ public class HttpUtilsApacheImpl implements HttpUtilsImpl {
 	public String doHttpGetContent(String uri, boolean allowSelfSigned, Map<String, String> headers)
 			throws IOException {
 		CloseableHttpResponse response = doHttpGet(uri, allowSelfSigned, headers);
+		try {
+			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				throw new IOException("Received " + response.getStatusLine().toString());
+			}
+			HttpEntity entity = response.getEntity();
+			return EntityUtils.toString(entity);
+
+		} finally {
+			try {
+				response.close();
+			} catch (IOException e) {
+			}
+		}
+	}
+	
+	@Override
+	public String doHttpDelete(String uri, boolean allowSelfSigned, Map<String, String> headers)
+			throws IOException {
+		
+		CloseableHttpClient client = createHttpClient(allowSelfSigned);
+		
+		HttpDelete request = new HttpDelete(uri);
+		for (String key : headers.keySet()) {
+			request.setHeader(key, headers.get(key));
+		}
+		CloseableHttpResponse response = client.execute(request);
 		try {
 			if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
 				throw new IOException("Received " + response.getStatusLine().toString());

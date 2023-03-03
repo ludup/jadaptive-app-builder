@@ -1,6 +1,6 @@
 package com.jadaptive.app.tenant;
 
-import javax.cache.Cache;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +15,12 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
 import com.jadaptive.app.db.DocumentDatabase;
 
 @Repository
-public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements TenantRepository {
+public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenant> implements TenantRepository {
 
 	private static Logger log = LoggerFactory.getLogger(TenantRepositoryImpl.class);
-	private static final String TENANT_DATABASE = "tenants";
 		
 	@Autowired
 	private CacheService cacheService;
@@ -44,6 +42,7 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 	@Override
 	public void deleteTenant(Tenant tenant) throws RepositoryException, ObjectException {
 		deleteObject(tenant, TENANT_DATABASE);
+		db.dropDatabase(tenant.getUuid());
 	}
 	
 	@Override
@@ -58,13 +57,7 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 	
 	@Override
 	public void dropSchema() throws RepositoryException, ObjectException {
-		
-		for(Tenant tenant : listTenants()) {
-			db.dropDatabase(tenant.getUuid());
-		}
-		
-		db.dropDatabase(TENANT_DATABASE);
-		
+		db.dropSchema();
 	}
 	
 	@Override
@@ -75,6 +68,7 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 		if(log.isInfoEnabled()) {
 			log.info("Creating new application schema");
 		}
+		
 	}
 
 	@Override
@@ -93,8 +87,13 @@ public class TenantRepositoryImpl extends AbstractObjectDatabaseImpl implements 
 	}
 	
 	@Override
-	protected <T extends UUIDEntity> Cache<String, T> getCache(Class<T> obj) {
+	protected <T extends UUIDEntity> Map<String, T> getCache(Class<T> obj) {
 		return cacheService.getCacheOrCreate("tenants.uuidCache", String.class, obj);
+	}
+
+	@Override
+	public Class<Tenant> getResourceClass() {
+		return Tenant.class;
 	}	
 
 }

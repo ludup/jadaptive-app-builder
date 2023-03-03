@@ -2,34 +2,39 @@ package com.jadaptive.app.user;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
-import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.user.FakeUser;
+import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
 import com.jadaptive.api.user.UserDatabase;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.utils.CompoundIterable;
 
 @Service
-public class UserServiceImpl extends AuthenticatedService implements UserService, TenantAware, UUIDObjectService<User> {
+public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
 	
 	@Autowired
 	private PermissionService permissionService; 
@@ -37,8 +42,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Autowired
 	private ApplicationService applicationService; 
 	
+	@Autowired
+	private EventService eventService; 
+	
 	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
 	
+	@Autowired
+	private TenantAwareObjectDatabase<User> userRepository;
+
 	@Override
 	public Integer getOrder() {
 		return 0;
@@ -65,16 +76,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public User getUserByUUID(String uuid) {
 		
-		User user = null;
-		
-		for(UserDatabase userDatabase : getOrderedDatabases()) {
-			try {
-				user = userDatabase.getUserByUUID(uuid);
-				if(Objects.nonNull(user)) {
-					break;
-				}
-			} catch(ObjectNotFoundException e) { }
-		}
+		User user = userRepository.get(uuid, User.class);
 		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("User with id %s not found", uuid));
@@ -82,23 +84,10 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		return user;
 	}
 
-	private List<UserDatabase> getOrderedDatabases() {
-		loadUserDatabases();
-		List<UserDatabase> tmp = new ArrayList<>(userDatabases.values());
-		Collections.sort(tmp, new Comparator<UserDatabase>() {
-
-			@Override
-			public int compare(UserDatabase o1, UserDatabase o2) {
-				return o1.weight().compareTo(o2.weight());
-			}
-		});
-		return tmp;
-	}
-
 	@Override
 	public boolean verifyPassword(User user, char[] password) {
 		try {
-			return getDatabase(user).verifyPassword(user, password);
+			return !(user instanceof FakeUser) && getDatabase(user).verifyPassword(user, password);
 		} catch(ObjectNotFoundException e) {
 			return false;
 		}
@@ -108,16 +97,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public User getUser(String username) {
 
-		User user = null;
-		
-		for(UserDatabase userDatabase : getOrderedDatabases()) {
-			try {
-				user = userDatabase.getUser(username);
-				if(Objects.nonNull(user)) {
-					break;
-				}
-			} catch(ObjectNotFoundException e) { }
-		}
+		User user = userRepository.get(User.class, SearchField.eq("username", username));
 		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("%s not found", username));
@@ -128,16 +108,7 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public User getUserByEmail(String email) {
 
-		User user = null;
-		
-		for(UserDatabase userDatabase : getOrderedDatabases()) {
-			try {
-				user = userDatabase.getUser(email);
-				if(Objects.nonNull(user)) {
-					break;
-				}
-			} catch(ObjectNotFoundException e) { }
-		}
+		User user = userRepository.get(User.class, SearchField.eq("email", email));
 		
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("%s not found", email));
@@ -150,8 +121,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		permissionService.assertPermission(SET_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
-		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 		
+		try {
+			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+			eventService.publishEvent(new SetPasswordEvent(user));
+		} catch(Throwable e) {
+			eventService.publishEvent(new SetPasswordEvent(user, e));
+			throw e;
+		}
 	}
 	
 	@Override
@@ -159,8 +136,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
-		verifyPassword(user, oldPassword);
-		getDatabase(user).setPassword(user, newPassword, false);
+		
+		try {
+			verifyPassword(user, oldPassword);
+			getDatabase(user).setPassword(user, newPassword, false);
+			eventService.publishEvent(new ChangePasswordEvent());
+		} catch(Throwable e) {
+			eventService.publishEvent(new ChangePasswordEvent(e));
+		}
 		
 	}
 	
@@ -169,7 +152,14 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 		
 		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
-		getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+		
+		try {
+			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+			eventService.publishEvent(new ChangePasswordEvent());
+		} catch(Throwable e) {
+			eventService.publishEvent(new ChangePasswordEvent(e));
+			throw e;
+		}
 		
 	}
 
@@ -186,16 +176,6 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
 
-	}
-
-	@Override
-	public Iterable<User> allUsers() {
-		
-		CompoundIterable<User> iterator = new CompoundIterable<>();
-		userDatabases.forEach((k,v)->{
-			iterator.add(v.iterateUsers());
-		});
-		return iterator;
 	}
 
 	@Override
@@ -245,25 +225,61 @@ public class UserServiceImpl extends AuthenticatedService implements UserService
 	
 	@Override
 	public boolean supportsLogin(User user) {
-		return getDatabase(user).getCapabilities().contains(UserDatabaseCapabilities.LOGON);
-	}
-
-	@Override
-	public Map<String, String> getUserProperties(User user) {
-		// TODO Return from user database implementation
-		return new HashMap<>();
-	}
-
-	@Override
-	public User getObjectByUUID(String uuid) {
-		return getUserByUUID(uuid);
+		return user instanceof FakeUser || getDatabase(user).getCapabilities().contains(UserDatabaseCapabilities.LOGON);
 	}
 
 	@Override
 	public String saveOrUpdate(User user) {
 		UserDatabase db = getDatabase(user);
+		boolean isNew = StringUtils.isBlank(user.getUuid());
 		db.updateUser(user);
+		if(user instanceof PasswordEnabledUser) {
+			if(isNew || !db.hasEncryptedPassword(user)) {
+				throw new UriRedirect("/app/ui/set-password/" + user.getUuid());
+			}
+		}
+
 		return user.getUuid();
+	}
+
+	@Override
+	public long getTotalResources() {
+		return userRepository.count(User.class);
+	}
+
+	@Override
+	public String getResourceKey() {
+		return "users";
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
+
+	@Override
+	public Collection<User> getUsersByUUID(Collection<String> users) {
+		
+		List<User> tmp = new ArrayList<>();
+		for(User user : userRepository.list(User.class, SearchField.in("uuid", users))) {
+			tmp.add(user);
+		}
+		return tmp;
+	}
+
+	@Override
+	public long countUsers() {
+		return userRepository.count(User.class);
+	}
+
+	@Override
+	protected Class<User> getResourceClass() {
+		return User.class;
+	}
+
+	@Override
+	public Map<String, String> getUserProperties(User user) {
+		return new HashMap<>();
 	}
 
 }

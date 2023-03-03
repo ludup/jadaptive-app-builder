@@ -76,6 +76,20 @@ public class PropertyServiceImpl implements PropertyService {
 	}
 	
 	@Override
+	public String getStringOrSaveDefault(String key, String defaultValue) {
+		
+		try {
+			Property property = propertyDatabase.get(Property.class, SearchField.eq("key", key));
+			return property.getValue();
+		} catch(ObjectNotFoundException e) {
+			setString(key, defaultValue);
+			return defaultValue;
+		}
+	}
+	
+	
+	
+	@Override
 	public void setString(String key, String value) {
 		
 		Property property;

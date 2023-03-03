@@ -173,9 +173,6 @@ public class EncryptionServiceImpl implements EncryptionService {
 			byte[] encrypted = Base64.getDecoder().decode(elements[2]);
 			
 			String tmp = new String(decryptAES(encrypted, key, iv), "UTF-8");
-			if(log.isInfoEnabled()) {
-				log.info("Decrypted " + tmp);
-			}
 			return tmp;
 		} catch (Exception e) {
 			throw new RepositoryException(e.getMessage(), e);

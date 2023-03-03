@@ -9,13 +9,13 @@ public interface PluginWebSocketHandler extends ExtensionPoint {
 
 	boolean handles(String handler);
 
-	void handleError(Throwable exception);
+	void handleError(WebSocketClient websocket, Throwable exception);
 
-	void connectionClosed(String reason);
+	void connectionClosed(WebSocketClient websocket, String reason);
 
-	void handleBinaryMessage(ByteBuffer payload, int payloadLength) throws IOException;
+	void handleBinaryMessage(WebSocketClient websocket, ByteBuffer payload, int payloadLength) throws IOException;
 
-	void handleTextMessage(String payload, int payloadLength) throws IOException;
+	void handleTextMessage(WebSocketClient websocket, String payload, int payloadLength) throws IOException;
 
 	void connectionOpened(WebSocketClient websocket) throws IOException;
 

@@ -7,57 +7,75 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectServiceBean;
+import com.jadaptive.api.template.TableView;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 
-@ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL)
+@ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL, creatable = false, updatable = false)
+@ObjectServiceBean(bean = SessionService.class)
+@TableView(defaultColumns = { "user", "signedIn", "remoteAddress", "type", "state", "userAgent"})
 public class Session extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -3842259533277443038L;
 
 	public static final String RESOURCE_KEY = "sessions";
 	
-	@ObjectField(type = FieldType.TEXT, required = true)
+	@ObjectField(type = FieldType.TEXT, searchable = true)
+	@Validator(type = ValidationType.REQUIRED)
 	String remoteAddress;
 	
-	@ObjectField(type = FieldType.TIMESTAMP, required = true)
-	Date lastUpdated;
+	@ObjectField(type = FieldType.ENUM, searchable = true)
+	@Validator(type = ValidationType.REQUIRED)
+	SessionType type;
 	
-	@ObjectField(type = FieldType.TIMESTAMP, required = true)
-	Date signedIn;
+	@ObjectField(type = FieldType.ENUM, searchable = true)
+	@Validator(type = ValidationType.REQUIRED)
+	SessionState state;
 	
 	@ObjectField(type = FieldType.TIMESTAMP)
+	@Validator(type = ValidationType.REQUIRED)
+	Date lastUpdated;
+	
+	@ObjectField(type = FieldType.TIMESTAMP)
+	@Validator(type = ValidationType.REQUIRED)
+	Date signedIn;
+	
+	@ObjectField(type = FieldType.TIMESTAMP, searchable = true)
 	Date signedOut;
-	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE)
-	Tenant tenant;
-	
-	@ObjectField(type = FieldType.TEXT, required = true)
+		
+	@ObjectField(type = FieldType.TEXT, searchable = true)
+	@Validator(type = ValidationType.REQUIRED)
 	String userAgent;
 	
-	@ObjectField(type = FieldType.INTEGER, required = true)
+	@ObjectField(type = FieldType.INTEGER)
+	@Validator(type = ValidationType.REQUIRED)
 	Integer sessionTimeout;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, required = true)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = User.RESOURCE_KEY, searchable = true)
+	@Validator(type = ValidationType.REQUIRED)
 	User user;
 	
-	String csrfToken; 
-	
+	Tenant tenant;
+
 	public Session() {
 
 	}
 
-	public String getId() {
-		/**
-		 * For compatibility with Hypersocket
-		 */
-		return getUuid();
-	}
-	
 	public String getResourceKey() {
 		return RESOURCE_KEY;
 	}
 	
+	public SessionType getType() {
+		return type;
+	}
+
+	public void setType(SessionType type) {
+		this.type = type;
+	}
+
 	public String getRemoteAddress() {
 		return remoteAddress;
 	}
@@ -122,22 +140,22 @@ public class Session extends AbstractUUIDEntity {
 	public void setUser(User user) {
 		this.user = user;
 	}
-
-	public String getCsrfToken() {
-		return csrfToken;
-	}
-
-	public void setCsrfToken(String csrfToken) {
-		this.csrfToken = csrfToken;
-	}
 	
+	public SessionState getState() {
+		return state;
+	}
+
+	public void setState(SessionState state) {
+		this.state = state;
+	}
+
 	@JsonIgnore
 	public boolean isReadyForUpdate() {
-		// We save our state every minute
+		// We save our state every 10 seconds
 		if(lastUpdated==null) {
 			return true;
 		}
-		return System.currentTimeMillis() - lastUpdated.getTime() > 60000L;
+		return System.currentTimeMillis() - lastUpdated.getTime() > 10000L;
 	}
 
 	public boolean isClosed() {

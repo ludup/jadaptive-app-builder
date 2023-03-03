@@ -4,13 +4,12 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.AbstractUUIDEntity;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
 
 @ObjectDefinition(resourceKey = TestStringCollections.RESOURCE_KEY, type = ObjectType.COLLECTION)
-public class TestStringCollections extends AbstractUUIDEntity {
+public class TestStringCollections extends TestUUIDEntity {
 
 	private static final long serialVersionUID = -222634087659887670L;
 
