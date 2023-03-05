@@ -13,9 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
+import org.pf4j.PluginManager;
+import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,8 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectExtension;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.ObjectView;
@@ -54,6 +59,10 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.app.db.DocumentHelper;
 
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
+
 @Service
 public class TemplateServiceImpl extends AuthenticatedService implements TemplateService, JsonTemplateEnabledService<ObjectTemplate>, TenantAware {
 	
@@ -68,10 +77,16 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Autowired
 	private ClassLoaderService classService;
 	
+	@Autowired
+	private PluginManager pluginManager;
+	
 //	Map<String,List<ObjectTemplate>> objectForwardDependencies = new HashMap<>();
 //	Map<String,List<String>> objectReverseDependencies = new HashMap<>();
 	Map<String,Class<? extends UUIDDocument>> templateClazzes = new HashMap<>();
 	Map<Class<?>,String> templateResourceKeys = new HashMap<>();
+	
+	private Map<String,Collection<Class<? extends UUIDDocument>>> extensionClasses = new HashMap<>();
+	private Map<String,Set<String>> extensionsByTemplate = new HashMap<>();
 	
 	@Override
 	public void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template) {
@@ -123,6 +138,90 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		return repository.list();
 	}
 	
+	@SuppressWarnings("unchecked")
+	private void generateExtensionTemplates() {
+		
+		for(PluginWrapper w : pluginManager.getPlugins()) {
+
+			if(log.isInfoEnabled()) {
+				log.info("Scanning plugin {} for entity templates in {}", 
+						w.getPluginId(),
+						w.getPlugin().getClass().getPackage().getName());
+			}
+
+			if(w.getPlugin()==null) {
+				continue;
+			}
+
+            try (ScanResult scanResult =
+                    new ClassGraph()                 
+                        .enableAllInfo()  
+                        .addClassLoader(w.getPluginClassLoader())
+                        .whitelistPackages(w.getPlugin().getClass().getPackage().getName())   
+                        .scan()) {                  
+                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectExtension.class.getName())) {
+
+                    if(classInfo.getPackageName().startsWith(w.getPlugin().getClass().getPackage().getName())) {
+                        if(log.isInfoEnabled()) {
+    						log.info("Found extension {}", classInfo.getName());
+    					}
+                        registerExtension((Class<? extends UUIDDocument>) classInfo.loadClass());
+                    }
+                }
+            }
+		}
+		
+		try (ScanResult scanResult =
+                new ClassGraph()                 
+                    .enableAllInfo()  
+                    .addClassLoader(getClass().getClassLoader())
+                    .whitelistPackages("com.jadaptive")   
+                    .scan()) {                  
+            for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectExtension.class.getName())) {
+                if(log.isInfoEnabled()) {
+					log.info("Found extension {}", classInfo.getName());
+				}
+                registerExtension((Class<? extends UUIDDocument>) classInfo.loadClass());
+            }
+        }
+		
+	}
+	private void registerExtension(Class<? extends UUIDDocument> loadClass) {
+		
+		ObjectExtension e = loadClass.getAnnotation(ObjectExtension.class);
+		ObjectDefinition d = loadClass.getAnnotation(ObjectDefinition.class);
+		if(!extensionClasses.containsKey(e.extend())) {
+			extensionClasses.put(e.extend(), new ArrayList<>());
+			extensionsByTemplate.put(e.extend(), new TreeSet<>());
+		}
+		extensionClasses.get(e.extend()).add(loadClass);
+		extensionsByTemplate.get(e.extend()).add(d.resourceKey());
+	}
+	
+	@Override
+	public Collection<String> getTemplateExtensions(ObjectTemplate template) {
+		
+		if(extensionsByTemplate.isEmpty()) {
+			generateExtensionTemplates();
+		}
+		
+		Collection<String> tmp = extensionsByTemplate.get(template.getParentTemplate());
+		var results = new TreeSet<String>();
+		
+		if(Objects.nonNull(tmp) && !tmp.isEmpty()) {
+		
+			results.addAll(extensionsByTemplate.get(template.getParentTemplate()));
+			
+			for(FieldTemplate field : template.getFields()) {
+				if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
+					results.remove(field.getValidationValue(ValidationType.RESOURCE_KEY));
+				}
+			}
+		}
+		
+		return Collections.unmodifiableCollection(results);
+
+	}
 	
 	
 	@Override

@@ -19,12 +19,24 @@ public class IconWithDropdownInput extends InputRender {
 	boolean up;
 	boolean dark;
 	String bundle;
+	String icon = "fa-theater-masks";
+	String iconGroup = "fa-regular";
 
 	public IconWithDropdownInput(String resourceKey, String bundle) {
 		super(resourceKey);
 		this.bundle = bundle;
 	}
 
+	public IconWithDropdownInput icon(String icon) {
+		this.icon = icon;
+		return this;
+	}
+	
+	public IconWithDropdownInput group(String icon) {
+		this.icon = icon;
+		return this;
+	}
+	
 	public IconWithDropdownInput up() {
 		this.up = true;
 		return this;
@@ -58,7 +70,7 @@ public class IconWithDropdownInput extends InputRender {
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false")
 					.appendChild(new Element("i")
-							.addClass("far fa-theater-masks me-1 text-decoration-none"))
+							.addClass(String.format("%s %s me-1 text-decoration-none", iconGroup, icon)))
 					.appendChild(nameElement = new Element("span")
 								.addClass("jdropdown-text")
 								.html("")))
@@ -119,6 +131,11 @@ public class IconWithDropdownInput extends InputRender {
 				valueElement.val(value.getValue());
 			}
 		}
+	}
+	
+	public void setName(String bundle, String i18n) {
+		nameElement.attr("jad:bundle", bundle);
+		nameElement.attr("jad:i18n", i18n);
 	}
 	
 	public void addEmptyValue() {

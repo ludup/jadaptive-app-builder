@@ -124,7 +124,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	private Map<String,ObjectTemplate> loadedTemplates = new HashMap<>();
 	private Map<String,Class<? extends ObjectEvent<?>>> eventClasses = new HashMap<>();
-	
+
 	@Override
 	public Iterable<TemplateVersion> list() throws RepositoryException, ObjectException {
 		return versionRepository.list();
@@ -667,6 +667,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 
 	}
 	
+	
+
+	@Override
 	public UUIDEntity extendWith(UUIDEntity baseObject, 
 			ObjectTemplate extensionTemplate,
 			String packageName,

@@ -58,4 +58,6 @@ public interface TemplateService {
 
 	ObjectTemplate getParentTemplate(ObjectTemplate template);
 
+	Collection<String> getTemplateExtensions(ObjectTemplate template);
+
 }
