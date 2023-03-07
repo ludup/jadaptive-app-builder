@@ -63,6 +63,10 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
 		
+		if(log.isInfoEnabled()) {
+			log.info("Scheduling tasks for {}", tenant.getName());
+		}
+		
 		for(ScheduledTask task  : applicationService.getBeans(ScheduledTask.class)) {
 			if(task.isSystemOnly() && !tenant.isSystem()) {
 				continue;
