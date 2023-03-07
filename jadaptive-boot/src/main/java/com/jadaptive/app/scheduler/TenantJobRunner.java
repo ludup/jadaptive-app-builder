@@ -59,9 +59,14 @@ public class TenantJobRunner implements Runnable {
 		
 		tenantService.setCurrentTenant(tenant);
 		
+		if(log.isInfoEnabled()) {
+			log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());
+		}
 		try {
 			task.run();
-		} finally {
+		} catch(Throwable e) {
+			log.error("Task ended with error", e);
+	    } finally {
 			tenantService.clearCurrentTenant();
 		}
 	}
