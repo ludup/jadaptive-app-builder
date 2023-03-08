@@ -17,7 +17,6 @@ package com.jadaptive.app;
 
 import org.pf4j.ExtensionFactory;
 import org.pf4j.Plugin;
-import org.pf4j.PluginDependency;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPlugin;
 import org.pf4j.spring.SpringPluginManager;
@@ -59,9 +58,9 @@ public class CustomSpringExtensionFactory implements ExtensionFactory {
                
                 autowireSpring(extension, plugin);
                 
-                for(PluginDependency depends : pluginWrapper.getDescriptor().getDependencies()) {
-                	autowireSpring(extension, pluginManager.getPlugin(depends.getPluginId()).getPlugin());
-                }
+//                for(PluginDependency depends : pluginWrapper.getDescriptor().getDependencies()) {
+//                	autowireSpring(extension, pluginManager.getPlugin(depends.getPluginId()).getPlugin());
+//                }
                 
             } else {
             	pluginManager.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(extension);

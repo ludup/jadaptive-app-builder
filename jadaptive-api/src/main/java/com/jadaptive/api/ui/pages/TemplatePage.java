@@ -35,6 +35,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	private SessionUtils sessionUtils;
 	
 	protected String resourceKey;
+	protected String displayKey;
 	
 	protected ObjectTemplate template;
 	protected Class<?> templateClazz;
@@ -53,10 +54,14 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		try {
 			template = templateService.get(resourceKey);
 			templateClazz = templateService.getTemplateClass(resourceKey);
-			
+			displayKey = resourceKey;
+			ObjectTemplate t = template;
+
 			if(!tenantService.getCurrentTenant().isSystem() && template.isSystem()) {
 				throw new FileNotFoundException(String.format("%s not found", resourceKey));
 			}
+			
+			
 		} catch (RepositoryException e) {
 			e.printStackTrace();
 			throw e;

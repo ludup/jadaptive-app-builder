@@ -21,4 +21,6 @@ public interface ClassLoaderService {
 
 	URL getResource(String string);
 
+	void injectClass(ObjectTemplate template);
+
 }

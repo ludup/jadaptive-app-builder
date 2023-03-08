@@ -11,4 +11,10 @@ public @interface ObjectExtension {
 		
 		String extend();
 		
+		String bundle();
+		
+		String resourceKey();
+		
+		Class<?> extendingInterface() default NoOp.class;
+		
 }

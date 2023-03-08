@@ -1,11 +1,13 @@
 package com.jadaptive.api.templates;
 
+import java.util.Collection;
+
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
-import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 
@@ -23,9 +25,12 @@ public interface TemplateVersionService {
 
 	void rebuildReferences();
 
-	void registerAnnotatedTemplate(Class<? extends UUIDDocument> clz, boolean newSchema, boolean isEvent);
+	ObjectTemplate registerAnnotatedTemplate(Class<? extends UUIDDocument> clz, boolean newSchema);
 
-	UUIDEntity extendWith(UUIDEntity baseObject, ObjectTemplate extensionTemplate, String packageName,
-			String className);
+	void loadExtendedTemplates(Tenant tenant);
+
+	AbstractObject extendWith(AbstractObject baseObject, 
+			ObjectTemplate extensionTemplate,
+			Collection<String> extensions);
 
 }

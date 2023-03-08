@@ -2,3 +2,4 @@
 /.settings/
 *.classpath
 /plugin.properties
+/bin/

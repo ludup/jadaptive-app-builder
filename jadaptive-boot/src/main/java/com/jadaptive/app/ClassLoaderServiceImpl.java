@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.WordUtils;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
@@ -189,5 +191,14 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 		} catch (ClassNotFoundException e) {
 			return false;
 		}
+	}
+	
+	@Override
+	public void injectClass(ObjectTemplate template) {
+		byte[] tmp = Base64.getDecoder().decode(template.getClassDefinition());
+		defineClass(String.format("com.jadaptive.extensions.%s",
+				   		WordUtils.capitalize(template.getResourceKey())), 
+						tmp, 0, tmp.length);
+		
 	}
 }

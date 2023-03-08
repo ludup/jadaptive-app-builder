@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -36,11 +35,11 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.template.ExtensionRegistration;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
-import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectExtension;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
@@ -86,7 +85,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	Map<Class<?>,String> templateResourceKeys = new HashMap<>();
 	
 	private Map<String,Collection<Class<? extends UUIDDocument>>> extensionClasses = new HashMap<>();
-	private Map<String,Set<String>> extensionsByTemplate = new HashMap<>();
+	private Map<String,List<ExtensionRegistration>> extensionsByTemplate = new HashMap<>();
 	
 	@Override
 	public void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template) {
@@ -189,32 +188,36 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	private void registerExtension(Class<? extends UUIDDocument> loadClass) {
 		
 		ObjectExtension e = loadClass.getAnnotation(ObjectExtension.class);
-		ObjectDefinition d = loadClass.getAnnotation(ObjectDefinition.class);
 		if(!extensionClasses.containsKey(e.extend())) {
 			extensionClasses.put(e.extend(), new ArrayList<>());
-			extensionsByTemplate.put(e.extend(), new TreeSet<>());
+			extensionsByTemplate.put(e.extend(), new ArrayList<>());
 		}
 		extensionClasses.get(e.extend()).add(loadClass);
-		extensionsByTemplate.get(e.extend()).add(d.resourceKey());
+		extensionsByTemplate.get(e.extend()).add(new ExtensionRegistration(e));
 	}
 	
 	@Override
-	public Collection<String> getTemplateExtensions(ObjectTemplate template) {
+	public Collection<ExtensionRegistration> getTemplateExtensions(ObjectTemplate template) {
 		
 		if(extensionsByTemplate.isEmpty()) {
 			generateExtensionTemplates();
 		}
 		
-		Collection<String> tmp = extensionsByTemplate.get(template.getParentTemplate());
-		var results = new TreeSet<String>();
+		Collection<ExtensionRegistration> registrations = extensionsByTemplate.get(template.getCollectionKey());
+		var results = new ArrayList<ExtensionRegistration>();
 		
-		if(Objects.nonNull(tmp) && !tmp.isEmpty()) {
+		if(Objects.nonNull(registrations) && !registrations.isEmpty()) {
 		
-			results.addAll(extensionsByTemplate.get(template.getParentTemplate()));
+			results.addAll(extensionsByTemplate.get(template.getCollectionKey()));
 			
 			for(FieldTemplate field : template.getFields()) {
 				if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
-					results.remove(field.getValidationValue(ValidationType.RESOURCE_KEY));
+					String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+					for(ExtensionRegistration reg : registrations) {
+						if(reg.resourceKey().equals(resourceKey)) {
+							results.remove(reg);
+						}
+					}
 				}
 			}
 		}
@@ -280,7 +283,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				switch(obj.getType()) {
 				case COLLECTION:
 				case SINGLETON:
-					if(obj.getPermissionProtected()) {
+					if(obj.getPermissionProtected() && !obj.hasParent()) {
 						permissionService.registerStandardPermissions(obj.getResourceKey());
 					}
 					break;
@@ -427,11 +430,18 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				continue;
 			}
 			
+			ObjectExtension e = clz.getAnnotation(ObjectExtension.class);
 			ObjectViews annonatedViews = tmp.getAnnotation(ObjectViews.class);
 
 			if(Objects.nonNull(annonatedViews)) {
 				for(ObjectViewDefinition def : annonatedViews.value()) {
-					views.put(def.value(), new TemplateView(def));
+					if(Objects.nonNull(e)) {
+						views.put(def.value(), new TemplateView(def, true,
+								e.resourceKey(), e.bundle()));
+					} else {
+						views.put(def.value(), new TemplateView(def, false,
+								null, null));
+					}
 				}
 			}
 			
@@ -587,5 +597,15 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			template = get(template.getParentTemplate());
 		}
 		return template;
+	}
+
+	@Override
+	public ObjectTemplate getBaseTemplate(ObjectTemplate template) {
+		
+		ObjectTemplate t = template;
+		while(t.hasParent()) {
+			t = get(t.getParentTemplate());
+		}
+		return t;
 	}
 }

@@ -12,6 +12,9 @@ public class TemplateView {
 	ViewType type;
 	int weight;
 	boolean rootView;
+	boolean isExtension;
+	String extension;
+	String extensionBundle;
 	String defaultBundle;
 	List<TemplateViewField> fields = new ArrayList<>();
 	List<TemplateView> childViews = new ArrayList<>();
@@ -23,6 +26,7 @@ public class TemplateView {
 		this.type = ViewType.TAB;
 		this.resourceKey = "root";
 		this.parent = null;
+		this.isExtension = false;
 	}
 	
 	public TemplateView(String bundle, String resourceKey) {
@@ -32,19 +36,27 @@ public class TemplateView {
 		this.type = ViewType.TAB;
 		this.resourceKey = resourceKey;
 		this.parent = null;
+		this.isExtension = false;
 	}
 	
-	public TemplateView(ObjectViewDefinition def) {
+	public TemplateView(ObjectViewDefinition def, boolean isExtension, String extension, String extensionBundle) {
 		this.rootView = false;
 		this.resourceKey = def.value();
 		this.parent = def.parent();
 		this.defaultBundle = def.bundle();
 		this.weight = def.weight();
 		this.type = def.type();
+		this.isExtension = isExtension;
+		this.extension = extension;
+		this.extensionBundle = extensionBundle;
 	}
 	
 	public boolean isRoot() {
 		return rootView;
+	}
+	
+	public boolean isExtension() {
+		return isExtension;
 	}
 	
 	public ViewType getType() {
@@ -95,5 +107,13 @@ public class TemplateView {
 
 	public String getParent() {
 		return parent;
+	}
+
+	public String getExtension() {
+		return extension;
+	}
+	
+	public String getExtensionBundle() {
+		return extensionBundle;
 	}
 }

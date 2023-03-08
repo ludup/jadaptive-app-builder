@@ -16,6 +16,8 @@ public @interface ObjectDefinition {
 		
 		String bundle() default "";
 		
+		ObjectTemplateType templateType() default ObjectTemplateType.SYSTEM;
+		
 		ObjectType type() default ObjectType.COLLECTION;
 		
 		ObjectScope scope() default ObjectScope.GLOBAL;

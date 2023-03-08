@@ -46,12 +46,22 @@ public class NonCachingIterable<T extends UUIDEntity> implements Iterable<T> {
 			}
 			ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(ObjectTemplateRepository.class).get(resourceKey);
 			if(StringUtils.isNotBlank(template.getTemplateClass())) {
+				ClassLoaderService classLoader = ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class);
 				try {
-					clz = ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(template.getTemplateClass());
+					clz = classLoader.findClass(template.getTemplateClass());
 					cachedTemplates.put(resourceKey, clz);
 					return clz;
 				} catch (ClassNotFoundException e) {
-					throw new IllegalStateException(e.getMessage(), e);
+					if(StringUtils.isNotBlank(template.getClassDefinition())) {
+						classLoader.injectClass(template);
+						try {
+							clz = classLoader.findClass(template.getTemplateClass());
+							cachedTemplates.put(resourceKey, clz);
+							return clz;
+						} catch (ClassNotFoundException e2) {
+							throw new IllegalStateException(e2.getMessage(), e2);
+						}
+					}
 				}
 				
 			} 

@@ -1,6 +1,8 @@
 package com.jadaptive.app.json;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 import javax.lang.model.UnknownEntityException;
@@ -36,6 +38,7 @@ import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.ui.ErrorPage;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.PageRedirect;
@@ -49,6 +52,9 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	@Autowired
 	private TemplateService templateService; 
+	
+	@Autowired
+	private TemplateVersionService versionService;
 	
 	@Autowired
 	private ObjectService objectService; 
@@ -178,6 +184,88 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			request.getSession().setAttribute(resourceKey, obj);
 
 			return new UUIDStatus(obj.getUuid());
+		}  catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/objects/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		}
+	}
+	
+	@RequestMapping(value="/app/api/form/extend/remove/{resourceKey}/{extension}", method = RequestMethod.POST, 
+			produces = {"application/json"},
+			consumes = { "multipart/form-data" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus removeObject(HttpServletRequest request, 
+			@PathVariable String resourceKey,
+			@PathVariable String extension)  {
+
+		try {
+
+			ObjectTemplate template = templateService.get(resourceKey);
+			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
+			
+			ObjectTemplate extensionTemplate = templateService.get(extension);
+			
+			Collection<String> extensions = new HashSet<>();
+			if(Objects.nonNull(template)) {
+				extensions.addAll(template.getExtensions());
+			}
+			extensions.remove(extension);
+			
+			
+			AbstractObject extended = versionService.extendWith(obj, extensionTemplate, extensions);
+			
+			request.getSession().setAttribute(extended.getResourceKey(), extended);
+			return new RequestStatusImpl(true, obj.isNew() 
+					? "/app/ui/create/" + extended.getResourceKey()
+					: "/app/ui/update/" + extended.getResourceKey() + "/" + extended.getUuid());
+		}  catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/objects/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		}
+	}
+	
+	@RequestMapping(value="/app/api/form/extend/add/{resourceKey}/{extension}", method = RequestMethod.POST, 
+			produces = {"application/json"},
+			consumes = { "multipart/form-data" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus extendObject(HttpServletRequest request, 
+			@PathVariable String resourceKey,
+			@PathVariable String extension)  {
+
+		try {
+
+			ObjectTemplate template = templateService.get(resourceKey);
+			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
+			
+			ObjectTemplate extensionTemplate = templateService.get(extension);
+			
+			Collection<String> extensions = new HashSet<>();
+			extensions.add(extensionTemplate.getResourceKey());
+			if(Objects.nonNull(template)) {
+				extensions.addAll(template.getExtensions());
+			}
+			
+			
+			AbstractObject extended = versionService.extendWith(obj, extensionTemplate, extensions);
+			
+			request.getSession().setAttribute(extended.getResourceKey(), extended);
+			return new RequestStatusImpl(true, obj.isNew() 
+					? "/app/ui/create/" + extended.getResourceKey()
+					: "/app/ui/update/" + extended.getResourceKey() + "/" + extended.getUuid());
 		}  catch(ValidationException ex) { 
 			return new RequestStatusImpl(false, ex.getMessage());
 		} catch (UriRedirect e) {

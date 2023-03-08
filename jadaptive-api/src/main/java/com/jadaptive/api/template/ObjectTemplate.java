@@ -24,6 +24,9 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 
 	public static final String RESOURCE_KEY = "objectTemplates";
 	
+	@ObjectField(type = FieldType.ENUM, defaultValue = "SYSTEM")
+	ObjectTemplateType templateType;
+	
 	@ObjectField(type = FieldType.ENUM, defaultValue = "COLLECTION")
 	ObjectType type;
 	
@@ -74,10 +77,22 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	@ObjectField(type = FieldType.TEXT, hidden = true)
 	String nameField;
 	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String classDefinition;
+	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String collectionKey;
+	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String displayKey;
+	
 	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true)
 	@Validator(type = ValidationType.REQUIRED)
 	protected String name;
 
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	Collection<String> extensions;
+	
 	public String getName() {
 		return name;
 	}
@@ -134,15 +149,23 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	}
 	
 	public String getCollectionKey() {
-		String parentKey = getParentTemplate();
-		if(StringUtils.isNotBlank(parentKey)) {
-			return parentKey;
-		}
-		return getResourceKey();
+		return collectionKey;
+	}
+	
+	public void setCollectionKey(String collectionKey) {
+		this.collectionKey = collectionKey;
 	}
 
 	public void setResourceKey(String resourceKey) {
 		this.resourceKey = resourceKey;
+	}
+
+	public ObjectTemplateType getTemplateType() {
+		return templateType;
+	}
+
+	public void setTemplateType(ObjectTemplateType templateType) {
+		this.templateType = templateType;
 	}
 
 	public Collection<String> getAliases() {
@@ -264,5 +287,37 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 
 	public boolean isSingleton() {
 		return type == ObjectType.SINGLETON;
+	}
+
+	public String getClassDefinition() {
+		return classDefinition;
+	}
+
+	public void setClassDefinition(String classDefinition) {
+		this.classDefinition = classDefinition;
+	}
+
+	public String getDisplayKey() {
+		if(isExtended()) {
+			return displayKey;
+		} else {
+			return getResourceKey();
+		}
+	}
+
+	public void setDisplayKey(String displayKey) {
+		this.displayKey = displayKey;
+	}
+
+	public Collection<String> getExtensions() {
+		return extensions;
+	}
+
+	public void setExtensions(Collection<String> extensions) {
+		this.extensions = extensions;
+	}
+
+	public boolean isExtended() {
+		return templateType==ObjectTemplateType.EXTENDED;
 	}
 }

@@ -13,8 +13,10 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.template.ExtensionRegistration;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.ObjectExtension;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
@@ -128,7 +130,12 @@ public class MockEntityTemplateService implements TemplateService {
 		return null;
 	}
 	@Override
-	public Collection<String> getTemplateExtensions(ObjectTemplate template) {
+	public Collection<ExtensionRegistration> getTemplateExtensions(ObjectTemplate template) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public ObjectTemplate getBaseTemplate(ObjectTemplate template) {
 		// TODO Auto-generated method stub
 		return null;
 	}

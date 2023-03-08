@@ -62,7 +62,7 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		if(Objects.nonNull(element)) {
 			element.attr("href", String.format("/app/ui/search/%s", template.getCollectionKey()))
 			.attr("jad:bundle", template.getBundle())
-			.attr("jad:i18n", String.format("%s.names", template.getResourceKey()));
+			.attr("jad:i18n", String.format("%s.names", template.getDisplayKey()));
 		}
 		
 		element = document.selectFirst("#cancelButton");
