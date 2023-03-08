@@ -7,15 +7,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.jadaptive.api.servlet.PluginController;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.Feedback;
-import com.jadaptive.api.ui.PageCache;
-import com.jadaptive.api.ui.PageRedirect;
 
 public class ExceptionHandlingController implements PluginController {
 
@@ -33,4 +30,20 @@ public class ExceptionHandlingController implements PluginController {
 			response.sendError(HttpStatus.UNAUTHORIZED.value());
 		}
 	}
+
+	@ExceptionHandler(AccessDeniedException.class)
+	public void handleException(HttpServletRequest request, 
+			HttpServletResponse response,
+			AccessDeniedException e) throws IOException {
+	
+		Feedback.error("userInterface", "unauthorized.text");
+		if(request.getRequestURI().startsWith("/app/ui/")) {
+			response.sendRedirect("/app/ui/login");
+		} else {
+			response.sendError(HttpStatus.UNAUTHORIZED.value());
+		}
+	}
+
+	
+
 }

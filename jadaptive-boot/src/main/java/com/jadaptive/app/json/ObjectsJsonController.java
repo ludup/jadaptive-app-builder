@@ -54,14 +54,6 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	@Autowired
 	private SessionUtils sessionUtils;
 	
-	@ExceptionHandler(AccessDeniedException.class)
-	public void handleException(HttpServletRequest request, 
-			HttpServletResponse response,
-			AccessDeniedException e) throws IOException {
-	   response.sendError(HttpStatus.FORBIDDEN.value(), e.getMessage());
-	}
-
-	
 	@RequestMapping(value="/app/api/objects/{resourceKey}/{uuid}", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
