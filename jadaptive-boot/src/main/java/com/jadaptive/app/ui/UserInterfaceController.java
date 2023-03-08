@@ -74,12 +74,32 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 	}
 	
-	@ExceptionHandler(AccessDeniedException.class)
-	public void onAccessDeniedException(AccessDeniedException e, HttpServletResponse response) throws IOException {
-		Feedback.error("userInterface", "accessDenied.text");
-		e.printStackTrace();
-	    response.sendRedirect(new PageRedirect(pageCache.resolvePage("login")).getUri());
+	@ExceptionHandler(UnauthorizedException.class)
+	public void handleException(HttpServletRequest request,
+			HttpServletResponse response,
+			Throwable e) throws IOException {
+		
+		Feedback.error("userInterface", "unauthorized.text");
+		if(request.getRequestURI().startsWith("/app/ui/")) {
+			response.sendRedirect("/app/ui/login");
+		} else {
+			response.sendError(HttpStatus.UNAUTHORIZED.value());
+		}
 	}
+
+	@ExceptionHandler(AccessDeniedException.class)
+	public void handleException(HttpServletRequest request, 
+			HttpServletResponse response,
+			AccessDeniedException e) throws IOException {
+	
+		Feedback.error("userInterface", "unauthorized.text");
+		if(request.getRequestURI().startsWith("/app/ui/")) {
+			response.sendRedirect("/app/ui/login");
+		} else {
+			response.sendError(HttpStatus.FORBIDDEN.value());
+		}
+	}
+	
 	
 	@ExceptionHandler(FileNotFoundException.class)
 	public void FileNotFoundException(FileNotFoundException e, HttpServletResponse response) throws IOException {
