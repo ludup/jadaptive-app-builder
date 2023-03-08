@@ -33,6 +33,11 @@ public class SessionReaperTask implements ScheduledTask {
 	}
 
 	@Override
+	public boolean isLogging() {
+		return false;
+	}
+	
+	@Override
 	public String cron() {
 		return EVERY_MINUTE;
 	}
