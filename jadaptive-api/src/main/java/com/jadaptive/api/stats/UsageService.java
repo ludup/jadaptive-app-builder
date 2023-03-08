@@ -26,4 +26,8 @@ public interface UsageService {
 
 	void setDailyValue(String key, long val);
 
+	Long sum(String key);
+
+	void delete(String key);
+
 }

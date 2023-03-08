@@ -39,6 +39,13 @@ public class UsageServiceImpl implements UsageService {
 	}
 	
 	@Override
+	public void delete(String key) {
+		for(Usage usage : usageDatabase.searchObjects(Usage.class, SearchField.all("keys", key))) {
+			usageDatabase.delete(usage);
+		}
+	}
+	
+	@Override
 	public void incrementDailyValue(String key) {
 		incrementDailyValue(key, 1L);
 	}
@@ -145,6 +152,14 @@ public class UsageServiceImpl implements UsageService {
 				SearchField.lt("created", to));
 	}
 
+	
+	@Override
+	public Long sum(String key) {
+		return usageDatabase.sum(Usage.class, "value", 
+				SearchField.in("keys", key));
+	}
+
+	
 	@Override
 	public Long sumOr(Date from, Date to, String... keys) {
 		return usageDatabase.sum(Usage.class, "value", 
