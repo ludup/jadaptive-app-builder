@@ -36,16 +36,35 @@ public class PageHelper {
 	
 	public static void appendScript(Document document, String uri) {
 		Element head = PageHelper.getOrCreateTag(document, "head");
+		
+		for(Element e : head.getElementsByTag("script")) {
+			if(uri.equals(e.attr("src"))) {
+				return;
+			}
+		}
 		PageHelper.appendLast(head, "script", new Element("script").attr("src", uri).attr("type", "text/javascript"));
 	}
 	
 	public static void appendStylesheet(Document document, String uri) {
 		Element head = PageHelper.getOrCreateTag(document, "head");
+		
+		for(Element e : head.getElementsByTag("link")) {
+			if(uri.equals(e.attr("href"))) {
+				return;
+			}
+		}
 		PageHelper.appendLast(head, "link", new Element("link").attr("href", uri).attr("rel", "stylesheet"));
 	}
 	
 	public static void appendStylesheet(Document document, String uri, String id) {
 		Element head = PageHelper.getOrCreateTag(document, "head");
+		
+		for(Element e : head.getElementsByTag("link")) {
+			if(uri.equals(e.attr("href"))) {
+				return;
+			}
+		}
+		
 		PageHelper.appendLast(head, "link", new Element("link").attr("id", id).attr("href", uri).attr("rel", "stylesheet"));
 	}
 
