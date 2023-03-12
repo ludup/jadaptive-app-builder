@@ -31,6 +31,7 @@ import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.repository.PersonalUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantService;
@@ -138,7 +139,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			if(log.isErrorEnabled()) {
 				log.error("Calling getCurrentUser without having previously setup a user context on the current thread!!!!");
 			}
-			throw new AccessDeniedException("There is no user context setup on this thread!");
+			throw new UnauthorizedException();
 		}
 		return userStack.peek();
 	}
