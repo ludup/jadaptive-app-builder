@@ -1,5 +1,6 @@
 package com.jadaptive.api.entity;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 	protected TenantAwareObjectDatabase<T> objectDatabase;
 	
 	protected abstract Class<T> getResourceClass();
+	
 	@Override
 	public T getObjectByUUID(String uuid) {
 		return objectDatabase.get(uuid, getResourceClass());
@@ -29,7 +31,26 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 		afterSave(object);
 		return object.getUuid();
 	}
+	
+	
 
+	@Override
+	public UUIDDocument createNew() {
+		
+		try {
+			T obj = getResourceClass().getDeclaredConstructor().newInstance();
+			setupDefaults(obj);
+			return obj;
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new ObjectException(e.getMessage(), e);
+		}
+		
+	}
+	
+	protected void setupDefaults(T object) {
+		
+	}
 	@Override
 	public void deleteObject(T object) {
 		validateDelete(object);

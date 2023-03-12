@@ -83,7 +83,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Override
 	public AbstractObject createNew(ObjectTemplate template) {
-		return new MongoEntity(template.getResourceKey());
+		return createViaObjectBean(template);
 	}
 	
 	@Override
@@ -422,6 +422,23 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 		
 		return objectRepository.getById(template, uuid);
+		
+	}
+	
+	private AbstractObject createViaObjectBean(ObjectTemplate template) {
+		
+		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(template.getResourceKey());
+
+		if(Objects.nonNull(clz)) {
+			
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				return convert(bean.createNew());
+			}			
+		}
+		
+		return new MongoEntity(template.getResourceKey());
 		
 	}
 	

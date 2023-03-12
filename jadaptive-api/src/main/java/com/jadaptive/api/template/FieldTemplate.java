@@ -2,6 +2,9 @@ package com.jadaptive.api.template;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -78,6 +81,9 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	
 	@ObjectField(type = FieldType.BOOL)
 	boolean requireAllPermissions = false;
+	
+	@ObjectField(type = FieldType.TEXT_AREA)
+	String meta;
 	
 	public FieldTemplate() {
 	}
@@ -267,5 +273,44 @@ public class FieldTemplate extends TemplateUUIDEntity {
 		} catch(Throwable e) {
 			return defaultValue;
 		}
+	}
+
+	public String getMeta() {
+		return meta;
+	}
+
+	public void setMeta(String meta) {
+		this.meta = meta;
+	}
+	
+	public String getMetaValue(String name, String defaultValue) {
+		Map<String,String> data = generateMap();
+		String value = data.get(name);
+		if(Objects.isNull(value)) {
+			return defaultValue;
+		} else {
+			return value;
+		}
+	}
+	
+	public int getMetaValueInt(String name, int defaultValue) {
+		Map<String,String> data = generateMap();
+		String value = data.get(name);
+		if(Objects.isNull(value)) {
+			return defaultValue;
+		} else {
+			return Integer.parseInt(value);
+		}
+	}
+	
+	private Map<String,String> generateMap() {
+		
+		String[] values = meta.split(",");
+		Map<String,String> data = new HashMap<>();
+		for(String value : values) {
+			data.put(StringUtils.substringBefore(value, "="),
+					StringUtils.substringAfter(value, "="));
+		}
+		return data;
 	}
 }

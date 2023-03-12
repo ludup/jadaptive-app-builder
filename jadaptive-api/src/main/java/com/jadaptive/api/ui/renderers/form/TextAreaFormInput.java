@@ -7,8 +7,10 @@ import com.jadaptive.api.template.TemplateViewField;
 
 public class TextAreaFormInput extends FieldInputRender {
 
-	public TextAreaFormInput(ObjectTemplate template, TemplateViewField field) {
+	int rows;
+	public TextAreaFormInput(ObjectTemplate template, TemplateViewField field, int rows) {
 		super(template, field);
+		this.rows = rows;
 	}
 
 	@Override
@@ -27,7 +29,7 @@ public class TextAreaFormInput extends FieldInputRender {
 				.appendChild(new Element("textarea")
 						.attr("id", field.getFormVariable())
 						.attr("name", field.getFormVariable())
-						.attr("rows", "15")
+						.attr("rows", String.valueOf(rows))
 						.addClass("form-control")
 						.val(value))
 				.appendChild(new Element("small")

@@ -93,6 +93,8 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 					object = objectService.get(template.getResourceKey(), uuid);
 				} else if (template.getType() == ObjectType.SINGLETON) {
 					object = objectService.getSingleton(template.getResourceKey());
+				} else {
+					object = objectService.createNew(template);
 				}
 			}
 

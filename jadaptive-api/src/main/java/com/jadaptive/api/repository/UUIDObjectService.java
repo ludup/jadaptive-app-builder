@@ -23,4 +23,6 @@ public interface UUIDObjectService<T extends UUIDDocument> {
 			SearchField... fields);
 	
 	long countTable(SearchField... fields);
+
+	default UUIDDocument createNew() { return null; };
 }

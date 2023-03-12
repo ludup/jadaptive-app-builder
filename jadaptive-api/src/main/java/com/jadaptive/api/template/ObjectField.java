@@ -35,11 +35,7 @@ public @interface ObjectField {
 		
 		String references() default "";
 
-//		// USER INTERFACE PROPERTIES
-//		@Deprecated
-//		String name() default "";
-//		
-//		@Deprecated
-//		String description() default "";
+		String meta() default "";
+
 		
 }

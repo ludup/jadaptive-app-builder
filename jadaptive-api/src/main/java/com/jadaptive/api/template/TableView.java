@@ -13,6 +13,8 @@ public @interface TableView {
 		
 		TableAction[] actions() default { };
 		
+		DynamicColumn[] otherColumns() default { };
+		
 		boolean requiresView() default true;
 		
 		boolean requiresUpdate() default false;

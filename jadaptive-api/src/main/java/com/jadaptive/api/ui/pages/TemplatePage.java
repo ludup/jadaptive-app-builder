@@ -55,7 +55,6 @@ public abstract class TemplatePage extends AuthenticatedPage {
 			template = templateService.get(resourceKey);
 			templateClazz = templateService.getTemplateClass(resourceKey);
 			displayKey = resourceKey;
-			ObjectTemplate t = template;
 
 			if(!tenantService.getCurrentTenant().isSystem() && template.isSystem()) {
 				throw new FileNotFoundException(String.format("%s not found", resourceKey));

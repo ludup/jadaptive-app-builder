@@ -48,6 +48,7 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 	protected void connect() throws IOException {
 		
 		String connectionString = ApplicationProperties.getValue("mongodb.connection", null);
+		
 		if(StringUtils.isNotBlank(connectionString)) {
 			mongoClient = new MongoClient(new MongoClientURI(connectionString));
 		} else {

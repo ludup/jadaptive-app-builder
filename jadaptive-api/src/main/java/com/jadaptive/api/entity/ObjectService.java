@@ -37,5 +37,6 @@ public interface ObjectService {
 	void rebuildReferences(ObjectTemplate template);
 
 	AbstractObject convert(UUIDDocument obj);
+
 	
 }

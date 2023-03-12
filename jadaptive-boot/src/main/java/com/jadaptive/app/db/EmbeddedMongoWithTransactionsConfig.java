@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.mongodb.BasicDBList;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
@@ -43,12 +44,12 @@ import de.flapdoodle.embed.process.runtime.Network;
 })
 public class EmbeddedMongoWithTransactionsConfig {
 
-    public static final int DFLT_PORT_NUMBER = 27017;
+   // public static final int DFLT_PORT_NUMBER = 27017;
     public static final String DFLT_REPLICASET_NAME = "rs0";
     public static final int DFLT_STOP_TIMEOUT_MILLIS = 200;
 
     private Version.Main mFeatureAwareVersion = Version.Main.V4_4;
-    private int mPortNumber = DFLT_PORT_NUMBER;
+    //private int mPortNumber = DFLT_PORT_NUMBER;
     private String mReplicaSetName = DFLT_REPLICASET_NAME;
     private long mStopTimeoutMillis = DFLT_STOP_TIMEOUT_MILLIS;
 
@@ -62,7 +63,7 @@ public class EmbeddedMongoWithTransactionsConfig {
     	MongodConfig mongodConfig = MongodConfig.builder()
     		    .version(mFeatureAwareVersion)
     		    .replication(storage)
-    		    .net(new Net(mPortNumber, Network.localhostIsIPv6()))
+    		    .net(new Net(ApplicationProperties.getValue("mongodb.port", 27017), Network.localhostIsIPv6()))
     		    .cmdOptions(MongoCmdOptions.builder()
     		            .useNoJournal(false)
     		            .build())
@@ -87,13 +88,15 @@ public class EmbeddedMongoWithTransactionsConfig {
             MongoClient mongoClient = null;
             try {
                 final BasicDBList members = new BasicDBList();
-                members.add(new Document("_id", 0).append("host", "localhost:" + mPortNumber));
+                members.add(new Document("_id", 0).append("host", "localhost:" + 
+                		ApplicationProperties.getValue("mongodb.port", 27017)));
 
                 final Document replSetConfig = new Document("_id", mReplicaSetName);
                 replSetConfig.put("members", members);
 
                 mongoClient =
-                    new MongoClient(new ServerAddress(Network.getLocalHost(), mPortNumber));
+                    new MongoClient(new ServerAddress(Network.getLocalHost(), 
+                    		ApplicationProperties.getValue("mongodb.port", 27017)));
                 final MongoDatabase adminDatabase = mongoClient.getDatabase("admin");
                 adminDatabase.runCommand(new Document("replSetInitiate", replSetConfig));
 

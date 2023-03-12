@@ -16,7 +16,6 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExtensionRegistration;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
-import com.jadaptive.api.template.ObjectExtension;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
