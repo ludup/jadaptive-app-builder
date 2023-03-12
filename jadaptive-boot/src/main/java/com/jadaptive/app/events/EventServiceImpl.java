@@ -89,6 +89,9 @@ public class EventServiceImpl implements EventService {
 	
 	@Override
 	public void preRegisterEventHandler(Runnable runnable) {
+		if(Objects.isNull(preRegistrations)) {
+			preRegistrations = new ArrayList<>();
+		}
 		preRegistrations.add(runnable);
 	}
 	
