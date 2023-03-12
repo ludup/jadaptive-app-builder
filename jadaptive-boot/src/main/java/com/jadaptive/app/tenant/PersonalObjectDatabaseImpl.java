@@ -93,4 +93,9 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	public T getObjectByUUID(Class<T> resourceClass, String uuid) {
 		return objectDatabase.get(uuid, resourceClass);
 	}
+
+	@Override
+	public long allObjectsCount(Class<T> resourceClass, SearchField...fields) {
+		return objectDatabase.count(resourceClass, fields);
+	}
 }

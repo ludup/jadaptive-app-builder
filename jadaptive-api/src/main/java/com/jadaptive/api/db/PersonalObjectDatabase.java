@@ -29,4 +29,6 @@ public interface PersonalObjectDatabase<T extends PersonalUUIDEntity> {
 	void saveOrUpdate(T obj);
 
 	T getObjectByUUID(Class<T> resourceClass, String uuid);
+
+	long allObjectsCount(Class<T> resourceClass, SearchField... fields);
 }
