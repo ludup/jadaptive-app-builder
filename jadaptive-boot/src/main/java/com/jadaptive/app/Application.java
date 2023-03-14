@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;
@@ -65,7 +64,7 @@ public class Application {
 	
 	public static void main(String[] args) {
 		 
-		 PropertyConfigurator.configure("conf/app-logging.properties");
+		 //PropertyConfigurator.configure("conf/app-logging.properties");
 		 
 		 System.setProperty("spring.main.allow-circular-references", "true");
 		 System.setProperty("spring.mongodb.embedded.version", "4.4.13");

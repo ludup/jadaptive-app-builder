@@ -96,22 +96,24 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 
 				switch(t.getFieldType()) {
 				case OBJECT_EMBEDDED:
-					AbstractObject embedded = value.getChild(t);
-					if(Objects.nonNull(embedded)) {
-						String clz = (String) embedded.getValue("_clz");
-						ObjectTemplate template = getTemplateService().get(templateService.getTemplateResourceKey(clz));
+//					AbstractObject embedded = value.getChild(t);
+//					if(Objects.nonNull(embedded)) {
+//						String clz = (String) embedded.getValue("_clz");
 						if(t.getCollection()) {
 							gen.writeArrayFieldStart(t.getResourceKey());
 							for(AbstractObject child : value.getObjectCollection(t.getResourceKey())) {
+								ObjectTemplate template = getTemplateService().get(child.getResourceKey());
 								writeEmbeddedObject(child, template, gen, true);
 							}
 							gen.writeEndArray();
 						} else {
-							writeEmbeddedObject(value.getChild(t), template, gen, false);
+							AbstractObject child = value.getChild(t);
+							ObjectTemplate template = getTemplateService().get(child.getResourceKey());
+							writeEmbeddedObject(child, template, gen, false);
 						}
-					} else {
-						gen.writeNullField(t.getResourceKey());
-					}
+//					} else {
+//						gen.writeNullField(t.getResourceKey());
+//					}
 					break;
 				case OBJECT_REFERENCE:
 					if(t.getCollection()) {
