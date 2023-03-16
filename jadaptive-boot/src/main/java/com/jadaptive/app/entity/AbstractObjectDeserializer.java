@@ -79,7 +79,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 			ObjectCodec oc = parser.getCodec();
 			JsonNode node = oc.readTree(parser);
    
-			JsonNode rkNode = node.findValue("resourceKey");
+			JsonNode rkNode = node.get("resourceKey");
 			
 			if(Objects.isNull(rkNode)) {
 				throw new IOException("Missing resourceKey in JSON deserialise");
@@ -149,7 +149,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 			}
 		} 
 		
-		if(field.getCollection() && !node.isArray()) {
+		if(field.getCollection() && !node.isArray() && !node.isNull()) {
 			throw new ValidationException(String.format("%s is a collection and the json node is not an array", field.getResourceKey()));
 		} else if(!field.getCollection() && node.isArray()) {
 			throw new ValidationException(String.format("%s is not a collection but the json node is an array", field.getResourceKey()));
