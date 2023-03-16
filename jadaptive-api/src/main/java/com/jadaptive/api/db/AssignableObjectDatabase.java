@@ -22,7 +22,7 @@ public interface AssignableObjectDatabase<T extends AssignableUUIDEntity> {
 
 	T getObject(Class<T> resourceClass, SearchField... fields);
 
-	long countObjects(Class<T> resourceClass);
+	long countObjects(Class<T> resourceClass, SearchField... fields);
 
 	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields);
 }

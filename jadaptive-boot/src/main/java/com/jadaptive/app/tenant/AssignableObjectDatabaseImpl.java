@@ -135,8 +135,8 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	}
 
 	@Override
-	public long countObjects(Class<T> resourceClass) {
-		return objectDatabase.count(resourceClass);
+	public long countObjects(Class<T> resourceClass, SearchField... fields) {
+		return objectDatabase.count(resourceClass, fields);
 	}
 	
 }

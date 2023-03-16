@@ -6,6 +6,7 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
+import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -22,10 +23,11 @@ import com.jadaptive.api.template.Validator;
 	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "optional", weight = -8888),
 	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "blockedIPs", weight = -7777),
 	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "allowedIPs", weight = -6666)})
-@TableView(defaultColumns = "name", requiresCreate = false, requiresUpdate = true, sortField = "weight")
+@TableView(defaultColumns = { "name", "scope" }, requiresCreate = false, requiresUpdate = true, sortField = "weight",
+			otherColumns = { @DynamicColumn(resourceKey = "scope", service = AuthenticationPolicyService.class)})
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
 @GenerateEventTemplates(AuthenticationPolicy.RESOURCE_KEY)
-public class AuthenticationPolicy extends AssignableUUIDEntity implements NamedDocument {
+public abstract class AuthenticationPolicy extends AssignableUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = -4581883248747380399L;
 
@@ -40,10 +42,6 @@ public class AuthenticationPolicy extends AssignableUUIDEntity implements NamedD
 	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true)
 	@Validator(type = ValidationType.REQUIRED)
 	String name;
-	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
-	@ObjectView(value = "factors")
-	Boolean passwordOnFirstPage;
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY)
 	@ObjectView(value = "factors")
@@ -78,13 +76,7 @@ public class AuthenticationPolicy extends AssignableUUIDEntity implements NamedD
 		this.name = name;
 	}
 
-	public Boolean getPasswordOnFirstPage() {
-		return passwordOnFirstPage;
-	}
-
-	public void setPasswordOnFirstPage(Boolean passwordOnFirstPage) {
-		this.passwordOnFirstPage = passwordOnFirstPage;
-	}
+	public abstract Boolean getPasswordOnFirstPage();
 
 	public Collection<AuthenticationModule> getRequiredAuthenticators() {
 		return requiredAuthenticators;

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +18,17 @@ import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyResolver;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.auth.PasswordResetAuthenticationPolicy;
+import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.db.AssignableObjectDatabase;
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.CIDRUtils;
 
@@ -46,11 +52,14 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	private AuthenticationPolicyResolver resolver;
 	
 	@Override
-	public AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, AuthenticationPolicy... additionalPolicies) {
+	public AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, Class<? extends AuthenticationPolicy> clz, AuthenticationPolicy... additionalPolicies) {
 		
 		List<AuthenticationPolicy> results =  new ArrayList<>();
 		
 		for(AuthenticationPolicy policy : policyDatabase.getAssignedObjectsA(AuthenticationPolicy.class, user)) {
+			if(!clz.isAssignableFrom(policy.getClass())) {
+				continue;
+			}
 			boolean update = false;
 			for(AuthenticationPolicy additional : additionalPolicies) {
 				if(StringUtils.isNotBlank(additional.getUuid())
@@ -67,6 +76,9 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		}
 		
 		for(AuthenticationPolicy additional : additionalPolicies) {
+			if(!clz.isAssignableFrom(additional.getClass())) {
+				continue;
+			}
 			if(additional.getUsers().contains(user)
 					|| roleService.hasRole(user, additional.getRoles())) {
 				if(assertIPAddress(ipAddress, additional)) {
@@ -134,8 +146,8 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	protected void beforeSave(AuthenticationPolicy policy) {		
 		authenticationService.validateModules(policy);
-		if(Request.isAvailable()) {
-			if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy))) {
+		if(Request.isAvailable() && policy instanceof UserLoginAuthenticationPolicy) {
+			if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getClass(), policy))) {
 				throw new IllegalStateException("The policy is invalid because it would lock the current user out from this location");
 			}
 		}
@@ -154,5 +166,27 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 
 	public void setResolver(AuthenticationPolicyResolver resolver) {
 		this.resolver = resolver;
+	}
+
+	@Override
+	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
+		switch(column) {
+		case "scope":
+			return Html.i18n(AuthenticationPolicy.RESOURCE_KEY, rowTemplate.getResourceKey() + ".name");
+		default:
+			throw new IllegalStateException("Unsupported dynamic column " + column);
+		}
+		
+	}
+
+	@Override
+	public boolean hasPasswordResetPolicy() {
+		return policyDatabase.countObjects(AuthenticationPolicy.class, 
+				SearchField.eq("resourceKey", PasswordResetAuthenticationPolicy.RESOURCE_KEY)) > 0;
+	}
+
+	@Override
+	public AuthenticationPolicy getPasswordResetPolicy() {
+		return null;
 	}
 }

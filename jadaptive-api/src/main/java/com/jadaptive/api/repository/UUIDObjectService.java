@@ -3,6 +3,7 @@ package com.jadaptive.api.repository;
 import java.util.Collection;
 
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 
 public interface UUIDObjectService<T extends UUIDDocument> {
@@ -24,5 +25,5 @@ public interface UUIDObjectService<T extends UUIDDocument> {
 	
 	long countTable(SearchField... fields);
 
-	default UUIDDocument createNew() { return null; };
+	default UUIDDocument createNew(ObjectTemplate template) { return null; };
 }

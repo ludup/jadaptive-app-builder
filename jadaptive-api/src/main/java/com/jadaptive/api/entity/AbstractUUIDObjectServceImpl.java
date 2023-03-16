@@ -10,12 +10,17 @@ import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.template.TemplateService;
 
 public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends AuthenticatedService implements AbstractUUIDObjectService<T> {
 
 	@Autowired
 	protected TenantAwareObjectDatabase<T> objectDatabase;
+	
+	@Autowired
+	private TemplateService templateService; 
 	
 	protected abstract Class<T> getResourceClass();
 	
@@ -34,12 +39,14 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 	
 	
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public UUIDDocument createNew() {
+	public UUIDDocument createNew(ObjectTemplate template) {
 		
 		try {
-			T obj = getResourceClass().getDeclaredConstructor().newInstance();
-			setupDefaults(obj);
+			Class<? extends UUIDDocument> clz = templateService.getTemplateClass(template.getResourceKey());
+			UUIDDocument obj = clz.getDeclaredConstructor().newInstance();
+			setupDefaults((T)obj);
 			return obj;
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
