@@ -132,8 +132,8 @@ public class Application {
 		KeyPair key = null;
 		X509Certificate[] chain = null;
 		X509Certificate cert = null;
-		File keystoreFile = new File(ApplicationProperties.getValue("server.ssl.key-store", "conf/cert.p12"));
-		File keyFile = new File(ApplicationProperties.getValue("server.ssl.private-key", "conf/key.pem"));
+		File keystoreFile = new File(ApplicationProperties.getValue("server.ssl.key-store", "conf.d/cert.p12"));
+		File keyFile = new File(ApplicationProperties.getValue("server.ssl.private-key", "conf.d/key.pem"));
 		
 		if(keyFile.exists() && (!keystoreFile.exists() || keyFile.lastModified()!=keystoreFile.lastModified())) {
 			
@@ -148,7 +148,7 @@ public class Application {
 				log.error("Failed to read PEM private key file", e);
 			}
 			
-			File chainFile = new File(ApplicationProperties.getValue("server.ssl.ca-bundle", "conf/chain.pem"));
+			File chainFile = new File(ApplicationProperties.getValue("server.ssl.ca-bundle", "conf.d/chain.pem"));
 			if(chainFile.exists()) {
 				try(InputStream cin = new FileInputStream(chainFile)) {
 					chain = X509CertificateUtils.loadCertificateChainFromPEM(cin);
@@ -157,7 +157,7 @@ public class Application {
 				}
 			}
 			
-			File certFile = new File(ApplicationProperties.getValue("server.ssl.certificate", "conf/cert.pem"));
+			File certFile = new File(ApplicationProperties.getValue("server.ssl.certificate", "conf.d/cert.pem"));
 			if(certFile.exists()) {
 				try(InputStream cin = new FileInputStream(certFile)) {
 					cert = X509CertificateUtils.loadCertificateFromPEM(cin);
