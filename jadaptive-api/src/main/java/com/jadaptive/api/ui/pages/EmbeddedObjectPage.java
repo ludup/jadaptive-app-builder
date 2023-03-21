@@ -2,11 +2,14 @@ package com.jadaptive.api.ui.pages;
 
 import java.io.FileNotFoundException;
 import java.util.Objects;
+import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.FieldTemplate;
@@ -17,6 +20,9 @@ public abstract class EmbeddedObjectPage extends ObjectTemplatePage {
 
 	@Autowired
 	private PermissionService permissionService;
+
+	@Autowired
+	private ObjectService objectService; 
 
 	String childUuid;
 	String fieldName;
@@ -48,7 +54,9 @@ public abstract class EmbeddedObjectPage extends ObjectTemplatePage {
 
 		try {
 			FieldTemplate field = template.getField(fieldName);
-			childResourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+			if(StringUtils.isBlank(childResourceKey)) {
+				childResourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+			}
 			childTemplate = templateService.get(childResourceKey);
 			childClazz = templateService.getTemplateClass(childResourceKey);
 		} catch (RepositoryException e) {
@@ -61,14 +69,21 @@ public abstract class EmbeddedObjectPage extends ObjectTemplatePage {
 		
 		FieldTemplate field = template.getField(fieldName);
 		if(field.getCollection()) {
-			for(AbstractObject o : object.getObjectCollection(fieldName)) {
-				if(o.getUuid().equals(childUuid)) {
-					childObject = o;
-					break;
-				}
- 			}
+			if(Objects.nonNull(childUuid)) {
+				for(AbstractObject o : object.getObjectCollection(fieldName)) {
+					if(o.getUuid().equals(childUuid)) {
+						childObject = o;
+						break;
+					}
+	 			}
+			}
 		} else {
 			childObject = object.getChild(field);
+		}
+		
+		if(Objects.isNull(childObject)) {
+			childObject = objectService.createNew(childTemplate);
+			childObject.setUuid(UUID.randomUUID().toString()); // Embedded objects don't get assigned these automatically
 		}
 	}
 

@@ -85,7 +85,7 @@ public class DropdownFormInput extends FieldInputRender {
 			nameElement.attr("disabled", "disabled");
 		}
 		nameElement.val(processEnumName(selected.name()));
-		valueElement.val(String.valueOf(selected.ordinal()));
+		valueElement.val(selected.name());
 	}
 	
 	public void renderValues(Collection<String> values, String defaultValue) {

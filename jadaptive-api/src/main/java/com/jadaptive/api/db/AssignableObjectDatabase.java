@@ -2,7 +2,6 @@ package com.jadaptive.api.db;
 
 import java.util.Collection;
 
-import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.user.User;

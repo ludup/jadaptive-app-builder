@@ -15,7 +15,7 @@ import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
 
 @Component
-@RequestPage(path = "object-create/{resourceKey}/{fieldName}")
+@RequestPage(path = "object-create/{resourceKey}/{fieldName}/{childResourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = {"freemarker", "i18n"})
 @ModalPage

@@ -9,8 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.auth.AuthenticationService;
-import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
@@ -20,9 +18,6 @@ public abstract class AuthenticatedPage extends HtmlPage {
 
 	@Autowired
 	private SessionUtils sessionUtils;
-	
-	@Autowired
-	private AuthenticationService authenticationService; 
 	
 	@Autowired
 	private PageCache pageCache;
