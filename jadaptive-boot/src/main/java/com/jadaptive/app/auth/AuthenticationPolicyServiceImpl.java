@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyResolver;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
+import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.PasswordResetAuthenticationPolicy;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
@@ -52,12 +53,12 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	private AuthenticationPolicyResolver resolver;
 	
 	@Override
-	public AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, Class<? extends AuthenticationPolicy> clz, AuthenticationPolicy... additionalPolicies) {
+	public AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, AuthenticationScope scope, AuthenticationPolicy... additionalPolicies) {
 		
 		List<AuthenticationPolicy> results =  new ArrayList<>();
 		
 		for(AuthenticationPolicy policy : policyDatabase.getAssignedObjectsA(AuthenticationPolicy.class, user)) {
-			if(!clz.isAssignableFrom(policy.getClass())) {
+			if(policy.getScope()!=scope) {
 				continue;
 			}
 			boolean update = false;
@@ -76,7 +77,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		}
 		
 		for(AuthenticationPolicy additional : additionalPolicies) {
-			if(!clz.isAssignableFrom(additional.getClass())) {
+			if(additional.getScope()!=scope) {
 				continue;
 			}
 			if(additional.getUsers().contains(user)
@@ -101,7 +102,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		
 		if(results.isEmpty()) {
 			if(permissionService.isAdministrator(user)) {
-				return getDefaultPolicy();
+				return getDefaultPolicy(scope);
 			}
 			return null;
 		}
@@ -147,7 +148,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	protected void beforeSave(AuthenticationPolicy policy) {		
 		authenticationService.validateModules(policy);
 		if(Request.isAvailable() && policy instanceof UserLoginAuthenticationPolicy) {
-			if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getClass(), policy))) {
+			if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getScope(), policy))) {
 				throw new IllegalStateException("The policy is invalid because it would lock the current user out from this location");
 			}
 		}
@@ -160,8 +161,14 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	}
 
 	@Override
-	public AuthenticationPolicy getDefaultPolicy() {
-		return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true));
+	public AuthenticationPolicy getDefaultPolicy(AuthenticationScope scope) {
+		switch(scope) {
+		case PASSWORD_RESET:
+			return getWeightedPolicy(scope);
+		default:
+			return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true));
+		}
+		
 	}
 
 	public void setResolver(AuthenticationPolicyResolver resolver) {
@@ -185,8 +192,24 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 				SearchField.eq("resourceKey", PasswordResetAuthenticationPolicy.RESOURCE_KEY)) > 0;
 	}
 
-	@Override
-	public AuthenticationPolicy getPasswordResetPolicy() {
-		return null;
+	private AuthenticationPolicy getWeightedPolicy(AuthenticationScope scope) {
+		
+		List<AuthenticationPolicy> tmp = new ArrayList<>(policyDatabase.searchObjects(
+				AuthenticationPolicy.class, 
+				SearchField.eq("resourceKey", 
+						scope.getResourceKey())));
+		
+		if(tmp.isEmpty()) {
+			throw new IllegalStateException("No password reset policies are configured!");
+		}
+
+		Collections.sort(tmp, new Comparator<AuthenticationPolicy>() {
+			@Override
+			public int compare(AuthenticationPolicy o1, AuthenticationPolicy o2) {
+				return o1.getWeight().compareTo(o2.getWeight());
+			}
+		});
+		
+		return tmp.get(0);
 	}
 }

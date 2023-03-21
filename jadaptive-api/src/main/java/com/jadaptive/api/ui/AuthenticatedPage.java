@@ -36,8 +36,6 @@ public abstract class AuthenticatedPage extends HtmlPage {
 		super.beforeProcess(uri, request, response);
 		
 		if(!sessionUtils.hasActiveSession(request)) {
-			AuthenticationState state = authenticationService.getCurrentState();
-			state.setHomePage(Request.get().getRequestURI());
 			throw new PageRedirect(pageCache.resolvePage("login"));
 		}
 		

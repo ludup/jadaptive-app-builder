@@ -138,5 +138,10 @@ public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implem
 	public long countObjects(Class<T> resourceClass, SearchField... fields) {
 		return objectDatabase.count(resourceClass, fields);
 	}
+
+	@Override
+	public Collection<T> searchObjects(Class<T> clz, SearchField... fields) {
+		return objectDatabase.searchObjects(clz, fields);
+	}
 	
 }

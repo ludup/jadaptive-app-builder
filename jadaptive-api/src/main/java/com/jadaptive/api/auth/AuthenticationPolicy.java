@@ -125,5 +125,9 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 	public void setWeight(Integer weight) {
 		this.weight = weight;
 	}
+
+	public abstract AuthenticationScope getScope();
+
+	public abstract boolean isSessionRequired();
 	
 }

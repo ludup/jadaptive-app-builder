@@ -35,4 +35,14 @@ public class UserLoginAuthenticationPolicy extends AuthenticationPolicy {
 	public void setPasswordOnFirstPage(Boolean passwordOnFirstPage) {
 		this.passwordOnFirstPage = passwordOnFirstPage;
 	}
+
+	@Override
+	public AuthenticationScope getScope() {
+		return AuthenticationScope.USER_LOGIN;
+	}
+
+	@Override
+	public boolean isSessionRequired() {
+		return true;
+	}
 }

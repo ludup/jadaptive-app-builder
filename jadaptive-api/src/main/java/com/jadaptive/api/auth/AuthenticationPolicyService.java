@@ -6,13 +6,11 @@ import com.jadaptive.api.user.User;
 
 public interface AuthenticationPolicyService extends AbstractUUIDObjectService<AuthenticationPolicy>, DynamicColumnService  {
 
-	AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, Class<? extends AuthenticationPolicy> clz, AuthenticationPolicy... additionalPolicies);
+	AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, AuthenticationScope scope, AuthenticationPolicy... additionalPolicies);
 
-	AuthenticationPolicy getDefaultPolicy();
+	AuthenticationPolicy getDefaultPolicy(AuthenticationScope scope);
 	
 	void setResolver(AuthenticationPolicyResolver resolver);
-
-	AuthenticationPolicy getPasswordResetPolicy();
 
 	boolean hasPasswordResetPolicy();
 

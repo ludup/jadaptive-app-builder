@@ -18,7 +18,7 @@ public class AuthenticationState {
 	User user;
 	List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
 	List<AuthenticationModule> optionalAuthentications = new ArrayList<>();
-	List<Class<? extends Page>> postAuthenticationPages = new ArrayList<>();
+	List<PostAuthenticatorPage> postAuthenticationPages = new ArrayList<>();
 	int currentPageIndex = 0;
 	String remoteAddress;
 	String userAgent;
@@ -37,6 +37,27 @@ public class AuthenticationState {
 	int optionalCompleted = 0;
 	int optionalRequired = 0;
 	
+	AuthenticationScope scope;
+	AuthenticationPolicy policy;
+	
+	public AuthenticationState(AuthenticationScope scope, AuthenticationPolicy policy, Redirect homePage) {
+		this.scope = scope;
+		this.policy = policy;
+		this.homePage = homePage;
+	}
+	
+	public AuthenticationScope getScope() {
+		return scope;
+	}
+
+	public AuthenticationPolicy getPolicy() {
+		return policy;
+	}
+
+	public void setPolicy(AuthenticationPolicy policy) {
+		this.policy = policy;
+	}
+
 	public Class<? extends Page> getCurrentPage() {
 		if(!isAuthenticationComplete()) {
 			return requiredAuthenticationPages.get(currentPageIndex);
@@ -46,16 +67,17 @@ public class AuthenticationState {
 			} else {
 				return optionalSelectionPage;
 			}
+			
 		} else {
 			
-			if(currentPostAuthenticationIndex >= postAuthenticationPages.size()) {
+			if(!hasPostAuthentication()) {
 				Request.get().getSession().setAttribute(AuthenticationService.AUTHENTICATION_STATE_ATTR, null);
 				if(Objects.nonNull(homePage)) {
 					throw homePage;
 				}
 				throw new IllegalStateException("No home page set in authentication state");
 			}
-			return postAuthenticationPages.get(currentPostAuthenticationIndex);
+			return postAuthenticationPages.get(currentPostAuthenticationIndex).getClass();
 		}
 	}
 	
@@ -67,13 +89,14 @@ public class AuthenticationState {
 		return optionalCompleted == optionalRequired;
 	}
 	
-	public boolean hasMorePages() {
-		return currentPageIndex < requiredAuthenticationPages.size() - 1;
+	public boolean hasPostAuthentication() {
+		return currentPostAuthenticationIndex < postAuthenticationPages.size();
 	}
 	
 	public boolean completePage() {
 		if(isAuthenticationComplete() && isOptionalComplete()) {
 			currentPostAuthenticationIndex++;
+			return !hasPostAuthentication();
 		} else {
 			currentPageIndex++;
 			if(isAuthenticationComplete()) {
@@ -112,7 +135,7 @@ public class AuthenticationState {
 		return optionalAuthentications;
 	}
 	
-	public List<Class<? extends Page>> getPostAuthenticationPages() {
+	public List<PostAuthenticatorPage> getPostAuthenticationPages() {
 		return postAuthenticationPages;
 	}
 

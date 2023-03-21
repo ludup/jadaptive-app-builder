@@ -26,4 +26,14 @@ public class PasswordResetAuthenticationPolicy extends AuthenticationPolicy {
 		return Boolean.FALSE;
 	}
 
+	@Override
+	public AuthenticationScope getScope() {
+		return AuthenticationScope.PASSWORD_RESET;
+	}
+
+	@Override
+	public boolean isSessionRequired() {
+		return false;
+	}
+
 }
