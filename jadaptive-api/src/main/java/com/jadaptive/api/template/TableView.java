@@ -13,7 +13,9 @@ public @interface TableView {
 		
 		TableAction[] actions() default { };
 		
-		DynamicColumn[] otherColumns() default { };
+		DynamicCallbackColumn[] otherColumns() default { };
+		
+		DynamicCalculatedColumn[] calculatedColumns() default { };
 		
 		boolean requiresView() default true;
 		

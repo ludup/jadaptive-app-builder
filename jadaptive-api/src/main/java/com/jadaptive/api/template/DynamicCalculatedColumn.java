@@ -6,11 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface DynamicColumn  {
+@Target(ElementType.METHOD)
+public @interface DynamicCalculatedColumn  {
 	
 	String resourceKey();
-	
-	Class<? extends DynamicColumnService> service();
-
 }

@@ -6,7 +6,7 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
-import com.jadaptive.api.template.DynamicColumn;
+import com.jadaptive.api.template.DynamicCallbackColumn;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -24,7 +24,7 @@ import com.jadaptive.api.template.Validator;
 	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "blockedIPs", weight = -7777),
 	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "allowedIPs", weight = -6666)})
 @TableView(defaultColumns = { "name", "scope" }, requiresCreate = false, requiresUpdate = true, sortField = "weight",
-			otherColumns = { @DynamicColumn(resourceKey = "scope", service = AuthenticationPolicyService.class)})
+			otherColumns = { @DynamicCallbackColumn(resourceKey = "scope", service = AuthenticationPolicyService.class)})
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
 @GenerateEventTemplates(AuthenticationPolicy.RESOURCE_KEY)
 public abstract class AuthenticationPolicy extends AssignableUUIDEntity implements NamedDocument {
