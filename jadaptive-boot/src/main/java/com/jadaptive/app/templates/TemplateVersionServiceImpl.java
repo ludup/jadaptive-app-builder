@@ -399,8 +399,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
-			if(log.isInfoEnabled()) {
-				log.info("Scanning plugin {} for entity templates in {}", 
+			if(log.isDebugEnabled()) {
+				log.debug("Scanning plugin {} for entity templates in {}", 
 						w.getPluginId(),
 						w.getPlugin().getClass().getPackage().getName());
 			}
@@ -418,8 +418,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                 for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectDefinition.class.getName())) {
 
                     if(classInfo.getPackageName().startsWith(w.getPlugin().getClass().getPackage().getName())) {
-                        if(log.isInfoEnabled()) {
-    						log.info("Found template {}", classInfo.getName());
+                        if(log.isDebugEnabled()) {
+    						log.debug("Found template {}", classInfo.getName());
     					}
                     	registerAnnotatedTemplate((Class<? extends UUIDDocument>) classInfo.loadClass(), newSchema);
                     }
@@ -434,8 +434,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                     .whitelistPackages("com.jadaptive")   
                     .scan()) {                  
             for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectDefinition.class.getName())) {
-                if(log.isInfoEnabled()) {
-					log.info("Found template {}", classInfo.getName());
+                if(log.isDebugEnabled()) {
+					log.debug("Found template {}", classInfo.getName());
 				}
                 registerAnnotatedTemplate((Class<? extends UUIDDocument>) classInfo.loadClass(), newSchema);
             }
@@ -447,10 +447,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	public ObjectTemplate registerAnnotatedTemplate(Class<? extends UUIDDocument> clz, boolean newSchema) {
 		
 		try {
-			
-			if(log.isInfoEnabled()) {
-				log.info("Registering template from annotations on class {}", clz.getSimpleName());
-			}
 			
 			List<Class<?>> parents = new ArrayList<>();
 			Class<?> c = clz.getSuperclass();
@@ -485,7 +481,15 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			try {
 				template = templateRepository.get(e.resourceKey());
+				
+				if(log.isInfoEnabled()) {
+					log.info("Registering template from annotations on class {}", clz.getSimpleName());
+				}
 			} catch (ObjectException ee) {
+
+				if(log.isInfoEnabled()) {
+					log.info("Registering NEW template from annotations on class {}", clz.getSimpleName());
+				}
 				template = new ObjectTemplate();
 				template.setUuid(e.resourceKey());
 			}
@@ -497,8 +501,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			boolean generateEventTemplates = ReflectionUtils.hasAnnotation(clz, GenerateEventTemplates.class);
 			
 			if(Objects.nonNull(parent)) {
-				if(log.isInfoEnabled()) {
-					log.info("{} template has {} as parent", e.resourceKey(), parent.resourceKey());
+				if(log.isDebugEnabled()) {
+					log.debug("{} template has {} as parent", e.resourceKey(), parent.resourceKey());
 				}
 				template.setParentTemplate(parent.resourceKey());
 				ObjectTemplate parentTemplate = templateRepository.get(parent.resourceKey());
@@ -594,8 +598,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, String group, boolean newSchema) {
 	
-		if(log.isInfoEnabled()) {
-			log.info("Generating events for {}", template.getResourceKey());
+		if(log.isDebugEnabled()) {
+			log.debug("Generating events for {}", template.getResourceKey());
 		}
 		generateEventTemplate(StringUtils.capitalize(group) + "Created",
 				template.getResourceKey(), template.getBundle(), group, clz, 
@@ -630,8 +634,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 		Generic genericType = TypeDescription.Generic.Builder.parameterizedType(ObjectEvent.class, clz).build();
 		
-		if(log.isInfoEnabled()) {
-			log.info("Generating event templates and class for {}", clz.getSimpleName());
+		if(log.isDebugEnabled()) {
+			log.debug("Generating event templates and class for {}", clz.getSimpleName());
 		}
 		try {
 			
