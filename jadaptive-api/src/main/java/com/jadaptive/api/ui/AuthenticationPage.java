@@ -8,6 +8,7 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
@@ -88,25 +89,31 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	
 	public final void processForm(Document document, T form) throws FileNotFoundException {
 		
+		
+		AuthenticationState state = authenticationService.getCurrentState();
+		
 		try {
-			
+		
 			sessionUtils.verifySameSiteRequest(Request.get());
-			
-			AuthenticationState state = authenticationService.getCurrentState();
 			
 			if(doForm(document, state, form)) {
 				throw new PageRedirect(pageCache.resolvePage(authenticationService.completeAuthentication(state)));
 			}
-			
-			authenticationService.reportAuthenticationFailure(state);
     	
+			
+			Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+	    	Feedback.error("default", "error.invalidCredentials");
+	    	
     	} catch(AccessDeniedException e) {
+    		Feedback.error(e.getMessage());
     	} catch(ObjectNotFoundException e) {	
+    		Feedback.error("userInterface","error.invalidCredentials");
     	} catch (UnauthorizedException e) {
-			log.error("Invalid CSRF token");
-		}
+    		Feedback.error("userInterface","error.invalidCredentials");
+    	}
 		
-		Feedback.error("userInterface","error.invalidCredentials");
+		authenticationService.reportAuthenticationFailure(state);
+		
 		throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentState().getCurrentPage()));
 	}
 	

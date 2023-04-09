@@ -27,8 +27,11 @@ import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
+import com.jadaptive.api.auth.events.AuthenticationFailedEvent;
+import com.jadaptive.api.auth.events.AuthenticationSuccessEvent;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -81,11 +84,17 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Autowired
 	private AuthenticationPolicyService policyService;
 
+	@Autowired
+	private EventService eventService; 
+	
 	Map<String, Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
 
+	Map<Class<? extends Page>, AuthenticationModule> registeredModulesByPage = new HashMap<>();
+
 	@Override
-	public void registerAuthenticationPage(String resourceKey, Class<? extends Page> page) {
-		registeredAuthenticationPages.put(resourceKey, page);
+	public void registerAuthenticationPage(AuthenticationModule module, Class<? extends Page> page) {
+		registeredAuthenticationPages.put(module.getAuthenticatorKey(), page);
+		registeredModulesByPage.put(page, module);
 	}
 
 	@Override
@@ -128,9 +137,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 			state.incrementFailedAttempts();
 
-			assertLoginThreshold(state.getAttemptedUsername());
-			assertLoginThreshold(Request.getRemoteAddress());
+			flagFailedLogin(state.getAttemptedUsername());
+			flagFailedLogin(Request.getRemoteAddress());
 
+			eventService.publishEvent(new AuthenticationFailedEvent(registeredModulesByPage.get(state.getCurrentPage()), 
+					state.getAttemptedUsername(),
+					"", Request.getRemoteAddress()));
 		} finally {
 			permissionService.clearUserContext();
 		}
@@ -142,9 +154,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		permissionService.setupSystemContext();
 
 		try {
-
-			assertLoginThreshold(username);
-			assertLoginThreshold(remoteAddress);
 
 			User user = userService.getUser(username);
 			if (Objects.isNull(user) || !userService.supportsLogin(user)) {
@@ -165,7 +174,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 						log.info("Flagged failed login from {} and {}", username, remoteAddress);
 					}
 
-					throw new AccessDeniedException("Bad username or password");
+					throw new AccessDeniedException();
 				}
 
 				return sessionService.createSession(tenant, user, remoteAddress, userAgent, SessionType.HTTPS);
@@ -178,6 +187,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			permissionService.clearUserContext();
 		}
 	}
+	
+	@Override
+	public void assertLoginThesholds(String username, String remoteAddress) {
+		assertLoginThreshold(username);
+		assertLoginThreshold(remoteAddress);
+	}
 
 	private void assertLoginThreshold(String key) {
 		Integer count = getCache().get(getCacheKey(key));
@@ -186,7 +201,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				if (log.isInfoEnabled()) {
 					log.info("Rejecting login due to too many failues from {}", key);
 				}
-				throw new AccessDeniedException("Too many failed login attempts");
+				throw new AccessDeniedException("Too many failed login attempts for " + key);
 			}
 		}
 	}
@@ -221,6 +236,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			throw new AccessDeniedException("Invalid credentials");
 		}
 
+		eventService.publishEvent(new AuthenticationSuccessEvent(registeredModulesByPage.get(state.getCurrentPage()), 
+				Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
+				Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+		
 		if (state.completePage()) {
 
 			if(state.isAuthenticationComplete() && state.isOptionalComplete() && !state.hasPostAuthentication()) {

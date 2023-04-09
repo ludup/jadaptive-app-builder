@@ -24,8 +24,6 @@ public interface AuthenticationService {
 
 	Class<? extends Page> completeAuthentication(AuthenticationState state);
 
-	void registerAuthenticationPage(String resourceKey, Class<? extends Page> page);
-
 	Class<? extends Page> resetAuthentication(@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
 
 	Class<? extends Page> resetAuthentication(String authenticationFlow, @SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
@@ -45,5 +43,9 @@ public interface AuthenticationService {
 	Iterable<AuthenticationModule> getAuthenticationModules();
 
 	AuthenticationModule getAuthenticationModule(String uuid);
+
+	void assertLoginThesholds(String username, String remoteAddress);
+
+	void registerAuthenticationPage(AuthenticationModule module, Class<? extends Page> page);
 	
 }
