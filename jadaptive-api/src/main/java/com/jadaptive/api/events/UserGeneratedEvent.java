@@ -11,6 +11,7 @@ public abstract class UserGeneratedEvent extends SystemEvent {
 
 	public static final String RESOURCE_KEY = "objectEvent";
 
+	@Deprecated
 	public UserGeneratedEvent() {
 	}
 	
