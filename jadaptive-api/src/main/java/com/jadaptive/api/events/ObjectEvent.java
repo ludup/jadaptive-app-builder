@@ -17,7 +17,6 @@ public abstract class ObjectEvent<T extends UUIDEntity> extends UserGeneratedEve
 	
 	public static final String OBJECT_VIEW = "object";
 
-	@Deprecated
 	public ObjectEvent() {
 		
 	}
