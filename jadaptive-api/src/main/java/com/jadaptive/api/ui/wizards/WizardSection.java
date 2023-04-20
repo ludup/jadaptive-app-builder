@@ -2,6 +2,7 @@ package com.jadaptive.api.ui.wizards;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -20,6 +21,17 @@ public abstract class WizardSection extends AbstractPageExtension {
 		this.bundle = bundle;
 		this.name = name;
 		this.resource = resource;
+	}
+	
+	/**
+	 * Automatic support for section as class name with HTML in classpath as
+	 * either &lt;classname&gt;.html or &lt;classname&gt;Section.html
+	 * @param bundle
+	 */
+	public WizardSection(String bundle) {
+		this.bundle = bundle;
+		this.name = StringUtils.uncapitalize(getClass().getSimpleName());
+		this.resource = "/" + getClass().getName().replace(".", "/") + ".html";
 	}
 	
 	@Override

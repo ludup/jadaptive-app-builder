@@ -40,7 +40,6 @@ import com.jadaptive.api.ui.MessagePage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageExtension;
-import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
 
 @Controller
