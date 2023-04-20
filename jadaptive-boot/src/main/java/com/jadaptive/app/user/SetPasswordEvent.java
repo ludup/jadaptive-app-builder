@@ -31,7 +31,9 @@ public class SetPasswordEvent extends PasswordEvent {
 	@ObjectView(TARGET_VIEW)
 	String targetName;
 	
-	public SetPasswordEvent() {  }
+	public SetPasswordEvent() { 
+		super(RESOURCE_KEY);
+	}
 	
 	public SetPasswordEvent(User user, Throwable t) {
 		super(RESOURCE_KEY, t);
