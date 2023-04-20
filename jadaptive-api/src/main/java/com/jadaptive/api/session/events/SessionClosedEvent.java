@@ -29,7 +29,9 @@ public class SessionClosedEvent extends UserGeneratedEvent {
 	@ObjectView(value = SystemEvent.EVENT_VIEW, weight = 9999, bundle = Session.RESOURCE_KEY)
 	String userAgent;
 
-	public SessionClosedEvent() { }
+	public SessionClosedEvent() {
+		super(RESOURCE_KEY, "sessions");
+	}
 	
 	public SessionClosedEvent(Session object) {
 		super(RESOURCE_KEY, "sessions");

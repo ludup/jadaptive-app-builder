@@ -82,7 +82,6 @@ public class SystemEvent extends UUIDEvent {
 	@ObjectView(value = EVENT_VIEW, weight = 9998, renderer = FieldRenderer.OPTIONAL)
 	String eventDescription;
 	
-	@Deprecated
 	public SystemEvent() {
 		
 	}
