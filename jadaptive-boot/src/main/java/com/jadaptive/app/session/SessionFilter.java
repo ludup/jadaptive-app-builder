@@ -95,33 +95,32 @@ public class SessionFilter implements Filter {
 		
 		tenantService.setCurrentTenant(req);
 		
-		Tenant tenant = tenantService.getCurrentTenant();
-		
-		if(Objects.nonNull(tenant)) {
-			if(!tenant.isValidHostname(request.getServerName())) {
-				TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
-				if(config.getRequireValidDomain()) {
-					if(req.getServerName().equalsIgnoreCase(config.getRegistrationDomain())) {
-						if(req.getRequestURI().equals("/")) {
-							if(req.getServerPort() != -1 && req.getServerPort() != 443) {
-								resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
-										config.getRegistrationDomain(),
-										request.getServerPort()));
-							} else {
-								resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
-							}	
+		try {
+			Tenant tenant = tenantService.getCurrentTenant();
+
+			if(Objects.nonNull(tenant)) {
+				if(!tenant.isValidHostname(request.getServerName())) {
+					TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
+					if(config.getRequireValidDomain()) {
+						if(req.getServerName().equalsIgnoreCase(config.getRegistrationDomain())) {
+							if(req.getRequestURI().equals("/")) {
+								if(req.getServerPort() != -1 && req.getServerPort() != 443) {
+									resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
+											config.getRegistrationDomain(),
+											request.getServerPort()));
+								} else {
+									resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
+								}	
+								return;
+							}
+							
+						} else {
+							resp.sendRedirect(config.getInvalidDomainRedirect());
 							return;
 						}
-						
-					} else {
-						resp.sendRedirect(config.getInvalidDomainRedirect());
-						return;
 					}
 				}
 			}
-		}
-		
-		try {
 
 			if(checkRedirects(req, resp)) {
 				return;
