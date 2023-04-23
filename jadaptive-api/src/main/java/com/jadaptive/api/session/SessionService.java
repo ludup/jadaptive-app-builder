@@ -20,4 +20,8 @@ public interface SessionService extends UUIDObjectService<Session> {
 
 	Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type);
 
+	void impersonate(Tenant tenant, Session session);
+
+	void unimpersonate(Session session);
+
 }

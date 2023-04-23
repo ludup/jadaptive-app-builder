@@ -15,6 +15,8 @@ import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.TableAction;
+import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
@@ -26,7 +28,8 @@ import com.jadaptive.utils.Utils;
 @ObjectServiceBean(bean = TenantService.class)
 @ObjectViews({ 
 	@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)})
-@TableView(defaultColumns = { "name", "hostname" })
+@TableView(defaultColumns = { "name", "hostname" },
+actions = { @TableAction(bundle = Tenant.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}" )})
 public class Tenant extends NamedUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 1567817173441528990L;

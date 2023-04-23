@@ -21,7 +21,9 @@ import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionService;
@@ -61,6 +63,12 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	
 	@Autowired
 	private CacheService cacheService;
+	
+	@Autowired
+	private PermissionService permissionService;
+	
+	@Autowired
+	private RoleService roleService; 
 	
 	@Override
 	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type) {
@@ -263,6 +271,39 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	
 	protected Collection<Session> filter(SearchField...fields) {
 		return new ArrayList<>(getCache(getCurrentTenant()).values());
+	}
+
+	@Override
+	public void impersonate(Tenant tenant, Session session) {
+		
+		permissionService.assertAdministrator();
+		
+		tenantService.setCurrentTenant(tenant);
+		User administrativeUser = roleService.getAdministrationRole().getUsers().iterator().next();
+		
+		session.setImpersonatingUser(administrativeUser);
+		session.setImpersontatingTenant(tenant);
+		
+		getCache(tenant).put(session.getUuid(), session);
+		
+	}
+	
+	@Override
+	public void unimpersonate(Session session) {
+		
+		Tenant tenant = session.getImpersontatingTenant();
+		
+		if(Objects.isNull(tenant)) {
+			throw new IllegalStateException("You cannot unimpersontate this session as there is no impersonation in progress");
+		}
+		
+		session.setImpersonatingUser(null);
+		session.setImpersontatingTenant(null);
+		
+		tenantService.setCurrentTenant(session.getTenant());
+		
+		getCache(tenant).remove(session.getUuid());
+		
 	}
 
 }
