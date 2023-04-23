@@ -1,5 +1,6 @@
 package com.jadaptive.api.session;
 import java.util.Date;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.ObjectScope;
@@ -59,7 +60,10 @@ public class Session extends AbstractUUIDEntity {
 	User user;
 	
 	Tenant tenant;
-
+	
+	User impersonatingUser;
+	Tenant impersontatingTenant;
+	
 	public Session() {
 
 	}
@@ -110,6 +114,9 @@ public class Session extends AbstractUUIDEntity {
 
 	@JsonIgnore
 	public Tenant getTenant() {
+		if(isImpersontating()) {
+			return impersontatingTenant;
+		}
 		return tenant;
 	}
 
@@ -134,6 +141,9 @@ public class Session extends AbstractUUIDEntity {
 	}
 
 	public User getUser() {
+		if(isImpersontating()) {
+			return impersonatingUser;
+		}
 		return user;
 	}
 
@@ -160,5 +170,25 @@ public class Session extends AbstractUUIDEntity {
 
 	public boolean isClosed() {
 		return signedOut!=null;
+	}
+
+	public User getImpersonatingUser() {
+		return impersonatingUser;
+	}
+
+	public void setImpersonatingUser(User impersonatingUser) {
+		this.impersonatingUser = impersonatingUser;
+	}
+
+	public Tenant getImpersontatingTenant() {
+		return impersontatingTenant;
+	}
+
+	public void setImpersontatingTenant(Tenant impersontatingTenant) {
+		this.impersontatingTenant = impersontatingTenant;
+	}
+
+	public boolean isImpersontating() {
+		return Objects.nonNull(impersonatingUser);
 	}
 }

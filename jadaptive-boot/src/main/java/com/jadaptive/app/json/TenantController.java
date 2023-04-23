@@ -28,8 +28,8 @@ public class TenantController {
 	static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	@Autowired
-	TenantService tenantService; 
-		
+	private TenantService tenantService; 
+	
 	@RequestMapping(value="/app/api/tenant/list", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
@@ -58,5 +58,4 @@ public class TenantController {
 		}
 		
 	}
-
 }
