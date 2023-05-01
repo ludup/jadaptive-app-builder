@@ -60,7 +60,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 
 	@Override
 	protected void documentComplete(Document document) throws IOException {
-		PageHelper.appendScript(document, "/app/content/jadaptive-session.js");
+		PageHelper.appendHeadScript(document, "/app/content/jadaptive-session.js");
 		super.documentComplete(document);
 	}
 

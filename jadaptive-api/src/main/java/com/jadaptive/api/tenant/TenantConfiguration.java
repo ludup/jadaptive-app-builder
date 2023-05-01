@@ -12,7 +12,8 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = TenantConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON, system = true)
-@ObjectViews({@ObjectViewDefinition(value = TenantConfiguration.DOMAIN_VIEW, bundle = TenantConfiguration.RESOURCE_KEY)})
+@ObjectViews({@ObjectViewDefinition(value = TenantConfiguration.DOMAIN_VIEW, bundle = TenantConfiguration.RESOURCE_KEY),
+		@ObjectViewDefinition(value = TenantConfiguration.DOMAIN_VIEW, bundle = TenantConfiguration.RESOURCE_KEY, weight = 9999)})
 public class TenantConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = 4952852039617671471L;
@@ -20,6 +21,7 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	public static final String RESOURCE_KEY = "tenantConfiguration";
 	
 	public static final String DOMAIN_VIEW = "domain";
+	public static final String ANALYTICS_VIEW = "analytics";
 	
 	@ObjectField(type = FieldType.TEXT, defaultValue = "")
 	@ObjectView(DOMAIN_VIEW)
@@ -38,6 +40,9 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	@ObjectView(DOMAIN_VIEW)
 	String invalidDomainRedirect;
 	
+	@ObjectField(type = FieldType.TEXT, defaultValue = "")
+	@ObjectView(ANALYTICS_VIEW)
+	String analyticsId = "";
 	
 	public String getRootDomain() {
 		return rootDomain;
@@ -69,6 +74,14 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 
 	public void setInvalidDomainRedirect(String invalidDomainRedirect) {
 		this.invalidDomainRedirect = invalidDomainRedirect;
+	}
+
+	public String getAnalyticsId() {
+		return analyticsId;
+	}
+
+	public void setAnalyticsId(String analyticsId) {
+		this.analyticsId = analyticsId;
 	}
 
 	@Override

@@ -168,13 +168,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 
 		URL url = ext.getClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
-			PageHelper.appendScript(document, "/app/script/" +
+			PageHelper.appendHeadScript(document, "/app/script/" +
 					ext.getClass().getPackage().getName().replace('.', '/') 
 						+ "/" + FileUtils.checkStartsWithNoSlash(ext.getJsResource()));
 		} else {
 			url = classService.getResource(ext.getJsResource());
 			if(Objects.nonNull(url)) {
-				PageHelper.appendScript(document, "/app/script/" +
+				PageHelper.appendHeadScript(document, "/app/script/" +
 						FileUtils.checkStartsWithNoSlash(ext.getJsResource()));
 			}
 		}

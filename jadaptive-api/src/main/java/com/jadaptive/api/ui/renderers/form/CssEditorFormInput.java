@@ -25,9 +25,9 @@ public class CssEditorFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(Element rootElement, String value) throws IOException {
 
-		PageHelper.appendScript(document, "/app/content/codemirror/lib/codemirror.js");
-		PageHelper.appendScript(document, "/app/content/codemirror/addon/display/autorefresh.js");
-		PageHelper.appendScript(document, "/app/content/codemirror/mode/css/css.js");
+		PageHelper.appendHeadScript(document, "/app/content/codemirror/lib/codemirror.js");
+		PageHelper.appendHeadScript(document, "/app/content/codemirror/addon/display/autorefresh.js");
+		PageHelper.appendHeadScript(document, "/app/content/codemirror/mode/css/css.js");
 		PageHelper.appendStylesheet(document, "/app/content/codemirror/lib/codemirror.css");
 				
 
@@ -65,7 +65,7 @@ public class CssEditorFormInput extends FieldInputRender {
 				+ "  $('#"  +field.getFormVariable() + "').val(text);\r\n"
 				+ "});\r\n});";
 		
-		PageHelper.appendScriptSnippet(document, script);
+		PageHelper.appendBodyScriptSnippet(document, script);
 		
 	}
 }
