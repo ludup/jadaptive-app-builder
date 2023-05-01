@@ -33,8 +33,11 @@ public class PageHelper {
 		document.prependChild(head);
 		return head;
 	}
+	public static void appendHeadScript(Document document, String uri) {
+		appendHeadScript(document, uri, false);
+	}
 	
-	public static void appendScript(Document document, String uri) {
+	public static void appendHeadScript(Document document, String uri, boolean async) {
 		Element head = PageHelper.getOrCreateTag(document, "head");
 		
 		for(Element e : head.getElementsByTag("script")) {
@@ -42,7 +45,11 @@ public class PageHelper {
 				return;
 			}
 		}
-		PageHelper.appendLast(head, "script", new Element("script").attr("src", uri).attr("type", "text/javascript"));
+		PageHelper.appendLast(head, "script", 
+				new Element("script")
+					.attr("src", uri)
+					.attr("async", async)
+					.attr("type", "text/javascript"));
 	}
 	
 	public static void appendStylesheet(Document document, String uri) {
@@ -74,10 +81,21 @@ public class PageHelper {
 				.text(text);
 	}
 	
-	public static void appendScriptSnippet(Document document, String script) {
+	public static void appendBodyScriptSnippet(Document document, String script) {
 
 		String nonce = Utils.generateRandomAlphaNumericString(32);
 		document.selectFirst("body").appendChild(new Element("script")
+				.attr("nonce", nonce)
+				.attr("type", "application/javascript")
+				.text(script));
+
+		ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).addScriptNoncePolicy(Request.response(), nonce);
+	}
+	
+	public static void appendHeadScriptSnippet(Document document, String script) {
+
+		String nonce = Utils.generateRandomAlphaNumericString(32);
+		document.selectFirst("head").appendChild(new Element("script")
 				.attr("nonce", nonce)
 				.attr("type", "application/javascript")
 				.text(script));

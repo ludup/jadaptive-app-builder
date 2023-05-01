@@ -30,12 +30,12 @@ public class HtmlEditorFormInput extends FieldInputRender {
 
 	public void renderInput(Element rootElement, String bundle, String resourceKey, String variableName, String value) throws IOException {
 
-		PageHelper.appendScript(document, "/app/content/codemirror/lib/codemirror.js");
-		PageHelper.appendScript(document, "/app/content/codemirror/addon/display/autorefresh.js");
-		PageHelper.appendScript(document, "/app/content/codemirror/mode/xml/xml.js");
-		PageHelper.appendScript(document, "/app/content/codemirror/mode/javascript/javascript.js");
-		PageHelper.appendScript(document, "/app/content/codemirror/mode/css/css.js");
-		PageHelper.appendScript(document, "/app/content/codemirror/mode/htmlmixed/htmlmixed.js");
+		PageHelper.appendHeadScript(document, "/app/content/codemirror/lib/codemirror.js");
+		PageHelper.appendHeadScript(document, "/app/content/codemirror/addon/display/autorefresh.js");
+		PageHelper.appendHeadScript(document, "/app/content/codemirror/mode/xml/xml.js");
+		PageHelper.appendHeadScript(document, "/app/content/codemirror/mode/javascript/javascript.js");
+		PageHelper.appendHeadScript(document, "/app/content/codemirror/mode/css/css.js");
+		PageHelper.appendHeadScript(document, "/app/content/codemirror/mode/htmlmixed/htmlmixed.js");
 		PageHelper.appendStylesheet(document, "/app/content/codemirror/lib/codemirror.css");
 				
 
@@ -73,7 +73,7 @@ public class HtmlEditorFormInput extends FieldInputRender {
 								+ "  $('#"  + variableName + "').val(text);\r\n"
 								+ "});\r\n});";
 		
-		PageHelper.appendScriptSnippet(document, script);
+		PageHelper.appendBodyScriptSnippet(document, script);
 	}
 
 }
