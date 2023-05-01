@@ -33,6 +33,7 @@ import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
+import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -174,6 +175,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			}
 		}
 		for(ObjectTemplate reference : templateRepository.findReferences(template)) {
+			if(Session.RESOURCE_KEY.equals(reference.getResourceKey())) {
+				continue; // Need object template attribute here?
+			}
 			validateCollectionReference(reference, template.getResourceKey(), uuid, "");
 			
 		}
