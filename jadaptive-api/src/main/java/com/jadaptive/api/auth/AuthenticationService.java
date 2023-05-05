@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 
 public interface AuthenticationService {
@@ -46,6 +47,7 @@ public interface AuthenticationService {
 
 	void assertLoginThesholds(String username, String remoteAddress);
 
-	void registerAuthenticationPage(AuthenticationModule module, Class<? extends Page> page);
+	@SuppressWarnings("unchecked")
+	void registerAuthenticationPage(AuthenticationModule module, Class<? extends AuthenticationPage<?>>... pages);
 	
 }

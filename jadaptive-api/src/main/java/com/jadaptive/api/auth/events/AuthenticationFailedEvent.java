@@ -37,6 +37,7 @@ public class AuthenticationFailedEvent extends UserGeneratedEvent {
 		setUsername(username);
 		setName(name);
 		setIpAddress(remoteAddress);
+		setEventDescription(authenticationModule.getName());
 		setState(EventState.FAILURE);
 		this.authenticationModule = authenticationModule;
 	}

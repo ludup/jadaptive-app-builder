@@ -36,6 +36,7 @@ public class AuthenticationSuccessEvent extends UserGeneratedEvent {
 		setUsername(username);
 		setName(name);
 		setIpAddress(remoteAddress);
+		setEventDescription(authenticationModule.getName());
 		this.authenticationModule = authenticationModule;
 	}
 

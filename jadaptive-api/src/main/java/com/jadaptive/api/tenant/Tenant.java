@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldType;
@@ -26,10 +27,11 @@ import com.jadaptive.utils.Utils;
 	scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
 	system = true, creatable = false, defaultColumn = "name")
 @ObjectServiceBean(bean = TenantService.class)
+@GenerateEventTemplates(value = Tenant.RESOURCE_KEY)
 @ObjectViews({ 
 	@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)})
 @TableView(defaultColumns = { "name", "hostname" },
-actions = { @TableAction(bundle = Tenant.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}" )})
+	actions = { @TableAction(bundle = Tenant.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}" )})
 public class Tenant extends NamedUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 1567817173441528990L;

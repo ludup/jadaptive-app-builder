@@ -42,6 +42,7 @@ import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionType;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
@@ -91,10 +92,16 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	Map<Class<? extends Page>, AuthenticationModule> registeredModulesByPage = new HashMap<>();
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void registerAuthenticationPage(AuthenticationModule module, Class<? extends Page> page) {
-		registeredAuthenticationPages.put(module.getAuthenticatorKey(), page);
-		registeredModulesByPage.put(page, module);
+	public void registerAuthenticationPage(AuthenticationModule module, Class<? extends AuthenticationPage<?>>... pages) {
+		if(Objects.isNull(pages) || pages.length == 0) {
+			throw new IllegalArgumentException();
+		}
+		registeredAuthenticationPages.put(module.getAuthenticatorKey(), pages[0]);
+		for(var c : pages) {
+			registeredModulesByPage.put(c, module);
+		}
 	}
 
 	@Override
