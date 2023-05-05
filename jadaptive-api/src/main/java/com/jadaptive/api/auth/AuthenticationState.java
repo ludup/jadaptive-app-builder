@@ -28,7 +28,7 @@ public class AuthenticationState {
 	String resetText = "Restart Authentication";
 	int failedAttempts = 0;
 	int currentPostAuthenticationIndex = 0;
-	Redirect homePage = new UriRedirect("/app/ui/dashboard");
+	Redirect homePage;
 	String attemptedUsername;
 	Class<? extends Page> optionalSelectionPage;
 	Class<? extends Page> selectedPage = null;
@@ -259,5 +259,9 @@ public class AuthenticationState {
 
 	public boolean hasCompleted(Class<? extends Page> page) {
 		return completedOptionsPages.contains(page);
+	}
+
+	public boolean isFirstPage() {
+		return currentPageIndex == 0;
 	}
 }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.user.User;
 
 public abstract class AuthenticatedPage extends HtmlPage {
@@ -31,7 +32,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 		super.beforeProcess(uri, request, response);
 		
 		if(!sessionUtils.hasActiveSession(request)) {
-			throw new PageRedirect(pageCache.resolvePage("login"));
+			throw new PageRedirect(pageCache.getPage(Login.class));
 		}
 		
 		currentSession.set(sessionUtils.getActiveSession(Request.get()));

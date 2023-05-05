@@ -91,7 +91,7 @@ public class ErrorPage extends HtmlPage {
 		}
 		Throwable e = (Throwable) Request.get().getSession().getAttribute(THROWABLE);
 		if(Objects.isNull(e)) {
-			throw new UriRedirect("dashboard");
+			throw new UriRedirect();
 		}
 		
 		document.selectFirst("#message").text(StringUtils.defaultString(e.getMessage()));

@@ -9,6 +9,10 @@ public class UriRedirect extends Redirect {
 		this.uri = uri;
 	}
 	
+	public UriRedirect() {
+		this.uri = "";
+	}
+	
 	public String getUri() {
 		return uri;
 	}

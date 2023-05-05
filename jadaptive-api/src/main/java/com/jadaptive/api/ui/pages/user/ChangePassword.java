@@ -1,0 +1,82 @@
+package com.jadaptive.api.ui.pages.user;
+
+import org.jsoup.nodes.Document;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.jadaptive.api.auth.AuthenticationScope;
+import com.jadaptive.api.auth.AuthenticationState;
+import com.jadaptive.api.auth.PostAuthenticatorPage;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.Session;
+import com.jadaptive.api.ui.AuthenticationPage;
+import com.jadaptive.api.ui.ModalPage;
+import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.pages.user.ChangePassword.PasswordForm;
+import com.jadaptive.api.user.PasswordEnabledUser;
+import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
+
+@Component
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
+@ModalPage
+public class ChangePassword extends AuthenticationPage<PasswordForm> implements PostAuthenticatorPage {
+
+	@Autowired
+	private PermissionService permissionService; 
+	
+	public ChangePassword() {
+		super(PasswordForm.class);
+	}
+
+	@Override
+	public String getUri() {
+		return "change-password";
+	}
+
+	public boolean doForm(Document document, AuthenticationState state, PasswordForm form) throws AccessDeniedException {
+
+		Session session = sessionUtils.getActiveSession(Request.get());
+		User user = session.getUser();
+		userService.changePassword(user, form.getPassword().toCharArray(), false);
+		return true;
+	}
+
+	public interface PasswordForm {
+
+		String getPassword();
+		String getConfirmPasssord();
+	}
+
+	@Override
+	public String getBundle() {
+		return "userInterface";
+	}
+
+	@Override
+	public AuthenticationScope getScope() {
+		return AuthenticationScope.USER_LOGIN;
+	}
+
+	@Override
+	public boolean requiresProcessing(AuthenticationState state) {
+		if(state.getUser() instanceof PasswordEnabledUser) {
+			
+	    	if(((PasswordEnabledUser)state.getUser()).getPasswordChangeRequired()) {
+	    		permissionService.setupUserContext(state.getUser());
+	    		try {
+		    		permissionService.assertPermission(UserService.CHANGE_PASSWORD_PERMISSION);
+					return true;
+	    		} catch(AccessDeniedException e) {
+	    			
+	    		}
+	    		finally {
+	    			permissionService.clearUserContext();
+	    		}
+	    	}
+    	}
+		return false;
+	}
+}

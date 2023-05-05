@@ -43,6 +43,7 @@ public class SetPasswordEvent extends PasswordEvent {
 	
 	public SetPasswordEvent(User user) {
 		super(RESOURCE_KEY);
+		setEventDescription(user.getUsername());
 		setTargetUsername(user.getUsername());
 		setTargetName(user.getName());
 	}

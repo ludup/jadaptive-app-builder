@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.ReflectionUtils;
@@ -31,6 +32,9 @@ public class PageCache {
 	@Autowired
 	private ApplicationService applicationService; 
 	
+	@Autowired
+	private ClassLoaderService classService; 
+	
 	Map<Class<? extends PageExtension>,PageExtension> extensionCache = new HashMap<>();
 	Map<String,PageExtension> extensionsByName = new HashMap<>();
 	Map<String,Page> aliasCache = new HashMap<>();
@@ -41,7 +45,7 @@ public class PageCache {
 		
 		String name = FileUtils.firstPathElement(resourceUri);
 		if(StringUtils.isBlank(name)) {
-			name = "dashboard";
+			return getHomePage();
 		}
 		Page cachedPage = aliasCache.get(name);
 		if(Objects.nonNull(cachedPage)) {
@@ -77,7 +81,7 @@ public class PageCache {
 		
 		String name = FileUtils.firstPathElement(resourceUri);
 		if(StringUtils.isBlank(name)) {
-			name = "dashboard";
+			return getHomePage().getClass();
 		}
 		Page cachedPage = aliasCache.get(name);
 		if(Objects.nonNull(cachedPage)) {
@@ -276,16 +280,31 @@ public class PageCache {
 	}
 
 	public Page getHomePage() throws FileNotFoundException {
-		if(Objects.isNull(homePage)) {
-			throw new IllegalStateException("Product does not appear to have set non-administrative home page!");
-		}
-		
-		return resolvePage(homePage);
+		return resolvePage(getHomeClass());
 	}
 	
-	public void setHomePage(Class<? extends Page> homePage) {
-		this.homePage = homePage;
+	@SuppressWarnings("unchecked")
+	public Class<? extends Page> getHomeClass() throws FileNotFoundException {
+		if(Objects.isNull(homePage)) {
+			Collection<?> classes = classService.resolveAnnotatedClasses(HomePage.class);
+			if(classes.isEmpty()) {
+				log.error("Product does not appear to have set a home page using the @HomePage annotation!");
+				throw new IllegalStateException("Product does not appear to have set a home page using the @HomePage annotation!");
+			}
+			if(classes.size() > 1) {
+				log.warn("Product has multiple home page configured with the @HomePage annotation! Only one allowed");
+			}
+			Class<?> resolved = (Class<?>) classes.iterator().next();
+			if(!Page.class.isAssignableFrom(resolved)) {
+				log.error("@HomePage is on a class that is not a Page class!");
+				throw new IllegalStateException("@HomePage is on a class that is not a Page class!");
+			}
+			homePage = (Class<? extends Page>) classes.iterator().next();
+		}
+		
+		return homePage;
 	}
+
 
 	public static String getPageURL(Page returnTo) {
 		return new PageRedirect(returnTo).getUri();

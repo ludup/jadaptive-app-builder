@@ -46,6 +46,8 @@ import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.pages.auth.Login;
+import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
@@ -147,9 +149,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			flagFailedLogin(state.getAttemptedUsername());
 			flagFailedLogin(Request.getRemoteAddress());
 
-			eventService.publishEvent(new AuthenticationFailedEvent(registeredModulesByPage.get(state.getCurrentPage()), 
-					state.getAttemptedUsername(),
-					"", Request.getRemoteAddress()));
+			if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
+				eventService.publishEvent(new AuthenticationFailedEvent(registeredModulesByPage.get(state.getCurrentPage()), 
+						state.getAttemptedUsername(),
+						"", Request.getRemoteAddress()));
+			}
 		} finally {
 			permissionService.clearUserContext();
 		}
@@ -243,9 +247,15 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			throw new AccessDeniedException("Invalid credentials");
 		}
 
-		eventService.publishEvent(new AuthenticationSuccessEvent(registeredModulesByPage.get(state.getCurrentPage()), 
-				Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
-				Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+		
+		if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
+			AuthenticationModule module = registeredModulesByPage.get(state.getCurrentPage());
+			if(Objects.nonNull(module)) {
+				eventService.publishEvent(new AuthenticationSuccessEvent(module, 
+						Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
+						Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+			}
+		}
 		
 		if (state.completePage()) {
 
@@ -317,14 +327,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			if (Objects.isNull(state)) {
 				state = new AuthenticationState(AuthenticationScope.USER_LOGIN,
 						policyService.getDefaultPolicy(AuthenticationScope.USER_LOGIN),
-						new PageRedirect(pageCache.resolvePage("login")));
+						new PageRedirect(pageCache.getHomePage()));
 				state.setRemoteAddress(Request.getRemoteAddress());
 				state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
 
-				try {
-					state.getRequiredPages().add(pageCache.resolvePage("login").getClass());
-				} catch (FileNotFoundException e) {
-				}
+				state.getRequiredPages().add(Login.class);
 
 				Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
 			}
@@ -341,12 +348,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			throws FileNotFoundException {
 
 		state.getRequiredPages().clear();
-		state.getRequiredPages().add(pageCache.resolvePage("login").getClass());
+		state.getRequiredPages().add(Login.class);
 
 		state.getOptionalAuthentications().clear();
 		state.setOptionalCompleted(0);
 		state.setOptionalRequired(policy.getOptionalRequired());
-		state.setOptionalSelectionPage(pageCache.resolvePage("select2fa").getClass());
+		state.setOptionalSelectionPage(OptionalAuthentication.class);
 
 		state.setPolicy(policy);
 		
