@@ -46,7 +46,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	}
 	
 	public String getIconGroup() {
-		return "fa-regular";
+		return "fa-solid";
 	}
 	
 	public String getIcon() {
@@ -58,7 +58,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 		try {
 			sessionUtils.getSession(Request.get());
-			throw new UriRedirect("/app/ui/dashboard");
+			throw new UriRedirect();
 		} catch (UnauthorizedException e) {
 			
 			doGenerateContent(doc);

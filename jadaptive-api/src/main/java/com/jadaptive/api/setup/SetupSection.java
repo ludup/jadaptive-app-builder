@@ -6,11 +6,16 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.wizards.DefaultWizardSection;
 import com.jadaptive.api.ui.wizards.WizardSection;
 import com.jadaptive.api.ui.wizards.WizardState;
 
-public class SetupSection extends WizardSection {
+public class SetupSection extends DefaultWizardSection {
 
+	public SetupSection(String bundle) {
+		super(bundle);
+	}
+	
 	public SetupSection(String bundle, String name, String resource) {
 		super(bundle, name, resource);
 	}

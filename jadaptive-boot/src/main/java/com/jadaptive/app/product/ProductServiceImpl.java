@@ -2,6 +2,7 @@ package com.jadaptive.app.product;
 
 import java.util.Calendar;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,8 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	ApplicationService appService; 
+	
+	final private Product defaultProduct = new Product() { };
 	
 	public String getVersion() {
 		return ApplicationVersion.getVersion();
@@ -32,27 +35,43 @@ public class ProductServiceImpl implements ProductService {
 			ProductLogoSource source = appService.getBean(ProductLogoSource.class);
 			return source.getProductLogo();
 		} catch(Throwable e) {
-			Product product = appService.getBean(Product.class);
-			return product.getLogoResource();
+			try {
+				Product product = appService.getBean(Product.class);
+				return product.getLogoResource();
+			} catch (NoSuchBeanDefinitionException e1) {
+				return defaultProduct.getLogoResource();
+			}
 		}
 	}
 	
 	@Override
 	public String getFaviconResource() {
-		Product product = appService.getBean(Product.class);
-		return product.getFaviconResource();
+		try {
+			Product product = appService.getBean(Product.class);
+			return product.getFaviconResource();
+		} catch (NoSuchBeanDefinitionException e1) {
+			return defaultProduct.getFaviconResource();
+		}
 	}
 	
 	@Override
 	public String getProductName() {
-		Product product = appService.getBean(Product.class);
-		return product.getName();	
+		try {
+			Product product = appService.getBean(Product.class);
+			return product.getName();
+		} catch (NoSuchBeanDefinitionException e1) {
+			return defaultProduct.getName();
+		}
 	}
 
 	@Override
 	public String getPoweredBy() {
-		Product product = appService.getBean(Product.class);
-		return product.getPoweredBy();
+		try {
+			Product product = appService.getBean(Product.class);
+			return product.getPoweredBy();
+		} catch (NoSuchBeanDefinitionException e1) {
+			return defaultProduct.getPoweredBy();
+		}
 	}
 
 }

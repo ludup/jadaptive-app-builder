@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
@@ -48,13 +49,14 @@ import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
+import com.jadaptive.api.ui.pages.auth.Password;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
 @Service
 @Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION }, defaultPermissions = {
 		AuthenticationService.USER_LOGIN_PERMISSION })
-public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService {
+public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService, StartupAware {
 
 	public static final String USERNAME_RESOURCE_KEY = "username";
 
@@ -150,7 +152,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			flagFailedLogin(Request.getRemoteAddress());
 
 			if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
-				eventService.publishEvent(new AuthenticationFailedEvent(registeredModulesByPage.get(state.getCurrentPage()), 
+				AuthenticationModule module = registeredModulesByPage.get(state.getCurrentPage());
+				eventService.publishEvent(new AuthenticationFailedEvent(module, 
 						state.getAttemptedUsername(),
 						"", Request.getRemoteAddress()));
 			}
@@ -430,5 +433,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public Iterable<AuthenticationModule> getAuthenticationModules() {
 		return moduleDatabase.list(AuthenticationModule.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void onApplicationStartup() {
+		registerAuthenticationPage(getAuthenticationModule(PASSWORD_MODULE_UUID), Password.class, Login.class);
 	}
 }

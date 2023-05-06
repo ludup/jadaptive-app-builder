@@ -28,7 +28,7 @@ public class Fontawesome extends AbstractPageExtension {
 	public void process(Document document, Element element, Page page) {
 	
 		if(Objects.isNull(runtimePath)) {
-			Collection<?> classes = classService.resolveAnnotatedClasses(EnableFontawesomePro.class);
+			Collection<?> classes = classService.resolveAnnotatedClasses(EnableFontAwesomePro.class);
 			if(classes.isEmpty()) {
 				runtimePath = free;
 			} else {

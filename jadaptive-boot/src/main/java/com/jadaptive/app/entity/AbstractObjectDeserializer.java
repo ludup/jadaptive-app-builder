@@ -36,6 +36,7 @@ import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.DocumentValidator;
 import com.jadaptive.utils.Utils;
 
+
 public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> {
 
 	private static final long serialVersionUID = -7322676764669077046L;

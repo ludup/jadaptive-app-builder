@@ -29,6 +29,7 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.CIDRUtils;
@@ -49,6 +50,9 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	
 	@Autowired
 	private PermissionService permissionService;
+	
+	@Autowired
+	private TenantService tenantService; 
 	
 	private AuthenticationPolicyResolver resolver;
 	
@@ -145,11 +149,18 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	}
 
 	@Override
-	protected void beforeSave(AuthenticationPolicy policy) {		
-		authenticationService.validateModules(policy);
-		if(Request.isAvailable() && policy instanceof UserLoginAuthenticationPolicy) {
-			if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getScope(), policy))) {
-				throw new IllegalStateException("The policy is invalid because it would lock the current user out from this location");
+	protected void beforeSave(AuthenticationPolicy policy) {	
+
+		if(tenantService.isReady()) {
+			/**
+			 * Only validate when the tenant is "ready" as this could be called in initialization
+			 * when the default policy is created. We don't want to error out when thats created
+			 */
+			authenticationService.validateModules(policy);
+			if(Request.isAvailable() && policy instanceof UserLoginAuthenticationPolicy) {
+				if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getScope(), policy))) {
+					throw new IllegalStateException("The policy is invalid because it would lock the current user out from this location");
+				}
 			}
 		}
 	}

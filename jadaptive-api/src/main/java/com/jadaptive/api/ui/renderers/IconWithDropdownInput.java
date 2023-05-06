@@ -20,7 +20,7 @@ public class IconWithDropdownInput extends InputRender {
 	boolean dark;
 	String bundle;
 	String icon = "fa-theater-masks";
-	String iconGroup = "fa-regular";
+	String iconGroup = "fa-solid";
 
 	public IconWithDropdownInput(String resourceKey, String bundle) {
 		super(resourceKey);

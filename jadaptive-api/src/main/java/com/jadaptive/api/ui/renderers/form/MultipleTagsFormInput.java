@@ -43,7 +43,7 @@ public class MultipleTagsFormInput {
 							.attr("role", "button" )
 							.attr("class", "input-group-text multipleTagAdd text-decoration-none")
 							.appendChild(new Element("i")
-									.attr("class", "fas fa-plus"))))
+									.attr("class", "fa-solid fa-plus"))))
 				.appendChild(new Element("div")
 						.addClass("row mt-3")
 					.appendChild(new Element("div")
@@ -67,7 +67,7 @@ public class MultipleTagsFormInput {
 			selected.appendChild(Html.option(value, "badge bg-primary me-1")
 							.appendChild(Html.span(value, "pe-1"))
 							.appendChild(Html.a("#", "jadaptive-tag")
-									.appendChild(Html.i("far fa-times me-3"))));			
+									.appendChild(Html.i("fa-solid fa-times me-3"))));			
 		}
 	}
 

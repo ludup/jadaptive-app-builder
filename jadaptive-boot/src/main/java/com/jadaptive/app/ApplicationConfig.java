@@ -1,6 +1,7 @@
 package com.jadaptive.app;
 
 import java.io.FileFilter;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.annotation.PreDestroy;
@@ -95,6 +96,18 @@ public class ApplicationConfig {
                       }, this::isDevelopment);
             	   }
                }
+               
+               String[] additionalDevelopmentPlugins = System.getProperty(
+            		   "jadaptive.developmentPluginPaths", 
+            		   "").split(",");
+               
+               for(String path : additionalDevelopmentPlugins) {
+            	   if(StringUtils.isNotBlank(path)) {
+            		   Path pluginPath = Paths.get(path);
+            		   pluginRepository.add(new SinglePluginRepository(pluginPath));
+            	   }
+               }
+               
                pluginRepository.add(new JarPluginRepository(getPluginsRoot()), this::isNotDevelopment);
                pluginRepository.add(new DefaultPluginRepository(getPluginsRoot()), this::isNotDevelopment);
                

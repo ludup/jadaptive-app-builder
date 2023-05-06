@@ -72,7 +72,7 @@ public class FieldSearchFormInput {
 					.appendChild(new Element("span")
 							.attr("class", "input-group-text")
 							.appendChild(new Element("i")
-								.attr("class", "fas fa-search")))
+								.attr("class", "fa-solid fa-search")))
 					.appendChild(new Element("div")
 							.addClass(readOnly ? "disabled-dropdown" : "dropdown-menu dropdown-size")
 							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))))

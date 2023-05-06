@@ -47,7 +47,7 @@ public class CollectionTextFormInput {
 					.appendChild(new Element("span")
 							.addClass("input-group-text collectionTextAdd")
 						.appendChild(new Element("i")
-								.attr("class", "fas fa-plus")))
+								.attr("class", "fa-solid fa-plus")))
 					.appendChild(new Element("div")
 							.addClass("dropdown-menu dropdown-size")
 							.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))));

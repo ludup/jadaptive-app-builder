@@ -9,7 +9,7 @@ public interface DashboardWidget extends ExtensionPoint {
 	String getIcon();
 	
 	default String getIconGroup() {
-		return "fa-regular";
+		return "fa-solid";
 	}
 	
 	String getBundle();

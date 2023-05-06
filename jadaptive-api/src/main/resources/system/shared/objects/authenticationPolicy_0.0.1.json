@@ -1,0 +1,17 @@
+[{
+    "uuid": "abc8affe-0409-4ed5-8f0c-e9de715779cb",
+	"resourceKey": "authenticationPolicy",
+	"name": "Default Authentication Policy",
+	"requiredAuthenticators": [
+		{ "uuid": "b76a4b67-ac70-45c2-95ca-9d7e14b3f695",
+		  "name": "Password"
+		}
+	],
+	"roles": [{
+	            "uuid": "c4b54f49-c478-46cc-8cfa-aaebaa4ea50f",
+	            "name": "Everyone"
+	           }],
+	"users": [],
+	"system": true,
+	"weight": 9999
+}]

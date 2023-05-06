@@ -25,5 +25,5 @@ public interface ConfigurationPageItem extends ExtensionPoint {
 	
 	default boolean isSystem() { return false; }
 	
-	default String getIconGroup() { return "fa-regular"; }
+	default String getIconGroup() { return "fa-solid"; }
 }

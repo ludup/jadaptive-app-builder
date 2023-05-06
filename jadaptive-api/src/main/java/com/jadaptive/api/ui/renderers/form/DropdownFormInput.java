@@ -50,7 +50,7 @@ public class DropdownFormInput extends FieldInputRender {
 					.appendChild(new Element("span")
 										.attr("class", "jdropdown input-group-text")
 									.appendChild(new Element("i")
-											.attr("class", "fas fa-chevron-down"))))
+											.attr("class", "fa-solid fa-chevron-down"))))
 				.appendChild(new Element("small")
 							.addClass("form-text")
 							.addClass("text-muted")

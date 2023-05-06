@@ -44,7 +44,7 @@ public class ContextHelp extends AbstractPageExtension {
 								.appendChild(new Element("h5")
 										.addClass("offcanvas-title")
 										.attr("id", id + "Label")
-										.appendChild(Html.i("far fa-books me-1"))
+										.appendChild(Html.i("fa-solid fa-books me-1"))
 										.appendChild(Html.i18n(bundle, id + ".names")))
 								.appendChild(new Element("button")
 										.addClass("btn-close text-reset")

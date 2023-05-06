@@ -4,11 +4,17 @@ import org.pf4j.ExtensionPoint;
 
 public interface Product extends ExtensionPoint {
 
-	String getName();
+	default String getName() {
+		return "Jadaptive App Builder";
+	}
 	
-	String getVersion();
+	default String getVersion() {
+		return "DEV_VERSION";
+	}
 	
-	String getPoweredBy();
+	default String getPoweredBy() {
+		return "Powered by Jadaptive";
+	}
 	
 	default String getLogoResource() {
 		return "/app/content/images/jadaptive-logo.png";

@@ -124,7 +124,7 @@
     'fas': 'solid',
     'fa-solid': 'solid',
     'far': 'regular',
-    'fa-regular': 'regular',
+    'fa-solid': 'regular',
     'fal': 'light',
     'fa-light': 'light',
     'fat': 'thin',
@@ -140,7 +140,7 @@
     'fass': 'solid',
     'fa-solid': 'solid',
     'fasr': 'regular',
-    'fa-regular': 'regular',
+    'fa-solid': 'regular',
     'fasl': 'light',
     'fa-light': 'light'
   }), _familyProxy));
@@ -162,12 +162,12 @@
     'fad': 'fa-duotone',
     'fak': 'fa-kit',
     'fal': 'fa-light',
-    'far': 'fa-regular',
+    'far': 'fa-solid',
     'fas': 'fa-solid',
     'fat': 'fa-thin'
   }), _defineProperty(_familyProxy3, FAMILY_SHARP, {
     'fass': 'fa-solid',
-    'fasr': 'fa-regular',
+    'fasr': 'fa-solid',
     'fasl': 'fa-light'
   }), _familyProxy3));
   var LONG_STYLE_TO_PREFIX = familyProxy((_familyProxy4 = {}, _defineProperty(_familyProxy4, FAMILY_CLASSIC, {
@@ -175,12 +175,12 @@
     'fa-duotone': 'fad',
     'fa-kit': 'fak',
     'fa-light': 'fal',
-    'fa-regular': 'far',
+    'fa-solid': 'far',
     'fa-solid': 'fas',
     'fa-thin': 'fat'
   }), _defineProperty(_familyProxy4, FAMILY_SHARP, {
     'fa-solid': 'fass',
-    'fa-regular': 'fasr',
+    'fa-solid': 'fasr',
     'fa-light': 'fasl'
   }), _familyProxy4));
   var FONT_WEIGHT_TO_PREFIX = familyProxy((_familyProxy5 = {}, _defineProperty(_familyProxy5, FAMILY_CLASSIC, {
@@ -439,7 +439,7 @@
 
   bunker(function () {
     defineIcons('far', icons);
-    defineIcons('fa-regular', icons);
+    defineIcons('fa-solid', icons);
   });
 
 }());

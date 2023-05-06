@@ -61,7 +61,7 @@ public class CollectionSearchFormInput {
 						.appendChild(new Element("span")
 								.attr("class", "input-group-text")
 							.appendChild(new Element("i")
-									.attr("class", "fas fa-search")))
+									.attr("class", "fa-solid fa-search")))
 						.appendChild(new Element("div")
 								.addClass("dropdown-menu dropdown-size")
 								.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))));

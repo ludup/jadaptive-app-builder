@@ -127,7 +127,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 					.attr("id", "backButton")
 					.addClass("btn btn-danger float-start wizardBack")
 					.appendChild(new Element("i")
-						.addClass("far fa-arrow-circle-left me-1"))
+						.addClass("fa-solid fa-arrow-circle-left me-1"))
 					.appendChild(new Element("span")
 						.attr("jad:bundle", "default")
 						.attr("jad:i18n", "back.name")));
@@ -138,7 +138,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 						.attr("id", "nextButton")
 						.addClass("btn btn-success float-end wizardNext")
 						.appendChild(new Element("i")
-							.addClass("far fa-arrow-circle-right me-1"))
+							.addClass("fa-solid fa-arrow-circle-right me-1"))
 						.appendChild(new Element("span")
 							.attr("jad:bundle", "default")
 							.attr("jad:i18n", "next.name")));
@@ -147,7 +147,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 						.attr("id", "finishButton")
 						.addClass("btn btn-primary float-end wizardFinish")
 					.appendChild(new Element("i")
-						.addClass("far fa-rocket me-1"))
+						.addClass("fa-solid fa-rocket me-1"))
 					.appendChild(new Element("span")
 							.attr("jad:bundle", "default")
 							.attr("jad:i18n", "finish.name")));

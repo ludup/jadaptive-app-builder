@@ -63,7 +63,7 @@ public class DropdownInput extends InputRender {
 							.attr("role", "button")
 							.attr("class", "jdropdown input-group-text text-decoration-none")
 						.appendChild(new Element("i")
-								.attr("class", "fas fa-chevron-down")))
+								.attr("class", "fa-solid fa-chevron-down")))
 					.appendChild(dropdownMenu = new Element("div")
 							.addClass("dropdown-menu dropdown-size" + (dark ? " dropdown-menu-dark" : ""))
 							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
