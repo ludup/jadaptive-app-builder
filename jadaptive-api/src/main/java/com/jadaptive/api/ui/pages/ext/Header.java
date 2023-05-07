@@ -11,6 +11,8 @@ import java.util.Objects;
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +31,8 @@ import com.jadaptive.api.ui.menu.ApplicationMenuService;
 @Component
 public class Header extends AbstractPageExtension {
 
+	static Logger log = LoggerFactory.getLogger(Header.class);
+	
 	@Autowired
 	private PermissionService permissionService;
 	
@@ -110,7 +114,7 @@ public class Header extends AbstractPageExtension {
 							continue;
 						}
 					}
-					
+
 					Element link;
 					parentElement.appendChild(link = new Element("a")
 							.addClass("dropdown-item me-3")

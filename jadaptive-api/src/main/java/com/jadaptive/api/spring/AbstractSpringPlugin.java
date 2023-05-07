@@ -21,13 +21,18 @@ public class AbstractSpringPlugin extends SpringPlugin {
 
 	@Override
 	public void start() {
-		doStart();
+		beforeStart();
 		super.start();
+		afterStart();
 	}
 
-    protected void doStart() {
+    protected void beforeStart() {
 		
 	}
+    
+    protected void afterStart() {
+    	
+    }
 
 	@Override
     protected ApplicationContext createApplicationContext() {

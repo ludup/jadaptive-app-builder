@@ -3,8 +3,8 @@ package com.jadaptive.api.ui.pages.objects;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;
-import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.ui.MessagePage;
@@ -15,7 +15,7 @@ import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UserInterfaceService;
 import com.jadaptive.api.ui.pages.ObjectTemplatePage;
 
-@Extension
+@Component
 @RequestPage(path = "create/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "i18n"} )

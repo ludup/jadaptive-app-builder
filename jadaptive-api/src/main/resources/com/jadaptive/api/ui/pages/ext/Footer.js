@@ -33,7 +33,7 @@ $(function() {
 		var target = _this.closest('.multipleTagInput').find('.multipleTagTarget');
 		if(source.val() !== '' && !duplicate(source.val(), target)) {
 			target.append('<option class="badge bg-primary me-3" value="' + source.val()
-				 + '" class="me-1"><span class="pe-1">' + source.val() + '</span><a href="#" class="jadaptive-tag text-light"><i class="far fa-times"></i></a></option>');
+				 + '" class="me-1"><span class="pe-1">' + source.val() + '</span><a href="#" class="jadaptive-tag text-light"><i class="fa-solid fa-times"></i></a></option>');
 			source.val('');
 		}
 	}
@@ -131,9 +131,9 @@ $(function() {
 			var name = source.closest('.collectionTextInput').data('resourcekey');
 			
 			select.append('<tr><input type="hidden" name="' + name + '" value="' + source.val() + '"><td>' + source.val() + '</td><td>' +
-							'<a href="#" class="collectionSearchUp"><i class="far fa-fw fa-arrow-up me-2"></i></a>'  +
-							'<a href="#" class="collectionSearchDown"><i class="far fa-fw fa-arrow-down me-2"></i></a>' +
-							'<a href="#" class="collectionSearchDelete"><i class="far fa-fw fa-trash me-2"></i></a>' + 
+							'<a href="#" class="collectionSearchUp"><i class="fa-solid fa-fw fa-arrow-up me-2"></i></a>'  +
+							'<a href="#" class="collectionSearchDown"><i class="fa-solid fa-fw fa-arrow-down me-2"></i></a>' +
+							'<a href="#" class="collectionSearchDelete"><i class="fa-solid fa-fw fa-trash me-2"></i></a>' + 
 						  '</td></tr>');
 		    source.val('');
 		    doOrderState(select.find('tr'));
@@ -151,9 +151,9 @@ $(function() {
 				var name = $(this).closest('.collectionTextInput').data('resourcekey');
 				
 				select.append('<tr><input type="hidden" name="' + name + '" value="' + $(this).val() + '"><td>' + $(this).val() + '</td><td>' +
-								'<a href="#" class="collectionSearchUp"><i class="far fa-fw fa-arrow-up me-2"></i></a>'  +
-								'<a href="#" class="collectionSearchDown"><i class="far fa-fw fa-arrow-down me-2"></i></a>' +
-								'<a href="#" class="collectionSearchDelete"><i class="far fa-fw fa-trash me-2"></i></a>' + 
+								'<a href="#" class="collectionSearchUp"><i class="fa-solid fa-fw fa-arrow-up me-2"></i></a>'  +
+								'<a href="#" class="collectionSearchDown"><i class="fa-solid fa-fw fa-arrow-down me-2"></i></a>' +
+								'<a href="#" class="collectionSearchDelete"><i class="fa-solid fa-fw fa-trash me-2"></i></a>' + 
 							  '</td></tr>');
 			    $(this).val('');
 			    doOrderState(select.find('tr'));
@@ -222,9 +222,9 @@ $(function() {
 			$(this).closest('.collectionSearchInput').find('.collectionSearchInputText').val('');
 			select.append('<tr><input type="hidden" name="' + variableName + '" value="' + uuid + '">'
 						+ '<input type="hidden" name="' + variableName + 'Text" value="' + name + '"><td>' + $(this).text() + '</td><td>' +
-							'<a href="#" class="collectionSearchUp"><i class="far fa-fw fa-arrow-up me-2"></i></a>'  +
-							'<a href="#" class="collectionSearchDown"><i class="far fa-fw fa-arrow-down me-2"></i></a>' +
-							'<a href="#" class="collectionSearchDelete"><i class="far fa-fw fa-trash me-2"></i></a>' + 
+							'<a href="#" class="collectionSearchUp"><i class="fa-solid fa-fw fa-arrow-up me-2"></i></a>'  +
+							'<a href="#" class="collectionSearchDown"><i class="fa-solid fa-fw fa-arrow-down me-2"></i></a>' +
+							'<a href="#" class="collectionSearchDelete"><i class="fa-solid fa-fw fa-trash me-2"></i></a>' + 
 						  '</td></tr>');
 			
 			doOrderState(select.find('.collectionSearchUp').first());

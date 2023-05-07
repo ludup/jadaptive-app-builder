@@ -6,7 +6,6 @@ import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,6 @@ import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.UriRedirect;
 
 @Controller
-@Extension
 public class WizardController extends AuthenticatedController {
 
 	static Logger log = LoggerFactory.getLogger(WizardController.class);

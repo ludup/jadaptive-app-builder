@@ -23,7 +23,7 @@ $(document).ready(function() {
                if(data.success) {
                    window.location = url;
                } else {
-               	   $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="far fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
+               	   $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="fa-solid fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
                	   $('#feedbackText').text(data.message);
                }
            },

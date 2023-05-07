@@ -36,19 +36,19 @@ stopAwesomeSpin : function(el, icon, spinner) {
 	},
 error: function(el, message) {
 	el.empty();
-	el.append('<p class="alert alert-danger"><i class="far fa-exclamation-square"></i> ' + message + '</p>');
+	el.append('<p class="alert alert-danger"><i class="fa-solid fa-exclamation-square"></i> ' + message + '</p>');
 },
 info: function(el, message) {
 	el.empty();
-	el.append('<p class="alert alert-info"><i class="far fa-info"></i> ' + message + '</p>');
+	el.append('<p class="alert alert-info"><i class="fa-solid fa-info"></i> ' + message + '</p>');
 },
 success: function(el, message) {
 	el.empty();
-	el.append('<p class="alert alert-success"><i class="far fa-thumbs-up"></i> ' + message + '</p>');
+	el.append('<p class="alert alert-success"><i class="fa-solid fa-thumbs-up"></i> ' + message + '</p>');
 },
 warning: function(el, message) {
 	el.empty();
-	el.append('<p class="alert alert-warning"><i class="far fa-warning"></i> ' + message + '</p>');
+	el.append('<p class="alert alert-warning"><i class="fa-solid fa-warning"></i> ' + message + '</p>');
 },
 checkBlank: function(elements) {
 	var empty = false;

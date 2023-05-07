@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -25,7 +25,7 @@ import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.ui.UserInterfaceService;
 import com.jadaptive.api.ui.pages.TemplatePage;
 
-@Extension
+@Component
 @RequestPage(path="table/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils" } )
 @PageProcessors(extensions = { "freemarker", "i18n"} )

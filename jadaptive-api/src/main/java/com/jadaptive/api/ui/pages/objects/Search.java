@@ -10,8 +10,8 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.entity.AbstractObject;
@@ -34,7 +34,7 @@ import com.jadaptive.api.ui.pages.objects.Search.SearchForm;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
 
-@Extension
+@Component
 @RequestPage(path="search/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "freemarker", "help", "i18n"} )

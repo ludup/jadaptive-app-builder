@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.pf4j.Extension;
+import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldView;
@@ -13,7 +13,7 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.pages.TemplatePage;
 
-@Extension
+@Component
 @PageDependencies(extensions = { "bootstrapTable"})
 public class TableWidget extends AbstractPageExtension {
 
