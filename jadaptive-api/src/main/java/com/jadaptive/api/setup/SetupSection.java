@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.wizards.DefaultWizardSection;
-import com.jadaptive.api.ui.wizards.WizardSection;
 import com.jadaptive.api.ui.wizards.WizardState;
 
 public class SetupSection extends DefaultWizardSection {

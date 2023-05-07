@@ -1,4 +1,4 @@
-package com.jadaptive.api.ui.pages;
+package com.jadaptive.api.ui.pages.stash;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,12 +16,12 @@ import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
 
-@Component
+@Component("stashUpdate")
 @RequestPage(path = "object-update/{resourceKey}/{uuid}/{fieldName}/{childUuid}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = {"freemarker", "i18n"})
 @ModalPage
-public class EmbeddedUpdate extends EmbeddedObjectPage {
+public class Update extends StashedObjectPage {
 	
 	@Override
 	public FieldView getScope() {

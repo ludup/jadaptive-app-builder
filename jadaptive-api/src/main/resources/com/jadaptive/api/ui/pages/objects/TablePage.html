@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<head>
+<title>${page.template.name}</title>
+</head>
+<body>
+<div class="wrapper">
+<header jad:id="header"></header>
+<main class="container mt-3">  
+  <div class="row">
+	<ol class="breadcrumb col-12">
+	  <li class="breadcrumb-item"><a jad:bundle="default" jad:i18n="home.name" href="/app/ui/"></a></li>
+	  <li class="breadcrumb-item active"><a jad:bundle="${page.template.bundle}" jad:i18n="${page.template.resourceKey}.names" href="/app/ui/table/${page.template.resourceKey}"></a></li>
+	</ol>
+  </div>
+  <div class="row">
+  	<div class="col-12">
+       <h1 jad:bundle="${page.template.bundle}" jad:i18n="${page.template.resourceKey}.names"></h1>
+    </div>
+  </div>
+  <div class="row">
+  	  <div id="tableholder" jad:id="tableWidget" class="col-12 mb-3">
+  	  	
+	  </div>
+	  <div id="objectActions" class="col-12 mt-3">
+	  </div>
+  </div>
+  <div id="searchDropdownHolder"></div>
+</main>
+</div>
+<footer jad:id="footer"></footer>
+<div id="rowActions" class="d-none"></div>
+</body>
+</html>

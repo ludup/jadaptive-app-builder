@@ -1,4 +1,4 @@
-package com.jadaptive.api.ui.pages;
+package com.jadaptive.api.ui.pages.stash;
 
 import java.io.FileNotFoundException;
 import java.util.Objects;
@@ -15,8 +15,9 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.ui.pages.ObjectTemplatePage;
 
-public abstract class EmbeddedObjectPage extends ObjectTemplatePage {
+public abstract class StashedObjectPage extends ObjectTemplatePage {
 
 	@Autowired
 	private PermissionService permissionService;

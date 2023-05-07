@@ -101,7 +101,7 @@ public class Login extends AuthenticationPage<LoginForm> {
 		
 		if(state.getScope()!=AuthenticationScope.USER_LOGIN) {
 			doc.selectFirst("#actions")
-				.after(Html.a("/reset-login")
+				.after(Html.a("/app/api/reset-login")
 					.addClass("text-dark text-decoration-none")
 					.appendChild(new Element("sup")
 							.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "resetLogin.text"))));

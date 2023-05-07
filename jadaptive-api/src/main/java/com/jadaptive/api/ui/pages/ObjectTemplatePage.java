@@ -27,7 +27,7 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 	@Autowired
 	private PermissionService permissionService;
 
-	String uuid;
+	protected String uuid;
 	
 	protected AbstractObject object;
 

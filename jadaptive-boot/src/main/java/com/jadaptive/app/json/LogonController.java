@@ -1,5 +1,6 @@
 package com.jadaptive.app.json;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -20,10 +21,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.app.SecurityPropertyService;
+import com.jadaptive.api.auth.AuthenticationPolicy;
+import com.jadaptive.api.auth.AuthenticationPolicyService;
+import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.SessionStatus;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
@@ -31,6 +37,10 @@ import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.PageCache;
+import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.app.session.SessionFilter;
 
 @Controller
@@ -55,6 +65,12 @@ public class LogonController {
 	
 	@Autowired
 	private SessionService sessionService; 
+	
+	@Autowired
+	private AuthenticationPolicyService policyService;
+	
+	@Autowired
+	private PageCache pageCache;
 	
 	@RequestMapping(value="/app/api/logon/basic", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
@@ -131,4 +147,22 @@ public class LogonController {
 		return new RequestStatusImpl(true, "");
 
 	}
+	
+	@RequestMapping(value="/app/api/reset-login", method = { RequestMethod.GET }, produces = { "text/html"})
+	public void startUserLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, AccessDeniedException, UnauthorizedException {
+
+		AuthenticationPolicy policy = policyService.getDefaultPolicy(AuthenticationScope.USER_LOGIN);
+		
+		AuthenticationState state = new AuthenticationState(AuthenticationScope.USER_LOGIN, policy, 
+				new UriRedirect());
+		state.setRemoteAddress(Request.getRemoteAddress());
+		state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
+		
+		state.getRequiredPages().add(Login.class);
+		
+		Request.get().getSession().setAttribute(AuthenticationService.AUTHENTICATION_STATE_ATTR, state);
+		
+		throw new PageRedirect(pageCache.resolvePage(Login.class));
+	}
+	
 }
