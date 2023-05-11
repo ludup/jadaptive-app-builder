@@ -58,11 +58,6 @@ public class ApplicationProperties {
 				#server.ssl.passprase=password
 				#server.ssl.ca-bundle=conf.d/chain.pem
 				#server.ssl.certificate=conf.d/cert.pem
-
-				# Database Properties
-				#mongodb.embedded=true
-				#mongodb.hostname=localhost
-				#mongodb.port=27017
 				""", Charset.forName("UTF-8"));
 				
 			} catch (IOException e) {
