@@ -22,6 +22,7 @@ import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.ReflectionUtils;
+import com.jadaptive.api.ui.pages.Welcome;
 import com.jadaptive.utils.FileUtils;
 
 @Component
@@ -289,7 +290,7 @@ public class PageCache {
 			Collection<?> classes = classService.resolveAnnotatedClasses(HomePage.class);
 			if(classes.isEmpty()) {
 				log.error("Product does not appear to have set a home page using the @HomePage annotation!");
-				throw new IllegalStateException("Product does not appear to have set a home page using the @HomePage annotation!");
+				return Welcome.class;
 			}
 			if(classes.size() > 1) {
 				log.warn("Product has multiple home page configured with the @HomePage annotation! Only one allowed");

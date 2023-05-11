@@ -42,8 +42,11 @@
 
 	<modules>
 		<module>jadaptive-http</module>
+		<module>jadaptive-dashboard</module>
 		<module>jadaptive-builtin-users</module>
-		<module>jadaptive-remote-users</module>
+		<module>jadaptive-ssh-synergy</module>
+		<module>jadaptive-ssh-keys</module>
+		<module>jadaptive-ssh-server</module>
 	</modules>
 
 	<dependencies>

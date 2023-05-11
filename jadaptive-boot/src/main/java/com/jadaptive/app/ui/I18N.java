@@ -29,6 +29,7 @@ public class I18N extends AbstractPageExtension {
 		 */
 		replaceAttributes(document, false);
 		replaceAttributes(document, true);
+
 	}
 
 	void replaceAttributes(Document document, boolean remove) {

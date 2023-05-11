@@ -186,42 +186,42 @@ public class TableRenderer {
 		if(canUpdate && !readOnly) {
 			if(Objects.isNull(parentObject)) {
 				el.appendChild(Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "ms-2")
-						.appendChild(Html.i("far", "fa-edit","fa-fw")));
+						.appendChild(Html.i("fa-solid", "fa-edit","fa-fw")));
 			} else {
 				el.appendChild(Html.a("#", "ms-2", "stash") 
 						.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
 						.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid())
-						.appendChild(Html.i("far", "fa-edit","fa-fw")));
+						.appendChild(Html.i("fa-solid", "fa-edit","fa-fw")));
 			}
 		}
 		
 		if(view.requiresView()) {
 			if(Objects.isNull(parentObject)) {
 				el.appendChild(Html.a(replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "ms-2")
-						.appendChild(Html.i("far", "fa-eye","fa-fw")));
+						.appendChild(Html.i("fa-solid", "fa-eye","fa-fw")));
 			} else {
 				el.appendChild(Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)
 						+ "/" + field.getResourceKey() + "/" + obj.getUuid(), "ms-2")
-							.appendChild(Html.i("far", "fa-eye","fa-fw")));
+							.appendChild(Html.i("fa-solid", "fa-eye","fa-fw")));
 			}
 		}
 		
 		
 		if(canCreate && !readOnly) {
 			el.appendChild(Html.a(replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "ms-2")
-					.appendChild(Html.i("far", "fa-copy","fa-fw")));
+					.appendChild(Html.i("fa-solid", "fa-copy","fa-fw")));
 		} else {
-			el.appendChild(Html.i("far", "fa-fw", "ms-2", "copy-placeholder"));
+			el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2", "copy-placeholder"));
 		}
 		
 		for(TableAction action : view.actions()) {
 			if(action.target()==Target.ROW) {
 				if(view.requiresCreate() && !canCreate) {
-					el.appendChild(Html.i("far", "fa-fw", "ms-2"));
+					el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2"));
 					continue;
 				}
 				if(view.requiresUpdate() && !canUpdate) {
-					el.appendChild(Html.i("far", "fa-fw", "ms-2"));
+					el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2"));
 					continue;
 				}
 				Object val = obj.getValue(template.getDefaultColumn());
@@ -231,18 +231,18 @@ public class TableRenderer {
 									.attr("data-name", val == null ? "" : val.toString())
 									.attr("data-url", replaceVariables(action.url(), obj))
 									.attr("target", action.window() == Window.BLANK ? "_blank" : "_self")
-									.appendChild(Html.i("far ", action.icon(), "fa-fw")));
+									.appendChild(Html.i("fa-solid ", action.icon(), "fa-fw")));
 					} else {
 						el.appendChild(Html.a("#", "deleteAction", "ms-2")
 								.attr("data-name", obj.getUuid())
 								.attr("data-url", replaceVariables(action.url(), obj))
 								.attr("target", action.window() == Window.BLANK ? "_blank" : "_self")
-								.appendChild(Html.i("far ", action.icon(), "fa-fw")));
+								.appendChild(Html.i("fa-solid", action.icon(), "fa-fw")));
 					}
 				} else {
 					el.appendChild(Html.a(replaceVariables(action.url(), obj), "ms-2")
 							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self")
-							.appendChild(Html.i("far ", action.icon(), "fa-fw")));
+							.appendChild(Html.i("fa-solid", action.icon(), "fa-fw")));
 				}
 			} 
 		}
@@ -252,9 +252,9 @@ public class TableRenderer {
 				el.appendChild(Html.a("#", "deleteAction", "ms-2", "readWrite")
 						.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())))
 						.attr("data-url", replaceVariables("/app/api/objects/{resourceKey}/{uuid}", obj))
-						.appendChild(Html.i("far", "fa-trash", "fa-fw")));
+						.appendChild(Html.i("fa-solid", "fa-trash", "fa-fw")));
 			} else {
-				el.appendChild(Html.i("far", "fa-fw", "ms-2", "delete-placeholder"));
+				el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2", "delete-placeholder"));
 			}
 		} 
 		
@@ -439,7 +439,7 @@ public class TableRenderer {
 	private Element processFieldValue(AbstractObject obj, ObjectTemplate template, FieldTemplate field) {
 		switch(field.getFieldType()) {
 		case BOOL:
-			return Html.i("far", Boolean.parseBoolean(obj.getValue(field).toString()) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
+			return Html.i("fa-solid", Boolean.parseBoolean(obj.getValue(field).toString()) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
 		case OBJECT_REFERENCE: 
 			Object value = obj.getValue(field);
 			if(value instanceof String) {

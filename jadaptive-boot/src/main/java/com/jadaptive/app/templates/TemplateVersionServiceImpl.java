@@ -48,6 +48,7 @@ import com.jadaptive.api.events.AuditedObject;
 import com.jadaptive.api.events.Events;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.events.ObjectEvent;
+import com.jadaptive.api.events.ObjectUpdateEvent;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
@@ -133,7 +134,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	private Map<String,ObjectTemplate> loadedTemplates = new HashMap<>();
 	private Map<String,Class<? extends ObjectEvent<?>>> eventClasses = new HashMap<>();
-
+	private Map<String,Class<? extends ObjectUpdateEvent<?>>> updateEventClasses = new HashMap<>();
+	
 	@Override
 	public Iterable<TemplateVersion> list() throws RepositoryException, ObjectException {
 		return versionRepository.list();
@@ -596,6 +598,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return eventClasses.get(resourceKey);
 	}
 	
+	@Override
+	public Class<? extends ObjectUpdateEvent<?>> getUpdateEventClass(String resourceKey) {
+		return updateEventClasses.get(resourceKey);
+	}
+	
 	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, String group, boolean newSchema) {
 	
 		if(log.isDebugEnabled()) {
@@ -605,7 +612,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				Events.created(template.getResourceKey()), newSchema, true);
 		
-		generateEventTemplate(StringUtils.capitalize(group) + "Updated", 
+		generateUpdateEventTemplate(StringUtils.capitalize(group) + "Updated", 
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				Events.updated(template.getResourceKey()), newSchema, true);
 		
@@ -618,7 +625,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				Events.creating(template.getResourceKey()), newSchema, false);
 		
-		generateEventTemplate(StringUtils.capitalize(group) + "Updating", 
+		generateUpdateEventTemplate(StringUtils.capitalize(group) + "Updating", 
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				Events.updating(template.getResourceKey()), newSchema, false);
 		
@@ -685,6 +692,81 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					  .getLoaded();
 			
 			eventClasses.put(eventKey, (Class<? extends ObjectEvent<?>>) dynamicType);
+			registerAnnotatedTemplate((Class<? extends UUIDDocument>) dynamicType, newSchema);
+			
+		} catch (SecurityException | NoSuchMethodException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void generateUpdateEventTemplate(String className, String resourceKey, String bundle, String group, Class<?> clz, 
+			String eventKey, boolean newSchema, boolean audited) {
+		
+		Generic genericType = TypeDescription.Generic.Builder.parameterizedType(ObjectUpdateEvent.class, clz).build();
+		
+		if(log.isDebugEnabled()) {
+			log.debug("Generating event templates and class for {}", clz.getSimpleName());
+		}
+		try {
+			
+			var b = new ByteBuddy().subclass(genericType, ConstructorStrategy.Default.DEFAULT_CONSTRUCTOR)
+					  .name(String.format("com.jadaptive.events.%s.%s", group, className));
+			
+			
+			 b = b.annotateType(AnnotationDescription.Builder.ofType(ObjectDefinition.class)
+	                  .define("resourceKey", eventKey)
+	                  .define("scope", ObjectScope.GLOBAL)
+	                  .define("type", ObjectType.OBJECT)
+	                  .define("templateType", ObjectTemplateType.EVENT)
+	                  .define("updatable", false)
+	                  .define("deletable", false)
+	                  .define("creatable", false)
+	                  .define("bundle", bundle)
+	                  .build());
+			
+			 if(audited) {
+				 b = b.annotateType(AnnotationDescription.Builder.ofType(AuditedObject.class).build());
+			 }
+			 
+			 b = b.annotateType(clz.getAnnotation(ObjectViews.class))
+			  .defineConstructor(Visibility.PUBLIC)
+			  .withParameters(clz, clz)
+			  .intercept(MethodCall
+			               .invoke(ObjectUpdateEvent.class.getDeclaredConstructor(String.class, String.class))
+			               .onSuper().with(eventKey, group)
+			               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0))
+			               .andThen(FieldAccessor.ofField("previous").setsArgumentAt(1)))
+			  .defineField("object", clz, Visibility.PRIVATE)
+				  .annotateField(AnnotationDescription.Builder.ofType(ObjectField.class)
+						  .define("type", FieldType.OBJECT_EMBEDDED).build())
+				  .annotateField(AnnotationDescription.Builder.ofType(Validator.class)
+						  .define("type", ValidationType.RESOURCE_KEY)
+						  .define("value", resourceKey).build())
+			  .defineField("previous", clz, Visibility.PRIVATE)
+				  .annotateField(AnnotationDescription.Builder.ofType(ObjectField.class)
+						  .define("type", FieldType.OBJECT_EMBEDDED).build())
+				  .annotateField(AnnotationDescription.Builder.ofType(Validator.class)
+						  .define("type", ValidationType.RESOURCE_KEY)
+						  .define("value", resourceKey).build())
+			  .defineMethod("getObject", clz, Visibility.PUBLIC)
+	          	.intercept(FieldAccessor.ofField("object"))
+	          .defineMethod("getPrevious", clz, Visibility.PUBLIC)
+	          	.intercept(FieldAccessor.ofField("previous"))
+	          .defineConstructor(Visibility.PUBLIC)
+			  .withParameters(clz, clz, Throwable.class)
+			  .intercept(MethodCall
+			               .invoke(ObjectUpdateEvent.class.getDeclaredConstructor(String.class, String.class, Throwable.class))
+			               .onSuper().with(eventKey, group).withArgument(2)
+			               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0))
+			               .andThen(FieldAccessor.ofField("previous").setsArgumentAt(1)));
+			 
+			var dynamicType = b.make()
+					  .load(classService.getClassLoader())
+					  .getLoaded();
+			
+			updateEventClasses.put(eventKey, (Class<? extends ObjectUpdateEvent<?>>) dynamicType);
 			registerAnnotatedTemplate((Class<? extends UUIDDocument>) dynamicType, newSchema);
 			
 		} catch (SecurityException | NoSuchMethodException e) {

@@ -24,6 +24,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.Events;
+import com.jadaptive.api.events.ObjectUpdateEvent;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
@@ -459,6 +460,22 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	protected <T extends UUIDEntity> void fireUpdateEvent(String eventKey, T obj, T previous, boolean ignoreErrors) {
+		
+		Class<? extends ObjectUpdateEvent<?>> eventClz = templateService.getUpdateEventClass(eventKey);
+		
+		if(Objects.nonNull(eventClz)) {
+			try {
+				eventService.publishEvent(createUpdateEvent(eventClz, obj, previous));
+			} catch(Throwable e) {
+				log.error(e.getMessage(), e);
+				if(!ignoreErrors) {
+					throw e;
+				}
+			}
+		}
+	}
+	
 	protected <T extends UUIDEntity> void fireEvent(String eventKey, T obj, Throwable t) {
 		
 		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
@@ -472,6 +489,25 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	protected <T extends UUIDEntity> SystemEvent createUpdateEvent(Class<? extends ObjectUpdateEvent<?>> eventClz, T obj, T previous) {
+		
+		try {
+			for(Constructor<?> c : eventClz.getConstructors()) {
+				if(c.getParameterCount()==2) {
+					if(c.getParameterTypes()[0].isAssignableFrom(obj.getClass())) {
+						return (SystemEvent) c.newInstance(obj, previous);
+					}
+				}
+			}
+			
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException | SecurityException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+		
+		throw new IllegalStateException("No such constructor for event " + eventClz.getName() + " and object " + obj.getClass().getName());
+	}
+
 	protected <T extends UUIDEntity> SystemEvent createSuccessEvent(Class<? extends ObjectEvent<?>> eventClz, T obj) {
 		
 		try {
@@ -545,12 +581,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	protected <T extends UUIDEntity> void onObjectUpdated(T obj, T previousObject) {
 		
-		fireEvent(Events.updated(obj.getEventGroup()), obj, true);
+		fireUpdateEvent(Events.updated(obj.getEventGroup()), obj, previousObject, true);
 	}
 	
 	protected <T extends UUIDEntity> void onObjectUpdating(T obj, T previousObject) {
 		
-		fireEvent(Events.updating(obj.getEventGroup()), obj, false);
+		fireUpdateEvent(Events.updating(obj.getEventGroup()), obj, previousObject, false);
 	}
 	
 	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {

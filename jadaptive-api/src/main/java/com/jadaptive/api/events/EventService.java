@@ -7,21 +7,23 @@ public interface EventService {
 	void on(String resourceKey, EventListener<?> handler);
 
 	<T extends UUIDEntity> void created(Class<T> clz, EventListener<ObjectEvent<T>> handler);
-	<T extends UUIDEntity> void updated(Class<T> clz, EventListener<ObjectEvent<T>> handler);
+	<T extends UUIDEntity> void updated(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler);
 	<T extends UUIDEntity> void deleted(Class<T> clz, EventListener<ObjectEvent<T>> handler);
 	<T extends UUIDEntity> void any(Class<T> clz, EventListener<ObjectEvent<T>> handler);	
+	<T extends UUIDEntity> void assigned(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler);
+	<T extends UUIDEntity> void unassigned(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler);
 	
 	void publishEvent(SystemEvent evt);
 
 	void registerListener(EventListener<?> listener);
 
-	void preRegisterEventHandler(Runnable runnable);
+	void eventRegistrations(Runnable runnable);
 
 	void executePreRegistrations();
 
 	<T extends UUIDEntity> void creating(Class<T> clz, EventListener<ObjectEvent<T>> handler);
 
-	<T extends UUIDEntity> void updating(Class<T> clz, EventListener<ObjectEvent<T>> handler);
+	<T extends UUIDEntity> void updating(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler);
 
 	<T extends UUIDEntity> void deleting(Class<T> clz, EventListener<ObjectEvent<T>> handler);
 
@@ -32,5 +34,7 @@ public interface EventService {
 	void haltEvents();
 
 	void resumeEvents();
+
+	
 
 }

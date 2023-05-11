@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<body>
+	<form id="uploadForm" enctype="multipart/form-data" method="POST">
+		<div class="col-12 dropzone text-muted text-center p-3 my-3 dashed-border">
+			  <div class="dropzoneClick">
+			  	<i id="uploadIcon" class="fa-solid fa-cloud-upload-alt fa-5x p-1"></i>
+			    <p><small id="helpText">To upload multiple files drag and drop them here or click in the area to select a file from your computer.</small></p>
+			  </div>
+			  
+			  <div id="uploadProgress">
+	   			<div class="progress mx-auto my-1 w-100">
+					<div id="progressBar" class="progress-bar" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+				</div>
+		      </div>
+	    </div>	  
+	    <div class="jfiles d-none">
+	    	<table class="table">
+	    		<thead>
+	    			<tr class="file-index">
+		    			<th class="col-4">Filename</th>
+		    			<th class="col-2">Size</th>
+		    			<th class="col-1"></th>
+	    			</tr>
+	    		</thead>
+	    		<tbody class="fileInputs">
+	    			<tr class="hidden">
+		    			<td class="filename"></td>
+		    			<td class="size"></td>
+		    			<td class="actions text-end">
+		    				<a class="deleteFile"><i class="fa-solid fa-trash-alt"></i></a>
+		    			</td>
+	    			</tr>
+	    		</tbody>
+	    	</table>
+	    	<div id="files">
+	    		<input class="file-input file-index d-none" type="file" name="file" multiple/>
+	    	</div>
+	    </div> 
+		<div class="row">
+			<div class="col-12 text-end">
+				<button id="uploadButton" class="btn btn-primary"><i class="fa-solid fa-upload"></i>&nbsp;<span jad:bundle="default" jad:i18n="upload.name">Upload</span></button>
+			</div>
+		</div>
+	</form>
+</body>

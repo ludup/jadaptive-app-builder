@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.ObjectTemplate;

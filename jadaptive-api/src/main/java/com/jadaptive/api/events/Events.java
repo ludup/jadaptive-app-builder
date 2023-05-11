@@ -25,4 +25,12 @@ public class Events {
 	public static String deleted(String resourceKey) {
 		return String.format("%s.deleted", resourceKey);
 	}
+	
+	public static String assigned(String resourceKey) {
+		return String.format("%s.assigned", resourceKey);
+	}
+	
+	public static String unassigned(String resourceKey) {
+		return String.format("%s.unassigned", resourceKey);
+	}
 }

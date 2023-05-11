@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<body>
+<div class="wrapper">
+<header jad:id="header"></header>
+<main class="container my-auto">
+   <div class="row justify-content-center">
+         <div class="col-10">
+            <div class="card">
+         	   	<div class="card-header"><span>Authorized Key Upload</span><div class="float-end"><a href="/app/ui/search/authorizedKeys"><i class="fa-solid fa-times"></i></a></div></div>
+       			<div class="card-body">		
+      		<div id="feedback"></div>
+      		<div id="nameGroup" class="row"> 
+      			<div class="col-12">
+	          		<label for="name" class="form-label">Name</label> 
+	          		<input type="text" id="name" name="name" class="form-control" value=""> 
+	          		<small class="form-text text-muted">A name to identify this public key</small> 
+          		</div>
+         	</div>
+		    
+		    <div id="uploadHolder" jad:id="uploadWidget" class="w-100"></div>
+
+		</div>
+         </div>
+         </div>
+   </div>
+</main>
+</div>
+<footer jad:id="footer"></footer>
+</body>
+</html>

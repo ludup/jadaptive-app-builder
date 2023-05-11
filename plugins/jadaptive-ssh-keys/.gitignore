@@ -1,0 +1,7 @@
+/target/
+/.classpath
+/.factorypath
+/plugin.properties
+/.settings/
+/.project
+/bin/

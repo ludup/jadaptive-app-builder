@@ -69,7 +69,7 @@ public class ResourceController extends ExceptionHandlingController {
 		
 		try {
 			
-			String resourceUri = uri.length() >= 4 ? uri.substring(12) : "";
+			String resourceUri = uri.length() >= 12 ? uri.substring(12) : "";
 			
 			if(resourceUri.endsWith("security.properties")) {
 				ResponseHelper.send404NotFound(uri, request, response);

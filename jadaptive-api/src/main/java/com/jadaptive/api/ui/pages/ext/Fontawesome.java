@@ -3,6 +3,7 @@ package com.jadaptive.api.ui.pages.ext;
 import java.util.Collection;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageHelper;
+import com.jadaptive.utils.FileUtils;
 
 @Component
 public class Fontawesome extends AbstractPageExtension {
@@ -28,11 +30,17 @@ public class Fontawesome extends AbstractPageExtension {
 	public void process(Document document, Element element, Page page) {
 	
 		if(Objects.isNull(runtimePath)) {
-			Collection<?> classes = classService.resolveAnnotatedClasses(EnableFontAwesomePro.class);
+			Collection<Class<?>> classes = classService.resolveAnnotatedClasses(EnableFontAwesomePro.class);
 			if(classes.isEmpty()) {
 				runtimePath = free;
 			} else {
-				runtimePath = pro;
+				Class<?> clz = classes.iterator().next();
+				EnableFontAwesomePro a = clz.getAnnotation(EnableFontAwesomePro.class);
+				if(StringUtils.isNotBlank(a.path())) {
+					runtimePath = "/app/content/" + FileUtils.checkStartsWithNoSlash(FileUtils.checkEndsWithSlash(a.path())) + "css/all.css";
+				} else {
+					runtimePath = pro;
+				}
 			}
 		}
 		PageHelper.appendStylesheet(document, runtimePath);

@@ -212,6 +212,8 @@ public class Application {
 					 ApplicationProperties.getValue("server.ssl.key-alias", "server"),
 					 ApplicationProperties.getValue("server.ssl.key-store-password", "changeit").toCharArray());
 			 
+			keystoreFile.getParentFile().mkdir();
+			
 			 try (OutputStream fout = new FileOutputStream(keystoreFile)) {
 				ks.store(fout, ApplicationProperties.getValue(
 						"server.ssl.key-store-password", 

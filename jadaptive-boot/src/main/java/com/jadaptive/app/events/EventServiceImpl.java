@@ -19,12 +19,14 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.events.EventListener;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.Events;
+import com.jadaptive.api.events.ObjectUpdateEvent;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.User;
 
 @Service
 public class EventServiceImpl implements EventService { 
@@ -47,6 +49,8 @@ public class EventServiceImpl implements EventService {
 	List<Runnable> preRegistrations = new ArrayList<>();
 	
 	ThreadLocal<Boolean> disableThreadEvents = new ThreadLocal<>();
+	ThreadLocal<Collection<User>> assignments = new ThreadLocal<>();
+	ThreadLocal<Collection<User>> unassignments = new ThreadLocal<>();
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -88,7 +92,7 @@ public class EventServiceImpl implements EventService {
 	}
 	
 	@Override
-	public void preRegisterEventHandler(Runnable runnable) {
+	public void eventRegistrations(Runnable runnable) {
 		if(Objects.isNull(preRegistrations)) {
 			preRegistrations = new ArrayList<>();
 		}
@@ -175,7 +179,7 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public <T extends UUIDEntity> void updated(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+	public <T extends UUIDEntity> void updated(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler) {
 		on(Events.updated(templateService.getTemplateResourceKey(clz)), handler);
 	}
 
@@ -190,13 +194,23 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public <T extends UUIDEntity> void updating(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+	public <T extends UUIDEntity> void updating(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler) {
 		on(Events.updating(templateService.getTemplateResourceKey(clz)), handler);
 	}
 
 	@Override
 	public <T extends UUIDEntity> void deleting(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
 		on(Events.deleting(templateService.getTemplateResourceKey(clz)), handler);
+	}
+	
+	@Override
+	public <T extends UUIDEntity> void assigned(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler) {
+		on(Events.assigned(templateService.getTemplateResourceKey(clz)), handler);
+	}
+	
+	@Override
+	public <T extends UUIDEntity> void unassigned(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler) {
+		on(Events.unassigned(templateService.getTemplateResourceKey(clz)), handler);
 	}
 
 	@Override
