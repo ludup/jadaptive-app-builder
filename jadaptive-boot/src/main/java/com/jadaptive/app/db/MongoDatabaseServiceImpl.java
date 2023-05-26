@@ -1,9 +1,6 @@
 package com.jadaptive.app.db;
 
 import java.io.IOException;
-import java.util.Objects;
-
-import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,8 +12,6 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
-import de.flapdoodle.embed.mongo.MongodProcess;
-
 
 @Service
 public class MongoDatabaseServiceImpl implements MongoDatabaseService {
@@ -24,14 +19,6 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 	static Logger log = LoggerFactory.getLogger(MongoDatabaseServiceImpl.class);
 	
 	private MongoClient mongoClient;
-	private MongodProcess process = null;
-
-	 @PreDestroy
-	 public void stop(){
-		 if(Objects.nonNull(process)) {
-			 process.stop();
-		 }
-	 }
 	 
 	@Override
 	public synchronized MongoClient getClient() {
