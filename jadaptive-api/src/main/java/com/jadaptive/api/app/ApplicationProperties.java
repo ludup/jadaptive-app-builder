@@ -40,7 +40,7 @@ public class ApplicationProperties {
 				
 				FileUtils.writeStringToFile(propertiesFile,"""		
 				# Server Properties
-				server.port=8443
+				server.port=443
 
 				server.ssl.enabled=true
 				server.ssl.protocol=TLS

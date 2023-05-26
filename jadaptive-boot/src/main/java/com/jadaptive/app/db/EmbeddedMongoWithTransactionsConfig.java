@@ -59,7 +59,7 @@ public class EmbeddedMongoWithTransactionsConfig {
     public MongodConfig mongodConfig() throws UnknownHostException, IOException {
     	
     	Storage storage = new Storage(databasePath.getAbsolutePath(), DFLT_REPLICASET_NAME, 0);
-    	 
+    	
     	MongodConfig mongodConfig = MongodConfig.builder()
     		    .version(mFeatureAwareVersion)
     		    .replication(storage)

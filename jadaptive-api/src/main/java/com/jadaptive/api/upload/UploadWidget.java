@@ -1,10 +1,10 @@
 package com.jadaptive.api.upload;
 
-import org.pf4j.Extension;
+import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.ui.AbstractPageExtension;
 
-@Extension
+@Component
 public class UploadWidget extends AbstractPageExtension {
 
 	@Override
