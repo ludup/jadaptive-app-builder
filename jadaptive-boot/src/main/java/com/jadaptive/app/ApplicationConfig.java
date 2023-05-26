@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.PreDestroy;
@@ -57,36 +58,56 @@ public class ApplicationConfig {
 	static Logger log = LoggerFactory.getLogger(ApplicationConfig.class);
 
 	SpringPluginManager pluginManager;
-
+	Path repoBase = null;
+	Set<String> disabledPlugins;
+	Map<String, Collection<String>> repositories = null;
+	File repositoriesFile = new File("repositories");
+	Path pluginRoot = Paths.get("./plugins");
+	
 	@Autowired
 	private ApplicationContext applicationContext;
 
 	@Bean
 	public SpringPluginManager pluginManager() {
 
-		Set<String> disabledPlugins;
-		Map<String, Collection<String>> repositories;
-		File repositoriesFile = new File("repositories");
-		Path pluginRoot = Paths.get("./plugins");
+		if(Boolean.getBoolean("jadaptive.development")) {
 		
-		try {
-			repositories = getConfiguration(repositoriesFile);
-			disabledPlugins = new HashSet<>();
-			if (repositories.containsKey("Disable")) {
-				disabledPlugins.addAll(repositories.get("Disable"));
-			}
-
-			if (Boolean.getBoolean("jadaptive.development") && !repositories.containsKey("AppBuilder")) {
-				throw new IllegalStateException(
-						"AppBuilder directive required in repositories file with valid path to jadaptive-app-builder project");
-			}
-
-			if (repositories.containsKey("AppBuilder")) {
-				String path = repositories.get("AppBuilder").iterator().next();
+			try {
+				repositories = getConfiguration(repositoriesFile);
+				disabledPlugins = new HashSet<>();
+				
+				if (repositories.containsKey("Disable")) {
+					disabledPlugins.addAll(repositories.get("Disable"));
+				}
+	
+				if (!repositories.containsKey("AppBuilder") && !repositories.containsKey("GitBase")) {
+					throw new IllegalStateException("Absolute path required in AppBuilder or GitBase configuration");
+				}
+	
+				
+				String path = "jadaptive-app-builder";
+				if(repositories.containsKey("AppBuilder")) {
+					path = repositories.get("AppBuilder").iterator().next();
+				}
+				
 				pluginRoot = Paths.get(FileUtils.checkEndsWithSlash(path) + "plugins");
+				
+				if(repositories.containsKey("GitBase")) {
+					repoBase = Paths.get(repositories.get("GitBase").iterator().next());
+				}
+				
+				if(!pluginRoot.isAbsolute() && Objects.isNull(repoBase)) {
+					throw new IllegalStateException("AppBuilder requires absolute path if no GitBase property has been provided");
+				}
+				if(!pluginRoot.isAbsolute()) {
+					pluginRoot = repoBase.resolve(pluginRoot);
+				} else if(Objects.isNull(repoBase) && pluginRoot.isAbsolute()) {
+					repoBase = pluginRoot.getParent().getParent();
+				}
+				
+			} catch (IOException e) {
+				throw new IllegalStateException(e.getMessage(), e);
 			}
-		} catch (IOException e) {
-			throw new IllegalStateException(e.getMessage(), e);
 		}
 		
 		pluginManager = new SpringPluginManager(pluginRoot) {
@@ -106,38 +127,47 @@ public class ApplicationConfig {
 
 				CompoundPluginRepository pluginRepository = new CompoundPluginRepository();
 
-				if (repositories.containsKey("PluginPath")) {
-					for (String pluginPath : repositories.get("PluginPath")) {
-						pluginRepository.add(new SinglePluginRepository(Paths.get(pluginPath)));
+				if(Boolean.getBoolean("jadaptive.development")) {
+					if (repositories.containsKey("PluginPath")) {
+						for (String pluginPath : repositories.get("PluginPath")) {
+							pluginRepository.add(new SinglePluginRepository(Paths.get(pluginPath)));
+						}
 					}
-				}
-
-				for (String path : repositories.get("GitPlugins")) {
-					pluginRepository.add(new DevelopmentPluginRepository(Paths.get(path)) {
+	
+					for (String path : repositories.get("GitPlugins")) {
+						
+						Path pluginsPath;
+						if(Objects.nonNull(repoBase)) {
+							pluginsPath = repoBase.resolve(path);
+						} else {
+							pluginsPath = Paths.get(path);
+						}
+						
+						pluginRepository.add(new DevelopmentPluginRepository(pluginsPath) {
+							protected FileFilter createHiddenPluginFilter() {
+								OrFileFilter hiddenPluginFilter = (OrFileFilter) super.createHiddenPluginFilter();
+	
+								for (String id : disabledPlugins) {
+									hiddenPluginFilter.addFileFilter(new NameFileFilter(id));
+								}
+	
+								return hiddenPluginFilter;
+							}
+						});
+					}
+	
+					pluginRepository.add(new DevelopmentPluginRepository(getPluginsRoot()) {
 						protected FileFilter createHiddenPluginFilter() {
 							OrFileFilter hiddenPluginFilter = (OrFileFilter) super.createHiddenPluginFilter();
-
+	
 							for (String id : disabledPlugins) {
 								hiddenPluginFilter.addFileFilter(new NameFileFilter(id));
 							}
-
+	
 							return hiddenPluginFilter;
 						}
-					});
+					}, this::isDevelopment);
 				}
-
-				pluginRepository.add(new DevelopmentPluginRepository(getPluginsRoot()) {
-					protected FileFilter createHiddenPluginFilter() {
-						OrFileFilter hiddenPluginFilter = (OrFileFilter) super.createHiddenPluginFilter();
-
-						for (String id : disabledPlugins) {
-							hiddenPluginFilter.addFileFilter(new NameFileFilter(id));
-						}
-
-						return hiddenPluginFilter;
-					}
-				}, this::isDevelopment);
-
 
 				pluginRepository.add(new JarPluginRepository(getPluginsRoot()), this::isNotDevelopment);
 				pluginRepository.add(new DefaultPluginRepository(getPluginsRoot()), this::isNotDevelopment);

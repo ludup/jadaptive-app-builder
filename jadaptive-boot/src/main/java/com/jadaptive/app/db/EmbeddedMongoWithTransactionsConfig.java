@@ -3,10 +3,11 @@ import java.io.File;
 import java.io.IOException;
 
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
@@ -38,6 +39,8 @@ import de.flapdoodle.reverse.transitions.Start;
 @ConditionalOnProperty(matchIfMissing = true, name = "mongodb.embedded", havingValue = "true")
 public class EmbeddedMongoWithTransactionsConfig {
 
+	static Logger log = LoggerFactory.getLogger(EmbeddedMongoWithTransactionsConfig.class);
+	
     public static final int DFLT_PORT_NUMBER = 27017;
     public static final String DFLT_REPLICASET_NAME = "rs0";
     public static final int DFLT_STOP_TIMEOUT_MILLIS = 200;
@@ -52,6 +55,14 @@ public class EmbeddedMongoWithTransactionsConfig {
     @Primary
     public Mongod mongod() throws IOException {
 
+    	if(log.isInfoEnabled()) {
+    		log.info("Starting mongod");
+    	}
+    	
+    	if(databasePath.exists()) {
+    		databasePath.mkdirs();
+    	}
+    	
     	Storage storage = Storage.of(DFLT_REPLICASET_NAME, 0);
     	
     	MongodArguments mongodArguments = MongodArguments.builder()
@@ -74,9 +85,17 @@ public class EmbeddedMongoWithTransactionsConfig {
 
         mongod.start(mFeatureAwareVersion);
         
+        if(log.isInfoEnabled()) {
+    		log.info("Started mongod");
+    	}
+    	
         File replicaSetInitiated = new File(databasePath, ".replicaSet");
     	if(!replicaSetInitiated.exists()) {
     		
+    		if(log.isInfoEnabled()) {
+        		log.info("Creating replica set");
+        	}
+        	
 	        MongoClient mongoClient = null;
 	        try {
 	            final BasicDBList members = new BasicDBList();
@@ -93,6 +112,10 @@ public class EmbeddedMongoWithTransactionsConfig {
 	            final MongoDatabase adminDatabase = mongoClient.getDatabase("admin");
 	            adminDatabase.runCommand(new Document("replSetInitiate", replSetConfig));
 	
+	            if(log.isInfoEnabled()) {
+	        		log.info("Created replica set");
+	        	}
+	        	
 	            replicaSetInitiated.createNewFile();
 	        }
 	        finally {
