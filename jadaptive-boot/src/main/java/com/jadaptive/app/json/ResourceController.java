@@ -3,6 +3,7 @@ package com.jadaptive.app.json;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.permissions.ExceptionHandlingController;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
@@ -50,6 +53,9 @@ public class ResourceController extends ExceptionHandlingController {
 	private ApplicationContext applicationContext;
 	
 	@Autowired
+	private ClassLoaderService classService; 
+	
+	@Autowired
 	private SessionUtils sessionUtils;
 	
 	private MimeMappings mimeTypes = new MimeMappings(MimeMappings.DEFAULT);
@@ -66,10 +72,9 @@ public class ResourceController extends ExceptionHandlingController {
 		tenantService.setCurrentTenant(request);
 		
 		String uri = request.getRequestURI();
+		String resourceUri = uri.length() >= 12 ? uri.substring(12) : "";
 		
-		try {
-			
-			String resourceUri = uri.length() >= 12 ? uri.substring(12) : "";
+		try {	
 			
 			if(resourceUri.endsWith("security.properties")) {
 				ResponseHelper.send404NotFound(uri, request, response);
@@ -94,7 +99,8 @@ public class ResourceController extends ExceptionHandlingController {
 					if(log.isInfoEnabled()) {
 						log.info("Resource not found {}", uri);
 					}
-					ResponseHelper.send404NotFound(uri, request, response);
+
+					tryClasspathFailover(request, response, resourceUri);
 					return;
 				}
 			} 
@@ -108,7 +114,11 @@ public class ResourceController extends ExceptionHandlingController {
 			ResponseHelper.sendContent(resource, getContentType(resource), request, response);
 		
 		} catch(FileNotFoundException e) { 
-			ResponseHelper.send404NotFound(uri, request, response);
+			try {
+				tryClasspathFailover(request, response, resourceUri);
+			} catch(FileNotFoundException e2) {
+				ResponseHelper.send404NotFound(uri, request, response);
+			}
 		} catch(Throwable e) { 
 			log.error("Error loading content resource " + uri, e);
 		} finally {
@@ -117,7 +127,37 @@ public class ResourceController extends ExceptionHandlingController {
 
 	}
 
+	private void tryClasspathFailover(HttpServletRequest request, HttpServletResponse response, String uri) throws FileNotFoundException, IOException {
+		
+		URL url = classService.getResource("webapp" + uri);
+		//if(Objects.isNull(url)) {
+			InputStream in = getClass().getClassLoader().getResourceAsStream("webapp" + uri);
+
+			if(Objects.nonNull(in)) {
+				if(log.isInfoEnabled()) {
+					log.info("Returning content for {} URL is null {}", uri, Boolean.toString(url==null));
+				}
+				
+				sessionUtils.setCachable(response, 600);
+				
+				ResponseHelper.sendContent(IOUtils.toString(in, "UTF-8"), getContentType(uri), request, response);
+				return;
+			}
+		//}
+		
+		throw new FileNotFoundException();
+		
+	}
+
 	private String getContentType(Path resource) {
+		String type = mimeTypes.get(getExtension(resource.getFileName().toString()));
+		if(Objects.isNull(type)) {
+			return "application/octet-stream";
+		}
+		return type;
+	}
+	
+	private String getContentType(String resource) {
 		String type = mimeTypes.get(getExtension(resource));
 		if(Objects.isNull(type)) {
 			return "application/octet-stream";
@@ -125,8 +165,7 @@ public class ResourceController extends ExceptionHandlingController {
 		return type;
 	}
 
-	private String getExtension(Path resource) {
-		String filename = resource.getFileName().toString();
+	private String getExtension(String filename) {
 		int idx = filename.toString().lastIndexOf(".");
 		if(idx > -1) {
 			return filename.substring(idx+1);
