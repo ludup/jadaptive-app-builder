@@ -22,7 +22,7 @@ public class Fontawesome extends AbstractPageExtension {
 	final String free = "/app/content/fontawesome-free-6.4.0-web/css/all.css";
 	final String pro = "/app/content/fontawesome-pro-6.4.0-web/css/all.css";
 	boolean isPro = false;
-	String iconSet = null;
+	String iconSet = "fa-solid";
 	
 	@Autowired
 	private ClassLoaderService classService; 
@@ -49,6 +49,7 @@ public class Fontawesome extends AbstractPageExtension {
 			}
 		}
 		PageHelper.appendStylesheet(document, runtimePath);
+		
 		if(isPro) {
 			page.addProcessor(new AbstractPageExtension() {
 				@Override
@@ -62,6 +63,8 @@ public class Fontawesome extends AbstractPageExtension {
 				}
 			});
 		}
+		
+		document.select("body").attr("data-iconset", iconSet);
 	}
 	
 	@Override

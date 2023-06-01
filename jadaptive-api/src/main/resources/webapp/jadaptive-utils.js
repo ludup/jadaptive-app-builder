@@ -8,7 +8,7 @@ startAwesomeSpin : function(el, icon, spinner) {
 			if(classList) {
 				$.each(classList.split(/\s+/), function(index, item) {
 				    if (item.startsWith('fa-') && !item.startsWith("fa-spin") && !item.startsWith("fa-spinner")
-				    && !item.startsWith("fa-solid") && !item.startsWith("fa-light")) {
+				    && !item.startsWith($('body').data('iconset'))) {
 				       icon = item;
 					   el.data('faicon', icon);
 				    }
@@ -37,19 +37,19 @@ stopAwesomeSpin : function(el, icon, spinner) {
 	},
 error: function(el, message) {
 	el.empty();
-	el.append('<p class="alert alert-danger"><i class="fa-solid fa-exclamation-square"></i> ' + message + '</p>');
+	el.append('<p class="alert alert-danger"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> ' + message + '</p>');
 },
 info: function(el, message) {
 	el.empty();
-	el.append('<p class="alert alert-info"><i class="fa-solid fa-info"></i> ' + message + '</p>');
+	el.append('<p class="alert alert-info"><i class="' + $('body').data('iconset') + ' fa-info"></i> ' + message + '</p>');
 },
 success: function(el, message) {
 	el.empty();
-	el.append('<p class="alert alert-success"><i class="fa-solid fa-thumbs-up"></i> ' + message + '</p>');
+	el.append('<p class="alert alert-success"><i class="' + $('body').data('iconset') + ' fa-thumbs-up"></i> ' + message + '</p>');
 },
 warning: function(el, message) {
 	el.empty();
-	el.append('<p class="alert alert-warning"><i class="fa-solid fa-warning"></i> ' + message + '</p>');
+	el.append('<p class="alert alert-warning"><i class="' + $('body').data('iconset') + ' fa-warning"></i> ' + message + '</p>');
 },
 checkBlank: function(elements) {
 	var empty = false;

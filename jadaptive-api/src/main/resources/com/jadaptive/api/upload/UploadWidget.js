@@ -123,7 +123,7 @@ var UploadWidget = {
 				}
 			}			
 			if($('.file-input').length <= 1) {
-				$(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="fa-solid fa-exclamation-circle"></i> There are no files selected!</p>');
+				$(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="' + $('body').data('iconset') + ' fa-exclamation-circle"></i> There are no files selected!</p>');
 				return;
 			}
 			$('.file-input').last().remove();
@@ -167,7 +167,7 @@ var UploadWidget = {
 							}
 							
 							if(!_self._options.disableFeedback) {
-								$(_self._options.feedbackDiv).prepend('<p class="alert alert-success"><i class="fa-solid fa-check"></i> The upload of ' + countFiles + ' file(s) completed.</p>');		
+								$(_self._options.feedbackDiv).prepend('<p class="alert alert-success"><i class="' + $('body').data('iconset') + ' fa-check"></i> The upload of ' + countFiles + ' file(s) completed.</p>');		
 							}
 //							setTimeout(function() {
 								JadaptiveUtils.stopAwesomeSpin($('#uploadButton i'), 'fa-upload');
@@ -177,7 +177,7 @@ var UploadWidget = {
 //							}, 2000);
  
 		        	   } else {
-		        		   $(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="fa-solid fa-exclamation-circle"></i> ' + data.message + '</p>');
+		        		   $(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="' + $('body').data('iconset') + ' fa-exclamation-circle"></i> ' + data.message + '</p>');
 							_self.clearFiles();
 		        	   }
 		           },

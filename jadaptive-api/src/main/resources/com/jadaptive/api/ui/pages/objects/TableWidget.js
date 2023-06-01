@@ -3,11 +3,11 @@ function renderActions(val, obj, idx, total) {
 	var ret = '';
 	var t = $(document).data('t');
 	if(t.updatable) {
-	ret += '<a href="/app/ui/update/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="fa-solid fa-edit"></i></a>&nbsp;';
+	ret += '<a href="/app/ui/update/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="' + $('body').data('iconset') + ' fa-edit"></i></a>&nbsp;';
 	}
-	ret += '<a href="/app/ui/view/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="fa-solid fa-eye"></i></a>&nbsp;';
+	ret += '<a href="/app/ui/view/' + obj.resourceKey + '/' + obj.uuid + '" data-uuid="' + obj.uuid + '"><i class="' + $('body').data('iconset') + ' fa-eye"></i></a>&nbsp;';
 	if(!obj.system) {
-		ret += '<a class="clickDelete" href="#" data-uuid="' + obj.uuid + '"><i class="fa-solid fa-trash-alt"></i></a>';
+		ret += '<a class="clickDelete" href="#" data-uuid="' + obj.uuid + '"><i class="' + $('body').data('iconset') + ' fa-trash-alt"></i></a>';
 	}
 	$('.tableAction').each(function(idx, row) {
 	    var url = $(this).data('url');
@@ -18,7 +18,7 @@ function renderActions(val, obj, idx, total) {
 }
 
 function renderBool(val) {
-	return val ? '<i class="fa-solid fa-check"></i>' : '';
+	return val ? '<i class="' + $('body').data('iconset') + ' fa-check"></i>' : '';
 }
 
 $(document).ready(function() {

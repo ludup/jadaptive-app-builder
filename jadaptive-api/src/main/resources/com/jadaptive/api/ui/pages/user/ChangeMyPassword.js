@@ -4,7 +4,7 @@ $(function() {
 			$('#feedback').empty();
 			if($('#confirmPassword').val() !== $('#newPassword').val()) {
 				
-           	   $('#feedback').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="fa-solid fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
+           	   $('#feedback').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
                $('#feedbackText').text("Passwords do not match!");
                
 			} else {

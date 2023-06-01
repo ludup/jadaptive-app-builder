@@ -12,5 +12,5 @@ public @interface EnableFontAwesomePro {
 
 	String path();
 	
-	String iconSet() default "fa-light";
+	String iconSet() default "fa-regular";
 }
