@@ -11,4 +11,6 @@ import java.lang.annotation.Target;
 public @interface EnableFontAwesomePro {
 
 	String path();
+	
+	String iconSet() default "fa-light";
 }

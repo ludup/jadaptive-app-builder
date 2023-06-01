@@ -129,21 +129,22 @@ public class ResourceController extends ExceptionHandlingController {
 
 	private void tryClasspathFailover(HttpServletRequest request, HttpServletResponse response, String uri) throws FileNotFoundException, IOException {
 		
-		URL url = classService.getResource("webapp" + uri);
-		//if(Objects.isNull(url)) {
-			InputStream in = getClass().getClassLoader().getResourceAsStream("webapp" + uri);
+		InputStream in = getClass().getClassLoader().getResourceAsStream("webapp" + uri);
 
-			if(Objects.nonNull(in)) {
-				if(log.isInfoEnabled()) {
-					log.info("Returning content for {} URL is null {}", uri, Boolean.toString(url==null));
-				}
-				
-				sessionUtils.setCachable(response, 600);
-				
-				ResponseHelper.sendContent(IOUtils.toString(in, "UTF-8"), getContentType(uri), request, response);
-				return;
+		if(Objects.nonNull(in)) {
+			if(log.isDebugEnabled()) {
+				log.debug("Returning content from InputStream for webapp{}", uri);
 			}
-		//}
+			
+			sessionUtils.setCachable(response, 600);
+			
+			ResponseHelper.sendContent(IOUtils.toString(in, "UTF-8"), getContentType(uri), request, response);
+			return;
+		}
+		
+		if(log.isDebugEnabled()) {
+			log.debug("No match for {}", uri);
+		}
 		
 		throw new FileNotFoundException();
 		
@@ -310,6 +311,7 @@ public class ResourceController extends ExceptionHandlingController {
 		URL url = getClass().getClassLoader().getResource(uri);
 		if(Objects.nonNull(url)) {
 			try {
+				log.info(url.toURI().toASCIIString());
 				Path path = Paths.get(url.toURI());
 				if(log.isDebugEnabled()) {
 					log.debug("Resource {} was found in class loader resources", resourceUri);
@@ -318,10 +320,6 @@ public class ResourceController extends ExceptionHandlingController {
 			} catch (Throwable e) {
 				log.debug("Failed to process classpath resource for " + uri, e);
 			}
-		}
-		
-		if(log.isInfoEnabled()) {
-			log.info("No match for {}", uri);
 		}
 		
 		throw new FileNotFoundException(String.format("%s not found", uri));

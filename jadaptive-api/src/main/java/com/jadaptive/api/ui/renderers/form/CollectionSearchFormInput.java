@@ -110,11 +110,11 @@ public class CollectionSearchFormInput {
 				if(!readOnly) {
 						row.appendChild(new Element("td")
 								.appendChild(Html.a("#", "collectionSearchUp")
-										.appendChild(Html.i("far", "fa-fw", "fa-arrow-up", "me-2")))
+										.appendChild(Html.i("fa-solid", "fa-fw", "fa-arrow-up", "me-2")))
 								.appendChild(Html.a("#", "collectionSearchDown")
-										.appendChild(Html.i("far", "fa-fw", "fa-arrow-down", "me-2")))
+										.appendChild(Html.i("fa-solid", "fa-fw", "fa-arrow-down", "me-2")))
 								.appendChild(Html.a("#", "collectionSearchDelete")
-										.appendChild(Html.i("far", "fa-fw", "fa-trash", "me-2"))));		
+										.appendChild(Html.i("fa-solid", "fa-fw", "fa-trash", "me-2"))));		
 				} else {
 					row.appendChild(new Element("td"));
 				}

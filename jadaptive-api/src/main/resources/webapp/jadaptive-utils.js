@@ -7,7 +7,8 @@ startAwesomeSpin : function(el, icon, spinner) {
 			var classList = el.prop('class');
 			if(classList) {
 				$.each(classList.split(/\s+/), function(index, item) {
-				    if (item.startsWith('fa-') && !item.startsWith("fa-spin")) {
+				    if (item.startsWith('fa-') && !item.startsWith("fa-spin") && !item.startsWith("fa-spinner")
+				    && !item.startsWith("fa-solid") && !item.startsWith("fa-light")) {
 				       icon = item;
 					   el.data('faicon', icon);
 				    }

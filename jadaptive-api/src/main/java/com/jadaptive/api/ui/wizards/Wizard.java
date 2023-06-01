@@ -54,11 +54,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	}
 	
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
+		super.beforeProcess(uri, request, response);
 		state = wizardService.getWizard(resourceKey).getState(request);
 		currentState.set(state);
 	}
 	
 	protected void afterProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
+		super.afterProcess(uri, request, response);
 		currentState.remove();
 	}
 

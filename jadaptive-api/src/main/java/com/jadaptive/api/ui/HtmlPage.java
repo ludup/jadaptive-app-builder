@@ -7,7 +7,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,8 +44,14 @@ public abstract class HtmlPage implements Page {
 	@Autowired
 	private ClassLoaderService classService; 
 	
+	private ThreadLocal<List<PageExtension>> extensions = new ThreadLocal<>();
+	
 	private Collection<HtmlPageExtender> extenders = null;
 	protected String resourcePath;
+	
+	public HtmlPage() {
+		
+	}
 	
 	public String getResourcePath() {
 		return resourcePath;
@@ -62,7 +70,7 @@ public abstract class HtmlPage implements Page {
 	}
 	
 	public final void created() throws FileNotFoundException {
-		
+	
 		extenders = applicationService.getBean(UserInterfaceService.class).getExtenders(this);
 		onCreated();
 	}
@@ -251,20 +259,20 @@ public abstract class HtmlPage implements Page {
 				if(Objects.nonNull(element)) {
 					element.prependChild(Html.div("col-12")
 								.appendChild(Html.div("alert", feedback.getAlert())
-								.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
+								.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
 								.appendChild(getTextElement(feedback))));
 				} else {
 					element = doc.selectFirst("main");
 					if(Objects.nonNull(element)) {
 						element.appendChild(Html.div("col-12")
 								.appendChild(Html.div("alert", feedback.getAlert())
-								.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
+								.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
 								.appendChild(getTextElement(feedback))));
 					}
 				}
 			} else {
 				element.appendChild(Html.div("alert", feedback.getAlert())
-						.appendChild(Html.i("far", feedback.getIcon(), "me-2"))
+						.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
 						.appendChild(getTextElement(feedback)));
 			}
 		}
@@ -291,8 +299,16 @@ public abstract class HtmlPage implements Page {
 		afterDocumentExtensions(document);
 	}
 	
-	protected void afterDocumentExtensions(Document document) {
+	protected void afterDocumentExtensions(Document document) throws IOException {	
+		List<PageExtension> exts = this.extensions.get();
 		
+		if(Objects.nonNull(exts)) {
+			for(PageExtension ext : exts) {
+				ext.process(document, null, this);
+			}
+			
+			this.extensions.get().clear();
+		}
 	}
 	
 	private void processChildExtensions(Document document, Element element) throws IOException {
@@ -459,16 +475,17 @@ public abstract class HtmlPage implements Page {
 		}
 	}
 
-	private void processPageLevelExtensions(Document document, String[] extensions) throws IOException {
+	private void processPageLevelExtensions(Document document, String[] extensionIds) throws IOException {
 		
-		for(String ext : extensions) {
+		for(String ext : extensionIds) {
 			pageCache.resolveExtension(ext).process(document, null, this);
 		}
+
 	}
 	
 	private void showFeedback(Document document, String icon, String bundle, String i18n, String... classes) {
 		document.selectFirst("#feedback").appendChild(Html.div(classes)
-				.appendChild(Html.i("far", icon))
+				.appendChild(Html.i("fa-solid", icon))
 				.appendChild(Html.i18n(bundle, i18n)));
 	}
 	
@@ -486,5 +503,13 @@ public abstract class HtmlPage implements Page {
 	
 	protected void showWarning(Document document, String bundle, String i18n) {
 		showFeedback(document, "fa-triangle-exclamation", bundle, i18n, "alert", "alert-warning");
+	}
+	
+	public void addProcessor(PageExtension ext) {
+		
+		if(extensions.get()==null) {
+			extensions.set(new ArrayList<>());
+		}
+		extensions.get().add(ext);
 	}
 }

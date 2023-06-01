@@ -1,5 +1,6 @@
 package com.jadaptive.api.ui.pages.ext;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -20,6 +21,8 @@ public class Fontawesome extends AbstractPageExtension {
 
 	final String free = "/app/content/fontawesome-free-6.4.0-web/css/all.css";
 	final String pro = "/app/content/fontawesome-pro-6.4.0-web/css/all.css";
+	boolean isPro = false;
+	String iconSet = null;
 	
 	@Autowired
 	private ClassLoaderService classService; 
@@ -41,9 +44,24 @@ public class Fontawesome extends AbstractPageExtension {
 				} else {
 					runtimePath = pro;
 				}
+				isPro = true;
+				iconSet = a.iconSet();				
 			}
 		}
 		PageHelper.appendStylesheet(document, runtimePath);
+		if(isPro) {
+			page.addProcessor(new AbstractPageExtension() {
+				@Override
+				public void process(Document document, Element extensionElement, Page page) throws IOException {
+					document.select(".fa-solid").removeClass("fa-solid").addClass(iconSet);
+				}
+
+				@Override
+				public String getName() {
+					return "fontawesome-pro";
+				}
+			});
+		}
 	}
 	
 	@Override

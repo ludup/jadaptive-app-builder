@@ -102,7 +102,7 @@ public class Dashboard extends AuthenticatedPage {
 								.attr("jad:help", widget.getName() + "Help")
 								.attr("jad:html", widget.getClass().getName().replace(".", "/") + "Help.html")
 								.attr("jad:bundle", widget.getBundle())
-								.appendChild(Html.i("far", "fa-question-circle")));
+								.appendChild(Html.i("fa-solid", "fa-question-circle")));
 					}
 					
 					widget.renderWidget(document, w);
