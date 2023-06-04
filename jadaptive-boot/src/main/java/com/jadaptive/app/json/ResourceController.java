@@ -260,8 +260,8 @@ public class ResourceController extends ExceptionHandlingController {
 
 		try {
 			res = ResourceUtils.getFile("classpath:" + uri);
-			if(log.isInfoEnabled()) {
-				log.info("Resource {} was found in spring boot resources with relative path", resourceUri);
+			if(log.isDebugEnabled()) {
+				log.debug("Resource {} was found in spring boot resources with relative path", resourceUri);
 			}
 			return res.toPath();
 
@@ -271,8 +271,8 @@ public class ResourceController extends ExceptionHandlingController {
 		
 		try {
 			res = ResourceUtils.getFile("classpath:/" + uri);
-			if(log.isInfoEnabled()) {
-				log.info("Resource {} was found in spring boot resources with absolute path", resourceUri);
+			if(log.isDebugEnabled()) {
+				log.debug("Resource {} was found in spring boot resources with absolute path", resourceUri);
 			}
 			return res.toPath();
 
@@ -284,8 +284,8 @@ public class ResourceController extends ExceptionHandlingController {
 		if(resource.exists()) {
 			try {
 				Path path = resource.getFile().toPath();
-				if(log.isInfoEnabled()) {
-					log.info("Resource {} was found in application context resources", resourceUri);
+				if(log.isDebugEnabled()) {
+					log.debug("Resource {} was found in application context resources", resourceUri);
 				}
 				return path;
 			} catch (Throwable e) {
