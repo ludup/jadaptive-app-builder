@@ -41,7 +41,7 @@
 	</build>
 
 	<modules>
-		<module>jadaptive-http</module>
+		<module>jadaptive-default-resources</module>
 		<module>jadaptive-dashboard</module>
 		<module>jadaptive-builtin-users</module>
 		<module>jadaptive-ssh-synergy</module>

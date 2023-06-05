@@ -1,2 +1,4 @@
 /target/
 /plugin.properties
+*.classpath
+/bin/

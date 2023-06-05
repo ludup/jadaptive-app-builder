@@ -15,8 +15,10 @@ public class AbstractSpringPlugin extends SpringPlugin {
 
 	static Logger log = LoggerFactory.getLogger(AbstractSpringPlugin.class);
 	
+	PluginWrapper wrapper;
 	public AbstractSpringPlugin(PluginWrapper wrapper) {
 		super(wrapper);
+		this.wrapper = wrapper;
 	}
 
 	@Override
@@ -38,11 +40,11 @@ public class AbstractSpringPlugin extends SpringPlugin {
     protected ApplicationContext createApplicationContext() {
 	
 		if(log.isInfoEnabled()) {
-			log.info("Creating application context for {}", getWrapper().getPluginId());
+			log.info("Creating application context for {}", wrapper.getPluginId());
 		}
 		
-		ApplicationContext parentContext = ((SpringPluginManager)getWrapper().getPluginManager()).getApplicationContext();
-		
+		ApplicationContext parentContext = ((SpringPluginManager)wrapper.getPluginManager()).getApplicationContext();
+
 		List<ApplicationContext> parentContexts = new ArrayList<>();
 		
 		/**
@@ -63,7 +65,7 @@ public class AbstractSpringPlugin extends SpringPlugin {
 			if(dependWrapper.getPlugin() instanceof SpringPlugin) {
 				if(log.isInfoEnabled()) {
 					log.info("Plugin {} has a Spring parent context from {}",
-							getWrapper().getPluginId(), 
+							wrapper.getPluginId(), 
 							dependWrapper.getPluginId());
 				}
 				parentContexts.add(parentContext = ((SpringPlugin)dependWrapper.getPlugin()).getApplicationContext());
@@ -73,7 +75,7 @@ public class AbstractSpringPlugin extends SpringPlugin {
 		
 		AnnotationConfigApplicationContext pluginContext = new AnnotationConfigApplicationContext();
 		pluginContext.setParent(parentContext);
-		pluginContext.setClassLoader(getWrapper().getPluginClassLoader());
+		pluginContext.setClassLoader(wrapper.getPluginClassLoader());
 		pluginContext.scan(getBasePackages());
 		pluginContext.refresh();
       

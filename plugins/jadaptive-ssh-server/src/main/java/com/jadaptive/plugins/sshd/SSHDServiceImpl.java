@@ -1,6 +1,5 @@
 package com.jadaptive.plugins.sshd;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
@@ -11,14 +10,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.codec.Charsets;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.StartupAware;

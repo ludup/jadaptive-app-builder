@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
-import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.permissions.ExceptionHandlingController;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
@@ -51,9 +50,6 @@ public class ResourceController extends ExceptionHandlingController {
 	
 	@Autowired
 	private ApplicationContext applicationContext;
-	
-	@Autowired
-	private ClassLoaderService classService; 
 	
 	@Autowired
 	private SessionUtils sessionUtils;
