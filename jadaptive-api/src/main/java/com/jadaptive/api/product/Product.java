@@ -2,6 +2,8 @@ package com.jadaptive.api.product;
 
 import org.pf4j.ExtensionPoint;
 
+import com.jadaptive.api.app.ApplicationVersion;
+
 public interface Product extends ExtensionPoint {
 
 	default String getName() {
@@ -9,7 +11,7 @@ public interface Product extends ExtensionPoint {
 	}
 	
 	default String getVersion() {
-		return "DEV_VERSION";
+		return Boolean.getBoolean("jadaptive.development") ? "DEV_VERSION" : ApplicationVersion.getVersion();
 	}
 	
 	default String getPoweredBy() {
