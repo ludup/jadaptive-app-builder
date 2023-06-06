@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -133,7 +135,9 @@ public class ApplicationConfig {
 							pluginRepository.add(new SinglePluginRepository(Paths.get(pluginPath)));
 						}
 					}
-	
+					
+					Collection<String> enabled = repositories.get("Enable");
+					
 					for (String path : repositories.get("GitPlugins")) {
 						
 						Path pluginsPath;
@@ -141,6 +145,18 @@ public class ApplicationConfig {
 							pluginsPath = repoBase.resolve(path);
 						} else {
 							pluginsPath = Paths.get(path);
+						}
+						
+						if(Objects.nonNull(enabled)) {
+							try (DirectoryStream<Path> paths = Files.newDirectoryStream(pluginsPath, Files::isDirectory)) {
+					            for (Path dir : paths) {
+					                disabledPlugins.add(dir.getFileName().toString());
+					            }
+					        } catch (IOException e) {
+					            
+					        }
+							
+							disabledPlugins.removeAll(enabled);
 						}
 						
 						pluginRepository.add(new DevelopmentPluginRepository(pluginsPath) {
