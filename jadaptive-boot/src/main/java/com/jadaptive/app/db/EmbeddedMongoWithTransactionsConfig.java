@@ -59,7 +59,7 @@ public class EmbeddedMongoWithTransactionsConfig {
     		log.info("Starting mongod");
     	}
     	
-    	if(databasePath.exists()) {
+    	if(!databasePath.exists()) {
     		databasePath.mkdirs();
     	}
     	
