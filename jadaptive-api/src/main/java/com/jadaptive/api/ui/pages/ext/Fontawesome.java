@@ -48,13 +48,17 @@ public class Fontawesome extends AbstractPageExtension {
 				iconSet = a.iconSet();				
 			}
 		}
-		PageHelper.appendStylesheet(document, runtimePath);
 		
+		PageHelper.appendStylesheet(document, runtimePath);
+
 		if(isPro) {
 			page.addProcessor(new AbstractPageExtension() {
 				@Override
 				public void process(Document document, Element extensionElement, Page page) throws IOException {
-					document.select(".fa-solid").removeClass("fa-solid").addClass(iconSet);
+					String appliedIconset = document.select("body").hasAttr("data-iconset") ?
+							document.select("body").attr("data-iconset") : iconSet;
+					document.select(".fa-solid").removeClass("fa-solid").addClass(appliedIconset);
+					document.select("body").attr("data-iconset", appliedIconset);
 				}
 
 				@Override
@@ -63,8 +67,6 @@ public class Fontawesome extends AbstractPageExtension {
 				}
 			});
 		}
-		
-		document.select("body").attr("data-iconset", iconSet);
 	}
 	
 	@Override
