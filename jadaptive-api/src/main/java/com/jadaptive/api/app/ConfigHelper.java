@@ -30,7 +30,7 @@ public class ConfigHelper {
 	static Map<String,List<ResourcePackage>> tenantPackages = new HashMap<>();
 	
 	public static File getConfFolder() {
-		return new File(System.getProperty("jadaptive.templatePath", "conf"));
+		return new File(System.getProperty("jadaptive.templatePath", "conf.d"));
 	}
 
 	public static File getSystemFolder() {
