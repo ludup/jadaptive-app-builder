@@ -46,7 +46,7 @@ public class Bootstrap extends AbstractPageExtension {
 					
 					File themePath = new File(ApplicationProperties.getConfdFolder(),
 							"system" + File.separator + "shared" + File.separator + 
-							a.path());
+							"webapp" + a.path());
 					
 					if(themePath.exists()) {
 						runtimePathJs = "/app/content/" + FileUtils.checkStartsWithNoSlash(FileUtils.checkEndsWithSlash(a.path())) + "js/bootstrap.bundle.min.js";

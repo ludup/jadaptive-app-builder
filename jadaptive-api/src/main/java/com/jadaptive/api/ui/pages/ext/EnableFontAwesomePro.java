@@ -9,8 +9,6 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EnableFontAwesomePro {
-
-	String path();
 	
 	String iconSet() default "fa-regular";
 }

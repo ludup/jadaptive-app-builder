@@ -29,7 +29,6 @@ import com.jadaptive.plugins.dashboard.DashboardWidget;
 @HomePage
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "help", "i18n"} )
-@EnableFontAwesomePro(path = "fontawesome", iconSet = "fa-duotone")
 @EnableBootstrapTheme(path = "bootstrap")
 public class Dashboard extends AuthenticatedPage {
 
