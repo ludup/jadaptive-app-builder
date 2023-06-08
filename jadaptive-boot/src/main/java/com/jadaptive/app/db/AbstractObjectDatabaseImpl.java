@@ -687,7 +687,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 			List<T> results = new ArrayList<>();
 			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, order, sortField, fields)) {
-				results.add(DocumentHelper.convertDocumentToObject(clz, document));
+				try {
+					results.add(DocumentHelper.convertDocumentToObject(clz, document));
+				} catch (Throwable e) {
+					log.error("Failed to create document from template", e);
+				}
 			}
 			
 			return results;

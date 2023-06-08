@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,8 @@ import com.jadaptive.plugins.dashboard.DashboardWidget;
 @EnableBootstrapTheme(path = "bootstrap")
 public class Dashboard extends AuthenticatedPage {
 
+	static Logger log = LoggerFactory.getLogger(Dashboard.class);
+	
 	@Autowired
 	private ApplicationService applicationService; 
 	
@@ -105,9 +109,12 @@ public class Dashboard extends AuthenticatedPage {
 								.appendChild(Html.i("fa-solid", "fa-question-circle")));
 					}
 					
-					widget.renderWidget(document, w);
-	
-					count++;
+					try {
+						widget.renderWidget(document, w);
+						count++;
+					} catch(Throwable e) {
+						log.error("Consumed exception whilst processing dashboard widget {}", widget.getName(), e);
+					}
 				}
 			}
 		}

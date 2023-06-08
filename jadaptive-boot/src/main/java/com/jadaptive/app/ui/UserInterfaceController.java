@@ -73,6 +73,8 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 	}
 	
+	
+	
 	@ExceptionHandler(UnauthorizedException.class)
 	public void handleException(HttpServletRequest request,
 			HttpServletResponse response,

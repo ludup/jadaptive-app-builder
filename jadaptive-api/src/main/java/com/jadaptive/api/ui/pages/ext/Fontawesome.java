@@ -1,5 +1,6 @@
 package com.jadaptive.api.ui.pages.ext;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
@@ -10,6 +11,7 @@ import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
@@ -40,12 +42,18 @@ public class Fontawesome extends AbstractPageExtension {
 				Class<?> clz = classes.iterator().next();
 				EnableFontAwesomePro a = clz.getAnnotation(EnableFontAwesomePro.class);
 				if(StringUtils.isNotBlank(a.path())) {
-					runtimePath = "/app/content/" + FileUtils.checkStartsWithNoSlash(FileUtils.checkEndsWithSlash(a.path())) + "css/all.css";
-				} else {
-					runtimePath = pro;
-				}
+					File themePath = new File(ApplicationProperties.getConfdFolder(),
+							"system" + File.separator + "shared" + File.separator + 
+							"webapp" + File.separator + a.path());
+					
+					if(themePath.exists()) {
+						runtimePath = "/app/content/" + FileUtils.checkStartsWithNoSlash(FileUtils.checkEndsWithSlash(a.path())) + "css/all.css";
+					} else {
+						runtimePath = pro;
+					}	
+				} 
 				isPro = true;
-				iconSet = a.iconSet();				
+				iconSet = a.iconSet();		
 			}
 		}
 		
