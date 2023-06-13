@@ -36,20 +36,31 @@ stopAwesomeSpin : function(el, icon, spinner) {
 		el.addClass(icon);
 	},
 error: function(el, message) {
-	el.empty();
-	el.append('<p class="alert alert-danger"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> ' + message + '</p>');
+	this.feedback(el, message, 'danger', 'fa-exclamation-square');
 },
 info: function(el, message) {
-	el.empty();
-	el.append('<p class="alert alert-info"><i class="' + $('body').data('iconset') + ' fa-info"></i> ' + message + '</p>');
+	this.feedback(el, message, 'info', 'fa-info-square');
 },
 success: function(el, message) {
-	el.empty();
-	el.append('<p class="alert alert-success"><i class="' + $('body').data('iconset') + ' fa-thumbs-up"></i> ' + message + '</p>');
-},
+	this.feedback(el, message, 'success', 'fa-thumbs-up');
+},	
 warning: function(el, message) {
-	el.empty();
-	el.append('<p class="alert alert-warning"><i class="' + $('body').data('iconset') + ' fa-warning"></i> ' + message + '</p>');
+	this.feedback(el, message, 'warning', 'fa-warning');
+},
+feedback: function(el, message, type, icon) {
+	$('.feedback').remove();
+	if(el.length == 0) {
+		var e = $('main');
+		var msg = '<p class="feedback alert alert-' + type + '"><i class="' + $('body').data('iconset') + ' ' + icon + '"></i> ' + message + '</p>';
+		if(e.length == 0) {
+			e = $('#content');
+		}
+		if(e.length > 0) {
+			e.prepend(msg);
+		} 
+	} else {
+		el.append('<p class="feedback alert alert-' + type + '"><i class="' + $('body').data('iconset') + ' ' + icon + '"></i> ' + message + '</p>');
+	}
 },
 checkBlank: function(elements) {
 	var empty = false;
