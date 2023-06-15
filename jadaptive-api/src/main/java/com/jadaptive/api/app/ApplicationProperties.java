@@ -93,6 +93,9 @@ public class ApplicationProperties {
         </Property>
     </Properties>
     <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
 		<RollingFile name="FileAppender" fileName="logs/application.log"
 		         filePattern="application-%i.log.gz">
 		    <PatternLayout>
@@ -107,6 +110,7 @@ public class ApplicationProperties {
     <Loggers>
         <Root level="info">
             <AppenderRef ref="FileAppender" />
+            <AppenderRef ref="ConsoleAppender"/>
         </Root>
     </Loggers>
 </Configuration>
