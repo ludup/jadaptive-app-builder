@@ -780,12 +780,19 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			ObjectTemplate extensionTemplate, Collection<String> extensions) {
 		
 		Class<? extends UUIDDocument> baseClass = templateService.getTemplateClass(baseObject.getResourceKey());
-		ObjectTemplate baseTemplate = templateService.get(baseObject.getResourceKey());
+		ObjectTemplate originalTemplate = templateService.get(baseObject.getResourceKey());
+		ObjectTemplate baseTemplate = originalTemplate;
 		
 		if(baseTemplate.isExtended()) {
 			baseClass = templateService.getTemplateClass(baseTemplate.getParentTemplate());
 			baseTemplate = templateService.get(baseTemplate.getParentTemplate());
 		}
+		
+		/**
+		 * TODO this should be in a transaction because it should be creating and
+		 * deleting multiple objects at once so relies on the entire transaction
+		 * succeeding.
+		 */
 		
 		if(!extensions.isEmpty()) {
 			String packageName = "com.jadaptive.extensions";
@@ -858,6 +865,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			AbstractObject obj =  new MongoEntity(doc);
 			
+			if(originalTemplate.isExtended()) {
+				templateService.delete(originalTemplate);
+			}
+			
 			return obj;
 		} else {
 			
@@ -867,6 +878,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			doc.put("resourceKey", baseTemplate.getResourceKey());
 			
 			AbstractObject obj =  new MongoEntity(doc);
+			
+			if(originalTemplate.isExtended()) {
+				templateService.delete(originalTemplate);
+			}
 			
 			return obj;
 		}
