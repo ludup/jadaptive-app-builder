@@ -4,8 +4,8 @@ import java.io.FileNotFoundException;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
-import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.ui.ErrorPage;
 import com.jadaptive.api.ui.Feedback;
@@ -21,7 +21,7 @@ import com.jadaptive.api.ui.pages.user.SetPassword.PasswordForm;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
-@Extension
+@Component
 @RequestPage(path = "set-password/{uuid}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "freemarker", "i18n" })

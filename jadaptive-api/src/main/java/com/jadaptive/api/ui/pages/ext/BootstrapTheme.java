@@ -33,11 +33,20 @@ public enum BootstrapTheme {
 	public static boolean hasCss(BootstrapTheme current) {
 		
 		switch(current) {
-		case DEFAULT:
 		case JADAPTIVE:
 			return false;
 		default:
 			return true;
+		}
+	}
+
+	public static String getThemeCssName(BootstrapTheme current) {
+		
+		switch(current) {
+		case DEFAULT:
+			return SUPERHERO.name().toLowerCase();
+		default:
+			return current.name().toLowerCase();
 		}
 	}
 }
