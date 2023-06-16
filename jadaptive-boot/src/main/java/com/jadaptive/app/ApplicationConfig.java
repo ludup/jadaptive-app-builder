@@ -153,7 +153,13 @@ public class ApplicationConfig {
 					                disabledPlugins.add(dir.getFileName().toString());
 					            }
 					        } catch (IOException e) {
-					            
+					        }
+							
+							try (DirectoryStream<Path> paths = Files.newDirectoryStream(getPluginsRoot(), Files::isDirectory)) {
+					            for (Path dir : paths) {
+					                disabledPlugins.add(dir.getFileName().toString());
+					            }
+					        } catch (IOException e) {
 					        }
 							
 							disabledPlugins.removeAll(enabled);

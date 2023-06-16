@@ -10,5 +10,6 @@ public enum FieldRenderer {
 	OPTIONAL, 
 	CSS_EDITOR, 
 	COUNTRY,
-	HTML_VIEW;
+	HTML_VIEW,
+	JAVA_EDITOR;
 }

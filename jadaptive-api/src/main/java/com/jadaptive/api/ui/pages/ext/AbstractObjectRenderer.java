@@ -64,6 +64,7 @@ import com.jadaptive.api.ui.renderers.form.FileFormInput;
 import com.jadaptive.api.ui.renderers.form.HiddenFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.ImageFormInput;
+import com.jadaptive.api.ui.renderers.form.JavascriptEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
@@ -602,6 +603,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				render.renderInput(element, getFieldValue(orderedField, obj));
 				break;
 			}
+			case JAVA_EDITOR:
+			{
+				JavascriptEditorFormInput render = new JavascriptEditorFormInput(currentTemplate.get(), orderedField, currentDocument.get(), view == FieldView.READ);
+				render.renderInput(element, getFieldValue(orderedField, obj));
+				break;
+			}
 			case HTML_VIEW:
 			{
 				/**
@@ -894,7 +901,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 								.addClass("float-end")
 								.appendChild(Html.i("fa-solid", "fa-times", "me-1"))
 								.appendChild(
-							Html.i18n(view.getExtensionBundle(), String.format("%s.remove", view.getExtension())))))));
+							Html.i18n(view.getBundle(), String.format("%s.remove", view.getExtension())))))));
 		}
 		Element tabPane = rootElement.select(".tab-pane").last();
 		

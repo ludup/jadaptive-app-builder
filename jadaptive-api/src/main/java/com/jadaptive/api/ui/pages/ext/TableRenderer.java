@@ -85,6 +85,9 @@ public class TableRenderer {
 			
 			view = templateClazz.getAnnotation(TableView.class);
 			int columns = 0;
+			if(Objects.isNull(view)) {
+				throw new IllegalStateException(templateClazz.getSimpleName() + " requires @TableView annotation to render this page");
+			}
 			for(String column : view.defaultColumns()) {
 				el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column))));
 				columns++;

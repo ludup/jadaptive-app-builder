@@ -22,7 +22,6 @@ import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.pages.ext.EnableBootstrapTheme;
-import com.jadaptive.api.ui.pages.ext.EnableFontAwesomePro;
 import com.jadaptive.plugins.dashboard.DashboardWidget;
 
 @Component

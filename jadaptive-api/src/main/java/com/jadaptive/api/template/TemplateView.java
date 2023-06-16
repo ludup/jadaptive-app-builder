@@ -14,14 +14,13 @@ public class TemplateView {
 	boolean rootView;
 	boolean isExtension;
 	String extension;
-	String extensionBundle;
-	String defaultBundle;
+	String bundle;
 	List<TemplateViewField> fields = new ArrayList<>();
 	List<TemplateView> childViews = new ArrayList<>();
 
 	public TemplateView(String bundle) {
 		this.rootView = true;
-		this.defaultBundle = bundle;
+		this.bundle = bundle;
 		this.weight = Integer.MIN_VALUE;
 		this.type = ViewType.TAB;
 		this.resourceKey = "root";
@@ -31,7 +30,7 @@ public class TemplateView {
 	
 	public TemplateView(String bundle, String resourceKey) {
 		this.rootView = false;
-		this.defaultBundle = bundle;
+		this.bundle = bundle;
 		this.weight = 0;
 		this.type = ViewType.TAB;
 		this.resourceKey = resourceKey;
@@ -39,16 +38,15 @@ public class TemplateView {
 		this.isExtension = false;
 	}
 	
-	public TemplateView(ObjectViewDefinition def, boolean isExtension, String extension, String extensionBundle) {
+	public TemplateView(ObjectViewDefinition def, boolean isExtension, String extension, String bundle) {
 		this.rootView = false;
 		this.resourceKey = def.value();
 		this.parent = def.parent();
-		this.defaultBundle = def.bundle();
+		this.bundle = bundle;
 		this.weight = def.weight();
 		this.type = def.type();
 		this.isExtension = isExtension;
 		this.extension = extension;
-		this.extensionBundle = extensionBundle;
 	}
 	
 	public boolean isRoot() {
@@ -98,7 +96,7 @@ public class TemplateView {
 	}
 
 	public String getBundle() {
-		return defaultBundle;
+		return bundle;
 	}
 	
 	public String getResourceKey() {
@@ -111,9 +109,5 @@ public class TemplateView {
 
 	public String getExtension() {
 		return extension;
-	}
-	
-	public String getExtensionBundle() {
-		return extensionBundle;
 	}
 }

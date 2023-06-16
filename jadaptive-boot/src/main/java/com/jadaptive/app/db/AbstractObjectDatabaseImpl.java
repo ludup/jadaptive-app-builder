@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,8 +25,8 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.Events;
-import com.jadaptive.api.events.ObjectUpdateEvent;
 import com.jadaptive.api.events.ObjectEvent;
+import com.jadaptive.api.events.ObjectUpdateEvent;
 import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
@@ -158,6 +159,16 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 	@SuppressWarnings("unchecked")
 	private <T extends UUIDEntity> void doSave(T obj, String database, T previous, boolean isEvent) {
+		
+		if(obj instanceof  AbstractUUIDEntity) {
+			
+			Date now = Utils.now();
+			AbstractUUIDEntity e = (AbstractUUIDEntity)obj;
+			if(Objects.isNull(previous) || Objects.isNull(e.getCreated())) {
+				e.setCreated(now);
+			}
+			e.setLastModified(now);
+		}
 		
 		Document document = new Document();
 		document.put("resourceKey", obj.getResourceKey());

@@ -396,7 +396,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			views.put(null, new TemplateView(template.getBundle()));
 		
 			if(!disableViews) {
-				iterateClassHeirarchy(clz, views, new HashSet<>());
+				iterateClassHeirarchy(clz, template, views, new HashSet<>());
 			}
 			
 			processFields(null,template, clz, views, new LinkedList<>(), disableViews); 
@@ -419,7 +419,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		}
 	}
 	
-	private void iterateClassHeirarchy(Class<?> clz, Map<String, TemplateView> views, Set<Class<?>> processed) {
+	private void iterateClassHeirarchy(Class<?> clz, ObjectTemplate template, Map<String, TemplateView> views, Set<Class<?>> processed) {
 		
 		Class<?> tmp = clz;
 		
@@ -437,10 +437,12 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				for(ObjectViewDefinition def : annonatedViews.value()) {
 					if(Objects.nonNull(e)) {
 						views.put(def.value(), new TemplateView(def, true,
-								e.resourceKey(), e.bundle()));
+								e.resourceKey(), 
+								StringUtils.defaultIfBlank(e.bundle(), 
+										StringUtils.defaultIfBlank(def.bundle(), template.getBundle()))));
 					} else {
 						views.put(def.value(), new TemplateView(def, false,
-								null, null));
+								null, StringUtils.defaultIfBlank(def.bundle(), template.getBundle())));
 					}
 				}
 			}
@@ -449,7 +451,9 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			
 			for(Field field : tmp.getDeclaredFields()) {
 				if(UUIDEntity.class.isAssignableFrom(field.getType())) {
-					iterateClassHeirarchy(field.getType(), views, processed);
+					iterateClassHeirarchy(field.getType(),
+							get(getTemplateResourceKey(field.getType())),
+							views, processed);
 				}
 			}
 
