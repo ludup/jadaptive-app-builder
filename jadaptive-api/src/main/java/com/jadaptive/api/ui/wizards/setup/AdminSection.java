@@ -28,15 +28,13 @@ public class AdminSection extends SetupSection {
 	private boolean setOwner;
 	
 	public AdminSection(boolean setOwner) {
-		super("setup");
+		super("setup", 2);
 		this.setOwner = setOwner;
 	}
 	
 	public Integer getPosition() {
 		return 2;
 	}
-	
-	
 
 	@Override
 	protected void processSection(Document document, Element element, Page page) throws IOException {

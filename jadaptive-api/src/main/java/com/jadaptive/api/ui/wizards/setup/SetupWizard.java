@@ -66,7 +66,7 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 
 		
 		sections.add(new SetupSection("setup", "createTenant", 
-				"/com/jadaptive/api/ui/wizards/setup/CreateTenant.html"));
+				"/com/jadaptive/api/ui/wizards/setup/CreateTenant.html", 1));
 
 		sections.add(applicationService.autowire(new AdminSection(true)));
 		return sections;
@@ -74,7 +74,7 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 
 	@Override
 	protected WizardSection getStartSection() {
-		return new DefaultWizardSection("setup", "startSetup", "/com/jadaptive/api/ui/wizards/setup/StartSetup.html");
+		return new DefaultWizardSection("setup", "startSetup", "/com/jadaptive/api/ui/wizards/setup/StartSetup.html", 0);
 	}
 	
 	@Override

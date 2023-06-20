@@ -20,7 +20,7 @@ public abstract class InterfaceSection extends SetupSection {
 	public InterfaceSection() {
 		super(CreateInterface.RESOURCE_KEY, 
 				"configureInterface", 
-				"/com/jadaptive/plugins/sshd/setup/CreateInterface.html");
+				"/com/jadaptive/plugins/sshd/setup/CreateInterface.html", 100);
 	}
 	
 	@Override

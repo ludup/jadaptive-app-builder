@@ -2,11 +2,11 @@ package com.jadaptive.api.ui.wizards;
 
 public class DefaultWizardSection extends WizardSection {
 
-	public DefaultWizardSection(String bundle) {
-		super(bundle);
+	public DefaultWizardSection(String bundle, Integer weight) {
+		super(bundle, weight);
 	}
 	
-	public DefaultWizardSection(String bundle, String name, String resource) {
-		super(bundle, name, resource);
+	public DefaultWizardSection(String bundle, String name, String resource, Integer weight) {
+		super(bundle, name, resource, weight);
 	}
 }

@@ -2,6 +2,8 @@ package com.jadaptive.api.ui.wizards;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -50,6 +52,15 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 				}
 				sections.add(section);
 			}
+			
+			Collections.sort(sections, new Comparator<WizardSection>() {
+
+				@Override
+				public int compare(WizardSection o1, WizardSection o2) {
+					return o1.getWeight().compareTo(o2.getWeight());
+				}
+				
+			});
 						
 			state.init(getStartSection(),
 					getFinishSection(), 
@@ -62,7 +73,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	}
 	
 	protected WizardSection getFinishSection() {
-		return new DefaultWizardSection(getResourceKey(), "finishWizard", "/com/jadaptive/plugins/web/ui/FinishWizard.html");
+		return new DefaultWizardSection(getResourceKey(), "finishWizard", "/com/jadaptive/plugins/web/ui/FinishWizard.html", 0);
 	}
 
 	

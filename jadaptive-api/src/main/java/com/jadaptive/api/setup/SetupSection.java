@@ -11,12 +11,14 @@ import com.jadaptive.api.ui.wizards.WizardState;
 
 public class SetupSection extends DefaultWizardSection {
 
-	public SetupSection(String bundle) {
-		super(bundle);
+	int weight;
+	
+	public SetupSection(String bundle, int weight) {
+		super(bundle, weight);
 	}
 	
-	public SetupSection(String bundle, String name, String resource) {
-		super(bundle, name, resource);
+	public SetupSection(String bundle, String name, String resource, int weight) {
+		super(bundle, name, resource, weight);
 	}
 	
 	public boolean isSystem() {
@@ -31,6 +33,4 @@ public class SetupSection extends DefaultWizardSection {
 	@Override
 	protected void processSection(Document document, Element element, Page page) throws IOException {
 	}
-	
-
 }

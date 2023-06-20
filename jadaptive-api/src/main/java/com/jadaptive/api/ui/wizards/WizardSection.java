@@ -1,6 +1,7 @@
 package com.jadaptive.api.ui.wizards;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
@@ -16,11 +17,13 @@ public abstract class WizardSection extends AbstractPageExtension {
 	String bundle;
 	String name;
 	String resource;
+	Integer weight;
 	
-	public WizardSection(String bundle, String name, String resource) {
+	public WizardSection(String bundle, String name, String resource, Integer weight) {
 		this.bundle = bundle;
 		this.name = name;
 		this.resource = resource;
+		this.weight = weight;
 	}
 	
 	/**
@@ -28,10 +31,11 @@ public abstract class WizardSection extends AbstractPageExtension {
 	 * either &lt;classname&gt;.html or &lt;classname&gt;Section.html
 	 * @param bundle
 	 */
-	public WizardSection(String bundle) {
+	public WizardSection(String bundle, Integer weight) {
 		this.bundle = bundle;
 		this.name = StringUtils.uncapitalize(getClass().getSimpleName());
 		this.resource = "/" + getClass().getName().replace(".", "/") + ".html";
+		this.weight = weight;
 	}
 	
 	@Override
@@ -86,5 +90,9 @@ public abstract class WizardSection extends AbstractPageExtension {
 
 	public boolean isSystem() {
 		return false;
+	}
+
+	public Integer getWeight() {
+		return weight;
 	}
 }
