@@ -1,8 +1,6 @@
 package com.jadaptive.api.ui.wizards;
 
 import java.io.IOException;
-import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
