@@ -25,4 +25,8 @@ public interface Product extends ExtensionPoint {
 	default String getFaviconResource() {
 		return "/app/content/images/jadaptive-favicon.png";
 	}
+
+	default String getProductCode() {
+		return "JADAPTIVE";
+	}
 }

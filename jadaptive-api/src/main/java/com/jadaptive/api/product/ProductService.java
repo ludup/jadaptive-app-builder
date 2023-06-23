@@ -14,4 +14,6 @@ public interface ProductService {
 
 	String getPoweredBy();
 
+	String getProductCode();
+
 }

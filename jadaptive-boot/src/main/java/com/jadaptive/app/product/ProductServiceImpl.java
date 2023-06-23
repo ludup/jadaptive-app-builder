@@ -74,4 +74,14 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
+	@Override
+	public String getProductCode() {
+		try {
+			Product product = appService.getBean(Product.class);
+			return product.getProductCode();
+		} catch (NoSuchBeanDefinitionException e1) {
+			return defaultProduct.getProductCode();
+		}
+	}
+
 }
