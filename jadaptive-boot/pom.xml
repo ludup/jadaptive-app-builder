@@ -87,11 +87,11 @@
 			<version>3.12.10</version>
 		</dependency>
 
-		<dependency>
-			<groupId>net.java.dev.jna</groupId>
-			<artifactId>jna</artifactId>
-			<version>5.3.1</version> <!--$NO-MVN-MAN-VER$ -->
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>net.java.dev.jna</groupId>-->
+<!--			<artifactId>jna</artifactId>-->
+<!--			<version>5.3.1</version> $NO-MVN-MAN-VER$ -->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>com.jadaptive</groupId>
