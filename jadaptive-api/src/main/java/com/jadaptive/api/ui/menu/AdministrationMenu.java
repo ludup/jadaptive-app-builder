@@ -6,11 +6,11 @@ import java.util.Collection;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ConfigurationMenu implements ApplicationMenu {
+public class AdministrationMenu implements ApplicationMenu {
 
 	@Override
 	public String getI18n() {
-		return "configuration.name";
+		return "administration.name";
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class ConfigurationMenu implements ApplicationMenu {
 
 	@Override
 	public String getUuid() {
-		return ApplicationMenuService.CONFIGURATION_MENU;
+		return ApplicationMenuService.ADMINISTRATION_MENU;
 	}
 
 	@Override

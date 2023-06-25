@@ -12,16 +12,16 @@ public @interface PageMenu {
 
 	String parent();
 
-	int weight() default 0;
+	int weight() default 9999;
 
-	String uuid();
+	String uuid() default "";
 
-	String path();
+	String path() default "";
 
 	String icon();
 
-	String i18n();
+	String i18n() default "";
 
-	String bundle();
+	String bundle() default "";
 	
 }

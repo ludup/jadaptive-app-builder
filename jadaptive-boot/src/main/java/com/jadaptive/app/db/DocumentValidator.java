@@ -191,11 +191,6 @@ public class DocumentValidator {
 					}
 					break;
 				}
-				case REGEX:
-				{
-					validateRegex(v.getValue(), value, v, field);
-					break;
-				}
 				case URL:
 				{
 					if(StringUtils.isNotBlank(value)) {
@@ -207,6 +202,33 @@ public class DocumentValidator {
 					break;
 				}
 			}
+			
+			/**
+			 * We allow multiple REGEX validations, If one succeeds, validation succeeds. Otherwise
+			 * we throw the last validation error we received.
+			 */
+			ValidationException lastValidationError = null;
+			for (FieldValidator v : field.getValidators()) {
+				try {
+				switch (v.getType()) {
+				case REGEX:
+				{
+					validateRegex(v.getValue(), value, v, field);
+					return;
+				}
+				default:
+					break;
+				}
+				
+				} catch(ValidationException e) {
+					lastValidationError = e;
+				}
+			}
+			
+			if(Objects.nonNull(lastValidationError)) {
+				throw lastValidationError;
+			}
+			
 		}
 	}
 	

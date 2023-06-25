@@ -1,9 +1,10 @@
 package com.jadaptive.api.ui.menu;
 
-import org.pf4j.Extension;
+import org.springframework.stereotype.Component;
 
-@Extension
+@Component
 public class OptionsMenu implements ApplicationMenu {
+	
 
 	@Override
 	public String getI18n() {
@@ -27,7 +28,7 @@ public class OptionsMenu implements ApplicationMenu {
 
 	@Override
 	public String getParent() {
-		return ApplicationMenuService.CONFIGURATION_MENU;
+		return ApplicationMenuService.ADMINISTRATION_MENU;
 	}
 
 	@Override

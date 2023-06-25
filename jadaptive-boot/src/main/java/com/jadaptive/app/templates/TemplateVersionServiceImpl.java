@@ -2,7 +2,9 @@ package com.jadaptive.app.templates;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -69,6 +71,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.ObjectTemplateType;
+import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.UniqueIndex;
@@ -500,7 +503,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			ObjectDefinition collection = getCollectionTemplate(clz);
 			
 			boolean auditObject = ReflectionUtils.hasAnnotation(clz, AuditedObject.class);
-			boolean generateEventTemplates = ReflectionUtils.hasAnnotation(clz, GenerateEventTemplates.class);
+			boolean generateEventTemplates = hasGenerateTemplatesAnnotation(clz);
 			
 			if(Objects.nonNull(parent)) {
 				if(log.isDebugEnabled()) {
@@ -582,7 +585,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			registerIndexes(template, clz, newSchema);
 			
 			if(generateEventTemplates) {
-				generateEventTemplates(template, clz, clz.getAnnotation(GenerateEventTemplates.class).value(), newSchema);
+				generateEventTemplates(template, clz, newSchema);
 			}
 			
 			return template;
@@ -593,6 +596,19 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 	}
 	
+	private boolean hasGenerateTemplatesAnnotation(Class<? extends UUIDDocument> clz) {
+		return ReflectionUtils.hasAnnotation(clz, GenerateEventTemplates.class);
+	}
+	
+	private String getResourceKey(Class<? extends UUIDDocument> clz) {
+		try {
+			return clz.getConstructor().newInstance().getResourceKey();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new IllegalStateException("Could not find resource key from UUIDDocument instance. Did you omit a default constructor?!");
+		}
+	}
+
 	@Override
 	public Class<? extends ObjectEvent<?>> getEventClass(String resourceKey) {
 		return eventClasses.get(resourceKey);
@@ -603,11 +619,15 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return updateEventClasses.get(resourceKey);
 	}
 	
-	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, String group, boolean newSchema) {
+	private void generateEventTemplates(ObjectTemplate template, Class<?> clz, boolean newSchema) {
 	
+		
 		if(log.isDebugEnabled()) {
 			log.debug("Generating events for {}", template.getResourceKey());
 		}
+		
+		String group = template.getResourceKey();
+		
 		generateEventTemplate(StringUtils.capitalize(group) + "Created",
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				Events.created(template.getResourceKey()), newSchema, true);
@@ -665,8 +685,17 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				 b = b.annotateType(AnnotationDescription.Builder.ofType(AuditedObject.class).build());
 			 }
 			 
-			 b = b.annotateType(clz.getAnnotation(ObjectViews.class))
-			  .defineConstructor(Visibility.PUBLIC)
+			 Annotation a = clz.getAnnotation(ObjectViews.class);
+			 if(Objects.nonNull(a)) {
+				 b = b.annotateType(a);
+			 } else {
+				 a = clz.getAnnotation(ObjectViewDefinition.class);
+				 if(Objects.nonNull(a)) {
+					 b = b.annotateType(a);
+				 }
+			 }
+			 
+			 b = b.defineConstructor(Visibility.PUBLIC)
 			  .withParameters(clz)
 			  .intercept(MethodCall
 			               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class))
@@ -730,8 +759,17 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				 b = b.annotateType(AnnotationDescription.Builder.ofType(AuditedObject.class).build());
 			 }
 			 
-			 b = b.annotateType(clz.getAnnotation(ObjectViews.class))
-			  .defineConstructor(Visibility.PUBLIC)
+			 Annotation a = clz.getAnnotation(ObjectViews.class);
+			 if(Objects.nonNull(a)) {
+				 b = b.annotateType(a);
+			 } else {
+				 a = clz.getAnnotation(ObjectViewDefinition.class);
+				 if(Objects.nonNull(a)) {
+					 b = b.annotateType(a);
+				 }
+			 }
+			 
+			 b = b.defineConstructor(Visibility.PUBLIC)
 			  .withParameters(clz, clz)
 			  .intercept(MethodCall
 			               .invoke(ObjectUpdateEvent.class.getDeclaredConstructor(String.class, String.class))

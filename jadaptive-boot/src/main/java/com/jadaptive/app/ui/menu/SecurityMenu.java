@@ -9,7 +9,7 @@ import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
 @Extension
-public class AdministrationMenu implements ApplicationMenu {
+public class SecurityMenu implements ApplicationMenu {
 
 	@Override
 	public String getUuid() {
@@ -18,7 +18,7 @@ public class AdministrationMenu implements ApplicationMenu {
 	
 	@Override
 	public String getI18n() {
-		return "administration.name";
+		return "security.name";
 	}
 
 	@Override
