@@ -9,8 +9,7 @@ import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
@@ -27,6 +26,9 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 	@Autowired
 	private PermissionService permissionService; 
 	
+	@Autowired
+	private TenantService tenantService; 
+	
 	public ChangePassword() {
 		super(PasswordForm.class);
 	}
@@ -38,10 +40,16 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 
 	public boolean doForm(Document document, AuthenticationState state, PasswordForm form) throws AccessDeniedException {
 
-		Session session = sessionUtils.getActiveSession(Request.get());
-		User user = session.getUser();
-		userService.changePassword(user, form.getPassword().toCharArray(), false);
-		return true;
+		return tenantService.execute(()->{
+			permissionService.setupUserContext(state.getUser());
+			try {
+				User user = state.getUser();
+				userService.changePassword(user, form.getPassword().toCharArray(), false);
+				return true;
+			} finally {
+				permissionService.clearUserContext();
+			}
+		});
 	}
 
 	public interface PasswordForm {
