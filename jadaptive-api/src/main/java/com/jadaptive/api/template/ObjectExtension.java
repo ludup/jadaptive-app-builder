@@ -17,4 +17,6 @@ public @interface ObjectExtension {
 		
 		Class<?> extendingInterface() default NoOp.class;
 		
+		String feature() default "";
+		
 }
