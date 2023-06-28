@@ -7,22 +7,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.config.ConfigurationPageItem;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.Html;
-import com.jadaptive.api.ui.PageDependencies;
-import com.jadaptive.api.ui.PageProcessors;
 
 public abstract class ConfigurationPage extends AuthenticatedPage {
 
