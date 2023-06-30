@@ -58,6 +58,10 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException {
 		
+		Element body = document.selectFirst("body");
+		if(Objects.nonNull(body)) {
+			body.attr("data-resourcekey", template.getResourceKey());
+		}
 		Element element = document.selectFirst("#searchBreadcrumb");
 		if(Objects.nonNull(element)) {
 			element.attr("href", String.format("/app/ui/search/%s", template.getCollectionKey()))
