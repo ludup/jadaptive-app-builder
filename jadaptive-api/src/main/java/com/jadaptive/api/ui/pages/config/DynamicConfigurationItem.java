@@ -39,6 +39,11 @@ public class DynamicConfigurationItem implements ConfigurationPageItem {
 	public String getIcon() {
 		return i.icon();
 	}
+	
+	@Override
+	public String getIconGroup() {
+		return i.iconGroup();
+	}
 
 	@Override
 	public Integer weight() {

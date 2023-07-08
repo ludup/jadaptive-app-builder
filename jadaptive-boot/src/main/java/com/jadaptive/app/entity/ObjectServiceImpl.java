@@ -1,5 +1,6 @@
 package com.jadaptive.app.entity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectServiceBean;
@@ -191,6 +193,20 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			for(AbstractObject obj : list(template.getResourceKey())) {
 				saveOrUpdate(obj);
 			}
+		}
+	}
+	
+	@Override
+	public <T extends UUIDDocument> void stashObject(T uuidObject) throws ValidationException, RepositoryException, ObjectException, IOException {
+		Request.get().getSession().setAttribute(uuidObject.getResourceKey(), uuidObject);
+	}
+	
+	@Override
+	public <T extends UUIDDocument> T fromStash(String resourceKey, Class<T> uuidObject)  {
+		try {
+			return (T) Request.get().getSession().getAttribute(resourceKey);
+		} finally {
+			 Request.get().getSession().removeAttribute(resourceKey);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.jadaptive.api.entity;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import com.jadaptive.api.repository.RepositoryException;
@@ -37,6 +38,10 @@ public interface ObjectService {
 	void rebuildReferences(ObjectTemplate template);
 
 	AbstractObject convert(UUIDDocument obj);
+
+	<T extends UUIDDocument> void stashObject(T uuidObject) throws ValidationException, RepositoryException, ObjectException, IOException;
+
+	<T extends UUIDDocument> T fromStash(String resourceKey, Class<T> clz);
 
 	
 }

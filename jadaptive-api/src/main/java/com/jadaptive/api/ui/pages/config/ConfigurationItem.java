@@ -18,6 +18,8 @@ public @interface ConfigurationItem {
 	
 	String icon();
 	
+	String iconGroup() default "fa-solid";
+	
 	String path() default "";
 	
 	boolean system() default false;
