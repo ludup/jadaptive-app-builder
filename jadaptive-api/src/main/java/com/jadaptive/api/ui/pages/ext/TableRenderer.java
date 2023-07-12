@@ -489,21 +489,21 @@ public class TableRenderer {
 		switch(renderer) {
 		case BOOTSTRAP_BADGE:
 		{
-			return BootstrapBadgeRender.generateBadge(StringUtils.defaultString(obj.getValue(field).toString()));
+			return BootstrapBadgeRender.generateBadge(Utils.checkNullToString(obj.getValue(field)));
 		}
 		case I18N:
 		{
-			return Html.i18n(template.getBundle(), StringUtils.defaultString(obj.getValue(field).toString()));
+			return Html.i18n(template.getBundle(), Utils.checkNullToString(obj.getValue(field)));
 		}
 		case COUNTRY:
 		{
 			return Html.span(ApplicationServiceImpl.getInstance()
 					.getBean(InternationalService.class)
-					.getCountryName(StringUtils.defaultString(obj.getValue(field).toString())));
+					.getCountryName(Utils.checkNullToString(obj.getValue(field))));
 		}
 		default:
 		{
-			return Html.span(StringUtils.defaultString(obj.getValue(field).toString()), "UTF-8");
+			return Html.span(Utils.checkNullToString(obj.getValue(field)), "UTF-8");
 		}
 		}
 	}

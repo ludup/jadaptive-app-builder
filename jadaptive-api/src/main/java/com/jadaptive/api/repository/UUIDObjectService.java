@@ -25,5 +25,6 @@ public interface UUIDObjectService<T extends UUIDDocument> {
 	
 	long countTable(SearchField... fields);
 
-	default UUIDDocument createNew(ObjectTemplate template) { return null; };
+	default UUIDDocument createNew(ObjectTemplate template) { return null; }
+
 }

@@ -891,7 +891,7 @@ public class DocumentHelper {
 		
 		try {
 			SHA256Digest sha2 = new SHA256Digest();
-			generateObjectHash(entity, sha2);
+			generateObjectHash(template, entity, sha2);
 			byte[] tmp = new byte[16];
 			new Random().nextBytes(tmp);
 			sha2.update(tmp, 0, tmp.length);
@@ -902,11 +902,9 @@ public class DocumentHelper {
 		}
 	}
 
-	public static void generateObjectHash(Document entity, SHA256Digest sha2) throws UnsupportedEncodingException {
+	public static void generateObjectHash(ObjectTemplate template, Document entity, SHA256Digest sha2) throws UnsupportedEncodingException {
 
-//		for(Map.Entry<String, Object> entry : entity.entrySet()) {
-//			
-//		}
+
 	}
 
 }

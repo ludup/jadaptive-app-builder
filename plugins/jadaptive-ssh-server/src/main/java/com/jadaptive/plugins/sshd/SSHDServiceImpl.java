@@ -296,19 +296,11 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			}
 			
 			if(Objects.isNull(home)) {
-//				if(sshdConfig.getHomeDirectoryMaxSpace() > 0) {
-//					home = new VirtualMountTemplate("/",
-//							"home/" + user.getUsername(), 
-//							new SpaceRestrictedFileFactoryAdapter(new VFSFileFactory(),
-//									sshdConfig.getHomeDirectoryMaxSpace()), 
-//							true);
-//				} else {
 				    String uri = "home/" + user.getUsername();
 					home = new VirtualMountTemplate("/",
 							uri, 
 							new VFSFileFactory(uri), 
 							true);
-//				}
 			}
 
 			return new VirtualFileFactory(home, 

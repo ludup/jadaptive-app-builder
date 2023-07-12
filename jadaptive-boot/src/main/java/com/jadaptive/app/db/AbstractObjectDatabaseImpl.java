@@ -176,7 +176,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		
 //		String contentHash = DocumentHelper.generateContentHash(templateRepository.get(obj.getResourceKey()), document);
 //		document.put("contentHash", contentHash);
-//		
+		
 //		if(Objects.nonNull(previous) && previous.getString("contentHash").equals(contentHash)) {
 //			if(log.isDebugEnabled()) {
 //				log.debug("Object {} with uuid {} has not been updated because it's new content hash is the same as the previous");
@@ -187,12 +187,13 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
 			obj.setUuid(document.getString("_id"));
 		
-			if(Boolean.getBoolean("jadaptive.cache")) {
-				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
-				cachedObjects.put(obj.getUuid(), obj);
-			}
-		
 			if(!isEvent && !(obj instanceof ObjectTemplate)) {
+			
+				if(Boolean.getBoolean("jadaptive.cache")) {
+					Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+					cachedObjects.put(obj.getUuid(), obj);
+				}
+				
 				if(Objects.isNull(previous)) {
 					onObjectCreated(obj);
 				} else {
