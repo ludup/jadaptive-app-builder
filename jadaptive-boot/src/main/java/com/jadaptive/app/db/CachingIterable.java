@@ -27,8 +27,8 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 				Map<String,T> cachedObjects,
 				Map<String,UUIDList> cachedUUIDs,
 				String cacheName) {
-			if(log.isDebugEnabled()) {
-				log.debug("Started cached iteration for {} ", clz.getSimpleName());
+			if(log.isInfoEnabled()) {
+				log.info("CACHE: Started cached iteration for {} ", clz.getSimpleName());
 			}
 			this.clz = clz;
 			this.iterator = iterator;
@@ -62,12 +62,19 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 				String uuid = doc.getString("_id");
 				T obj = cachedObjects.get(uuid);
 				if(Objects.nonNull(obj)) {
+					if(log.isInfoEnabled()) {
+						log.info("CACHE: Returning iterated object {} from cache for uuid {}", obj.getClass().getSimpleName(), uuid);
+					}
 					if(processedUUIDs.size() < maximumCachedUUIDs) {
 						processedUUIDs.add(obj.getUuid());
 					}
 					return obj;
 				}
 				obj = DocumentHelper.convertDocumentToObject(clz, doc);
+				
+				if(log.isInfoEnabled()) {
+					log.info("CACHE: Caching object {} uuid {}", obj.getClass().getSimpleName(), uuid);
+				}
 				cachedObjects.put(obj.getUuid(), obj);
 				if(processedUUIDs.size() < maximumCachedUUIDs) {
 					processedUUIDs.add(obj.getUuid());
@@ -82,6 +89,9 @@ public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
 					 * cache the operation?
 					 */
 					if(processedUUIDs.size() <= maximumCachedUUIDs) {
+						if(log.isInfoEnabled()) {
+							log.info("CACHE: Caching iterators list of UUIDs");
+						}
 						cachedUUIDs.put(cacheName, processedUUIDs);
 					}
 				}

@@ -191,7 +191,17 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 				if(Boolean.getBoolean("jadaptive.cache")) {
 					Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+					if(log.isInfoEnabled()) {
+						log.info("CACHE: Saving database value and caching {}", obj.getClass().getSimpleName());
+					}
 					cachedObjects.put(obj.getUuid(), obj);
+					if(Objects.isNull(previous)) {
+						if(log.isInfoEnabled()) {
+							log.info("CACHE: New object added to {} collection so clearing iterator cache", obj.getClass().getSimpleName());
+						}
+						Map<String,UUIDList> cachedUUIDs = getIteratorCache(obj.getClass());
+						cachedUUIDs.clear();
+					}
 				}
 				
 				if(Objects.isNull(previous)) {
@@ -214,6 +224,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
+					if(log.isInfoEnabled()) {
+						log.info("CACHE: Returning cached {} for uuid {}", clz.getSimpleName(), uuid);
+					}
 					return result;
 				}
 				Document document = db.getByUUID(uuid, getCollectionName(clz), database);
@@ -222,6 +235,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 							getCollectionName(clz), uuid));
 				}
 				result = DocumentHelper.convertDocumentToObject(clz, document);
+				if(log.isInfoEnabled()) {
+					log.info("CACHE: Caching {} for uuid {}", clz.getSimpleName(), result.getUuid());
+				}
 				cachedObjects.put(result.getUuid(), result);
 				return result;
 			} else {
@@ -242,6 +258,18 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		try {
 
 			if(Boolean.getBoolean("jadaptive.cache")) {
+				Map<String,T> cachedObjects = getCache(clz);
+				String searchKey = createSearchKey(fields);
+				if(log.isInfoEnabled()) {
+					log.info("CACHE: Looking for {} with search key {}", clz.getSimpleName(), searchKey);
+				}
+				T result = cachedObjects.get(searchKey);
+				if(Objects.nonNull(result)) {
+					if(log.isInfoEnabled()) {
+						log.info("CACHE: Returning value from {} cache", clz.getSimpleName());
+					}
+					return result;
+				}
 				Document document = db.get(getCollectionName(clz), database, fields);
 				if(Objects.isNull(document)) {
 					throw new ObjectNotFoundException(String.format("Object from %s not found for fields %s", 
@@ -249,9 +277,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 							getSearchFieldsText(fields, "AND")));
 				}
 				
-				T result = DocumentHelper.convertDocumentToObject(clz, document);
-				Map<String,T> cachedObjects = getCache(clz);
-				cachedObjects.put(result.getUuid(), result);
+				result = DocumentHelper.convertDocumentToObject(clz, document);
+				if(log.isInfoEnabled()) {
+					log.info("CACHE: Returning database value and caching {}", clz.getSimpleName());
+				}
+				cachedObjects.put(searchKey, result);
 				return result;
 			} else {
 				Document document = db.get(getCollectionName(clz), database, fields);
@@ -270,6 +300,21 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 
+	private String createSearchKey(SearchField[] fields) {
+		StringBuilder builder = new StringBuilder();
+		for(SearchField field : fields) {
+			if(builder.length() > 0) {
+				builder.append(field.getSearchType().name());
+			}
+			builder.append(field.getColumn());
+			builder.append("=");
+			if(Objects.nonNull(field.getValue())) {
+				builder.append(Utils.csv(field.getValue()));
+			}
+		}
+		return builder.toString();
+	}
+
 	protected <T extends UUIDEntity> T max(String database, Class<T> clz, String field) throws RepositoryException, ObjectException {
 		try {
 			
@@ -285,10 +330,16 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
+					if(log.isInfoEnabled()) {
+						log.info("CACHE: Returning value from {} cache", clz.getSimpleName());
+					}
 					return result;
 				}
 				
 				result = DocumentHelper.convertDocumentToObject(clz, document);
+				if(log.isInfoEnabled()) {
+					log.info("CACHE: Returning database value and caching {} with uuid", clz.getSimpleName(), result.getUuid());
+				}
 				cachedObjects.put(result.getUuid(), result);
 				return result;
 			} else {
@@ -317,10 +368,16 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
+					if(log.isInfoEnabled()) {
+						log.info("CACHE: Returning value from {} cache", clz.getSimpleName());
+					}
 					return result;
 				}
 				
 				result = DocumentHelper.convertDocumentToObject(clz, document);
+				if(log.isInfoEnabled()) {
+					log.info("CACHE: Returning database value and caching {} with uuid {}", clz.getSimpleName(), result.getUuid());
+				}
 				cachedObjects.put(result.getUuid(), result);
 				return result;
 			} else {
@@ -441,6 +498,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			if(Boolean.getBoolean("jadaptive.cache")) {
 				@SuppressWarnings("unchecked")
 				Map<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
+				if(log.isInfoEnabled()) {
+					log.info("CACHE: Deleting cached {} with uuid", obj.getClass().getSimpleName(), obj.getUuid());
+				}
 				cachedObjects.remove(obj.getUuid());
 			}
 			onObjectDeleted(obj);
