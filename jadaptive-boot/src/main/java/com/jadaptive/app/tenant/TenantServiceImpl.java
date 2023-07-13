@@ -43,6 +43,7 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.utils.Utils;
 
 @Service
 public class TenantServiceImpl implements TenantService, JsonTemplateEnabledService<Tenant>, UUIDObjectService<Tenant> {
@@ -392,9 +393,10 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 
 	@Override
 	public Tenant getTenantByDomain(String name) {
-		Tenant tenant = tenantsByDomain.get(name);
+		String domain = Utils.before(name, ":");
+		Tenant tenant = tenantsByDomain.get(domain);
 		if(Objects.isNull(tenant)) {
-			throw new ObjectNotFoundException(String.format("Tenant %s not found", name));
+			throw new ObjectNotFoundException(String.format("Tenant %s not found", domain));
 		}
 		return tenant;
 	}
