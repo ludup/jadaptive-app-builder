@@ -85,11 +85,11 @@ public class Application {
 		 
 		 try {
 			checkDefaultCertificate();
-		} catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException
+		 } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException
 				| MismatchedCertificateException e) {
 			log.error("Failed to setup default SSL certificate", e);
 			return;
-		}
+		 }
 		 
 		 app = new SpringApplication(Application.class);
 		 app.setBanner(new Banner() {

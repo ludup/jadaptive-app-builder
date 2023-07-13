@@ -301,6 +301,13 @@ public class Utils {
 		return str;
 	}
 	
+	public static String checkNullToString(Object obj) {
+		if(obj==null) {
+			return "";
+		}
+		return obj.toString();
+	}
+	
 	public static String checkNull(String str, String def) {
 		if(str==null) {
 			return def;

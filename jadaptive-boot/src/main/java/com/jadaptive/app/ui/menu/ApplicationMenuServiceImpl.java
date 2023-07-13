@@ -14,15 +14,18 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuExtender;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 import com.jadaptive.api.ui.menu.PageMenu;
 
 @Service
-public class ApplicationMenuServiceImpl implements ApplicationMenuService { 
+public class ApplicationMenuServiceImpl extends AuthenticatedService implements ApplicationMenuService { 
 	
+	public static final String MENU_CACHE = "menuCache";
 	@Autowired
 	private ApplicationService applicationService; 
 
@@ -32,6 +35,12 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
 	private List<ApplicationMenu> annotatedMenus = null;
 	
 	public Collection<ApplicationMenu> getMenus() {
+		
+		@SuppressWarnings("unchecked")
+		Collection<ApplicationMenu> tmp = (Collection<ApplicationMenu>) Request.get().getSession().getAttribute(MENU_CACHE);
+		if(Objects.nonNull(tmp)) {
+			return tmp;
+		}
 		
 		List<ApplicationMenu> results = new ArrayList<>();
 		List<ApplicationMenu> menus = new ArrayList<>();
@@ -90,7 +99,9 @@ public class ApplicationMenuServiceImpl implements ApplicationMenuService {
 				results.add(menu);
 			}
 		}
-		return Collections.unmodifiableCollection(results);
+		
+		Request.get().getSession().setAttribute(MENU_CACHE, tmp = Collections.unmodifiableCollection(results));
+		return tmp;
 	}
 	
 	class DynamicMenu implements ApplicationMenu {

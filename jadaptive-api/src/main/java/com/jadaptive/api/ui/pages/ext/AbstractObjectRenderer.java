@@ -763,6 +763,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		if(Objects.nonNull(parents)) {
 			for(FieldTemplate parentField : parents) {
 				obj = obj.getChild(parentField);
+				if(Objects.isNull(obj)) {
+					return getDefaultValue(field);
+				}
 			}
 		}
 		if(Objects.isNull(obj)) {

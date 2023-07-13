@@ -600,6 +600,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return ReflectionUtils.hasAnnotation(clz, GenerateEventTemplates.class);
 	}
 	
+	@SuppressWarnings("unused")
 	private String getResourceKey(Class<? extends UUIDDocument> clz) {
 		try {
 			return clz.getConstructor().newInstance().getResourceKey();
