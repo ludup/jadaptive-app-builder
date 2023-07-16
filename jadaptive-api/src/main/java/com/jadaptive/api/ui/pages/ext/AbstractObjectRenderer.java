@@ -800,6 +800,15 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			default:
 				break;
 			}
+			break;
+		case OBJECT_REFERENCE:
+		{
+			AbstractObject ref = obj.getChild(field.getField());
+			if(Objects.nonNull(ref)) {
+				return ref.getUuid();
+			}
+			return "";
+		}
 		default:
 			break;
 		}

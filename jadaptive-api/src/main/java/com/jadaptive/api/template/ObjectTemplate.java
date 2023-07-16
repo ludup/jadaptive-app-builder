@@ -18,6 +18,7 @@ import com.jadaptive.api.repository.NamedDocument;
 
 @ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, system = true)
 @UniqueIndex(columns = {"resourceKey"})
+@ObjectCache
 public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = -8159475909799827150L;

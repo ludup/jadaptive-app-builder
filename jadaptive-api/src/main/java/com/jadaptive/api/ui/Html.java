@@ -151,4 +151,8 @@ public class Html {
 		return new Element("p").html(text);
 	}
 
+	public static Element button(String... classes) {
+		return new Element("button").addClass(Utils.csv(" ", classes));
+	}
+
 }

@@ -33,6 +33,7 @@ import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDEvent;
+import com.jadaptive.api.template.ObjectCache;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
@@ -68,8 +69,13 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		this.db = db;
 	}
 	
+	protected boolean isCaching(Class<?> clz) {
+		return clz.getAnnotation(ObjectCache.class) != null;
+	}
+	
 	protected String getCollectionName(Class<?> clz) {
 		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
+		
 		while(template==null || template.type() == ObjectType.OBJECT) {
 			clz = clz.getSuperclass();
 			template = clz.getAnnotation(ObjectDefinition.class);
@@ -189,7 +195,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		
 			if(!isEvent && !(obj instanceof ObjectTemplate)) {
 			
-				if(Boolean.getBoolean("jadaptive.cache")) {
+				if(isCaching(obj.getClass())) {
 					Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
 					if(log.isInfoEnabled()) {
 						log.info("CACHE: Saving database value and caching {}", obj.getClass().getSimpleName());
@@ -220,7 +226,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends UUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, ObjectException {
 		try {
 			
-			if(Objects.nonNull(uuid) && Boolean.getBoolean("jadaptive.cache")) {
+			if(Objects.nonNull(uuid) && isCaching(clz)) {
 				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
 				if(Objects.nonNull(result)) {
@@ -257,7 +263,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends UUIDEntity> T getObject(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
-			if(Boolean.getBoolean("jadaptive.cache")) {
+			if(isCaching(clz)) {
 				Map<String,T> cachedObjects = getCache(clz);
 				String searchKey = createSearchKey(fields);
 				if(log.isInfoEnabled()) {
@@ -302,14 +308,60 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 	private String createSearchKey(SearchField[] fields) {
 		StringBuilder builder = new StringBuilder();
+		iterateFields(fields, builder, SearchField.Type.AND);
+		return builder.toString().trim();
+		
+	}
+	
+	private String iterateFields(SearchField[] fields, StringBuilder builder, SearchField.Type type) {
+		
+		int c = 0;
 		for(SearchField field : fields) {
-			if(builder.length() > 0) {
-				builder.append(field.getSearchType().name());
+			
+			if(c++ > 0) {
+				builder.append(" ");
+				builder.append(type.name());
 			}
-			builder.append(field.getColumn());
-			builder.append("=");
-			if(Objects.nonNull(field.getValue())) {
-				builder.append(Utils.csv(field.getValue()));
+			
+			switch(field.getSearchType()) {
+			case OR:
+			case AND:
+				if(builder.length() > 0) {
+					builder.append(" ");
+					builder.append(field.getSearchType().name());
+					builder.append(" ( ");
+					iterateFields(field.getFields(), builder, field.getSearchType());
+					builder.append(" )");
+				} else {
+					iterateFields(field.getFields(), builder, field.getSearchType());
+				}
+				break;
+			default:
+				builder.append(" ");
+				builder.append(field.getColumn());
+				builder.append(" ");
+				builder.append(field.getSearchType().name());
+				if(Objects.nonNull(field.getValue())) {
+					boolean brackets = field.getSearchType() == SearchField.Type.IN || field.getSearchType() == SearchField.Type.ALL;
+					if(brackets) {
+						builder.append(" (");
+					}
+					Object[] values = field.getValue();
+					if(values.length > 1) {
+						
+						builder.append(" ( ");
+						builder.append(Utils.csv(field.getValue()));
+						builder.append(" }");
+					} else {
+						builder.append(" ");
+						builder.append(values[0].toString());
+						builder.append(" ");
+					
+				    }
+					if(brackets) {
+						builder.append(" )");
+					}
+			}
 			}
 		}
 		return builder.toString();
@@ -325,7 +377,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 						field));
 			}
 			
-			if(Boolean.getBoolean("jadaptive.cache")) {
+			if(isCaching(clz)) {
 				String uuid = document.getString("_id");
 				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
@@ -363,7 +415,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 						field));
 			}
 			
-			if(Boolean.getBoolean("jadaptive.cache")) {
+			if(isCaching(clz)) {
 				String uuid = document.getString("_id");
 				Map<String,T> cachedObjects = getCache(clz);
 				T result = cachedObjects.get(uuid);
@@ -495,7 +547,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			db.deleteByUUID(obj.getUuid(), getCollectionName(obj.getClass()), database);
 			
-			if(Boolean.getBoolean("jadaptive.cache")) {
+			if(isCaching(obj.getClass())) {
 				@SuppressWarnings("unchecked")
 				Map<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
 				if(log.isInfoEnabled()) {
@@ -665,7 +717,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		
 		try {
 			
-			if(Boolean.getBoolean("jadaptive.cache")) {
+			if(isCaching(clz)) {
 				Map<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
 				Map<String,T> cachedObjects = getCache(clz);
 				
@@ -695,7 +747,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		
 		try {
-			if(Boolean.getBoolean("jadaptive.cache")) {
+			if(isCaching(clz)) {
 				String cacheName = getSearchFieldsText(fields, "AND");
 				Map<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
 				Map<String,T> cachedObjects = getCache(clz);

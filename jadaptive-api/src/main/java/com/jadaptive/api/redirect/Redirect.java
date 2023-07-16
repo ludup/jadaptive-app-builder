@@ -8,10 +8,12 @@ import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.ObjectCache;
 import com.jadaptive.api.template.ObjectDefinition;
 
 @ObjectDefinition(resourceKey =  Redirect.RESOURCE_KEY, bundle = Redirect.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 @TableView(defaultColumns = { "hostname", "path", "location" })
+@ObjectCache
 public class Redirect extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 3127030622719884860L;

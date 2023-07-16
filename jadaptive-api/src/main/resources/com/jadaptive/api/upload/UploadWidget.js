@@ -6,19 +6,21 @@ Object.defineProperty(Number.prototype,'fileSize',{value:function(a,b,c,d){
 	
 function appendFile(fileInput) {
 	
-	for(var i=0;i<fileInput[0].files.length;i++) {
-		debugger;
-		var row = fileInput.parents('.jfiles').find('tr').last();
-		row.parent().append(row.clone());
-		row.attr('data-filename', fileInput[0].files[i].name);
-		row.addClass('file-index');
-		row.find(".filename").text(fileInput[0].files[i].name);
-		row.find(".size").text((fileInput[0].files[i].size).fileSize(1));
-		row.show();
+	if($('.uploading').length == 0) {
+		for(var i=0;i<fileInput[0].files.length;i++) {
+			debugger;
+			var row = fileInput.parents('.jfiles').find('tr').last();
+			row.parent().append(row.clone());
+			row.attr('data-filename', fileInput[0].files[i].name);
+			row.addClass('file-index');
+			row.find(".filename").text(fileInput[0].files[i].name);
+			row.find(".size").text((fileInput[0].files[i].size).fileSize(1));
+			row.show();
+		}
+	
+		fileInput.parent().append('<input class="file-input file-index d-none" type="file" name="file" multiple/>');
+		$('.jfiles').removeClass('d-none');
 	}
-
-	fileInput.parent().append('<input class="file-input file-index d-none" type="file" name="file" multiple/>');
-	$('.jfiles').removeClass('d-none');
 }
 $(function() {
 	
@@ -130,6 +132,8 @@ var UploadWidget = {
 			
 			JadaptiveUtils.startAwesomeSpin($('#uploadButton i'), 'fa-upload');
 
+			$('#uploadProgress').addClass('uploading');
+
 			var fd = new FormData();
 			if(_self._options.callback) {
 				_self._options.callback(fd);
@@ -185,6 +189,7 @@ var UploadWidget = {
 		        	    JadaptiveUtils.stopAwesomeSpin($('#uploadButton i'), 'fa-upload');
 					    $('#uploadButton').attr('disabled', false);
 						$('#uploadProgress').addClass('d-none');
+						$('#uploadProgress').removeClass('uploading');
 						$('.file-index').remove();
 						$('#files').append('<input class="file-input d-none" type="file" name="file" multiple/>');
 						$('#helpText').show(); 
