@@ -127,7 +127,6 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 		Page page = pageCache.resolvePage(resourceUri);
 		page.doGet(resourceUri, request, response);
-
 	}
 	
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.POST)
@@ -138,7 +137,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 		Page page = pageCache.resolvePage(resourceUri);
 		page.doPost(resourceUri, request, response);
-		
+
 	}
 	
 	@RequestMapping(value="/app/css/{name}", method = RequestMethod.GET)

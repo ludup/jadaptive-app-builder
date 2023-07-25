@@ -263,10 +263,10 @@ public class SessionFilter implements Filter {
 				
 			String location = cachedRedirects.get(request.getRequestURL().toString());
 			
-			if(Objects.nonNull(location)) {
+			if(StringUtils.isNotBlank(location)) {
 				response.sendRedirect(location);
 				return true;
-			} else {
+			} else if(Objects.isNull(location)) {
 				
 				if(log.isDebugEnabled()) {
 					log.debug("Checking redirect {}", request.getRequestURL().toString());
@@ -307,6 +307,8 @@ public class SessionFilter implements Filter {
 						return true;
 					}
 				}
+				
+				cachedRedirects.put(request.getRequestURL().toString(), "");
 			}
 			
 		} catch(ObjectNotFoundException e) {
