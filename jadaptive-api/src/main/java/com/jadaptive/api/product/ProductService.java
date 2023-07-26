@@ -16,4 +16,6 @@ public interface ProductService {
 
 	String getProductCode();
 
+	String getVendor();
+
 }

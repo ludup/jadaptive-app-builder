@@ -84,4 +84,14 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
+	@Override
+	public String getVendor() {
+		try {
+			Product product = appService.getBean(Product.class);
+			return product.getVendor();
+		} catch (NoSuchBeanDefinitionException e1) {
+			return defaultProduct.getVendor();
+		}
+	}
+
 }

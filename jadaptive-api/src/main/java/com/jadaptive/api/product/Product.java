@@ -29,4 +29,9 @@ public interface Product extends ExtensionPoint {
 	default String getProductCode() {
 		return "JADAPTIVE";
 	}
+	
+	default String getVendor() {
+		return "JADAPTIVE Limited";
+	}
+	
 }
