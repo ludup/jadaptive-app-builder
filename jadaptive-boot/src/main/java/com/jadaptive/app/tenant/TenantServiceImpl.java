@@ -41,6 +41,7 @@ import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.Utils;
@@ -74,10 +75,14 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Autowired
 	private SingletonObjectDatabase<SystemConfiguration> systemConfig;
 
-	
+	@Autowired
+	private SingletonObjectDatabase<TenantConfiguration> tenantConfig;
+
 	Tenant systemTenant;
 	
 	Map<String,Tenant> tenantsByDomain = new HashMap<>();
+	Map<String,Tenant> tenantsByName = new HashMap<>();
+	Map<String,Tenant> tenantsByCode = new HashMap<>();
 	Map<String,Tenant> tenantsByUUID = new HashMap<>();
 	
 	boolean setupMode = false;
@@ -174,12 +179,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		setCurrentTenant(tenant);
 		
-		tenantsByDomain.put(tenant.getDomain(), tenant);
-		tenantsByUUID.put(tenant.getUuid(), tenant);
-		
-		for(String domain : tenant.getAlternativeDomains()) {
-			tenantsByDomain.put(domain, tenant);
-		}
+		setupCache(tenant);
 		
 		try {
 			
@@ -230,6 +230,17 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 	}
 	
+	private void setupCache(Tenant tenant) {
+		tenantsByDomain.put(tenant.getDomain(), tenant);
+		tenantsByName.put(tenant.getName(), tenant);
+		tenantsByCode.put(tenant.getCode(), tenant);
+		tenantsByUUID.put(tenant.getUuid(), tenant);
+		
+		for(String domain : tenant.getAlternativeDomains()) {
+			tenantsByDomain.put(domain, tenant);
+		}
+	}
+
 	public Tenant getSystemTenant() throws RepositoryException, ObjectException {
 		return systemTenant;
 	}
@@ -262,6 +273,9 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			throw new ObjectException(String.format("%s is already used by another tenant", primaryDomain));
 		}
 		
+		if(tenantsByName.containsKey(name)) {
+			throw new ObjectException(String.format("%s is already used by another tenant", name));
+		}
 		for(String domain : additionalDomains) {
 			if(tenantsByDomain.containsKey(domain)) {
 				throw new ObjectException(String.format("%s is already used by another tenant", primaryDomain));
@@ -270,13 +284,15 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		Tenant tenant = new Tenant(uuid, name, primaryDomain);
 		tenant.setSystem(system);
+		tenant.setCode(generateUniqueCode(tenant));
 		tenant.getAlternativeDomains().addAll(Arrays.asList(additionalDomains));
 		tenant.setOwnerEmail(ownerEmail);
 		tenant.setOwnerName(ownerName);
 		
 		try {
 			repository.saveTenant(tenant);
-			return tenant;
+			setupCache(tenant);
+			return getObjectByUUID(tenant.getUuid());
 		} catch (RepositoryException | ObjectException e) {
 			throw e;
 		}
@@ -351,15 +367,19 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		}
 		
 		repository.deleteTenant(tenant);
-		
+		resetCache(tenant);
+
+	}
+	
+	private void resetCache(Tenant tenant) {
 		tenantsByDomain.remove(tenant.getDomain());
+		tenantsByName.remove(tenant.getName());
+		tenantsByCode.remove(tenant.getCode());
 		tenantsByUUID.remove(tenant.getUuid());
 		
 		for(String domain : tenant.getAlternativeDomains()) {
 			tenantsByDomain.remove(domain);
 		}
-		
-
 	}
 	
 	@Override
@@ -422,9 +442,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Override
 	public Tenant resolveTenantName(String username) {
 		
+		String rootDomain = tenantConfig.getObject(TenantConfiguration.class).getRootDomain();
+		
 		if(username.contains("@")) {
 			String name = StringUtils.substringAfter(username, "@");
-			Tenant tenant = tenantsByDomain.get(name);
+			Tenant tenant = lookupTenantDomain(name, rootDomain);
 			if(tenant!=null) {
 				return tenant;
 			}
@@ -432,7 +454,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		if(username.contains("\\")) {
 			String name = StringUtils.substringBefore(username, "\\");
-			Tenant tenant = tenantsByDomain.get(name);
+			Tenant tenant = lookupTenantDomain(name, rootDomain);
 			if(tenant!=null) {
 				return tenant;
 			}
@@ -440,12 +462,26 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		if(username.contains("/")) {
 			String name = StringUtils.substringBefore(username, "/");
-			Tenant tenant = tenantsByDomain.get(name);
+			Tenant tenant = lookupTenantDomain(name, rootDomain);
 			if(tenant!=null) {
 				return tenant;
 			}
 		}
 		return getSystemTenant();
+	}
+
+	private Tenant lookupTenantDomain(String name, String rootDomain) {
+		Tenant t = tenantsByDomain.get(name);
+		if(Objects.isNull(t)) {
+			t = tenantsByDomain.get(String.format("%s.%s", name, rootDomain));
+		}
+		if(Objects.isNull(t)) {
+			t = tenantsByName.get(name);
+		}
+		if(Objects.isNull(t)) {
+			t = tenantsByCode.get(name);
+		}
+		return t;
 	}
 
 	@Override
@@ -465,10 +501,20 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Override
 	public String saveOrUpdate(Tenant tenant) {
 		
+		if(StringUtils.isBlank(tenant.getCode())) {
+			tenant.setCode(generateUniqueCode(tenant));
+		}
+		
 		if(StringUtils.isNotBlank(tenant.getUuid())) {
 			Tenant previous = repository.getTenant(tenant.getUuid());
 			if(!previous.getDomain().equals(tenant.getDomain())) {
 				tenantsByDomain.remove(previous.getDomain());
+			}
+			if(!previous.getName().equals(tenant.getName())) {
+				tenantsByName.remove(previous.getName());
+			}
+			if(!previous.getCode().equals(tenant.getCode())) {
+				tenantsByCode.remove(previous.getCode());
 			}
 			if(Objects.nonNull(previous.getAlternativeDomains())) {
 				for(String domain : previous.getAlternativeDomains()) {
@@ -489,12 +535,42 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		tenantsByUUID.put(tenant.getUuid(), tenant);
 		tenantsByDomain.put(tenant.getDomain(), tenant);
+		tenantsByName.put(tenant.getName(), tenant);
+		tenantsByCode.put(tenant.getCode(), tenant);
 		if(Objects.nonNull(tenant.getAlternativeDomains())) {
 			for(String domain : tenant.getAlternativeDomains()) {
 				tenantsByDomain.put(domain, tenant);
 			}
 		}
 		return tenant.getUuid();
+		
+	}
+
+	private String generateUniqueCode(Tenant tenant) {
+		
+		String code;
+		
+		char fillingCharacter = 'Z';
+		do {
+			code = Utils.generate3LetterCode(tenant.getName(), fillingCharacter--);
+			if(!tenantsByCode.containsKey(code)) {
+				return code;
+			}
+		} while(fillingCharacter >= 'A');
+		
+		fillingCharacter = '0';
+		do {
+			code = Utils.generate3LetterCode(tenant.getName(), fillingCharacter++);
+			if(!tenantsByCode.containsKey(code)) {
+				return code;
+			}
+		} while(fillingCharacter >= '9');
+		
+		while(tenantsByCode.containsKey(code)) {
+			code = Utils.generateRandomAlphaNumericString(3).toUpperCase();
+		}
+		
+		return code;
 		
 	}
 

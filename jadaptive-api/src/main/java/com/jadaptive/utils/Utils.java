@@ -35,6 +35,8 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriUtils;
@@ -557,5 +559,45 @@ public class Utils {
 			return Long.parseLong(value);
 		} catch(NumberFormatException e) { }
 		return defaultValue;
+	}
+	
+	public static String stripNonAlphanumeric(String str) {
+	   return str = str.replaceAll("[^a-zA-Z0-9]", "");
+	}
+
+	public static boolean isNotCompanyType(String element) {
+
+		element = stripNonAlphanumeric(element);
+		
+		switch(element.trim().toLowerCase()) {
+		case "ltd":
+		case "inc":
+		case "limited":
+		case "plc":
+		case "gmbh":
+		case "ag":
+		case "llc":
+		case "private":
+			return false;
+		default:
+			return true;
+		}
+	}
+	
+	public static String generate3LetterCode(String name, char fillingCharacter) {
+		
+		name = WordUtils.capitalizeFully(name);
+		String[] elements = name.split(" ");
+		StringBuffer buf = new StringBuffer();
+		for(int i=0;i<3;i++) {
+			if(i < elements.length && StringUtils.isNotBlank(elements[i])) {
+				if(Utils.isNotCompanyType(elements[i])) {
+					buf.append(elements[i].charAt(0));
+				}
+			} else {
+				buf.append(fillingCharacter);
+			}
+		}
+		return buf.toString();
 	}
 }

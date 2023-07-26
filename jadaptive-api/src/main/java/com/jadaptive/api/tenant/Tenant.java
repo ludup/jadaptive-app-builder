@@ -30,7 +30,7 @@ import com.jadaptive.utils.Utils;
 @GenerateEventTemplates(value = Tenant.RESOURCE_KEY)
 @ObjectViews({ 
 	@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)})
-@TableView(defaultColumns = { "name", "hostname" },
+@TableView(defaultColumns = { "name", "hostname", "code" },
 	actions = { @TableAction(bundle = Tenant.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}" )})
 public class Tenant extends NamedUUIDEntity implements NamedDocument {
 
@@ -42,6 +42,10 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 	
 	@ObjectField(type = FieldType.TEXT)
 	String hostname;
+	
+	@ObjectField(type = FieldType.TEXT, unique = true)
+	@Validator(type = ValidationType.LENGTH, value = "3")
+	String code;
 	
 	@ObjectField(type = FieldType.TEXT)
 	@Validator(type = ValidationType.REQUIRED)
@@ -68,6 +72,14 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 		this.setUuid(uuid);
 		this.name = name;
 		this.hostname = hostname;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public String getDomain() {
