@@ -1,6 +1,11 @@
 package com.jadaptive.api.spring;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginWrapper;
@@ -10,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import com.jadaptive.api.app.AutowiredExtension;
 
 public class AbstractSpringPlugin extends SpringPlugin {
 
@@ -39,10 +46,6 @@ public class AbstractSpringPlugin extends SpringPlugin {
 	@Override
     protected ApplicationContext createApplicationContext() {
 	
-		if(log.isInfoEnabled()) {
-			log.info("Creating application context for {}", wrapper.getPluginId());
-		}
-		
 		ApplicationContext parentContext = ((SpringPluginManager)wrapper.getPluginManager()).getApplicationContext();
 
 		List<ApplicationContext> parentContexts = new ArrayList<>();
@@ -68,22 +71,76 @@ public class AbstractSpringPlugin extends SpringPlugin {
 							wrapper.getPluginId(), 
 							dependWrapper.getPluginId());
 				}
-				parentContexts.add(parentContext = ((SpringPlugin)dependWrapper.getPlugin()).getApplicationContext());
-				break;
+				ApplicationContext ctx = ((SpringPlugin)dependWrapper.getPlugin()).getApplicationContext();
+				if(parentContexts.isEmpty()) {
+					parentContext = ctx;
+				}
+				parentContexts.add(ctx);
 			}
 		}
 		
+		if(log.isInfoEnabled()) {
+			log.info("Creating application context for {}", wrapper.getPluginId());
+		}
+		
+		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext pluginContext = new AnnotationConfigApplicationContext();
+		
 		pluginContext.setParent(parentContext);
 		pluginContext.setClassLoader(wrapper.getPluginClassLoader());
 		pluginContext.scan(getBasePackages());
 		pluginContext.refresh();
       
+		for(String name : pluginContext.getBeanDefinitionNames()) {
+			Object bean = pluginContext.getBean(name);
+			for(Field field : findFields(bean.getClass(), AutowiredExtension.class)) {
+				try {
+					field.setAccessible(true);
+					field.set(bean, findExtension(field.getType(), parentContexts));
+					if(log.isInfoEnabled()) {
+						log.info("Autowired {} Extension on {}", field.getType().getSimpleName(), name);
+					}
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new IllegalStateException(e.getMessage(), e);
+				}
+			}
+		}
+		
         return pluginContext;
+	}
+
+	private Object findExtension(Class<?> type, List<ApplicationContext> parentContexts) {
+		
+		for(ApplicationContext ctx : parentContexts) {
+			try {
+				return ctx.getBean(type);
+			} catch(Throwable e) {
+			}
+		}
+		
+		throw new IllegalStateException("Cannot find a instance of " + type.getSimpleName() + " within the extensions parent application contexts");
 	}
 
 	protected String[] getBasePackages() {
 		return new String[] { getClass().getPackage().getName() };
+	}
+	
+	
+	/**
+	 * https://stackoverflow.com/questions/16585451/get-list-of-fields-with-annotation-by-using-reflection
+	 */
+	public static Set<Field> findFields(Class<?> classs, Class<? extends Annotation> ann) {
+	    Set<Field> set = new HashSet<>();
+	    Class<?> c = classs;
+	    while (c != null) {
+	        for (Field field : c.getDeclaredFields()) {
+	            if (field.isAnnotationPresent(ann)) {
+	                set.add(field);
+	            }
+	        }
+	        c = c.getSuperclass();
+	    }
+	    return set;
 	}
 
 }

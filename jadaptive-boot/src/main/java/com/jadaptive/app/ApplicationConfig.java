@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +37,9 @@ import org.pf4j.util.NameFileFilter;
 import org.pf4j.util.OrFileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
@@ -46,6 +51,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.jadaptive.api.app.ApplicationProperties;
+import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.app.AutowiredExtension;
 import com.jadaptive.app.json.upload.UploadServlet;
 import com.jadaptive.app.scheduler.LockableTaskScheduler;
 import com.jadaptive.utils.FileUtils;
@@ -113,7 +120,7 @@ public class ApplicationConfig {
 		}
 		
 		pluginManager = new SpringPluginManager(pluginRoot) {
-
+			
 			@Override
 			protected ExtensionFinder createExtensionFinder() {
 				return new ScanningExtensionFinder(this);
