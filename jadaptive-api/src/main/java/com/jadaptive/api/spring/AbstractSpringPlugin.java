@@ -4,9 +4,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.pf4j.Extension;
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPlugin;
@@ -83,7 +85,6 @@ public class AbstractSpringPlugin extends SpringPlugin {
 			log.info("Creating application context for {}", wrapper.getPluginId());
 		}
 		
-		@SuppressWarnings("resource")
 		AnnotationConfigApplicationContext pluginContext = new AnnotationConfigApplicationContext();
 		
 		pluginContext.setParent(parentContext);
@@ -93,54 +94,14 @@ public class AbstractSpringPlugin extends SpringPlugin {
       
 		for(String name : pluginContext.getBeanDefinitionNames()) {
 			Object bean = pluginContext.getBean(name);
-			for(Field field : findFields(bean.getClass(), AutowiredExtension.class)) {
-				try {
-					field.setAccessible(true);
-					field.set(bean, findExtension(field.getType(), parentContexts));
-					if(log.isInfoEnabled()) {
-						log.info("Autowired {} Extension on {}", field.getType().getSimpleName(), name);
-					}
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new IllegalStateException(e.getMessage(), e);
-				}
-			}
+			ExtensionAutowireHelper.autowiredExtensions(bean, parentContexts);
 		}
-		
-        return pluginContext;
-	}
 
-	private Object findExtension(Class<?> type, List<ApplicationContext> parentContexts) {
-		
-		for(ApplicationContext ctx : parentContexts) {
-			try {
-				return ctx.getBean(type);
-			} catch(Throwable e) {
-			}
-		}
-		
-		throw new IllegalStateException("Cannot find a instance of " + type.getSimpleName() + " within the extensions parent application contexts");
+        return pluginContext;
 	}
 
 	protected String[] getBasePackages() {
 		return new String[] { getClass().getPackage().getName() };
-	}
-	
-	
-	/**
-	 * https://stackoverflow.com/questions/16585451/get-list-of-fields-with-annotation-by-using-reflection
-	 */
-	public static Set<Field> findFields(Class<?> classs, Class<? extends Annotation> ann) {
-	    Set<Field> set = new HashSet<>();
-	    Class<?> c = classs;
-	    while (c != null) {
-	        for (Field field : c.getDeclaredFields()) {
-	            if (field.isAnnotationPresent(ann)) {
-	                set.add(field);
-	            }
-	        }
-	        c = c.getSuperclass();
-	    }
-	    return set;
 	}
 
 }

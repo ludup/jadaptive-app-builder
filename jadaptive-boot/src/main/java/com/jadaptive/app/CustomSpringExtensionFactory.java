@@ -15,14 +15,22 @@
  */
 package com.jadaptive.app;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import org.pf4j.ExtensionFactory;
 import org.pf4j.Plugin;
+import org.pf4j.PluginDependency;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPlugin;
 import org.pf4j.spring.SpringPluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+
+import com.jadaptive.api.spring.AbstractSpringPlugin;
+import com.jadaptive.api.spring.ExtensionAutowireHelper;
 
 /**
  * Basic implementation of a extension factory that uses Java reflection to
@@ -51,16 +59,22 @@ public class CustomSpringExtensionFactory implements ExtensionFactory {
     public <T> T create(Class<T> extensionClass) {
         T extension = createWithoutSpring(extensionClass);
         if (autowire && extension != null) {
-            // test for SpringBean
+
         	PluginWrapper pluginWrapper = pluginManager.whichPlugin(extensionClass);
             if (pluginWrapper != null) {
                 Plugin plugin = pluginWrapper.getPlugin();
                
                 autowireSpring(extension, plugin);
                 
-//                for(PluginDependency depends : pluginWrapper.getDescriptor().getDependencies()) {
-//                	autowireSpring(extension, pluginManager.getPlugin(depends.getPluginId()).getPlugin());
-//                }
+                List<ApplicationContext> ctxs = new ArrayList<>();
+                for(PluginDependency depends : pluginWrapper.getDescriptor().getDependencies()) {
+                	Plugin dep = pluginManager.getPlugin(depends.getPluginId()).getPlugin();
+                	if(Objects.nonNull(dep) && dep instanceof AbstractSpringPlugin) {
+                		ctxs.add(((AbstractSpringPlugin)dep).getApplicationContext());
+                	}
+                }
+                
+                ExtensionAutowireHelper.autowiredExtensions(extension, ctxs);
                 
             } else {
             	pluginManager.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(extension);
@@ -72,7 +86,6 @@ public class CustomSpringExtensionFactory implements ExtensionFactory {
     
     private void autowireSpring(Object extension, Plugin plugin) {
     	if (plugin instanceof SpringPlugin) {
-            // autowire
         	SpringPlugin sp = ((SpringPlugin) plugin);
             ApplicationContext pluginContext = sp.getApplicationContext();
             pluginContext.getAutowireCapableBeanFactory().autowireBean(extension);
