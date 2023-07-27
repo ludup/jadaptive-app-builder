@@ -139,7 +139,7 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 						try {
 							results.add(plugin.getPluginClassLoader().loadClass(classInfo.getName()));
 						} catch (ClassNotFoundException e) {
-							log.error("Failed to load annotated class", e);
+							log.error("Failed to load annotated class {} for plugin {}", clz.getSimpleName(), plugin.getPluginId(), e);
 						}
 	                }
 	            } catch(Throwable t) {
@@ -158,7 +158,7 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
             	try {
             		results.add(getClass().getClassLoader().loadClass(classInfo.getName()));
 				} catch (ClassNotFoundException e) {
-					log.error("Failed to load annotated class", e);
+					log.error("Failed to load annotated class for system classpath", clz.getSimpleName(), e);
 				}
             }
         } catch(Throwable t) {
