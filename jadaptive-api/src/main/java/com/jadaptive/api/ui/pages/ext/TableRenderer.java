@@ -495,12 +495,6 @@ public class TableRenderer {
 		{
 			return Html.i18n(template.getBundle(), Utils.checkNullToString(obj.getValue(field)));
 		}
-		case COUNTRY:
-		{
-			return Html.span(ApplicationServiceImpl.getInstance()
-					.getBean(InternationalService.class)
-					.getCountryName(Utils.checkNullToString(obj.getValue(field))));
-		}
 		default:
 		{
 			return Html.span(Utils.checkNullToString(obj.getValue(field)), "UTF-8");

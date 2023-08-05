@@ -88,7 +88,6 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 				if(obj instanceof AbstractObject) {
 					object = (AbstractObject)obj;
 				} else if(obj instanceof UUIDEntity) {
-					Request.get().getSession().removeAttribute(template.getResourceKey());
 					object = objectService.convert((UUIDEntity) obj);
 				}
 				

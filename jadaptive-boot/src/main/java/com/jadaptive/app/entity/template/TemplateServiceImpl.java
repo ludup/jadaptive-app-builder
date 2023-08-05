@@ -519,7 +519,9 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			
 			Field f = ReflectionUtils.getField(clz, field.getResourceKey());
 			ObjectView v = f.getAnnotation(ObjectView.class);
-			
+			if(Objects.isNull(v)) {
+				v = currentView;
+			}
 			if(field.getFieldType()==FieldType.OBJECT_EMBEDDED && !field.getCollection()) {
 				Class<?> c = ReflectionUtils.getObjectType(f);
 				String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);

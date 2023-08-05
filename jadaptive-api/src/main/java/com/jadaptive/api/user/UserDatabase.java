@@ -12,21 +12,35 @@ public interface UserDatabase extends ExtensionPoint {
 
 	boolean verifyPassword(User user, char[] password);
 
-	boolean hasEncryptedPassword(User u);
+	boolean hasPassword(User u);
 	
 	ObjectTemplate getUserTemplate();
 
-	boolean isDatabaseUser(User user);
+	default boolean isDatabaseUser(User user) {
+		return user.getClass().equals(getUserClass());
+	}
 
 	Class<? extends User> getUserClass();
 	
 	Set<UserDatabaseCapabilities> getCapabilities();
 
-	void deleteUser(User user);
+	default void deleteUser(User user) {
+		throw new UnsupportedOperationException();
+	}
 
-	void updateUser(User user);
+	default void updateUser(User user) {
+		throw new UnsupportedOperationException();
+	}
 
-	void createUser(User user, char[] password, boolean forceChange);
+	default void createUser(User user, char[] password, boolean forceChange) {
+		throw new UnsupportedOperationException();
+	}
 	
 	Integer weight();
+
+	default User importUser(String username) {
+		throw new UnsupportedOperationException();
+	};
+	
+	void registerLogin(User user);
 }

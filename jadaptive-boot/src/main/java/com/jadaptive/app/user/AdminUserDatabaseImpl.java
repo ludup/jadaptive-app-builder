@@ -137,4 +137,10 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	public long countTable(SearchField... fields) {
 		return objectDatabase.count(AdminUser.class, fields);
 	}
+
+
+	@Override
+	public void registerLogin(User user) {
+		objectDatabase.saveOrUpdate((AdminUser)user);
+	}
 }

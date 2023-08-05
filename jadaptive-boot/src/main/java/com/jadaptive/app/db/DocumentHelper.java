@@ -235,12 +235,12 @@ public class DocumentHelper {
 		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
 	}
 	
-	private static String getParameter(HttpServletRequest request, FieldTemplate field) {
-		return getParameter(request, field.getFormVariable());
+	private static String getParameter(HttpServletRequest request, FieldTemplate field, String formVariablePrefix) {
+		return getParameter(request, formVariablePrefix + field.getFormVariable());
 	}
 	
-	private static String getTextParameter(HttpServletRequest request, FieldTemplate field) {
-		return getParameter(request, String.format("%sText", field.getFormVariable()));
+	private static String getTextParameter(HttpServletRequest request, FieldTemplate field, String formVariablePrefix) {
+		return getParameter(request, String.format("%sText", formVariablePrefix + field.getFormVariable()));
 	}
 	
 	private static String getParameter(HttpServletRequest request, String formVariable) {
@@ -260,13 +260,17 @@ public class DocumentHelper {
 		return request.getParameter(formVariable);
 	}
 
-	public static AbstractObject buildObject(HttpServletRequest request, String fieldName, ObjectTemplate template) throws IOException, ValidationException {
+	public static AbstractObject buildRootObject(HttpServletRequest request, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
+		return buildObject(request, resourceKey, "", template);
+	}
+	
+	private static AbstractObject buildObject(HttpServletRequest request, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
 
 		if(log.isDebugEnabled()) {
-			log.debug("Building object {} using template {}", fieldName, template.getResourceKey());
+			log.debug("Building object {} using template {}", resourceKey, template.getResourceKey());
 		}
 		
-		MongoEntity obj = new MongoEntity(fieldName);
+		MongoEntity obj = new MongoEntity(resourceKey);
 		String uuid = request.getParameter("uuid");
 		if(StringUtils.isNotBlank(uuid)) {
 			obj.setUuid(uuid);
@@ -286,13 +290,13 @@ public class DocumentHelper {
 		for(FieldTemplate field : template.getFields()) {
 			
 			if(log.isDebugEnabled()) {
-				log.debug("Processing field {} using form variable {}", field.getResourceKey(), field.getFormVariable());
+				log.debug("Processing field {} using form variable {}", field.getResourceKey(), formVariablePrefix + field.getFormVariable());
 			}
 			
 			if(field.getCollection()) {
 				obj.setValue(field, convertValues(field, request));
 			} else {
-				obj.setValue(field, convertValue(field, request));
+				obj.setValue(field, convertValue(field, request, formVariablePrefix));
 			}
 
 		}
@@ -300,17 +304,23 @@ public class DocumentHelper {
 		return obj;
 	}
 	
-	private static Object convertValue(FieldTemplate field, HttpServletRequest request) throws IOException, ValidationException {
+	private static Object convertValue(FieldTemplate field, HttpServletRequest request, String formVariablePrefix) throws IOException, ValidationException {
 		
-		String value = getParameter(request, field);
+		String value = getParameter(request, field, formVariablePrefix);
 
 		switch(field.getFieldType()) {
 		case OBJECT_EMBEDDED:
 		{
 			ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
 					.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
+			
+			StringBuffer tmp = new StringBuffer();
+			tmp.append(formVariablePrefix);
+			tmp.append(field.getFormVariable());
+			tmp.append(".");
 			return buildObject(request, 
 					template.getResourceKey(),
+					tmp.toString(),
 					template).getDocument();
 		}
 		case OBJECT_REFERENCE:
@@ -319,10 +329,10 @@ public class DocumentHelper {
 				log.debug("Returning {} as reference {}", field.getResourceKey(), value);
 			}
 
-			String name = getTextParameter(request, field);
+			String name = getTextParameter(request, field, formVariablePrefix);
 			
 			Document doc = new Document();
-			convertObjectToDocument(generateReference(getParameter(request, field), name), doc);
+			convertObjectToDocument(generateReference(getParameter(request, field, formVariablePrefix), name), doc);
 			return doc;
 		}
 		case BOOL:
@@ -335,7 +345,7 @@ public class DocumentHelper {
 			if(request instanceof StandardMultipartHttpServletRequest) {
 				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
 				if(file.isEmpty()) {
-					return getParameter(request, field.getFormVariable() + "_previous");
+					return getParameter(request, formVariablePrefix + field.getFormVariable() + "_previous");
 				}
 				if(file.size() > 1) {
 					throw new IllegalStateException("Multiple file parts for single value!");
@@ -344,7 +354,7 @@ public class DocumentHelper {
 				
 				String encoded = Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
 				if(StringUtils.isBlank(encoded)) {
-					return getParameter(request, field.getFormVariable() + "_previous");
+					return getParameter(request, formVariablePrefix + field.getFormVariable() + "_previous");
 				}
 				try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
 					BufferedImage bimg = ImageIO.read(in);
@@ -372,7 +382,7 @@ public class DocumentHelper {
 				}
 				
 			}
-			return getParameter(request, field.getFormVariable() + "_previous");
+			return getParameter(request, formVariablePrefix + field.getFormVariable() + "_previous");
 		case FILE:
 			if(request instanceof StandardMultipartHttpServletRequest) {
 				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
@@ -387,7 +397,7 @@ public class DocumentHelper {
 					return Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
 				}
 			}
-			return getParameter(request, field.getFormVariable() + "_previous");
+			return getParameter(request, formVariablePrefix + field.getFormVariable() + "_previous");
 		default:
 			if(Objects.isNull(value)) {
 				
@@ -796,6 +806,10 @@ public class DocumentHelper {
 			} else {
 				return null;
 			}
+		case COUNTRY:
+		{
+			return value;
+		}
 		default:
 			throw new IllegalStateException("Unhandled field type " + def.getFieldType() + " in DocumentHelper.fromString");
 		}

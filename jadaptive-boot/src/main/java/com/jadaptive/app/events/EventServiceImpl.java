@@ -174,6 +174,11 @@ public class EventServiceImpl implements EventService {
 	}
 	
 	@Override
+	public <T extends UUIDEntity> void on(String eventKey, Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+		on(eventKey, handler);
+	}
+	
+	@Override
 	public <T extends UUIDEntity> void created(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
 		on(Events.created(templateService.getTemplateResourceKey(clz)), handler);
 	}

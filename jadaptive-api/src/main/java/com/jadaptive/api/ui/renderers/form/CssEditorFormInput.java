@@ -1,10 +1,12 @@
 package com.jadaptive.api.ui.renderers.form;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageDependencies;
@@ -25,6 +27,17 @@ public class CssEditorFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(Element rootElement, String value) throws IOException {
 
+		StringBuffer formVariable = new StringBuffer();
+		
+		if(Objects.nonNull(field.getParentFields())) {
+			for(FieldTemplate t : field.getParentFields()) {
+				formVariable.append(t.getResourceKey());
+				formVariable.append(".");
+			}
+		}
+		
+		formVariable.append(field.getFormVariable());
+		
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/lib/codemirror.js");
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/addon/display/autorefresh.js");
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/mode/css/css.js");
@@ -42,8 +55,8 @@ public class CssEditorFormInput extends FieldInputRender {
 						.attr("jad:bundle", field.getBundle())
 						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
 				.appendChild(new Element("textarea")
-						.attr("id", field.getFormVariable())
-						.attr("name", field.getFormVariable())
+						.attr("id", formVariable.toString())
+						.attr("name", formVariable.toString())
 						.addClass("form-control")
 						.val(value))
 				.appendChild(new Element("small")

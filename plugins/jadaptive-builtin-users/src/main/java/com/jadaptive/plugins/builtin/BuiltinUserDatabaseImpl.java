@@ -174,4 +174,9 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 		return objectDatabase.count(BuiltinUser.class, fields);
 	}
 
+	@Override
+	public void registerLogin(User user) {
+		objectDatabase.saveOrUpdate((BuiltinUser)user);
+	}
+
 }

@@ -36,8 +36,8 @@ public class Update extends StashedObjectPage {
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException {
 		
-		AbstractObject parentObject = (AbstractObject) Request.get().getSession().getAttribute(template.getResourceKey());
-		String returnURL = parentObject.isNew() ? getCreateURL() : getUpdateURL();
+		//AbstractObject parentObject = (AbstractObject) Request.get().getSession().getAttribute(template.getResourceKey());
+		String returnURL = object.isNew() ? getCreateURL() : getUpdateURL();
 		
 		Element element = document.selectFirst("#saveButton");
 		if(Objects.nonNull(element)) {

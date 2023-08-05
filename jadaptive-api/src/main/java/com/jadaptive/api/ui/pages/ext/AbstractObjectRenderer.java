@@ -247,16 +247,16 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			Element viewElement = createViewElement(view, element, first && !view.isRoot());
 			
-			for(TemplateViewField orderedField : view.getFields()) {
-				FieldTemplate field = orderedField.getField();
+			for(TemplateViewField fieldView : view.getFields()) {
+				FieldTemplate field = fieldView.getField();
 				if(field.isHidden()) {
-					HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), orderedField);
-					render.renderInput(element, getFieldValue(orderedField, obj));
+					HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), fieldView);
+					render.renderInput(element, getFieldValue(fieldView, obj));
 					continue;
 				}
 				switch(field.getFieldType()) {
 				default:
-					renderField(viewElement, obj, orderedField, scope, view);
+					renderField(viewElement, obj, fieldView, scope, view);
 					break;
 				}
 			}
@@ -323,9 +323,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		return -1;
 	}
 
-	private void renderField(Element element, AbstractObject obj, TemplateViewField orderedField,  FieldView scope, TemplateView panel) throws IOException {
+	private void renderField(Element element, AbstractObject obj, TemplateViewField fieldView,  FieldView scope, TemplateView panel) throws IOException {
 		
-		FieldTemplate field = orderedField.getField();
+		FieldTemplate field = fieldView.getField();
 		
 		Set<String> ignores = ignoreResources.get();
 		if(Objects.nonNull(ignores) && ignores.contains(field.getResourceKey())) {
@@ -334,14 +334,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		if(!field.getViews().isEmpty()) {
 			if(!field.getViews().contains(scope)) {
-				HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), orderedField);
-				render.renderInput(element, getFieldValue(orderedField, obj));
+				HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), fieldView);
+				render.renderInput(element, getFieldValue(fieldView, obj));
 				return;
 			}
 		}
 		
 		if(field.getCollection()) {
-			renderCollection(element, obj, orderedField, scope, panel); 
+			renderCollection(element, obj, fieldView, scope, panel); 
 		} else {
 			switch(field.getFieldType()) {
 			case OBJECT_REFERENCE:
@@ -350,14 +350,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				String uuid = null;
 				String name = null;
 				if(Objects.nonNull(obj)) {
-					AbstractObject ref = obj.getChild(orderedField.getField());
+					AbstractObject ref = obj.getChild(fieldView.getField());
 					if(Objects.nonNull(ref)) {
 						uuid = ref.getUuid();
 						name = (String) ref.getValue("name");
 					}
 				}
 
-				FieldSearchFormInput input = new FieldSearchFormInput(currentTemplate.get(), orderedField, 
+				FieldSearchFormInput input = new FieldSearchFormInput(currentTemplate.get(), fieldView, 
 						String.format("/app/api/objects/%s/table", objectType),
 						objectTemplate.getNameField(), "uuid");
 				input.renderInput(element, uuid, name, false, scope == FieldView.READ);
@@ -366,18 +366,20 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 //				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
 				throw new IllegalStateException("Embedded object field should not be processed here");
 			default:	
-				renderFormField(element, obj, orderedField, scope, panel);
+				renderFormField(element, obj, fieldView, scope, panel);
 			}
 			
+			Elements thisElement = element.select("#" + field.getResourceKey());
+			processDynamicElements(thisElement, fieldView, obj);
 		}
 	}
 	
-	private void renderCollection(Element element, AbstractObject obj, TemplateViewField orderedField,
+	private void renderCollection(Element element, AbstractObject obj, TemplateViewField fieldView,
 			FieldView view, TemplateView panel) throws IOException {
 		
-		FieldTemplate field = orderedField.getField();
+		FieldTemplate field = fieldView.getField();
 		
-		List<FieldTemplate> parents = orderedField.getParentFields();
+		List<FieldTemplate> parents = fieldView.getParentFields();
 		if(Objects.nonNull(parents)) {
 			for(FieldTemplate parentField : parents) {
 				obj = obj.getChild(parentField);
@@ -409,7 +411,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					available.add(enumObj.toString());
 				}
 
-				MultipleSelectionFormInput render = new MultipleSelectionFormInput(currentTemplate.get(), orderedField);
+				MultipleSelectionFormInput render = new MultipleSelectionFormInput(currentTemplate.get(), fieldView);
 				render.renderInput(panel, element, available, values, false);
 			} catch (ClassNotFoundException e) {
 				log.error("Cannot render enum as the class could not be found", e);
@@ -463,17 +465,33 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				}
 			}
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
-					currentTemplate.get(), orderedField, String.format("/app/api/objects/%s/table", objectType),
+					currentTemplate.get(), fieldView, String.format("/app/api/objects/%s/table", objectType),
 					objectTemplate.getNameField(), "uuid");
 			render.renderInput(panel, element, values, false, 
-					(view == FieldView.READ || orderedField.getField().isReadOnly()));
+					(view == FieldView.READ || fieldView.getField().isReadOnly()));
 			break;
 		}
 		case PASSWORD:
 			break;
+		case COUNTRY:
+		{
+			List<NamePairValue> values = new ArrayList<>();
+			if(Objects.nonNull(obj)) {
+				for(String permission : obj.getCollection(field.getResourceKey())) {
+					values.add(new NamePairValue(internationalService.getCountryName(permission), permission));
+				}
+			}
+			
+			CollectionSearchFormInput render = new CollectionSearchFormInput(
+					currentTemplate.get(), fieldView, "/app/api/countries/table",
+					"name", "code");
+			render.renderInput(panel, element, values, false, (view == FieldView.READ || fieldView.getField().isReadOnly()));
+			
+			break;
+		}
 		case TEXT:
 		{
-			switch(orderedField.getRenderer()) {
+			switch(fieldView.getRenderer()) {
 //			case TAGS:
 //			{
 //				MultipleTagsFormInput render = new MultipleTagsFormInput(currentTemplate.get(), orderedField);
@@ -484,11 +502,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 //			}
 			default:
 			{
-				CollectionTextFormInput render = new CollectionTextFormInput(currentTemplate.get(), orderedField);
+				CollectionTextFormInput render = new CollectionTextFormInput(currentTemplate.get(), fieldView);
 				render.renderInput(panel, element, 
 						Objects.nonNull(obj) ? 
 								obj.getCollection(field.getResourceKey()) 
-								: Collections.emptyList(), (view == FieldView.READ || orderedField.getField().isReadOnly()));
+								: Collections.emptyList(), (view == FieldView.READ || fieldView.getField().isReadOnly()));
 				break;
 			}
 			}
@@ -510,9 +528,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
-					currentTemplate.get(), orderedField, "/app/api/permissions/table",
+					currentTemplate.get(), fieldView, "/app/api/permissions/table",
 					"name", "value");
-			render.renderInput(panel, element, values, false, (view == FieldView.READ || orderedField.getField().isReadOnly()));
+			render.renderInput(panel, element, values, false, (view == FieldView.READ || fieldView.getField().isReadOnly()));
 			
 			break;
 		}
@@ -522,54 +540,54 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 	}
 	
-	private void renderFormField(Element element, AbstractObject obj, TemplateViewField orderedField,
+	private void renderFormField(Element element, AbstractObject obj, TemplateViewField fieldView,
 			FieldView view, TemplateView panel) throws IOException {
 		
-		FieldTemplate field = orderedField.getField();
-
+		FieldTemplate field = fieldView.getField();
+		
 		switch(field.getFieldType()) {
+		case COUNTRY:
+		{
+			DropdownFormInput dropdown = new DropdownFormInput(currentTemplate.get(), fieldView);
+			dropdown.renderInput(element, "");
+			for(Country country : internationalService.getCountries()) {
+				dropdown.addInputValue(country.getCode(), country.getName());
+			}
+			String code = getFieldValue(fieldView, obj);
+			if(StringUtils.isNotBlank(code)) {
+				dropdown.setSelectedValue(code, internationalService.getCountryName(code));
+			}
+			break; 
+		}
 		case TEXT:
 		{
-			switch(orderedField.getRenderer()) {
+			switch(fieldView.getRenderer()) {
 			case BOOTSTRAP_BADGE:
 			{
-				BootstrapBadgeRender render = new BootstrapBadgeRender(currentTemplate.get(), orderedField);
-				render.renderInput(element, getFieldValue(orderedField, obj));
+				BootstrapBadgeRender render = new BootstrapBadgeRender(currentTemplate.get(), fieldView);
+				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
 			case I18N:
 			{
-				String i18nValue = i18nService.format(currentTemplate.get().getBundle(), Locale.getDefault(), getFieldValue(orderedField, obj));
-				TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
+				String i18nValue = i18nService.format(currentTemplate.get().getBundle(), Locale.getDefault(), getFieldValue(fieldView, obj));
+				TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
 				render.renderInput(element, i18nValue);
 				break;
 			}
-			case COUNTRY:
-			{
-				DropdownFormInput dropdown = new DropdownFormInput(currentTemplate.get(), orderedField);
-				dropdown.renderInput(element, "");
-				for(Country country : internationalService.getCountries()) {
-					dropdown.addInputValue(country.getCode(), country.getName());
-				}
-				String code = getFieldValue(orderedField, obj);
-				if(StringUtils.isNotBlank(code)) {
-					dropdown.setSelectedValue(code, internationalService.getCountryName(code));
-				}
-				break; 
-			}
 			case OPTIONAL:
 			{
-				String value = getFieldValue(orderedField, obj); 
-				if(StringUtils.isNotBlank(value) || (!orderedField.getField().isReadOnly() && view !=FieldView.READ)) {
-					TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
+				String value = getFieldValue(fieldView, obj); 
+				if(StringUtils.isNotBlank(value) || (!fieldView.getField().isReadOnly() && view !=FieldView.READ)) {
+					TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
 					render.renderInput(element, value);
 				}
 				break;
 			}
 			default:
 			{
-				TextFormInput render = new TextFormInput(currentTemplate.get(), orderedField);
-				render.renderInput(element, getFieldValue(orderedField, obj));
+				TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
+				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
 			}
@@ -577,36 +595,36 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case IMAGE:
 		{
-			String val = getFieldValue(orderedField, obj);
-			ImageFormInput render = new ImageFormInput(currentTemplate.get(), orderedField);
+			String val = getFieldValue(fieldView, obj);
+			ImageFormInput render = new ImageFormInput(currentTemplate.get(), fieldView);
 			render.renderInput(element, val);
 			break;
 		}
 		case FILE:
 		{
-			FileFormInput render = new FileFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(element, getFieldValue(orderedField, obj));
+			FileFormInput render = new FileFormInput(currentTemplate.get(), fieldView);
+			render.renderInput(element, getFieldValue(fieldView, obj));
 			break;
 		}
 		case TEXT_AREA:
 		{
-			switch(orderedField.getRenderer()) {
+			switch(fieldView.getRenderer()) {
 			case CSS_EDITOR:
 			{
-				CssEditorFormInput render = new CssEditorFormInput(currentTemplate.get(), orderedField, currentDocument.get(), view == FieldView.READ);
-				render.renderInput(element, getFieldValue(orderedField, obj));
+				CssEditorFormInput render = new CssEditorFormInput(currentTemplate.get(), fieldView, currentDocument.get(), view == FieldView.READ);
+				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
 			case HTML_EDITOR:
 			{
-				HtmlEditorFormInput render = new HtmlEditorFormInput(currentTemplate.get(), orderedField, currentDocument.get(), view == FieldView.READ);
-				render.renderInput(element, getFieldValue(orderedField, obj));
+				HtmlEditorFormInput render = new HtmlEditorFormInput(currentTemplate.get(), fieldView, currentDocument.get(), view == FieldView.READ);
+				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
 			case JAVA_EDITOR:
 			{
-				JavascriptEditorFormInput render = new JavascriptEditorFormInput(currentTemplate.get(), orderedField, currentDocument.get(), view == FieldView.READ);
-				render.renderInput(element, getFieldValue(orderedField, obj));
+				JavascriptEditorFormInput render = new JavascriptEditorFormInput(currentTemplate.get(), fieldView, currentDocument.get(), view == FieldView.READ);
+				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
 			case HTML_VIEW:
@@ -619,29 +637,29 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				element.appendChild(new Element("iframe")
 						.addClass("w-100")
 						.attr("height", "600")
-						.attr("srcdoc", getFieldValue(orderedField, obj)));
+						.attr("srcdoc", getFieldValue(fieldView, obj)));
 				break;
 			}
 			case I18N:
 			{
-				String i18nValue = i18nService.format(panel.getBundle(), Locale.getDefault(), getFieldValue(orderedField, obj));
-				TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), orderedField, field.getMetaValueInt("rows", 15));
+				String i18nValue = i18nService.format(panel.getBundle(), Locale.getDefault(), getFieldValue(fieldView, obj));
+				TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), fieldView, field.getMetaValueInt("rows", 15));
 				render.renderInput(element, i18nValue);
 				break;
 			}
 			case OPTIONAL:
 			{
-				String value = getFieldValue(orderedField, obj);
+				String value = getFieldValue(fieldView, obj);
 				if(StringUtils.isNotBlank(value) || view!=FieldView.READ) {
-					TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), orderedField, field.getMetaValueInt("rows", 15));
+					TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), fieldView, field.getMetaValueInt("rows", 15));
 					render.renderInput(element, value);
 				}
 				break;
 			}
 			default:
 			{
-				TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), orderedField, field.getMetaValueInt("rows", 10));
-				render.renderInput(element, getFieldValue(orderedField, obj));
+				TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), fieldView, field.getMetaValueInt("rows", 10));
+				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
 			}
@@ -649,34 +667,34 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case PASSWORD:
 		{
-			PasswordFormInput render = new PasswordFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(element, getFieldValue(orderedField, obj));
+			PasswordFormInput render = new PasswordFormInput(currentTemplate.get(), fieldView);
+			render.renderInput(element, getFieldValue(fieldView, obj));
 			break;
 		}
 		case TIMESTAMP:
 		{
-			TimestampFormInput render = new TimestampFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(element, getFieldValue(orderedField, obj));
+			TimestampFormInput render = new TimestampFormInput(currentTemplate.get(), fieldView);
+			render.renderInput(element, getFieldValue(fieldView, obj));
 			break;
 		}
 		case DATE:
 		{
-			String dateValue = getFieldValue(orderedField, obj);
-			if(orderedField.getRenderer()==FieldRenderer.OPTIONAL) {
+			String dateValue = getFieldValue(fieldView, obj);
+			if(fieldView.getRenderer()==FieldRenderer.OPTIONAL) {
 				if(StringUtils.isBlank(dateValue)) {
 					break;
 				}
 			}
 
-			DateFormInput render = new DateFormInput(currentTemplate.get(), orderedField);
+			DateFormInput render = new DateFormInput(currentTemplate.get(), fieldView);
 			render.renderInput(element, dateValue);
 			break;
 			
 		}
 		case BOOL:
 		{
-			BooleanFormInput render = new BooleanFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(element, getFieldValue(orderedField, obj));
+			BooleanFormInput render = new BooleanFormInput(currentTemplate.get(), fieldView);
+			render.renderInput(element, getFieldValue(fieldView, obj));
 			if(field.isReadOnly() || view == FieldView.READ) {
 				render.disable();
 			}
@@ -684,28 +702,28 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case PERMISSION:
 		{
-			DropdownFormInput render = new DropdownFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(element, getFieldValue(orderedField, obj));
-			render.renderValues(permissionService.getAllPermissions(), getFieldValue(orderedField, obj));
+			DropdownFormInput render = new DropdownFormInput(currentTemplate.get(), fieldView);
+			render.renderInput(element, getFieldValue(fieldView, obj));
+			render.renderValues(permissionService.getAllPermissions(), getFieldValue(fieldView, obj));
 		
 			break;
 		}
 		case ENUM:
 		{
-			switch(orderedField.getRenderer()) {
+			switch(fieldView.getRenderer()) {
 			case BOOTSTRAP_BADGE:
 			{
-				BootstrapBadgeRender render = new BootstrapBadgeRender(currentTemplate.get(), orderedField);
-				render.renderInput(element, getFieldValue(orderedField, obj));
+				BootstrapBadgeRender render = new BootstrapBadgeRender(currentTemplate.get(), fieldView);
+				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
 			default:
 				Class<?> values;
 				try {
 					values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
-					DropdownFormInput render = new DropdownFormInput(currentTemplate.get(), orderedField);
-					render.renderInput(element, getFieldValue(orderedField, obj));
-					render.renderValues((Enum<?>[])values.getEnumConstants(), getFieldValue(orderedField, obj), view == FieldView.READ);
+					DropdownFormInput render = new DropdownFormInput(currentTemplate.get(), fieldView);
+					render.renderInput(element, getFieldValue(fieldView, obj));
+					render.renderValues((Enum<?>[])values.getEnumConstants(), getFieldValue(fieldView, obj), view == FieldView.READ);
 				} catch (ClassNotFoundException e) {
 					throw new IllegalStateException(e.getMessage(), e);
 				}
@@ -716,8 +734,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case INTEGER:
 		case LONG:
 		{
-			NumberFormInput render = new NumberFormInput(currentTemplate.get(), orderedField);
-			render.renderInput(element, getFieldValue(orderedField, obj));
+			NumberFormInput render = new NumberFormInput(currentTemplate.get(), fieldView);
+			render.renderInput(element, getFieldValue(fieldView, obj));
 			break;
 		}
 		case OBJECT_EMBEDDED:
@@ -735,8 +753,50 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		if(field.isReadOnly() || view == FieldView.READ) {
 			thisElement.attr("readonly", "readonly");
 		}
+		
 	}
 
+	private void processDynamicElements(Elements thisElement, TemplateViewField fieldView, AbstractObject obj) {
+
+		Element row = thisElement.parents().select(".row").first();
+		if(Objects.nonNull(row)) {
+			
+			if(fieldView.isOptional()) {
+				row.attr("data-depends-on", fieldView.getDependsOn());
+				row.attr("data-depends-value", fieldView.getDependsValue());
+				row.addClass("processDepends");
+				String[] matchValues = fieldView.getDependsValue().split(",");
+				boolean matches = false;
+				for(String matchValue : matchValues) {
+					boolean expectedResult = !matchValue.startsWith("!");
+					if(!expectedResult) {
+						matchValue = matchValue.substring(1);
+					}
+					FieldTemplate depends = currentTemplate.get().getField(fieldView.getDependsOn());
+					if(Objects.nonNull(obj)) {
+						Object value = obj.getValue(depends);
+						if(Objects.isNull(value)) {
+							value = depends.getDefaultValue();
+						}
+						if(value.toString().equals(matchValue)) {
+							matches = expectedResult;
+							break;
+						}
+					}
+				}
+				
+				if(!matches) {
+					row.addClass("d-none");
+				}
+			}
+			
+			if(fieldView.isAutoSave()) {
+				row.addClass("processAutosave");
+				row.attr("data-action", String.format("/app/api/form/stash/%s", currentTemplate.get().getResourceKey()));
+			}
+		}
+	}
+	
 	private String getDefaultValue(TemplateViewField field) {
 		return encodeValue(field, field.getField().getDefaultValue());
 	}

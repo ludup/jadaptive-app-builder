@@ -19,4 +19,10 @@ public @interface ObjectView {
 
 	boolean disableEncoding() default false;
 	
+	String dependsOn() default "";
+	
+	String dependsValue() default "";
+	
+	boolean autosave() default false;
+	
 }

@@ -89,9 +89,9 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		Map<String,Session> tenantSessions = getCache(tenant); 
 		tenantSessions.put(session.getUuid(), session);
 		
-		user.setLastLogin(Utils.now());
+		
 		eventService.haltEvents();
-		userService.saveOrUpdate(user);
+		userService.registerLogin(user);
 		eventService.resumeEvents();
 		
 		tenantService.executeAs(tenant, ()->eventService.publishEvent(new SessionOpenedEvent(session)));

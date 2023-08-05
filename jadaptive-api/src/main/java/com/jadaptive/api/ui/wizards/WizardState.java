@@ -7,14 +7,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.Page;
 
 public class WizardState {
 
-	Integer currentStep = 0;
+	Integer currentStep = 1;
 	List<WizardSection> pages = new ArrayList<>();
 	WizardSection startPage;
 	WizardSection finishPage;
@@ -26,8 +28,11 @@ public class WizardState {
 	
 	private boolean finished;;
 	
+	CompletionCallback onFinish = null;
+	
 	public WizardState(WizardFlow flow) {
 		this.flow = flow;
+		currentStep = Objects.nonNull(getStartPage()) ? 0 : 1;
 	} 
 	
 	public void init(WizardSection startPage, WizardSection finishPage, WizardSection...pages) {
@@ -97,6 +102,12 @@ public class WizardState {
 		flow.finish(this);
 		setFinished(true);
 	}
+	
+	public void completed() {
+		if(Objects.nonNull(onFinish)) {
+			onFinish.finish(flow.getState(Request.get()));
+		}
+	}
 
 	public boolean isStartPage() {
 		return currentStep == 0;
@@ -115,7 +126,7 @@ public class WizardState {
 	}
 
 	public void saveObject(UUIDEntity object) {
-		stateObjects.put(pages.get(getCurrentStep()-1).getName(), object);
+		stateObjects.put(object.getUuid(), object);
 	}
 
 	public Collection<WizardSection> getSections() {
@@ -126,10 +137,11 @@ public class WizardState {
 		return stateObjects.get(section.getName());
 	}
 	
-	public UUIDEntity getObject(Class<?> type) {
+	@SuppressWarnings("unchecked")
+	public <T extends UUIDEntity> T getObject(Class<T> type) {
 		for(UUIDEntity e : stateObjects.values()) {
 			if(e.getClass().equals(type)) {
-				return e;
+				return (T)e;
 			}
 		}
 		throw new IllegalStateException("No object of type " + type.getSimpleName());
@@ -195,5 +207,23 @@ public class WizardState {
 
 	public String getBundle() {
 		return flow.getBundle();
+	}
+	
+	public void onComplete(CompletionCallback onFinish) {
+		this.onFinish = onFinish;
+	}
+	
+	@FunctionalInterface
+	public interface CompletionCallback {
+		void finish(WizardState state);
+	}
+
+	public boolean hasObject(Class<? extends UUIDEntity> type) {
+		for(UUIDEntity e : stateObjects.values()) {
+			if(e.getClass().equals(type)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -16,9 +16,11 @@ public class TemplateViewField {
 	String bundle = null;
 	boolean disableEncoding;
 	FieldRenderer renderer = null;
+	ObjectView view;
 	
 	public TemplateViewField(ObjectView view, TemplateView panel, FieldTemplate field, LinkedList<FieldTemplate> objectPath) {
 		super();
+		this.view = view;
 		this.field = field;
 		this.panel = panel;
 		this.objectPath = objectPath;
@@ -72,6 +74,9 @@ public class TemplateViewField {
 				obj = obj.getChild(objectField);
 			}
 		}
+		if(Objects.isNull(obj)) {
+			return field.getDefaultValue();
+		}
 		Object val = obj.getValue(field);
 		if(Objects.isNull(val)) {
 			return field.getDefaultValue();
@@ -84,5 +89,21 @@ public class TemplateViewField {
 			return false;
 		}
 		return field.isManuallyEncrypted() || field.isAutomaticallyEncrypted();
+	}
+	
+	public boolean isOptional() {
+		return Objects.nonNull(view) && StringUtils.isNotBlank(view.dependsOn());
+	}
+	
+	public String getDependsOn() {
+		return view.dependsOn();
+	}
+	
+	public String getDependsValue() {
+		return view.dependsValue();
+	}
+	
+	public boolean isAutoSave() {
+		return Objects.nonNull(view) && view.autosave();
 	}
 }

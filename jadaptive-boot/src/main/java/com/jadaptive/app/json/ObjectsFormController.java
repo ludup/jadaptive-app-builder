@@ -33,6 +33,8 @@ import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -44,6 +46,7 @@ import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.app.db.DocumentHelper;
+import com.jadaptive.app.entity.MongoEntity;
 
 @Controller
 public class ObjectsFormController {
@@ -92,7 +95,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			
 			ObjectTemplate template = templateService.get(resourceKey);
 			request.getSession().removeAttribute(resourceKey);
-			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(request, template.getResourceKey(), template);
 			String uuid = objectService.saveOrUpdate(obj);
 			
 			if(template.isSingleton()) {
@@ -130,7 +133,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			ObjectTemplate template = templateService.get(resourceKey);
 			request.getSession().removeAttribute(resourceKey);
 			
-			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(request, template.getResourceKey(), template);
 			String uuid = objectService.saveOrUpdate(obj);
 			
 			if(template.isSingleton()) {
@@ -180,9 +183,8 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			ObjectTemplate template = templateService.get(resourceKey);
-			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
-			request.getSession().setAttribute(resourceKey, obj);
-
+			AbstractObject obj = DocumentHelper.buildRootObject(request, template.getResourceKey(), template);
+			objectService.stashObject(obj);
 			return new UUIDStatus(obj.getUuid());
 		}  catch(ValidationException ex) { 
 			return new RequestStatusImpl(false, ex.getMessage());
@@ -208,7 +210,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		try {
 
 			ObjectTemplate template = templateService.get(resourceKey);
-			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(request, template.getResourceKey(), template);
 			
 			ObjectTemplate extensionTemplate = templateService.get(extension);
 			
@@ -249,7 +251,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		try {
 
 			ObjectTemplate template = templateService.get(resourceKey);
-			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(request, template.getResourceKey(), template);
 			
 			ObjectTemplate extensionTemplate = templateService.get(extension);
 			
@@ -288,12 +290,19 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		try {
 			ObjectTemplate parentTemplate = templateService.get(resourceKey);
 			ObjectTemplate childTemplate = templateService.get(childResource);
-			AbstractObject childObject = DocumentHelper.buildObject(request, childTemplate.getResourceKey(), childTemplate);
+			AbstractObject childObject = DocumentHelper.buildRootObject(request, childTemplate.getResourceKey(), childTemplate);
 			FieldTemplate fieldTemplate = parentTemplate.getField(fieldName);
-			AbstractObject parentObject = (AbstractObject) request.getSession().getAttribute(resourceKey);
-			if(Objects.isNull(parentObject)) {
+			Object stashedObject = Request.get().getSession().getAttribute(resourceKey);
+			if(Objects.isNull(stashedObject)) {
 				throw new IllegalStateException("No parent object found for " + resourceKey);
 			}
+			if(!(stashedObject instanceof AbstractObject)) {
+				Document doc = new Document();
+				DocumentHelper.convertObjectToDocument((UUIDDocument) stashedObject, doc);
+				stashedObject = new MongoEntity(doc);
+			}
+			AbstractObject parentObject = (AbstractObject) stashedObject;
+			
 			if(fieldTemplate.getCollection()) {
 				AbstractObject existing = null;
 				for(AbstractObject child : parentObject.getObjectCollection(fieldName)) {
@@ -314,8 +323,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			
 			Feedback.info(childTemplate.getBundle(), fieldName + ".stashed");
 			
-			request.getSession().setAttribute(resourceKey, parentObject);
-
+			objectService.stashObject(parentObject);
 			return new UUIDStatus(childObject.getUuid());
 		}  catch(ValidationException ex) { 
 			return new RequestStatusImpl(false, ex.getMessage());
@@ -340,7 +348,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			ObjectTemplate template = templateService.get(resourceKey);
-			AbstractObject obj = DocumentHelper.buildObject(request, template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(request, template.getResourceKey(), template);
 			objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
 					templateService.getTemplateClass(resourceKey), 
 					new Document(obj.getDocument())));

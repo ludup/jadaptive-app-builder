@@ -2,10 +2,10 @@ $(function() {
 	
 	$(document).on('click', '.jdropdown-item', function(e) {
 		e.preventDefault();
-		$(this).closest(".dropdown").find('input[type="hidden"]').val($(this).data('resourcekey')).change();
 		$(this).closest(".dropdown").find('input[type="text"]').val($(this).text());
 		$(this).closest(".dropdown").find('.jdropdown-text').html($(this).text());
 		$(this).closest(".dropdown").find('.dropdown-menu').removeClass('show');
+		$(this).closest(".dropdown").find('input[type="hidden"]').val($(this).data('resourcekey')).change();
 	});
 	
 	$(document).on('click', '.jdropdown', function(e) {
@@ -164,10 +164,11 @@ $(function() {
 
 	var doOrderState = function(el) {
 
-		el.closest("tbody").find('.fa-arrow-up').show();
-		el.closest("tbody").find('tr').find('.fa-arrow-up').first().hide();
-		el.closest("tbody").find('.fa-arrow-down').show();
-		el.closest("tbody").find('tr').find('.fa-arrow-down').last().hide();
+		el.closest("tbody").find('.collectionSearchUp').find('i').addClass('fa-arrow-up');
+		el.closest("tbody").find('.collectionSearchUp').find('i').first().removeClass('fa-arrow-up');
+		el.closest("tbody").find('.collectionSearchDown').find('i').addClass('fa-arrow-down');
+		el.closest("tbody").find('.collectionSearchDown').find('i').last().removeClass('fa-arrow-down');
+
 	}
 		
 	$(document).on('click', '.collectionSearchDelete', function(e) {
@@ -300,6 +301,37 @@ $(function() {
 	
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
+		$('.processDepends').each(function() {
+			var dependsOn = $(this).data('depends-on');
+			var dependsValue = $(this).attr('data-depends-value');
+			
+			var input = $('#' + dependsOn);
+			var matchValues = dependsValue.split(',');
+			var matches = false;
+			$.each(matchValues, function(i, obj) {
+				
+				var expectedResult = !obj.startsWith("!");
+				if(!expectedResult) {
+					obj = obj.substring(1);
+				}
+				var value;
+				if(input.attr('type') === 'checkbox') {
+					value = input.is(':checked').toString();
+				} else {
+					value = input.val();
+				}
+				if(obj == value) {
+					matches = expectedResult;
+					return true;
+				}
+				return false;
+			});
+			if(matches) {
+				$(this).removeClass('d-none');
+			} else {
+				$(this).addClass('d-none');
+			}
+		});
 	});
 	
 	$('.checkExit').click(function(e) {

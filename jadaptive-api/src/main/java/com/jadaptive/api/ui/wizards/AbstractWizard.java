@@ -14,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
@@ -27,12 +28,35 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	@Autowired
 	private TenantService tenantService; 
 	
+	@Autowired
+	private TransactionService transactionService; 
+	
 	protected abstract Class<? extends WizardSection> getSectionClass();
 	
 	protected abstract String getStateAttribute();
 	
-	public abstract void finish(WizardState state);
+	public void finish(WizardState state) {
+		
+		beforeTransaction(state);
+		transactionService.executeTransaction(()-> {
+			startTransaction(state);
+			for(WizardSection section : state.getSections()) {
+				section.finish(state);
+			}
+			finishTransaction(state);
+			state.completed();
+		});
+		afterTransaction(state);
+	}
 	
+	protected void beforeTransaction(WizardState state) { };
+
+	protected void afterTransaction(WizardState state) { };
+	
+	protected void finishTransaction(WizardState state) { };
+
+	protected void startTransaction(WizardState state) { };
+
 	@Override
 	public WizardState getState(HttpServletRequest request) {
 		

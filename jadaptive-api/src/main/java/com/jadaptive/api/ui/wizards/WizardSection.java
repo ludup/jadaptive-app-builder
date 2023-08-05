@@ -67,7 +67,7 @@ public abstract class WizardSection extends AbstractPageExtension {
 
 	public void validateAndSave(UUIDEntity object, WizardState state) {
 		onValidate(object, state);
-		state.saveObject(object);
+		state.setCurrentObject(object);
 	}
 
 	protected void onValidate(UUIDEntity object, WizardState state) {

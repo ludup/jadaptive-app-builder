@@ -48,5 +48,6 @@ public interface UserService extends UUIDObjectService<User> {
 
 	long countUsers();
 
+	void registerLogin(User user);
 
 }

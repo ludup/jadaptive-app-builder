@@ -38,13 +38,16 @@ $(document).ready(function() {
          });
     });
     
-    $('.stash').click(function(e) {
+    var stashFunc = function(e) {
 		e.preventDefault();
 		
 		$('#feedback').remove();
 		
 		var url = $(this).data('action');
 		var redirect = $(this).data('url');
+		if(!redirect) {
+			redirect = window.location;
+		}
 		var form = $('form');
 		
     	$.ajax({
@@ -67,7 +70,22 @@ $(document).ready(function() {
            		
            }
          });
+	};
+	
+	$('.stash').click(stashFunc);         
+    $('.processAutosave').on('autosave', stashFunc);         
+   
+    $('input').change(function(e) {
+        var auto = $(this).closest('.processAutosave');
+		if(auto.length > 0) {
+			if(!$(this).hasClass('jsearchText')) {
+				$(this).data('action', auto.data('action'));
+				$('.processAutosave').first().trigger('autosave');
+			}
+		}
+	
 	});
+
 
     
 });

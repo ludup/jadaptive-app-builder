@@ -130,4 +130,9 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public void deleteAll() {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public void stashObject(T obj) {
+		stash(obj);
+	}
 }

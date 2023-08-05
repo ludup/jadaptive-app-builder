@@ -33,4 +33,8 @@ public class Events {
 	public static String unassigned(String resourceKey) {
 		return String.format("%s.unassigned", resourceKey);
 	}
+
+	public static String stashed(String resourceKey) {
+		return String.format("%s.stashed", resourceKey);
+	}
 }

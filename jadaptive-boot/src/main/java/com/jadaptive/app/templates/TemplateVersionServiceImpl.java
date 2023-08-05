@@ -79,6 +79,7 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.template.ViewPermission;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
+import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
 import com.jadaptive.api.templates.TemplateVersionService;
@@ -474,18 +475,18 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			ObjectDefinition e = clz.getAnnotation(ObjectDefinition.class);
 			
-			if(Objects.isNull(e.resourceKey())) {
-				log.error("{} requires resource key in ObjectDefinition annotation!", clz.getSimpleName());
-				throw new IllegalStateException();
+			String resourceKey = e.resourceKey();
+			if(StringUtils.isBlank(resourceKey)) {
+				resourceKey = TemplateUtils.lookupClassResourceKey(clz);
 			}
 			
-			ObjectTemplate template = loadedTemplates.get(e.resourceKey());
+			ObjectTemplate template = loadedTemplates.get(resourceKey);
 			if(Objects.nonNull(template)) {
 				return template;
 			}
 			
 			try {
-				template = templateRepository.get(e.resourceKey());
+				template = templateRepository.get(resourceKey);
 				
 				if(log.isInfoEnabled()) {
 					log.info("Registering template from annotations on class {}", clz.getSimpleName());
@@ -496,40 +497,57 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					log.info("Registering NEW template from annotations on class {}", clz.getSimpleName());
 				}
 				template = new ObjectTemplate();
-				template.setUuid(e.resourceKey());
+				template.setUuid(resourceKey);
 			}
 			
-			ObjectDefinition parent = getParentTemplate(clz);
-			ObjectDefinition collection = getCollectionTemplate(clz);
-			
-			boolean auditObject = ReflectionUtils.hasAnnotation(clz, AuditedObject.class);
-			boolean generateEventTemplates = hasGenerateTemplatesAnnotation(clz);
+			Class<?> parentClass = getParentClass(clz);
+			ObjectDefinition parent = null;
+			if(Objects.nonNull(parentClass)) {
+				parent = parentClass.getAnnotation(ObjectDefinition.class);
+			}
 			
 			if(Objects.nonNull(parent)) {
-				if(log.isDebugEnabled()) {
-					log.debug("{} template has {} as parent", e.resourceKey(), parent.resourceKey());
+				String parentResourceKey = parent.resourceKey();
+				if(StringUtils.isBlank(parentResourceKey)) {
+					parentResourceKey = TemplateUtils.lookupClassResourceKey(parentClass);
 				}
-				template.setParentTemplate(parent.resourceKey());
-				ObjectTemplate parentTemplate = templateRepository.get(parent.resourceKey());
+				if(log.isDebugEnabled()) {
+					log.debug("{} template has {} as parent", resourceKey, parentResourceKey);
+				}
+				template.setParentTemplate(parentResourceKey);
+				ObjectTemplate parentTemplate = templateRepository.get(parentResourceKey);
 				if(e.templateType()!=ObjectTemplateType.EXTENDED) {
-					if(!parentTemplate.getChildTemplates().contains(e.resourceKey())) {
-						parentTemplate.addChildTemplate(e.resourceKey());
+					if(!parentTemplate.getChildTemplates().contains(resourceKey)) {
+						parentTemplate.addChildTemplate(resourceKey);
 					}
 				}
 				
 				templateRepository.saveOrUpdate(parentTemplate);
 			}
 			
-			if(Objects.nonNull(collection)) {
-				template.setCollectionKey(collection.resourceKey());
-			} else {
-				template.setCollectionKey(e.resourceKey());
+			Class<?> baseClass = getBaseClass(clz);
+			ObjectDefinition collection = null; 
+			if(Objects.nonNull(baseClass)) {
+				collection = baseClass.getAnnotation(ObjectDefinition.class);
 			}
-			template.setDisplayKey(getDisplayKey(clz, e.resourceKey()));
-			template.setResourceKey(e.resourceKey());
+			
+			boolean auditObject = ReflectionUtils.hasAnnotation(clz, AuditedObject.class);
+			boolean generateEventTemplates = hasGenerateTemplatesAnnotation(clz);
+			
+			if(Objects.nonNull(collection)) {
+				String collectionResourceKey = collection.resourceKey();
+				if(StringUtils.isBlank(collectionResourceKey)) {
+					collectionResourceKey = TemplateUtils.lookupClassResourceKey(baseClass);
+				}
+				template.setCollectionKey(collectionResourceKey);
+			} else {
+				template.setCollectionKey(resourceKey);
+			}
+			template.setDisplayKey(getDisplayKey(clz, resourceKey));
+			template.setResourceKey(resourceKey);
 			template.setTemplateType(e.templateType());
-			template.setBundle(StringUtils.isBlank(e.bundle()) ? e.resourceKey() : e.bundle());
-			template.setName(e.resourceKey());
+			template.setBundle(StringUtils.isBlank(e.bundle()) ? resourceKey : e.bundle());
+			template.setName(resourceKey);
 			template.setHidden(e.hidden());
 			template.setSystem(!auditObject && e.system());
 			template.setType(e.type());
@@ -540,7 +558,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.getAliases().addAll(Arrays.asList(e.aliases()));
 			template.setDefaultFilter(e.defaultFilter());
 			template.setDefaultColumn(e.defaultColumn());
-			template.setName(e.resourceKey());
 			
 			template.setCreatable(e.creatable());
 			template.setUpdatable(e.updatable());
@@ -568,8 +585,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 
 			template.setNameField(nameField);
 			templateRepository.saveOrUpdate(template);
-			loadedTemplates.put(e.resourceKey(), template);
-			templateService.registerTemplateClass(e.resourceKey(), clz, template);
+			loadedTemplates.put(resourceKey, template);
+			templateService.registerTemplateClass(resourceKey, clz, template);
 			
 			switch(template.getType()) {
 			case COLLECTION:
@@ -641,6 +658,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template.getResourceKey(), template.getBundle(), group, clz, 
 				Events.deleted(template.getResourceKey()), newSchema, true);
 		
+		generateEventTemplate(StringUtils.capitalize(group) + "Stashed",
+				template.getResourceKey(), template.getBundle(), group, clz, 
+				Events.stashed(template.getResourceKey()), newSchema, false);
 		
 		generateEventTemplate(StringUtils.capitalize(group) + "Creating",
 				template.getResourceKey(), template.getBundle(), group, clz, 
@@ -1001,9 +1021,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			Class<?> clz = ReflectionUtils.getObjectType(f);
 			ObjectDefinition objd = clz.getAnnotation(ObjectDefinition.class);
 			if(Objects.nonNull(objd)) {
+				String resourceKey = objd.resourceKey();
+				if(StringUtils.isBlank(resourceKey)) {
+					resourceKey = TemplateUtils.lookupClassResourceKey(clz);
+				}
 				t.getValidators().add(new FieldValidator(
 						ValidationType.RESOURCE_KEY, 
-						objd.resourceKey(), ObjectTemplate.RESOURCE_KEY, "resourceKey.invalid"));
+						resourceKey, ObjectTemplate.RESOURCE_KEY, "resourceKey.invalid"));
 			}
 			t.getValidators().add(new FieldValidator(
 					ValidationType.OBJECT_TYPE, 
@@ -1034,24 +1058,20 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 		case OBJECT_REFERENCE:
 		{
-//			if(isEvent) {
-//				t.setFieldType(FieldType.TEXT);
-//			} else {
-				if(StringUtils.isBlank(field.references())) {
-					throw new IllegalStateException("Missing references attribute from OBJECT_REFERENCE typed @ObjectField annotation");
-				} else {
-					t.getValidators().add(new FieldValidator(
-							ValidationType.OBJECT_TYPE, 
-							field.references(), 
-							ObjectTemplate.RESOURCE_KEY,
-							"objectType.invalid"));
-					t.getValidators().add(new FieldValidator(
-							ValidationType.RESOURCE_KEY, 
-							field.references(),
-							ObjectTemplate.RESOURCE_KEY,
-							"resourceKey.invalid"));
-				}
-//			}
+			String resourceKey = field.references();
+			if(StringUtils.isBlank(resourceKey)) {
+				resourceKey = TemplateUtils.lookupClassResourceKey(f.getType());
+			} 
+			t.getValidators().add(new FieldValidator(
+					ValidationType.OBJECT_TYPE, 
+					resourceKey, 
+					ObjectTemplate.RESOURCE_KEY,
+					"objectType.invalid"));
+			t.getValidators().add(new FieldValidator(
+					ValidationType.RESOURCE_KEY, 
+					resourceKey,
+					ObjectTemplate.RESOURCE_KEY,
+					"resourceKey.invalid"));
 			break;
 		}
 		default:
@@ -1098,7 +1118,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return columns;
 	}
 	
-	private ObjectDefinition getParentTemplate(Class<?> clz) {
+	private Class<?> getParentClass(Class<?> clz) {
 		
 		Class<?> parent = clz.getSuperclass();
 		ObjectDefinition template = null;
@@ -1106,12 +1126,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			ObjectDefinition t = parent.getAnnotation(ObjectDefinition.class);
 			if(Objects.nonNull(t)) {
-				template = t;
+				return parent;
 			}
 			parent = parent.getSuperclass();
 		}
 		
-		return template;
+		return null;
+		
 	}
 	
 	private String getDisplayKey(Class<?> clz, String defaultValue) {
@@ -1123,6 +1144,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			ObjectDefinition t = parent.getAnnotation(ObjectDefinition.class);
 			if(Objects.nonNull(t) && t.templateType()!=ObjectTemplateType.EXTENDED) {
 				displayKey = t.resourceKey();
+				if(StringUtils.isBlank(displayKey)) {
+					displayKey = TemplateUtils.lookupClassResourceKey(parent);
+				}
 				break;
 			}
 			parent = parent.getSuperclass();
@@ -1131,20 +1155,20 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return displayKey;
 	}
 	
-	private ObjectDefinition getCollectionTemplate(Class<?> clz) {
+	private Class<?> getBaseClass(Class<?> clz) {
 		
 		Class<?> parent = clz.getSuperclass();
-		ObjectDefinition template = null;
+		Class<?> templateBase = null;
 		while(parent!=null){
 			
 			ObjectDefinition t = parent.getAnnotation(ObjectDefinition.class);
 			if(Objects.nonNull(t)) {
-				template = t;
+				templateBase = parent;
 			}
 			parent = parent.getSuperclass();
 		}
 		
-		return template;
+		return templateBase;
 	}
 
 	private void resolveFields(Class<?> clz, List<Field> fields, boolean recurse) {

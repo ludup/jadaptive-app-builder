@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageHelper;
@@ -23,6 +24,17 @@ public class DropdownFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(Element rootElement, String defaultValue) {
 
+		StringBuffer formVariable = new StringBuffer();
+		
+		if(Objects.nonNull(field.getParentFields())) {
+			for(FieldTemplate t : field.getParentFields()) {
+				formVariable.append(t.getResourceKey());
+				formVariable.append(".");
+			}
+		}
+		
+		formVariable.append(field.getFormVariable());
+		
 		rootElement.appendChild(new Element("div").addClass("row mb-3")
 				.appendChild(new Element("div")
 						.addClass("col-12")
@@ -37,7 +49,7 @@ public class DropdownFormInput extends FieldInputRender {
 						.addClass("input-group position-relative dropdown")
 					.appendChild(valueElement = new Element("input")
 							.attr("id", getFormVariable())
-							.attr("name", getFormVariable())
+							.attr("name", formVariable.toString())
 							.attr("type", "hidden"))
 					.appendChild(nameElement = new Element("input")
 							.attr("id", String.format("%sText", getResourceKey()))

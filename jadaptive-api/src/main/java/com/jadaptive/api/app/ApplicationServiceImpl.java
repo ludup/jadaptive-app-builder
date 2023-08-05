@@ -10,7 +10,9 @@ import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
+import org.pf4j.Plugin;
 import org.pf4j.PluginClassLoader;
+import org.pf4j.PluginDependency;
 import org.pf4j.PluginWrapper;
 import org.pf4j.spring.SpringPlugin;
 import org.pf4j.spring.SpringPluginManager;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.ReflectionUtils;
+import com.jadaptive.api.spring.ExtensionAutowireHelper;
 
 @Service
 public class ApplicationServiceImpl implements ApplicationService {
@@ -114,6 +117,9 @@ public class ApplicationServiceImpl implements ApplicationService {
 	@Override
 	public <T> T autowire(T obj) {
 		
+		List<ApplicationContext> dependencyContexts = new ArrayList<>();
+		ApplicationContext parentContext = null;
+		PluginWrapper pluginWrapper = null;
 		try {
 			if(obj.getClass().getClassLoader() instanceof PluginClassLoader) {
 				PluginClassLoader classLoader = (PluginClassLoader) obj.getClass().getClassLoader();
@@ -121,15 +127,33 @@ public class ApplicationServiceImpl implements ApplicationService {
 					if(w.getPluginClassLoader().equals(classLoader)) {
 						if(w.getPlugin() instanceof SpringPlugin) {
 							SpringPlugin plugin = (SpringPlugin) w.getPlugin();
-							plugin.getApplicationContext().getAutowireCapableBeanFactory().autowireBean(obj);
-							ReflectionUtils.executeAnnotatedMethods(obj, PostConstruct.class);
-							return obj;
+							pluginWrapper = w;
+							parentContext = plugin.getApplicationContext();
+							dependencyContexts.add(parentContext);
+							break;
 						}
 					}
 				}
 			}
 			
-			context.getAutowireCapableBeanFactory().autowireBean(obj);
+			if(Objects.nonNull(pluginWrapper)) {
+				
+				for(PluginDependency dependency : pluginWrapper.getDescriptor().getDependencies()) {
+					PluginWrapper w = pluginManager.getPlugin(dependency.getPluginId());
+					if(w.getPlugin() instanceof SpringPlugin) {
+						SpringPlugin plugin = (SpringPlugin) w.getPlugin();
+						dependencyContexts.add(plugin.getApplicationContext());
+					}
+				}
+			}
+			
+			if(Objects.isNull(parentContext)) {
+				parentContext = context;
+			}
+			
+			parentContext.getAutowireCapableBeanFactory().autowireBean(obj);
+			ExtensionAutowireHelper.autowiredExtensions(obj, dependencyContexts);
+			
 			ReflectionUtils.executeAnnotatedMethods(obj, PostConstruct.class);
 			return obj;
 		

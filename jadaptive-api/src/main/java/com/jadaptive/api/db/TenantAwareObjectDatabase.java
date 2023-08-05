@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.SortOrder;
 
 public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
@@ -42,5 +43,7 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 	Long sum(Class<T> resourceClass, String groupBy, SearchField... fields);
 
 	void deleteAll();
+
+	void stashObject(T obj);
 
 }

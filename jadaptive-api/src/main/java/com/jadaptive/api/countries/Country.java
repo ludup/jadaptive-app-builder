@@ -17,6 +17,9 @@ public class Country {
 	public void setCode(String code) {
 		this.code = code;
 	}
+	public String getResourceKey() {
+		return getCode();
+	}
 	
 	
 

@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
@@ -599,5 +601,12 @@ public class Utils {
 			}
 		}
 		return buf.toString();
+	}
+
+	public static Double round(Double value) {
+		return round(value, 2);
+	}
+	public static Double round(Double value, int digits) {
+		return BigDecimal.valueOf(value).setScale(digits, RoundingMode.HALF_DOWN).doubleValue();
 	}
 }

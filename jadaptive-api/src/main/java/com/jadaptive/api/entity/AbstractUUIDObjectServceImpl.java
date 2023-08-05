@@ -10,6 +10,7 @@ import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
@@ -37,7 +38,13 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 		return object.getUuid();
 	}
 	
-	
+	@Override
+	public boolean onObjectStashed(T obj) {
+		
+		objectDatabase.stashObject(obj);
+		Request.get().getSession().setAttribute(obj.getResourceKey(), obj);
+		return true;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override

@@ -32,6 +32,7 @@ import com.jadaptive.api.user.UserAware;
 import com.jadaptive.api.user.UserDatabase;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.utils.Utils;
 
 @Service
 public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
@@ -97,12 +98,23 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override
 	public User getUser(String username) {
 
-		User user = userRepository.get(User.class, SearchField.eq("username", username));
-		
-		if(Objects.isNull(user)) {
+		try {
+			return userRepository.get(User.class, SearchField.eq("username", username));
+		} catch(ObjectNotFoundException e) {
+			for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {
+				if(userDatabase.getCapabilities().contains(UserDatabaseCapabilities.IMPORT)) {
+					try {
+						User user = userDatabase.importUser(username);
+						if(Objects.nonNull(user)) {
+							return user;
+						}
+					} catch(ObjectNotFoundException e2) { }
+				}
+			}
+			
 			throw new ObjectNotFoundException(String.format("%s not found", username));
+		
 		}
-		return user;
 	}
 	
 	@Override
@@ -234,7 +246,7 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		boolean isNew = StringUtils.isBlank(user.getUuid());
 		db.updateUser(user);
 		if(user instanceof PasswordEnabledUser) {
-			if(isNew || !db.hasEncryptedPassword(user)) {
+			if(isNew || !db.hasPassword(user)) {
 				throw new UriRedirect("/app/ui/set-password/" + user.getUuid());
 			}
 		}
@@ -280,6 +292,15 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override
 	public Map<String, String> getUserProperties(User user) {
 		return new HashMap<>();
+	}
+
+	@Override
+	public void registerLogin(User user) {
+		
+		eventService.haltEvents();
+		user.setLastLogin(Utils.now());
+		getDatabase(user).registerLogin(user);
+		eventService.resumeEvents();
 	}
 
 }

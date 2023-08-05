@@ -197,10 +197,27 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
-	public <T extends UUIDDocument> void stashObject(T uuidObject) throws ValidationException, RepositoryException, ObjectException, IOException {
-		Request.get().getSession().setAttribute(uuidObject.getResourceKey(), uuidObject);
+	public <T extends UUIDDocument> void stashObject(T object) throws ValidationException, RepositoryException, ObjectException, IOException {
+		
+		Document doc = new Document();
+		DocumentHelper.convertObjectToDocument(object, doc);
+		MongoEntity e = new MongoEntity(doc);
+		if(!stashViaObjectBean(e, templateRepository.get(object.getResourceKey()))) {
+			Request.get().getSession().setAttribute(object.getResourceKey(), object);
+		}
+		
+
 	}
 	
+	@Override
+	public <T extends UUIDDocument> void stashObject(AbstractObject object) throws ValidationException, RepositoryException, ObjectException, IOException {
+		
+		if(!stashViaObjectBean(object, templateRepository.get(object.getResourceKey()))) {
+			Request.get().getSession().setAttribute(object.getResourceKey(), object);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends UUIDDocument> T fromStash(String resourceKey, Class<T> uuidObject)  {
 		try {
@@ -329,6 +346,38 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		return objectRepository.save(entity);
 		
 	}
+	
+//	private <T extends UUIDDocument> void stashViaObjectBean(T obj, ObjectTemplate template) {
+//		
+//		assertWrite(template);
+//		
+//		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(template.getResourceKey());
+//		if(Objects.nonNull(clz)) {
+//			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+//			
+//			if(Objects.nonNull(annotation)) {
+//				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+//				bean.onObjectStashed((T)obj);
+//			} 
+//		}		
+//	}
+
+	private boolean stashViaObjectBean(AbstractObject obj, ObjectTemplate template) {
+		
+		assertWrite(template);
+		
+		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(template.getResourceKey());
+		if(Objects.nonNull(clz)) {
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				return bean.onObjectStashed(DocumentHelper.convertDocumentToObject(clz, new Document(obj.getDocument())));
+			} 
+		}		
+		return false;
+	}
+
 	
 	private void deleteViaObjectBean(AbstractObject entity, ObjectTemplate template) {
 		

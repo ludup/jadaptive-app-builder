@@ -14,7 +14,7 @@ public interface WizardFlow extends ExtensionPoint {
 
 	default String getBundle() { return getResourceKey(); };
 	
-	WizardState getState(HttpServletRequest request) throws FileNotFoundException;
+	WizardState getState(HttpServletRequest request);
 
 	void clearState(HttpServletRequest request);
 	

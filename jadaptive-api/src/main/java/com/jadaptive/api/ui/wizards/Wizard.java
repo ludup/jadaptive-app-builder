@@ -202,16 +202,14 @@ public class Wizard extends HtmlPage implements ObjectPage {
 
 	@Override
 	public AbstractObject getObject() {
-		try {
-			WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
-			UUIDEntity obj = state.getObject(state.getCurrentPage());
-			if(Objects.isNull(obj)) {
-				return null;
-			}
-			return objectService.convert(obj);
-		} catch (FileNotFoundException e) {
-			throw new IllegalStateException(e.getMessage(), e);		
+		
+		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
+		UUIDEntity obj = state.getObject(state.getCurrentPage());
+		if(Objects.isNull(obj)) {
+			return null;
 		}
+		return objectService.convert(obj);
+		
 	}
 
 }

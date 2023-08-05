@@ -9,7 +9,6 @@ public enum FieldRenderer {
 	BOOTSTRAP_BADGE,
 	OPTIONAL, 
 	CSS_EDITOR, 
-	COUNTRY,
 	HTML_VIEW,
 	JAVA_EDITOR;
 }

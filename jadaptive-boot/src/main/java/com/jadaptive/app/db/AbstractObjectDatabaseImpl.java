@@ -38,6 +38,7 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.utils.Utils;
 import com.mongodb.MongoWriteException;
@@ -74,6 +75,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 	protected String getCollectionName(Class<?> clz) {
+		
 		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
 		
 		while(template==null || template.type() == ObjectType.OBJECT) {
@@ -81,21 +83,28 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			template = clz.getAnnotation(ObjectDefinition.class);
 		} 
 		if(Objects.nonNull(template)) {
-			ObjectTemplate t = templateRepository.get(template.resourceKey());
-			return t.getCollectionKey();
+			String resourceKey = template.resourceKey();
+			if(StringUtils.isBlank(resourceKey)) {
+				resourceKey = TemplateUtils.lookupClassResourceKey(clz);
+			}
+			return templateRepository.get(resourceKey).getCollectionKey();
 		}
 		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
 	}
 	
 	protected ObjectTemplate getObjectTemplate(Class<?> clz) {
+		
 		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
 		while(template!=null && template.type() == ObjectType.OBJECT) {
 			clz = clz.getSuperclass();
 			template = clz.getAnnotation(ObjectDefinition.class);
 		} 
 		if(Objects.nonNull(template)) {
-			ObjectTemplate t = templateRepository.get(template.resourceKey());
-			return t;
+			String resourceKey = template.resourceKey();
+			if(StringUtils.isBlank(resourceKey)) {
+				resourceKey = TemplateUtils.lookupClassResourceKey(clz);
+			}
+			return templateRepository.get(resourceKey);
 		}
 		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
 	}
@@ -117,6 +126,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 //	protected <T extends UUIDEntity> Map<Class<T>, List> getIteratorCache(String name, Class<T> clz) {
 //		return cacheService.getCacheOrCreate(String.format("iterator.%s.%s", clz.getSimpleName(), name), clz, List.class);
 //	}
+	
+	protected <T extends UUIDEntity> void stash(T object) {
+		onObjectStashed(object);
+	}
 	
 	@SuppressWarnings("unchecked")
 	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
@@ -691,6 +704,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	protected <T extends UUIDEntity> void onObjectCreated(T obj) { 
 		
 		fireEvent(Events.created(obj.getEventGroup()), obj, true);
+	}
+	
+	protected <T extends UUIDEntity> void onObjectStashed(T obj) { 
+		
+		fireEvent(Events.stashed(obj.getEventGroup()), obj, true);
 	}
 
 	protected <T extends UUIDEntity> void onCreatedError(T obj, Throwable t) { 

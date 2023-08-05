@@ -6,5 +6,6 @@ public enum UserDatabaseCapabilities {
 	CREATE,
 	UPDATE,
 	DELETE, 
-	LOGON
+	LOGON,
+	IMPORT
 }
