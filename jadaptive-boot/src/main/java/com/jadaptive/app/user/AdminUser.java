@@ -10,8 +10,10 @@ import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
+import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
+import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
@@ -21,6 +23,7 @@ import com.jadaptive.utils.PasswordEncryptionType;
 @ObjectServiceBean(bean = UserService.class)
 @ObjectViews({ 
 	@ObjectViewDefinition(bundle = "users", value = "passwordOptions")})
+@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}")
 public class AdminUser extends PasswordEnabledUser {
 
 	private static final long serialVersionUID = -4995333149629598100L;

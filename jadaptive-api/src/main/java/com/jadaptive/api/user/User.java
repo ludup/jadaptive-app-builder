@@ -28,8 +28,7 @@ import com.jadaptive.utils.Utils;
 @ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "contact", weight=100),
 	@ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)})
 @TableView(defaultColumns = { "username", "name", "lastLogin" },
-	requiresUpdate = true, sortField = "username", actions = {
-		@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}", writeAction = true) })
+	requiresUpdate = true, sortField = "username")
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
 public abstract class User extends AbstractUUIDEntity implements NamedDocument {

@@ -49,6 +49,9 @@ public class TableRenderer {
 	@Autowired
 	private UserInterfaceService uiService;
 	
+	@Autowired
+	private TemplateService templateService;
+	
 	int start;
 	int length;
 	
@@ -142,7 +145,9 @@ public class TableRenderer {
 						}
 					}
 					
-					renderRowActions(row, obj, view, rowTemplate);
+					TableAction[] rowActions = templateService.getTemplateClass(obj.getResourceKey()).getAnnotationsByType(TableAction.class);
+					
+					renderRowActions(row, obj, view, rowTemplate, rowActions);
 					
 					el.appendChild(row);
 				}
@@ -179,7 +184,7 @@ public class TableRenderer {
 		return results;
 	}
 	
-	private void renderRowActions(Element row, AbstractObject obj, TableView view, ObjectTemplate template) {
+	private void renderRowActions(Element row, AbstractObject obj, TableView view, ObjectTemplate template, TableAction[] actions) {
 		
 		Element el = Html.td("text-end");
 		
@@ -217,16 +222,20 @@ public class TableRenderer {
 			el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2", "copy-placeholder"));
 		}
 		
-		for(TableAction action : view.actions()) {
+//		if(view.requiresCreate() && !canCreate) {
+//			el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2"));
+//		}
+//		if(view.requiresUpdate() && !canUpdate) {
+//			el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2"));
+//		}
+		
+		Collection<TableAction> allActions = new ArrayList<>();
+		allActions.addAll(Arrays.asList(view.actions()));
+		allActions.addAll(Arrays.asList(actions));
+		
+		for(TableAction action : allActions) {
 			if(action.target()==Target.ROW) {
-				if(view.requiresCreate() && !canCreate) {
-					el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2"));
-					continue;
-				}
-				if(view.requiresUpdate() && !canUpdate) {
-					el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2"));
-					continue;
-				}
+				
 				Object val = obj.getValue(template.getDefaultColumn());
 				if(action.confirmationRequired()) {
 					if(StringUtils.isNotBlank(template.getDefaultColumn())) {
