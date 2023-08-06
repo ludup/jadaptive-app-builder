@@ -534,6 +534,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		if(e instanceof RepositoryException) {
 			throw (RepositoryException)e;
 		}
+		
+		log.error("Document error", e);
+		
 		if(e instanceof MongoWriteException) {
 			MongoWriteException mwe = (MongoWriteException)e;
 			switch(mwe.getCode()) {
@@ -545,7 +548,6 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			}
 			
 		}
-		log.error("Document error", e);
 	}
 	
 	protected <T extends UUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, ObjectException {
