@@ -60,8 +60,9 @@ public class AbstractSpringPlugin extends SpringPlugin {
 			
 			if(dependWrapper.getPlugin() instanceof SpringPlugin) {
 				if(log.isInfoEnabled()) {
-					log.info("Plugin {} has a Spring parent context from {}",
+					log.info("Plugin {} has {} Spring parent context from {}",
 							wrapper.getPluginId(), 
+							parentContexts.isEmpty() ? "primary" : "secondary",
 							dependWrapper.getPluginId());
 				}
 				ApplicationContext ctx = ((SpringPlugin)dependWrapper.getPlugin()).getApplicationContext();
@@ -73,11 +74,13 @@ public class AbstractSpringPlugin extends SpringPlugin {
 		}
 		
 		if(log.isInfoEnabled()) {
-			log.info("Creating application context for {}", wrapper.getPluginId());
+			log.info("Creating application context for {} from parent context {}", 
+					wrapper.getPluginId(),
+					parentContext.getDisplayName());
 		}
 		
 		AnnotationConfigApplicationContext pluginContext = new AnnotationConfigApplicationContext();
-		
+		pluginContext.setDisplayName(wrapper.getPluginId());
 		pluginContext.setParent(parentContext);
 		pluginContext.setClassLoader(wrapper.getPluginClassLoader());
 		pluginContext.scan(getBasePackages());
