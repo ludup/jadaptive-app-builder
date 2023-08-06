@@ -90,9 +90,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		tenantSessions.put(session.getUuid(), session);
 		
 		
-		eventService.haltEvents();
 		userService.registerLogin(user);
-		eventService.resumeEvents();
 		
 		tenantService.executeAs(tenant, ()->eventService.publishEvent(new SessionOpenedEvent(session)));
 		return session;

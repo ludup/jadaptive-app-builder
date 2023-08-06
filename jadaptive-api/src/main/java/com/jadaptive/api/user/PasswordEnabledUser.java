@@ -2,7 +2,7 @@ package com.jadaptive.api.user;
 
 import com.jadaptive.utils.PasswordEncryptionType;
 
-public abstract class PasswordEnabledUser extends User {
+public abstract class PasswordEnabledUser extends User implements PasswordChangeRequired {
 
 	private static final long serialVersionUID = 8159475827968045376L;
 
@@ -19,7 +19,5 @@ public abstract class PasswordEnabledUser extends User {
 	public abstract void setEncodingType(PasswordEncryptionType encodingType);
 
 	public abstract void setPasswordChangeRequired(boolean passwordChangeRequired);
-
-	public abstract boolean getPasswordChangeRequired();
 
 }

@@ -14,6 +14,7 @@ import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.pages.user.ChangePassword.PasswordForm;
+import com.jadaptive.api.user.PasswordChangeRequired;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
@@ -70,9 +71,9 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 
 	@Override
 	public boolean requiresProcessing(AuthenticationState state) {
-		if(state.getUser() instanceof PasswordEnabledUser) {
+		if(state.getUser() instanceof PasswordChangeRequired) {
 			
-	    	if(((PasswordEnabledUser)state.getUser()).getPasswordChangeRequired()) {
+	    	if(((PasswordChangeRequired)state.getUser()).getPasswordChangeRequired()) {
 	    		permissionService.setupUserContext(state.getUser());
 	    		try {
 		    		permissionService.assertPermission(UserService.CHANGE_PASSWORD_PERMISSION);
