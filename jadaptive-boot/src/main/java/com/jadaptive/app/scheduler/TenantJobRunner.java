@@ -13,6 +13,7 @@ import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.utils.Utils;
 
 public class TenantJobRunner implements Runnable {
 
@@ -42,6 +43,11 @@ public class TenantJobRunner implements Runnable {
 	public void schedule(TenantTask task, String expression) {
 		this.task = task;
 		future = taskScheduler.schedule(this, new CronTrigger(expression));
+	}
+	
+	public void runNow(TenantTask task) {
+		this.task = task;
+		taskScheduler.schedule(task, Utils.now());
 	}
 	
 	@Override

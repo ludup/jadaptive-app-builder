@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,6 +107,9 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 					try {
 						User user = userDatabase.importUser(username);
 						if(Objects.nonNull(user)) {
+							if(StringUtils.isBlank(user.getUuid())) {
+								user.setUuid(UUID.randomUUID().toString());
+							}
 							return user;
 						}
 					} catch(ObjectNotFoundException e2) { }
