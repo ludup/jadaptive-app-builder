@@ -35,7 +35,7 @@ public class Logoff extends AuthenticatedPage {
 			sessionService.closeSession(sessionUtils.getActiveSession(Request.get()));
 		} catch (AccessDeniedException | ObjectNotFoundException e) {
 		}
-		throw new PageRedirect(pageCache.resolvePage(Login.class));
+		throw new PageRedirect(pageCache.resolveDefault());
 	}
 
 	@Override

@@ -23,10 +23,14 @@ import java.util.StringTokenizer;
 import javax.crypto.Cipher;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RsaEncryptionProvider {
 
 	static public RsaEncryptionProvider instance;
+	
+	static Logger log = LoggerFactory.getLogger(RsaEncryptionProvider.class);
 	
 	private File privateFolder = new File("conf", "private");
 	private File prvFile = new File(privateFolder, "secrets");
@@ -76,13 +80,19 @@ public class RsaEncryptionProvider {
 	}
 	
 	private void setOwnerPermissions(Path path) throws IOException {
-		Set<PosixFilePermission> ownerWritable;
-		if(Files.isDirectory(path)) {
-			ownerWritable = PosixFilePermissions.fromString("rwx------");
-		} else {
-			ownerWritable = PosixFilePermissions.fromString("rw-------");
+		
+		
+		try {
+			Set<PosixFilePermission> ownerWritable;
+			if(Files.isDirectory(path)) {
+				ownerWritable = PosixFilePermissions.fromString("rwx------");
+			} else {
+				ownerWritable = PosixFilePermissions.fromString("rw-------");
+			}
+			Files.setPosixFilePermissions(path, ownerWritable);
+		} catch (Throwable e) {
+			log.warn("Could not set strict permissions on private keys", e);
 		}
-		Files.setPosixFilePermissions(path, ownerWritable);
 	}
 	
 	private void loadKeys() throws Exception {

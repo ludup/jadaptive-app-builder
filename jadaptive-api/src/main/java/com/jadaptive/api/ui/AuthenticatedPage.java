@@ -25,14 +25,13 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	
 	ThreadLocal<Session> currentSession = new ThreadLocal<>();
 	
-	
 	@Override
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response)
 			throws FileNotFoundException {
 		super.beforeProcess(uri, request, response);
 		
 		if(!sessionUtils.hasActiveSession(request)) {
-			throw new PageRedirect(pageCache.getPage(Login.class));
+			throw new PageRedirect(pageCache.resolveDefault());
 		}
 		
 		currentSession.set(sessionUtils.getActiveSession(Request.get()));

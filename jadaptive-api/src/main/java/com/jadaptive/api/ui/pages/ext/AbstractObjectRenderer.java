@@ -386,6 +386,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 		}
 		
+		if(Objects.isNull(obj) && 
+				field.isReadOnly() &&
+				fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
+			return;
+		}
+		
 		switch(field.getFieldType()) {
 		case BOOL:
 			break;
@@ -400,6 +406,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				for(String val : obj.getCollection(field.getResourceKey())) {
 					values.add(val);
 				}
+			}
+			
+			if(values.isEmpty() && 
+					field.isReadOnly() &&
+					fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
+				return;
 			}
 			
 			List<String> available = new ArrayList<>();
@@ -438,6 +450,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				objects = new ArrayList<>();
 			}
 			
+			if(objects.isEmpty() && 
+					field.isReadOnly() &&
+					fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
+				return;
+			}
+			
 			table.setLength(objects.size());
 			table.setStart(0);
 			table.setTotalObjects(objects.size());
@@ -464,6 +482,13 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					}
 				}
 			}
+			
+			if(values.isEmpty() && 
+					field.isReadOnly() &&
+					fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
+				return;
+			}
+			
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), fieldView, String.format("/app/api/objects/%s/table", objectType),
 					objectTemplate.getNameField(), "uuid");
@@ -502,11 +527,18 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 //			}
 			default:
 			{
+				Collection<String> values = Objects.nonNull(obj) ? obj.getCollection(field.getResourceKey())
+						: Collections.emptyList();
+				
+				if(values.isEmpty() && 
+						field.isReadOnly() &&
+						(fieldView.getRenderer() == FieldRenderer.OPTIONAL)) {
+					return;
+				}
+				
 				CollectionTextFormInput render = new CollectionTextFormInput(currentTemplate.get(), fieldView);
 				render.renderInput(panel, element, 
-						Objects.nonNull(obj) ? 
-								obj.getCollection(field.getResourceKey()) 
-								: Collections.emptyList(), (view == FieldView.READ || fieldView.getField().isReadOnly()));
+						values, (view == FieldView.READ || fieldView.getField().isReadOnly()));
 				break;
 			}
 			}

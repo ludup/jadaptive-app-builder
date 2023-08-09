@@ -162,7 +162,7 @@ public class LogonController {
 		
 		Request.get().getSession().setAttribute(AuthenticationService.AUTHENTICATION_STATE_ATTR, state);
 		
-		throw new PageRedirect(pageCache.resolvePage(Login.class));
+		throw new PageRedirect(pageCache.resolveDefault());
 	}
 	
 }

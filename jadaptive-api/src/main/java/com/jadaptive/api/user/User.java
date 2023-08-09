@@ -1,5 +1,6 @@
 package com.jadaptive.api.user;
 
+import java.util.Collection;
 import java.util.Date;
 
 import com.jadaptive.api.db.Transactional;
@@ -8,6 +9,7 @@ import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.ExcludeView;
+import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -16,8 +18,6 @@ import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
-import com.jadaptive.api.template.TableAction;
-import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
@@ -63,6 +63,10 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@ExcludeView(values =  { FieldView.CREATE })
 	@ObjectView(DETAILS_VIEW)
 	Date lastLogin;
+	
+	@ObjectField(type = FieldType.TEXT, readOnly = true)
+	@ObjectView(value = DETAILS_VIEW, renderer = FieldRenderer.OPTIONAL)
+	Collection<String> aliases;
 
 	public String getUsername() {
 		return username;
@@ -102,6 +106,14 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	public void setMobilePhone(String mobilePhone) {
 		this.mobilePhone = mobilePhone;
+	}
+
+	public Collection<String> getAliases() {
+		return aliases;
+	}
+
+	public void setAliases(Collection<String> aliases) {
+		this.aliases = aliases;
 	}
 	
 }

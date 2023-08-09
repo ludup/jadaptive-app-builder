@@ -80,7 +80,7 @@ public class EmbeddedMongoWithTransactionsConfig {
                 		.initializedWith(ImmutableNet.builder()
                 				.isIpv6(false)
                 				.port(ApplicationProperties.getValue("mongodb.port", DFLT_PORT_NUMBER))
-                    	.bindIp(ApplicationProperties.getValue("mongodb.address", "127.0.0.1")).build()))
+                    	.bindIp(ApplicationProperties.getValue("mongodb.hostname", "127.0.0.1")).build()))
                 .build();
 
         mongod.start(mFeatureAwareVersion);
@@ -99,7 +99,8 @@ public class EmbeddedMongoWithTransactionsConfig {
 	        MongoClient mongoClient = null;
 	        try {
 	            final BasicDBList members = new BasicDBList();
-	            members.add(new Document("_id", 0).append("host", "localhost:" + 
+	            members.add(new Document("_id", 0).append("host",
+	            		ApplicationProperties.getValue("mongodb.hostname", "127.0.0.1") + 
 	            		ApplicationProperties.getValue("mongodb.port", 27017)));
 	
 	            final Document replSetConfig = new Document("_id", mReplicaSetName);
@@ -107,7 +108,7 @@ public class EmbeddedMongoWithTransactionsConfig {
 	
 	            mongoClient =
 	                new MongoClient(new ServerAddress(
-	                		ApplicationProperties.getValue("mongodb.address", "127.0.0.1"), 
+	                		ApplicationProperties.getValue("mongodb.hostname", "127.0.0.1"), 
 	                		ApplicationProperties.getValue("mongodb.port", 27017)));
 	            final MongoDatabase adminDatabase = mongoClient.getDatabase("admin");
 	            adminDatabase.runCommand(new Document("replSetInitiate", replSetConfig));

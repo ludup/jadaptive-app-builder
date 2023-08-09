@@ -100,7 +100,10 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	public User getUser(String username) {
 
 		try {
-			return userRepository.get(User.class, SearchField.eq("username", username));
+			return userRepository.get(User.class, 
+					SearchField.or(
+					SearchField.eq("username", username),
+					SearchField.in("aliases", username)));
 		} catch(ObjectNotFoundException e) {
 			for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {
 				if(userDatabase.getCapabilities().contains(UserDatabaseCapabilities.IMPORT)) {
@@ -119,17 +122,6 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 			throw new ObjectNotFoundException(String.format("%s not found", username));
 		
 		}
-	}
-	
-	@Override
-	public User getUserByEmail(String email) {
-
-		User user = userRepository.get(User.class, SearchField.eq("email", email));
-		
-		if(Objects.isNull(user)) {
-			throw new ObjectNotFoundException(String.format("%s not found", email));
-		}
-		return user;
 	}
 
 	@Override

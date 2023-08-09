@@ -30,8 +30,6 @@ public interface UserService extends UUIDObjectService<User> {
 
 	Iterable<User> allObjects();
 
-	User getUserByEmail(String email);
-
 	Collection<ObjectTemplate> getCreateUserTemplates();
 
 	void deleteUser(User confirmedUser);

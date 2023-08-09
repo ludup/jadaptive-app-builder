@@ -23,6 +23,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.ui.pages.Welcome;
+import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.utils.FileUtils;
 
 @Component
@@ -41,6 +42,8 @@ public class PageCache {
 	Map<String,Page> aliasCache = new HashMap<>();
 	Map<Class<? extends Page>, Page> pageCache = new HashMap<>();
 	Class<? extends Page> homePage;
+	private Class<? extends Page> defaultPage = Login.class;
+	
 	
 	public Page resolvePage(String resourceUri) throws FileNotFoundException, AccessDeniedException {
 		
@@ -309,5 +312,21 @@ public class PageCache {
 
 	public static String getPageURL(Page returnTo) {
 		return new PageRedirect(returnTo).getUri();
+	}
+
+	public void setDefaultPage(Class<? extends Page> defaultPage) {
+		this.defaultPage = defaultPage;
+	}
+	
+	public Page resolveDefault() {
+		try {
+			return resolvePage(defaultPage);
+		} catch (FileNotFoundException e) {
+			throw new IllegalStateException("There is no default page set!");
+		}
+	}
+
+	public Class<? extends Page> getDefaultPage() {
+		return defaultPage;
 	}
 }
