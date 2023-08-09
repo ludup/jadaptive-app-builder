@@ -811,7 +811,10 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 							value = depends.getDefaultValue();
 						}
 						if(value.toString().equals(matchValue)) {
-							matches = expectedResult;
+							matches = true;
+							break;
+						} else if(!expectedResult) {
+							matches = true;
 							break;
 						}
 					}
