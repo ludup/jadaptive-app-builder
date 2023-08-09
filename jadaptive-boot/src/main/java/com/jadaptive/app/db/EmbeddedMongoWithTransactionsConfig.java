@@ -100,7 +100,7 @@ public class EmbeddedMongoWithTransactionsConfig {
 	        try {
 	            final BasicDBList members = new BasicDBList();
 	            members.add(new Document("_id", 0).append("host",
-	            		ApplicationProperties.getValue("mongodb.hostname", "127.0.0.1") + 
+	            		ApplicationProperties.getValue("mongodb.hostname", "127.0.0.1") + ":" + 
 	            		ApplicationProperties.getValue("mongodb.port", 27017)));
 	
 	            final Document replSetConfig = new Document("_id", mReplicaSetName);

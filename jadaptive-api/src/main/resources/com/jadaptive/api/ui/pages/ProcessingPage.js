@@ -1,7 +1,11 @@
 $(function() {
 					
 	$.get('/app/api/process/' + $('#uuid').val()).then(function(res) {
-		window.location = res.message;	
+		
+		setTimeout(function() {
+			window.location = res.message;
+		}, 2000);
+			
 	});
 		
 });

@@ -83,7 +83,7 @@ public class Dashboard extends AuthenticatedPage {
 					Element row = count % 2 == 0 ? left : right;
 					Element w;
 					Element help;
-					row.appendChild(new Element("div").addClass("row").appendChild(new Element("div")
+					Element e = new Element("div").addClass("row").appendChild(new Element("div")
 							.addClass("col-md-12 mb-3 h-100")
 							.appendChild(new Element("div")
 									.addClass("card")
@@ -97,7 +97,7 @@ public class Dashboard extends AuthenticatedPage {
 														.attr("jad:i18n",String.format("%s.name", widget.getName()) )))
 												.appendChild(help = Html.div("w-25 float-end text-end")))
 									.appendChild(w = new Element("div")
-											.addClass("card-body")))));
+											.addClass("card-body"))));
 					
 					if(widget.hasHelp()) {
 						help.appendChild(new Element("a")
@@ -109,9 +109,10 @@ public class Dashboard extends AuthenticatedPage {
 					
 					try {
 						widget.renderWidget(document, w);
+						row.appendChild(e);
 						count++;
-					} catch(Throwable e) {
-						log.error("Consumed exception whilst processing dashboard widget {}", widget.getName(), e);
+					} catch(Throwable ex) {
+						log.error("Consumed exception whilst processing dashboard widget {}", widget.getName(), ex);
 					}
 				}
 			}
