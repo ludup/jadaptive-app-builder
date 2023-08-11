@@ -131,11 +131,11 @@
 	
 	<repositories>
 		<repository>
-			<id>oss-snapshots</id>
+			<id>public-snapshots</id>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+			<url>https://artifactory.jadaptive.com/public-snapshots/</url>
 		</repository>
 	</repositories>
 </project>
