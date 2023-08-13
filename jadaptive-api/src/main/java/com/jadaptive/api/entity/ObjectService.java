@@ -44,6 +44,8 @@ public interface ObjectService {
 	<T extends UUIDDocument> void stashObject(T obj) throws ValidationException, RepositoryException, ObjectException, IOException;
 
 	<T extends UUIDDocument> T fromStash(String resourceKey, Class<T> clz);
+	
+	<T extends UUIDDocument> T peekStash(String resourceKey, Class<T> clz);
 
 	
 }

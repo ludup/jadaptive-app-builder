@@ -295,8 +295,12 @@ $(function() {
 		JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
 	});
 	
-	$('.spinClick').on('click', function(e) {
+	$('.spinClick').on('click', function() {
 		JadaptiveUtils.startAwesomeSpin($(this).children('i'));
+	});
+	
+	$('form').on('submit', function() {
+		JadaptiveUtils.startAwesomeSpin($(this).find('.spinForm').children('i'));
 	});
 	
 	$('input').change(function(e) {
