@@ -85,6 +85,8 @@ public class AbstractSpringPlugin extends SpringPlugin {
 		pluginContext.setClassLoader(wrapper.getPluginClassLoader());
 		pluginContext.scan(getBasePackages());
 		pluginContext.refresh();
+		
+		parentContexts.add(parentContext);
       
 		for(String name : pluginContext.getBeanDefinitionNames()) {
 			Object bean = pluginContext.getBean(name);

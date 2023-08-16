@@ -85,6 +85,21 @@ public abstract class HtmlPage implements Page {
 		
 		beforeProcess(uri, request, response);
 		
+		Document document = generateHTMLDocument(uri);
+		
+		if(!isCacheable()) {
+			sessionUtils.setDoNotCache(response);
+		} else {
+			sessionUtils.setCachable(response, getMaxAge());
+		}
+		
+		afterProcess(uri, request, response);
+		ResponseHelper.sendContent(document.toString(), "text/html;charset=UTF-8;", request, response);
+	}
+
+	@Override
+	public Document generateHTMLDocument(String uri) throws IOException {
+		
 		Document document = resolveDocument(this);
 		
 		processPageDependencies(document);
@@ -103,7 +118,9 @@ public abstract class HtmlPage implements Page {
 			}
 		}
 		
-		injectFeedback(document, request);
+		if(Request.isAvailable()) {
+			injectFeedback(document, Request.get());
+		}
 		processPageExtensions(uri, document);
 		documentComplete(document);
 		
@@ -113,14 +130,7 @@ public abstract class HtmlPage implements Page {
 			}
 		}
 		
-		if(!isCacheable()) {
-			sessionUtils.setDoNotCache(response);
-		} else {
-			sessionUtils.setCachable(response, getMaxAge());
-		}
-		
-		afterProcess(uri, request, response);
-		ResponseHelper.sendContent(document.toString(), "text/html;charset=UTF-8;", request, response);
+		return document;
 	}
 
 	protected void documentComplete(Document document) throws FileNotFoundException, IOException { };

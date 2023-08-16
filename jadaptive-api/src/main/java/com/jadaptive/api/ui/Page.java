@@ -32,4 +32,6 @@ public interface Page extends PageResources, ExtensionPoint {
 			throws IOException;;
 			
     void addProcessor(PageExtension ext);
+
+	Document generateHTMLDocument(String uri) throws IOException;
 }

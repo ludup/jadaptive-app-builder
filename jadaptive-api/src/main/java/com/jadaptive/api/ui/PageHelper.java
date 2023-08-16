@@ -64,15 +64,25 @@ public class PageHelper {
 	}
 	
 	public static void appendStylesheet(Document document, String uri, String id) {
+		appendStylesheet(document, uri, id, "screen");
+	}
+	
+	public static void appendStylesheet(Document document, String uri, String id, String media) {
 		Element head = PageHelper.getOrCreateTag(document, "head");
 		
 		for(Element e : head.getElementsByTag("link")) {
 			if(uri.equals(e.attr("href"))) {
-				return;
+				if(e.attr("media") == media) {
+					return;
+				}
 			}
 		}
 		
-		PageHelper.appendLast(head, "link", new Element("link").attr("id", id).attr("href", uri).attr("rel", "stylesheet"));
+		PageHelper.appendLast(head, "link", new Element("link")
+				.attr("id", id)
+				.attr("href", uri)
+				.attr("media", media)
+				.attr("rel", "stylesheet"));
 	}
 
 	public static Element createAnchor(String href, String text) {
