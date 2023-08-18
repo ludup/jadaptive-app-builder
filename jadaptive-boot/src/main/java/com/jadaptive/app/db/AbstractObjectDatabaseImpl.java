@@ -542,9 +542,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			switch(mwe.getCode()) {
 			case 11000:
 			case -3:
-				throw new RepositoryException("The object could not be saved because of a unique constraint violation");
+				throw new RepositoryException("The object could not be saved because of a unique constraint violation", e);
 			default:
-				throw new RepositoryException(mwe.getError().getMessage().split(":")[0]);
+				throw new RepositoryException(mwe.getError().getMessage().split(":")[0], e);
 			}
 			
 		}

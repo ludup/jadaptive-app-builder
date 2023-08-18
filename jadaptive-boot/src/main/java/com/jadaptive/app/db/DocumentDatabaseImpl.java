@@ -81,32 +81,36 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Override
 	public void doInTransaction(Runnable r) {
 		
-		currentSession.set(mongo.getClient().startSession());
-		if(log.isDebugEnabled()) {
-			log.debug("Starting transaction");
-		}
-		currentSession.get().startTransaction();
-		try {
+		if(isTransactionActive()) {
 			r.run();
+		} else {
+			currentSession.set(mongo.getClient().startSession());
 			if(log.isDebugEnabled()) {
-				log.debug("Committing transaction");
+				log.debug("Starting transaction");
 			}
-			currentSession.get().commitTransaction();
-		} catch(Throwable t) {
-			if(log.isDebugEnabled()) {
-				log.debug("Aborting transaction");
+			currentSession.get().startTransaction();
+			try {
+				r.run();
+				if(log.isDebugEnabled()) {
+					log.debug("Committing transaction");
+				}
+				currentSession.get().commitTransaction();
+			} catch(Throwable t) {
+				if(log.isDebugEnabled()) {
+					log.debug("Aborting transaction");
+				}
+				currentSession.get().abortTransaction();
+				if(t instanceof RepositoryException || t instanceof ObjectException) {
+					throw t;
+				}
+				throw new IllegalStateException("Transaction failed with " + t.getMessage(), t);
+			} finally {
+				if(log.isDebugEnabled()) {
+					log.debug("Closing session");
+				}
+				currentSession.get().close();
+				currentSession.remove();
 			}
-			currentSession.get().abortTransaction();
-			if(t instanceof RepositoryException || t instanceof ObjectException) {
-				throw t;
-			}
-			throw new IllegalStateException("Transaction failed with " + t.getMessage(), t);
-		} finally {
-			if(log.isDebugEnabled()) {
-				log.debug("Closing session");
-			}
-			currentSession.get().close();
-			currentSession.remove();
 		}
 	}
 	
