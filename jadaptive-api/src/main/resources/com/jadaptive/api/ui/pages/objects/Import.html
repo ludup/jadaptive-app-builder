@@ -33,10 +33,10 @@
 			<div id="importFields" class="col-6">
 				<h2>Import Columns</h2>
 				<form>
-					<div class="csvColumns">
+					<div id="csvColumns">
 
 					</div>
-					<div class="row">
+					<div class="row  mt-3">
 						<button id="addColumn" type="button"
 							class="bg-dark btn btn-success">Add Column</button>
 					</div>
@@ -48,7 +48,7 @@
 					action="/app/upload" method="post">
 					<input type="hidden" id="orderedFields" name="orderedFields"
 						class="form-control" value="">
-					<div class="row">
+					<div class="row mt-3">
 						<div class="col-6">
 							<label for="quoteChar">Quote Character</label>
 						</div>
@@ -57,7 +57,7 @@
 								class="form-control" value="&quot">
 						</div>
 					</div>
-					<div class="row">
+					<div class="row mt-3">
 						<div class="col-6">
 							<label for="delimiterChar">Delimiter Character</label>
 						</div>
@@ -66,7 +66,7 @@
 								class="form-control" value=",">
 						</div>
 					</div>
-					<div class="row">
+					<div class="row mt-3">
 						<div class="col-6">
 							<label for="containsHeader">Contains Headers</label>
 						</div>
@@ -75,7 +75,7 @@
 								class="form-check-input" value="true">
 						</div>
 					</div>
-					<div class="row">
+					<div class="row mt-3">
 						<div class="col-6">
 							<label for="surroundingSpacesNeedQuotes">Spaces Need
 								Quotes</label>
@@ -85,7 +85,7 @@
 								class="form-check-input" value="true">
 						</div>
 					</div>
-					<div class="row">
+					<div class="row mt-3">
 						<div class="col-6">
 							<label for="ignoreEmptyLines">Ignore Empty Lines</label>
 						</div>
@@ -94,7 +94,7 @@
 								class="form-check-input" value="true">
 						</div>
 					</div>
-					<div class="row">
+					<div class="row mt-3">
 						<div class="col-6">
 							<label for="file">CSV File</label>
 						</div>
@@ -102,13 +102,12 @@
 							<input id="image-file" type="file" name="file" />
 						</div>
 					</div>
-					<div class="row">
+					<div class="row mt-3">
 						<button id="importButton" class="bg-dark btn btn-success">Import</button>
 					</div>
 				</form>
 			</div>
 		</div>
-  </div>
 
 </main>
 </div>

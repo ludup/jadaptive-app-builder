@@ -19,6 +19,8 @@ public @interface ObjectView {
 
 	boolean disableEncoding() default false;
 	
+	boolean disableLabels() default false;
+	
 	String dependsOn() default "";
 	
 	String dependsValue() default "";

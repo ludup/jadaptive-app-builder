@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.jadaptive</groupId>
@@ -6,6 +8,10 @@
 		<version>0.4.0-SNAPSHOT</version>
 		<relativePath>../</relativePath>
 	</parent>
+	
+	<properties>
+		<spring-security-saml2-core.version>2.0.0.M31</spring-security-saml2-core.version>
+	</properties>
 
 	<artifactId>jadaptive-api</artifactId>
 	<name>JADAPTIVE - API Interfaces</name>
@@ -21,7 +27,19 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
+		<dependency>
+            <groupId>org.springframework.security.extensions</groupId>
+            <artifactId>spring-security-saml2-core</artifactId>
+            <version>${spring-security-saml2-core.version}</version>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.slf4j</groupId>
+            		<artifactId>slf4j-api</artifactId>
+            	</exclusion>
+            </exclusions>
+        </dependency>
+        
 		<dependency>
 			<groupId>org.pf4j</groupId>
 			<artifactId>pf4j-spring</artifactId>
@@ -106,6 +124,12 @@
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
 			<version>1.12.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 

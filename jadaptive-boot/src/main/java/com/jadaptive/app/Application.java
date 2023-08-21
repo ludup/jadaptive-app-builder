@@ -25,6 +25,7 @@ import org.springframework.boot.Banner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
@@ -36,7 +37,7 @@ import com.jadaptive.api.x509.InvalidPassphraseException;
 import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = { JmxAutoConfiguration.class })
 public class Application {
 
 	static Logger log = LoggerFactory.getLogger(Application.class);

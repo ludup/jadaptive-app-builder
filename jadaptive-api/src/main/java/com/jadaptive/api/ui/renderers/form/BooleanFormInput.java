@@ -16,35 +16,37 @@ public class BooleanFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(Element rootElement, String value) {
 		
-
-		rootElement.appendChild(new Element("div")
-						.addClass("row mb-3")
-						.appendChild(new Element("div")
-								.addClass("col-12")
-				
+		Element e;
+		rootElement.appendChild(e = new Element("div")
+						.addClass("row mb-3"));
+		
+		e.appendChild(new Element("div")
+				.addClass("col-12")
 				.appendChild(new Element("label")
-						.attr("for", field.getFormVariable())
-						.addClass("form-label")
-						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))))
-						.appendChild(new Element("div")
-								.addClass("col-12")
-						.appendChild(new Element("div")
-								.addClass("col-12 form-check form-switch")
-				
-				.appendChild(input = new Element("input")
-					.attr("id", field.getFormVariable())
-					.attr("name", field.getFormVariable())
-					.attr("type", "checkbox")
-					.addClass("form-check-input")
-					.val("true")))
-						.appendChild(new Element("div")
-								.addClass("col-12"))
+					.attr("for", field.getFormVariable())
+					.addClass("form-label")
+					.attr("jad:bundle", field.getBundle())
+					.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))));
+		
+		
+		e.appendChild(new Element("div")
+							.addClass("col-12")
+					.appendChild(new Element("div")
+							.addClass("col-12 form-check form-switch")))
+					.appendChild(input = new Element("input")
+							.attr("id", field.getFormVariable())
+							.attr("name", field.getFormVariable())
+							.attr("type", "checkbox")
+							.addClass("form-check-input")
+							.val("true"));
+		
+		e.appendChild(new Element("div")
+				.addClass("col-12"))
 				.appendChild(new Element("p")
 						.addClass("form-text")
 						.addClass("text-muted text-small")
 						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
+						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())));
 
 		if("true".equalsIgnoreCase(value)) {
 			input.attr("checked", "checked");
