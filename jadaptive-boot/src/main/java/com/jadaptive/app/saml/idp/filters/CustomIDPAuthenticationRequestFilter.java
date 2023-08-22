@@ -8,7 +8,10 @@ import org.springframework.security.saml.saml2.authentication.Assertion;
 import org.springframework.security.saml.saml2.authentication.AuthenticationRequest;
 import org.springframework.security.saml.saml2.metadata.ServiceProviderMetadata;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class CustomIDPAuthenticationRequestFilter extends CustomIDPInitiatedLoginFilter {
 
@@ -21,7 +24,7 @@ public class CustomIDPAuthenticationRequestFilter extends CustomIDPInitiatedLogi
         );
     }
 
-    public CustomIDPAuthenticationRequestFilter(SamlProviderProvisioning<IdentityProviderService> provisioning,
+	public CustomIDPAuthenticationRequestFilter(SamlProviderProvisioning<IdentityProviderService> provisioning,
                                                 SamlMessageStore<Assertion, HttpServletRequest> assertionStore,
                                                 SamlRequestMatcher requestMatcher) {
         super(provisioning, assertionStore, requestMatcher);

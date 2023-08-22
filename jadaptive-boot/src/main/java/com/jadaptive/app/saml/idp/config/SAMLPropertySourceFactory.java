@@ -17,8 +17,11 @@ public class SAMLPropertySourceFactory implements PropertySourceFactory {
         YamlPropertiesFactoryBean factory = new YamlPropertiesFactoryBean();
         factory.setResources(encodedResource.getResource());
 
-        Properties properties = factory.getObject();
-
-        return new PropertiesPropertySource(encodedResource.getResource().getFilename(), properties);
+        try {
+        	Properties properties = factory.getObject();
+        	return new PropertiesPropertySource(encodedResource.getResource().getFilename(), properties);
+        } catch(Throwable e) {
+        	return new PropertiesPropertySource("saml.yml", new Properties());
+        }
     }
 }

@@ -3,6 +3,9 @@ package com.jadaptive.api.ui.pages.auth;
 import java.io.FileNotFoundException;
 import java.util.Objects;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -10,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.auth.AuthenticationModule;
@@ -77,7 +81,14 @@ public class Login extends AuthenticationPage<LoginForm> {
 			doc.selectFirst("#authenticationHeader").appendChild(Html.i18n("default", "passwordReset.text"));
 			break;
 		default:
-			doc.selectFirst("#authenticationHeader").appendChild(Html.i18n("default", "userLogin.text"));
+			
+			DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) Request.get().getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+		    if(defaultSavedRequest != null){
+		    	doc.selectFirst("#authenticationHeader").appendChild(Html.i18n("default", "samlLogin.text"));
+		    } else {
+		    	doc.selectFirst("#authenticationHeader").appendChild(Html.i18n("default", "userLogin.text"));
+		    }
+			
 			break;
 		}
 		

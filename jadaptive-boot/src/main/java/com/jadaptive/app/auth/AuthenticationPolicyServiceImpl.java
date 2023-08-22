@@ -176,6 +176,8 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		switch(scope) {
 		case PASSWORD_RESET:
 			return getWeightedPolicy(scope);
+		case SAML_IDP:
+			return getWeightedPolicy(scope);
 		default:
 			return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true));
 		}
@@ -211,7 +213,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 						scope.getResourceKey())));
 		
 		if(tmp.isEmpty()) {
-			throw new IllegalStateException("No password reset policies are configured!");
+			throw new IllegalStateException("No " + scope.name() + " policies are configured!");
 		}
 
 		Collections.sort(tmp, new Comparator<AuthenticationPolicy>() {

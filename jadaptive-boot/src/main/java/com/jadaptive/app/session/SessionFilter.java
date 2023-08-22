@@ -314,12 +314,12 @@ public class SessionFilter implements Filter {
 		} catch(ObjectNotFoundException e) {
 		}
 		
-//		if(request.getRequestURI().equals("/")
-//				|| request.getRequestURI().equals("/app")
-//				|| request.getRequestURI().equals("/app/")) {
-//			response.sendRedirect("/app/ui/");
-//			return true;
-//		}
+		if(request.getRequestURI().equals("/")
+				|| request.getRequestURI().equals("/app")
+				|| request.getRequestURI().equals("/app/")) {
+			response.sendRedirect("/app/ui/");
+			return true;
+		}
 		
 		return false;
 	}

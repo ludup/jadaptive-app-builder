@@ -8,20 +8,19 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.saml.saml2.attribute.Attribute;
 
+import com.jadaptive.api.user.User;
+
 
 public class IDPUserDetails implements UserDetails {
 
-
     private static final long serialVersionUID = 1L;
 	private List<Attribute> samlAttributesToSendToSP;
-    private String username;
-    private String role;
     private List<Authority> authorities;
+    private User user;
 
-
-    public IDPUserDetails(String username, String role, List<Attribute> attributes) {
-        this.username = username;
-        this.authorities = Collections.singletonList(new Authority(role));
+    public IDPUserDetails(User user, List<Attribute> attributes) {
+        this.user = user;
+    	this.authorities = Collections.singletonList(new Authority("USER"));
         this.samlAttributesToSendToSP = attributes;
     }
 
@@ -32,12 +31,12 @@ public class IDPUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return "{noop}pass"; // no password encoder
+        return "{noop}notused"; // no password encoder
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return user.getUsername();
     }
 
     @Override
@@ -69,15 +68,14 @@ public class IDPUserDetails implements UserDetails {
 	}
 
 	public String getRole() {
-		return role;
+		return "USER";
 	}
 
 	public void setRole(String role) {
-		this.role = role;
+	
 	}
 
 	public void setUsername(String username) {
-		this.username = username;
 	}
 
 	public void setAuthorities(List<Authority> authorities) {
@@ -86,13 +84,13 @@ public class IDPUserDetails implements UserDetails {
 
 	@Override
 	public String toString() {
-		return "IDPUserDetails [samlAttributesToSendToSP=" + samlAttributesToSendToSP + ", username=" + username
-				+ ", role=" + role + ", authorities=" + authorities + "]";
+		return "IDPUserDetails [samlAttributesToSendToSP=" + samlAttributesToSendToSP + ", username=" + user.getUsername()
+				+ ", role=USER, authorities=" + authorities + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(username);
+		return Objects.hash(user.getUsername());
 	}
 
 	@Override
@@ -104,9 +102,8 @@ public class IDPUserDetails implements UserDetails {
 		if (getClass() != obj.getClass())
 			return false;
 		IDPUserDetails other = (IDPUserDetails) obj;
-		return Objects.equals(username, other.username);
+		return Objects.equals(user.getUsername(), other.user.getUsername());
 	}
-    
 	
 }
 

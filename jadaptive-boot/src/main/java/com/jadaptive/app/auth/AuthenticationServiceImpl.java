@@ -3,6 +3,7 @@ package com.jadaptive.app.auth;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,12 +12,26 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpSession;
+
+import org.apache.catalina.Role;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.saml.saml2.attribute.Attribute;
+import org.springframework.security.web.WebAttributes;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.savedrequest.DefaultSavedRequest;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
@@ -37,6 +52,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.permissions.Permissions;
+import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
@@ -47,11 +63,13 @@ import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
 import com.jadaptive.api.ui.pages.auth.Password;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.app.saml.idp.config.IDPUserDetails;
 
 @Service
 @Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION }, defaultPermissions = {
@@ -65,6 +83,9 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private RoleService roleService; 
+	
 	@Autowired
 	private SessionService sessionService;
 
@@ -91,6 +112,9 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Autowired
 	private EventService eventService; 
+	
+	@Autowired
+	private UserDetailsService springUsers;
 	
 	Map<String, Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
 
@@ -270,6 +294,30 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				if(state.getPolicy().isSessionRequired()) {
 					createSession(state);
 				}
+				
+				if(state.getScope() == AuthenticationScope.SAML_IDP) {
+					DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) Request.get().getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+				    
+					if(defaultSavedRequest != null){
+				    	AbstractAuthenticationToken auth = 
+								  new NoAuthAuthenticationToken(new IDPUserDetails(state.getUser(),
+										  buildAttributes(state.getUser())), getAuthorities());
+				    	auth.setDetails(new WebAuthenticationDetails(Request.get()));
+				    	auth.setAuthenticated(true);
+				    	
+				    	SecurityContext context = SecurityContextHolder.createEmptyContext(); 
+				    	context.setAuthentication(auth); 
+				    	SecurityContextHolder.setContext(context);
+				    	
+				    	HttpSession session = Request.get().getSession(false);
+						if (session != null) {
+							session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+						}
+						session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
+				    	String targetURL = defaultSavedRequest.getRedirectUrl();
+				        throw new UriRedirect(targetURL);
+				    }
+				}
 			}
 			
 		}
@@ -277,6 +325,36 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return state.getCurrentPage();
 
 	}
+	
+	private List<Attribute> buildAttributes(User user) {
+		
+		var tmp = new ArrayList<Attribute>();
+		List<Attribute> attrs = new ArrayList<>();
+        attrs.add(new Attribute().setName("emailAddress").setValues(Collections.singletonList(user.getEmail())));
+        attrs.add(new Attribute().setName("name").setValues(Collections.singletonList(user.getName())));
+        
+        List<String> roles = new ArrayList<String>();
+        for(com.jadaptive.api.role.Role role : roleService.getRolesByUser(user)) {
+        	roles.add(role.getName());
+        }
+        attrs.add(new Attribute().setName("roles").addValues(roles));
+        return tmp;
+	}
+
+	
+	public Collection<GrantedAuthority> getAuthorities() {
+        //make everyone ROLE_USER
+        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+        GrantedAuthority grantedAuthority = new GrantedAuthority() {
+            //anonymous inner type
+            public String getAuthority() {
+                return "ROLE_USER";
+            }
+        }; 
+        grantedAuthorities.add(grantedAuthority);
+        return grantedAuthorities;
+    }
+
 
 	private void createSession(AuthenticationState state) {
 		
@@ -328,8 +406,17 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			AuthenticationState state = (AuthenticationState) Request.get().getSession()
 					.getAttribute(AUTHENTICATION_STATE_ATTR);
 			if (Objects.isNull(state)) {
-				state = new AuthenticationState(AuthenticationScope.USER_LOGIN,
-						policyService.getDefaultPolicy(AuthenticationScope.USER_LOGIN),
+
+
+				DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) Request.get().getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
+			    
+				AuthenticationScope scope = defaultSavedRequest==null? 
+						AuthenticationScope.USER_LOGIN :
+							AuthenticationScope.SAML_IDP;
+				
+				AuthenticationPolicy policy = policyService.getDefaultPolicy(scope);
+				state = new AuthenticationState(scope,
+						policy,
 						new PageRedirect(pageCache.getHomePage()));
 				state.setRemoteAddress(Request.getRemoteAddress());
 				state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
@@ -439,5 +526,30 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public void onApplicationStartup() {
 		registerAuthenticationPage(getAuthenticationModule(PASSWORD_MODULE_UUID), Password.class, Login.class);
+	}
+	
+	class NoAuthAuthenticationToken extends AbstractAuthenticationToken {
+
+		private static final long serialVersionUID = 5824719286066761500L;
+		
+		UserDetails user;
+		
+		public NoAuthAuthenticationToken(UserDetails user, Collection<? extends GrantedAuthority> authorities) {
+			super(authorities);
+			this.user = user;
+		}
+
+		@Override
+		public Object getCredentials() {
+			return null;
+		}
+
+		@Override
+		public Object getPrincipal() {
+			return user;
+		}
+
+		public boolean isAuthenticated() { return true; }
+		
 	}
 }
