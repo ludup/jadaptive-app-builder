@@ -68,13 +68,23 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 			state = new WizardState(this);
 			
 			List<WizardSection> sections = new ArrayList<>();
-			sections.addAll(getDefaultSections());
+			
+			for(WizardSection section : getDefaultSections()) {
+				if(!isSystem && section.isSystem()) {
+					continue;
+				}
+				if(section.isEnabled()) {
+					sections.add(section);
+				}
+			}
 			
 			for(WizardSection section : applicationService.getBeans(getSectionClass())) {
 				if(!isSystem && section.isSystem()) {
 					continue;
 				}
-				sections.add(section);
+				if(section.isEnabled()) {
+					sections.add(section);
+				}
 			}
 			
 			Collections.sort(sections, new Comparator<WizardSection>() {

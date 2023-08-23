@@ -85,6 +85,10 @@ public abstract class WizardSection extends AbstractPageExtension {
 	public void finish(WizardState state) {
 		
 	}
+	
+	public boolean isEnabled() {
+		return true;
+	}
 
 	public boolean isSystem() {
 		return false;
