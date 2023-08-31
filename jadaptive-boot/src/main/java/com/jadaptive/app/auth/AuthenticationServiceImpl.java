@@ -37,7 +37,6 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.permissions.Permissions;
-import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
@@ -66,9 +65,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Autowired
 	private UserService userService;
 
-	@Autowired
-	private RoleService roleService; 
-	
 	@Autowired
 	private SessionService sessionService;
 

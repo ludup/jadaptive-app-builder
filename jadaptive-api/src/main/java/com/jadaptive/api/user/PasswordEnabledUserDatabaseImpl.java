@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AuthenticatedService;
-import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.utils.PasswordEncryptionType;
 import com.jadaptive.utils.PasswordUtils;

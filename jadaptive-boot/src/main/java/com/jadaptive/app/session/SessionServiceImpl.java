@@ -38,7 +38,6 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.jadaptive.utils.Utils;
 
 @Service
 public class SessionServiceImpl extends AuthenticatedService implements SessionService {

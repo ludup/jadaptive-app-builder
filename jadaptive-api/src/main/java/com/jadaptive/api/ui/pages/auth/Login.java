@@ -3,6 +3,9 @@ package com.jadaptive.api.ui.pages.auth;
 import java.io.FileNotFoundException;
 import java.util.Objects;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -60,12 +63,17 @@ public class Login extends AuthenticationPage<LoginForm> {
 	public Login() {
 		super(LoginForm.class);
 	}
-
+	
 	@Override
-	protected void doGenerateContent(Document doc) throws FileNotFoundException {
+	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response)
+			throws FileNotFoundException {
 		if(tenantService.isSetupMode()) {
 			throw new UriRedirect("/app/ui/wizards/setup");
 		}
+	}
+
+	@Override
+	protected void doGenerateContent(Document doc) throws FileNotFoundException {
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		if(!state.getCurrentPage().equals(Login.class)) {

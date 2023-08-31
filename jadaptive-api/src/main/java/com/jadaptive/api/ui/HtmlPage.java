@@ -460,6 +460,17 @@ public abstract class HtmlPage implements Page {
 	}
 	
 	protected Document resolveDocument(Class<?> clz, String resource, boolean canFail) throws IOException {
+		
+		if(isOverride(clz)) {
+			return getCustomizedContent(clz);
+		} else {
+			return getPageDocument(clz, resource, canFail);
+		}
+		
+	}
+	
+	protected Document getPageDocument(Class<?> clz, String resource, boolean canFail) throws IOException {
+		
 		URL url = clz.getResource(resource);
 		if(Objects.isNull(url)) {
 			url = getResourceClass().getResource(resource);
@@ -483,6 +494,18 @@ public abstract class HtmlPage implements Page {
 			doc.appendChild(new Element("body"));
 			return doc;
 		}
+		
+	}
+
+	private Document getCustomizedContent(Class<?> clz) {
+		
+		//HtmlContentService contentService = applicationService.getBean(HtmlContentService.class);
+		
+		return null;
+	}
+
+	private boolean isOverride(Class<?> clz) {
+		return false; //clz.getAnnotation(CustomizablePage.class) != null;
 	}
 
 	private void processPageLevelExtensions(Document document, String[] extensionIds) throws IOException {

@@ -12,12 +12,14 @@ import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AbstractPageExtension;
+import com.jadaptive.api.ui.CustomizablePage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
 import com.jadaptive.utils.Utils;
 
 @Component
+@CustomizablePage
 public class Footer extends AbstractPageExtension {
 	
 	@Override

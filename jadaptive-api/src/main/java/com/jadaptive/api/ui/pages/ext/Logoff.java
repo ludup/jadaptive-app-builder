@@ -14,7 +14,6 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
-import com.jadaptive.api.ui.pages.auth.Login;
 
 @Component
 public class Logoff extends AuthenticatedPage {

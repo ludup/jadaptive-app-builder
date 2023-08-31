@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.user.User;
 
 public abstract class AuthenticatedPage extends HtmlPage {

@@ -10,7 +10,6 @@ import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
-import org.pf4j.Plugin;
 import org.pf4j.PluginClassLoader;
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginWrapper;

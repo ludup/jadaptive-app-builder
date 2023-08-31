@@ -16,7 +16,6 @@ public class BooleanFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(Element rootElement, String value) {
 		
-		Element e;
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")
 				.appendChild(new Element("div")

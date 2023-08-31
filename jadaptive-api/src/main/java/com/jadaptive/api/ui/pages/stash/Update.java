@@ -8,8 +8,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.entity.AbstractObject;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;

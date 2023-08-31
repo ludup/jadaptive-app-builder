@@ -325,6 +325,8 @@ public class PageCache {
 			throw new IllegalStateException("There is no default page set!");
 		}
 	}
+	
+	
 
 	public Class<? extends Page> getDefaultPage() {
 		return defaultPage;

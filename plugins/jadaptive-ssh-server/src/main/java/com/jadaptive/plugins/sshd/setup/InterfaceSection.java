@@ -17,8 +17,8 @@ public abstract class InterfaceSection extends SetupSection {
 	@Autowired
 	protected SSHInterfaceService interfaceService; 
 	
-	public InterfaceSection() {
-		super(CreateInterface.RESOURCE_KEY, 
+	public InterfaceSection(String bundle) {
+		super(bundle, 
 				"configureInterface", 
 				"/com/jadaptive/plugins/sshd/setup/CreateInterface.html", 100);
 	}

@@ -44,6 +44,7 @@ import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
 
@@ -92,7 +93,7 @@ public class SessionFilter implements Filter {
 		if(log.isDebugEnabled()) {
 			log.debug(req.getMethod() + " " + req.getRequestURI().toString());
 		}
-		
+
 		tenantService.setCurrentTenant(req);
 		
 		try {

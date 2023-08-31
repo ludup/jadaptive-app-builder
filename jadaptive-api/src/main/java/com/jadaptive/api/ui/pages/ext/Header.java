@@ -23,12 +23,14 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.AbstractPageExtension;
+import com.jadaptive.api.ui.CustomizablePage;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
 @Component
+@CustomizablePage
 public class Header extends AbstractPageExtension {
 
 	static Logger log = LoggerFactory.getLogger(Header.class);
