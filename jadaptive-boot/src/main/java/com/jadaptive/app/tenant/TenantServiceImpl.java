@@ -87,6 +87,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	boolean setupMode = false;
 	boolean ready = false;
+	
+	List<Runnable> onSetupComplete = new ArrayList<>();
 
 	@EventListener
 	public void onApplicationStartup(ApplicationReadyEvent evt) {
@@ -584,6 +586,14 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		SystemConfiguration cfg = systemConfig.getObject(SystemConfiguration.class);
 		cfg.setSetupComplete(true);
 		systemConfig.saveObject(cfg);
+		
+		for(Runnable run : onSetupComplete) {
+			try {
+				run.run();
+			} catch(Throwable e) { 
+				log.error("Caught error in setup completion hook (ignoring)", e);
+			}
+		}
 	}
 	
 	@Override
@@ -683,6 +693,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	protected Collection<Tenant> filter(SearchField...fields) {
 		return new ArrayList<>(tenantsByUUID.values());
+	}
+
+	@Override
+	public void onSetupComplete(Runnable run) {
+		onSetupComplete.add(run);
 	}
 	
 }

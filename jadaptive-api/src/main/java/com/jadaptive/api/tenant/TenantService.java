@@ -76,4 +76,6 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	<T> T execute(Callable<T> r);
 
 	void setSystemOwner(String company, String name, String emailAddress);
+
+	void onSetupComplete(Runnable run);
 }
