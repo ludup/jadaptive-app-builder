@@ -71,4 +71,6 @@ public interface PermissionService {
 	
 	void assertWrite(String resourceKey);
 
+	default boolean isAdministrator() { return isAdministrator(getCurrentUser()); }
+
 }

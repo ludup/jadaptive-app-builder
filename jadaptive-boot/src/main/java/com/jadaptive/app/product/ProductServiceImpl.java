@@ -94,4 +94,14 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
+	@Override
+	public boolean requiresRegistration() {
+		try {
+			Product product = appService.getBean(Product.class);
+			return product.requiresRegistration();
+		} catch (NoSuchBeanDefinitionException e1) {
+			return defaultProduct.requiresRegistration();
+		}
+	}
+
 }

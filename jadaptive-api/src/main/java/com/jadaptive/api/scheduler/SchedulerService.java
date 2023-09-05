@@ -8,7 +8,7 @@ public interface SchedulerService {
 
 	void cancelTask(String uuid, boolean mayInterrupt);
 
-	void runNow(ScheduledTask task);
+	void runNow(TenantTask task);
 
 //	CronSchedule getSchedule(String uuid);
 //

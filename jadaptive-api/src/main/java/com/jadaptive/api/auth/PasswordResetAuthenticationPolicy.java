@@ -8,7 +8,6 @@ import com.jadaptive.api.template.ObjectViews;
 
 @ObjectDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, resourceKey = PasswordResetAuthenticationPolicy.RESOURCE_KEY, scope = ObjectScope.GLOBAL, defaultColumn = "name")
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
-@ObjectViews({})
 @GenerateEventTemplates(PasswordResetAuthenticationPolicy.RESOURCE_KEY)
 public class PasswordResetAuthenticationPolicy extends AuthenticationPolicy {
 

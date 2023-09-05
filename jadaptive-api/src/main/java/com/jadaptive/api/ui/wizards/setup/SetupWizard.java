@@ -12,6 +12,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
@@ -40,6 +41,9 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	@Autowired
 	private TransactionService transactionService;
 	
+	@Autowired
+	private ProductService productService; 
+	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
@@ -64,10 +68,11 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	protected Collection<? extends WizardSection> getDefaultSections() {
 		List<SetupSection> sections = new ArrayList<>();
 
-		
-		sections.add(new SetupSection("setup", "createTenant", 
+		if(productService.requiresRegistration()) {
+			sections.add(new SetupSection("setup", "createTenant", 
 				"/com/jadaptive/api/ui/wizards/setup/CreateTenant.html", 1));
-
+		}
+		
 		sections.add(applicationService.autowire(new AdminSection(true)));
 		return sections;
 	}

@@ -578,6 +578,26 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	protected <T extends UUIDEntity> void delete(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
+			
+		try {
+		
+			db.delete(database, getCollectionName(clz), fields);
+			
+			if(isCaching(clz)) {
+				Map<String,T> cachedObjects = getCache(clz);
+				if(log.isDebugEnabled()) {
+					log.debug("CACHE: Ckearing cache {}", clz.getSimpleName());
+				}
+				cachedObjects.clear();
+			}
+
+		} catch(Throwable e) {
+			checkException(e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
+		}
+	}
+	
 	protected <T extends UUIDEntity> void onDeletingError(T obj, Throwable e) {
 		
 		fireEvent(Events.deleted(obj.getEventGroup()), obj, e);

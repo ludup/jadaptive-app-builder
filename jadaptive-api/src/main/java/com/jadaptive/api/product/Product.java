@@ -34,4 +34,8 @@ public interface Product extends ExtensionPoint {
 		return "JADAPTIVE Limited";
 	}
 	
+	default boolean requiresRegistration() {
+		return true;
+	}
+	
 }

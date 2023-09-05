@@ -45,4 +45,6 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
 	void stashObject(T obj);
 
+	void delete(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException;
+
 }

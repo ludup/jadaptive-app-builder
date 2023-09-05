@@ -18,4 +18,6 @@ public interface ProductService {
 
 	String getVendor();
 
+	boolean requiresRegistration();
+
 }

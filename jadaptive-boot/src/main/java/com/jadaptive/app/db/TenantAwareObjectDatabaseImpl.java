@@ -85,6 +85,11 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public void delete(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException {
 		deleteObject(get(uuid, resourceClass), tenantService.getCurrentTenant().getUuid());
 	}
+	
+	@Override
+	public void delete(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException {
+		delete(tenantService.getCurrentTenant().getUuid(), resourceClass, fields);
+	}
 
 	@Override
 	public void saveOrUpdate(T obj) throws RepositoryException, ObjectException {

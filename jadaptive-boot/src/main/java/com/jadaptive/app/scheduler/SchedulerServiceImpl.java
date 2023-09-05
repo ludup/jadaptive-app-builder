@@ -88,7 +88,7 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	}
 	
 	@Override
-	public void runNow(ScheduledTask task) {
+	public void runNow(TenantTask task) {
 	
 		applicationService.autowire(task);
 		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), UUID.randomUUID().toString());
