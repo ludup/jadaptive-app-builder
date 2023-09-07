@@ -30,7 +30,7 @@ public class ProcessingController {
 	@RequestMapping(value = { "/app/api/process/{uuid}" }, produces = { "application/json" }, method = RequestMethod.GET)
 	@ResponseBody
 	@ResponseStatus(code = HttpStatus.OK)
-	public RequestStatus sendEmail(HttpServletRequest request, HttpServletResponse response,
+	public RequestStatus process(HttpServletRequest request, HttpServletResponse response,
 			@PathVariable String uuid) throws IOException, AccessDeniedException, UnauthorizedException {
 		
 		ProcessingJob job = (ProcessingJob) Request.get().getSession().getAttribute(uuid);
