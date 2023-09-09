@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.template.ValidationException;
@@ -44,11 +45,15 @@ public class AdminSection extends SetupSection {
 			CreateAccount obj = (CreateAccount) Wizard.getCurrentState().getObject(CreateAccount.class);
 		} catch(IllegalStateException e) {
 			
-			CreateTenant obj = ObjectUtils.assertObject(Wizard.getCurrentState().getObject(CreateTenant.class), CreateTenant.class);
-			CreateAccount acc = new CreateAccount();
-			acc.setUsername("admin");
-			acc.setEmail(obj.getEmailAddress());
-			Wizard.getCurrentState().setCurrentObject(acc);
+			try {
+				CreateTenant obj = ObjectUtils.assertObject(Wizard.getCurrentState().getObject(CreateTenant.class), CreateTenant.class);
+				CreateAccount acc = new CreateAccount();
+				acc.setUsername("admin");
+				acc.setEmail(obj.getEmailAddress());
+				Wizard.getCurrentState().setCurrentObject(acc);
+			} catch(Throwable e2) {
+				// This just means there is no default
+			}
 		
 		}
 		
