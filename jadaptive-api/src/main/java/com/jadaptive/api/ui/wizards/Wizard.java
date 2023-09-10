@@ -18,6 +18,7 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.ObjectPage;
@@ -81,16 +82,36 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		if(state.isFinished()) {
 			throw new PageRedirect(state.getCompletePage());
 		}
+
+		Element body = document.selectFirst("body");
 		
-		document.selectFirst("body").attr("jad:wizard", resourceKey);
+		body.attr("jad:wizard", resourceKey);
 		
 		WizardSection ext = state.getCurrentPage();
 		Element el = document.selectFirst("#wizardContent");
 
 		injectHtmlSection(document, el, ext);
 		
+		/**
+		 * This is here to remove the previous style of wizard where an info alert
+		 * panel is used. We now render this automatically below so this code removes
+		 * it from any HTML files. Once the HTML code-base has been cleaned this code
+		 * can be removed.
+		 */
+		Element wizardContent = document.selectFirst("#wizardContent");
+		if(Objects.nonNull(wizardContent) && wizardContent.childNodeSize() > 0) {
+			Element div = wizardContent.child(0);
+			if(div.tag().getName().equals("div") && div.childNodeSize() > 0) {
+				Element e = div.child(0);
+				if(e.tag().getName().equals("p") && e.hasClass("alert-info")) {
+					div.remove();
+				}
+			}
+		}
+		
 		Element actions = document.selectFirst("#actions");
 		Element content = document.selectFirst("#content");
+		
 		if(!state.isStartPage()) {
 			Element h2;
 			content.prependChild(new Element("div")
@@ -109,6 +130,14 @@ public class Wizard extends HtmlPage implements ObjectPage {
 							.addClass("ms-1")
 							.attr("jad:bundle", state.getCurrentPage().getBundle())
 							.attr("jad:i18n", state.getCurrentPage().getName() + ".stepName"));
+					
+					
+					h2.after(new Element("h4")
+										.appendChild(Html.i("fa-solid fa-info-square text-primary me-2"))
+										.appendChild(Html.i18n(state.getCurrentPage().getBundle(),
+														state.getCurrentPage().getName() + ".summary"))
+														.addClass("my-3 text-primary"));
+					
 			} else {
 				h2.appendChild(new Element("span")
 						.attr("jad:bundle", state.getCurrentPage().getBundle())

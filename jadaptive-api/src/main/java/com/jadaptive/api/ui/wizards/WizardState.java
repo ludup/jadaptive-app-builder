@@ -16,7 +16,7 @@ import com.jadaptive.api.ui.Page;
 
 public class WizardState {
 
-	Integer currentStep = 1;
+	Integer currentStep = 0;
 	List<WizardSection> pages = new ArrayList<>();
 	WizardSection startPage;
 	WizardSection finishPage;
@@ -32,13 +32,13 @@ public class WizardState {
 	
 	public WizardState(WizardFlow flow) {
 		this.flow = flow;
-		currentStep = Objects.nonNull(getStartPage()) ? 0 : 1;
 	} 
 	
 	public void init(WizardSection startPage, WizardSection finishPage, WizardSection...pages) {
 		this.startPage = startPage;
 		this.finishPage = finishPage;
 		this.pages.addAll(Arrays.asList(pages));
+		currentStep = Objects.nonNull(getStartPage()) ? 0 : 1;
 	}
 	
 	public Integer getCurrentStep() {
