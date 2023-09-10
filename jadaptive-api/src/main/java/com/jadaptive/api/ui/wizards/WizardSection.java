@@ -36,6 +36,13 @@ public abstract class WizardSection extends AbstractPageExtension {
 		this.weight = weight;
 	}
 	
+	public WizardSection(String bundle, String name, Integer weight) {
+		this.bundle = bundle;
+		this.name = name;
+		this.resource = "/" + getClass().getName().replace(".", "/") + ".html";
+		this.weight = weight;
+	}
+	
 	@Override
 	public final void process(Document document, Element element, Page page) throws IOException {
 		processSection(document, element, page);

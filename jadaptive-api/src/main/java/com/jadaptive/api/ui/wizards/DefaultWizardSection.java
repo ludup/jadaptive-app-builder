@@ -6,6 +6,10 @@ public class DefaultWizardSection extends WizardSection {
 		super(bundle, weight);
 	}
 	
+	public DefaultWizardSection(String bundle, String name, Integer weight) {
+		super(bundle, name, weight);
+	}
+	
 	public DefaultWizardSection(String bundle, String name, String resource, Integer weight) {
 		super(bundle, name, resource, weight);
 	}

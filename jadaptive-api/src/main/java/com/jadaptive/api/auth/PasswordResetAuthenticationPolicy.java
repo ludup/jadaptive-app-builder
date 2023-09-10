@@ -4,7 +4,6 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.template.ObjectViews;
 
 @ObjectDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, resourceKey = PasswordResetAuthenticationPolicy.RESOURCE_KEY, scope = ObjectScope.GLOBAL, defaultColumn = "name")
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
