@@ -140,8 +140,14 @@ public class Search extends TemplatePage implements FormProcessor<SearchForm> {
 		document.selectFirst("#searchDropdownHolder").appendChild(searchColumns.renderInput());
 		List<I18nOption> columns = new ArrayList<>();
 		
+		if(StringUtils.isBlank(searchField)) {
+			searchField = template.getDefaultColumn();
+		}
+		
+		columns.add(new I18nOption(template.getBundle(), String.format("%s.name", template.getDefaultColumn()), template.getDefaultColumn()));
+		
 		for(FieldTemplate field : template.getFields()) {
-			if(field.isSearchable()) {
+			if(field.isSearchable() && !field.getResourceKey().equals(template.getDefaultColumn())) {
 				columns.add(new I18nOption(template.getBundle(), String.format("%s.name", field.getResourceKey()), field.getResourceKey()));
 			}
 		}
