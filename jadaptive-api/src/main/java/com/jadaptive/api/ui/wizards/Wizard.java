@@ -69,7 +69,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		return currentState.get();
 	}
 
-	protected Class<?> getResourceClass() {
+	public Class<?> getResourceClass() {
 		return Wizard.class;
 	}
 	

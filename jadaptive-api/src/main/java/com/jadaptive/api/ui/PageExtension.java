@@ -11,6 +11,4 @@ public interface PageExtension extends PageResources, ExtensionPoint {
 	void process(Document document, Element extensionElement, Page page) throws IOException;
 
 	String getName();
-
-
 }

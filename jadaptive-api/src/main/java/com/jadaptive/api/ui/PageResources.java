@@ -7,4 +7,6 @@ public interface PageResources {
 	String getCssResource();
 	
 	String getJsResource();
+	
+	default Class<?> getResourceClass() { return getClass(); };
 }

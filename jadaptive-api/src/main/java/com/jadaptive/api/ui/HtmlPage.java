@@ -452,11 +452,7 @@ public abstract class HtmlPage implements Page {
 	}
 	
 	protected Document resolveDocument(PageExtension ext) throws IOException {
-		return resolveDocument(ext.getClass(), ext.getHtmlResource(), false);
-	}
-	
-	protected Class<?> getResourceClass() {
-		return getClass();
+		return resolveDocument(ext.getResourceClass(), ext.getHtmlResource(), false);
 	}
 	
 	protected Document resolveDocument(Class<?> clz, String resource, boolean canFail) throws IOException {

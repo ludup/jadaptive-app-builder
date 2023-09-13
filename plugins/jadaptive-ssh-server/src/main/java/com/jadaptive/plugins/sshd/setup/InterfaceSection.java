@@ -29,6 +29,11 @@ public abstract class InterfaceSection extends SetupSection {
 	}
 	
 	@Override
+	public Class<?> getResourceClass() {
+		return CreateInterface.class;
+	}
+	
+	@Override
 	public void processReview(Document document, WizardState state) {
 
 		Element content = document.selectFirst("#wizardContent");
