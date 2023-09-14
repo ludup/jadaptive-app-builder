@@ -20,4 +20,6 @@ public interface ProductService {
 
 	boolean requiresRegistration();
 
+	boolean isTenantLicensing();
+
 }

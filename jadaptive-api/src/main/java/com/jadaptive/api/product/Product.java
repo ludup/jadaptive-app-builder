@@ -38,4 +38,8 @@ public interface Product extends ExtensionPoint {
 		return true;
 	}
 	
+	default boolean isTenantLicensing() {
+		return false;
+	}
+	
 }

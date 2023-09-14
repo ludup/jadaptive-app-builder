@@ -104,4 +104,14 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
+	@Override
+	public boolean isTenantLicensing() {
+		try {
+			Product product = appService.getBean(Product.class);
+			return product.isTenantLicensing();
+		} catch (NoSuchBeanDefinitionException e1) {
+			return defaultProduct.isTenantLicensing();
+		}
+	}
+
 }
