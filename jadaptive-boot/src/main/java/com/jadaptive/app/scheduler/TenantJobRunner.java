@@ -65,7 +65,7 @@ public class TenantJobRunner implements Runnable {
 		
 		tenantService.setCurrentTenant(tenant);
 		
-		if(log.isInfoEnabled()) {
+		if(task.isLogging() && log.isInfoEnabled()) {
 			log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());
 		}
 		try {
