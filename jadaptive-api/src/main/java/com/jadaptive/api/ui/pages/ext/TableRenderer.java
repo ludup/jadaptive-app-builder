@@ -261,10 +261,8 @@ public class TableRenderer {
 		if(template.isDeletable()) {
 			if(!obj.isSystem() && !readOnly) {
 				if(Objects.nonNull(parentObject)) {
-					el.appendChild(Html.a("#", "deleteAction", "ms-2", "readWrite")
+					el.appendChild(Html.a("#", "removeAction", "", "ms-2", "readWrite")
 							.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())))
-							.attr("data-url", "/app/api/form/delete/" + parentObject.getResourceKey() + "/"   
-									+ field.getResourceKey() + "/" + obj.getUuid())
 							.appendChild(Html.i("fa-solid", "fa-trash", "fa-fw")));
 				} else {
 					el.appendChild(Html.a("#", "deleteAction", "ms-2", "readWrite")

@@ -343,7 +343,7 @@ $(function() {
         var _self = $(this);
         if($('.dirty').length > 0) {
 	    	bootbox.confirm({
-	    		message: "Are you sure you want to exit?",
+	    		message: "${userInterface:exit.text}",
 			    buttons: {
 			        confirm: {
 			            label: 'Yes',
@@ -372,7 +372,7 @@ $(function() {
 		var url = $(this).data('url');
 
 		bootbox.confirm({
-    		message: 'Are you sure you want to delete ' + name + '?',
+    		message: '${userInterface:delete.text} ' + name + '?',
 		    buttons: {
 		        confirm: {
 		            label: 'Yes',
@@ -397,6 +397,32 @@ $(function() {
 					        window.location = window.location.href;
 					    }
 					});
+		        }
+		    }
+		});
+	});
+	
+	$('.removeAction').on('click', function(e) {
+		e.preventDefault();
+		var name = $(this).data('name');
+		var _row = $(this).closest('tr');
+		bootbox.confirm({
+    		message: '${userInterface:delete.text} ' + name + '?',
+		    buttons: {
+		        confirm: {
+		            label: 'Yes',
+		            className: 'btn-success'
+		        },
+		        cancel: {
+		            label: 'No',
+		            className: 'btn-danger'
+		        }
+		    },
+		    callback: function (result) {
+		        if(result)
+		        {
+		        	_row.remove();
+		        	JadaptiveUtils.success($('#feedback'), name + " ${userInterface:removed.text}");
 		        }
 		    }
 		});

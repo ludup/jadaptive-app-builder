@@ -3,6 +3,7 @@ package com.jadaptive.app.ui;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Objects;
 
@@ -10,6 +11,7 @@ import javax.lang.model.UnknownEntityException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -57,6 +60,9 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@Autowired
 	private ClassLoaderService classLoader; 
+	
+	@Autowired
+	private I18nService i18n;
 	
 	@RequestMapping(value="/app/verify", method = RequestMethod.GET, produces = "application/json")
 	@ResponseBody
@@ -176,25 +182,33 @@ public class UserInterfaceController extends AuthenticatedController {
 		sessionUtils.setCachable(response, 600);
 		
 		try {
-			Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".js", "")));
-			URL url = page.getClass().getResource(page.getJsResource());
-			response.setContentType("application/javascript");
-			response.setStatus(HttpStatus.OK.value());
-			try(InputStream in = url.openStream()) {
-				IOUtils.copy(in, response.getOutputStream());
-			}
-		} catch(FileNotFoundException e) {
 			try {
-				PageExtension page = pageCache.resolveExtension(name.replace(".js", ""));
+				Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".js", "")));
 				URL url = page.getClass().getResource(page.getJsResource());
-				response.setContentType("text/javascript");
+				response.setContentType("application/javascript");
 				response.setStatus(HttpStatus.OK.value());
-				try(InputStream in = url.openStream()) {
+				
+				try(InputStream in = new ReaderInputStream(
+						new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name), "UTF-8")) {
 					IOUtils.copy(in, response.getOutputStream());
 				}
-			} catch(FileNotFoundException e2) {
-				response.sendError(HttpStatus.NOT_FOUND.value());
+			} catch(FileNotFoundException e) {
+				try {
+					PageExtension page = pageCache.resolveExtension(name.replace(".js", ""));
+					URL url = page.getClass().getResource(page.getJsResource());
+					response.setContentType("application/javascript");
+					response.setStatus(HttpStatus.OK.value());
+					try(InputStream in = new ReaderInputStream(
+							new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name), "UTF-8")) {
+						IOUtils.copy(in, response.getOutputStream());
+					}
+				} catch(FileNotFoundException e2) {
+					response.sendError(HttpStatus.NOT_FOUND.value());
+				}
 			}
+		} catch(Throwable e) {
+			log.error("Script content error", e);
+			response.sendError(500);
 		}
 		
 	}
@@ -204,15 +218,22 @@ public class UserInterfaceController extends AuthenticatedController {
 
 		sessionUtils.setCachable(response, 600);
 		
-		String name = request.getRequestURI().substring(12);
-		URL url = classLoader.getResource(name);
-		if(Objects.isNull(url)) {
-			throw new FileNotFoundException();
-		}
-		response.setContentType("application/javascript");
-		response.setStatus(HttpStatus.OK.value());
-		try(InputStream in = url.openStream()) {
-			IOUtils.copy(in, response.getOutputStream());
+		try {
+			String name = request.getRequestURI().substring(12);
+			URL url = classLoader.getResource(name);
+			if(Objects.isNull(url)) {
+				throw new FileNotFoundException();
+			}
+			response.setContentType("application/javascript");
+			response.setStatus(HttpStatus.OK.value());
+			try(InputStream in = new ReaderInputStream(
+					new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name), "UTF-8")) {
+				IOUtils.copy(in, response.getOutputStream());
+			}
+			
+		} catch(Throwable e) {
+			log.error("Script content error", e);
+			response.sendError(500);
 		}
 
 	}
