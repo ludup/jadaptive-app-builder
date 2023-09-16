@@ -8,10 +8,14 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.I18N;
+import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldValidator;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
+import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.utils.Utils;
 
 public class DocumentValidator {
@@ -50,15 +54,25 @@ public class DocumentValidator {
 			validateText(value, field);
 			return value;
 		case OBJECT_REFERENCE:
-//			if(node.isObject()) {
-//				return validateReference(node, field);
-//			}
-			return value;
+			return validateReference(value, field);
 		default:
 			throw new ValidationException(
 					String.format("Missing field type %s in validate method", field.getFieldType().name()));
 		}
 
+	}
+
+	private static Object validateReference(String value, FieldTemplate field) {
+		
+		String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+		
+		try {
+			ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
+					ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(resourceKey), value);
+			return value;
+		} catch(ObjectNotFoundException e) {
+			throw new IllegalStateException("Invalid reference to " + field.getResourceKey());
+		}
 	}
 
 	private static void validatePermission(String value, FieldTemplate field) throws ValidationException {
@@ -102,6 +116,13 @@ public class DocumentValidator {
 									"Invalid range %s value in validator use \"<min>,<max>\" format", v.getValue()));
 						}
 						break;
+					case PORT:
+					{
+						if(value > 0 && value < 65536) {
+							return;
+						}
+						throw new ValidationException("Invalid port number! Port value must be within the range 1-65535");
+					}
 					default:
 						break;
 					}
@@ -198,6 +219,13 @@ public class DocumentValidator {
 					}
 					break;
 				}
+				case EMPTY:
+				{
+					if(StringUtils.isBlank(value)) {
+						return;
+					}
+					break;
+				}
 				default:
 					break;
 				}
@@ -211,6 +239,36 @@ public class DocumentValidator {
 			for (FieldValidator v : field.getValidators()) {
 				try {
 				switch (v.getType()) {
+				case IPV6:
+				{
+					validateRegex("^((([0-9A-Fa-f]{1,4}:){1,6}:)|(([0-9A-Fa-f]{1,4}:){7}))([0-9A-Fa-f]{1,4})$", 
+							value, v, field);
+					return;
+				}
+				case IPV4:
+				{
+					validateRegex("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", 
+							value, v, field);
+					return;
+				}
+				case CIDR_V6:
+				{
+					validateRegex("^(?:(?:(?:[A-F0-9]{1,4}:){6}|(?=(?:[A-F0-9]{0,4}:){0,6}(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?![:.\\w]))(([0-9A-F]{1,4}:){0,5}|:)((:[0-9A-F]{1,4}){1,5}:|:)|::(?:[A-F0-9]{1,4}:){5})(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}|(?=(?:[A-F0-9]{0,4}:){0,7}[A-F0-9]{0,4}(?![:.\\w]))(([0-9A-F]{1,4}:){1,7}|:)((:[0-9A-F]{1,4}){1,7}|:)|(?:[A-F0-9]{1,4}:){7}:|:(:[A-F0-9]{1,4}){7})(?![:.\\w])\\/(?:12[0-8]|1[01][0-9]|[1-9]?[0-9])$", 
+							value, v, field);
+					return;
+				}
+				case CIDR_V4:
+				{
+					validateRegex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))?$", 
+							value, v, field);
+					return;
+				}
+				case HOSTNAME:
+				{
+					validateRegex("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$", 
+							value, v, field);
+					return;
+				}
 				case REGEX:
 				{
 					validateRegex(v.getValue(), value, v, field);

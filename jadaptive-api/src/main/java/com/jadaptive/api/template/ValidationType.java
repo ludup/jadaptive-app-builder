@@ -2,24 +2,22 @@ package com.jadaptive.api.template;
 
 public enum ValidationType {
 
-	RANGE(false), 
-	LENGTH(false),
-	REGEX(false),
-	OBJECT_TYPE(true),
-	RESOURCE_KEY(true),
-	URL(false),
-	REQUIRED(false), 
-	IMAGE_HEIGHT(false),
-	IMAGE_WIDTH(false),
-	CLASSES(false);
-	
-	final boolean required;
-	
-	ValidationType(boolean required) {
-		this.required = required;
-	}
+	RANGE, 
+	LENGTH,
+	REGEX,
+	OBJECT_TYPE,
+	RESOURCE_KEY,
+	URL,
+	REQUIRED, 
+	IMAGE_HEIGHT,
+	IMAGE_WIDTH,
+	CLASSES,
+	IPV4,
+	IPV6,
+	CIDR_V4,
+	CIDR_V6, 
+	EMPTY, 
+	HOSTNAME, 
+	PORT;
 
-	public final boolean isRequired() {
-		return required;
-	}
 }

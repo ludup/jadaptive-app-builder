@@ -17,6 +17,10 @@ public class SetupSection extends DefaultWizardSection {
 		super(bundle, weight);
 	}
 	
+	public SetupSection(String bundle, String name, Integer weight) {
+		super(bundle, name, weight);
+	}
+	
 	public SetupSection(String bundle, String name, String resource, int weight) {
 		super(bundle, name, resource, weight);
 	}

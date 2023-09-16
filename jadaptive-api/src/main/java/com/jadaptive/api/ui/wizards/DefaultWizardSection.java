@@ -13,4 +13,5 @@ public class DefaultWizardSection extends WizardSection {
 	public DefaultWizardSection(String bundle, String name, String resource, Integer weight) {
 		super(bundle, name, resource, weight);
 	}
+
 }

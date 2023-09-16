@@ -524,7 +524,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 	}
 	
-	private Collection<AbstractObject> convertObjects(Collection<? extends UUIDDocument> objects) {
+	@Override
+	public Collection<AbstractObject> convertObjects(Collection<? extends UUIDDocument> objects) {
 		
 		List<AbstractObject> results = new ArrayList<>();
 		for(UUIDDocument obj : objects) {
