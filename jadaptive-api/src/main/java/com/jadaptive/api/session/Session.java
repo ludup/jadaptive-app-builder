@@ -159,15 +159,6 @@ public class Session extends AbstractUUIDEntity {
 		this.state = state;
 	}
 
-	@JsonIgnore
-	public boolean isReadyForUpdate() {
-		// We save our state every 10 seconds
-		if(lastUpdated==null) {
-			return true;
-		}
-		return System.currentTimeMillis() - lastUpdated.getTime() > 10000L;
-	}
-
 	public boolean isClosed() {
 		return signedOut!=null;
 	}

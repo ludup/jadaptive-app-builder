@@ -8,6 +8,8 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.permissions.FeatureGroup;
+import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.UUIDEvent;
@@ -36,8 +38,11 @@ import com.jadaptive.utils.Utils;
 @TableView(defaultColumns = { "state", "timestamp", "username", "eventKey", "eventDescription", "ipAddress"}, 
 				sortOrder = SortOrder.DESC, sortField = "timestamp", requiresView = false,
 				actions = { @TableAction(bundle = SystemEvent.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/event/{resourceKey}/{uuid}" )})
+@LicensedFeature(value = SystemEvent.FEATURE, group = FeatureGroup.PROFESSIONAL)
 public class SystemEvent extends UUIDEvent {
 
+	public static final String FEATURE = "Event Log";
+	
 	private static final long serialVersionUID = 4068966863055480029L;
 
 	public static final String RESOURCE_KEY = "systemEvent";

@@ -34,7 +34,9 @@ public class SessionUtils {
 	
 	static boolean debugCSRF = "true".equals(System.getProperty("jadaptive.csrfDebugRequests"));
 
-	public static final String AUTHENTICATED_SESSION = "authenticatedSession";
+	//public static final String AUTHENTICATED_SESSION = "authenticatedSession";
+	
+	public static final String SESSION_ID = "sessionId";
 	public static final String SESSION_COOKIE = "JADAPTIVE_SESSION";
 	
 	public static final String USER_LOCALE = "userLocale";
@@ -107,10 +109,7 @@ public class SessionUtils {
 	public Session touchSession(HttpServletRequest request,
 			HttpServletResponse response, Session session) {
 
-		// Preserve the session for future lookups in this request and session
-		request.setAttribute(AUTHENTICATED_SESSION, session);
-		request.getSession().setAttribute(AUTHENTICATED_SESSION, session);
-
+		sessionService.touch(session);
 		addSessionCookies(request, response, session);
 
 		return session;

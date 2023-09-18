@@ -144,7 +144,7 @@ public class Search extends TemplatePage implements FormProcessor<SearchForm> {
 			searchField = template.getDefaultColumn();
 		}
 		
-		columns.add(new I18nOption(template.getBundle(), String.format("%s.name", template.getDefaultColumn()), template.getDefaultColumn()));
+		columns.add(new I18nOption(template.getDefaultColumn().equals("uuid") ? "default" : template.getBundle(), String.format("%s.name", template.getDefaultColumn()), template.getDefaultColumn()));
 		
 		for(FieldTemplate field : template.getFields()) {
 			if(field.isSearchable() && !field.getResourceKey().equals(template.getDefaultColumn())) {

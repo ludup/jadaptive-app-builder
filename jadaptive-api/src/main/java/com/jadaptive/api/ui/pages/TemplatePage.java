@@ -47,6 +47,11 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	public String getResourceKey() {
 		return resourceKey;
 	}
+	
+	public Class<?> getTemplateClass() {
+		return templateClazz;
+	}
+	
 
 	public void onCreate() throws FileNotFoundException {
 		

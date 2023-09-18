@@ -161,16 +161,8 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	
 	@Override
 	public void touch(Session session) {
-		if(session.isReadyForUpdate()) {
-			if(log.isDebugEnabled()) {
-				log.debug("Touching " + session.getUser().getUsername() + "/"
-						+ session.getUuid() + " " + 
-							(Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : "") 
-								+ " timeout=" + session.getSessionTimeout());
-			}
-			session.setLastUpdated(new Date());
-			getCache(session.getTenant()).put(session.getUuid(), session);
-		}
+		session.setLastUpdated(new Date());
+		getCache(session.getTenant()).put(session.getUuid(), session);
 	}
 
 	@Override
