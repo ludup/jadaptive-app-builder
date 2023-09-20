@@ -70,6 +70,10 @@ public class Search extends TemplatePage implements FormProcessor<SearchForm> {
 		if(!template.getCollectionKey().equals(resourceKey)) {
 			throw new UriRedirect(String.format("/app/ui/search/%s", template.getCollectionKey()));
 		}
+		
+		if(template.isSingleton()) {
+			throw new UriRedirect(String.format("/app/ui/config/%s", template.getCollectionKey()));
+		}
 	}	
 	
 	public final void processForm(Document document, SearchForm form) throws IOException {
@@ -109,6 +113,8 @@ public class Search extends TemplatePage implements FormProcessor<SearchForm> {
 		Request.get().getSession().setAttribute(resourceKey + "." + key, value);
 	}
 
+	
+	
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws IOException {
 		
