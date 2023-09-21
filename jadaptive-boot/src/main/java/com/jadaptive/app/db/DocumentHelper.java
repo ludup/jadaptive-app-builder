@@ -806,6 +806,7 @@ public class DocumentHelper {
 			} else {
 				return null;
 			}
+		case OPTIONS:
 		case COUNTRY:
 		{
 			return value;

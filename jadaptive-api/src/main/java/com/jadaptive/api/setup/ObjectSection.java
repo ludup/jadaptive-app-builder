@@ -74,6 +74,9 @@ public class ObjectSection extends SetupSection {
 				break;
 			case OBJECT_REFERENCE:
 				break;
+			case OPTIONS:
+				// TODO option
+				break;
 			case COUNTRY:
 				value = ApplicationServiceImpl.getInstance().getBean(InternationalService.class).getCountryName(value);
 				// Purposely NOT breaking to render value below

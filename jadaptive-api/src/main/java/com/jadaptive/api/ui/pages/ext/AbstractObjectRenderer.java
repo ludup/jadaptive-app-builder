@@ -67,6 +67,7 @@ import com.jadaptive.api.ui.renderers.form.ImageFormInput;
 import com.jadaptive.api.ui.renderers.form.JavascriptEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
+import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
@@ -498,6 +499,13 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case PASSWORD:
 			break;
+		case OPTIONS:
+			
+			new OptionsFormInput(fieldView).renderInput(element, 
+					obj.getCollection(field.getResourceKey()),
+					objectService.list(field.getValidationValue(ValidationType.RESOURCE_KEY)));
+			
+			break;
 		case COUNTRY:
 		{
 			List<NamePairValue> values = new ArrayList<>();
@@ -772,6 +780,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case OBJECT_EMBEDDED:
 		case OBJECT_REFERENCE:
+		case OPTIONS:
 			throw new IllegalStateException("Object cannot be rendered by renderField");
 		default:
 			throw new IllegalStateException("Missing field type " + field.getFieldType().name());

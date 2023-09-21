@@ -1056,6 +1056,19 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					"resourceKey.invalid"));
 			break;
 		}
+		case OPTIONS:
+		{
+			String resourceKey = field.references();
+			if(StringUtils.isBlank(resourceKey)) {
+				throw new IllegalStateException("OPTIONS input requires references attribte on @ObjectField annotation");
+			}
+			t.getValidators().add(new FieldValidator(
+					ValidationType.RESOURCE_KEY, 
+					resourceKey,
+					ObjectTemplate.RESOURCE_KEY,
+					"resourceKey.invalid"));
+			break;
+		}
 		case OBJECT_REFERENCE:
 		{
 			String resourceKey = field.references();

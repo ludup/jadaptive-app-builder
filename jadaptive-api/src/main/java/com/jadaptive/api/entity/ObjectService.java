@@ -47,7 +47,7 @@ public interface ObjectService {
 	
 	<T extends UUIDDocument> T peekStash(String resourceKey, Class<T> clz);
 
-	Collection<AbstractObject> convertObjects(Collection<? extends UUIDDocument> objects);
+	Collection<AbstractObject> convertObjects(Iterable<? extends UUIDDocument> objects);
 
 	
 }

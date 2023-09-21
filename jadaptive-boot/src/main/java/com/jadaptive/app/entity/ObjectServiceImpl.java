@@ -140,7 +140,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 		assertRead(template);
 
-		return objectRepository.list(template);
+		return listViaObjectBean(template);
 	}
 
 	@Override
@@ -470,6 +470,26 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 	}
 	
+	private Iterable<AbstractObject> listViaObjectBean(ObjectTemplate template) {
+		
+		assertRead(template);
+		
+		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
+		
+		if(Objects.nonNull(clz)) {
+		
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				return convertObjects(bean.allObjects());
+			}
+		}
+		
+		return objectRepository.list(template);
+		
+	}
+	
 	private long countViaObjectBean(ObjectTemplate template, SearchField... fields) {
 		
 		assertRead(template);
@@ -525,7 +545,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
-	public Collection<AbstractObject> convertObjects(Collection<? extends UUIDDocument> objects) {
+	public Collection<AbstractObject> convertObjects(Iterable<? extends UUIDDocument> objects) {
 		
 		List<AbstractObject> results = new ArrayList<>();
 		for(UUIDDocument obj : objects) {

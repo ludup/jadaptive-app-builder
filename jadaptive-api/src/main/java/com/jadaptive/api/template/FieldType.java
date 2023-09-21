@@ -18,7 +18,8 @@ public enum FieldType {
 //	HIDDEN,
 	IMAGE,
 	FILE,
-	COUNTRY;
+	COUNTRY, 
+	OPTIONS;
 	
 	ValidationType[] options;
 	boolean canDefault = false;
