@@ -107,7 +107,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	}
 	
 	protected WizardSection getFinishSection() {
-		return new DefaultWizardSection(getResourceKey(), "finishWizard", "/com/jadaptive/plugins/web/ui/FinishWizard.html", 0);
+		return new DefaultWizardSection(getBundle(), "finishWizard", "/com/jadaptive/plugins/web/ui/FinishWizard.html", 0);
 	}
 
 	

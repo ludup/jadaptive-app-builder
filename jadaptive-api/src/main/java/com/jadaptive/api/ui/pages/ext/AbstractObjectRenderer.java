@@ -69,8 +69,10 @@ import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
+import com.jadaptive.api.ui.renderers.form.ReplacementFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
+import com.jadaptive.api.ui.renderers.form.TimeFormInput;
 import com.jadaptive.api.ui.renderers.form.TimestampFormInput;
 import com.jadaptive.utils.Utils;
 
@@ -115,6 +117,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 	protected ThreadLocal<Boolean> disableViews = new ThreadLocal<>();
 	protected ThreadLocal<Set<String>> ignoreResources = new ThreadLocal<>();
+	protected ThreadLocal<List<ObjectTemplate>> replacementVariables = new ThreadLocal<>();
+	protected ThreadLocal<RenderScope> formRenderer = new ThreadLocal<>();
+	protected ThreadLocal<String> formHandler = new ThreadLocal<>();
 	
 	protected void process(Document contents, Page page, ObjectTemplate template, AbstractObject object, FieldView scope) throws IOException {
 
@@ -132,6 +137,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				children.put(object.getResourceKey(), object);
 				extractChildObjects(object, children, template);
 				childObjects.set(children);
+			} else {
+				object = objectService.createNew(template);
 			}
 			 
 			
@@ -250,7 +257,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			for(TemplateViewField fieldView : view.getFields()) {
 				FieldTemplate field = fieldView.getField();
-				if(field.isHidden()) {
+				if(field.isHidden() && !field.getCollection()) {
 					HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), fieldView);
 					render.renderInput(element, getFieldValue(fieldView, obj));
 					continue;
@@ -439,7 +446,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			break;
 		case OBJECT_EMBEDDED:
 		{
-			TableRenderer table = applicationService.autowire(new TableRenderer(view == FieldView.READ, obj, field));
+			TableRenderer table = applicationService.autowire(new TableRenderer(view == FieldView.READ, 
+					obj, field,
+					formRenderer.get(), formHandler.get()));
 			String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
 			ObjectTemplate objectTemplate = templateService.get(objectType);
 			
@@ -554,6 +563,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 			break;
 		}
+		case TIME:
+			break;
 		case TEXT_AREA:
 			break;
 		case TIMESTAMP:
@@ -626,8 +637,16 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			default:
 			{
-				TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
-				render.renderInput(element, getFieldValue(fieldView, obj));
+//				List<ObjectTemplate> replacementVars = replacementVariables.get();
+//				if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
+//					ReplacementFormInput render = new ReplacementFormInput(currentTemplate.get(), fieldView);
+//					render.renderInput(element, getFieldValue(fieldView, obj));
+//					render.renderTemplateReplacements(replacementVars);
+//				} else {
+					TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
+					render.renderInput(element, getFieldValue(fieldView, obj));
+//				}
+				
 				break;
 			}
 			}
@@ -714,6 +733,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case TIMESTAMP:
 		{
 			TimestampFormInput render = new TimestampFormInput(currentTemplate.get(), fieldView);
+			render.renderInput(element, getFieldValue(fieldView, obj));
+			break;
+		}
+		case TIME:
+		{
+			TimeFormInput render = new TimeFormInput(currentTemplate.get(), fieldView);
 			render.renderInput(element, getFieldValue(fieldView, obj));
 			break;
 		}

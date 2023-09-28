@@ -44,8 +44,11 @@ public class PageCache {
 	Class<? extends Page> homePage;
 	private Class<? extends Page> defaultPage = Login.class;
 	
-	
 	public Page resolvePage(String resourceUri) throws FileNotFoundException, AccessDeniedException {
+		return resolvePage(resourceUri, true);
+	}
+	
+	public Page resolvePage(String resourceUri, boolean parseRequestURI) throws FileNotFoundException, AccessDeniedException {
 		
 		String name = FileUtils.firstPathElement(resourceUri);
 		if(StringUtils.isBlank(name)) {
@@ -53,6 +56,9 @@ public class PageCache {
 		}
 		Page cachedPage = aliasCache.get(name);
 		if(Objects.nonNull(cachedPage)) {
+			if(!parseRequestURI) {
+				return cachedPage;
+			}
 			if(ReflectionUtils.hasAnnotation(cachedPage.getClass(), RequestPage.class)) {
 				Page page = createNewInstance(resourceUri, cachedPage);
 				postCreation(page);

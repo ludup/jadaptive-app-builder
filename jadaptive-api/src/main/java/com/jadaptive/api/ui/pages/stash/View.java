@@ -17,7 +17,7 @@ import com.jadaptive.api.ui.RequestPage;
 @Component("stashView")
 @RequestPage(path = "object-view/{resourceKey}/{uuid}/{fieldName}/{childUuid}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = { "freemarker", "i18n"} )
+@PageProcessors(extensions = { "i18n"} )
 @ModalPage
 public class View extends StashedObjectPage {
 	

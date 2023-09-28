@@ -32,7 +32,7 @@ import com.jadaptive.utils.FileUtils;
 @Component
 @RequestPage(path="wizards/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = { "freemarker", "i18n"} )
+@PageProcessors(extensions = { "i18n"} )
 @ModalPage
 public class Wizard extends HtmlPage implements ObjectPage {
 
@@ -231,6 +231,12 @@ public class Wizard extends HtmlPage implements ObjectPage {
 
 	@Override
 	public AbstractObject getObject() {
+		
+		
+		AbstractObject o = objectService.fromStashToAbstractObject(state.getCurrentPage().getName());
+		if(Objects.nonNull(o)) {
+			return o;
+		}
 		
 		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
 		UUIDEntity obj = state.getObject(state.getCurrentPage());

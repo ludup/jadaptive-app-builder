@@ -152,7 +152,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		sessionUtils.setCachable(response, 600);
 		
 		try {
-			Page page = pageCache.resolvePage(name.replace(".css", ""));
+			Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".css", "")));
 			URL url = page.getClass().getResource(page.getCssResource());
 			response.setContentType("text/css");
 			response.setStatus(HttpStatus.OK.value());

@@ -17,7 +17,7 @@ import com.jadaptive.api.ui.RequestPage;
 @Component("stashCreate")
 @RequestPage(path = "object-create/{resourceKey}/{fieldName}/{childResourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = {"freemarker", "i18n"})
+@PageProcessors(extensions = {"i18n"})
 @ModalPage
 public class Create extends StashedObjectPage {
 	

@@ -108,4 +108,41 @@ $(function() {
 		});
 	}
 	
+	var stashFunc = function(e) {
+		e.preventDefault();
+		
+		$('#feedback').remove();
+		
+		var url = $(this).data('action');
+		var redirect = $(this).data('url');
+		if(!redirect) {
+			redirect = window.location;
+		}
+		var form = $('form');
+		
+    	$.ajax({
+           type: "POST",
+           url: url,
+           cache: false,
+           contentType: false,
+    	   processData: false,
+           data: new FormData(form[0]),
+           success: function(data)
+           {
+			   debugger;
+                if(data.success) {
+                   window.location = redirect;
+               } else {
+               	   $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
+               	   $('#feedbackText').text(data.message);
+               }
+           },
+           complete: function() {
+           		
+           }
+         });
+	};
+	
+	$('.stash').click(stashFunc);  
+	
 });

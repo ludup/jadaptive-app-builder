@@ -49,5 +49,7 @@ public interface ObjectService {
 
 	Collection<AbstractObject> convertObjects(Iterable<? extends UUIDDocument> objects);
 
+	AbstractObject fromStashToAbstractObject(String resourceKey);
+
 	
 }

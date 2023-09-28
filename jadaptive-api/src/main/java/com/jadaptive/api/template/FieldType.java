@@ -19,7 +19,8 @@ public enum FieldType {
 	IMAGE,
 	FILE,
 	COUNTRY, 
-	OPTIONS;
+	OPTIONS,
+	TIME;
 	
 	ValidationType[] options;
 	boolean canDefault = false;

@@ -234,6 +234,19 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 	}
 	
+	@Override
+	public AbstractObject fromStashToAbstractObject(String resourceKey)  {
+		try {
+			UUIDDocument doc = (UUIDDocument) Request.get().getSession().getAttribute(resourceKey);
+			if(Objects.nonNull(doc)) {
+				return convert(doc); 
+			}
+			return null;
+		} finally {
+			 Request.get().getSession().removeAttribute(resourceKey);
+		}
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends UUIDDocument> T peekStash(String resourceKey, Class<T> uuidObject)  {

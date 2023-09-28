@@ -45,6 +45,9 @@ public class DocumentValidator {
 		case ENUM:
 			validateEnum(value, field);
 			return value;
+		case TIME:
+			
+			return value;
 		case PERMISSION:
 			validatePermission(value, field);
 			return value;

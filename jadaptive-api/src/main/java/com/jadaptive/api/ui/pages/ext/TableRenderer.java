@@ -64,11 +64,16 @@ public class TableRenderer {
 	AbstractObject parentObject = null;
 	FieldTemplate field;
 	private boolean readOnly;
+	RenderScope formRenderer;
+	String formHandler;
 	
-	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field) {
+	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field,
+			RenderScope formRenderer, String formHandler) {
 		this.parentObject = parentObject;
 		this.field = field;
 		this.readOnly = readOnly;
+		this.formRenderer = formRenderer;
+		this.formHandler = formHandler;
 	}
 	
 	public TableRenderer(boolean readOnly) {
@@ -156,10 +161,11 @@ public class TableRenderer {
 						.appendChild(Html.i18n("default", "noResults.text"))));
 			}
 			
-			tableholder.add(Html.div("col-md-6 float-start text-start")
-							.attr("id", "objectActions"));
-			tableholder.add(Html.div("col-md-6 float-end text-end")
-							.attr("id", "pagnation"));
+			tableholder.add(Html.div("row", "mb-3").appendChild(
+					Html.div("col-md-6 float-start text-start")
+							.attr("id", "objectActions"))
+					.appendChild(Html.div("col-md-6 float-end text-end")
+							.attr("id", "pagnation")));
 			
 			generateTableActions(tableholder.select("#objectActions").first());
 			
@@ -311,7 +317,7 @@ public class TableRenderer {
 
 					createStashAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
 							template.getCollectionKey(), "fa-plus", "fa-solid",
-							"stash", "readWrite");					
+							"create", "readWrite");					
 				}
 				
 
@@ -324,7 +330,7 @@ public class TableRenderer {
 				} else {
 					createStashAction(element, String.format("create/%s", template.getResourceKey()), 
 							template.getCollectionKey(), "fa-plus", "fa-solid",
-							"primary", "create", "stash", "readWrite");	
+							"primary", "create", "readWrite");	
 				}
 			}
 		}
@@ -364,7 +370,7 @@ public class TableRenderer {
 		element.appendChild(
 				new Element("a").attr("href", "#")
 				.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
-				.attr("data-url", replaceVariables("/app/ui/object-create/{resourceKey}", parentObject) + "/" + field.getResourceKey() + "/" + field.getValidationValue(ValidationType.RESOURCE_KEY))
+				.attr("data-url", replaceVariables("/app/ui/object-" + resourceKey + "/{resourceKey}", parentObject) + "/" + field.getResourceKey() + "/" + field.getValidationValue(ValidationType.RESOURCE_KEY))
 				.addClass(StringUtils.join(classes, " "))
 				.appendChild(Html.i(iconGroup, icon, "me-1"))
 				.appendChild(new Element("span")

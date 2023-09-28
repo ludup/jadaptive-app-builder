@@ -429,8 +429,10 @@ public class DocumentHelper {
 			ObjectMapper mapper = new ObjectMapper();
 
 			for(String value : values) {
-				String json = new String(Base64.getUrlDecoder().decode(value), "UTF-8");
-				result.add(mapper.readValue(json, MongoEntity.class).getDocument());
+				if(StringUtils.isNotBlank(value)) {
+					String json = new String(Base64.getUrlDecoder().decode(value), "UTF-8");
+					result.add(mapper.readValue(json, MongoEntity.class).getDocument());
+				}
 			}
 
 			break;
@@ -807,6 +809,7 @@ public class DocumentHelper {
 				return null;
 			}
 		case OPTIONS:
+		case TIME:
 		case COUNTRY:
 		{
 			return value;

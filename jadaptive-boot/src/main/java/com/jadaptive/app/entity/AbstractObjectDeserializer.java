@@ -269,6 +269,9 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		case ENUM:
 			validateEnum(node, field);
 			return node.asText();
+		case TIME:
+			
+			return node.asText();
 		case PERMISSION:
 			validatePermission(node, field);
 			return node.asText();

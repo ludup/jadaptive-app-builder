@@ -1,6 +1,7 @@
 package com.jadaptive.api.ui.pages.ext;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
@@ -26,6 +27,7 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 	
 	ThreadLocal<String> actionURL = new ThreadLocal<>();
 	ThreadLocal<AbstractObject> object = new ThreadLocal<>();
+	
 	
 	@Override
 	public String getName() {
@@ -63,6 +65,12 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 				}
 			}
 			
+			if(element.hasAttr("jad:renderer")) {
+				formRenderer.set(RenderScope.valueOf(element.attr("jad:renderer")));
+			}
+		
+			formHandler.set(handler);
+			
 			if(page instanceof ObjectPage) {
 				object.set(((ObjectPage)page).getObject());
 			}
@@ -74,6 +82,8 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			if(element.hasAttr("jad:ignores")) {
 				ignoreResources.set(new HashSet<>(Arrays.asList(element.attr("jad:ignores").split(","))));
 			}
+			
+			replacementVariables.set(new ArrayList<>(Arrays.asList(template)));
 
 			AbstractObject displayObject = object.get();
 			ObjectTemplate displayTemplate = template;

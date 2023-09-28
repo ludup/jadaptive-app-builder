@@ -148,8 +148,14 @@ public class WizardState {
 	}
 
 	public void insertNextPage(WizardSection setupSection) {
+		insertNextPage(setupSection, true);
+	}
+	
+	public void insertNextPage(WizardSection setupSection, boolean removePrevious) {
 
-		removePage(setupSection.getClass());
+		if(removePrevious) {
+			removePage(setupSection.getClass());
+		}
 		ApplicationServiceImpl.getInstance().autowire(setupSection);
 		pages.add(getCurrentStep(), setupSection);
 		

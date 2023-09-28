@@ -8,6 +8,13 @@ $(function() {
 		$(this).closest(".dropdown").find('input[type="hidden"]').val($(this).data('resourcekey')).change();
 	});
 	
+	$(document).on('click', '.replacement-item', function(e) {
+		e.preventDefault();
+		$(this).closest(".dropdown").find('input[type="text"]').val($(this).data('resourcekey'));
+		$(this).closest(".dropdown").find('.jdropdown-text').html($(this).data('resourcekey'));
+		$(this).closest(".dropdown").find('.dropdown-menu').removeClass('show');
+	});
+	
 	$(document).on('click', '.jdropdown', function(e) {
 		e.stopPropagation();
 		var el = $(this).closest(".dropdown");
