@@ -63,6 +63,8 @@ public class Search extends TemplatePage implements FormProcessor<SearchForm> {
 	public void onCreate() throws FileNotFoundException {
 		super.onCreate();
 		
+		Request.get().getSession().removeAttribute(template.getResourceKey());
+		
 		if(template.getPermissionProtected()) {
 			permissionService.assertRead(template.getResourceKey());
 		}
