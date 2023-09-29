@@ -41,9 +41,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.templates.TemplateVersionService;
-import com.jadaptive.api.ui.ErrorPage;
 import com.jadaptive.api.ui.Feedback;
-import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.entity.MongoEntity;
@@ -161,17 +159,10 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	}
 
 	@RequestMapping(value="/app/api/form/cancel/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
-	public void cancelForm(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey)  {
+	public RequestStatus cancelForm(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey)  {
 
-		try {
-			request.getSession().removeAttribute(resourceKey);
-			response.sendRedirect("/app/ui/search/" + resourceKey);
-		}  catch (Throwable e) {
-			if(log.isErrorEnabled()) {
-				log.error("POST api/objects/{}", resourceKey, e);
-			}
-			throw new PageRedirect(new ErrorPage(e));
-		}
+		request.getSession().removeAttribute(resourceKey);
+		return new RequestStatusImpl(true);
 	}
 	
 	@RequestMapping(value="/app/api/form/stash/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},

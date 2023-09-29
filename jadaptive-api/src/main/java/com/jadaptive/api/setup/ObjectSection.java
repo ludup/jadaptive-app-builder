@@ -51,7 +51,7 @@ public class ObjectSection extends SetupSection {
 				.appendChild(row = new Element("div")
 					.addClass("row")));
 		
-		AbstractObject object = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).convert(uuidObject);
+		AbstractObject object = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).toAbstractObject(uuidObject);
 		for(FieldTemplate field : template.getFields()) { 
 		
 			if(field.isHidden()) {

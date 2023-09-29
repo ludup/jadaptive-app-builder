@@ -34,16 +34,13 @@ public class Create extends StashedObjectPage {
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException {
 		
+		super.doGenerateTemplateContent(document);
+		
 		Element element = document.selectFirst("#saveButton");
 		if(Objects.nonNull(element)) {
 			element.attr("data-url", String.format("/app/ui/create/%s", template.getResourceKey()))
 				.attr("data-action", String.format("/app/api/form/stash/%s/%s/%s", template.getResourceKey(), childResourceKey, fieldName));
 		}
-		
-		element = document.selectFirst("#cancelButton");
-		
-		if(Objects.nonNull(element)) {
-			element.attr("href", String.format("/app/ui/create/%s", template.getResourceKey()));
-		}
+
 	}
 }

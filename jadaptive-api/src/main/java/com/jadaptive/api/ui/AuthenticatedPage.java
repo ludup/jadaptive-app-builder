@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
@@ -18,6 +19,9 @@ public abstract class AuthenticatedPage extends HtmlPage {
 
 	@Autowired
 	private SessionUtils sessionUtils;
+	
+	@Autowired
+	private PermissionService permissionService;
 	
 	@Autowired
 	private PageCache pageCache;
@@ -61,16 +65,8 @@ public abstract class AuthenticatedPage extends HtmlPage {
 		
 	}
 	
-	protected void setCurrentSession(Session session) {
-		currentSession.set(session);
-	}
-	
 	protected User getCurrentUser() {
-		return getCurrentSession().getUser();
-	}
-	
-	protected Session getCurrentSession() {
-		return currentSession.get();
+		return permissionService.getCurrentUser();
 	}
 	
 	protected boolean isSystem() {

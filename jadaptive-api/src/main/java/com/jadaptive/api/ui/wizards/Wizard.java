@@ -237,7 +237,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		if(Objects.isNull(obj)) {
 			return null;
 		}
-		return objectService.convert(obj);
+		return objectService.toAbstractObject(obj);
 		
 	}
 

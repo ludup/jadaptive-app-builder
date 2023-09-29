@@ -341,6 +341,12 @@ $(function() {
 	$('.checkExit').click(function(e) {
         e.preventDefault();
         var _self = $(this);
+        
+        var cancelFunc = function() {
+			$.getJSON("/app/api/form/cancel/" + _self.data('resourcekey'), function(data) {
+				window.location = _self.attr('href');
+			});
+		};
         if($('.dirty').length > 0) {
 	    	bootbox.confirm({
 	    		message: "${userInterface:exit.text}",
@@ -357,12 +363,12 @@ $(function() {
 			    callback: function (result) {
 			        if(result)
 			        {
-			        	window.location = _self.attr('href');
+			        	cancelFunc();
 			        }
 			    }
 			});
 		} else {
-			window.location = _self.attr('href');
+			cancelFunc();
 		}
     });
     

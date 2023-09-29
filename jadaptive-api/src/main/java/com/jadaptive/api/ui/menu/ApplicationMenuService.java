@@ -13,4 +13,6 @@ public interface ApplicationMenuService {
 	
 	Collection<ApplicationMenu> getMenus();
 
+	boolean checkPermission(ApplicationMenu m);
+
 }
