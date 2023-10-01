@@ -25,22 +25,25 @@ public class Footer extends AbstractPageExtension {
 	@Override
 	public void process(Document document, Element element, Page page) throws IOException {
 		
-		BootstrapTheme current = getThemeFromCookie(BootstrapTheme.DEFAULT);
-		
-		if(BootstrapTheme.hasCss(current)) {
-			PageHelper.appendStylesheet(document, String.format("/app/content/themes/%s/bootstrap.min.css", BootstrapTheme.getThemeCssName(current)), "bootstrapTheme");	
-		}	
-		
-		Element footer = document.selectFirst("#footer");
-		boolean allowChange = true;
-		if(allowChange) {
+		Element bootstrap = document.selectFirst("#bootstrapCss");
+		if(Objects.nonNull(bootstrap)) {
+			BootstrapTheme current = getThemeFromCookie(BootstrapTheme.DEFAULT);
 			
-			IconWithDropdownInput input = new IconWithDropdownInput("theme", current.name().toLowerCase());
-			input.up().dark();
-			footer.appendChild(new Element("div")
-					.addClass("float-end me-3")
-					.appendChild(new Element("div").addClass("col-3 ms-3").appendChild(input.renderInput())));
-			input.renderValues(BootstrapTheme.values(), current.name(), false, true);
+			if(BootstrapTheme.hasCss(current)) {
+				PageHelper.appendStylesheet(document, String.format("/app/content/themes/%s/bootstrap.min.css", BootstrapTheme.getThemeCssName(current)), "bootstrapTheme");	
+			}
+			
+			Element footer = document.selectFirst("#footer");
+			boolean allowChange = true;
+			if(allowChange) {
+				
+				IconWithDropdownInput input = new IconWithDropdownInput("theme", current.name().toLowerCase());
+				input.up().dark();
+				footer.appendChild(new Element("div")
+						.addClass("float-end me-3")
+						.appendChild(new Element("div").addClass("col-3 ms-3").appendChild(input.renderInput())));
+				input.renderValues(BootstrapTheme.values(), current.name(), false, true);
+			}
 		}
 	}
 
