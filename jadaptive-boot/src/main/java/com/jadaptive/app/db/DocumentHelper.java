@@ -386,6 +386,9 @@ public class DocumentHelper {
 		case FILE:
 			if(request instanceof StandardMultipartHttpServletRequest) {
 				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
+				if(Objects.isNull(file)) {
+					return null;
+				}
 				if(file.isEmpty()) {
 					return null;
 				}
