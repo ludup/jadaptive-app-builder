@@ -142,6 +142,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						.addClass("jadaptiveForm")
 						.attr("id", "objectForm")
 						.attr("method", "POST")
+						.attr("autocomplete", "off")
 						.attr("data-resourcekey", template.getResourceKey())
 						.attr("enctype", "multipart/form-data")
 						.attr("action", getActionURL())
