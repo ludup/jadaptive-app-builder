@@ -159,6 +159,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	}
 
 	@RequestMapping(value="/app/api/form/cancel/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
 	public RequestStatus cancelForm(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey)  {
 
 		request.getSession().removeAttribute(resourceKey);
