@@ -18,6 +18,7 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.ModalPage;
@@ -45,6 +46,9 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	@Autowired
 	private ClassLoaderService classService; 
 	
+	@Autowired
+	private SessionUtils sessionUtils;
+	
 	String resourceKey;
 	WizardState state;
 	
@@ -57,6 +61,11 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
 		super.beforeProcess(uri, request, response);
 		state = wizardService.getWizard(resourceKey).getState(request);
+		if(state.getFlow().requiresUserSession() && !sessionUtils.hasActiveSession(Request.get())) {
+			throw new FileNotFoundException();
+		}
+		
+		
 		currentState.set(state);
 	}
 	

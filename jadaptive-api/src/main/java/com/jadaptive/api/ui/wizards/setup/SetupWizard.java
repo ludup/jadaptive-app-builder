@@ -58,6 +58,11 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	protected Class<? extends WizardSection> getSectionClass() {
 		return SetupSection.class;
 	}
+	
+	@Override
+	public boolean requiresUserSession() {
+		return false;
+	}
 
 	@Override
 	protected String getStateAttribute() {

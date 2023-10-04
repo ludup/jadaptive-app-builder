@@ -99,7 +99,6 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 				if(ext.isExtending(menu)) {
 					extended = true;
 					if(ext.isVisible(menu)) {
-						
 						results.add(menu);
 						break;
 					}
