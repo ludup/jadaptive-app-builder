@@ -8,7 +8,7 @@ $(function() {
 		$(this).closest(".dropdown").find('input[type="hidden"]').val($(this).data('resourcekey')).change();
 	});
 	
-	$(document).on('click', '.jdropdown', function(e) {
+	$(document).on('click keyup', '.jdropdown', function(e) {
 		e.stopPropagation();
 		var el = $(this).closest(".dropdown");
 		el = el.find('.dropdown-toggle');
