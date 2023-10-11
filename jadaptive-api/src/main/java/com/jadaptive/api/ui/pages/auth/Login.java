@@ -118,14 +118,6 @@ public class Login extends AuthenticationPage<LoginForm> {
 				.attr("jad:i18n", "start.name");
 		}
 		
-		if(state.getScope()!=AuthenticationScope.USER_LOGIN
-				|| !pageCache.getDefaultPage().equals(Login.class)) {
-			doc.selectFirst("#actions")
-				.after(Html.a("/app/api/reset-login")
-					.addClass("text-decoration-none d-block")
-					.appendChild(new Element("sup")
-							.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "resetLogin.text"))));
-		} 
 	}
 	
 	@Override

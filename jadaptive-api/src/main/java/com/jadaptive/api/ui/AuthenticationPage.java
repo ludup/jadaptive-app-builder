@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import com.jadaptive.api.auth.AuthenticationPolicy;
+import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -17,6 +19,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.user.UserService;
 
 public abstract class AuthenticationPage<T> extends HtmlPage implements FormProcessor<T> {
@@ -75,6 +78,19 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 						sessionUtils.setupCSRFToken(Request.get()))
 						.attr("id", "csrftoken"));
 		}
+		
+		AuthenticationState state = authenticationService.getCurrentState();
+		
+		if(state.getScope()!=AuthenticationScope.USER_LOGIN
+				|| !pageCache.getDefaultPage().equals(Login.class)) {
+			Element el = doc.selectFirst("#actions");
+			if(Objects.nonNull(el)) {
+				el.appendChild(Html.a("/app/api/reset-login")
+					.addClass("text-decoration-none d-block")
+					.appendChild(new Element("sup")
+							.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "resetLogin.text"))));
+			}
+		} 
 	}
 	
 	protected boolean isAllowFormExternalRedirect() {
