@@ -7,8 +7,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclEntryPermission;
+import java.nio.file.attribute.AclEntryType;
+import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.attribute.UserPrincipalLookupService;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -17,12 +23,15 @@ import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.crypto.Cipher;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,15 +90,40 @@ public class RsaEncryptionProvider {
 	
 	private void setOwnerPermissions(Path path) throws IOException {
 		
-		
 		try {
-			Set<PosixFilePermission> ownerWritable;
-			if(Files.isDirectory(path)) {
-				ownerWritable = PosixFilePermissions.fromString("rwx------");
+			if(SystemUtils.IS_OS_WINDOWS) {
+				
+				AclFileAttributeView aclAttr = Files.getFileAttributeView(path, AclFileAttributeView.class);
+				
+				UserPrincipalLookupService upls = path.getFileSystem().getUserPrincipalLookupService();
+				UserPrincipal user = upls.lookupPrincipalByName(System.getProperty("user.name"));
+				AclEntry.Builder builder = AclEntry.newBuilder();       
+				builder.setPermissions( EnumSet.of(AclEntryPermission.READ_DATA, AclEntryPermission.EXECUTE, 
+				        AclEntryPermission.READ_ACL, AclEntryPermission.READ_ATTRIBUTES, AclEntryPermission.READ_NAMED_ATTRS,
+				        AclEntryPermission.WRITE_ACL, AclEntryPermission.DELETE
+				));
+				builder.setPrincipal(user);
+				builder.setType(AclEntryType.ALLOW);
+				aclAttr.setAcl(Collections.singletonList(builder.build()));
+				
+				if(log.isInfoEnabled()) {
+					log.info("Set strict permissions on {}", path.toAbsolutePath());
+				}
 			} else {
-				ownerWritable = PosixFilePermissions.fromString("rw-------");
+				
+				Set<PosixFilePermission> ownerWritable;
+				if(Files.isDirectory(path)) {
+					ownerWritable = PosixFilePermissions.fromString("rwx------");
+				} else {
+					ownerWritable = PosixFilePermissions.fromString("rw-------");
+				}
+				Files.setPosixFilePermissions(path, ownerWritable);
+				
+				if(log.isInfoEnabled()) {
+					log.info("Set strict permissions on {}", path.toAbsolutePath());
+				}
 			}
-			Files.setPosixFilePermissions(path, ownerWritable);
+			
 		} catch (Throwable e) {
 			log.warn("Could not set strict permissions on private keys", e);
 		}
