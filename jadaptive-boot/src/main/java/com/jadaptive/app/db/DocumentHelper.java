@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.Collections;
+//import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -597,7 +597,7 @@ public class DocumentHelper {
 					Class<?> type = (Class<?>) o.getActualTypeArguments()[0];
 					List<?> list = (List<?>) document.get(name);
 					if(Objects.isNull(list)) {
-						m.invoke(obj, Collections.emptySet());
+						m.invoke(obj, new HashSet<>());
 						continue;
 					}
 					if(UUIDEntity.class.isAssignableFrom(type)) {
