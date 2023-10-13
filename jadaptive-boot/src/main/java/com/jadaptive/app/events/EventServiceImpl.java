@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.events.EventListener;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.Events;
-import com.jadaptive.api.events.ObjectUpdateEvent;
 import com.jadaptive.api.events.ObjectEvent;
+import com.jadaptive.api.events.ObjectUpdateEvent;
 import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -185,6 +185,12 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public <T extends UUIDEntity> void updated(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler) {
+		on(Events.updated(templateService.getTemplateResourceKey(clz)), handler);
+	}
+	
+	@Override
+	public <T extends UUIDEntity> void saved(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+		on(Events.created(templateService.getTemplateResourceKey(clz)), handler);
 		on(Events.updated(templateService.getTemplateResourceKey(clz)), handler);
 	}
 
