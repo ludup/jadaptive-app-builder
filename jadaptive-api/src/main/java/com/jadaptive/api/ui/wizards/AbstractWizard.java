@@ -21,7 +21,6 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
-import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.UriRedirect;
 
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
@@ -34,9 +33,6 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	
 	@Autowired
 	private TransactionService transactionService; 
-	
-	@Autowired
-	private PageCache pageCache;
 	
 	protected abstract Class<? extends WizardSection> getSectionClass();
 	

@@ -30,7 +30,6 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.Html;
-import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.UriRedirect;
@@ -56,9 +55,6 @@ public class Login extends AuthenticationPage<LoginForm> {
 
 	@Autowired
 	private  TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
-	
-	@Autowired
-	private PageCache pageCache; 
 	
 	public Login() {
 		super(LoginForm.class);
