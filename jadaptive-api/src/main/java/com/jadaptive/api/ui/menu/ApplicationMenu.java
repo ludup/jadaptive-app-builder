@@ -14,6 +14,8 @@ public interface ApplicationMenu extends ExtensionPoint {
 	String getPath();
 
 	default Collection<String> getPermissions() { return Collections.emptyList(); }
+	
+	default Collection<String> getWithoutPermissions() { return Collections.emptyList(); }
 
 	String getIcon();
 
@@ -28,4 +30,5 @@ public interface ApplicationMenu extends ExtensionPoint {
 	default boolean isVisible() { return true; }
 
 	default String getIconGroup() { return "fa-solid"; }
+
 }

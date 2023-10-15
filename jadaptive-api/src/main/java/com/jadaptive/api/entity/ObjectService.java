@@ -3,6 +3,7 @@ package com.jadaptive.api.entity;
 import java.io.IOException;
 import java.util.Collection;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -37,7 +38,7 @@ public interface ObjectService {
 
 	void rebuildReferences(ObjectTemplate template);
 
-	AbstractObject convert(UUIDDocument obj);
+	AbstractObject toAbstractObject(UUIDDocument obj);
 
 	<T extends UUIDDocument> void stashObject(AbstractObject obj) throws ValidationException, RepositoryException, ObjectException, IOException;
 
@@ -50,6 +51,13 @@ public interface ObjectService {
 	Collection<AbstractObject> convertObjects(Iterable<? extends UUIDDocument> objects);
 
 	AbstractObject fromStashToAbstractObject(String resourceKey);
+
+	long countObjects(String resourceKey, String searchField, String searchValue, SearchField... fields);
+
+	Collection<AbstractObject> tableObjects(String resourceKey, String searchField, String searchValue, int offset,
+			int limit, SearchField... fields);
+
+	UUIDDocument toUUIDDocument(AbstractObject entity);
 
 	
 }

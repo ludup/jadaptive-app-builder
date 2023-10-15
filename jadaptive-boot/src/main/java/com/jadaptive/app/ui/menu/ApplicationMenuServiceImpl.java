@@ -2,6 +2,7 @@ package com.jadaptive.app.ui.menu;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
@@ -31,6 +34,9 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 
 	@Autowired
 	private ClassLoaderService classService; 
+	
+	@Autowired
+	private PermissionService permissionService;
 	
 	private List<ApplicationMenu> annotatedMenus = null;
 	
@@ -49,34 +55,36 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		
 			annotatedMenus = new ArrayList<>();
 			for(Class<?> clz : classService.resolveAnnotatedClasses(PageMenu.class)) {
-				PageMenu m = clz.getAnnotation(PageMenu.class);
-				if(Objects.nonNull(m)) {
-					
-					String path = m.path();
-					String uuid = m.uuid();
-					String bundle = m.bundle();
-					String i18n = m.i18n();
-					
-					if(UUIDEntity.class.isAssignableFrom(clz)) {
-						try {
-							UUIDEntity e = (UUIDEntity) clz.getConstructor().newInstance();
-							if(StringUtils.isBlank(path)) {
-								path = "/app/ui/search/" + e.getResourceKey();
+				PageMenu[] pageMenus = clz.getAnnotationsByType(PageMenu.class);
+				if(Objects.nonNull(pageMenus)) {
+					for(PageMenu m : pageMenus) {
+						
+						String path = m.path();
+						String uuid = m.uuid();
+						String bundle = m.bundle();
+						String i18n = m.i18n();
+						
+						if(UUIDEntity.class.isAssignableFrom(clz)) {
+							try {
+								UUIDEntity e = (UUIDEntity) clz.getConstructor().newInstance();
+								if(StringUtils.isBlank(path)) {
+									path = "/app/ui/search/" + e.getResourceKey();
+								}
+								if(StringUtils.isBlank(bundle)) {
+									bundle = e.getResourceKey();
+								}
+								if(StringUtils.isBlank(uuid)) {
+									uuid = UUID.randomUUID().toString();
+								}
+								if(StringUtils.isBlank(i18n)) {
+									i18n = e.getResourceKey() + ".names";
+								}
+							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+									| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 							}
-							if(StringUtils.isBlank(bundle)) {
-								bundle = e.getResourceKey();
-							}
-							if(StringUtils.isBlank(uuid)) {
-								uuid = UUID.randomUUID().toString();
-							}
-							if(StringUtils.isBlank(i18n)) {
-								i18n = e.getResourceKey() + ".names";
-							}
-						} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-								| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						}
+						annotatedMenus.add(new DynamicMenu(m, path, bundle, uuid, i18n));
 					}
-					annotatedMenus.add(new DynamicMenu(m, path, bundle, uuid, i18n));
 				}
 			}
 		}
@@ -86,6 +94,7 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		
 		for(ApplicationMenu menu :  menus) {
 			boolean extended = false;
+			
 			for(ApplicationMenuExtender ext : applicationService.getBeans(ApplicationMenuExtender.class)) {
 				if(ext.isExtending(menu)) {
 					extended = true;
@@ -95,15 +104,42 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 					}
 				}
 			}
+			
 			if(!extended && menu.isVisible()) {
 				results.add(menu);
 			}
+			
+			
 		}
 		
 		Request.get().getSession().setAttribute(MENU_CACHE, tmp = Collections.unmodifiableCollection(results));
 		return tmp;
 	}
 	
+	@Override
+	public boolean checkPermission(ApplicationMenu m) {
+		for(String perm : m.getPermissions()) {
+			if(StringUtils.isNotBlank(perm)) {
+				try {
+					permissionService.assertPermission(perm);
+				} catch(AccessDeniedException e) { 
+					return false;
+				}
+			}
+		}
+		
+		for(String perm : m.getWithoutPermissions()) {
+			if(StringUtils.isNotBlank(perm)) {
+				try {
+					permissionService.assertPermission(perm);
+					return false;
+				} catch(AccessDeniedException e) { 
+				}
+			}
+		}
+		
+		return true;
+	}
 	class DynamicMenu implements ApplicationMenu {
 		
 		String path;
@@ -154,5 +190,18 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		public String getBundle() {
 			return bundle;
 		}
+
+		@Override
+		public Collection<String> getPermissions() {
+			return Arrays.asList(m.withPermission().split(","));
+		}
+
+		@Override
+		public Collection<String> getWithoutPermissions() {
+			return Arrays.asList(m.withoutPermission().split(","));
+		}
+		
+		
+		
 	}
 }

@@ -3,11 +3,11 @@ package com.jadaptive.plugins.keys;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserService;
 
 @Extension
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
@@ -16,14 +16,9 @@ import com.jadaptive.api.user.UserService;
 public class GenerateUserKey extends GeneratePublicKey {
 
 	@Autowired
-	UserService userService; 
+	private PermissionService permissionService; 
 	
 	String uuid;
-	
-	@Override
-	protected User getUser() {
-		return getCurrentSession().getUser();
-	}
 
 	@Override
 	public String getUri() {
@@ -33,6 +28,11 @@ public class GenerateUserKey extends GeneratePublicKey {
 	@Override
 	protected String getAction() {
 		return "/generate/user/key";
+	}
+
+	@Override
+	protected User getUser() {
+		return permissionService.getCurrentUser();
 	}
 
 }

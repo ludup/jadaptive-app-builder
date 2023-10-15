@@ -44,11 +44,8 @@ public class PageCache {
 	Class<? extends Page> homePage;
 	private Class<? extends Page> defaultPage = Login.class;
 	
-	public Page resolvePage(String resourceUri) throws FileNotFoundException, AccessDeniedException {
-		return resolvePage(resourceUri, true);
-	}
 	
-	public Page resolvePage(String resourceUri, boolean parseRequestURI) throws FileNotFoundException, AccessDeniedException {
+	public Page resolvePage(String resourceUri, boolean processParameters) throws FileNotFoundException, AccessDeniedException {
 		
 		String name = FileUtils.firstPathElement(resourceUri);
 		if(StringUtils.isBlank(name)) {
@@ -56,10 +53,7 @@ public class PageCache {
 		}
 		Page cachedPage = aliasCache.get(name);
 		if(Objects.nonNull(cachedPage)) {
-			if(!parseRequestURI) {
-				return cachedPage;
-			}
-			if(ReflectionUtils.hasAnnotation(cachedPage.getClass(), RequestPage.class)) {
+			if(processParameters && ReflectionUtils.hasAnnotation(cachedPage.getClass(), RequestPage.class)) {
 				Page page = createNewInstance(resourceUri, cachedPage);
 				postCreation(page);
 				page.onCreate();
@@ -73,7 +67,7 @@ public class PageCache {
 				if(page.getUri().contentEquals(resourceUri) || page.getUri().contentEquals(name) || page.getClass().getName().equalsIgnoreCase(name)) {
 					aliasCache.put(page.getUri(), page);
 					pageCache.put(page.getClass(), page);
-					if(ReflectionUtils.hasAnnotation(page.getClass(), RequestPage.class)) {
+					if(processParameters && ReflectionUtils.hasAnnotation(page.getClass(), RequestPage.class)) {
 						page = createNewInstance(resourceUri, page);
 					}
 					postCreation(page);

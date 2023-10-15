@@ -149,6 +149,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						.addClass("jadaptiveForm")
 						.attr("id", "objectForm")
 						.attr("method", "POST")
+						.attr("autocomplete", "off")
 						.attr("data-resourcekey", template.getResourceKey())
 						.attr("enctype", "multipart/form-data")
 						.attr("action", getActionURL())
@@ -342,8 +343,15 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		if(!field.getViews().isEmpty()) {
 			if(!field.getViews().contains(scope)) {
-				HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), fieldView);
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				if(scope != FieldView.READ) {
+					/**
+					 * Edit will need hidden fields 
+					 * 
+					 * TODO encrypt these
+					 */
+					HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), fieldView);
+					render.renderInput(element, getFieldValue(fieldView, obj));
+				}
 				return;
 			}
 		}

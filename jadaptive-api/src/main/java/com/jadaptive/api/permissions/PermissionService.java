@@ -4,9 +4,8 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
-import com.jadaptive.api.repository.PersonalUUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.ui.NamePairValue;
@@ -63,14 +62,16 @@ public interface PermissionService {
 
 	<T> T asSystem(Callable<T> call);
 
-	void assertOwnership(PersonalUUIDEntity obj);
-
-	void assertOwnership(AbstractObject e);
+//	void assertOwnership(PersonalUUIDEntity obj);
+//
+//	void assertOwnership(AbstractObject e);
 
 //	void assertWrite(ObjectTemplate template);
 	
 	void assertWrite(String resourceKey);
 
 	default boolean isAdministrator() { return isAdministrator(getCurrentUser()); }
+
+	void assertOwnership(UUIDDocument e);
 
 }

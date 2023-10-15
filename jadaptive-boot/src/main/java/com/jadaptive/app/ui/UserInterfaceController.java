@@ -131,7 +131,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		String uri = request.getRequestURI();
 		String resourceUri = uri.length() >= 8 ? uri.substring(8) : "";
 		
-		Page page = pageCache.resolvePage(resourceUri);
+		Page page = pageCache.resolvePage(resourceUri, true);
 		page.doGet(resourceUri, request, response);
 	}
 	
@@ -141,7 +141,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		String uri = request.getRequestURI();
 		String resourceUri = uri.length() >= 8 ? uri.substring(8) : "";
 		
-		Page page = pageCache.resolvePage(resourceUri);
+		Page page = pageCache.resolvePage(resourceUri, true);
 		page.doPost(resourceUri, request, response);
 
 	}

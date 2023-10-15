@@ -23,6 +23,8 @@ public interface Page extends PageResources, ExtensionPoint {
 	String getUri();
 	
 	String getResourcePath();
+	
+	default boolean isThemePage() { return true; }
 
 	default void onCreate() throws FileNotFoundException { }
 

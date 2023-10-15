@@ -532,7 +532,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
 			if(Objects.nonNull(annotation)) {
 				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-				return convert(bean.getObjectByUUID(uuid));
+				return toAbstractObject(bean.getObjectByUUID(uuid));
 			}			
 		}
 		
@@ -549,7 +549,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
 			if(Objects.nonNull(annotation)) {
 				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-				return convert(bean.createNew(template));
+				return toAbstractObject(bean.createNew(template));
 			}			
 		}
 		
@@ -562,7 +562,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		List<AbstractObject> results = new ArrayList<>();
 		for(UUIDDocument obj : objects) {
-			results.add(convert(obj));
+			results.add(toAbstractObject(obj));
 		}
 		
 		return results;
@@ -717,6 +717,12 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
+	public Collection<AbstractObject> tableObjects(String resourceKey, String searchField, String searchValue, int offset, int limit, SearchField... fields) {
+		ObjectTemplate template = templateService.get(resourceKey);
+		return tableViaObjectBean(template, offset, limit, SortOrder.ASC, searchField, generateSearchFields(searchField, searchValue, template, fields));
+	}
+	
+	@Override
 	public long count(String resourceKey, String searchField, String searchValue) {
 		ObjectTemplate template = templateService.get(resourceKey);
 
@@ -739,6 +745,12 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			return countViaObjectBean(template, generateSearchFields(searchField, searchValue, template));
 		}
 		
+	}
+	
+	@Override
+	public long countObjects(String resourceKey, String searchField, String searchValue, SearchField... fields) {
+		ObjectTemplate template = templateService.get(resourceKey);
+		return countViaObjectBean(template, generateSearchFields(searchField, searchValue, template, fields));
 	}
 
 	private SearchField[] generateSearchFields(String searchField, String searchValue, ObjectTemplate template, SearchField... additional) {
@@ -784,11 +796,18 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 
 	@Override
-	public AbstractObject convert(UUIDDocument obj) {
+	public AbstractObject toAbstractObject(UUIDDocument obj) {
 
 		Document doc = new Document();
 		DocumentHelper.convertObjectToDocument(obj, doc);		
 		return new MongoEntity(obj.getResourceKey(), doc);
+	}
+	
+	@Override
+	public UUIDDocument toUUIDDocument(AbstractObject entity) {
+		
+		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(entity.getResourceKey());
+		return DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument()));
 	}
 	
 	

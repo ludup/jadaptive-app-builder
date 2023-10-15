@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -20,12 +21,12 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.ui.ObjectPage;
 
 public abstract class ObjectTemplatePage extends TemplatePage implements ObjectPage {
+	
+	@Autowired
+	protected ObjectService objectService;
 
 	@Autowired
-	private ObjectService objectService;
-
-	@Autowired
-	private PermissionService permissionService;
+	protected PermissionService permissionService;
 
 	protected String uuid;
 	
@@ -62,17 +63,13 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		if(Objects.nonNull(body)) {
 			body.attr("data-resourcekey", template.getResourceKey());
 		}
-		Element element = document.selectFirst("#searchBreadcrumb");
-		if(Objects.nonNull(element)) {
-			element.attr("href", String.format("/app/ui/search/%s", template.getCollectionKey()))
-			.attr("jad:bundle", template.getBundle())
-			.attr("jad:i18n", String.format("%s.names", template.getDisplayKey()));
-		}
 		
-		element = document.selectFirst("#cancelButton");
+		Element element = document.selectFirst("#cancelButton");
 		
 		if(Objects.nonNull(element)) {
-			element.attr("href", String.format("/app/api/form/cancel/%s", template.getCollectionKey()));
+			String referrer = Request.get().getHeader(HttpHeaders.REFERER);
+			element.attr("href", referrer);
+			element.attr("data-resourcekey", template.getCollectionKey());
 		}
 
 	}
@@ -88,7 +85,7 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 				if(obj instanceof AbstractObject) {
 					object = (AbstractObject)obj;
 				} else if(obj instanceof UUIDEntity) {
-					object = objectService.convert((UUIDEntity) obj);
+					object = objectService.toAbstractObject((UUIDEntity) obj);
 				}
 				
 			} else {

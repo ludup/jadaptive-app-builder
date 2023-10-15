@@ -22,6 +22,8 @@ public interface WizardFlow extends ExtensionPoint {
 
 	void finish(WizardState wizardState);
 
+	boolean requiresUserSession();
+
 	
 	
 	

@@ -58,7 +58,7 @@ public class Bootstrap extends AbstractPageExtension {
 		
 		PageHelper.appendHeadScript(document, runtimePathJs, false, "bootstrapEnabled");
 		PageHelper.appendHeadScript(document, "/app/content/bootbox/bootbox.all.min.js");
-		PageHelper.appendStylesheet(document, runtimePathCss);
+		PageHelper.appendStylesheet(document, runtimePathCss, "bootstrapCss");
 		PageHelper.appendStylesheet(document, runtimePathCss, "printBootstrap", "print");
 
 	}

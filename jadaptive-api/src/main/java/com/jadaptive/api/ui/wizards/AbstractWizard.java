@@ -1,5 +1,6 @@
 package com.jadaptive.api.ui.wizards;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +20,8 @@ import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.UriRedirect;
 
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	
@@ -33,7 +36,14 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	
 	protected abstract Class<? extends WizardSection> getSectionClass();
 	
-	protected abstract String getStateAttribute();
+	protected String getStateAttribute() {
+		return String.format("%s-state", getResourceKey());
+	}
+	
+	@Override
+	public boolean requiresUserSession() {
+		return true;
+	}
 	
 	public void finish(WizardState state) {
 		
@@ -131,7 +141,14 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 		return object.getUuid();
 	}
 
-	protected abstract WizardSection getStartSection();
+	protected WizardSection getStartSection() {
+		return new StartSection(getBundle(), getResourceKey());
+	}
+
+	@Override
+	public Page getCompletePage() throws FileNotFoundException {
+		throw new UriRedirect("/app/ui/wizard-complete/" + getResourceKey());
+	}
 
 	protected abstract Collection<? extends WizardSection> getDefaultSections();
 }

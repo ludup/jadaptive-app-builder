@@ -12,6 +12,8 @@ import com.jadaptive.api.ui.menu.ApplicationMenuService;
 public class DashboardMenu implements ApplicationMenu {
 
 	
+	public static final String MENU_UUID = "89519436-6b47-44ff-8432-333de2d0a125";
+
 	@Override
 	public String getI18n() {
 		return "dashboard.name";
@@ -44,7 +46,7 @@ public class DashboardMenu implements ApplicationMenu {
 
 	@Override
 	public String getUuid() {
-		return "89519436-6b47-44ff-8432-333de2d0a125";
+		return MENU_UUID;
 	}
 
 	@Override

@@ -58,6 +58,11 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	protected Class<? extends WizardSection> getSectionClass() {
 		return SetupSection.class;
 	}
+	
+	@Override
+	public boolean requiresUserSession() {
+		return false;
+	}
 
 	@Override
 	protected String getStateAttribute() {
@@ -73,7 +78,7 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 				"/com/jadaptive/api/ui/wizards/setup/CreateTenant.html", 1));
 		}
 		
-		sections.add(applicationService.autowire(new AdminSection(true)));
+		sections.add(applicationService.autowire(new AdminSection(productService.requiresRegistration())));
 		return sections;
 	}
 

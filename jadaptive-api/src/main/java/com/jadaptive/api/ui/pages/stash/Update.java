@@ -34,6 +34,8 @@ public class Update extends StashedObjectPage {
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException {
 		
+		super.doGenerateTemplateContent(document);
+		
 		//AbstractObject parentObject = (AbstractObject) Request.get().getSession().getAttribute(template.getResourceKey());
 		String returnURL = object.isNew() ? getCreateURL() : getUpdateURL();
 		
@@ -44,13 +46,6 @@ public class Update extends StashedObjectPage {
 						template.getResourceKey(),
 						childResourceKey, 
 						fieldName));
-		}
-		
-		element = document.selectFirst("#cancelButton");
-		
-		if(Objects.nonNull(element)) {
-			
-			element.attr("href", returnURL);
 		}
 	}
 	

@@ -21,6 +21,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
@@ -31,6 +33,8 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.utils.FileUtils;
 
 public abstract class HtmlPage implements Page {
+	
+	static Logger log = LoggerFactory.getLogger(HtmlPage.class);
 	
 	@Autowired
 	private PageCache pageCache; 
@@ -251,6 +255,7 @@ public abstract class HtmlPage implements Page {
 			if(e.getCause() instanceof Redirect) {
 				throw (Redirect) e.getCause();
 			}
+			log.error("Failed to generate HTML page", e);
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}

@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.servlet.Request;
@@ -87,12 +86,8 @@ public class Header extends AbstractPageExtension {
 			
 			for(ApplicationMenu parent : parents) {
 				
-				if(Objects.nonNull(parent.getPermissions()) && !parent.getPermissions().isEmpty()) {
-					try {
-						permissionService.assertAnyPermission(parent.getPermissions().toArray(new String[0]));
-					} catch(AccessDeniedException e) {
-						continue;
-					}
+				if(!menuService.checkPermission(parent)) {
+					continue;
 				}
 				
 				Element parentElement = new Element("div")
@@ -109,12 +104,12 @@ public class Header extends AbstractPageExtension {
 
 				for(ApplicationMenu child : children) {
 					
-					if(Objects.nonNull(child.getPermissions()) && !child.getPermissions().isEmpty()) {
-						try {
-							permissionService.assertAnyPermission(child.getPermissions().toArray(new String[0]));
-						} catch(AccessDeniedException e) {
-							continue;
-						}
+					if(log.isInfoEnabled()) {
+						log.info("Checking menu " + child.getI18n());
+					}
+					
+					if(!menuService.checkPermission(child)) {
+						continue;
 					}
 
 					Element link;
