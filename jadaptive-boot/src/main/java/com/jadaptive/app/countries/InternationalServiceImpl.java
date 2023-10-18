@@ -3,8 +3,10 @@ package com.jadaptive.app.countries;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.annotation.PostConstruct;
@@ -26,7 +28,42 @@ public class InternationalServiceImpl implements InternationalService {
 	private Collection<Country> countries = null;
 	private Map<String,Country> countriesByCode = null;
 	
-	@PostConstruct
+	private static final Set<String> EU_COUNTRIES;
+
+    static {
+        Set<String> euCountries = new HashSet<>();
+        euCountries.add("AT"); // Austria
+        euCountries.add("BE"); // Belgium
+        euCountries.add("BG"); // Bulgaria
+        euCountries.add("CY"); // Cyprus
+        euCountries.add("CZ"); // Czech Republic
+        euCountries.add("DE"); // Germany
+        euCountries.add("DK"); // Denmark
+        euCountries.add("EE"); // Estonia
+        euCountries.add("ES"); // Spain
+        euCountries.add("FI"); // Finland
+        euCountries.add("FR"); // France
+        euCountries.add("GR"); // Greece
+        euCountries.add("HR"); // Croatia
+        euCountries.add("HU"); // Hungary
+        euCountries.add("IE"); // Ireland
+        euCountries.add("IT"); // Italy
+        euCountries.add("LT"); // Lithuania
+        euCountries.add("LU"); // Luxembourg
+        euCountries.add("LV"); // Latvia
+        euCountries.add("MT"); // Malta
+        euCountries.add("NL"); // Netherlands
+        euCountries.add("PL"); // Poland
+        euCountries.add("PT"); // Portugal
+        euCountries.add("RO"); // Romania
+        euCountries.add("SE"); // Sweden
+        euCountries.add("SI"); // Slovenia
+        euCountries.add("SK"); // Slovakia
+
+        EU_COUNTRIES = euCountries;
+    }
+    
+    @PostConstruct
 	private void postConstruct() {
 		
 		try {
@@ -57,6 +94,13 @@ public class InternationalServiceImpl implements InternationalService {
 		
 		
 	}
+
+    public boolean isEU(String countryCode) {
+        if (countryCode == null) {
+            return false;
+        }
+        return EU_COUNTRIES.contains(countryCode.toUpperCase());
+    }
 	
 	@Override
 	public Country getCountry(String country) {

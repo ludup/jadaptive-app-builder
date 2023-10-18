@@ -62,4 +62,6 @@ public interface TemplateService {
 
 	ObjectTemplate getBaseTemplate(ObjectTemplate template);
 
+	Collection<TableAction> getTableActions(String template);
+
 }

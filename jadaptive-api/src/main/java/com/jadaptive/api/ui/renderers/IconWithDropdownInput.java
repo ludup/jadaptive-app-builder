@@ -9,7 +9,9 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.PageHelper;
+import com.jadaptive.utils.Utils;
 
 public class IconWithDropdownInput extends InputRender {
 	
@@ -65,7 +67,7 @@ public class IconWithDropdownInput extends InputRender {
 							.attr("id", String.format("%sText", resourceKey))
 							.attr("href", "#")
 							.attr("role", "button")
-							.addClass("h-100 text-decoration-none dropdown-toggle" + (dark ? " text-light" : ""))
+							.addClass("h-100 text-decoration-none" + (dark ? " text-light" : ""))
 							.attr("data-bs-toggle", "dropdown")
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false")
@@ -166,6 +168,27 @@ public class IconWithDropdownInput extends InputRender {
 			el.attr("jad:i18n", value);
 		}
 		dropdownMenu.appendChild(el);
+	}
+	
+	public void addAnchorValue(String key, String value, boolean i18n, String url) {
+		Element el = PageHelper.createAnchor(url, value)
+				.attr("data-resourcekey", key)
+				.addClass("jdropdown-item dropdown-item");
+		if(i18n) {
+			el.attr("jad:bundle", bundle);
+			el.attr("jad:i18n", value);
+		}
+		dropdownMenu.appendChild(el);
+	}
+	
+	public Element addI18nAnchorWithIconValue(String bundle, String key, String url, String iconGroup, String icon, String... classes) {
+		Element el = PageHelper.createAnchor(url)
+				.addClass("dropdown-item " + Utils.csv(" ", classes))
+				.appendChild(Html.i(iconGroup, icon, "fa-fw", "me-1"))
+				.appendChild(Html.i18n(bundle, key));
+
+		dropdownMenu.appendChild(el);
+		return el;
 	}
 
 	private void renderValues(Iterable<? extends NamedUUIDEntity> fields, String defaultValue, boolean i18n) {

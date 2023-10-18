@@ -37,6 +37,7 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.UserInterfaceService;
+import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
 import com.jadaptive.api.ui.renderers.form.BootstrapBadgeRender;
 import com.jadaptive.utils.Utils;
 
@@ -64,7 +65,7 @@ public class TableRenderer {
 	AbstractObject parentObject = null;
 	FieldTemplate field;
 	private boolean readOnly;
-	
+
 	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field) {
 		this.parentObject = parentObject;
 		this.field = field;
@@ -95,22 +96,8 @@ public class TableRenderer {
 				columns++;
 			}
 			
-			boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
-			if(objects.size() > 0) {
-				boolean requiresActions = canUpdate || template.isDeletable();
-				
-				for(TableAction action : view.actions()) {
-					if(action.target()==Target.ROW) {
-						requiresActions |= true;
-						break;
-					}
-				}
-				if(requiresActions) {
-					el.appendChild(Html.td());
-					columns++;
-				}
-			}
-		
+			el.appendChild(Html.td());
+			columns++;
 			
 			table.appendChild(el = Html.tbody());
 			
@@ -144,9 +131,8 @@ public class TableRenderer {
 						}
 					}
 					
-					TableAction[] rowActions = templateService.getTemplateClass(obj.getResourceKey()).getAnnotationsByType(TableAction.class);
-					
-					renderRowActions(row, obj, view, rowTemplate, rowActions);
+				
+					renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getResourceKey()));
 					
 					el.appendChild(row);
 				}
@@ -161,7 +147,7 @@ public class TableRenderer {
 			tableholder.add(Html.div("col-md-6 float-end text-end")
 							.attr("id", "pagnation"));
 			
-			generateTableActions(tableholder.select("#objectActions").first());
+			generateTableActions(tableholder.select("#objectActions").first(), generateActions(template.getCollectionKey()));
 			
 			if(readOnly) {
 				tableholder.select(".readWrite").remove();
@@ -175,6 +161,20 @@ public class TableRenderer {
 		
 	}
 	
+	private Collection<TableAction> generateActions(String resourceKey) {
+		Collection<TableAction> allActions = new ArrayList<>();
+		Collection<TableAction> registeredActions = templateService.getTableActions(resourceKey);
+		if(Objects.nonNull(registeredActions)) {
+			allActions.addAll(registeredActions);
+		}
+		
+		if(Objects.nonNull(view.actions())) {
+			allActions.addAll(Arrays.asList(view.actions()));
+		}
+		
+		return allActions;
+	}
+
 	private Map<String, DynamicColumn> generateDynamicColumns() {
 		Map<String, DynamicColumn> results = new HashMap<>();
 		for(DynamicColumn column : view.otherColumns()) {
@@ -183,54 +183,39 @@ public class TableRenderer {
 		return results;
 	}
 	
-	private void renderRowActions(Element row, AbstractObject obj, TableView view, ObjectTemplate template, TableAction[] actions) {
+	private void renderRowActions(Element row, AbstractObject obj, TableView view, ObjectTemplate template, Collection<TableAction> allActions) {
 		
 		Element el = Html.td("text-end");
 		
 		boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
 		boolean canCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
 		
+		IconWithDropdownInput dropdown = new IconWithDropdownInput("options", "default");
+		dropdown.icon("fa-ellipsis");
+		el.appendChild(dropdown.renderInput());
+		
 		if(canUpdate && !readOnly) {
 			if(Objects.isNull(parentObject)) {
-				el.appendChild(Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "ms-2")
-						.appendChild(Html.i("fa-solid", "fa-edit","fa-fw")));
+				dropdown.addI18nAnchorWithIconValue("default", "edit.name", replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "fa-solid", "fa-edit");
 			} else {
-				el.appendChild(Html.a("#", "ms-2", "stash") 
-						.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
-						.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid())
-						.appendChild(Html.i("fa-solid", "fa-edit","fa-fw")));
+				dropdown.addI18nAnchorWithIconValue("default", "edit.name", replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "fa-solid", "fa-edit", "stash")
+					.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+					.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid());	
 			}
 		}
 		
 		if(view.requiresView()) {
 			if(Objects.isNull(parentObject)) {
-				el.appendChild(Html.a(replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "ms-2")
-						.appendChild(Html.i("fa-solid", "fa-eye","fa-fw")));
+				dropdown.addI18nAnchorWithIconValue("default", "view.name", replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "fa-solid", "fa-eye");
 			} else {
-				el.appendChild(Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)
-						+ "/" + field.getResourceKey() + "/" + obj.getUuid(), "ms-2")
-							.appendChild(Html.i("fa-solid", "fa-eye","fa-fw")));
+				dropdown.addI18nAnchorWithIconValue("default", "view.name", replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)
+						+ "/" + field.getResourceKey() + "/" + obj.getUuid(), "fa-solid", "fa-eye");
 			}
 		}
-		
-		
+				
 		if(canCreate && !readOnly) {
-			el.appendChild(Html.a(replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "ms-2")
-					.appendChild(Html.i("fa-solid", "fa-copy","fa-fw")));
-		} else {
-			el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2", "copy-placeholder"));
-		}
-		
-//		if(view.requiresCreate() && !canCreate) {
-//			el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2"));
-//		}
-//		if(view.requiresUpdate() && !canUpdate) {
-//			el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2"));
-//		}
-		
-		Collection<TableAction> allActions = new ArrayList<>();
-		allActions.addAll(Arrays.asList(view.actions()));
-		allActions.addAll(Arrays.asList(actions));
+			dropdown.addI18nAnchorWithIconValue("default", "copy.name", replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "fa-solid", "fa-copy");
+		} 
 		
 		for(TableAction action : allActions) {
 			if(action.target()==Target.ROW) {
@@ -238,22 +223,19 @@ public class TableRenderer {
 				Object val = obj.getValue(template.getDefaultColumn());
 				if(action.confirmationRequired()) {
 					if(StringUtils.isNotBlank(template.getDefaultColumn())) {
-						el.appendChild(Html.a("#", "deleteAction", "ms-2")
-									.attr("data-name", val == null ? "" : val.toString())
-									.attr("data-url", replaceVariables(action.url(), obj))
-									.attr("target", action.window() == Window.BLANK ? "_blank" : "_self")
-									.appendChild(Html.i("fa-solid ", action.icon(), "fa-fw")));
+						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), "deleteAction")
+							.attr("data-name", val == null ? "" : val.toString())
+							.attr("data-url", replaceVariables(action.url(), obj))
+							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
 					} else {
-						el.appendChild(Html.a("#", "deleteAction", "ms-2")
-								.attr("data-name", obj.getUuid())
-								.attr("data-url", replaceVariables(action.url(), obj))
-								.attr("target", action.window() == Window.BLANK ? "_blank" : "_self")
-								.appendChild(Html.i("fa-solid", action.icon(), "fa-fw")));
+						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), "deleteAction")
+							.attr("data-name", obj.getUuid())
+							.attr("data-url", replaceVariables(action.url(), obj))
+							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
 					}
 				} else {
-					el.appendChild(Html.a(replaceVariables(action.url(), obj), "ms-2")
-							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self")
-							.appendChild(Html.i("fa-solid", action.icon(), "fa-fw")));
+					dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", replaceVariables(action.url(), obj), action.iconGroup(), action.icon())
+						.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
 				}
 			} 
 		}
@@ -261,18 +243,14 @@ public class TableRenderer {
 		if(template.isDeletable()) {
 			if(!obj.isSystem() && !readOnly) {
 				if(Objects.nonNull(parentObject)) {
-					el.appendChild(Html.a("#", "removeAction", "", "ms-2", "readWrite")
-							.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())))
-							.appendChild(Html.i("fa-solid", "fa-trash", "fa-fw")));
+					dropdown.addI18nAnchorWithIconValue("default", "delete.name", "#", "fa-solid", "fa-trash", "removeAction", "readWrite")
+							.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())));
 				} else {
-					el.appendChild(Html.a("#", "deleteAction", "ms-2", "readWrite")
-							.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())))
-							.attr("data-url", replaceVariables("/app/api/objects/{resourceKey}/{uuid}", obj))
-							.appendChild(Html.i("fa-solid", "fa-trash", "fa-fw")));
+					dropdown.addI18nAnchorWithIconValue("default", "delete.name", "#", "fa-solid", "fa-trash", "deleteAction", "readWrite")
+						.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())))
+						.attr("data-url", replaceVariables("/app/api/objects/{resourceKey}/{uuid}", obj));
 				}
-			} else {
-				el.appendChild(Html.i("fa-solid", "fa-fw", "ms-2", "delete-placeholder"));
-			}
+			} 
 		} 
 		
 		if(el.children().size() > 0) {
@@ -281,7 +259,7 @@ public class TableRenderer {
 		
 	}
 	
-	private void generateTableActions(Element element) {
+	private void generateTableActions(Element element, Collection<TableAction> allActions) {
 		
 		if(uiService.canCreate(template)) {
 			
@@ -330,9 +308,11 @@ public class TableRenderer {
 		}
 
 		if(view != null) {
-			for(TableAction action : view.actions()) {
-				if(action.target()==Target.TABLE) {
-					createTableAction(element, action.url(), action.bundle(), action.icon(), action.iconGroup(), action.buttonClass(), action.resourceKey());
+			if(Objects.nonNull(allActions)) {
+				for(TableAction action : allActions) {
+					if(action.target()==Target.TABLE) {
+						createTableAction(element, action.url(), action.bundle(), action.icon(), action.iconGroup(), action.buttonClass(), action.resourceKey());
+					}
 				}
 			}
 		}

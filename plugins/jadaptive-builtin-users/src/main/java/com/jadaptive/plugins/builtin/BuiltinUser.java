@@ -20,7 +20,6 @@ import com.jadaptive.utils.PasswordEncryptionType;
 @ObjectServiceBean(bean = UserService.class)
 @ObjectViewDefinition(bundle = "users", value = "passwordOptions", weight=300)
 @GenerateEventTemplates
-@TableAction(bundle = "default", icon = "fa-key", resourceKey = "setPassword", target = Target.ROW, url = "/app/ui/set-password/{uuid}")
 public class BuiltinUser extends PasswordEnabledUser {
 
 	private static final long serialVersionUID = -4186606233520076592L;
