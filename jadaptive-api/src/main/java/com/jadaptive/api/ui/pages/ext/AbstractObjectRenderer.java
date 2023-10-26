@@ -69,7 +69,6 @@ import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
-import com.jadaptive.api.ui.renderers.form.ReplacementFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimeFormInput;
@@ -519,8 +518,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case OPTIONS:
 			
 			new OptionsFormInput(fieldView).renderInput(element, 
-					obj.getCollection(field.getResourceKey()),
-					objectService.list(field.getValidationValue(ValidationType.RESOURCE_KEY)));
+					obj.getObjectCollection(field.getResourceKey()),
+					objectService.list(field.getValidationValue(ValidationType.RESOURCE_KEY)),
+					field.getMetaValue("ignoreUUIDs", "").split(","));
 			
 			break;
 		case COUNTRY:

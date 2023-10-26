@@ -1,5 +1,6 @@
 package com.jadaptive.api.ui.wizards;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -61,7 +62,7 @@ public class DefaultWizardSection extends WizardSection {
 				.appendChild(row = new Element("div")
 					.addClass("row")));
 		
-		AbstractObject object = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).convert(uuidObject);
+		AbstractObject object = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).toAbstractObject(uuidObject);
 		for(FieldTemplate field : template.getFields()) { 
 		
 			if(field.isHidden()) {
@@ -93,9 +94,35 @@ public class DefaultWizardSection extends WizardSection {
 								.text(Utils.maskingString(value, 2, "*")))));
 				break;
 			case OBJECT_REFERENCE:
-				break;
 			case OPTIONS:
-				// TODO option
+				
+				if(field.getCollection()) {
+					Collection<AbstractObject> values = object.getObjectCollection(field.getResourceKey());
+					
+					row.appendChild(new Element("div")
+							.addClass("col-3")
+							.appendChild(new Element("span")
+											.attr("jad:bundle", template.getBundle())
+											.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))))
+						.appendChild(new Element("div")
+							.addClass("col-9")
+							.appendChild(new Element("span")
+									.appendChild(new Element("strong")
+									.text(createObjectCSVString(values, field)))));
+				} else {
+					
+					AbstractObject obj = object.getChild(field);
+					row.appendChild(new Element("div")
+							.addClass("col-3")
+							.appendChild(new Element("span")
+											.attr("jad:bundle", template.getBundle())
+											.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))))
+						.appendChild(new Element("div")
+							.addClass("col-9")
+							.appendChild(new Element("span")
+									.appendChild(new Element("strong")
+									.text((String) obj.getValue("name")))));
+				}
 				break;
 			case COUNTRY:
 				value = ApplicationServiceImpl.getInstance().getBean(InternationalService.class).getCountryName(value);
@@ -116,5 +143,19 @@ public class DefaultWizardSection extends WizardSection {
 			
 		}
 	}
+
+	private String createObjectCSVString(Collection<AbstractObject> values, FieldTemplate field) {
+		
+		StringBuffer buf = new StringBuffer();
+		for(AbstractObject value : values) {
+			if(buf.length() > 0) {
+				buf.append(", ");
+			}
+			buf.append(value.getValue("name"));
+		}
+		return buf.toString();
+	}
+
+	
 
 }

@@ -239,7 +239,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		try {
 			UUIDDocument doc = (UUIDDocument) Request.get().getSession().getAttribute(resourceKey);
 			if(Objects.nonNull(doc)) {
-				return convert(doc); 
+				return toAbstractObject(doc); 
 			}
 			return null;
 		} finally {

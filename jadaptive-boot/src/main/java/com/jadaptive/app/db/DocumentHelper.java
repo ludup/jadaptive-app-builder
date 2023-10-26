@@ -449,6 +449,19 @@ public class DocumentHelper {
 			}
 			break;
 		}
+		case OPTIONS:
+		{
+			String nameField = field.getMetaValue("nameField", "name");
+			ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(field.getValidationValue(ValidationType.RESOURCE_KEY));
+			ObjectService service = ApplicationServiceImpl.getInstance().getBean(ObjectService.class);
+			for(int i=0;i<values.length;i++) {
+				AbstractObject obj = service.get(template, values[i]);
+				Document doc = new Document();
+				convertObjectToDocument(generateReference(values[i], (String) obj.getValue(nameField)), doc);
+				result.add(doc);
+			}
+			break;
+		}
 		default:
 		{
 			for(String value : values) {

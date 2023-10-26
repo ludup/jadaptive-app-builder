@@ -24,6 +24,7 @@ import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 
@@ -58,6 +59,8 @@ public class SessionUtils {
 	private SingletonObjectDatabase<SessionConfiguration> sessionConfig; 
 	
 	public static final String UNSAFE_INLINE = "unsafe-inline";
+
+	private static final String DISABLE_CONTENT_SECURITY = "disableCSP";
 	
 	public User getCurrentUser() {
 		return permissionService.getCurrentUser();
@@ -392,10 +395,12 @@ public class SessionUtils {
 
 	public void populateSecurityHeaders(HttpServletResponse response) {
 		
-		response.setHeader("X-Content-Type-Options", "nosniff");
-		response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-		response.setHeader("Content-Security-Policy", 
-				"default-src 'none'; font-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self';");
+		if(Objects.isNull(Request.get().getAttribute(DISABLE_CONTENT_SECURITY))) {
+			response.setHeader("X-Content-Type-Options", "nosniff");
+			response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+			response.setHeader("Content-Security-Policy", 
+					"default-src 'none'; font-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self';");
+		}
 	}
 
 	public void setDoNotCache(HttpServletResponse response) {
@@ -409,28 +414,37 @@ public class SessionUtils {
 	}
 	
 	public void addContentSecurityPolicy(HttpServletResponse response, String policy, String value) {
-		Collection<String> csp = response.getHeaders("Content-Security-Policy");
-		if(csp.isEmpty()) {
-			populateSecurityHeaders(response);
-		}
-		String header = csp.iterator().next();
-		int idx = header.indexOf(policy);
-		if(idx > -1) {
-			int idx2 = header.indexOf(';', idx);
-			String tmp = header.substring(idx, idx2);
-			if(tmp.contains(String.format("'%s'", value))) {
-				return;
+		
+		if(Objects.isNull(Request.get().getAttribute(DISABLE_CONTENT_SECURITY))) {
+			Collection<String> csp = response.getHeaders("Content-Security-Policy");
+			if(csp.isEmpty()) {
+				populateSecurityHeaders(response);
+				csp = response.getHeaders("Content-Security-Policy");
 			}
-			header = header.replace(policy, String.format("%s '%s'", policy, value));
-			
-		} else {
-			header = header + String.format(" %s '%s';", policy, value);
+			String header = csp.iterator().next();
+			int idx = header.indexOf(policy);
+			if(idx > -1) {
+				int idx2 = header.indexOf(';', idx);
+				String tmp = header.substring(idx, idx2);
+				if(tmp.contains(String.format("'%s'", value))) {
+					return;
+				}
+				header = header.replace(policy, String.format("%s '%s'", policy, value));
+				
+			} else {
+				header = header + String.format(" %s '%s';", policy, value);
+			}
+			response.setHeader("Content-Security-Policy", header);
 		}
-		response.setHeader("Content-Security-Policy", header);
 	}
 	
 	public void addScriptNoncePolicy(HttpServletResponse response, String nonce) {
 		addContentSecurityPolicy(response, "script-src", String.format("nonce-%s", nonce));
+	}
+
+	public void disableContentSecurityPolicy() {
+		
+		Request.get().setAttribute(DISABLE_CONTENT_SECURITY, Boolean.TRUE);
 	}
 
 }

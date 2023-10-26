@@ -41,6 +41,7 @@ public class WizardCompletePage extends WizardPage {
 
 		document.selectFirst("#completeInfo").appendChild(Html.i18n(state.getBundle(), "wizard.complete.info"));
 		
+		wizardService.clearState(resourceKey, Request.get());
 	}
 	
 	

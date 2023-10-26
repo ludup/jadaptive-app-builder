@@ -1060,7 +1060,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		{
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {
-				throw new IllegalStateException("OPTIONS input requires references attribte on @ObjectField annotation");
+				Class<?> clz = f.getType();
+				if(Collection.class.isAssignableFrom(clz)) {
+					clz = (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
+				} 
+				resourceKey = TemplateUtils.lookupClassResourceKey(clz);
 			}
 			t.getValidators().add(new FieldValidator(
 					ValidationType.RESOURCE_KEY, 
@@ -1073,8 +1077,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		{
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {
-				resourceKey = TemplateUtils.lookupClassResourceKey(f.getType());
-			} 
+				Class<?> clz = f.getType();
+				if(Collection.class.isAssignableFrom(clz)) {
+					clz = (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0];
+				} 
+				resourceKey = TemplateUtils.lookupClassResourceKey(clz);
+			}
 			t.getValidators().add(new FieldValidator(
 					ValidationType.OBJECT_TYPE, 
 					resourceKey, 

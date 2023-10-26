@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
@@ -48,6 +49,9 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	
 	@Autowired
 	private SessionUtils sessionUtils;
+	
+	@Autowired
+	private PermissionService permissionService; 
 	
 	String resourceKey;
 	WizardState state;
@@ -84,119 +88,124 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	
 	@Override
 	protected void generateContent(Document document) throws IOException {
+		
 		super.generateContent(document);
 		
-		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
-		
-		if(state.isFinished()) {
-			throw new PageRedirect(state.getCompletePage());
-		}
+		permissionService.asSystem(()->{
+			WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
+			
+			if(state.isFinished()) {
+				throw new PageRedirect(state.getCompletePage());
+			}
 
-		Element body = document.selectFirst("body");
-		
-		body.attr("jad:wizard", resourceKey);
-		
-		WizardSection ext = state.getCurrentPage();
-		Element el = document.selectFirst("#wizardContent");
+			Element body = document.selectFirst("body");
+			
+			body.attr("jad:wizard", resourceKey);
+			
+			WizardSection ext = state.getCurrentPage();
+			Element el = document.selectFirst("#wizardContent");
 
-		injectHtmlSection(document, el, ext);
-		
-		/**
-		 * This is here to remove the previous style of wizard where an info alert
-		 * panel is used. We now render this automatically below so this code removes
-		 * it from any HTML files. Once the HTML code-base has been cleaned this code
-		 * can be removed.
-		 */
-		Element wizardContent = document.selectFirst("#wizardContent");
-		if(Objects.nonNull(wizardContent) && wizardContent.childNodeSize() > 0) {
-			Element div = wizardContent.child(0);
-			if(div.tag().getName().equals("div") && div.childNodeSize() > 0) {
-				Element e = div.child(0);
-				if(e.tag().getName().equals("p") && e.hasClass("alert-info")) {
-					div.remove();
+			injectHtmlSection(document, el, ext);
+			
+			/**
+			 * This is here to remove the previous style of wizard where an info alert
+			 * panel is used. We now render this automatically below so this code removes
+			 * it from any HTML files. Once the HTML code-base has been cleaned this code
+			 * can be removed.
+			 */
+			Element wizardContent = document.selectFirst("#wizardContent");
+			if(Objects.nonNull(wizardContent) && wizardContent.childNodeSize() > 0) {
+				Element div = wizardContent.child(0);
+				if(div.tag().getName().equals("div") && div.childNodeSize() > 0) {
+					Element e = div.child(0);
+					if(e.tag().getName().equals("p") && e.hasClass("alert-info")) {
+						div.remove();
+					}
 				}
 			}
-		}
-		
-		Element actions = document.selectFirst("#actions");
-		Element content = document.selectFirst("#content");
-		
-		if(!state.isStartPage()) {
-			Element h2;
-			content.prependChild(new Element("div")
-					.addClass("col-12")
-					.appendChild(h2 = new Element("h2")));
 			
-			if(!state.isFinishPage()) {
+			Element actions = document.selectFirst("#actions");
+			Element content = document.selectFirst("#content");
+			
+			if(!state.isStartPage()) {
+				Element h2;
+				content.prependChild(new Element("div")
+						.addClass("col-12")
+						.appendChild(h2 = new Element("h2")));
+				
+				if(!state.isFinishPage()) {
+						h2.appendChild(new Element("span")
+							.attr("jad:bundle", "setup")
+							.attr("jad:i18n", "step.name"))
+						.appendChild(new Element("span")
+								.text(" " + String.valueOf(state.getCurrentStep())))
+						.appendChild(new Element("span")
+										.text(" - "))
+						.appendChild(new Element("span")
+								.addClass("ms-1")
+								.attr("jad:bundle", state.getCurrentPage().getBundle())
+								.attr("jad:i18n", state.getCurrentPage().getName() + ".stepName"));
+						
+						
+						h2.after(new Element("h4")
+											.appendChild(Html.i("fa-solid fa-info-square text-primary me-2"))
+											.appendChild(Html.i18n(state.getCurrentPage().getBundle(),
+															state.getCurrentPage().getName() + ".summary"))
+															.addClass("my-3 text-primary"));
+						
+				} else {
 					h2.appendChild(new Element("span")
-						.attr("jad:bundle", "setup")
-						.attr("jad:i18n", "step.name"))
-					.appendChild(new Element("span")
-							.text(" " + String.valueOf(state.getCurrentStep())))
-					.appendChild(new Element("span")
-									.text(" - "))
-					.appendChild(new Element("span")
-							.addClass("ms-1")
 							.attr("jad:bundle", state.getCurrentPage().getBundle())
-							.attr("jad:i18n", state.getCurrentPage().getName() + ".stepName"));
-					
-					
-					h2.after(new Element("h4")
-										.appendChild(Html.i("fa-solid fa-info-square text-primary me-2"))
-										.appendChild(Html.i18n(state.getCurrentPage().getBundle(),
-														state.getCurrentPage().getName() + ".summary"))
-														.addClass("my-3 text-primary"));
-					
-			} else {
-				h2.appendChild(new Element("span")
-						.attr("jad:bundle", state.getCurrentPage().getBundle())
-						.attr("jad:i18n", "finish.name"));
+							.attr("jad:i18n", "finish.name"));
+				}
 			}
-		}
-		
-		if(!state.isStartPage()) {
-			content.prependChild(new Element("div")
-					.addClass("col-12")
-					.appendChild(new Element("h1")
-							.attr("jad:bundle", state.getBundle())
-							.attr("jad:i18n", "wizard.name")));
-		} 
-     
-		if(state.hasBackButton()) {
-			actions.appendChild(new Element("a")
-					.attr("id", "backButton")
-					.addClass("btn btn-danger float-start wizardBack")
-					.appendChild(new Element("i")
-						.addClass("fa-solid fa-arrow-circle-left me-1"))
-					.appendChild(new Element("span")
-						.attr("jad:bundle", "default")
-						.attr("jad:i18n", "back.name")));
-		}
-		
-		if(state.hasNextButton()) {
-			actions.appendChild(new Element("a")
-						.attr("id", "nextButton")
-						.addClass("btn btn-success float-end wizardNext")
+			
+			if(!state.isStartPage()) {
+				content.prependChild(new Element("div")
+						.addClass("col-12")
+						.appendChild(new Element("h1")
+								.attr("jad:bundle", state.getBundle())
+								.attr("jad:i18n", "wizard.name")));
+			} 
+	     
+			if(state.hasBackButton()) {
+				actions.appendChild(new Element("a")
+						.attr("id", "backButton")
+						.addClass("btn btn-danger float-start wizardBack")
 						.appendChild(new Element("i")
-							.addClass("fa-solid fa-arrow-circle-right me-1"))
+							.addClass("fa-solid fa-arrow-circle-left me-1"))
 						.appendChild(new Element("span")
 							.attr("jad:bundle", "default")
-							.attr("jad:i18n", "next.name")));
-		} else if(state.isFinishPage()) {
-			actions.appendChild(new Element("a")
-						.attr("id", "finishButton")
-						.addClass("btn btn-primary float-end wizardFinish")
-					.appendChild(new Element("i")
-						.addClass("fa-solid fa-rocket me-1"))
-					.appendChild(new Element("span")
-							.attr("jad:bundle", "default")
-							.attr("jad:i18n", "finish.name")));
-			
-			for(WizardSection section : state.getSections()) {
-				section.processReview(document, state);
+							.attr("jad:i18n", "back.name")));
 			}
-		}
-		
+			
+			if(state.hasNextButton()) {
+				actions.appendChild(new Element("a")
+							.attr("id", "nextButton")
+							.addClass("btn btn-success float-end wizardNext")
+							.appendChild(new Element("i")
+								.addClass("fa-solid fa-arrow-circle-right me-1"))
+							.appendChild(new Element("span")
+								.attr("jad:bundle", "default")
+								.attr("jad:i18n", "next.name")));
+			} else if(state.isFinishPage()) {
+				actions.appendChild(new Element("a")
+							.attr("id", "finishButton")
+							.addClass("btn btn-primary float-end wizardFinish")
+						.appendChild(new Element("i")
+							.addClass("fa-solid fa-rocket me-1"))
+						.appendChild(new Element("span")
+								.attr("jad:bundle", "default")
+								.attr("jad:i18n", "finish.name")));
+				
+				for(WizardSection section : state.getSections()) {
+					section.processReview(document, state);
+				}
+			}
+			
+			return null;
+		});
+
 	}
 	
 	protected void documentComplete(Document document) throws IOException {

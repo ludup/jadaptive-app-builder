@@ -1,19 +1,12 @@
 package com.jadaptive.api.auth.reset;
 
-import com.jadaptive.api.ui.wizards.DefaultWizardSection;
+import com.jadaptive.api.setup.ObjectSection;
 
-public class PasswordWizardSection extends DefaultWizardSection {
-
-	public PasswordWizardSection(String bundle, Integer weight) {
-		super(bundle, weight);
-	}
+public class PasswordWizardSection extends ObjectSection {
 
 	public PasswordWizardSection(String bundle, String name, Integer weight) {
 		super(bundle, name, weight);
 	}
 
-	public PasswordWizardSection(String bundle, String name, String resource, Integer weight) {
-		super(bundle, name, resource, weight);
-	}
 
 }

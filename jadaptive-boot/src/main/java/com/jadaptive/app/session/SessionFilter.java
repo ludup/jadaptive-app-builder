@@ -154,6 +154,8 @@ public class SessionFilter implements Filter {
 				permissionService.clearUserContext();
 			}
 			
+			sessionUtils.populateSecurityHeaders(response);
+			
 			Request.tearDown();
 		
 		} catch(Throwable e) {
@@ -176,8 +178,6 @@ public class SessionFilter implements Filter {
 				session = sessionUtils.getSession(request);
 			} catch (UnauthorizedException e) {
 			}
-			
-			sessionUtils.populateSecurityHeaders(response);
 			
 			/**
 			 * Get the security.properties hierarchy from the web application
