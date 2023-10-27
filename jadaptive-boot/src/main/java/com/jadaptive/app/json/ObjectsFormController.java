@@ -149,6 +149,9 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			return new RequestStatusImpl(false, ex.getMessage());
 		} catch (UriRedirect e) {
 			return new RedirectStatus(e.getUri());
+		} catch (ObjectException e) {
+			Feedback.error(e.getMessage());
+			return new RequestStatusImpl(false, e.getMessage());
 		} catch (Throwable e) {
 			Feedback.error(e.getMessage());
 			if(log.isErrorEnabled()) {
