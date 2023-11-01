@@ -18,6 +18,7 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.app.db.DocumentHelper;
@@ -135,6 +136,11 @@ public class MockEntityTemplateService implements TemplateService {
 	}
 	@Override
 	public ObjectTemplate getBaseTemplate(ObjectTemplate template) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public Collection<TableAction> getTableActions(String template) {
 		// TODO Auto-generated method stub
 		return null;
 	}

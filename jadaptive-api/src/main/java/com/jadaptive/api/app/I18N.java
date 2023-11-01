@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.servlet.Request;
 
 public class I18N {
 
@@ -35,6 +36,15 @@ public class I18N {
 	private I18N() {
 	}
 
+	public static String getResource(String bundle, String key, Object...arguments) {
+		
+		Locale locale = Locale.getDefault();
+		if(Request.isAvailable()) {
+			locale = Request.get().getLocale();
+		}
+		return getResource(locale, bundle, key, arguments);
+	}
+	
 	public static Set<String> getResourceKeys(Locale locale,
 			String resourceBundle) {
 		if (resourceBundle == null) {

@@ -14,4 +14,6 @@ public interface InternationalService {
 
 	String getCountryName(String country);
 
+	boolean isEU(String country);
+
 }

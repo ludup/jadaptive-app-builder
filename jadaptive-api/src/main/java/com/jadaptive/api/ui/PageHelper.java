@@ -97,6 +97,11 @@ public class PageHelper {
 				.text(text);
 	}
 	
+	public static Element createAnchor(String href) {
+		return new Element("a")
+				.attr("href", href);
+	}
+	
 	public static void appendBodyScriptSnippet(Document document, String script) {
 
 		String nonce = Utils.generateRandomAlphaNumericString(32);

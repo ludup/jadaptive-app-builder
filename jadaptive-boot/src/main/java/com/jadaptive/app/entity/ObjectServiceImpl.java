@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.FormHandler;
@@ -180,6 +181,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 						reference.getResourceKey());
 			}
 		}
+		
 		for(ObjectTemplate reference : templateRepository.findReferences(template)) {
 			if(Session.RESOURCE_KEY.equals(reference.getResourceKey())) {
 				continue; // Need object template attribute here?
@@ -259,10 +261,17 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			case OBJECT_REFERENCE:
 			{
 				String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+				ObjectTemplate parentTemplate = templateService.getParentTemplate(reference);
 				if(resourceKey.equals(foreignType)) {
-					if(count(reference.getResourceKey(), generateFieldName(parentField, field), foreignKey) > 0) {
-						throw new ObjectException(String.format("Cannot delete this object because it is still referenced by %s",
-								reference.getResourceKey()));
+					long count = count(reference.getResourceKey(), generateFieldName(parentField, field), foreignKey);
+					if(count > 0) {
+						if(parentTemplate.getType() == ObjectType.SINGLETON) {
+							throw new ObjectException("default", "foriegnReference.singleton.error",	count, 
+									I18N.getResource(parentTemplate.getBundle(), parentTemplate.getResourceKey() + ".names"));
+						} else {
+							throw new ObjectException("default", "foriegnReference.collection.error",	count, 
+								I18N.getResource(parentTemplate.getBundle(), parentTemplate.getResourceKey() + ".names"));
+						}
 					}
 				}
 				break;
@@ -342,9 +351,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 	private String generateFieldName(String parent, FieldTemplate field) {
 		if(StringUtils.isBlank(parent)) {
-			return field.getResourceKey();
+			return field.getResourceKey() + "._id";
 		} else {
-			return parent + "." + field.getResourceKey();
+			return parent + "." + field.getResourceKey() + "._id";
 		}
 	}
 

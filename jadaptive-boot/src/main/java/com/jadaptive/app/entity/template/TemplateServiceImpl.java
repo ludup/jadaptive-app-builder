@@ -47,6 +47,7 @@ import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.TemplateView;
@@ -86,6 +87,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 	private Map<String,Collection<Class<? extends UUIDDocument>>> extensionClasses = new HashMap<>();
 	private Map<String,List<ExtensionRegistration>> extensionsByTemplate = new HashMap<>();
+	private Map<String,List<TableAction>> actionsByTarget = new HashMap<>();
 	
 	@Override
 	public void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template) {
@@ -94,6 +96,30 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		}
 		templateClazzes.put(resourceKey, templateClazz);
 		templateResourceKeys.put(templateClazz, resourceKey);
+		
+		TableView view = templateClazz.getAnnotation(TableView.class);
+		if(Objects.nonNull(view)) {
+			if(Objects.nonNull(view.actions())) {
+				for(TableAction action : view.actions()) {
+					addTableAction(action, template.getCollectionKey());
+				}
+			}
+		}
+		Class<?> tmp = templateClazz;
+		do {
+			TableAction[] actions = tmp.getAnnotationsByType(TableAction.class);
+			if(Objects.nonNull(actions)) {
+				for(TableAction action : actions) {
+					if(StringUtils.isBlank(action.targetKey())) {
+						addTableAction(action, template.getResourceKey());
+					} else {
+						addTableAction(action, action.targetKey());
+					}
+				}
+			}
+			
+			tmp = tmp.getSuperclass();
+		} while(!tmp.getSuperclass().equals(Object.class));
 	}
 	
 //	@Override
@@ -115,6 +141,20 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 //	}
 //	
 	
+	private void addTableAction(TableAction action, String resourceKey) {
+		
+		if(!actionsByTarget.containsKey(resourceKey)) {
+			actionsByTarget.put(resourceKey, new ArrayList<>());
+		}
+		List<TableAction> targetActions = actionsByTarget.get(resourceKey);
+		targetActions.add(action);
+	}
+	
+	@Override
+	public Collection<TableAction> getTableActions(String template) {
+		return actionsByTarget.get(template);
+	}
+
 	@Override
 	public ObjectTemplate get(String resourceKey) throws RepositoryException, ObjectException {
 		
