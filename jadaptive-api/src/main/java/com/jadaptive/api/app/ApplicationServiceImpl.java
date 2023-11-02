@@ -43,6 +43,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 	static ApplicationServiceImpl instance = new ApplicationServiceImpl();
 	
 	Map<Class<?>,Object> testingBeans = new HashMap<>();
+	
 	@PostConstruct
 	private void postConstruct() {
 		instance = this;

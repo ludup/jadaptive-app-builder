@@ -36,6 +36,8 @@ public interface EventService {
 	void resumeEvents();
 
 	<T extends UUIDEntity> void on(String eventKey, Class<T> clz, EventListener<ObjectEvent<T>> handler);
+	
+	<T extends UUIDEntity, E extends ObjectEvent<T>> void on(String eventKey, Class<E> eventClz, Class<T> clz, EventListener<E> handler);
 
 	<T extends UUIDEntity> void saved(Class<T> clz, EventListener<ObjectEvent<T>> handler);
 
