@@ -152,7 +152,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			if(log.isErrorEnabled()) {
 				log.error("Calling getCurrentUser without having previously setup a user context on the current thread!!!!");
 			}
-			throw new UnauthorizedException();
+			throw new AccessDeniedException();
 		}
 		return userStack.peek();
 	}
