@@ -2,6 +2,8 @@ package com.jadaptive.api.auth;
 
 import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.permissions.FeatureGroup;
@@ -128,9 +130,12 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 	public void setWeight(Integer weight) {
 		this.weight = weight;
 	}
-
-	public abstract AuthenticationScope getScope();
-
+	
 	public abstract boolean isSessionRequired();
+
+	public String getBundle() {
+		ObjectDefinition def = getClass().getAnnotation(ObjectDefinition.class);
+		return StringUtils.defaultIfEmpty(def.bundle(), def.resourceKey());
+	}
 	
 }

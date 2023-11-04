@@ -37,17 +37,11 @@ public class AuthenticationState {
 	int optionalCompleted = 0;
 	int optionalRequired = 0;
 	
-	AuthenticationScope scope;
 	AuthenticationPolicy policy;
 	
-	public AuthenticationState(AuthenticationScope scope, AuthenticationPolicy policy, Redirect homePage) {
-		this.scope = scope;
+	public AuthenticationState(AuthenticationPolicy policy, Redirect homePage) {
 		this.policy = policy;
 		this.homePage = homePage;
-	}
-	
-	public AuthenticationScope getScope() {
-		return scope;
 	}
 
 	public AuthenticationPolicy getPolicy() {

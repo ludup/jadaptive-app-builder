@@ -37,11 +37,6 @@ public class UserLoginAuthenticationPolicy extends AuthenticationPolicy {
 	}
 
 	@Override
-	public AuthenticationScope getScope() {
-		return AuthenticationScope.USER_LOGIN;
-	}
-
-	@Override
 	public boolean isSessionRequired() {
 		return true;
 	}

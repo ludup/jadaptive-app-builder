@@ -32,11 +32,6 @@ public class SAMLIdpAuthenticationPolicy extends AuthenticationPolicy {
 	}
 
 	@Override
-	public AuthenticationScope getScope() {
-		return AuthenticationScope.SAML_IDP;
-	}
-
-	@Override
 	public boolean isSessionRequired() {
 		return false;
 	}

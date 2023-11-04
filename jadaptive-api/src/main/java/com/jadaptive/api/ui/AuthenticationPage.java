@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.jadaptive.api.auth.AuthenticationPolicy;
-import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
+import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
@@ -81,7 +81,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		
-		if(state.getScope()!=AuthenticationScope.USER_LOGIN
+		if(!(state.getPolicy() instanceof UserLoginAuthenticationPolicy)
 				|| !pageCache.getDefaultPage().equals(Login.class)) {
 			Element el = doc.selectFirst("#actions");
 			if(Objects.nonNull(el)) {

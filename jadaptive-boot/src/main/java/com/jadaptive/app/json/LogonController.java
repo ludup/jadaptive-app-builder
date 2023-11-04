@@ -23,9 +23,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
-import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
+import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.SessionStatus;
@@ -151,10 +151,9 @@ public class LogonController {
 	@RequestMapping(value="/app/api/reset-login", method = { RequestMethod.GET }, produces = { "text/html"})
 	public void startUserLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, AccessDeniedException, UnauthorizedException {
 
-		AuthenticationPolicy policy = policyService.getDefaultPolicy(AuthenticationScope.USER_LOGIN);
+		AuthenticationPolicy policy = policyService.getDefaultPolicy(UserLoginAuthenticationPolicy.class);
 		
-		AuthenticationState state = new AuthenticationState(AuthenticationScope.USER_LOGIN, policy, 
-				new UriRedirect());
+		AuthenticationState state = new AuthenticationState(policy, new UriRedirect());
 		state.setRemoteAddress(Request.getRemoteAddress());
 		state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
 		

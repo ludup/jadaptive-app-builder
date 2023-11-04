@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
-import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
@@ -76,43 +74,32 @@ public class Login extends AuthenticationPage<LoginForm> {
 			authenticationService.clearAuthenticationState();
 		}
 		
-		switch(state.getScope()) {
-		case PASSWORD_RESET:
-			doc.selectFirst("#authenticationHeader").appendChild(Html.i18n("default", "passwordReset.text"));
-			break;
-		default:
-			
-//			DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) Request.get().getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-//		    if(defaultSavedRequest != null){
-//		    	doc.selectFirst("#authenticationHeader").appendChild(Html.i18n("default", "samlLogin.text"));
-//		    } else {
-		    	doc.selectFirst("#authenticationHeader").appendChild(Html.i18n("default", "userLogin.text"));
-//		    }
-			
-			break;
-		}
+		doc.selectFirst("#authenticationHeader").appendChild(Html.i18n(state.getPolicy().getBundle(), String.format("%s.name", state.getPolicy().getResourceKey())));
 		
 		if(!state.getPolicy().getPasswordOnFirstPage()) {
 			doc.selectFirst("#passwordDiv").remove();
 		}
 		
-		if(policyService.hasPasswordResetPolicy()
-				&& state.getScope()==AuthenticationScope.USER_LOGIN) {
-			doc.selectFirst("#actions")
-				.after(Html.a("/start-password-reset")
-						.addClass("text-decoration-none")
-						.appendChild(new Element("sup")
-								.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "forgotPassword.text"))));
-		}
-		
-		if(state.getScope()==AuthenticationScope.PASSWORD_RESET) {
-			doc.selectFirst("#policyMessage").appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "forgotPassword.desc"));
-			doc.selectFirst("#policyDiv").removeClass("d-none");
-			
-			doc.selectFirst("#buttonName")
-				.attr("jad:bundle", "default")
-				.attr("jad:i18n", "start.name");
-		}
+		/**
+		 * TODO: This needs to be HtmlExtender in password reset plugin
+		 */
+//		if(policyService.hasPasswordResetPolicy()
+//				&& state.getScope()==AuthenticationScope.USER_LOGIN) {
+//			doc.selectFirst("#actions")
+//				.after(Html.a("/start-password-reset")
+//						.addClass("text-decoration-none")
+//						.appendChild(new Element("sup")
+//								.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "forgotPassword.text"))));
+//		}
+//		
+//		if(state.getScope()==AuthenticationScope.PASSWORD_RESET) {
+//			doc.selectFirst("#policyMessage").appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "forgotPassword.desc"));
+//			doc.selectFirst("#policyDiv").removeClass("d-none");
+//			
+//			doc.selectFirst("#buttonName")
+//				.attr("jad:bundle", "default")
+//				.attr("jad:i18n", "start.name");
+//		}
 		
 	}
 	
@@ -136,7 +123,7 @@ public class Login extends AuthenticationPage<LoginForm> {
 				user = new FakeUser(form.getUsername());
 			}
 			state.setUser(user);
-			AuthenticationPolicy assigned = policyService.getAssignedPolicy(user, Request.getRemoteAddress(), state.getScope());
+			AuthenticationPolicy assigned = policyService.getAssignedPolicy(user, Request.getRemoteAddress(), state.getPolicy().getClass());
 			
 			if(Objects.nonNull(assigned)) {
 				authenticationService.processRequiredAuthentication(state, assigned);

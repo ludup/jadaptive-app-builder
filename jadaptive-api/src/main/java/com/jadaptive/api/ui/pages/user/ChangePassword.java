@@ -4,9 +4,9 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
+import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.tenant.TenantService;
@@ -64,27 +64,25 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 	}
 
 	@Override
-	public AuthenticationScope getScope() {
-		return AuthenticationScope.USER_LOGIN;
-	}
-
-	@Override
 	public boolean requiresProcessing(AuthenticationState state) {
-		if(state.getUser() instanceof PasswordChangeRequired) {
-			
-	    	if(((PasswordChangeRequired)state.getUser()).getPasswordChangeRequired()) {
-	    		permissionService.setupUserContext(state.getUser());
-	    		try {
-		    		permissionService.assertPermission(UserService.CHANGE_PASSWORD_PERMISSION);
-					return true;
-	    		} catch(AccessDeniedException e) {
-	    			
-	    		}
-	    		finally {
-	    			permissionService.clearUserContext();
-	    		}
+		
+		if(state.getPolicy().getResourceKey().equals(UserLoginAuthenticationPolicy.RESOURCE_KEY)) {
+			if(state.getUser() instanceof PasswordChangeRequired) {
+				
+		    	if(((PasswordChangeRequired)state.getUser()).getPasswordChangeRequired()) {
+		    		permissionService.setupUserContext(state.getUser());
+		    		try {
+			    		permissionService.assertPermission(UserService.CHANGE_PASSWORD_PERMISSION);
+						return true;
+		    		} catch(AccessDeniedException e) {
+		    			
+		    		}
+		    		finally {
+		    			permissionService.clearUserContext();
+		    		}
+		    	}
 	    	}
-    	}
+		}
 		return false;
 	}
 }

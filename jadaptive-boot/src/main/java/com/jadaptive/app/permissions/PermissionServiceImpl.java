@@ -37,7 +37,6 @@ import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
-import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;

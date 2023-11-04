@@ -24,10 +24,10 @@ import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
-import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
+import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.auth.events.AuthenticationFailedEvent;
 import com.jadaptive.api.auth.events.AuthenticationSuccessEvent;
 import com.jadaptive.api.cache.CacheService;
@@ -355,10 +355,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		List<PostAuthenticatorPage> additional = new ArrayList<>();
 		for(PostAuthenticatorPage a : applicationService.getBeans(PostAuthenticatorPage.class)) {
-			if(a.getScope()==state.getPolicy().getScope()) {
-				if(a.requiresProcessing(state)) {
-					additional.add(a);
-				}
+			if(a.requiresProcessing(state)) {
+				additional.add(a);
 			}
 		}
 		
@@ -393,8 +391,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //						AuthenticationScope.USER_LOGIN :
 //							AuthenticationScope.SAML_IDP;
 				
-				AuthenticationPolicy policy = policyService.getDefaultPolicy(AuthenticationScope.USER_LOGIN);
-				state = new AuthenticationState(AuthenticationScope.USER_LOGIN,
+				AuthenticationPolicy policy = policyService.getDefaultPolicy(UserLoginAuthenticationPolicy.class);
+				state = new AuthenticationState(
 						policy,
 						new PageRedirect(pageCache.getHomePage()));
 				state.setRemoteAddress(Request.getRemoteAddress());

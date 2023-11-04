@@ -6,9 +6,9 @@ import com.jadaptive.api.user.User;
 
 public interface AuthenticationPolicyService extends AbstractUUIDObjectService<AuthenticationPolicy>, DynamicColumnService  {
 
-	AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, AuthenticationScope scope, AuthenticationPolicy... additionalPolicies);
+	AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, Class<? extends AuthenticationPolicy> scope, AuthenticationPolicy... additionalPolicies);
 
-	AuthenticationPolicy getDefaultPolicy(AuthenticationScope scope);
+	AuthenticationPolicy getDefaultPolicy(Class<? extends AuthenticationPolicy> scope);
 	
 	void setResolver(AuthenticationPolicyResolver resolver);
 

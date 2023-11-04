@@ -1,5 +1,6 @@
 package com.jadaptive.app.auth;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyResolver;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
-import com.jadaptive.api.auth.AuthenticationScope;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.PasswordResetAuthenticationPolicy;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
@@ -57,12 +57,12 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	private AuthenticationPolicyResolver resolver;
 	
 	@Override
-	public AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, AuthenticationScope scope, AuthenticationPolicy... additionalPolicies) {
+	public AuthenticationPolicy getAssignedPolicy(User user, String ipAddress, Class<? extends AuthenticationPolicy> policyClz, AuthenticationPolicy... additionalPolicies) {
 		
 		List<AuthenticationPolicy> results =  new ArrayList<>();
 		
 		for(AuthenticationPolicy policy : policyDatabase.getAssignedObjectsA(AuthenticationPolicy.class, user)) {
-			if(policy.getScope()!=scope) {
+			if(!policy.getClass().equals(policyClz)) {
 				continue;
 			}
 			boolean update = false;
@@ -81,7 +81,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		}
 		
 		for(AuthenticationPolicy additional : additionalPolicies) {
-			if(additional.getScope()!=scope) {
+			if(!additional.getClass().equals(policyClz)) {
 				continue;
 			}
 			if(additional.getUsers().contains(user)
@@ -106,7 +106,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		
 		if(results.isEmpty()) {
 			if(permissionService.isAdministrator(user)) {
-				return getDefaultPolicy(scope);
+				return getDefaultPolicy(policyClz);
 			}
 			return null;
 		}
@@ -158,7 +158,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 			 */
 			authenticationService.validateModules(policy);
 			if(Request.isAvailable() && policy instanceof UserLoginAuthenticationPolicy) {
-				if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getScope(), policy))) {
+				if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getClass(), policy))) {
 					throw new IllegalStateException("The policy is invalid because it would lock the current user out from this location");
 				}
 			}
@@ -172,13 +172,10 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	}
 
 	@Override
-	public AuthenticationPolicy getDefaultPolicy(AuthenticationScope scope) {
-		switch(scope) {
-		case PASSWORD_RESET:
-			return getWeightedPolicy(scope);
-		case SAML_IDP:
-			return getWeightedPolicy(scope);
-		default:
+	public AuthenticationPolicy getDefaultPolicy(Class<? extends AuthenticationPolicy> clz) {
+		if(!clz.equals(UserLoginAuthenticationPolicy.class)) {
+			return getWeightedPolicy(clz);
+		} else {
 			return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true));
 		}
 		
@@ -205,24 +202,29 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 				SearchField.eq("resourceKey", PasswordResetAuthenticationPolicy.RESOURCE_KEY)) > 0;
 	}
 
-	private AuthenticationPolicy getWeightedPolicy(AuthenticationScope scope) {
+	private AuthenticationPolicy getWeightedPolicy(Class<? extends AuthenticationPolicy> scope) {
 		
-		List<AuthenticationPolicy> tmp = new ArrayList<>(policyDatabase.searchObjects(
-				AuthenticationPolicy.class, 
-				SearchField.eq("resourceKey", 
-						scope.getResourceKey())));
-		
-		if(tmp.isEmpty()) {
-			throw new IllegalStateException("No " + scope.name() + " policies are configured!");
-		}
-
-		Collections.sort(tmp, new Comparator<AuthenticationPolicy>() {
-			@Override
-			public int compare(AuthenticationPolicy o1, AuthenticationPolicy o2) {
-				return o1.getWeight().compareTo(o2.getWeight());
+		try {
+			List<AuthenticationPolicy> tmp = new ArrayList<>(policyDatabase.searchObjects(
+					AuthenticationPolicy.class, 
+					SearchField.eq("resourceKey", 
+							scope.getConstructor().newInstance().getResourceKey())));
+			
+			if(tmp.isEmpty()) {
+				throw new IllegalStateException("No " + scope.getClass().getSimpleName() + " policies are configured!");
 			}
-		});
-		
-		return tmp.get(0);
+
+			Collections.sort(tmp, new Comparator<AuthenticationPolicy>() {
+				@Override
+				public int compare(AuthenticationPolicy o1, AuthenticationPolicy o2) {
+					return o1.getWeight().compareTo(o2.getWeight());
+				}
+			});
+			
+			return tmp.get(0);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 }
