@@ -97,14 +97,6 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		templateClazzes.put(resourceKey, templateClazz);
 		templateResourceKeys.put(templateClazz, resourceKey);
 		
-		TableView view = templateClazz.getAnnotation(TableView.class);
-		if(Objects.nonNull(view)) {
-			if(Objects.nonNull(view.actions())) {
-				for(TableAction action : view.actions()) {
-					addTableAction(action, template.getCollectionKey());
-				}
-			}
-		}
 		Class<?> tmp = templateClazz;
 		do {
 			TableAction[] actions = tmp.getAnnotationsByType(TableAction.class);

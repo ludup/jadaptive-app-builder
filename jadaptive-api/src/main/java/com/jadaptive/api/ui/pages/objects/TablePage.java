@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,23 +99,20 @@ public class TablePage extends TemplatePage {
 //		searchColumns.renderValues(columns, "");
 		
 		
-		TableView view = templateClazz.getAnnotation(TableView.class);
 		Element rowActions = document.selectFirst("#rowActions");
 		
-		if(view != null) {
-			for(TableAction action : view.actions()) {
-				if(action.target()==Target.TABLE) {
-					createTableAction(document, action.url(), action.bundle(), action.icon(), action.buttonClass(), action.resourceKey());
-				} else {
-					rowActions.appendChild( new Element("div")
-						.addClass("tableAction")
-						.attr("data-url", action.url())
-						.attr("data-bundle", action.bundle())
-						.attr("data-icon", action.icon())
-						.attr("data-icon-group", action.iconGroup())
-						.attr("data-resourcekey", action.resourceKey())
-						.attr("data-window", action.window().name()));
-				}
+		for(TableAction action : templateService.getTableActions(template.getCollectionKey())) {
+			if(action.target()==Target.TABLE) {
+				createTableAction(document, action.url(), action.bundle(), action.icon(), action.buttonClass(), action.resourceKey());
+			} else {
+				rowActions.appendChild( new Element("div")
+					.addClass("tableAction")
+					.attr("data-url", action.url())
+					.attr("data-bundle", action.bundle())
+					.attr("data-icon", action.icon())
+					.attr("data-icon-group", action.iconGroup())
+					.attr("data-resourcekey", action.resourceKey())
+					.attr("data-window", action.window().name()));
 			}
 		}
 		

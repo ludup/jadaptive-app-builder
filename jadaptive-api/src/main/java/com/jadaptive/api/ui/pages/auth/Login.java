@@ -79,28 +79,6 @@ public class Login extends AuthenticationPage<LoginForm> {
 		if(!state.getPolicy().getPasswordOnFirstPage()) {
 			doc.selectFirst("#passwordDiv").remove();
 		}
-		
-		/**
-		 * TODO: This needs to be HtmlExtender in password reset plugin
-		 */
-//		if(policyService.hasPasswordResetPolicy()
-//				&& state.getScope()==AuthenticationScope.USER_LOGIN) {
-//			doc.selectFirst("#actions")
-//				.after(Html.a("/start-password-reset")
-//						.addClass("text-decoration-none")
-//						.appendChild(new Element("sup")
-//								.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "forgotPassword.text"))));
-//		}
-//		
-//		if(state.getScope()==AuthenticationScope.PASSWORD_RESET) {
-//			doc.selectFirst("#policyMessage").appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "forgotPassword.desc"));
-//			doc.selectFirst("#policyDiv").removeClass("d-none");
-//			
-//			doc.selectFirst("#buttonName")
-//				.attr("jad:bundle", "default")
-//				.attr("jad:i18n", "start.name");
-//		}
-		
 	}
 	
 	@Override

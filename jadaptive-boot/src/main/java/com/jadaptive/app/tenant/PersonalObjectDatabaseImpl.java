@@ -98,4 +98,9 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	public long allObjectsCount(Class<T> resourceClass, SearchField...fields) {
 		return objectDatabase.count(resourceClass, fields);
 	}
+
+	@Override
+	public T max(Class<T> resourceClass, String field) {
+		return objectDatabase.max(resourceClass, field);
+	}
 }

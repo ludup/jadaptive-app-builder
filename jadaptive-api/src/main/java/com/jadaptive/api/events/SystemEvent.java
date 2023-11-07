@@ -36,8 +36,8 @@ import com.jadaptive.utils.Utils;
      creatable = false, updatable = false, defaultColumn = "eventKey")
 @ObjectViews({@ObjectViewDefinition(value = "event", bundle = SystemEvent.RESOURCE_KEY, weight = Integer.MIN_VALUE)})
 @TableView(defaultColumns = { "state", "timestamp", "username", "eventKey", "eventDescription", "ipAddress"}, 
-				sortOrder = SortOrder.DESC, sortField = "timestamp", requiresView = false,
-				actions = { @TableAction(bundle = SystemEvent.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/event/{resourceKey}/{uuid}" )})
+				sortOrder = SortOrder.DESC, sortField = "timestamp", requiresView = false)
+@TableAction(bundle = SystemEvent.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/event/{resourceKey}/{uuid}" )
 @LicensedFeature(value = SystemEvent.FEATURE, group = FeatureGroup.PROFESSIONAL)
 public class SystemEvent extends UUIDEvent {
 

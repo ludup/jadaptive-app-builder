@@ -119,7 +119,7 @@ public class Html {
 		return new Element("div").addClass(Utils.csv(" ", classes));
 	}
 
-	public static Element table(String classes) {
+	public static Element table(String... classes) {
 		return new Element("table").addClass(Utils.csv("", classes));
 	}
 	
@@ -147,12 +147,16 @@ public class Html {
 		return new Element("input").attr("type", type).attr("name", name).val(value);
 	}
 
-	public static Element p(String text) {
-		return new Element("p").html(text);
+	public static Element p(String text, String... classes) {
+		return new Element("p").html(text).addClass(Utils.csv(" ", classes));
 	}
 
 	public static Element button(String... classes) {
 		return new Element("button").addClass(Utils.csv(" ", classes));
+	}
+
+	public static Element img(String src, String... classes) {
+		return new Element("img").attr("src", src).addClass(Utils.csv(" ", classes));
 	}
 
 }

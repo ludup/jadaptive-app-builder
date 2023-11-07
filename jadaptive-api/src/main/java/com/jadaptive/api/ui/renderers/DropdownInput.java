@@ -97,7 +97,7 @@ public class DropdownInput extends InputRender {
 			addInputValue(entry.getKey(), entry.getValue(), i18n);
 			if(defaultValue.equals(entry.getKey())) {
 				if(!i18n) {
-					nameElement.text(entry.getValue());
+					nameElement.val(entry.getValue());
 				} else {
 					nameElement.attr("jad:bundle", bundle);
 					nameElement.attr("jad:i18n", entry.getValue());

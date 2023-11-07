@@ -38,10 +38,9 @@ import com.jadaptive.api.template.Validator;
 @DisableStandardActions
 @GenerateEventTemplates(value = AuthorizedKey.RESOURCE_KEY)
 @ObjectViews(@ObjectViewDefinition(bundle = AuthorizedKey.RESOURCE_KEY, value = AuthorizedKey.KEY_VIEW))
-@TableView(defaultColumns = { "name", "fingerprint", "type", "expires" },
-			actions = {
-				@TableAction(resourceKey = "generateKey", bundle = AuthorizedKey.RESOURCE_KEY, url = "generate-key", icon = "fa-solid fa-wrench", writeAction = true),
-				@TableAction(resourceKey = "uploadPublicKey",  bundle = AuthorizedKey.RESOURCE_KEY, url = "upload-key", icon = "fa-solid fa-upload", writeAction = true)})
+@TableView(defaultColumns = { "name", "fingerprint", "type", "expires" })
+@TableAction(resourceKey = "generateKey", bundle = AuthorizedKey.RESOURCE_KEY, url = "generate-key", icon = "fa-solid fa-wrench", writeAction = true)
+@TableAction(resourceKey = "uploadPublicKey",  bundle = AuthorizedKey.RESOURCE_KEY, url = "upload-key", icon = "fa-solid fa-upload", writeAction = true)
 public class AuthorizedKey extends PersonalUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 9215617764035887442L;

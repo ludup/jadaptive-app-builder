@@ -92,7 +92,8 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.title")))
 						.appendChild(new Element("p")
 								.addClass("card-text")
-								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.body")))
+								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.body")
+										.addClass("small")))
 						.appendChild(Html.a("#").addClass("select stretched-link float-end")
 								.attr("data-authenticator", module.getUuid()))));
 			}

@@ -12,6 +12,6 @@ public interface AuthenticationPolicyService extends AbstractUUIDObjectService<A
 	
 	void setResolver(AuthenticationPolicyResolver resolver);
 
-	boolean hasPasswordResetPolicy();
+	boolean hasPolicy(String resourceKey);
 
 }

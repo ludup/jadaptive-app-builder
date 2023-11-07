@@ -11,8 +11,6 @@ public @interface TableView {
 				
 		String[] defaultColumns();
 		
-		TableAction[] actions() default { };
-		
 		DynamicColumn[] otherColumns() default { };
 		
 		boolean requiresView() default true;

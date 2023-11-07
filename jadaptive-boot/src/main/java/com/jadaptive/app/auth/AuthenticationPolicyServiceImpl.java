@@ -19,7 +19,6 @@ import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyResolver;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
-import com.jadaptive.api.auth.PasswordResetAuthenticationPolicy;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.db.AssignableObjectDatabase;
 import com.jadaptive.api.db.SearchField;
@@ -196,12 +195,6 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		
 	}
 
-	@Override
-	public boolean hasPasswordResetPolicy() {
-		return policyDatabase.countObjects(AuthenticationPolicy.class, 
-				SearchField.eq("resourceKey", PasswordResetAuthenticationPolicy.RESOURCE_KEY)) > 0;
-	}
-
 	private AuthenticationPolicy getWeightedPolicy(Class<? extends AuthenticationPolicy> scope) {
 		
 		try {
@@ -226,5 +219,10 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 				| NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public boolean hasPolicy(String resourceKey) {
+		return policyDatabase.countObjects(AuthenticationPolicy.class, SearchField.eq("resourceKey", resourceKey)) > 0;
 	}
 }

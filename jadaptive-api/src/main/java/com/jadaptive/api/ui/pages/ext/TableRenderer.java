@@ -169,17 +169,7 @@ public class TableRenderer {
 	}
 	
 	private Collection<TableAction> generateActions(String resourceKey) {
-		Collection<TableAction> allActions = new ArrayList<>();
-		Collection<TableAction> registeredActions = templateService.getTableActions(resourceKey);
-		if(Objects.nonNull(registeredActions)) {
-			allActions.addAll(registeredActions);
-		}
-		
-		if(Objects.nonNull(view.actions())) {
-			allActions.addAll(Arrays.asList(view.actions()));
-		}
-		
-		return allActions;
+		return templateService.getTableActions(resourceKey);
 	}
 
 	private Map<String, DynamicColumn> generateDynamicColumns() {
@@ -270,9 +260,10 @@ public class TableRenderer {
 		
 		if(uiService.canCreate(template)) {
 			
-			List<ObjectTemplate> creatableTemplates = new ArrayList<>();
-			
 			if(!template.getChildTemplates().isEmpty()) {
+				
+				List<ObjectTemplate> creatableTemplates = new ArrayList<>();
+				
 				ObjectTemplate collectionTemplate = templateRepository.get(template.getCollectionKey());
 				
 				for(String template : collectionTemplate.getChildTemplates()) {
@@ -281,25 +272,23 @@ public class TableRenderer {
 						creatableTemplates.add(childTemplate);
 					}
 				}
-			} 
 			
-			if(creatableTemplates.size() > 1) {
-				createMultipleOptionAction(element, "create", creatableTemplates, template.getCollectionKey());
-			} else if(creatableTemplates.size() == 1) {
-				
-				ObjectTemplate singleTemplate = creatableTemplates.get(0);
-				if(Objects.isNull(parentObject)) {
-					createTableAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
-							template.getCollectionKey(), "fa-plus", "fa-solid",
-							"primary", "create", "readWrite");					
-				} else {
+				if(creatableTemplates.size() > 1) {
+					createMultipleOptionAction(element, "create", creatableTemplates, template.getCollectionKey());
+				} else if(creatableTemplates.size() == 1) {
+					
+					ObjectTemplate singleTemplate = creatableTemplates.get(0);
+					if(Objects.isNull(parentObject)) {
+						createTableAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
+								template.getCollectionKey(), "fa-plus", "fa-solid",
+								"primary", "create", "readWrite");					
+					} else {
 
-					createStashAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
-							template.getCollectionKey(), "fa-plus", "fa-solid",
-							"create", "readWrite");					
+						createStashAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
+								template.getCollectionKey(), "fa-plus", "fa-solid",
+								"create", "readWrite");					
+					}
 				}
-				
-
 			} else {
 				
 				if(Objects.isNull(parentObject)) {

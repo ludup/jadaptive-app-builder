@@ -2,9 +2,9 @@ $(function() {
 					
 	$('.select').click(function(e) {
 		e.preventDefault()
-		$('.card-body').removeClass('bg-secondary text-light');
+		$('.card-body').removeClass('bg-primary text-light');
 		$('.stretched-link').empty();
-		$(this).parents().closest('.card-body').addClass('bg-secondary text-light');
+		$(this).parents().closest('.card-body').addClass('bg-primary text-light');
 		$('#authenticator').val($(this).data('authenticator'));
 	});
 	
