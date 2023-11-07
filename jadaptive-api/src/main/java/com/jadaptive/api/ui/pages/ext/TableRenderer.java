@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -169,7 +170,11 @@ public class TableRenderer {
 	}
 	
 	private Collection<TableAction> generateActions(String resourceKey) {
-		return templateService.getTableActions(resourceKey);
+		var t = templateService.getTableActions(resourceKey);
+		if(Objects.nonNull(t)) {
+			return t;
+		}
+		return Collections.emptySet();
 	}
 
 	private Map<String, DynamicColumn> generateDynamicColumns() {
