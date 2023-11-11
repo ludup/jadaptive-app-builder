@@ -3,6 +3,7 @@ package com.jadaptive.app.cache;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
@@ -88,11 +89,16 @@ public class CacheServiceImpl implements CacheService {
 		private void purgeEntries() {
 	        long currentTime = new Date().getTime();
 	        for (K key : entryTime.keySet()) {
-	        	long expiry = (entryTime.get(key) + expiryInMillis);
-	            if (currentTime > expiry) {
-	                remove(key);
-	                entryTime.remove(key);
-	            }
+	        	Long val = entryTime.get(key);
+	        	if(Objects.nonNull(val)) {
+		        	long expiry = (val.longValue() + expiryInMillis);
+		            if (currentTime > expiry) {
+		                remove(key);
+		                entryTime.remove(key);
+		            }
+	        	} else {
+	        		entryTime.remove(key);
+	        	}
 	        }
 	    }
 	}

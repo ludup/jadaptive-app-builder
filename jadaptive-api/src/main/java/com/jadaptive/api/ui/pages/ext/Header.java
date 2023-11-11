@@ -155,7 +155,10 @@ public class Header extends AbstractPageExtension {
 		}
 		
 		if(StringUtils.isNotBlank(productService.getLogoResource())) {
-			document.selectFirst("#logo").attr("src", productService.getLogoResource());
+			Element e = document.selectFirst("#logo");
+			if(Objects.nonNull(e)) {
+				e.attr("src", productService.getLogoResource());
+			}
 		}
 		
 		if(StringUtils.isNotBlank(productService.getFaviconResource())) {
