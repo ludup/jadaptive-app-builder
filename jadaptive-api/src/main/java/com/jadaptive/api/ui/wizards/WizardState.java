@@ -154,11 +154,37 @@ public class WizardState {
 	public void insertNextPage(WizardSection setupSection, boolean removePrevious) {
 
 		if(removePrevious) {
-			removePage(setupSection.getClass());
+			removePage(setupSection);
 		}
 		ApplicationServiceImpl.getInstance().autowire(setupSection);
 		pages.add(getCurrentStep(), setupSection);
 		
+	}
+	
+	public void removePage(WizardSection section) {
+		int idx = pageIndex(section);
+		if(idx > -1) {
+			pages.remove(idx);
+		}
+	}
+
+	public boolean containsPage(WizardSection section) {
+		return pageIndex(section) > -1;
+	}
+	
+	public boolean containsPage(Class<? extends WizardSection> clz) {
+		return pageIndex(clz) > -1;
+	}
+	
+	public int pageIndex(WizardSection section) {
+		int idx = 0;
+		for(WizardSection page : pages) {
+			if(page.getName().equals(section.getName())) {
+				return idx;
+			}
+			idx++;
+		}
+		return -1;
 	}
 	
 	public void removePage(Class<? extends WizardSection> clz) {
@@ -167,15 +193,11 @@ public class WizardState {
 			pages.remove(idx);
 		}
 	}
-
-	public boolean containsPage(Class<? extends WizardSection> clz) {
-		return pageIndex(clz) > -1;
-	}
 	
 	public int pageIndex(Class<? extends WizardSection> clz) {
 		int idx = 0;
 		for(WizardSection page : pages) {
-			if(clz.isAssignableFrom(page.getClass())) {
+			if(clz.equals(page.getClass())) {
 				return idx;
 			}
 			idx++;

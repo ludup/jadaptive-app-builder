@@ -32,6 +32,12 @@ public class AuthenticationModule extends NamedUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String iconGroup;
 	
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
+	boolean requiresPhoneNumber;
+	
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
+	boolean requiresEmailAddress;
+	
 	public Boolean getEnabled() {
 		return enabled;
 	}
@@ -62,6 +68,22 @@ public class AuthenticationModule extends NamedUUIDEntity {
 
 	public void setSecretCapture(boolean secretCapture) {
 		this.secretCapture = secretCapture;
+	}
+
+	public boolean isRequiresPhoneNumber() {
+		return requiresPhoneNumber;
+	}
+
+	public void setRequiresPhoneNumber(boolean requiresPhoneNumber) {
+		this.requiresPhoneNumber = requiresPhoneNumber;
+	}
+
+	public boolean isRequiresEmailAddress() {
+		return requiresEmailAddress;
+	}
+
+	public void setRequiresEmailAddress(boolean requiresEmailAddress) {
+		this.requiresEmailAddress = requiresEmailAddress;
 	}
 
 	@Override
