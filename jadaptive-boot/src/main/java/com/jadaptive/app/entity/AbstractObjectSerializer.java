@@ -171,6 +171,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 			case ENUM:
 			case OPTIONS:
 			case COUNTRY:
+			case IMAGE:
 				gen.writeStringField(t.getResourceKey(), value.toString());
 				break;
 			case OBJECT_REFERENCE:
