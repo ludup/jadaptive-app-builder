@@ -66,13 +66,13 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 	
 	@Override
-	public T max(Class<T> resourceClass, String field) throws RepositoryException, ObjectException {
-		return max(getCurrentTenant().getUuid(), resourceClass, field);
+	public T max(Class<T> resourceClass, String field, SearchField... fields) throws RepositoryException, ObjectException {
+		return max(getCurrentTenant().getUuid(), resourceClass, field, fields);
 	}
 	
 	@Override
-	public T min(Class<T> resourceClass, String field) throws RepositoryException, ObjectException {
-		return min(getCurrentTenant().getUuid(), resourceClass, field);
+	public T min(Class<T> resourceClass, String field, SearchField... fields) throws RepositoryException, ObjectException {
+		return min(getCurrentTenant().getUuid(), resourceClass, field, fields);
 	}
 
 	@SuppressWarnings("unchecked")

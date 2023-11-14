@@ -380,10 +380,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		return builder.toString();
 	}
 
-	protected <T extends UUIDEntity> T max(String database, Class<T> clz, String field) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> T max(String database, Class<T> clz, String field, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 			
-			Document document = db.max(getCollectionName(clz), database, field);
+			Document document = db.max(getCollectionName(clz), database, field, fields);
 			if(Objects.isNull(document)) {
 				throw new ObjectNotFoundException(String.format("Maximum value from %s not found for fields %s", 
 						getCollectionName(clz),
@@ -419,9 +419,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 
 
-	protected <T extends UUIDEntity> T min(String database, Class<T> clz, String field) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> T min(String database, Class<T> clz, String field, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
-			Document document = db.min(getCollectionName(clz), database, field);
+			Document document = db.min(getCollectionName(clz), database, field, fields);
 			if(Objects.isNull(document)) {
 				throw new ObjectNotFoundException(String.format("Minimum value from %s not found for fields %s", 
 						getCollectionName(clz),

@@ -154,13 +154,13 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public Document max(String table, String database, String field) {
+	public Document max(String table, String database, String field, SearchField... fields) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Document min(String table, String database, String field) {
+	public Document min(String table, String database, String field, SearchField... fields) {
 		// TODO Auto-generated method stub
 		return null;
 	}

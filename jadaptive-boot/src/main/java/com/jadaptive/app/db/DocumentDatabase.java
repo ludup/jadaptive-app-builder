@@ -47,9 +47,9 @@ public interface DocumentDatabase {
 
 	void createIndex(String table, String database, String... fieldNames);
 
-	Document max(String table, String database, String field);
+	Document max(String table, String database, String field, SearchField... fields);
 	
-	Document min(String table, String database, String field);
+	Document min(String table, String database, String field, SearchField... fields);
 
 	void dropSchema();
 

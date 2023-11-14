@@ -315,17 +315,25 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public Document max(String table, String database, String field) {
+	public Document max(String table, String database, String field, SearchField... fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		
 		FindIterable<Document> result;
 		
 		ClientSession session= currentSession.get();
-		if(Objects.nonNull(session)) {
-			result = collection.find(session).sort(new BasicDBObject(field, -1));
+		if(fields.length > 0) {
+			if(Objects.nonNull(session)) {
+				result = collection.find(session, buildFilter(fields)).sort(new BasicDBObject(field, -1));
+			} else {
+				result = collection.find(buildFilter(fields)).sort(new BasicDBObject(field, -1));
+			}
 		} else {
-			result = collection.find().sort(new BasicDBObject(field, -1));
+			if(Objects.nonNull(session)) {
+				result = collection.find(session).sort(new BasicDBObject(field, -1));
+			} else {
+				result = collection.find().sort(new BasicDBObject(field, -1));
+			}
 		}
 		
 		if(!result.cursor().hasNext()) {
@@ -335,17 +343,25 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public Document min(String table, String database, String field) {
+	public Document min(String table, String database, String field, SearchField... fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		
 		FindIterable<Document> result;
 		
 		ClientSession session= currentSession.get();
-		if(Objects.nonNull(session)) {
-			result = collection.find(session).sort(new BasicDBObject(field, 1));
+		if(fields.length > 0) {
+			if(Objects.nonNull(session)) {
+				result = collection.find(session, buildFilter(fields)).sort(new BasicDBObject(field, 1));
+			} else {
+				result = collection.find(buildFilter(fields)).sort(new BasicDBObject(field, 1));
+			}
 		} else {
-			result = collection.find().sort(new BasicDBObject(field, 1));
+			if(Objects.nonNull(session)) {
+				result = collection.find(session).sort(new BasicDBObject(field, 1));
+			} else {
+				result = collection.find().sort(new BasicDBObject(field, 1));
+			}
 		}
 
 		if(!result.cursor().hasNext()) {

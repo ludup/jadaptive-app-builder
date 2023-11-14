@@ -29,9 +29,9 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
 	Long searchCount(Class<T> resourceClass, SearchField... fields);
 
-	T max(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
+	T max(Class<T> resourceClass, String field, SearchField... fields) throws RepositoryException, ObjectException;
 
-	T min(Class<T> resourceClass, String field) throws RepositoryException, ObjectException;
+	T min(Class<T> resourceClass, String field, SearchField... fields) throws RepositoryException, ObjectException;
 
 	Collection<T> searchTable(Class<T> resourceClass, int start, int length, SortOrder order, String sortField,
 			SearchField... fields);
