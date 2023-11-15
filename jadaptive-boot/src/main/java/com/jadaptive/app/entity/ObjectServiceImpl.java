@@ -351,9 +351,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 	private String generateFieldName(String parent, FieldTemplate field) {
 		if(StringUtils.isBlank(parent)) {
-			return field.getResourceKey() + "._id";
+			return field.getResourceKey();
 		} else {
-			return parent + "." + field.getResourceKey() + "._id";
+			return parent + "." + field.getResourceKey();
 		}
 	}
 
@@ -770,9 +770,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				switch(f.getFieldType()) {
 				case OBJECT_REFERENCE:
 					if(f.getCollection()) {
-						fields.add(SearchField.all(searchField, searchValue));
+						fields.add(SearchField.all(searchField + ".uuid", searchValue));
 					} else {
-						fields.add(SearchField.eq(searchField, searchValue));
+						fields.add(SearchField.eq(searchField + ".uuid", searchValue));
 					}
 					break;
 				default:
