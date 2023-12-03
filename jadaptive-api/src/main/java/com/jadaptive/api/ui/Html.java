@@ -159,4 +159,14 @@ public class Html {
 		return new Element("img").attr("src", src).addClass(Utils.csv(" ", classes));
 	}
 
+	public static Element label(String bundle, String i18n, String... args) {
+		Element el = new Element("label").attr("jad:bundle", bundle).attr("jad:i18n", i18n);
+		for(int i=0;i<args.length;i++) {
+			if(args[i]!=null) {
+				el.attr(String.format("jad:arg%d",i), args[i].toString());
+			}
+		}
+		return el;
+	}
+
 }
