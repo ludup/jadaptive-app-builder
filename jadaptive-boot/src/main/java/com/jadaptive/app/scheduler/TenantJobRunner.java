@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.jobs.TaskRunnerContext;
 import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
@@ -47,7 +49,7 @@ public class TenantJobRunner implements Runnable {
 	
 	public void runNow(TenantTask task) {
 		this.task = task;
-		taskScheduler.schedule(task, Utils.now());
+		taskScheduler.schedule(this, Utils.now());
 	}
 	
 	@Override
@@ -64,6 +66,10 @@ public class TenantJobRunner implements Runnable {
 		}
 		
 		tenantService.setCurrentTenant(tenant);
+		
+		for(TaskRunnerContext ctx : ApplicationServiceImpl.getInstance().getBeans(TaskRunnerContext.class)) {
+			ctx.setupContext();
+		}
 		
 		if(task.isLogging() && log.isInfoEnabled()) {
 			log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());

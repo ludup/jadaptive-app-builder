@@ -64,4 +64,6 @@ public interface TemplateService {
 
 	Collection<TableAction> getTableActions(String template);
 
+	void registerTemporaryTemplate(ObjectTemplate template);
+
 }

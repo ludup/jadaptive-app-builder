@@ -6,8 +6,10 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
@@ -36,9 +38,11 @@ public class Create extends StashedObjectPage {
 		
 		super.doGenerateTemplateContent(document);
 		
+		String referer = Request.get().getHeader(HttpHeaders.REFERER);
+		
 		Element element = document.selectFirst("#saveButton");
 		if(Objects.nonNull(element)) {
-			element.attr("data-url", String.format("/app/ui/create/%s", template.getResourceKey()))
+			element.attr("data-url", referer /*String.format("/app/ui/create/%s", template.getResourceKey())*/)
 				.attr("data-action", String.format("/app/api/form/stash/%s/%s/%s", template.getResourceKey(), childResourceKey, fieldName));
 		}
 

@@ -90,7 +90,6 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 	
 	private void writeFields(JsonGenerator gen, Collection<FieldTemplate> templates, AbstractObject value) throws IOException {
 		
-		
 		if(!Objects.isNull(templates)) {
 			for (FieldTemplate t : templates) {
 
@@ -108,8 +107,10 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 							gen.writeEndArray();
 						} else {
 							AbstractObject child = value.getChild(t);
-							ObjectTemplate template = getTemplateService().get(child.getResourceKey());
-							writeEmbeddedObject(child, template, gen, false);
+							if(Objects.nonNull(child)) {
+								ObjectTemplate template = getTemplateService().get(child.getResourceKey());
+								writeEmbeddedObject(child, template, gen, false);
+							}
 						}
 //					} else {
 //						gen.writeNullField(t.getResourceKey());

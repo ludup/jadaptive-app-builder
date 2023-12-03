@@ -6,5 +6,8 @@ public interface TaskImpl<T extends Task> extends ExtensionPoint {
 
 	String getResourceKey();
 	
-	TaskResult doTask(T task);
+	TaskResult doTask(T task, String executionId);
+
+	@SuppressWarnings("unchecked")
+	default TaskResult executeTask(Task task, String executionId) { return doTask((T) task, executionId); }
 }

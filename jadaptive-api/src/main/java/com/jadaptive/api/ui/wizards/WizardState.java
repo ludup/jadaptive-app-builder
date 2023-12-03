@@ -118,11 +118,11 @@ public class WizardState {
 	}
 
 	public UUIDEntity getCurrentObject() {
-		return stateObjects.get(pages.get(getCurrentStep()-1).getName());
+		return stateObjects.get(pages.get(getCurrentStep()-1).getStateKey());
 	}
 	
 	public void setCurrentObject(UUIDEntity obj) {
-		stateObjects.put(pages.get(getCurrentStep()-1).getName(), obj);
+		stateObjects.put(pages.get(getCurrentStep()-1).getStateKey(), obj);
 	}
 
 	public void saveObject(UUIDEntity object) {
@@ -134,7 +134,7 @@ public class WizardState {
 	}
 
 	public UUIDEntity getObject(WizardSection section) {
-		return stateObjects.get(section.getName());
+		return stateObjects.get(section.getStateKey());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -158,6 +158,13 @@ public class WizardState {
 		}
 		ApplicationServiceImpl.getInstance().autowire(setupSection);
 		pages.add(getCurrentStep(), setupSection);
+		
+	}
+	
+	public void insertNextPage(WizardSection setupSection, boolean removePrevious, UUIDEntity stateObject) {
+
+		insertNextPage(setupSection, removePrevious);
+		stateObjects.put(setupSection.getStateKey(), stateObject);
 		
 	}
 	

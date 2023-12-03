@@ -144,5 +144,10 @@ public class MockEntityTemplateService implements TemplateService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@Override
+	public void registerTemporaryTemplate(ObjectTemplate template) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

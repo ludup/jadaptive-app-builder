@@ -34,6 +34,11 @@ public class Create extends ObjectTemplatePage {
 		return "create";
 	}
 	
+	@Override
+	protected String getCancelURI() {
+		return "/app/ui/search/" + resourceKey;
+	}
+	
 	protected void beforeGenerateContent(Document document) {
 
 		if(Objects.isNull(object)) {

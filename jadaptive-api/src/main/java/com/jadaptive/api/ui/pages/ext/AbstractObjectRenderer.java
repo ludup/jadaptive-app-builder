@@ -45,6 +45,7 @@ import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.ViewType;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.NamePairValue;
@@ -69,6 +70,7 @@ import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
+import com.jadaptive.api.ui.renderers.form.ReplacementFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimeFormInput;
@@ -109,6 +111,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	@Autowired
 	private ApplicationService applicationService;
 	
+	@Autowired
+	private TenantService tenantService; 
+	
 	protected ThreadLocal<Document> currentDocument = new ThreadLocal<>();
 	protected ThreadLocal<ObjectTemplate> currentTemplate = new ThreadLocal<>();
 	private ThreadLocal<Properties> securityProperties = new ThreadLocal<>();
@@ -116,7 +121,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 	protected ThreadLocal<Boolean> disableViews = new ThreadLocal<>();
 	protected ThreadLocal<Set<String>> ignoreResources = new ThreadLocal<>();
-	protected ThreadLocal<List<ObjectTemplate>> replacementVariables = new ThreadLocal<>();
+	protected ThreadLocal<List<String>> replacementVariables = new ThreadLocal<>();
+	
 	protected ThreadLocal<RenderScope> formRenderer = new ThreadLocal<>();
 	protected ThreadLocal<String> formHandler = new ThreadLocal<>();
 	
@@ -142,32 +148,35 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			 
 			
 			Element row;
-			Element form;
-			contents.selectFirst("body").appendChild(
-					form = new Element("form")
-						.addClass("jadaptiveForm")
-						.attr("id", "objectForm")
-						.attr("method", "POST")
-						.attr("autocomplete", "off")
-						.attr("data-resourcekey", template.getResourceKey())
-						.attr("enctype", "multipart/form-data")
-						.attr("action", getActionURL())
-						.appendChild(new Element("input")
-							.attr("type", "hidden")
-							.attr("name", "uuid")
-							.val(Objects.nonNull(object) ? object.getUuid() : ""))
-						.appendChild(new Element("input")
-								.attr("type", "hidden")
-								.attr("name", "system")
-								.val(Objects.nonNull(object) ? String.valueOf(object.isSystem()) : "false"))
-						.appendChild(new Element("input")
-								.attr("type", "hidden")
-								.attr("name", "resourceKey")
-								.val(Objects.nonNull(object) ? object.getResourceKey() : template.getResourceKey())
-						.appendChild(new Element("input")
-								.attr("type", "hidden")
-					 			.attr("name", "hidden")
-								.val(Objects.nonNull(object) ?  String.valueOf(object.isHidden()) : "false"))));
+			Element form = contents.selectFirst("form");
+			if(Objects.isNull(form)) {
+				contents.selectFirst("body").appendChild(form = new Element("form"));
+			}
+			
+					
+			form.addClass("jadaptiveForm")
+				.attr("id", "objectForm")
+				.attr("method", "POST")
+				.attr("autocomplete", "off")
+				.attr("data-resourcekey", template.getResourceKey())
+				.attr("enctype", "multipart/form-data")
+				.attr("action", getActionURL())
+				.appendChild(new Element("input")
+					.attr("type", "hidden")
+					.attr("name", "uuid")
+					.val(Objects.nonNull(object) ? object.getUuid() : ""))
+				.appendChild(new Element("input")
+						.attr("type", "hidden")
+						.attr("name", "system")
+						.val(Objects.nonNull(object) ? String.valueOf(object.isSystem()) : "false"))
+				.appendChild(new Element("input")
+						.attr("type", "hidden")
+						.attr("name", "resourceKey")
+						.val(Objects.nonNull(object) ? object.getResourceKey() : template.getResourceKey())
+				.appendChild(new Element("input")
+						.attr("type", "hidden")
+			 			.attr("name", "hidden")
+						.val(Objects.nonNull(object) ?  String.valueOf(object.isHidden()) : "false")));
 				
 			Session session = sessionUtils.getActiveSession(Request.get());
 			if(Objects.nonNull(session)) {
@@ -207,7 +216,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			
 			List<TemplateView> views = templateService.getViews(template, disable);
-			
+			if(Objects.isNull(views)) {
+				views = new ArrayList<>();
+				TemplateView v = new TemplateView("dynamic");
+				for(FieldTemplate t : template.getFields()) {
+					v.getFields().add(new TemplateViewField(null, v, t, null));
+				}
+				views.add(v);
+			}
 			createViews(views, row, object, scope);
 
 		} catch (IOException e) {
@@ -257,9 +273,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			for(TemplateViewField fieldView : view.getFields()) {
 				FieldTemplate field = fieldView.getField();
-				if(field.isHidden() && !field.getCollection()) {
-					HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), fieldView);
-					render.renderInput(element, getFieldValue(fieldView, obj));
+				if(field.isHidden()) {
+					if(!field.getCollection()) {
+						HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), fieldView);
+						render.renderInput(element, getFieldValue(fieldView, obj));
+					}
 					continue;
 				}
 				switch(field.getFieldType()) {
@@ -337,6 +355,10 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		Set<String> ignores = ignoreResources.get();
 		if(Objects.nonNull(ignores) && ignores.contains(field.getResourceKey())) {
+			return;
+		}
+		
+		if(!tenantService.getCurrentTenant().isSystem() && fieldView.isSystemOnly()) {
 			return;
 		}
 		
@@ -456,6 +478,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			TableRenderer table = applicationService.autowire(new TableRenderer(view == FieldView.READ, 
 					obj, field,
 					formRenderer.get(), formHandler.get()));
+
 			String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
 			ObjectTemplate objectTemplate = templateService.get(objectType);
 			
@@ -505,11 +528,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
 				return;
 			}
-			
+
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), fieldView, String.format("/app/api/objects/%s/table", objectType),
 					objectTemplate.getNameField(), "uuid");
-			render.renderInput(panel, element, values, false, 
+			render.renderInput(element, values, false, 
 					(view == FieldView.READ || fieldView.getField().isReadOnly()));
 			break;
 		}
@@ -535,7 +558,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), fieldView, "/app/api/countries/table",
 					"name", "code");
-			render.renderInput(panel, element, values, false, (view == FieldView.READ || fieldView.getField().isReadOnly()));
+			render.renderInput(element, values, false, (view == FieldView.READ || fieldView.getField().isReadOnly()));
 			
 			break;
 		}
@@ -589,7 +612,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), fieldView, "/app/api/permissions/table",
 					"name", "value");
-			render.renderInput(panel, element, values, false, (view == FieldView.READ || fieldView.getField().isReadOnly()));
+			render.renderInput(element, values, false, (view == FieldView.READ || fieldView.getField().isReadOnly()));
 			
 			break;
 		}
@@ -645,15 +668,15 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			default:
 			{
-//				List<ObjectTemplate> replacementVars = replacementVariables.get();
-//				if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
-//					ReplacementFormInput render = new ReplacementFormInput(currentTemplate.get(), fieldView);
-//					render.renderInput(element, getFieldValue(fieldView, obj));
-//					render.renderTemplateReplacements(replacementVars);
-//				} else {
+				List<String> replacementVars = replacementVariables.get();
+				if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
+					ReplacementFormInput render = new ReplacementFormInput(currentTemplate.get(), fieldView);
+					render.renderInput(element, getFieldValue(fieldView, obj));
+					render.renderTemplateReplacements(replacementVars);
+				} else {
 					TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
 					render.renderInput(element, getFieldValue(fieldView, obj));
-//				}
+				}
 				
 				break;
 			}

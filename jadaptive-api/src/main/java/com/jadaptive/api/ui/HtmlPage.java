@@ -500,7 +500,7 @@ public abstract class HtmlPage implements Page {
 
 	private Document getCustomizedContent(Class<?> clz) {
 		
-		//HtmlContentService contentService = applicationService.getBean(HtmlContentService.class);
+//		HtmlContentService contentService = applicationService.getBean(HtmlContentService.class);
 		
 		return null;
 	}

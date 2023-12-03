@@ -17,6 +17,5 @@ public abstract class TaskResult extends CustomEvent {
 		super(resourceKey);
 	}
 	
-
 	public abstract String getEventGroup();
 }

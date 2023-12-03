@@ -32,6 +32,7 @@ public class I18N {
 	static Logger log = LoggerFactory.getLogger(I18N.class);
 	
 	static Map<String,ResourceBundle> cachedBundles = new HashMap<>();
+	static Map<String,String> dynamic = new HashMap<>();
 	
 	private I18N() {
 	}
@@ -52,44 +53,37 @@ public class I18N {
 					"You must specify a resource bundle");
 		}
 		
-		String bundle = resourceBundle;
-		bundle = "i18n/" + resourceBundle;
-
 		Set<String> keys = new HashSet<String>();
-		try {
-			ResourceBundle rb = cachedBundles.get(bundle);
-			if(Objects.isNull(rb)) {
-				rb = ResourceBundle.getBundle(bundle, locale,
-						I18N.class.getClassLoader());
+		
+		if(resourceBundle.equals("dynamic")) {
+			keys.addAll(dynamic.keySet());
+		} else {
+			String bundle = resourceBundle;
+			bundle = "i18n/" + resourceBundle;
+	
+			
+			try {
+				ResourceBundle rb = cachedBundles.get(bundle);
+				if(Objects.isNull(rb)) {
+					rb = ResourceBundle.getBundle(bundle, locale,
+							I18N.class.getClassLoader());
+				}
+				keys.addAll(rb.keySet());
+			} catch (MissingResourceException e) {
+					
 			}
-			keys.addAll(rb.keySet());
-		} catch (MissingResourceException e) {
-				
-		}
-//		
-//		if(repository.hasResources(locale, resourceBundle)) {
-//			if(log.isInfoEnabled()) {
-//				log.info("i18n overrides exist in bundle " + resourceBundle);
-//			}
-//			keys.addAll(repository.getResourceKeys(locale, resourceBundle));
-//		} 
+		} 
 
 		return keys;
 	}
 	
-//	public static void overrideMessage(Locale locale, Message message) {
-//		
-//		ApplicationContextServiceImpl.getInstance()
-//		.getBean(I18nOverrideRepository.class)
-//			.createResource(locale, message.getBundle(), message.getId(), message.getTranslated());
-//
-//	}
-//	
-//	public static void removeOverrideMessage(Locale locale, Message message) {		
-//		ApplicationContextServiceImpl.getInstance()
-//			.getBean(I18nOverrideRepository.class)
-//				.deleteResource(locale, message.getBundle(), message.getId());
-//	}
+	public static void overrideMessage(Locale locale, String key, String value) {
+		dynamic.put(key, value);
+	}
+	
+	public static void removeOverrideMessage(Locale locale, String key) {		
+		dynamic.remove(key);
+	}
 
 	public static String getResourceOrException(Locale locale, String resourceBundle,
 			String key, Object... arguments) {
@@ -101,45 +95,34 @@ public class I18N {
 					"You must specify a resource bundle for key " + key);
 		}
 
-//		I18nOverride override = null;
-//		try {
-//			override = ApplicationContextServiceImpl.getInstance()
-//					.getBean(I18nOverrideRepository.class)
-//						.getResource(locale, resourceBundle, key);
-//		}
-//		catch(Exception e) {
-//			log.warn("Could check for localisation override.", e);
-//		}
-//
-//		if (override!=null) {
-//			String localizedString = override.getValue();
-//			if (arguments == null || arguments.length == 0) {
-//				return localizedString;
-//			}
-//
-//			MessageFormat messageFormat = new MessageFormat(localizedString);
-//			messageFormat.setLocale(locale);
-//			return messageFormat.format(formatParameters(arguments));
-//		}
+		if(resourceBundle.equals("dynamic")) {
+			
+			String localizedString = dynamic.get(key);
+			MessageFormat messageFormat = new MessageFormat(localizedString);
+			messageFormat.setLocale(locale);
+			return messageFormat.format(formatParameters(arguments));
+			
+		} else {
 		
-		String bundlePath = resourceBundle;
-		bundlePath = "i18n/" + resourceBundle;
-		
-		ResourceBundle resource = cachedBundles.get(bundlePath);
-		
-		if(Objects.isNull(resource)) {
-			resource = ResourceBundle.getBundle(bundlePath,
-					locale, ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).getClassLoader());
+			String bundlePath = resourceBundle;
+			bundlePath = "i18n/" + resourceBundle;
+			
+			ResourceBundle resource = cachedBundles.get(bundlePath);
+			
+			if(Objects.isNull(resource)) {
+				resource = ResourceBundle.getBundle(bundlePath,
+						locale, ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).getClassLoader());
+			}
+			
+			String localizedString = resource.getString(key);
+			if (arguments == null || arguments.length == 0) {
+				return localizedString;
+			}
+	
+			MessageFormat messageFormat = new MessageFormat(localizedString);
+			messageFormat.setLocale(locale);
+			return messageFormat.format(formatParameters(arguments));
 		}
-		
-		String localizedString = resource.getString(key);
-		if (arguments == null || arguments.length == 0) {
-			return localizedString;
-		}
-
-		MessageFormat messageFormat = new MessageFormat(localizedString);
-		messageFormat.setLocale(locale);
-		return messageFormat.format(formatParameters(arguments));
 	}
 
 	public static String getResource(Locale locale, String resourceBundle,
@@ -204,21 +187,5 @@ public class I18N {
 		}
 		return formatted.toArray(new Object[formatted.size()]);
 	}
-	
-//	public static boolean hasOveride(Locale locale, String resourceBundle,
-//			String key) {
-//		
-//		if (key == null) {
-//			throw new IllegalArgumentException("You must specify a key!");
-//		}
-//		if (resourceBundle == null) {
-//			throw new IllegalArgumentException(
-//					"You must specify a resource bundle for key " + key);
-//		}
-//
-//		I18nOverride override = ApplicationContextServiceImpl.getInstance()
-//				.getBean(I18nOverrideRepository.class)
-//					.getResource(locale, resourceBundle, key);
-//		return override!=null;
-//	}
+
 }

@@ -67,13 +67,15 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		Element element = document.selectFirst("#cancelButton");
 		
 		if(Objects.nonNull(element)) {
-			String referrer = Request.get().getHeader(HttpHeaders.REFERER);
-			element.attr("href", referrer);
+			element.attr("href", getCancelURI());
 			element.attr("data-resourcekey", template.getCollectionKey());
 		}
-
 	}
 	
+	protected String getCancelURI() {
+		return Request.get().getHeader(HttpHeaders.REFERER);
+	}
+
 	public void onCreate() throws FileNotFoundException {
 
 		super.onCreate();

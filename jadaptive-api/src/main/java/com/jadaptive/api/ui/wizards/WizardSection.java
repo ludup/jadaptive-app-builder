@@ -104,4 +104,20 @@ public abstract class WizardSection extends AbstractPageExtension {
 	public Integer getWeight() {
 		return weight;
 	}
+
+	public String getStateKey() {
+		return getName();
+	}
+
+	public String getObjectName() {
+		return getName();
+	}
+
+	public String getStepNamei18n() {
+		return getName() + ".stepName";
+	}
+	
+	public String getStepSummaryi18n() {
+		return getName() + ".summary";
+	}
 }

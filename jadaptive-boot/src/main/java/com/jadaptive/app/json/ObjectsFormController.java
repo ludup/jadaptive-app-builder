@@ -193,6 +193,30 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		}
 	}
 	
+	@RequestMapping(value="/app/api/form/temp/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+			consumes = { "multipart/form-data" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus temporaryObject(HttpServletRequest request, 
+			@PathVariable String resourceKey)  {
+
+		try {
+			ObjectTemplate template = templateService.get(resourceKey);
+			AbstractObject obj = DocumentHelper.buildRootObject(request, template.getResourceKey(), template);
+			Request.get().getSession().setAttribute(obj.getResourceKey(), obj);
+			return new UUIDStatus(resourceKey);
+		}  catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/objects/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		}
+	}
+	
 	@RequestMapping(value="/app/api/form/extend/remove/{resourceKey}/{extension}", method = RequestMethod.POST, 
 			produces = {"application/json"},
 			consumes = { "multipart/form-data" })

@@ -365,7 +365,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 						builder.append(" ( ");
 						builder.append(Utils.csv(field.getValue()));
 						builder.append(" }");
-					} else {
+					} else if(Objects.nonNull(values[0])) {
 						builder.append(" ");
 						builder.append(values[0].toString());
 						builder.append(" ");

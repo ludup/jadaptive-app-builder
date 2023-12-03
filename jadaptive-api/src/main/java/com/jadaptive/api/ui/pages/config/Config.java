@@ -36,5 +36,10 @@ public class Config extends ObjectTemplatePage {
 		}		
 	}
 	
+	@Override
+	protected String getCancelURI() {
+		return "/app/ui/options";
+	}
+	
 	
 }

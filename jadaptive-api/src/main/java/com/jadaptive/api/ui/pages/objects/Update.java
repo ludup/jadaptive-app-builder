@@ -42,4 +42,11 @@ public class Update extends ObjectTemplatePage {
 					String.format("/app/ui/search/%s", template.getResourceKey())));
 		}
 	}
+
+	@Override
+	protected String getCancelURI() {
+		return "/app/ui/search/" + resourceKey;
+	}
+	
+	
 }

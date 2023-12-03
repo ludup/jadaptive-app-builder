@@ -68,8 +68,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		if(state.getFlow().requiresUserSession() && !sessionUtils.hasActiveSession(Request.get())) {
 			throw new FileNotFoundException();
 		}
-		
-		
+
 		currentState.set(state);
 	}
 	
@@ -144,13 +143,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 						.appendChild(new Element("span")
 								.addClass("ms-1")
 								.attr("jad:bundle", state.getCurrentPage().getBundle())
-								.attr("jad:i18n", state.getCurrentPage().getName() + ".stepName"));
+								.attr("jad:i18n", state.getCurrentPage().getStepNamei18n()));
 						
 						
 						h2.after(new Element("h4")
 											.appendChild(Html.i("fa-solid fa-info-square text-primary me-2"))
 											.appendChild(Html.i18n(state.getCurrentPage().getBundle(),
-															state.getCurrentPage().getName() + ".summary"))
+															state.getCurrentPage().getStepSummaryi18n()))
 															.addClass("my-3 text-primary"));
 						
 				} else {
@@ -250,13 +249,14 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	@Override
 	public AbstractObject getObject() {
 		
+		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
 		
-		AbstractObject o = objectService.fromStashToAbstractObject(state.getCurrentPage().getName());
+		AbstractObject o = objectService.fromStashToAbstractObject(state.getCurrentPage().getObjectName());
 		if(Objects.nonNull(o)) {
+			state.setCurrentObject((UUIDEntity)objectService.toUUIDDocument(o));
 			return o;
 		}
-		
-		WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
+
 		UUIDEntity obj = state.getObject(state.getCurrentPage());
 		if(Objects.isNull(obj)) {
 			return null;

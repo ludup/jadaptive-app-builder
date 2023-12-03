@@ -23,4 +23,9 @@ public class System extends ObjectTemplatePage {
 	public String getUri() {
 		return "system";
 	}
+	
+	@Override
+	protected String getCancelURI() {
+		return "/app/ui/systemConfiguration";
+	}
 }

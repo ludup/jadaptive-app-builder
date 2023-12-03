@@ -807,6 +807,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public AbstractObject toAbstractObject(UUIDDocument obj) {
 
+		if(obj instanceof AbstractObject) {
+			return (AbstractObject) obj;
+		}
 		Document doc = new Document();
 		DocumentHelper.convertObjectToDocument(obj, doc);		
 		return new MongoEntity(obj.getResourceKey(), doc);

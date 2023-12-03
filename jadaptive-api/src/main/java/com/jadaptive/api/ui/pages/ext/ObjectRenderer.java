@@ -1,9 +1,9 @@
 package com.jadaptive.api.ui.pages.ext;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;
@@ -73,7 +73,7 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			
 			if(page instanceof ObjectPage) {
 				object.set(((ObjectPage)page).getObject());
-			}
+			} 
 			
 			if(element.hasAttr("jad:disableViews")) {
 				disableViews.set(Boolean.valueOf(element.attr("jad:disableViews")));
@@ -83,8 +83,6 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 				ignoreResources.set(new HashSet<>(Arrays.asList(element.attr("jad:ignores").split(","))));
 			}
 			
-			replacementVariables.set(new ArrayList<>(Arrays.asList(template)));
-
 			AbstractObject displayObject = object.get();
 			ObjectTemplate displayTemplate = template;
 			if(Objects.nonNull(displayObject)) {
@@ -101,12 +99,17 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			actionURL.remove();
 			object.remove();
 			disableViews.remove();
+			replacementVariables.remove();
 		 }
 	 }
 
 	@Override
 	protected String getActionURL() {
 		return actionURL.get();
+	}
+
+	public void setParameters(List<String> params) {
+		replacementVariables.set(params);
 	}
 
 }

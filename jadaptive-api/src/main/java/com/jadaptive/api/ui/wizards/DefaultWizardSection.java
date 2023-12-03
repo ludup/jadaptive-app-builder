@@ -32,15 +32,19 @@ public class DefaultWizardSection extends WizardSection {
 		super(bundle, name, resource, weight);
 	}
 	
-	protected void renderObjectSection(Document document, String resourceKey) {
+	protected Element renderObjectSection(Document document, String resourceKey) {
 		
-		document.selectFirst("body").appendChild(Html.div("col-12")
+		Element object;
+		document.selectFirst("body").appendChild(object = Html.div("row")
+				.appendChild(Html.div("col-12")
 				.attr("id", "feedback"))
 			.appendChild(Html.div("col-12")
 					.attr("jad:id", "objectRenderer")
 					.attr("jad:renderer", "WIZARD")
 					.attr("jad:handler", Wizard.getCurrentState().getResourceKey())
-					.attr("jad:resourceKey", resourceKey));
+					.attr("jad:resourceKey", resourceKey)));
+		
+		return object;
 
 	}
 	
@@ -63,22 +67,42 @@ public class DefaultWizardSection extends WizardSection {
 					.addClass("row")));
 		
 		AbstractObject object = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).toAbstractObject(uuidObject);
-		for(FieldTemplate field : template.getFields()) { 
+		renderObject(object, template, row);
 		
+		
+	}
+	
+	private void renderObject(AbstractObject object, ObjectTemplate template, Element row) {
+		for(FieldTemplate field : template.getFields()) { 
+			
 			if(field.isHidden()) {
 				continue;
 			}
 			
-			Object v  = object.getValue(field);
-			if(Objects.isNull(v)) {
-				continue;
+			switch(field.getFieldType()) {
+			case OBJECT_EMBEDDED:
+			case OBJECT_REFERENCE:
+				if(!field.getCollection()) {
+					AbstractObject o = object.getChild(field);
+					if(Objects.isNull(o)) {
+						continue;
+					}
+				}
+				break;
+			default:
+				
+				Object v  = object.getValue(field);
+				if(Objects.isNull(v)) {
+					continue;
+				}
+				
+				String value = v.toString();
+				
+				if(StringUtils.isBlank(value)) {
+					continue;
+				}
 			}
 			
-			String value = v.toString();
-			
-			if(StringUtils.isBlank(value)) {
-				continue;
-			}
 			
 			switch(field.getFieldType()) {
 			case PASSWORD:
@@ -91,9 +115,10 @@ public class DefaultWizardSection extends WizardSection {
 						.addClass("col-9")
 						.appendChild(new Element("span")
 								.appendChild(new Element("strong")
-								.text(Utils.maskingString(value, 2, "*")))));
+								.text(Utils.maskingString(object.getValue(field).toString(), 2, "*")))));
 				break;
 			case OBJECT_REFERENCE:
+			case OBJECT_EMBEDDED:
 			case OPTIONS:
 				
 				if(field.getCollection()) {
@@ -112,21 +137,28 @@ public class DefaultWizardSection extends WizardSection {
 				} else {
 					
 					AbstractObject obj = object.getChild(field);
-					row.appendChild(new Element("div")
-							.addClass("col-3")
-							.appendChild(new Element("span")
-											.attr("jad:bundle", template.getBundle())
-											.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))))
-						.appendChild(new Element("div")
-							.addClass("col-9")
-							.appendChild(new Element("span")
-									.appendChild(new Element("strong")
-									.text((String) obj.getValue("name")))));
+					if(Objects.nonNull(obj)) {
+						renderObject(obj, 
+								ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(obj.getResourceKey()), 
+								row);
+					}
 				}
 				break;
 			case COUNTRY:
-				value = ApplicationServiceImpl.getInstance().getBean(InternationalService.class).getCountryName(value);
-				// Purposely NOT breaking to render value below
+
+				row.appendChild(new Element("div")
+						.addClass("col-3")
+						.appendChild(new Element("span")
+										.attr("jad:bundle", template.getBundle())
+										.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))))
+					.appendChild(new Element("div")
+						.addClass("col-9")
+						.appendChild(new Element("span")
+								.appendChild(new Element("strong")
+								.text(ApplicationServiceImpl.getInstance().getBean(InternationalService.class)
+										.getCountryName(object.getValue(field).toString())))));
+				break;
+				
 			default:
 				row.appendChild(new Element("div")
 						.addClass("col-3")
@@ -137,7 +169,7 @@ public class DefaultWizardSection extends WizardSection {
 						.addClass("col-9")
 						.appendChild(new Element("span")
 								.appendChild(new Element("strong")
-								.text(value))));
+								.text(object.getValue(field).toString()))));
 				break;
 			}
 			

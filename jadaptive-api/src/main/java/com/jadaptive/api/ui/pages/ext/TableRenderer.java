@@ -69,6 +69,7 @@ public class TableRenderer {
 
 	RenderScope formRenderer;
 	String formHandler;
+	String stashURL = null;
 	
 	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field,
 			RenderScope formRenderer, String formHandler) {
@@ -344,8 +345,11 @@ public class TableRenderer {
 		classes.add("me-3");
 		element.appendChild(
 				new Element("a").attr("href", "#")
-				.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
-				.attr("data-url", replaceVariables("/app/ui/object-" + resourceKey + "/{resourceKey}", parentObject) + "/" + field.getResourceKey() + "/" + field.getValidationValue(ValidationType.RESOURCE_KEY))
+				.attr("data-action", 
+						//Objects.nonNull(stashURL) ? stashURL : 
+						replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+				.attr("data-url",
+						replaceVariables("/app/ui/object-" + resourceKey + "/{resourceKey}", parentObject) + "/" + field.getResourceKey() + "/" + field.getValidationValue(ValidationType.RESOURCE_KEY))
 				.addClass(StringUtils.join(classes, " "))
 				.appendChild(Html.i(iconGroup, icon, "me-1"))
 				.appendChild(new Element("span")
@@ -523,5 +527,9 @@ public class TableRenderer {
 
 	public TableView getView() {
 		return view;
+	}
+
+	public void setStashURL(String stashURL) {
+		this.stashURL = stashURL;
 	}
 }

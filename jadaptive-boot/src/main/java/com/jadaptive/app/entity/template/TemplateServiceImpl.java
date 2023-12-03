@@ -88,6 +88,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	private Map<String,Collection<Class<? extends UUIDDocument>>> extensionClasses = new HashMap<>();
 	private Map<String,List<ExtensionRegistration>> extensionsByTemplate = new HashMap<>();
 	private Map<String,List<TableAction>> actionsByTarget = new HashMap<>();
+	private Map<String,ObjectTemplate> temporaryTemplates = new HashMap<>();
 	
 	@Override
 	public void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template) {
@@ -98,9 +99,13 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		templateResourceKeys.put(templateClazz, resourceKey);
 		
 		Class<?> tmp = templateClazz;
+		
 		do {
 			TableAction[] actions = tmp.getAnnotationsByType(TableAction.class);
 			if(Objects.nonNull(actions)) {
+				if(log.isInfoEnabled()) {
+					log.info("Building table actions for {}", resourceKey);
+				}
 				for(TableAction action : actions) {
 					if(StringUtils.isBlank(action.targetKey())) {
 						addTableAction(action, template.getResourceKey());
@@ -111,7 +116,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			}
 			
 			tmp = tmp.getSuperclass();
-		} while(!tmp.getSuperclass().equals(Object.class));
+		} while(tmp!=null);
 	}
 	
 //	@Override
@@ -149,6 +154,11 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 
 	@Override
 	public ObjectTemplate get(String resourceKey) throws RepositoryException, ObjectException {
+		
+		ObjectTemplate temporary = temporaryTemplates.get(resourceKey);
+		if(Objects.nonNull(temporary)) {
+			return temporary;
+		}
 		
 		ObjectTemplate e = repository.get(SearchField.or(
 				SearchField.eq("resourceKey", resourceKey),
@@ -645,5 +655,10 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			t = get(t.getParentTemplate());
 		}
 		return t;
+	}
+
+	@Override
+	public void registerTemporaryTemplate(ObjectTemplate template) {
+		temporaryTemplates.put(template.getResourceKey(), template);
 	}
 }

@@ -39,4 +39,9 @@ public class View extends ObjectTemplatePage {
 			}
 		}
 	}
+	
+	@Override
+	protected String getCancelURI() {
+		return "/app/ui/search/" + resourceKey;
+	}
 }
