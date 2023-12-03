@@ -12,21 +12,36 @@ public class FieldSearchFormInput {
 	String searchField;
 	String idField;
 	protected ObjectTemplate template;
-	protected TemplateViewField field;
+	
+	String resourceKey;
+	String formVariable;
+	String bundle;
 	
 	public FieldSearchFormInput(ObjectTemplate template, TemplateViewField field, String url, String searchField, String idField) {
 		this.template = template;
-		this.field = field;
 		this.url = url;
 		this.searchField = searchField;
 		this.idField = idField;
+		this.resourceKey = field.getResourceKey();
+		this.formVariable = field.getFormVariable();
+		this.bundle = field.getBundle();
+	}
+	
+	public FieldSearchFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle, String url, String searchField, String idField) {
+		this.template = template;
+		this.url = url;
+		this.searchField = searchField;
+		this.idField = idField;
+		this.resourceKey = resourceKey;
+		this.formVariable = formVariable;
+		this.bundle = bundle;
 	}
 
 	public void renderInput(Element rootElement, 
 			String value, String name,
 			boolean nameIsResourceKey,
 			boolean readOnly) {
-		renderInput(rootElement, field.getBundle(), field.getResourceKey(), field.getFormVariable(),
+		renderInput(rootElement, resourceKey, formVariable, bundle,
 				value, name, nameIsResourceKey, readOnly);
 	}
 	

@@ -10,21 +10,28 @@ import com.jadaptive.api.template.TemplateViewField;
 public abstract class FieldInputRender {
 
 	protected ObjectTemplate template;
-	protected TemplateViewField field;
 
+	TemplateViewField field;
+	String resourceKey;
+	String formVariable;
+	String bundle;
+	
 	public FieldInputRender(ObjectTemplate template, TemplateViewField field) {
 		this.template = template;
 		this.field = field;
+		this.resourceKey = field.getResourceKey();
+		this.formVariable = field.getFormVariable();
+		this.bundle = field.getBundle();
 	}
 	
 	protected String getFormVariable() {
-		return field.getFormVariable();
+		return formVariable;
 	}
 	protected String getBundle() {
-		return field.getBundle();
+		return bundle;
 	}
 	protected String getResourceKey() {
-		return field.getResourceKey();
+		return resourceKey;
 	}
 	
 	public abstract void renderInput(Element rootElement, String value) throws IOException;
