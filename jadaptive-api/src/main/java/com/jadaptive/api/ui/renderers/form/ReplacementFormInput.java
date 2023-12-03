@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.Html;
@@ -22,19 +21,9 @@ public class ReplacementFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String defaultValue) {
+	public void renderInput(Element rootElement, String value) {
 
-		StringBuffer formVariable = new StringBuffer();
-		
-		if(Objects.nonNull(field.getParentFields())) {
-			for(FieldTemplate t : field.getParentFields()) {
-				formVariable.append(t.getResourceKey());
-				formVariable.append(".");
-			}
-		}
-		
-		formVariable.append(field.getFormVariable());
-		
+	
 		rootElement.appendChild(new Element("div").addClass("row mb-3")
 				.appendChild(new Element("div")
 						.addClass("col-12")
@@ -48,7 +37,9 @@ public class ReplacementFormInput extends FieldInputRender {
 						.attr("id", String.format("%sDropdown", getResourceKey()))
 						.addClass("input-group position-relative dropdown")
 					.appendChild(valueElement = new Element("input")
-							.attr("id", String.format("%sText", getResourceKey()))
+							.attr("id", getFormVariable())
+							.attr("name", getFormVariableWithParents())
+							.attr("value", value)
 							.attr("data-display", "static")
 							.addClass("form-control dropdown-toggle filter-dropdown")
 							.attr("type", "text")
@@ -72,10 +63,23 @@ public class ReplacementFormInput extends FieldInputRender {
 		if(Objects.isNull(dropdownMenu)) {
 			dropdownInput.appendChild(dropdownMenu = new Element("div")
 					.addClass("dropdown-menu dropdown-size")
-					.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey())));
+					.attr("aria-labelledby", String.format("%sDropdown", getResourceKey())));
 		}
 		dropdownMenu.appendChild(new Element("a").attr("href", "#")
 				.appendChild(Html.i18n(bundle, name + ".name"))
+				.attr("data-resourcekey", value)
+				.addClass("replacement-item dropdown-item"));
+	}
+		
+	public void addInputValue(String value, String name) {
+		
+		if(Objects.isNull(dropdownMenu)) {
+			dropdownInput.appendChild(dropdownMenu = new Element("div")
+					.addClass("dropdown-menu dropdown-size")
+					.attr("aria-labelledby", String.format("%sDropdown", getResourceKey())));
+		}
+		dropdownMenu.appendChild(new Element("a").attr("href", "#")
+				.text(name)
 				.attr("data-resourcekey", value)
 				.addClass("replacement-item dropdown-item"));
 	}
@@ -85,7 +89,7 @@ public class ReplacementFormInput extends FieldInputRender {
 		if(Objects.isNull(dropdownMenu)) {
 			dropdownInput.appendChild(dropdownMenu = new Element("div")
 					.addClass("dropdown-menu dropdown-size")
-					.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey())));
+					.attr("aria-labelledby", String.format("%sDropdown", getResourceKey())));
 		}
 		dropdownMenu.appendChild(PageHelper.createAnchor("#", name)
 				.addClass("dropdown-item small text-muted")
@@ -96,26 +100,10 @@ public class ReplacementFormInput extends FieldInputRender {
 		valueElement.val(value);
 	}
 
-	public void renderTemplateReplacements(List<ObjectTemplate> replacementVars) {
+	public void renderTemplateReplacements(List<String> replacementVars) {
 		
-		int index = 0;
-		for(ObjectTemplate template : replacementVars) {
-			addSection(String.valueOf(index));
-			for(FieldTemplate field : template.getFields()) {
-				switch(field.getFieldType()) {
-				case TEXT:
-					if(!field.getCollection()) {
-						addInputValue(String.format("${%s:%s}", index, field.getResourceKey()), 
-							template.getBundle(),
-							field.getResourceKey());
-					}
-					break;
-				default:
-				}
-			}
-			
-			
-			index++;
+		for(String variable : replacementVars) {
+			addInputValue(variable, variable);			
 		}
 		
 	}

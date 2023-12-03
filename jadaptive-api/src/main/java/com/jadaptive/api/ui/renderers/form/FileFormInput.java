@@ -21,7 +21,7 @@ public class FileFormInput extends FormInputRender {
 		
 		rootElement.selectFirst("input").val("");
 		rootElement.appendChild(new Element("input")
-							.attr("name", field.getFormVariable() + "_previous")
+							.attr("name", getFormVariable() + "_previous")
 							.attr("type", "hidden")
 							.val(value));
 	}

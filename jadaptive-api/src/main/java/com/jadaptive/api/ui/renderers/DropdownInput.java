@@ -68,6 +68,19 @@ public class DropdownInput extends InputRender {
 							.addClass("dropdown-menu dropdown-size" + (dark ? " dropdown-menu-dark" : ""))
 							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
 	}
+	
+	public void setDefaultValue(String name, String value, boolean i18n, String bundle) {
+		
+		if(i18n) {
+			nameElement.attr("jad:bundle", bundle);
+			nameElement.attr("jad:i18n", name);
+		} else {
+			nameElement.val(name);
+
+		}
+		
+		valueElement.val(value);
+	}
 
 	public void renderValues(Enum<?>[] values, String defaultValue, boolean i18n) {
 		
@@ -139,6 +152,10 @@ public class DropdownInput extends InputRender {
 	}
 	
 	public void addInputValue(String key, String value, boolean i18n) {
+		addInputValue(key, value, i18n, bundle);
+	}
+	
+	public void addInputValue(String key, String value, boolean i18n, String bundle) {
 		Element el = PageHelper.createAnchor("#", value)
 				.attr("data-resourcekey", key)
 				.addClass("jdropdown-item dropdown-item");
@@ -149,14 +166,14 @@ public class DropdownInput extends InputRender {
 		dropdownMenu.appendChild(el);
 	}
 
-	private void renderValues(Iterable<? extends NamedDocument> fields, String defaultValue, boolean i18n) {
+	private void renderValues(Iterable<? extends NamedDocument> fields, String defaultValue, boolean i18n, String append) {
 		NamedDocument selected = null;
 		for(NamedDocument field : fields) {
 			if(Objects.isNull(selected)) {
 				selected = field;
 			}
 
-			addInputValue(field.getUuid(), field.getName(), i18n);
+			addInputValue(field.getUuid(), field.getName() + append, i18n);
 			if(field.getUuid().equals(defaultValue)) {
 				selected = field;
 			}
@@ -170,8 +187,12 @@ public class DropdownInput extends InputRender {
 	}
 
 	public Element renderInputWithValues(Iterable<? extends NamedDocument> children, String defaultValue, boolean i18n) {
+		return renderInputWithValues(children, defaultValue, i18n, "");
+	}
+	
+	public Element renderInputWithValues(Iterable<? extends NamedDocument> children, String defaultValue, boolean i18n, String append) {
 		Element el = renderInput();
-		renderValues(children, defaultValue, i18n);
+		renderValues(children, defaultValue, i18n, append);
 		return el;
 	}
 	
@@ -201,6 +222,4 @@ public class DropdownInput extends InputRender {
 			valueElement.val(selected.getResourceKey());
 		}
 	}
-
-	
 }

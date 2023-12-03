@@ -20,12 +20,12 @@ public class TimestampFormInput extends FieldInputRender {
 				.appendChild(new Element("div")
 						.addClass("col-12")
 				.appendChild(new Element("label")
-						.attr("for", field.getFormVariable())
+						.attr("for", getFormVariable())
 						.addClass("form-label")
-						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))
+						.attr("jad:bundle", getBundle())
+						.attr("jad:i18n", String.format("%s.name", getResourceKey())))
 				.appendChild(new Element("input")
-						.attr("id", field.getFormVariable())
+						.attr("id", getFormVariable())
 						.addClass("form-control")
 						.attr("value", StringUtils.isNotBlank(value) ? Utils.parseTimestamp(value).toString() : "")
 						.attr("autocomplete", "off")
@@ -33,12 +33,12 @@ public class TimestampFormInput extends FieldInputRender {
 				.appendChild(new Element("small")
 						.addClass("form-text")
 						.addClass("text-muted")
-						.attr("jad:bundle", field.getBundle())
-						.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
+						.attr("jad:bundle", getBundle())
+						.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
 		
 
 		rootElement.appendChild(new Element("input")
-				.attr("name", field.getFormVariable())
+				.attr("name", getFormVariableWithParents())
 				.addClass("form-control")
 				.attr("value", value)
 				.attr("type", "hidden"));

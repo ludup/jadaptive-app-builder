@@ -25,10 +25,6 @@ public class JavascriptEditorFormInput extends FieldInputRender {
 	
 	@Override
 	public void renderInput(Element rootElement, String value) throws IOException {
-		renderInput(rootElement, field.getBundle(), field.getResourceKey(), field.getFormVariable(), value);
-	}
-
-	public void renderInput(Element rootElement, String bundle, String resourceKey, String variableName, String value) throws IOException {
 
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/lib/codemirror.js");
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/addon/display/autorefresh.js");
@@ -43,13 +39,13 @@ public class JavascriptEditorFormInput extends FieldInputRender {
 				.appendChild(new Element("div")
 						.addClass("col-12")
 				.appendChild(new Element("label")
-						.attr("for", variableName)
+						.attr("for", getFormVariable())
 						.addClass("form-label")
 						.attr("jad:bundle", bundle)
 						.attr("jad:i18n", String.format("%s.name", resourceKey)))
 				.appendChild(new Element("textarea")
-						.attr("id", variableName)
-						.attr("name", variableName)
+						.attr("id", getFormVariable())
+						.attr("name", getFormVariableWithParents())
 						.addClass("form-control")
 						.val(Base64.getEncoder().encodeToString(value.getBytes("UTF-8"))))
 				.appendChild(new Element("small")
@@ -59,16 +55,16 @@ public class JavascriptEditorFormInput extends FieldInputRender {
 						.attr("jad:i18n", String.format("%s.desc", resourceKey)))));
 
 		String script = "$(function() {\n$('#" + resourceKey + "').val(window.atob($('#" + resourceKey + "').val()));\r\n"
-								+ "var " + variableName + "Editor = CodeMirror.fromTextArea(document.getElementById('" + resourceKey + "'), {\r\n"
+								+ "var " + getFormVariable() + "Editor = CodeMirror.fromTextArea(document.getElementById('" + resourceKey + "'), {\r\n"
 								+ "    lineNumbers: true,\r\n"
 								+ "    lineWrapping: true,\r\n"
 								+ "    readOnly: " + String.valueOf(readOnly) + ",\r\n"
 								+ "    mode:  'htmlmixed'\r\n"
 								+ "  });\r\n"
 								+ resourceKey + "Editor.refresh();\r\n"
-								+ variableName + "Editor.on('change', function(e) {\r\n"
+								+ getFormVariable() + "Editor.on('change', function(e) {\r\n"
 								+ "  const text = e.doc.getValue();\r\n"
-								+ "  $('#"  + variableName + "').val(text);\r\n"
+								+ "  $('#"  + getFormVariable() + "').val(text);\r\n"
 								+ "});\r\n});";
 		
 		PageHelper.appendBodyScriptSnippet(document, script);

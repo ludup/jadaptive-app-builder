@@ -6,7 +6,6 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.NamePairValue;
 
@@ -17,37 +16,54 @@ public class CollectionSearchFormInput {
 	String searchField;
 	String idField;
 	protected ObjectTemplate template;
-	protected TemplateViewField field;
 	
-	public CollectionSearchFormInput(ObjectTemplate template, TemplateViewField field, String url, String searchField, String idField) {
+	String resourceKey;
+	String formVariable;
+	String bundle;
+	
+	public CollectionSearchFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle, String url, String searchField, String idField) {
 		this.template = template;
-		this.field = field;
 		this.url = url;
 		this.searchField = searchField;
 		this.idField = idField;
+		this.resourceKey = resourceKey;
+		this.formVariable = formVariable;
+		this.bundle = bundle;
 	}
+	
+	public CollectionSearchFormInput(ObjectTemplate template, TemplateViewField field, String url, String searchField, String idField) {
+		this.template = template;
+		this.url = url;
+		this.searchField = searchField;
+		this.idField = idField;
+		this.resourceKey = field.getResourceKey();
+		this.formVariable = field.getFormVariable();
+		this.bundle = field.getBundle();
+	}
+	
+	
 
-	public void renderInput(TemplateView panel, Element rootElement, 
+	public void renderInput(Element rootElement, 
 			Collection<NamePairValue> selectedValues,
 			boolean nameIsResourceKey,
 			boolean readOnly) {
 		
 			Element div;
 			rootElement.appendChild(new Element("div").addClass("row mb-3 collectionSearchInput")
-					.attr("data-resourcekey", field.getResourceKey())
+					.attr("data-resourcekey", resourceKey)
 					.appendChild(div = new Element("div")
 							.addClass("col-12")
 					.appendChild(new Element("label")
-							.attr("for", field.getFormVariable())
+							.attr("for", formVariable)
 							.addClass("form-label")
-							.attr("jad:bundle", field.getBundle())
-							.attr("jad:i18n", String.format("%s.name", field.getResourceKey())))));
+							.attr("jad:bundle", bundle)
+							.attr("jad:i18n", String.format("%s.name", resourceKey)))));
 			
 			div.appendChild(new Element("div")
-							.attr("id", String.format("%sDropdown", field.getResourceKey()))
+							.attr("id", String.format("%sDropdown", resourceKey))
 							.addClass("input-group position-relative dropdown" + (readOnly ? " d-none" : ""))
 						.appendChild(new Element("input")
-								.attr("id", String.format("%sText", field.getResourceKey()))
+								.attr("id", String.format("%sText", resourceKey))
 								.attr("data-display", "static")
 								.addClass("form-control collectionSearchInputText")
 								.attr("data-bs-toggle", "dropdown")
@@ -64,12 +80,12 @@ public class CollectionSearchFormInput {
 									.attr("class", "fa-solid fa-search")))
 						.appendChild(new Element("div")
 								.addClass("dropdown-menu dropdown-size")
-								.attr("aria-labelledby", String.format("%sDropdown", field.getResourceKey()))));
+								.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
 			
 			div.appendChild(new Element("div")
 						.addClass("row mt-3")
 						.appendChild(new Element("div")
-								.attr("id", field.getFormVariable())
+								.attr("id", formVariable)
 								.addClass("col-md-12")
 								.appendChild(new Element("table")
 										.addClass("w-100 collectionSearchTarget table table-sm table-striped")
@@ -88,8 +104,8 @@ public class CollectionSearchFormInput {
 									.addClass("col-md-10")
 									.appendChild(new Element("small")
 											.addClass("text-muted")
-											.attr("jad:bundle", field.getBundle())
-											.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))))	);
+											.attr("jad:bundle", bundle)
+											.attr("jad:i18n", String.format("%s.desc", resourceKey))))	);
 		
 		
 		if(selectedValues.size() > 0) {
@@ -99,11 +115,11 @@ public class CollectionSearchFormInput {
 				table.appendChild(row = new Element("tr")
 						.appendChild(new Element("input")
 								.attr("type", "hidden")
-								.attr("name", field.getFormVariable())
+								.attr("name", formVariable)
 								.attr("value", value.getValue()))
 						.appendChild(new Element("input")
 								.attr("type", "hidden")
-								.attr("name", String.format("%sText", field.getFormVariable()))
+								.attr("name", String.format("%sText", formVariable))
 								.attr("value", value.getName()))
 						.appendChild(new Element("td")
 								.appendChild(displayName = Html.span(value.getName(), "underline"))));
@@ -119,7 +135,7 @@ public class CollectionSearchFormInput {
 					row.appendChild(new Element("td"));
 				}
 				if(nameIsResourceKey) {
-					displayName.attr("jad:bundle", field.getBundle())
+					displayName.attr("jad:bundle", bundle)
 								.attr("jad:i18n", value.getName());
 				}
 			}

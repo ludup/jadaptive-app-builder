@@ -8,8 +8,12 @@ import com.jadaptive.api.template.ValidationType;
 
 public class ImageFormInput extends FormInputRender {
 
+	String classes = "col-12 my-3";
 	public ImageFormInput(ObjectTemplate template, TemplateViewField field) {
 		super(template, field);
+		try {
+			classes += " " + field.getField().getValidationValue(ValidationType.CLASSES);
+		} catch(UnsupportedOperationException e) { }
 	}
 
 	@Override
@@ -19,11 +23,7 @@ public class ImageFormInput extends FormInputRender {
 	
 	@Override
 	protected void onRender(Element rootElement, String value) {  
-		String classes = "col-12 my-3";
-		try {
-			classes += " " + field.getField().getValidationValue(ValidationType.CLASSES);
-		} catch(UnsupportedOperationException e) { }
-		
+
 		rootElement.selectFirst("small").after(
 				new Element("div").addClass(classes)
 								.appendChild(
@@ -31,7 +31,7 @@ public class ImageFormInput extends FormInputRender {
 		
 		rootElement.selectFirst("input").val("");
 		rootElement.appendChild(new Element("input")
-							.attr("name", field.getFormVariable() + "_previous")
+							.attr("name", getFormVariable() + "_previous")
 							.attr("type", "hidden")
 							.val(value));
 	}

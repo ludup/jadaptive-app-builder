@@ -106,4 +106,8 @@ public class TemplateViewField {
 	public boolean isAutoSave() {
 		return Objects.nonNull(view) && view.autosave();
 	}
+
+	public boolean isSystemOnly() {
+		return Objects.nonNull(view) && view.systemOnly();
+	}
 }

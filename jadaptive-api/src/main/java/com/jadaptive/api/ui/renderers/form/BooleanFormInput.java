@@ -22,18 +22,18 @@ public class BooleanFormInput extends FieldInputRender {
 						.addClass("col-12")
 		
 		.appendChild(new Element("label")
-				.attr("for", field.getFormVariable())
+				.attr("for", getFormVariable())
 				.addClass("form-label")
-				.attr("jad:bundle", field.getBundle())
-				.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))))
+				.attr("jad:bundle", getBundle())
+				.attr("jad:i18n", String.format("%s.name", getResourceKey()))))
 				.appendChild(new Element("div")
 						.addClass("col-12")
 				.appendChild(new Element("div")
 						.addClass("col-12 form-check form-switch")
 		
 		.appendChild(input = new Element("input")
-			.attr("id", field.getFormVariable())
-			.attr("name", field.getFormVariable())
+			.attr("id", getFormVariable())
+			.attr("name", getFormVariable())
 			.attr("type", "checkbox")
 			.addClass("form-check-input")
 			.val("true")))
@@ -41,8 +41,8 @@ public class BooleanFormInput extends FieldInputRender {
 						.addClass("col-12"))
 		.appendChild(new Element("p")
 				.addClass("form-text text-muted text-small mt-3")
-				.attr("jad:bundle", field.getBundle())
-				.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))));
+				.attr("jad:bundle", getBundle())
+				.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
 
 		if("true".equalsIgnoreCase(value)) {
 			input.attr("checked", "checked");
