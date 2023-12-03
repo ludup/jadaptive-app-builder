@@ -27,4 +27,6 @@ public @interface ObjectView {
 	
 	boolean autosave() default false;
 	
+	boolean systemOnly() default false;
+	
 }
