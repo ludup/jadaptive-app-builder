@@ -20,8 +20,8 @@ public class BootstrapBadgeRender extends FieldInputRender {
 						.addClass("col-12")
 				.appendChild(generateBadge(value))
 				.appendChild(new Element("input")
-						.attr("id", field.getFormVariable())
-						.attr("name", field.getFormVariable())
+						.attr("id", getFormVariable())
+						.attr("name", getFormVariableWithParents())
 						.addClass("form-control")
 						.attr("value", value)
 						.attr("type", "hidden"))));
