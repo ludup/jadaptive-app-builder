@@ -394,7 +394,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					}
 				}
 
-				FieldSearchFormInput input = new FieldSearchFormInput(currentTemplate.get(), fieldView, 
+				FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
 						String.format("/app/api/objects/%s/table", objectType),
 						objectTemplate.getNameField(), "uuid");
 				input.renderInput(element, uuid, name, false, scope == FieldView.READ);

@@ -41,7 +41,7 @@ public class FieldSearchFormInput {
 			String value, String name,
 			boolean nameIsResourceKey,
 			boolean readOnly) {
-		renderInput(rootElement, resourceKey, formVariable, bundle,
+		renderInput(rootElement, bundle, resourceKey, formVariable,
 				value, name, nameIsResourceKey, readOnly);
 	}
 	

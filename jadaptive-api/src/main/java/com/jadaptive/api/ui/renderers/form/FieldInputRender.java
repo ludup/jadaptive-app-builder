@@ -33,7 +33,7 @@ public abstract class FieldInputRender {
 		}
 		
 		formVariable.append(field.getFormVariable());
-		formVariableWithParents = formVariableWithParents.toString();
+		formVariableWithParents = formVariable.toString();
 	}
 	
 	public FieldInputRender(ObjectTemplate template, String resourceKey, String formVariable, String bundle) {

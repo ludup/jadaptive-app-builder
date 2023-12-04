@@ -271,15 +271,15 @@ public class DocumentHelper {
 		}
 		
 		MongoEntity obj = new MongoEntity(resourceKey);
-		String uuid = request.getParameter("uuid");
+		String uuid = request.getParameter(formVariablePrefix + "uuid");
 		if(StringUtils.isNotBlank(uuid)) {
 			obj.setUuid(uuid);
 		}
-		String system = request.getParameter("system");
+		String system = request.getParameter(formVariablePrefix + "system");
 		if(Objects.nonNull(system)) {
 			obj.setSystem(Boolean.valueOf(system));
 		}
-		String hidden = request.getParameter("hidden");
+		String hidden = request.getParameter(formVariablePrefix + "hidden");
 		if(Objects.nonNull(hidden)) {
 			obj.setHidden(Boolean.valueOf(hidden));
 		}
@@ -290,7 +290,7 @@ public class DocumentHelper {
 		for(FieldTemplate field : template.getFields()) {
 			
 			if(log.isDebugEnabled()) {
-				log.debug("Processing field {} using form variable {}", field.getResourceKey(), formVariablePrefix + field.getFormVariable());
+				log.debug("Processing field {} using form variable {}", field.getResourceKey());
 			}
 			
 			if(field.getCollection()) {
