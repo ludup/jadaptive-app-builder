@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.template.FieldRenderer;
@@ -52,6 +54,9 @@ public class TableRenderer {
 	
 	@Autowired
 	private TemplateService templateService;
+	
+	@Autowired
+	private PermissionService permissionService;
 	
 	int start;
 	int length;
@@ -222,6 +227,14 @@ public class TableRenderer {
 		
 		for(TableAction action : allActions) {
 			if(action.target()==Target.ROW) {
+				
+				if(action.permissions().length > 0) {
+					try {
+					permissionService.assertAnyPermission(action.permissions());
+					} catch(AccessDeniedException e) {
+						continue;
+					}
+				}
 				
 				Object val = obj.getValue(template.getDefaultColumn());
 				if(action.confirmationRequired()) {

@@ -48,4 +48,6 @@ public interface UserService extends UUIDObjectService<User> {
 
 	void registerLogin(User user);
 
+	Iterable<User> allObjects(String userTemplate);
+
 }

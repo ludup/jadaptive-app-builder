@@ -299,4 +299,9 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		eventService.resumeEvents();
 	}
 
+	@Override
+	public Iterable<User> allObjects(String userTemplate) {
+		return userRepository.list(User.class, SearchField.eq("resourceKey", userTemplate));
+	}
+
 }

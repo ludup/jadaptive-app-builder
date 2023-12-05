@@ -81,7 +81,8 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		
-		if(!(state.getPolicy() instanceof UserLoginAuthenticationPolicy)
+		if(!(state.getPolicy() instanceof UserLoginAuthenticationPolicy || state.getPolicy().isTemporary())
+			
 				|| !pageCache.getDefaultPage().equals(Login.class)) {
 			Element el = doc.selectFirst("#actions");
 			if(Objects.nonNull(el)) {

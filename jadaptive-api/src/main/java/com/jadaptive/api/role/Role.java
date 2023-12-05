@@ -1,5 +1,6 @@
 package com.jadaptive.api.role;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -12,6 +13,7 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
@@ -47,6 +49,9 @@ public class Role extends NamedUUIDEntity {
 			type = FieldType.BOOL)
 	@ObjectView(OPTIONS_VIEW)
 	boolean allUsers;
+	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	Collection<String> userTemplates = new ArrayList<>();
 	
 	@ObjectField(
 			type = FieldType.PERMISSION,
@@ -98,5 +103,15 @@ public class Role extends NamedUUIDEntity {
 	public void setUsers(Collection<User> users) {
 		this.users = users;
 	}
+
+	public Collection<String> getUserTemplates() {
+		return userTemplates;
+	}
+
+	public void setUserTemplates(Collection<String> userTemplates) {
+		this.userTemplates = userTemplates;
+	}
+	
+	
 	
 }

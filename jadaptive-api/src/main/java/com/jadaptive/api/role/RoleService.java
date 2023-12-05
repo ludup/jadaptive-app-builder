@@ -50,8 +50,6 @@ public interface RoleService {
 	Iterable<Role> allRoles();
 
 	Collection<Role> getRolesByUser(User user);
-
-	Collection<Role> getAllUserRoles();
 	
 	boolean isAssigned(AssignableUUIDEntity obj, User user);
 
@@ -68,5 +66,9 @@ public interface RoleService {
 	Collection<Role> getAdministrationRoles();
 
 	<T extends AssignableUUIDEntity> boolean hasEveryoneRole(T obj);
+
+	Collection<Role> getAllUserRoles(User user);
+
+	void saveOrUpdate(Role role);
 
 }

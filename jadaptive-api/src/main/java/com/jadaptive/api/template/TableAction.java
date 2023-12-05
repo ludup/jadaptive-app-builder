@@ -36,6 +36,8 @@ public @interface TableAction  {
 	boolean confirmationRequired() default false;
 	
 	String targetKey() default "";
+	
+	String[] permissions() default {};
 
 
 }

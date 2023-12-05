@@ -55,6 +55,23 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		if(newSchema) {
 			setupDefaultRoles(tenant);
 		}
+		
+		upgradeRolesWithTemplates(tenant);
+	}
+	
+	private void upgradeRolesWithTemplates(Tenant tenant) {
+		
+		Role role = getAdministrationRole();
+		if(role.getUserTemplates().isEmpty()) {
+			role.getUserTemplates().add(User.RESOURCE_KEY);
+			saveOrUpdate(role);
+		}
+		
+		role = getEveryoneRole();
+		if(role.getUserTemplates().isEmpty()) {
+			role.getUserTemplates().add(User.RESOURCE_KEY);
+			saveOrUpdate(role);
+		}
 	}
 	
 	private void setupDefaultRoles(Tenant tenant) {
@@ -64,6 +81,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		role.setName(ADMINISTRATION);
 		role.setSystem(true);
 		role.setAllPermissions(true);
+		role.getUserTemplates().add(User.RESOURCE_KEY);
 		
 		repository.saveOrUpdate(role);
 		
@@ -72,6 +90,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		role.setName(EVERYONE);
 		role.setSystem(true);
 		role.setAllUsers(true);
+		role.getUserTemplates().add(User.RESOURCE_KEY);
 		
 		role.setPermissions(new HashSet<>(Arrays.asList(
 				UserServiceImpl.CHANGE_PASSWORD_PERMISSION,
@@ -105,7 +124,7 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		
 		Set<Role> roles = new HashSet<>();
 		roles.addAll(getRolesByUser(user));
-		roles.addAll(getAllUserRoles());
+		roles.addAll(getAllUserRoles(user));
 		return roles;
 	}
 	
@@ -262,14 +281,16 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	
 	@Override
 	public Collection<Role> getRolesByUser(User user) {
-		List<Role> results = new ArrayList<>(getAllUserRoles());
+		List<Role> results = new ArrayList<>(getAllUserRoles(user));
 		results.addAll(repository.searchObjects(Role.class, SearchField.all("users.uuid", user.getUuid())));
 		return results;
 	}
 
 	@Override
-	public Collection<Role> getAllUserRoles() {
-		return repository.searchObjects(Role.class, SearchField.eq("allUsers", true));
+	public Collection<Role> getAllUserRoles(User user) {
+		return repository.searchObjects(Role.class, 
+				SearchField.in("userTemplates", user.getResourceKey(), User.RESOURCE_KEY),
+				SearchField.eq("allUsers", true));
 	}
 
 	@Override
@@ -307,10 +328,18 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		
 		Set<User> values = new HashSet<>();
 		for(Role role : roles) {
-			if(role.getUuid().equals(EVERYONE_UUID) || role.isAllUsers()) {
+			if(role.getUuid().equals(EVERYONE_UUID) || (role.isAllUsers() && role.getUserTemplates().contains(User.RESOURCE_KEY))) {
 				userService.allObjects().forEach((val)-> {
 					values.add(val);
 				});
+				return values;
+			}
+			if(role.isAllUsers()) {
+				for(String userTemplate : role.getUserTemplates()) {
+					userService.allObjects(userTemplate).forEach((val)-> {
+						values.add(val);
+					});
+				}
 				return values;
 			}
 		}
@@ -341,6 +370,11 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		unassignments.addAll(assignedThen);
 		unassignments.removeAll(assignedNow);
 		
+	}
+
+	@Override
+	public void saveOrUpdate(Role role) {
+		repository.saveOrUpdate(role);
 	}
 
 }

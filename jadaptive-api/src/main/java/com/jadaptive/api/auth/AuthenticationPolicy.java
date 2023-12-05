@@ -17,16 +17,14 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
-import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = AuthenticationPolicy.RESOURCE_KEY, scope = ObjectScope.GLOBAL, defaultColumn = "name")
-@ObjectViews({ @ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "factors", weight = -9999),
-	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "optional", weight = -8888),
-	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "blockedIPs", weight = -7777),
-	@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "allowedIPs", weight = -6666)})
+@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "optional", weight = -8888)
+@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "blockedIPs", weight = -7777)
+@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "allowedIPs", weight = -6666)
 @TableView(defaultColumns = { "name", "scope" }, requiresCreate = false, requiresUpdate = true, sortField = "weight",
 			otherColumns = { @DynamicColumn(resourceKey = "scope", service = AuthenticationPolicyService.class)})
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
@@ -129,6 +127,10 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 
 	public void setWeight(Integer weight) {
 		this.weight = weight;
+	}
+	
+	public boolean isTemporary() {
+		return false;
 	}
 	
 	public abstract boolean isSessionRequired();
