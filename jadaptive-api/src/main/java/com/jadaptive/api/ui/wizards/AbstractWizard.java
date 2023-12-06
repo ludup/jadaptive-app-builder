@@ -106,9 +106,12 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 				
 			});
 						
+			
 			state.init(getStartSection(),
 					getFinishSection(), 
 					sections.toArray((new WizardSection[0]))); 
+			
+			init(state);
 			request.getSession().setAttribute(getStateAttribute(), state);
 		}
 		
@@ -116,6 +119,10 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 		return state;
 	}
 	
+	protected void init(WizardState state) {
+
+	}
+
 	protected WizardSection getFinishSection() {
 		return new DefaultWizardSection(getBundle(), "finishWizard", "/com/jadaptive/plugins/web/ui/FinishWizard.html", 0);
 	}
