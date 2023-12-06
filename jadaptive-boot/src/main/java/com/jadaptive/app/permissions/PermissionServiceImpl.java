@@ -42,6 +42,7 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.NamePairValue;
+import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.app.user.AdminUser;
@@ -193,6 +194,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		setupUserContext(user);
 		try {
 			return call.call();
+		}  catch(Redirect e) {
+			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		} finally {
@@ -205,6 +208,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		setupUserContext(SYSTEM_USER);
 		try {
 			return call.call();
+		}  catch(Redirect e) {
+			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		} finally {
