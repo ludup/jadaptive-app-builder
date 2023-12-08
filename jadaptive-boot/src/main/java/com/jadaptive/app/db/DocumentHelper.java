@@ -53,6 +53,7 @@ import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.repository.UUIDReference;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -235,51 +236,46 @@ public class DocumentHelper {
 		return convertDocumentToObject(baseClass, document, baseClass.getClassLoader());
 	}
 	
-	private static String getParameter(HttpServletRequest request, FieldTemplate field, String formVariablePrefix) {
-		return getParameter(request, formVariablePrefix + field.getFormVariable());
+	private static String getParameter(Map<String,String[]> parameters, FieldTemplate field, String formVariablePrefix) {
+		return getParameter(parameters, formVariablePrefix + field.getFormVariable());
 	}
 	
-	private static String getTextParameter(HttpServletRequest request, FieldTemplate field, String formVariablePrefix) {
-		return getParameter(request, String.format("%sText", formVariablePrefix + field.getFormVariable()));
+	private static String getTextParameter(Map<String,String[]> parameters, FieldTemplate field, String formVariablePrefix) {
+		return getParameter(parameters, String.format("%sText", formVariablePrefix + field.getFormVariable()));
 	}
 	
-	private static String getParameter(HttpServletRequest request, String formVariable) {
-//		switch(field.getFieldType()) {
-//		case TEXT:
-//			return Encode.forJava(request.getParameter(formVariable));
-//			break;
-//		case TEXT_AREA:
-//			return Encode.forJava(request.getParameter(formVariable))
-//		default:
-//			try {
-//				return URLDecoder.decode(request.getParameter(formVariable), "UTF-8");
-//			} catch (UnsupportedEncodingException e) {
-//				return "";
-//			}
-//		}
-		return request.getParameter(formVariable);
+	private static String getParameter(Map<String,String[]> parameters, String formVariable) {
+		String[] val = parameters.get(formVariable);
+		if(Objects.isNull(val) || val.length == 0) {
+			return null;
+		}
+		return val[0];
 	}
 
 	public static AbstractObject buildRootObject(HttpServletRequest request, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
-		return buildObject(request, resourceKey, "", template);
+		return buildRootObject(request.getParameterMap(), resourceKey, template);
 	}
 	
-	private static AbstractObject buildObject(HttpServletRequest request, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
+	public static AbstractObject buildRootObject(Map<String,String[]> parameters, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
+		return buildObject(parameters, resourceKey, "", template);
+	}
+	
+	private static AbstractObject buildObject(Map<String,String[]> parameters, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
 
 		if(log.isDebugEnabled()) {
 			log.debug("Building object {} using template {}", resourceKey, template.getResourceKey());
 		}
 		
 		MongoEntity obj = new MongoEntity(resourceKey);
-		String uuid = request.getParameter(formVariablePrefix + "uuid");
+		String uuid = getParameter(parameters, formVariablePrefix + "uuid");
 		if(StringUtils.isNotBlank(uuid)) {
 			obj.setUuid(uuid);
 		}
-		String system = request.getParameter(formVariablePrefix + "system");
+		String system = getParameter(parameters, formVariablePrefix + "system");
 		if(Objects.nonNull(system)) {
 			obj.setSystem(Boolean.valueOf(system));
 		}
-		String hidden = request.getParameter(formVariablePrefix + "hidden");
+		String hidden = getParameter(parameters, formVariablePrefix + "hidden");
 		if(Objects.nonNull(hidden)) {
 			obj.setHidden(Boolean.valueOf(hidden));
 		}
@@ -294,9 +290,9 @@ public class DocumentHelper {
 			}
 			
 			if(field.getCollection()) {
-				obj.setValue(field, convertValues(field, request));
+				obj.setValue(field, convertValues(field, parameters));
 			} else {
-				obj.setValue(field, convertValue(field, request, formVariablePrefix));
+				obj.setValue(field, convertValue(field, parameters, formVariablePrefix));
 			}
 
 		}
@@ -304,9 +300,9 @@ public class DocumentHelper {
 		return obj;
 	}
 	
-	private static Object convertValue(FieldTemplate field, HttpServletRequest request, String formVariablePrefix) throws IOException, ValidationException {
+	private static Object convertValue(FieldTemplate field, Map<String,String[]> parameters, String formVariablePrefix) throws IOException, ValidationException {
 		
-		String value = getParameter(request, field, formVariablePrefix);
+		String value = getParameter(parameters, field, formVariablePrefix);
 
 		switch(field.getFieldType()) {
 		case OBJECT_EMBEDDED:
@@ -318,7 +314,7 @@ public class DocumentHelper {
 			tmp.append(formVariablePrefix);
 			tmp.append(field.getFormVariable());
 			tmp.append(".");
-			return buildObject(request, 
+			return buildObject(parameters, 
 					template.getResourceKey(),
 					tmp.toString(),
 					template).getDocument();
@@ -329,10 +325,10 @@ public class DocumentHelper {
 				log.debug("Returning {} as reference {}", field.getResourceKey(), value);
 			}
 
-			String name = getTextParameter(request, field, formVariablePrefix);
+			String name = getTextParameter(parameters, field, formVariablePrefix);
 			
 			Document doc = new Document();
-			convertObjectToDocument(generateReference(getParameter(request, field, formVariablePrefix), name), doc);
+			convertObjectToDocument(generateReference(getParameter(parameters, field, formVariablePrefix), name), doc);
 			return doc;
 		}
 		case BOOL:
@@ -342,10 +338,10 @@ public class DocumentHelper {
 				return Boolean.valueOf(value);
 			}
 		case IMAGE:
-			if(request instanceof StandardMultipartHttpServletRequest) {
-				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
+			if(Request.get() instanceof StandardMultipartHttpServletRequest) {
+				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)Request.get()).getMultiFileMap().get(field.getFormVariable());
 				if(file.isEmpty()) {
-					return getParameter(request, formVariablePrefix + field.getFormVariable() + "_previous");
+					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 				}
 				if(file.size() > 1) {
 					throw new IllegalStateException("Multiple file parts for single value!");
@@ -354,7 +350,7 @@ public class DocumentHelper {
 				
 				String encoded = Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
 				if(StringUtils.isBlank(encoded)) {
-					return getParameter(request, formVariablePrefix + field.getFormVariable() + "_previous");
+					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 				}
 				try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
 					BufferedImage bimg = ImageIO.read(in);
@@ -382,10 +378,10 @@ public class DocumentHelper {
 				}
 				
 			}
-			return getParameter(request, formVariablePrefix + field.getFormVariable() + "_previous");
+			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 		case FILE:
-			if(request instanceof StandardMultipartHttpServletRequest) {
-				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
+			if(Request.get() instanceof StandardMultipartHttpServletRequest) {
+				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)Request.get()).getMultiFileMap().get(field.getFormVariable());
 				if(Objects.isNull(file)) {
 					return null;
 				}
@@ -400,7 +396,7 @@ public class DocumentHelper {
 					return Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
 				}
 			}
-			return getParameter(request, formVariablePrefix + field.getFormVariable() + "_previous");
+			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 		default:
 			if(Objects.isNull(value)) {
 				
@@ -416,12 +412,12 @@ public class DocumentHelper {
 		}
 	}
 	
-	private static List<Object> convertValues(FieldTemplate field, HttpServletRequest request) throws IOException, ValidationException {
+	private static List<Object> convertValues(FieldTemplate field, Map<String,String[]> parameters) throws IOException, ValidationException {
 		
 		String fieldName = field.getFormVariable();
 		
 		List<Object> result = new ArrayList<>();
-		String[] values = request.getParameterValues(fieldName);
+		String[] values = parameters.get(fieldName);
 		if(Objects.isNull(values) || values.length == 0) {
 			return result;
 		}
@@ -441,7 +437,7 @@ public class DocumentHelper {
 			break;
 		case OBJECT_REFERENCE:
 		{
-			String[] names = request.getParameterValues(String.format("%sText", field.getFormVariable()));
+			String[] names = parameters.get(String.format("%sText", field.getFormVariable()));
 			for(int i=0;i<values.length;i++) {
 				Document doc = new Document();
 				convertObjectToDocument(generateReference(values[i], names[i]), doc);

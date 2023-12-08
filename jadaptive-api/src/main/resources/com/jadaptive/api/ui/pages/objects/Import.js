@@ -1,17 +1,4 @@
 $(function() {
-
-//	$.getJSON('/app/api/template/' + $('body').data('resourcekey'), function(data) {
-//		if(data.success) {
-//			var t = data.resource;
-//			
-//			$('.columnNumber').each(function(idx) {
-//				$(this).text(idx+1);
-//			});
-//
-//			
-//			
-//		}
-//	});
 	
 	$('#addColumn').off('click');
 	$('#addColumn').on('click', function() {
@@ -38,7 +25,7 @@ $(function() {
 		});
 		debugger;
 		$('#orderedFields').val(orderedFields);
-		$('#uploadForm').attr('action', "/upload/entity/" + t.resourceKey);
+		$('#uploadForm').attr('action', "/upload/entity/" + $('body').data('resourcekey'));
 		$('#uploadForm').submit();
 	});
 });

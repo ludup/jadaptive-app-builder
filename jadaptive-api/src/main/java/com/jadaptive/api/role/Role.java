@@ -13,7 +13,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;

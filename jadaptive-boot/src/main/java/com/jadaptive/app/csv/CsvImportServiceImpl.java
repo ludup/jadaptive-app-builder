@@ -3,9 +3,9 @@ package com.jadaptive.app.csv;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,10 +18,9 @@ import org.supercsv.io.ICsvListReader;
 import org.supercsv.prefs.CsvPreference;
 
 import com.jadaptive.api.csv.CsvImportService;
-import com.jadaptive.api.csv.ImportCallback;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.app.entity.MongoEntity;
+import com.jadaptive.app.db.DocumentHelper;
 
 @Service
 public class CsvImportServiceImpl implements CsvImportService {
@@ -30,14 +29,7 @@ public class CsvImportServiceImpl implements CsvImportService {
 	
 	@Autowired
 	private ObjectService entityService;
-	
-	private ThreadLocal<ImportCallback> callbacks = new ThreadLocal<>();
-	
-	@Override
-	public void prepareCallback(ImportCallback callback) {
-		callbacks.set(callback);
-	}
-	
+
 	@Override
 	public long importCsv(ObjectTemplate template, InputStream in, boolean containsHeader, String... orderedFields)
 			throws IOException {
@@ -48,9 +40,7 @@ public class CsvImportServiceImpl implements CsvImportService {
 	public long importCsv(ObjectTemplate template, InputStream in, char quoteChar, char delimiterChar, boolean ignoreEmptyLines, 
 			int maxLinesPerRow, boolean surroundingSpacesNeedQuotes, boolean skipComments, boolean containsHeader, String... orderedFields) 
 				throws IOException {
-		
-		String[] fields = validateFields(orderedFields, template);
-		
+
 		CsvPreference.Builder csvPreferences = new CsvPreference.Builder(quoteChar, 
 				delimiterChar, 
 				"\r\n")
@@ -77,44 +67,32 @@ public class CsvImportServiceImpl implements CsvImportService {
                 }
                 
                 List<String> results;
-                List<String> values = new ArrayList<>();
-                ImportCallback cb = callbacks.get();
-                
+   
                 while((results = listReader.read()) != null ) {
                         
-                	MongoEntity e = new MongoEntity(template.getResourceKey());
-                	values.clear();
-                    for(int i=0; i < fields.length && i < results.size();i++)  {
-                    	String name = fields[i];
+                	Map<String,String[]> objectParameters = new HashMap<>();
+                	
+                    for(int i=0; i < orderedFields.length && i < results.size();i++)  {
+                    	String name = orderedFields[i];
                     	if(StringUtils.isBlank(name)) {
                     		continue;
                     	}
                     	
                     	String value = results.get(i);
-                    	if(name.equalsIgnoreCase("UUID")) {
-                    		e.setUuid(value);
-                    	} else {
-                    		e.setValue(template.getField(name), value);
-                    	}
                     	
-                    	values.add(value);
+                    	objectParameters.put(name, new String[] { value });
                     }
 
-                    entityService.saveOrUpdate(e);
-                    count++;
+                    entityService.saveOrUpdate(
+                    		DocumentHelper.buildRootObject(objectParameters, 
+                    		template.getResourceKey(), template));
                     
-                    if(Objects.nonNull(cb)) {
-                    	cb.imported(count, values.toArray(new String[0]));
-                    }
+                    count++;
                
                 }
                 
                 if(log.isInfoEnabled()) {
                 	log.info("Imported {} entities", count);
-                }
-                
-                if(Objects.nonNull(cb)) {
-                	callbacks.remove();
                 }
                 
                 return count;
@@ -126,15 +104,5 @@ public class CsvImportServiceImpl implements CsvImportService {
         }
   
 	}
-	
-	private String[] validateFields(String[] fields, ObjectTemplate template) throws IOException {
-		for(String field : fields) {
-			if(StringUtils.isNotBlank(field) && Objects.isNull(template.getField(field))) {
-				if(!field.equalsIgnoreCase("UUID")) {
-					throw new IOException(String.format("Invalid field reference '%s'", field));
-				}
-			}
-		}
-		return fields;
-	}
+
 }
