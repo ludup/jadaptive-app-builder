@@ -213,13 +213,12 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 							.appendChild(Html.i("fa-solid fa-chevron-left"))));
 		}
 
-		for(int i=0;i<pages;i++) {
+	
+		for(long i=0;i<pages;i++) {
 			pageList.appendChild(Html.li("page-item", currentPage == i ? "active" : "")
 						.appendChild(Html.a("#", "page-link searchTable")
 								.attr("data-start", String.valueOf(i*length))
 								.text(String.valueOf(i+1))));
-			if(i== 4)
-				break;
 		}
 		
 		if(currentPage < pages - 1) {
