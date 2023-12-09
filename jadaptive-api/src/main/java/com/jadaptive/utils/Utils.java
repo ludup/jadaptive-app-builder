@@ -587,11 +587,14 @@ public class Utils {
 	}
 	
 	public static String generate3LetterCode(String name, char fillingCharacter) {
-		
+		return generateUsername(name, fillingCharacter, 3);
+	}
+	
+	public static String generateUsername(String name, char fillingCharacter, int length) {
 		name = WordUtils.capitalizeFully(name);
 		String[] elements = name.split(" ");
 		StringBuffer buf = new StringBuffer();
-		for(int i=0;i<3;i++) {
+		for(int i=0;i<length;i++) {
 			if(i < elements.length && StringUtils.isNotBlank(elements[i])) {
 				if(Utils.isNotCompanyType(elements[i])) {
 					buf.append(elements[i].charAt(0));
@@ -602,11 +605,38 @@ public class Utils {
 		}
 		return buf.toString();
 	}
+	
+	public static String intitals(String name) {
+		name = WordUtils.capitalizeFully(name);
+		String[] elements = name.split(" ");
+		StringBuffer buf = new StringBuffer();
+		for(int i=0;i<elements.length;i++) {
+			buf.append(elements[i].charAt(0));
+		}
+		return buf.toString();
+	}
 
 	public static Double round(Double value) {
 		return round(value, 2);
 	}
 	public static Double round(Double value, int digits) {
 		return BigDecimal.valueOf(value).setScale(digits, RoundingMode.HALF_DOWN).doubleValue();
+	}
+
+	public static String generateShortName(String val, int i) {
+		StringBuffer buf = new StringBuffer();
+		String str = "abcdefghijklmnopqrstuvwxyz";
+		val = val.toLowerCase();
+		for(Character c : val.toCharArray()) {
+			
+			if(str.indexOf(c) > -1) {
+				buf.append(c);
+			}
+			if(buf.length() >= i) {
+				break;
+			}
+			
+		}
+		return buf.toString();
 	}
 }

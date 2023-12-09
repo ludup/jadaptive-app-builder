@@ -37,7 +37,7 @@ import com.jadaptive.utils.Utils;
 
 @Service
 public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
-	
+
 	@Autowired
 	private PermissionService permissionService; 
 	
