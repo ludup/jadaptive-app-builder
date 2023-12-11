@@ -185,11 +185,11 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			pages++;
 		}
 		
-		int currentPage = 0;
+		long currentPage = 0;
 		if(start > 0) {
 			currentPage = start / length;
 		}
-		
+
 		Element pageList;
 
 		pagnation.appendChild(Html.nav().appendChild(pageList = Html.ul("pagination")));
@@ -213,15 +213,33 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 							.appendChild(Html.i("fa-solid fa-chevron-left"))));
 		}
 
-	
-		for(long i=0;i<pages;i++) {
-			pageList.appendChild(Html.li("page-item", currentPage == i ? "active" : "")
+		int totalPages = 0;
+		long firstPage = Math.max(currentPage-5, 1);
+		
+		for(long i=firstPage;i<currentPage;i++) {
+			pageList.appendChild(Html.li("page-item")
 						.appendChild(Html.a("#", "page-link searchTable")
 								.attr("data-start", String.valueOf(i*length))
 								.text(String.valueOf(i+1))));
+			totalPages++;
 		}
 		
-		if(currentPage < pages - 1) {
+		pageList.appendChild(Html.li("page-item", "active")
+				.appendChild(Html.a("#", "page-link searchTable")
+						.attr("data-start", String.valueOf(currentPage*length))
+						.text(String.valueOf(currentPage+1))));
+		long endPage = currentPage + 1;
+		
+		while(totalPages < 10 && endPage <= pages) {
+			pageList.appendChild(Html.li("page-item")
+					.appendChild(Html.a("#", "page-link searchTable")
+							.attr("data-start", String.valueOf(endPage*length))
+							.text(String.valueOf(endPage+1))));
+			totalPages++;
+			endPage++;
+		}
+	
+		if(endPage < pages - 1) {
 			pageList.appendChild(Html.li("page-item")
 					.appendChild(Html.a("#", "page-link searchTable")
 							.attr("data-start", String.valueOf((currentPage+1)*length))
