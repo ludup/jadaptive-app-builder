@@ -214,7 +214,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 
 		int totalPages = 0;
-		long firstPage = Math.max(currentPage-5, 1);
+		long firstPage = Math.max(currentPage-5, 0);
 		
 		for(long i=firstPage;i<currentPage;i++) {
 			pageList.appendChild(Html.li("page-item")
@@ -230,7 +230,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 						.text(String.valueOf(currentPage+1))));
 		long endPage = currentPage + 1;
 		
-		while(totalPages < 10 && endPage <= pages) {
+		while(totalPages < 9 && endPage < pages) {
 			pageList.appendChild(Html.li("page-item")
 					.appendChild(Html.a("#", "page-link searchTable")
 							.attr("data-start", String.valueOf(endPage*length))
