@@ -104,11 +104,14 @@ public class Header extends AbstractPageExtension {
 
 				for(ApplicationMenu child : children) {
 					
-					if(log.isInfoEnabled()) {
-						log.info("Checking menu " + child.getI18n());
+					if(log.isDebugEnabled()) {
+						log.debug("Checking {} menu access to {}", permissionService.getCurrentUser().getUsername(), child.getI18n());
 					}
 					
 					if(!menuService.checkPermission(child)) {
+						if(log.isDebugEnabled()) {
+							log.debug("{} does not have access to menu {}", permissionService.getCurrentUser().getUsername(), child.getI18n());
+						}
 						continue;
 					}
 
