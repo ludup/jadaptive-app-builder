@@ -53,6 +53,7 @@ public class CsvImportServiceImpl implements CsvImportService {
 		}
 		
 		long count = 0;
+		long errors = 0;
 		ICsvListReader listReader = null;
 		
 		if(log.isInfoEnabled()) {
@@ -83,16 +84,21 @@ public class CsvImportServiceImpl implements CsvImportService {
                     	objectParameters.put(name, new String[] { value });
                     }
 
-                    entityService.saveOrUpdate(
-                    		DocumentHelper.buildRootObject(objectParameters, 
-                    		template.getResourceKey(), template));
+                    try {
+	                    entityService.saveOrUpdate(
+	                    		DocumentHelper.buildRootObject(objectParameters, 
+	                    		template.getResourceKey(), template));
+	                    
+	                    count++;
                     
-                    count++;
+                    } catch(Throwable t) {
+                    	errors++;
+                    }
                
                 }
                 
                 if(log.isInfoEnabled()) {
-                	log.info("Imported {} entities", count);
+                	log.info("Imported {} entities with {} errors", count, errors);
                 }
                 
                 return count;

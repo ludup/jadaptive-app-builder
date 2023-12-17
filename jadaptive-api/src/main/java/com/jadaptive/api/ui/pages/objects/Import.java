@@ -9,6 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
@@ -106,7 +107,17 @@ public class Import extends ObjectTemplatePage {
 			iterateFields(embeddedTemplate, e, tmp.toString());
 
 			break;
+		case OBJECT_REFERENCE:
+			
+			e.appendChild(Html.option(formVariablePrefix + field.getFormVariable() + "Text", "")
+					.text(I18N.getResource(template.getBundle(), field.getResourceKey() + ".name") + " Name"));
+			
+			e.appendChild(Html.option(formVariablePrefix + field.getFormVariable(), "")
+					.text(I18N.getResource(template.getBundle(), field.getResourceKey() + ".name") + " UUID"));
+
+			break;
 		default:
+		
 			e.appendChild(Html.option(formVariablePrefix + field.getFormVariable(), field.getResourceKey())
 					.attr("jad:bundle", template.getBundle())
 					.attr("jad:i18n", field.getResourceKey() + ".name"));
