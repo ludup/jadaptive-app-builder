@@ -21,7 +21,7 @@ public class ReplacementFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String value) {
+	public void renderInput(Element rootElement, String value, String... classes) {
 
 	
 		rootElement.appendChild(new Element("div").addClass("row mb-3")

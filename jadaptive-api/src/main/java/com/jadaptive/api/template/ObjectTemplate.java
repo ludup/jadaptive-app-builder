@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.JadaptiveIgnore;
@@ -201,12 +202,31 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 		
 		if(Objects.isNull(fieldsByName)) {
 			Map<String,FieldTemplate> tmp = new HashMap<>();
-			for(FieldTemplate t : fields) {
-				tmp.put(t.getResourceKey(), t);
-			}
+			buildMap("", tmp, fields, null);
 			fieldsByName = tmp;
 		}
 		return fieldsByName;
+	}
+	
+	private void buildMap(String prefix, Map<String,FieldTemplate> map, Collection<FieldTemplate> fields, FieldTemplate parentField) {
+		
+		for(FieldTemplate t : fields) {
+			switch(t.getFieldType()) {
+			case OBJECT_EMBEDDED:
+				buildMap(prefix + t.getResourceKey() + ".", 
+						map, 
+						ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
+							.get(t.getValidationValue(ValidationType.RESOURCE_KEY))
+							.getFields(),
+							t);
+			default:
+				if(Objects.nonNull(parentField)) {
+					t.setParentKey(parentField.getResourceKey());
+				}
+				map.put(prefix + t.getResourceKey(), t);
+			}
+			
+		}
 	}
 
 	public void setTemplateClass(String templateClass) {
@@ -320,5 +340,13 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 
 	public boolean isExtended() {
 		return templateType==ObjectTemplateType.EXTENDED;
+	}
+
+	public boolean isObjectReference(String searchField) {
+		FieldTemplate t = toMap().get(searchField);
+		if(Objects.nonNull(t) ) {
+			return t.getFieldType()==FieldType.OBJECT_REFERENCE;
+		}
+		return false;
 	}
 }

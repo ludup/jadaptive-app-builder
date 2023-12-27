@@ -4,6 +4,7 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.utils.Utils;
 
 public class BooleanFormInput extends FieldInputRender {
 
@@ -13,36 +14,47 @@ public class BooleanFormInput extends FieldInputRender {
 		super(template, field);
 	}
 
+	public BooleanFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle) {
+		super(template, resourceKey, formVariable, bundle);
+	}
+
 	@Override
-	public void renderInput(Element rootElement, String value) {
+	public void renderInput(Element rootElement, String value, String... classes) {
 		
-		rootElement.appendChild(new Element("div")
-				.addClass("row mb-3")
+		Element e;
+		
+		rootElement.appendChild(e = new Element("div")
+				.addClass(Utils.csv(" ", classes) + " row mb-3"))
 				.appendChild(new Element("div")
-						.addClass("col-12")
+						.addClass("col-12"));
 		
-		.appendChild(new Element("label")
+		if(decorate) {
+			e.appendChild(new Element("label")
 				.attr("for", getFormVariable())
 				.addClass("form-label")
 				.attr("jad:bundle", getBundle())
-				.attr("jad:i18n", String.format("%s.name", getResourceKey()))))
-				.appendChild(new Element("div")
+				.attr("jad:i18n", String.format("%s.name", getResourceKey())));
+		}
+		
+		e.appendChild(new Element("div")
 						.addClass("col-12")
 				.appendChild(new Element("div")
 						.addClass("col-12 form-check form-switch")
+				.appendChild(input = new Element("input")
+					.attr("id", resourceKey)
+					.attr("name", getFormVariable())
+					.attr("type", "checkbox")
+					.addClass("form-check-input")
+					.val("true"))));
 		
-		.appendChild(input = new Element("input")
-			.attr("id", getFormVariable())
-			.attr("name", getFormVariable())
-			.attr("type", "checkbox")
-			.addClass("form-check-input")
-			.val("true")))
-				.appendChild(new Element("div")
+		if(decorate) {
+				e.appendChild(new Element("div")
 						.addClass("col-12"))
-		.appendChild(new Element("p")
+				.appendChild(new Element("p")
 				.addClass("form-text text-muted text-small mt-3")
 				.attr("jad:bundle", getBundle())
-				.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
+				.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
+		}
 
 		if("true".equalsIgnoreCase(value)) {
 			input.attr("checked", "checked");

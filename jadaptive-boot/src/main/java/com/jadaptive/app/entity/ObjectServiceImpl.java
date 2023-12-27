@@ -54,6 +54,7 @@ import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 import com.jadaptive.utils.UUIDObjectUtils;
+import com.jadaptive.utils.Utils;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.type.TypeDescription;
@@ -769,11 +770,83 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			if(Objects.nonNull(f)) {
 				switch(f.getFieldType()) {
 				case OBJECT_REFERENCE:
-					if(f.getCollection()) {
-						fields.add(SearchField.all(searchField + ".uuid", searchValue));
+					if(Utils.isUUID(searchValue)) {
+						if(f.getCollection()) {
+							fields.add(SearchField.in(searchField + ".uuid", searchValue));
+						} else {
+							fields.add(SearchField.eq(searchField + ".uuid", searchValue));
+						}
 					} else {
-						fields.add(SearchField.eq(searchField + ".uuid", searchValue));
+						if(f.getCollection()) {
+							fields.add(SearchField.like(searchField + ".name", searchValue));
+						} else {
+							fields.add(SearchField.like(searchField + ".name", searchValue));
+						}
 					}
+					
+					break;
+				
+				case DECIMAL:
+				{
+					if(searchValue.startsWith(">=")) {
+						fields.add(SearchField.gte(searchField, Double.parseDouble(searchValue.substring(2))));
+					} else if(searchValue.startsWith("<=")) {
+						fields.add(SearchField.lte(searchField, Double.parseDouble(searchValue.substring(2))));
+					} else if(searchValue.startsWith(">")) {
+						fields.add(SearchField.gt(searchField, Double.parseDouble(searchValue.substring(1))));
+					} else if(searchValue.startsWith("<")) {
+						fields.add(SearchField.lt(searchField, Double.parseDouble(searchValue.substring(1))));
+					} else {
+						fields.add(SearchField.eq(searchField, Double.parseDouble(searchValue)));
+					}
+					break;
+				}
+				case INTEGER:
+				{
+					if(searchValue.startsWith(">=")) {
+						fields.add(SearchField.gte(searchField, Integer.parseInt(searchValue.substring(2))));
+					} else if(searchValue.startsWith("<=")) {
+						fields.add(SearchField.lte(searchField, Integer.parseInt(searchValue.substring(2))));
+					} else if(searchValue.startsWith(">")) {
+						fields.add(SearchField.gt(searchField, Integer.parseInt(searchValue.substring(1))));
+					} else if(searchValue.startsWith("<")) {
+						fields.add(SearchField.lt(searchField, Integer.parseInt(searchValue.substring(1))));
+					} else {
+						fields.add(SearchField.eq(searchField, Integer.parseInt(searchValue)));
+					}
+					break;
+				}
+				case LONG:
+				{
+					if(searchValue.startsWith(">=")) {
+						fields.add(SearchField.gte(searchField, Long.parseLong(searchValue.substring(2))));
+					} else if(searchValue.startsWith("<=")) {
+						fields.add(SearchField.lte(searchField, Long.parseLong(searchValue.substring(2))));
+					} else if(searchValue.startsWith(">")) {
+						fields.add(SearchField.gt(searchField, Long.parseLong(searchValue.substring(1))));
+					} else if(searchValue.startsWith("<")) {
+						fields.add(SearchField.lt(searchField, Long.parseLong(searchValue.substring(1))));
+					} else {
+						fields.add(SearchField.eq(searchField, Long.parseLong(searchValue)));
+					}
+					break;
+				}
+				case TIMESTAMP:
+				case DATE:
+					if(searchValue.startsWith(">=")) {
+						fields.add(SearchField.gte(searchField, Utils.parseDate(searchValue.substring(2), "yyyy-MM-dd")));
+					} else if(searchValue.startsWith("<=")) {
+						fields.add(SearchField.lte(searchField, Utils.parseDate(searchValue.substring(2), "yyyy-MM-dd")));
+					} else if(searchValue.startsWith(">")) {
+						fields.add(SearchField.gt(searchField, Utils.parseDate(searchValue.substring(1), "yyyy-MM-dd")));
+					} else if(searchValue.startsWith("<")) {
+						fields.add(SearchField.lt(searchField, Utils.parseDate(searchValue.substring(1), "yyyy-MM-dd")));
+					} else {
+						fields.add(SearchField.eq(searchField, Utils.parseDate(searchValue, "yyyy-MM-dd")));
+					}
+					break;
+				case BOOL:
+					fields.add(SearchField.eq(searchField, Boolean.parseBoolean(searchValue)));
 					break;
 				default:
 					fields.add(SearchField.like(searchField, searchValue));

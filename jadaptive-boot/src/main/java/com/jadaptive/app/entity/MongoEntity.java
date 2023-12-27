@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.utils.Utils;
 
 @JsonDeserialize(using=AbstractObjectDeserializer.class)
 @JsonSerialize(using=AbstractObjectSerializer.class)
@@ -91,11 +93,23 @@ public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 
 	@Override
 	public AbstractObject getChild(FieldTemplate c) {
-		AbstractObject obj = children.get(c.getResourceKey());
+		return getChild(c.getResourceKey());
+	}
+	
+	@Override
+	public AbstractObject getChild(String resourceKey) {
+		AbstractObject obj = children.get(resourceKey);
 		if(Objects.isNull(obj)) {
-			Document doc = (Document) document.get(c.getResourceKey());
+			Document doc = (Document) document.get(resourceKey);
 			if(Objects.nonNull(doc)) {
-				obj = new MongoEntity(this, (String)document.get("resourceKey"), doc);
+				return new MongoEntity(this, (String)document.get("resourceKey"), doc);
+			} else {
+				for(AbstractObject child : children.values()) {
+					obj = child.getChild(resourceKey);
+					if(Objects.nonNull(obj)) {
+						return obj;
+					}
+				}
 			}
 		}
 		return obj;

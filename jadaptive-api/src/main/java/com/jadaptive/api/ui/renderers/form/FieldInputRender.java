@@ -17,6 +17,8 @@ public abstract class FieldInputRender {
 	String formVariable;
 	String bundle;
 	String formVariableWithParents;
+	boolean decorate = true;
+	
 	public FieldInputRender(ObjectTemplate template, TemplateViewField field) {
 		this.template = template;
 		this.resourceKey = field.getResourceKey();
@@ -36,12 +38,16 @@ public abstract class FieldInputRender {
 		formVariableWithParents = formVariable.toString();
 	}
 	
-	public FieldInputRender(ObjectTemplate template, String resourceKey, String formVariable, String bundle) {
+	public FieldInputRender(ObjectTemplate template, String resourceKey,String formVariable, String bundle) {
 		this.template = template;
 		this.resourceKey = resourceKey;
 		this.formVariable = formVariable;
 		this.bundle = bundle;
 		this.formVariableWithParents = formVariable;
+	}
+	
+	public void disableDecoration() {
+		decorate = false;
 	}
 	
 	protected String getFormVariableWithParents() {
@@ -58,6 +64,6 @@ public abstract class FieldInputRender {
 		return resourceKey;
 	}
 	
-	public abstract void renderInput(Element rootElement, String value) throws IOException;
+	public abstract void renderInput(Element rootElement, String value, String... classes) throws IOException;
 
 }

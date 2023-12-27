@@ -29,7 +29,7 @@ public class HtmlEditorFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String value) throws IOException {
+	public void renderInput(Element rootElement, String value, String... classes) throws IOException {
 	
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/lib/codemirror.js");
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/addon/display/autorefresh.js");

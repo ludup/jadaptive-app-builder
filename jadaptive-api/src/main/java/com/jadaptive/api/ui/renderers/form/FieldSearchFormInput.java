@@ -11,41 +11,45 @@ public class FieldSearchFormInput {
 	String url;
 	String searchField;
 	String idField;
+	String valueField;
 	protected ObjectTemplate template;
 	
 	String resourceKey;
 	String formVariable;
 	String bundle;
+	boolean decorate = true; 
 	
 	public FieldSearchFormInput(ObjectTemplate template, TemplateViewField field, String url, String searchField, String idField) {
 		this.template = template;
 		this.url = url;
 		this.searchField = searchField;
 		this.idField = idField;
+		this.valueField = idField;
 		this.resourceKey = field.getResourceKey();
 		this.formVariable = field.getFormVariable();
 		this.bundle = field.getBundle();
 	}
 	
-	public FieldSearchFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle, String url, String searchField, String idField) {
+	public FieldSearchFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle, String url, String searchField, String idField, String valueField) {
 		this.template = template;
 		this.url = url;
 		this.searchField = searchField;
 		this.idField = idField;
+		this.valueField = valueField;
 		this.resourceKey = resourceKey;
 		this.formVariable = formVariable;
 		this.bundle = bundle;
 	}
 
-	public void renderInput(Element rootElement, 
+	public Element renderInput(Element rootElement, 
 			String value, String name,
 			boolean nameIsResourceKey,
 			boolean readOnly) {
-		renderInput(rootElement, bundle, resourceKey, formVariable,
+		return renderInput(rootElement, bundle, resourceKey, formVariable,
 				value, name, nameIsResourceKey, readOnly);
 	}
 	
-	public void renderInput(Element rootElement, 
+	public Element renderInput(Element rootElement, 
 			String bundle,
 			String resourceKey,
 			String variableName,
@@ -53,16 +57,21 @@ public class FieldSearchFormInput {
 			String name,
 			boolean nameIsResourceKey,
 			boolean readOnly) {
-		rootElement.appendChild(new Element("div")
-				.addClass("row mb-3 fieldSearchInput")
-				.appendChild(new Element("div")
+		Element _this;
+		rootElement.appendChild(_this = new Element("div")
+				.addClass("row mb-3 fieldSearchInput"));
+		
+		if(decorate) {
+			_this.appendChild(new Element("div")
 						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", variableName)
 						.addClass("form-label")
 						.attr("jad:bundle", bundle)
-						.attr("jad:i18n", String.format("%s.name", resourceKey)))
-				.appendChild(new Element("div")
+						.attr("jad:i18n", String.format("%s.name", resourceKey))));
+		}
+			
+		_this.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", resourceKey))
 						.addClass("input-group position-relative dropdown")
 					.appendChild(new Element("input")
@@ -73,14 +82,14 @@ public class FieldSearchFormInput {
 							.attr("data-bs-toggle", "dropdown")
 							.attr("data-url", url)
 							.attr("data-field", searchField)
-							.attr("data-id", idField)
+							.attr("data-id", valueField)
 							.attr("type", "text")
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false")
 							.attr("readOnly", readOnly)
 							.val(name))
 					.appendChild(new Element("input")
-							.attr("id", variableName)
+							.attr("id", idField)
 							.attr("name", variableName)
 							.attr("type", "hidden")
 							.val(value))
@@ -90,12 +99,21 @@ public class FieldSearchFormInput {
 								.attr("class", "fa-solid fa-search")))
 					.appendChild(new Element("div")
 							.addClass(readOnly ? "disabled-dropdown" : "dropdown-menu dropdown-size")
-							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))))
-				.appendChild(new Element("small")
+							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
+		
+		if(decorate) {
+				_this.appendChild(new Element("small")
 						.addClass("text-muted")
 						.attr("jad:bundle", bundle)
-						.attr("jad:i18n", String.format("%s.desc", resourceKey)))));
+						.attr("jad:i18n", String.format("%s.desc", resourceKey)));
+		}
 		
+		return _this;
+		
+	}
+	
+	public void diableDecoration() {
+		this.decorate = false;
 	}
 
 }

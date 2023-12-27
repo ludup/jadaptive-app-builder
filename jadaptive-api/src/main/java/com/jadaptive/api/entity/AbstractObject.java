@@ -44,4 +44,6 @@ public interface AbstractObject extends UUIDDocument {
 
 	boolean isNew();
 
+	AbstractObject getChild(String resourceKey);
+
 }

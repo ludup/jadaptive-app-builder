@@ -1,7 +1,6 @@
 package com.jadaptive.api.ui;
 
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 
 import com.jadaptive.utils.Utils;
 
@@ -107,7 +106,7 @@ public class Html {
 		return new Element("nav");
 	}
 
-	public static Node text(String id, String name, String value, String... classes) {
+	public static Element text(String id, String name, String value, String... classes) {
 		return new Element("input").attr("type", "text")
 				.attr("id", id)
 				.attr("name", name)

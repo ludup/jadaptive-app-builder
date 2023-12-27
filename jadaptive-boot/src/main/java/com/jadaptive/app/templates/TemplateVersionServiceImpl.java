@@ -575,7 +575,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				ObjectField objectAnnotation = field.getAnnotation(ObjectField.class);
 				
 				if(Objects.nonNull(objectAnnotation)) {
-					FieldTemplate t = processFieldAnnotations(objectAnnotation, field, /*i18n,*/ template);
+					FieldTemplate t = processFieldAnnotations(objectAnnotation, "", field,  template);
 					if(objectAnnotation.nameField()) {
 						nameField =t.getResourceKey();
 					}
@@ -995,11 +995,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 	}
 
-	private FieldTemplate processFieldAnnotations(ObjectField field, /*Field parentField,*/ Field f, /*Properties i18n,*/ ObjectTemplate template) {
+	private FieldTemplate processFieldAnnotations(ObjectField field, String parentPrefix, Field f, ObjectTemplate template) {
 
 		FieldTemplate t = new FieldTemplate();
 		t.setResourceKey(f.getName());
-		t.setParentKey(template.getUuid());
+		t.setParentKey(parentPrefix);
 		t.setFormVariable(StringUtils.isNotBlank(field.formVariable()) ? field.formVariable() : f.getName());
 		t.setDefaultValue(field.defaultValue());
 		t.setFieldType(selectFieldType(f.getType(), field.type()));
@@ -1028,10 +1028,26 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				t.getValidators().add(new FieldValidator(
 						ValidationType.RESOURCE_KEY, 
 						resourceKey, ObjectTemplate.RESOURCE_KEY, "resourceKey.invalid"));
+				
+//				List<Field> fields = new ArrayList<>();
+//				resolveFields(clz, fields, true);
+//				ObjectTemplate t2 = templateService.get(objd.resourceKey());
+//				for(Field f2 : fields) {
+//					
+//					ObjectField objectAnnotation = f2.getAnnotation(ObjectField.class);
+//					
+//					if(Objects.nonNull(objectAnnotation)) {
+//						FieldTemplate t3 = processFieldAnnotations(objectAnnotation, parentPrefix + f.getName() + ".", f2,  t2);
+//						template.getFields().add(t3);
+//					}
+//				}
 			}
+			
 			t.getValidators().add(new FieldValidator(
 					ValidationType.OBJECT_TYPE, 
 					f.getType().getName(), ObjectTemplate.RESOURCE_KEY, "objectType.invalid"));
+			
+			
 			break;
 		}
 		case ENUM:

@@ -22,10 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.template.FieldRenderer;
@@ -57,6 +59,9 @@ public class TableRenderer {
 	
 	@Autowired
 	private PermissionService permissionService;
+	
+	@Autowired
+	private InternationalService internationalService; 
 	
 	int start;
 	int length;
@@ -105,7 +110,12 @@ public class TableRenderer {
 				throw new IllegalStateException(templateClazz.getSimpleName() + " requires @TableView annotation to render this page");
 			}
 			for(String column : view.defaultColumns()) {
-				el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column))));
+				FieldTemplate t = template.getField(column);
+				if(Objects.nonNull(t)) {
+					el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey()))));
+				} else {
+					el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column))));
+				}
 				columns++;
 			}
 			
@@ -140,7 +150,8 @@ public class TableRenderer {
 							DynamicColumnService service = ApplicationServiceImpl.getInstance().getBean(dc.service());
 							row.appendChild(Html.td().appendChild(service.renderColumn(column, obj, rowTemplate)));
 						} else {
-							row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, template.getField(column))));
+							FieldTemplate t = template.getField(column);
+							row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t)));
 						}
 					}
 					
@@ -454,25 +465,16 @@ public class TableRenderer {
 	private Element processFieldValue(AbstractObject obj, ObjectTemplate template, FieldTemplate field) {
 		switch(field.getFieldType()) {
 		case BOOL:
-			return Html.i("fa-solid", Boolean.parseBoolean(obj.getValue(field).toString()) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
+			return Html.i("fa-solid", Boolean.parseBoolean(getStringValue(field, obj)) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
 		case OBJECT_REFERENCE: 
-			Object value = obj.getValue(field);
-			if(value instanceof String) {
-				if(StringUtils.isBlank((String)value)) {
-					return Html.span("-");
-				} else {
-					ObjectTemplate t = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(field.getValidationValue(ValidationType.RESOURCE_KEY));
-					AbstractObject ref = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(t.getResourceKey(), value.toString());
-					return Html.span(StringUtils.defaultIfEmpty((String) ref.getValue(t.getNameField()), "-"));
-				}
-			} 
-			
-			value = obj.getChild(field);
-			if(value instanceof AbstractObject) {
-				return Html.span(StringUtils.defaultIfEmpty((String)((AbstractObject)value).getValue("name"), "-"));
-			} 
+			AbstractObject value = getReferenceValue(field, obj);
+			if(Objects.nonNull(value)) {
+				if(value instanceof AbstractObject) {
+					return Html.span(StringUtils.defaultIfEmpty((String)((AbstractObject)value).getValue("name"), "-"));
+				} 
+			}
+			return Html.span("-");
 		case TEXT:
-			
 		case ENUM:
 		{
 			return renderText(field, obj, template);
@@ -484,9 +486,60 @@ public class TableRenderer {
 			} else {
 				return Html.span("-");
 			}
+		case COUNTRY:
+			String code = getStringValue(field, obj);
+			if(StringUtils.isNotBlank(code)) {
+				return Html.span(internationalService.getCountryName(code));
+			} else {
+				return Html.span("-");
+			}
 		default:
-			return Html.span(StringUtils.defaultString(safeCast(obj.getValue(field))), "UTF-8");
+			return Html.span(getStringValue(field, obj));
 		}
+	}
+	
+	String getStringValue(FieldTemplate field, AbstractObject rootObject) {
+
+		if(StringUtils.isNotBlank(field.getParentKey())) {
+			AbstractObject obj = rootObject.getChild(field.getParentKey());
+			if(Objects.nonNull(obj)) {
+				return safeCast(obj.getValue(field.getResourceKey()));
+			} 
+			return "";
+		} else {
+			return safeCast(rootObject.getValue(field.getResourceKey()));
+		}
+		
+	}
+	
+	AbstractObject getReferenceValue(FieldTemplate field, AbstractObject rootObject) {
+
+		AbstractObject obj = null;
+		if(StringUtils.isNotBlank(field.getParentKey())) {
+			obj = rootObject.getChild(field.getParentKey());
+			if(Objects.nonNull(obj)) {
+				obj = obj.getChild(field.getResourceKey());
+			} 
+		} else {
+			obj = rootObject.getChild(field.getResourceKey());
+		}
+		
+		return obj;
+		
+	}
+	
+	Object getObjectValue(FieldTemplate field, AbstractObject rootObject) {
+
+		if(StringUtils.isNotBlank(field.getParentKey())) {
+			AbstractObject obj = rootObject.getChild(field.getParentKey());
+			if(Objects.nonNull(obj)) {
+				return obj.getValue(field.getResourceKey());
+			} 
+			return null;
+		} else {
+			return rootObject.getValue(field.getResourceKey());
+		}
+		
 	}
 
 	private String safeCast(Object value) {
@@ -501,15 +554,15 @@ public class TableRenderer {
 		switch(renderer) {
 		case BOOTSTRAP_BADGE:
 		{
-			return BootstrapBadgeRender.generateBadge(Utils.checkNullToString(obj.getValue(field)));
+			return BootstrapBadgeRender.generateBadge(Utils.checkNullToString(getStringValue(field, obj)));
 		}
 		case I18N:
 		{
-			return Html.i18n(template.getBundle(), Utils.checkNullToString(obj.getValue(field)));
+			return Html.i18n(template.getBundle(), Utils.checkNullToString(getStringValue(field, obj)));
 		}
 		default:
 		{
-			return Html.span(Utils.checkNullToString(obj.getValue(field)), "UTF-8");
+			return Html.span(Utils.checkNullToString(getStringValue(field, obj)), "UTF-8");
 		}
 		}
 	}

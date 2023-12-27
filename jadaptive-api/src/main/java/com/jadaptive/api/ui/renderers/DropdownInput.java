@@ -69,7 +69,7 @@ public class DropdownInput extends InputRender {
 							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
 	}
 	
-	public void setDefaultValue(String name, String value, boolean i18n, String bundle) {
+	public Element setDefaultValue(String name, String value, boolean i18n, String bundle) {
 		
 		if(i18n) {
 			nameElement.attr("jad:bundle", bundle);
@@ -80,6 +80,7 @@ public class DropdownInput extends InputRender {
 		}
 		
 		valueElement.val(value);
+		return valueElement;
 	}
 
 	public void renderValues(Enum<?>[] values, String defaultValue, boolean i18n) {
@@ -140,7 +141,7 @@ public class DropdownInput extends InputRender {
 		dropdownMenu.appendChild(el);
 	}
 	
-	private void addInputValue(I18nOption value) {
+	private Element addInputValue(I18nOption value) {
 		Element el = PageHelper.createAnchor("#", value.getValue())
 				.attr("data-resourcekey", value.getValue())
 				.addClass("jdropdown-item dropdown-item");
@@ -149,13 +150,14 @@ public class DropdownInput extends InputRender {
 		el.attr("jad:i18n", value.getI18n());
 	
 		dropdownMenu.appendChild(el);
+		return el;
 	}
 	
-	public void addInputValue(String key, String value, boolean i18n) {
-		addInputValue(key, value, i18n, bundle);
+	public Element addInputValue(String key, String value, boolean i18n) {
+		return addInputValue(key, value, i18n, bundle);
 	}
 	
-	public void addInputValue(String key, String value, boolean i18n, String bundle) {
+	public Element addInputValue(String key, String value, boolean i18n, String bundle) {
 		Element el = PageHelper.createAnchor("#", value)
 				.attr("data-resourcekey", key)
 				.addClass("jdropdown-item dropdown-item");
@@ -164,6 +166,7 @@ public class DropdownInput extends InputRender {
 			el.attr("jad:i18n", value);
 		}
 		dropdownMenu.appendChild(el);
+		return el;
 	}
 
 	private void renderValues(Iterable<? extends NamedDocument> fields, String defaultValue, boolean i18n, String append) {

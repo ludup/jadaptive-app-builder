@@ -23,7 +23,7 @@ public class CssEditorFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String value) throws IOException {
+	public void renderInput(Element rootElement, String value, String... classes) throws IOException {
 
 
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/lib/codemirror.js");

@@ -9,6 +9,12 @@ public class DateFormInput extends FormInputRender {
 		super(template, field);
 	}
 	
+	public DateFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle) {
+		super(template, resourceKey, formVariable, bundle);
+	}
+	
+	
+	
 	@Override
 	public String getInputType() {
 		return "date";
