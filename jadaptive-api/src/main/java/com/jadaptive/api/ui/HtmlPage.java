@@ -53,6 +53,8 @@ public abstract class HtmlPage implements Page {
 	private Collection<HtmlPageExtender> extenders = null;
 	protected String resourcePath;
 	
+	static ThreadLocal<Document> currentDocument = new ThreadLocal<>();
+	
 	public HtmlPage() {
 		
 	}
@@ -71,6 +73,14 @@ public abstract class HtmlPage implements Page {
 	
 	protected void afterProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
 		
+	}
+	
+	public static boolean isProcessingDocument() {
+		return currentDocument.get()!=null;
+	}
+	
+	public static Document getCurrentDocument() {
+		return currentDocument.get();
 	}
 	
 	public final void created() throws FileNotFoundException {
@@ -105,35 +115,40 @@ public abstract class HtmlPage implements Page {
 	public Document generateHTMLDocument(String uri) throws IOException {
 		
 		Document document = resolveDocument(this);
+		currentDocument.set(document);
 		
-		processPageDependencies(document);
-		
-		if(Objects.nonNull(extenders)) {
-			for(HtmlPageExtender extender : extenders) {
-				extender.processStart(document, uri, this);
+		try {
+			processPageDependencies(document);
+			
+			if(Objects.nonNull(extenders)) {
+				for(HtmlPageExtender extender : extenders) {
+					extender.processStart(document, uri, this);
+				}
 			}
-		}
-		
-		generateContent(document);
-		
-		if(Objects.nonNull(extenders)) {
-			for(HtmlPageExtender extender : extenders) {
-				extender.generateContent(document, this);
+			
+			generateContent(document);
+			
+			if(Objects.nonNull(extenders)) {
+				for(HtmlPageExtender extender : extenders) {
+					extender.generateContent(document, this);
+				}
 			}
-		}
-		
-		if(Request.isAvailable()) {
-			injectFeedback(document, Request.get());
-		}
-		processPageExtensions(uri, document);
-		documentComplete(document);
-		
-		if(Objects.nonNull(extenders)) {
-			for(HtmlPageExtender extender : extenders) {
-				extender.processEnd(document, uri, this);
+			
+			if(Request.isAvailable()) {
+				injectFeedback(document, Request.get());
 			}
-		}
+			processPageExtensions(uri, document);
+			documentComplete(document);
+			
+			if(Objects.nonNull(extenders)) {
+				for(HtmlPageExtender extender : extenders) {
+					extender.processEnd(document, uri, this);
+				}
+			}
 		
+		} finally {
+			currentDocument.remove();
+		}
 		return document;
 	}
 
@@ -180,6 +195,7 @@ public abstract class HtmlPage implements Page {
 		try {
 
 			Document doc = resolveDocument(this);
+			currentDocument.set(doc);
 			
 			processPageDependencies(doc);
 			
@@ -257,6 +273,8 @@ public abstract class HtmlPage implements Page {
 			}
 			log.error("Failed to generate HTML page", e);
 			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			currentDocument.remove();
 		}
 	}
 	

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.CustomizablePage;
+import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
@@ -25,7 +26,7 @@ public class Footer extends AbstractPageExtension {
 	@Override
 	public void process(Document document, Element element, Page page) throws IOException {
 
-		Element bootstrap = document.selectFirst("#bootstrapCss");
+		Element bootstrap = HtmlPage.getCurrentDocument().selectFirst("#bootstrapCss");
 		if(Objects.nonNull(bootstrap)) {
 			BootstrapTheme current = getThemeFromCookie(BootstrapTheme.DEFAULT);
 			
