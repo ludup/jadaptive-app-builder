@@ -31,7 +31,7 @@ public class CssEditorFormInput extends FieldInputRender {
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/mode/css/css.js");
 		PageHelper.appendStylesheet(document, "/app/content/codemirror/lib/codemirror.css");
 				
-
+		Element input;
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")
 				.addClass("w-100")
@@ -42,10 +42,9 @@ public class CssEditorFormInput extends FieldInputRender {
 						.addClass("form-label")
 						.attr("jad:bundle", getBundle())
 						.attr("jad:i18n", String.format("%s.name", getResourceKey())))
-				.appendChild(new Element("textarea")
-						.attr("id", getFormVariable())
+				.appendChild(input = new Element("textarea")
 						.attr("name", getFormVariableWithParents())
-						.addClass("form-control")
+						.addClass(getResourceKey() + " form-control")
 						.val(value))
 				.appendChild(new Element("small")
 						.addClass("form-text")
@@ -53,6 +52,10 @@ public class CssEditorFormInput extends FieldInputRender {
 						.attr("jad:bundle", getBundle())
 						.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
 
+		if(!disableIDAttribute) {
+			input.attr("id", getResourceKey());
+		}
+		
 		String script = "$(function() {\nvar " + getFormVariable() + "Editor = CodeMirror.fromTextArea(document.getElementById('" + getResourceKey() + "'), {\r\n"
 				+ "    lineNumbers: true,\r\n"
 				+ "    autoRefresh:true,\r\n"

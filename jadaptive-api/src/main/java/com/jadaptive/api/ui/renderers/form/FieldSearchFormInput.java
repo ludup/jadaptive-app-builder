@@ -17,7 +17,8 @@ public class FieldSearchFormInput {
 	String resourceKey;
 	String formVariable;
 	String bundle;
-	boolean decorate = true; 
+	boolean decorate = true;
+	boolean disableIDAttribute; 
 	
 	public FieldSearchFormInput(ObjectTemplate template, TemplateViewField field, String url, String searchField, String idField) {
 		this.template = template;
@@ -70,15 +71,16 @@ public class FieldSearchFormInput {
 						.attr("jad:bundle", bundle)
 						.attr("jad:i18n", String.format("%s.name", resourceKey))));
 		}
-			
+		
+		Element input;
+		Element inputText;
 		_this.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", resourceKey))
 						.addClass("input-group position-relative dropdown")
-					.appendChild(new Element("input")
-							.attr("id", String.format("%sText", resourceKey))
+					.appendChild(inputText = new Element("input")
 							.attr("name", String.format("%sText", variableName))
 							.attr("data-display", "static")
-							.addClass("form-control jsearchText")
+							.addClass(String.format("%sText", resourceKey) + " form-control jsearchText")
 							.attr("data-bs-toggle", "dropdown")
 							.attr("data-url", url)
 							.attr("data-field", searchField)
@@ -88,9 +90,9 @@ public class FieldSearchFormInput {
 							.attr("aria-expanded", "false")
 							.attr("readOnly", readOnly)
 							.val(name))
-					.appendChild(new Element("input")
-							.attr("id", idField)
+					.appendChild(input = new Element("input")
 							.attr("name", variableName)
+							.addClass(idField)
 							.attr("type", "hidden")
 							.val(value))
 					.appendChild(new Element("span")
@@ -108,12 +110,22 @@ public class FieldSearchFormInput {
 						.attr("jad:i18n", String.format("%s.desc", resourceKey)));
 		}
 		
+		if(!disableIDAttribute) {
+			inputText.attr("id", String.format("%sText", resourceKey));
+			input.attr("id", idField);
+			
+		}
+		
 		return _this;
 		
 	}
 	
 	public void diableDecoration() {
 		this.decorate = false;
+	}
+
+	public void disableIDAttribute() {
+		this.disableIDAttribute = true;
 	}
 
 }

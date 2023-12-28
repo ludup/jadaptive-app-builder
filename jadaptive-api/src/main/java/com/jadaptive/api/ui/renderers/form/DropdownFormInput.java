@@ -43,16 +43,14 @@ public class DropdownFormInput extends FieldInputRender {
 		}
 		
 		e.appendChild(dropdownInput = new Element("div")
-				.attr("id", String.format("%sDropdown", getResourceKey()))
-				.addClass("input-group position-relative dropdown")
+				.addClass(String.format("%sDropdown", getResourceKey()) + " input-group position-relative dropdown")
 			.appendChild(valueElement = new Element("input")
-					.attr("id", resourceKey)
+					.addClass(resourceKey)
 					.attr("name", getFormVariableWithParents())
 					.attr("type", "hidden"))
 			.appendChild(nameElement = new Element("input")
-					.attr("id", String.format("%sText", getResourceKey()))
 					.attr("data-display", "static")
-					.addClass("form-control dropdown-toggle filter-dropdown")
+					.addClass(String.format("%sText", getResourceKey()) + " form-control dropdown-toggle filter-dropdown")
 					.attr("type", "text")
 					.attr("data-bs-toggle", "dropdown")
 					.attr("aria-haspopup", "true")
@@ -68,6 +66,12 @@ public class DropdownFormInput extends FieldInputRender {
 						.addClass("text-muted")
 						.attr("jad:bundle", getBundle())
 						.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
+		}
+		
+		if(!disableIDAttribute) {
+			dropdownInput.attr("id", String.format("%sDropdown", getResourceKey()));
+			valueElement.attr("id", resourceKey);
+			nameElement.attr("id", String.format("%sText", getResourceKey()));
 		}
 
 	}

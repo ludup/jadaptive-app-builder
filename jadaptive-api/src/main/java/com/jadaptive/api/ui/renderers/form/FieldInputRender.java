@@ -18,6 +18,7 @@ public abstract class FieldInputRender {
 	String bundle;
 	String formVariableWithParents;
 	boolean decorate = true;
+	boolean disableIDAttribute = false;
 	
 	public FieldInputRender(ObjectTemplate template, TemplateViewField field) {
 		this.template = template;
@@ -48,6 +49,10 @@ public abstract class FieldInputRender {
 	
 	public void disableDecoration() {
 		decorate = false;
+	}
+	
+	public void disableIDAttribute() {
+		this.disableIDAttribute = true;
 	}
 	
 	protected String getFormVariableWithParents() {

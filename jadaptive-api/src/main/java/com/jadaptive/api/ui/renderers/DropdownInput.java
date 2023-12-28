@@ -18,12 +18,17 @@ public class DropdownInput extends InputRender {
 	boolean up;
 	boolean dark;
 	String bundle;
+	boolean disableIDAttribute = false;
 	
 	public DropdownInput(String resourceKey, String bundle) {
 		super(resourceKey);
 		this.bundle = bundle;
 	}
 
+	public void disableIDAttribute() {
+		this.disableIDAttribute = true;
+	}
+	
 	public DropdownInput up() {
 		this.up = true;
 		return this;
@@ -41,18 +46,15 @@ public class DropdownInput extends InputRender {
 	@Override
 	public Element renderInput() {
 
-		return new Element("div").attr("class", "row")
-				.appendChild(new Element("div")
-						.attr("id", String.format("%sDropdown", resourceKey))
-						.addClass("input-group position-relative dropdown" + (up ? " dropup" : ""))
+		Element e = new Element("div")
+						.addClass(String.format("%sDropdown", resourceKey) + " input-group position-relative dropdown" + (up ? " dropup" : ""))
 					.appendChild(valueElement = new Element("input")
-							.attr("id", resourceKey)
+							.addClass(resourceKey)
 							.attr("name", resourceKey)
 							.attr("type", "hidden"))
 					.appendChild(nameElement = new Element("input")
-							.attr("id", String.format("%sText", resourceKey))
 							.attr("data-display", "static")
-							.addClass("dropdown-toggle filter-dropdown form-control" + (dark ? " text-light" : ""))
+							.addClass(String.format("%sText", resourceKey) + " dropdown-toggle filter-dropdown form-control" + (dark ? " text-light" : ""))
 							.attr("readonly", "readonly")
 							.attr("type", "text")
 							.attr("autocomplete", "off")
@@ -66,7 +68,15 @@ public class DropdownInput extends InputRender {
 								.attr("class", "fa-solid fa-chevron-down")))
 					.appendChild(dropdownMenu = new Element("div")
 							.addClass("dropdown-menu dropdown-size" + (dark ? " dropdown-menu-dark" : ""))
-							.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
+							.attr("aria-labelledby", String.format("%sDropdown", resourceKey)));
+		
+		if(!disableIDAttribute) {
+			e.attr("id", String.format("%sDropdown", resourceKey));
+			nameElement.attr("id", String.format("%sText", resourceKey));
+			valueElement.attr("id", resourceKey);
+		}
+		
+		return e;
 	}
 	
 	public Element setDefaultValue(String name, String value, boolean i18n, String bundle) {

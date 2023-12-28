@@ -27,30 +27,27 @@
   <div class="row">
       <div id="searchForm" class="col-12 mb-3">
       <form id="form" method="POST" action="/app/ui/search/${page.template.resourceKey}"> 
-      	<div class="row mb-3">
-	      	<div id="searchColumnHolder" class="col-md-4">
+      	<div class="searchRow row mb-5">
+	      	<div class="col-md-4">
 	      		<label class="form-label w-100" jad:bundle="default" jad:i18n="search.column.name" >Search Column</label>
-	      		<div id="searchDropdownHolder"></div>
+	      		<div class="searchDropdownHolder"></div>
 	      	</div>
 	      	<div id="searchValueHolder" class="col-md-4">
 	      		<label class="form-label w-100" jad:bundle="default" jad:i18n="search.filter.name">Search Filter</label>
 	      	</div>
-	      	<div id="searchPageHolder" class="col-md-4">
-	      		<label class="form-label w-100" jad:bundle="default" jad:i18n="search.page.name">Results per Page</label>
-	      		<div id="searchPageHolder"></div>
-	      	</div>
-	    </div>
-	    <div class="row mb-3">
-	      	<div id="searchValueHolder" class="col-md-12 text-end">
+	      	<div class="col-md-4 text-start">
+	      		<label class="form-label w-100">&nbsp;</label>
 	      		<button class="btn btn-primary float-en searchTable spinClick"><i class="fa-solid fa-search"></i> <span jad:bundle="default" jad:i18n="search.name"></span></button>
 	      	</div>
-      	</div>
+	    </div>
+        <hr>
       	<input type="hidden" name="start" id="start" value="${page.start}">
+      	<div id="tableholder" class="col-12 mb-3">
+  	  	
+	  	</div>
 	  </form>
 	  
-  	  <div id="tableholder" class="col-12 mb-3">
-  	  	
-	  </div>
+
   </div>
   </div>
 

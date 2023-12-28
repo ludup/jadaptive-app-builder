@@ -25,6 +25,7 @@ public abstract class FormInputRender extends FieldInputRender {
 	public final void renderInput(Element rootElement, String value, String... classes) {
 		
 		Element myElement;
+		Element input;
 		rootElement.appendChild(myElement = 
 				new Element("div").addClass(Utils.csv(" ", classes) + " row mb-3"));
 		
@@ -39,10 +40,9 @@ public abstract class FormInputRender extends FieldInputRender {
 						.attr("jad:i18n", String.format("%s.name", getResourceKey()))));
 		}
 		
-		myElement.appendChild(new Element("input")
-						.attr("id", resourceKey)
+		myElement.appendChild(input = new Element("input")
 						.attr("name", getFormVariableWithParents())
-						.addClass("form-control")
+						.addClass(resourceKey + " form-control")
 						.attr("value", value)
 						.attr("autocomplete", "off")
 						.attr("type", getInputType()));
@@ -52,6 +52,10 @@ public abstract class FormInputRender extends FieldInputRender {
 					.addClass("text-muted")
 					.attr("jad:bundle", getBundle())
 					.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
+		}
+		
+		if(!disableIDAttribute) {
+			input.attr("id", resourceKey);
 		}
 		
 		onRender(myElement, value);

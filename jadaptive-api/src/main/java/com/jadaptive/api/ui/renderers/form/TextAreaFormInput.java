@@ -16,7 +16,7 @@ public class TextAreaFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(Element rootElement, String value, String... classes) {
 
-		
+		Element input;
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")
 				.appendChild(new Element("div")
@@ -26,11 +26,10 @@ public class TextAreaFormInput extends FieldInputRender {
 						.addClass("form-label")
 						.attr("jad:bundle", getBundle())
 						.attr("jad:i18n", String.format("%s.name", getResourceKey())))
-				.appendChild(new Element("textarea")
-						.attr("id", getFormVariable())
+				.appendChild(input = new Element("textarea")
 						.attr("name", getFormVariableWithParents())
 						.attr("rows", String.valueOf(rows))
-						.addClass("form-control")
+						.addClass(getResourceKey() + " form-control")
 						.val(value))
 				.appendChild(new Element("small")
 						.addClass("form-text")
@@ -38,7 +37,9 @@ public class TextAreaFormInput extends FieldInputRender {
 						.attr("jad:bundle", getBundle())
 						.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
 
-
+		if(!disableIDAttribute) {
+			input.attr("id", getResourceKey());
+		}
 	}
 
 }

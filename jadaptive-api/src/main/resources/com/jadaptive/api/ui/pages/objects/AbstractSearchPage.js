@@ -5,34 +5,40 @@ window.onload = function() {
 		$('#form').submit();
 	});
 	
-	$('#searchColumnDropdown .jdropdown-item').click(function(e) {
+	$('.searchColumnDropdown .jdropdown-item').click(function(e) {
 		e.preventDefault();
-		$('#searchColumn').data('formvar', $(this).data('formvar'));
+		var r = $(this).closest('.searchRow');
+		r = r.find('input[name="searchColumn"]').first();
+		var f = $(this).data('formvar');
+		r.data('formvar', f);
 	});
 	
-	$('#searchColumn').change(function() {
-		var e = $('#searchValueHolder').find('input[name="searchValue"]');
-		e.val('');
-		var m = $('#searchValueHolder').find('input[name="searchModifier"]');
-		m.val('');
+	$('.searchColumn').change(function() {
+		var currentField = $(this).closest('.searchRow').find('input[name="searchValue"]');
+		currentField.val('');
+		currentField.attr("name", "unused");
+		var currentModifier = $(this).closest('.searchRow').find('input[name="searchModifier"]');
+		currentModifier.val('');
+		currentModifier.attr("name", "unusedModifier");
 		
-		var p = e.closest('.searchValueField');
-		var x = p.find(".unusedModifier");
-		
-		var column = '#' + $(this).val();
-		$('#searchColumn').val($(this).data('formvar'));
-		var n = $(document).find(column);
-		var f = n.closest('.searchValueField');
+		var currentParent = currentField.closest('.searchValueField');
+		currentParent.addClass("d-none");
 
-		e.attr("name", "unused");
-		if(m){
-		   m.attr("name", "unusedModifier");
-		}
-		if(x) {
-			x.attr("name", "searchModifier");
-		}
-		p.addClass("d-none");
-		n.attr("name", "searchValue");
-		f.removeClass("d-none");
+		var targetColumn = '.' + $(this).val();
+		var v = $(this).data('formvar');
+		$(this).val(v);
+		var targetField = $(this).closest('.searchRow').find(targetColumn);
+		var targetParent = targetField.closest('.searchValueField');
+        var targetModifier = targetParent.find(".unusedModifier");
+		
+		targetField.attr("name", "searchValue");
+		targetParent.removeClass("d-none");
+		targetModifier.attr("name", "searchModifier");
+		
+	});
+	
+	$('form').submit(function() {	
+		$('.unused').remove();
+		$('.unusedModifier').remove();
 	});
 };

@@ -34,14 +34,12 @@ public class ReplacementFormInput extends FieldInputRender {
 						.attr("jad:bundle", getBundle())
 						.attr("jad:i18n", String.format("%s.name", getResourceKey())))
 				.appendChild(dropdownInput = new Element("div")
-						.attr("id", String.format("%sDropdown", getResourceKey()))
-						.addClass("input-group position-relative dropdown")
+						.addClass(String.format("%s.desc", getResourceKey()) + " input-group position-relative dropdown")
 					.appendChild(valueElement = new Element("input")
-							.attr("id", getFormVariable())
 							.attr("name", getFormVariableWithParents())
 							.attr("value", value)
 							.attr("data-display", "static")
-							.addClass("form-control dropdown-toggle filter-dropdown")
+							.addClass(getResourceKey() + " form-control dropdown-toggle filter-dropdown")
 							.attr("type", "text")
 							.attr("data-bs-toggle", "dropdown")
 							.attr("aria-haspopup", "true")
@@ -56,6 +54,10 @@ public class ReplacementFormInput extends FieldInputRender {
 							.attr("jad:bundle", getBundle())
 							.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
 
+		if(!disableIDAttribute) {
+			dropdownInput.attr("id", String.format("%sDropdown", getResourceKey()));
+			valueElement.attr("id", getResourceKey());
+		}
 	}
 	
 	public void addInputValue(String value, String bundle, String name) {

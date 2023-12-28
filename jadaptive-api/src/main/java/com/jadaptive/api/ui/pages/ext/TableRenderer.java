@@ -166,11 +166,16 @@ public class TableRenderer {
 						.appendChild(Html.i18n("default", "noResults.text"))));
 			}
 			
+			tableholder.add(new Element("hr").addClass("mt-5"));
 			tableholder.add(Html.div("row", "mb-3").appendChild(
-					Html.div("col-md-6 float-start text-start")
-							.attr("id", "objectActions"))
-					.appendChild(Html.div("col-md-6 float-end text-end")
-							.attr("id", "pagnation")));
+						Html.div("col-md-6 float-start text-start")
+							.attr("id", "pagnation"))
+					.appendChild(Html.div("col-md-6 float-start text-end")
+							.attr("id", "pagesize")));
+			
+			tableholder.add(Html.div("row", "mb-3").appendChild(
+					Html.div("col-md-12 float-start text-start")
+						.attr("id", "objectActions")));
 			
 			generateTableActions(tableholder.select("#objectActions").first(), generateActions(template.getCollectionKey()));
 			

@@ -13,12 +13,16 @@ public class HiddenFormInput extends FieldInputRender {
 	
 	public final void renderInput(Element rootElement, String value, String... classes) {
 	
-		rootElement.appendChild(new Element("input")
-						.attr("id", getFormVariable())
+		Element input;
+		rootElement.appendChild(input = new Element("input")
 						.attr("name", getFormVariable())
-						.addClass("form-control")
+						.addClass(resourceKey + " form-control")
 						.attr("value", value)
 						.attr("type", "hidden"));
+		
+		if(!disableIDAttribute) {
+			input.attr("id", resourceKey);
+		}
 	}
 
 }

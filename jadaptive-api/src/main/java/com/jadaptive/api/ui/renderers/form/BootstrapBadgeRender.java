@@ -13,19 +13,21 @@ public class BootstrapBadgeRender extends FieldInputRender {
 	
 	public final void renderInput(Element rootElement, String value, String... classes) {
 		
-
+		Element input;
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")
 				.appendChild(new Element("div")
 						.addClass("col-12")
 				.appendChild(generateBadge(value))
-				.appendChild(new Element("input")
-						.attr("id", getFormVariable())
+				.appendChild(input = new Element("input")
 						.attr("name", getFormVariableWithParents())
-						.addClass("form-control")
+						.addClass(getResourceKey() + " form-control")
 						.attr("value", value)
 						.attr("type", "hidden"))));
 
+		if(!disableIDAttribute) {
+			input.attr("id", getResourceKey());
+		}
 	}
 
 	public static Element generateBadge(String value) {

@@ -58,6 +58,8 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	protected Integer length = 10;
 	protected String searchField;
 	protected String searchValue;
+	protected String searchValueText;
+	protected String searchModifier;
 	
 	public final void processForm(Document document, SearchForm form) throws IOException {
 		
@@ -67,10 +69,18 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		searchValue = form.getSearchValue();
 		setCachedValue("searchValue", searchValue);
 		
+		searchValueText = form.getSearchValueText();
+		setCachedValue("searchValueText", searchValueText);
+		
+		searchModifier = form.getSearchModifier();
+		setCachedValue("searchModifier", searchModifier);
+		
 		start = form.getStart();
 		setCachedValue("start", String.valueOf(start));
 		
 		length = form.getLength();
+		length =  Math.max(length, 10);
+		
 		setCachedValue("length", String.valueOf(length));
 		
 		generateTable(document);
@@ -117,6 +127,22 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			}
 		}
 		
+		searchValueText = Request.get().getParameter("searchValueText");
+		if(Objects.isNull(searchValueText)) {
+			searchValueText = getCachedValue("searchValueText", StringUtils.defaultString(Request.get().getParameter("searchValueText"), ""));
+			if(StringUtils.isBlank(searchValueText)) {
+				searchValueText = null;
+			}
+		}
+		
+		searchModifier = Request.get().getParameter("searchModifier");
+		if(Objects.isNull(searchModifier)) {
+			searchModifier = getCachedValue("searchModifier", StringUtils.defaultString(Request.get().getParameter("searchModifier"), ""));
+			if(StringUtils.isBlank(searchModifier)) {
+				searchModifier = null;
+			}
+		}
+		
 		start = getCachedInt("start", (String) Request.get().getParameter("start"), 0);
 		length = getCachedInt("length", (String) Request.get().getParameter("length"), 10);
 		
@@ -128,54 +154,30 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		
 		DropdownInput searchColumns = new DropdownInput("searchColumn", "default");
-		document.selectFirst("#searchDropdownHolder").appendChild(searchColumns.renderInput());
+		searchColumns.disableIDAttribute();
+		document.selectFirst(".searchDropdownHolder").appendChild(searchColumns.renderInput());
 		
 		if(StringUtils.isBlank(searchField)) {
 			searchField = template.getDefaultColumn();
 		}
 		
-		searchColumns.addInputValue(template.getDefaultColumn(), String.format("%s.name", template.getDefaultColumn()), true, template.getDefaultColumn().equals("uuid") ? "default" : template.getBundle());
-
-		if(template.getDefaultColumn().equals("uuid")) {
-			
-			Element e = Html.text("uuid", "searchValue", searchValue, "form-control");
-			Element holder = document.selectFirst("#searchValueHolder");
-			if(!searchField.equals(template.getDefaultColumn())) {
-				e.addClass("d-none searchValueField");
-			} else {
-				e.addClass("searchValueField");
-			}
-			holder.appendChild(e);
-		} else {
-			addSearchValueField(template, "", template.getField(template.getDefaultColumn()), document, searchField.equals(template.getDefaultColumn()));
-		}
-		
 		generateSearchFields(template, searchColumns, document, "", searchField);
-		document.selectFirst("#searchColumn").val(searchField);
-		
-		DropdownInput searchPage = new DropdownInput("length", "default");
-		document.selectFirst("#searchPageHolder").appendChild(searchPage.renderInput());
-		
-		var pageResults = new ArrayList<I18nOption>();
-		pageResults.add(new I18nOption("default", "5.items", "5"));
-		pageResults.add(new I18nOption("default", "10.items", "10"));
-		pageResults.add(new I18nOption("default", "25.items", "25"));
-		pageResults.add(new I18nOption("default", "50.items", "50"));
-		pageResults.add(new I18nOption("default", "100.items", "100"));
-		pageResults.add(new I18nOption("default", "250.items", "250"));
-		searchPage.renderValues(pageResults, String.valueOf(length));
+		document.selectFirst(".searchColumn").val(searchField);
 		
 		Element table = document.selectFirst("#tableholder");
-		
-		long totalObjects = generateCount(template, searchField, searchValue);
-		
-		if(start > 0 && totalObjects <= start) {
-			start -= length;
-		}
 		
 		String searchModifier = Request.get().getParameter("searchModifier");
 		if(StringUtils.isNotBlank(searchModifier)) {
 			searchValue = searchModifier + searchValue;
+		}
+		
+		if(log.isInfoEnabled()) {
+			log.info("Searching for {} {}", searchField, searchValue);
+		}
+		long totalObjects = generateCount(template, searchField, searchValue);
+		
+		if(start > 0 && totalObjects <= start) {
+			start -= length;
 		}
 		
 		Collection<AbstractObject> objects = generateTable(template, searchField, searchValue, start, length);
@@ -199,16 +201,14 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		table.insertChildren(0, renderer.render());
 
-		if(totalObjects > length) {
-			renderPagination(totalObjects, table);
-		}
+		renderPagination(totalObjects, table.selectFirst("#pagnation"));
 		
 	}
 	
 	private void generateSearchFields(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField) {
 		
 		for(FieldTemplate field : template.getFields()) {
-			if(field.isSearchable() && !field.getResourceKey().equals(template.getDefaultColumn())) {
+			if(field.isSearchable()) {
 				input.addInputValue(field.getResourceKey(), String.format("%s.name", field.getResourceKey()), true, template.getBundle()).attr("data-formvar", parentPrefix + field.getFormVariable());
 				if(searchField.equals(parentPrefix + field.getFormVariable())) {
 					input.setDefaultValue(String.format("%s.name", field.getResourceKey()), 
@@ -234,10 +234,12 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			BooleanFormInput input = new BooleanFormInput(template,field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			
 			input.disableDecoration();
+			input.disableIDAttribute();
+			
 			if(initial) {
 				input.renderInput(holder, searchValue, "searchValueField");
 			} else {
-				input.renderInput(holder, "", "searchValueField", "d-none");
+				input.renderInput(holder, "", "d-none", "searchValueField");
 			}
 			break;
 		}
@@ -253,6 +255,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			
 			DropdownFormInput dropdown = new DropdownFormInput(template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			dropdown.disableDecoration();
+			dropdown.disableIDAttribute();
 			dropdown.renderInput(e, "");
 			for(Country country : internationalService.getCountries()) {
 				dropdown.addInputValue(country.getCode(), country.getName());
@@ -276,21 +279,23 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			}
 			
 			
-//			DropdownInput modifier = new DropdownInput(initial ? "searchModifier" : "unusedModifier", "userInterface");
-//			Collection<I18nOption> modifiers = new ArrayList<>();
-//			modifiers.add(new I18nOption("userInterface","equals.name", ""));
-//			modifiers.add(new I18nOption("userInterface","gt.name", ">"));
-//			modifiers.add(new I18nOption("userInterface","gte.name", ">="));
-//			modifiers.add(new I18nOption("userInterface","lt.name", "<"));
-//			modifiers.add(new I18nOption("userInterface","lte.name", "<="));
+			DropdownInput modifier = new DropdownInput(initial ? "searchModifier" : "unusedModifier", "userInterface");
+			modifier.disableIDAttribute();
+			Collection<I18nOption> modifiers = new ArrayList<>();
+			modifiers.add(new I18nOption("userInterface","equals.name", ""));
+			modifiers.add(new I18nOption("userInterface","gt.name", ">"));
+			modifiers.add(new I18nOption("userInterface","gte.name", ">="));
+			modifiers.add(new I18nOption("userInterface","lt.name", "<"));
+			modifiers.add(new I18nOption("userInterface","lte.name", "<="));
 			
-//			e.appendChild(Html.div("col-3").appendChild(modifier.renderInput()));
-//			modifier.renderValues(modifiers, StringUtils.defaultString(Request.get().getParameter("searchModifier"),""));
+			e.appendChild(Html.div("col-3").appendChild(modifier.renderInput()));
+			modifier.renderValues(modifiers, StringUtils.defaultString(Request.get().getParameter("searchModifier"),""));
 			
 			Element valueElement = Html.div("col-9");
 			e.appendChild(valueElement);
 			DateFormInput input = new DateFormInput(template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			input.disableDecoration();
+			input.disableIDAttribute();
 			if(initial) {
 				input.renderInput(valueElement, searchValue);
 			} else {
@@ -311,6 +316,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			
 			DropdownFormInput dropdown = new DropdownFormInput(template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			dropdown.disableDecoration();
+			dropdown.disableIDAttribute();
 			dropdown.renderInput(e, "");
 
 			try {
@@ -331,15 +337,14 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 		case OBJECT_REFERENCE:
 		{
-			String searchText = Request.get().getParameter("searchValueText");
-			
+			String searchText = StringUtils.defaultString(searchValueText, Request.get().getParameter("searchValueText"));
 			ObjectTemplate referenceTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
 			FieldSearchFormInput input = new FieldSearchFormInput(
 					template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle(), 
 					String.format("/app/api/objects/%s/table", field.getValidationValue(ValidationType.RESOURCE_KEY)),
 						referenceTemplate.getNameField(), field.getResourceKey(), "uuid");
 			input.diableDecoration();
-			
+			input.disableIDAttribute();
 			if(!initial) {
 				Element e = input.renderInput(holder,  "",  "", true, false);
 				e.addClass("d-none searchValueField");
@@ -364,33 +369,49 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			}
 			
 			
-//			DropdownInput modifier = new DropdownInput(initial ? "searchModifier" : "unusedModifier", "userInterface");
-//			Collection<I18nOption> modifiers = new ArrayList<>();
-//			modifiers.add(new I18nOption("userInterface","equals.name", ""));
-//			modifiers.add(new I18nOption("userInterface","gt.name", ">"));
-//			modifiers.add(new I18nOption("userInterface","gte.name", ">="));
-//			modifiers.add(new I18nOption("userInterface","lt.name", "<"));
-//			modifiers.add(new I18nOption("userInterface","lte.name", "<="));
-//			
-//			e.appendChild(Html.div("col-3").appendChild(modifier.renderInput()));
-//			modifier.renderValues(modifiers, StringUtils.defaultString(Request.get().getParameter("searchModifier"),""));
+			DropdownInput modifier = new DropdownInput(initial ? "searchModifier" : "unusedModifier", "userInterface");
+			modifier.disableIDAttribute();
+			
+			Collection<I18nOption> modifiers = new ArrayList<>();
+			modifiers.add(new I18nOption("userInterface","equals.name", ""));
+			modifiers.add(new I18nOption("userInterface","gt.name", ">"));
+			modifiers.add(new I18nOption("userInterface","gte.name", ">="));
+			modifiers.add(new I18nOption("userInterface","lt.name", "<"));
+			modifiers.add(new I18nOption("userInterface","lte.name", "<="));
+			
+			e.appendChild(Html.div("col-3").appendChild(modifier.renderInput()));
+			modifier.renderValues(modifiers, StringUtils.defaultString(Request.get().getParameter("searchModifier"),""));
 			
 			Element valueElement = Html.div("col-9");
 			e.appendChild(valueElement);
-			valueElement.appendChild(Html.text(field.getResourceKey(), initial ? "searchValue" : "unused", initial ? searchValue : "", "form-control"));
+			
+			Element input = new Element("input")
+					.attr("type", "text")
+					.attr("name",  initial ? "searchValue" : "unused")
+					.addClass(field.getResourceKey() + " form-control");
+			if(initial) {
+				input.val(searchValue);
+			} 
+			valueElement.appendChild(input);
 			break;
 		}
 		case TEXT:
 		case TEXT_AREA:
 		default:
 		{
-			Element e = Html.text(field.getResourceKey(), initial ? "searchValue" : "unused", initial ? searchValue : "", "form-control");
-			if(!initial) {
-				e.addClass("d-none searchValueField");
+			Element input;
+			Element div = new Element("div")
+					.appendChild(input = new Element("input")
+							.attr("type", "text")
+							.attr("name",  initial ? "searchValue" : "unused")
+							.addClass(field.getResourceKey() + " form-control"));
+			if(initial) {
+				input.val(searchValue);
+				div.addClass("searchValueField");
 			} else {
-				e.addClass("searchValueField");
+				div.addClass("d-none searchValueField");
 			}
-			holder.appendChild(e);
+			holder.appendChild(div);
 			break;
 		}
 		}
@@ -416,8 +437,19 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 
 		Element pageList;
-
 		pagnation.appendChild(Html.nav().appendChild(pageList = Html.ul("pagination")));
+		
+		Element pageSize = pagnation.nextElementSibling();
+		DropdownInput searchPage = new DropdownInput("length", "default");
+		pageSize.appendChild(searchPage.renderInput());
+		
+		var pageResults = new ArrayList<I18nOption>();
+		pageResults.add(new I18nOption("default", "10.items", "10"));
+		pageResults.add(new I18nOption("default", "25.items", "25"));
+		pageResults.add(new I18nOption("default", "50.items", "50"));
+		pageResults.add(new I18nOption("default", "100.items", "100"));
+		pageResults.add(new I18nOption("default", "250.items", "250"));
+		searchPage.renderValues(pageResults, String.valueOf(length));
 		
 		if(currentPage > 0) {
 			pageList.appendChild(Html.li("page-item")
@@ -508,7 +540,9 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	
 	public interface SearchForm {
 		String getSearchColumn();
+		String getSearchValueText();
 		String getSearchValue();
+		String getSearchModifier();
 		int getStart();
 		int getLength();
 		

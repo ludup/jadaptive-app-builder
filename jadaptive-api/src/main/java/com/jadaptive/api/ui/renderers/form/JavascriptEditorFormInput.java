@@ -32,7 +32,7 @@ public class JavascriptEditorFormInput extends FieldInputRender {
 		PageHelper.appendHeadScript(document, "/app/content/codemirror/mode/css/css.js");
 		PageHelper.appendStylesheet(document, "/app/content/codemirror/lib/codemirror.css");
 				
-
+		Element input;
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")
 				.addClass("w-100")
@@ -43,10 +43,9 @@ public class JavascriptEditorFormInput extends FieldInputRender {
 						.addClass("form-label")
 						.attr("jad:bundle", bundle)
 						.attr("jad:i18n", String.format("%s.name", resourceKey)))
-				.appendChild(new Element("textarea")
-						.attr("id", getFormVariable())
+				.appendChild(input = new Element("textarea")
 						.attr("name", getFormVariableWithParents())
-						.addClass("form-control")
+						.addClass(getResourceKey() + " form-control")
 						.val(Base64.getEncoder().encodeToString(value.getBytes("UTF-8"))))
 				.appendChild(new Element("small")
 						.addClass("form-text")
@@ -54,6 +53,10 @@ public class JavascriptEditorFormInput extends FieldInputRender {
 						.attr("jad:bundle", bundle)
 						.attr("jad:i18n", String.format("%s.desc", resourceKey)))));
 
+		if(!disableIDAttribute) {
+			input.attr("id", getResourceKey());
+		}
+		
 		String script = "$(function() {\n$('#" + resourceKey + "').val(window.atob($('#" + resourceKey + "').val()));\r\n"
 								+ "var " + getFormVariable() + "Editor = CodeMirror.fromTextArea(document.getElementById('" + resourceKey + "'), {\r\n"
 								+ "    lineNumbers: true,\r\n"

@@ -83,20 +83,6 @@ public class TablePage extends TemplatePage {
 			}
 		}
 		
-//		DropdownInput searchColumns = new DropdownInput("searchColumn", "default");
-//		document.selectFirst("#searchDropdownHolder").appendChild(searchColumns.renderInput());
-//		List<I18nOption> columns = new ArrayList<>();
-//		columns.add(new I18nOption("default", "default.value", ""));
-//		
-//		for(FieldTemplate field : template.getFields()) {
-//			if(field.isSearchable()) {
-//				columns.add(new I18nOption(template.getBundle(), String.format("%s.name", field.getResourceKey()), field.getResourceKey()));
-//			}
-//		}
-//		
-//		searchColumns.renderValues(columns, "");
-		
-		
 		Element rowActions = document.selectFirst("#rowActions");
 		
 		for(TableAction action : templateService.getTableActions(template.getCollectionKey())) {

@@ -24,9 +24,7 @@ public class BooleanFormInput extends FieldInputRender {
 		Element e;
 		
 		rootElement.appendChild(e = new Element("div")
-				.addClass(Utils.csv(" ", classes) + " row mb-3"))
-				.appendChild(new Element("div")
-						.addClass("col-12"));
+				.addClass(Utils.csv(" ", classes) + " row mb-3"));
 		
 		if(decorate) {
 			e.appendChild(new Element("label")
@@ -41,10 +39,9 @@ public class BooleanFormInput extends FieldInputRender {
 				.appendChild(new Element("div")
 						.addClass("col-12 form-check form-switch")
 				.appendChild(input = new Element("input")
-					.attr("id", resourceKey)
 					.attr("name", getFormVariable())
 					.attr("type", "checkbox")
-					.addClass("form-check-input")
+					.addClass(resourceKey + " form-check-input")
 					.val("true"))));
 		
 		if(decorate) {
@@ -54,6 +51,10 @@ public class BooleanFormInput extends FieldInputRender {
 				.addClass("form-text text-muted text-small mt-3")
 				.attr("jad:bundle", getBundle())
 				.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
+		}
+		
+		if(!disableIDAttribute) {
+			input.attr("id", resourceKey);
 		}
 
 		if("true".equalsIgnoreCase(value)) {
