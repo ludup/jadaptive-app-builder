@@ -165,6 +165,9 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 			case TIMESTAMP:
 				gen.writeStringField(t.getResourceKey(), Utils.formatDate((Date)value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
 				break;
+			case DATE:
+				gen.writeStringField(t.getResourceKey(), Utils.formatDate((Date)value, "yyyy-MM-dd"));
+				break;
 			case TEXT:
 			case TEXT_AREA:
 			case PASSWORD:
@@ -173,6 +176,8 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 			case OPTIONS:
 			case COUNTRY:
 			case IMAGE:
+			case FILE:
+			case TIME:
 				gen.writeStringField(t.getResourceKey(), value.toString());
 				break;
 			case OBJECT_REFERENCE:

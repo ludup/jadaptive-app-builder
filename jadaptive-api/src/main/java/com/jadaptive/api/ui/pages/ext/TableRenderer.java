@@ -499,7 +499,7 @@ public class TableRenderer {
 				return Html.span("-");
 			}
 		default:
-			return Html.span(getStringValue(field, obj));
+			return Html.span(StringUtils.defaultString(getStringValue(field, obj)));
 		}
 	}
 	
