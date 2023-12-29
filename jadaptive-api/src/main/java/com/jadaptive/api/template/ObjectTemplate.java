@@ -202,26 +202,28 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 		
 		if(Objects.isNull(fieldsByName)) {
 			Map<String,FieldTemplate> tmp = new HashMap<>();
-			buildMap("", tmp, fields, null);
+			buildMap("", tmp, fields, null,null);
 			fieldsByName = tmp;
 		}
 		return fieldsByName;
 	}
 	
-	private void buildMap(String prefix, Map<String,FieldTemplate> map, Collection<FieldTemplate> fields, FieldTemplate parentField) {
+	private void buildMap(String prefix, Map<String,FieldTemplate> map, Collection<FieldTemplate> fields, FieldTemplate parentField, ObjectTemplate template) {
 		
 		for(FieldTemplate t : fields) {
 			switch(t.getFieldType()) {
 			case OBJECT_EMBEDDED:
+				ObjectTemplate parentTemplate = ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
+						.get(t.getValidationValue(ValidationType.RESOURCE_KEY));
 				buildMap(prefix + t.getResourceKey() + ".", 
 						map, 
-						ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
-							.get(t.getValidationValue(ValidationType.RESOURCE_KEY))
-							.getFields(),
-							t);
+							parentTemplate.getFields(),
+							t,
+							parentTemplate);
 			default:
 				if(Objects.nonNull(parentField)) {
-					t.setParentKey(parentField.getResourceKey());
+					t.setParentField(parentField.getResourceKey());
+					t.setParentKey(template.getResourceKey());
 				}
 				map.put(prefix + t.getResourceKey(), t);
 			}

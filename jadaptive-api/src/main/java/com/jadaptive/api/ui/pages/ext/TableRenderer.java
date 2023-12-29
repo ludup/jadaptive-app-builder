@@ -166,11 +166,10 @@ public class TableRenderer {
 						.appendChild(Html.i18n("default", "noResults.text"))));
 			}
 			
-			tableholder.add(new Element("hr").addClass("mt-5"));
 			tableholder.add(Html.div("row", "mb-3").appendChild(
-						Html.div("col-md-6 float-start text-start")
+						Html.div("col-md-9 float-start text-start")
 							.attr("id", "pagnation"))
-					.appendChild(Html.div("col-md-6 float-start text-end")
+					.appendChild(Html.div("col-md-3 float-start text-end")
 							.attr("id", "pagesize")));
 			
 			tableholder.add(Html.div("row", "mb-3").appendChild(
@@ -505,8 +504,8 @@ public class TableRenderer {
 	
 	String getStringValue(FieldTemplate field, AbstractObject rootObject) {
 
-		if(StringUtils.isNotBlank(field.getParentKey())) {
-			AbstractObject obj = rootObject.getChild(field.getParentKey());
+		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
+			AbstractObject obj = rootObject.getChild(field.getParentField());
 			if(Objects.nonNull(obj)) {
 				return safeCast(obj.getValue(field.getResourceKey()));
 			} 
@@ -520,8 +519,8 @@ public class TableRenderer {
 	AbstractObject getReferenceValue(FieldTemplate field, AbstractObject rootObject) {
 
 		AbstractObject obj = null;
-		if(StringUtils.isNotBlank(field.getParentKey())) {
-			obj = rootObject.getChild(field.getParentKey());
+		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
+			obj = rootObject.getChild(field.getParentField());
 			if(Objects.nonNull(obj)) {
 				obj = obj.getChild(field.getResourceKey());
 			} 
@@ -535,8 +534,8 @@ public class TableRenderer {
 	
 	Object getObjectValue(FieldTemplate field, AbstractObject rootObject) {
 
-		if(StringUtils.isNotBlank(field.getParentKey())) {
-			AbstractObject obj = rootObject.getChild(field.getParentKey());
+		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
+			AbstractObject obj = rootObject.getChild(field.getParentField());
 			if(Objects.nonNull(obj)) {
 				return obj.getValue(field.getResourceKey());
 			} 
