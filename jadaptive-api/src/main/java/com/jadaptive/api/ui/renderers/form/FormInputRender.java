@@ -26,12 +26,14 @@ public abstract class FormInputRender extends FieldInputRender {
 		
 		Element myElement;
 		Element input;
+		
 		rootElement.appendChild(myElement = 
 				new Element("div").addClass(Utils.csv(" ", classes) + " row mb-3"));
 		
+		Element parent = myElement;
 		if(decorate) {
 			
-			myElement.appendChild(new Element("div")
+			myElement.appendChild(parent = new Element("div")
 						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", getFormVariable())
@@ -40,14 +42,14 @@ public abstract class FormInputRender extends FieldInputRender {
 						.attr("jad:i18n", String.format("%s.name", getResourceKey()))));
 		}
 		
-		myElement.appendChild(input = new Element("input")
+		parent.appendChild(input = new Element("input")
 						.attr("name", getFormVariableWithParents())
 						.addClass(resourceKey + " form-control")
 						.attr("value", value)
 						.attr("autocomplete", "off")
 						.attr("type", getInputType()));
 		if(decorate) {
-			myElement.appendChild(new Element("small")
+			parent.appendChild(new Element("small")
 					.addClass("form-text")
 					.addClass("text-muted")
 					.attr("jad:bundle", getBundle())

@@ -92,6 +92,7 @@ public class CsvImportServiceImpl implements CsvImportService {
 	                    count++;
                     
                     } catch(Throwable t) {
+                    	log.info("Import error", t);
                     	errors++;
                     }
                
