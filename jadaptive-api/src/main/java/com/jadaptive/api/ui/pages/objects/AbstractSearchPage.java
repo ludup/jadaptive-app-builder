@@ -166,7 +166,6 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		Element table = document.selectFirst("#tableholder");
 		
-		String searchModifier = Request.get().getParameter("searchModifier");
 		if(StringUtils.isNotBlank(searchModifier)) {
 			searchValue = searchModifier + searchValue;
 		}
@@ -289,7 +288,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			modifiers.add(new I18nOption("userInterface","lte.name", "<="));
 			
 			e.appendChild(Html.div("col-3").appendChild(modifier.renderInput()));
-			modifier.renderValues(modifiers, StringUtils.defaultString(Request.get().getParameter("searchModifier"), searchModifier));
+			modifier.renderValues(modifiers, StringUtils.defaultString(searchModifier));
 			
 			Element valueElement = Html.div("col-9");
 			e.appendChild(valueElement);
@@ -380,7 +379,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			modifiers.add(new I18nOption("userInterface","lte.name", "<="));
 			
 			e.appendChild(Html.div("col-3").appendChild(modifier.renderInput()));
-			modifier.renderValues(modifiers, StringUtils.defaultString(Request.get().getParameter("searchModifier"), searchModifier));
+			modifier.renderValues(modifiers, searchModifier);
 			
 			Element valueElement = Html.div("col-9");
 			e.appendChild(valueElement);
