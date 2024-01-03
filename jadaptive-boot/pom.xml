@@ -200,7 +200,6 @@
 			<plugin>
 				<groupId>com.sshtools</groupId>
 				<artifactId>pf4j-plugin-generator</artifactId>
-				<version>0.1.0</version>
 				<configuration>
 					<artifactIsPlugin>true</artifactIsPlugin>
 					<copyDependencies>false</copyDependencies>

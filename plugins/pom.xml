@@ -7,6 +7,7 @@
 		<groupId>com.jadaptive</groupId>
 		<artifactId>jadaptive</artifactId>
 		<version>0.4.0-SNAPSHOT</version>
+		<relativePath>../</relativePath>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -27,19 +28,6 @@
 		<plugin.dependencies />
 	</properties>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-				<version>2.8.2</version>
-			</plugin>
-		</plugins>
-	</build>
-
 	<modules>
 		<module>jadaptive-default-resources</module>
 		<module>jadaptive-dashboard</module>
@@ -57,5 +45,37 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>build-helper-maven-plugin</artifactId>
+					<version>3.2.0</version>
+					<executions>
+						<execution>
+							<id>attach-extension-zip</id>
+							<phase>install</phase>
+							<goals>
+								<goal>attach-artifact</goal>
+							</goals>
+							<configuration>
+								<skipAttach>false</skipAttach>
+								<artifacts>
+									<artifact>
+										<file>
+											${project.build.directory}/plugin-def/${project.artifactId}/${project.artifactId}-${project.version}.zip</file>
+										<type>zip</type>
+										<classifier>jadx</classifier>
+									</artifact>
+								</artifacts>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
 </project>
