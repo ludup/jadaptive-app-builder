@@ -45,7 +45,6 @@ import com.jadaptive.api.ui.NamePairValue;
 import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
-import com.jadaptive.app.user.AdminUser;
 import com.jadaptive.utils.Utils;
 
 import io.github.classgraph.ClassGraph;
@@ -163,6 +162,11 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
+	public User getSystemUser() {
+		return SYSTEM_USER;
+	}
+	
+	@Override
 	public void clearUserContext() {
 		
 		Stack<User> userStack = currentUser.get();
@@ -180,6 +184,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Override
 	public boolean isAdministrator(User user) {
+		if(user.equals(SYSTEM_USER)) {
+			return true;
+		}
 		Collection<Role> roles = roleService.getRoles(user);
 		for(Role role : roles) {
 			if(role.isAllPermissions()) {
@@ -285,11 +292,15 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		Set<String> allPermissions = new TreeSet<>();
 		Collection<Role> roles = roleService.getRoles(user);
-		for(Role role : roles) {
-			if(role.isAllPermissions()) {
-				allPermissions.addAll(getAllPermissions());
+		if(isAdministrator()) {
+			allPermissions.addAll(getAllPermissions());
+		} else {
+			for(Role role : roles) {
+				if(role.isAllPermissions()) {
+					allPermissions.addAll(getAllPermissions());
+				}
+				allPermissions.addAll(role.getPermissions());
 			}
-			allPermissions.addAll(role.getPermissions());
 		}
 
 		Set<String> resolvedPermissions = new HashSet<>(allPermissions);
@@ -299,8 +310,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	private void processAliases(Map<String,Set<String>> aliasPermissions, Set<String> allPermissions, Set<String> resolvedPermissions) {
-
-		
 		for(String permission : allPermissions) {
 			Set<String> aliases = aliasPermissions.get(permission);
 			if(Objects.nonNull(aliases)) {
@@ -319,9 +328,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			log.debug(String.format("Asserting permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
 		}
 		
-		if(user.getUuid().equals(SYSTEM_USER_UUID) 
-				|| user instanceof AdminUser
-				|| isAdministrator(user)) {
+		if( isAdministrator(user)) {
 			return;
 		}
 
@@ -351,7 +358,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			log.debug(String.format("Asserting all permissions %s for user %s", Utils.csv(permissions), user.getUsername()));
 		}
 		
-		if(user.getUuid().equals(SYSTEM_USER_UUID)) {
+		if(isAdministrator(user)) {
 			return;
 		}
 

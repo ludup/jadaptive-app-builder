@@ -8,9 +8,16 @@ public class FeedbackMessage implements Serializable {
 	FeedbackStatus status;
 	String message;
 	boolean done;
+	ProgressStatus progress;
+	long value;
 	
 	public FeedbackMessage() {
 		
+	}
+	
+	public FeedbackMessage(ProgressStatus progress, long value) {
+		this.progress = progress;
+		this.value = value;
 	}
 	
 	public FeedbackMessage(FeedbackStatus status, String message, boolean done) {
@@ -41,6 +48,22 @@ public class FeedbackMessage implements Serializable {
 
 	public void setDone(boolean done) {
 		this.done = done;
+	}
+
+	public ProgressStatus getProgress() {
+		return progress;
+	}
+
+	public void setProgress(ProgressStatus progress) {
+		this.progress = progress;
+	}
+
+	public long getValue() {
+		return value;
+	}
+
+	public void setValue(long value) {
+		this.value = value;
 	}
 	
 	

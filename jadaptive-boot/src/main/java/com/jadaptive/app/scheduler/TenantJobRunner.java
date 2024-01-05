@@ -11,6 +11,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.jobs.TaskRunnerContext;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
@@ -26,6 +27,9 @@ public class TenantJobRunner implements Runnable {
 	
 	@Autowired
 	private TaskScheduler taskScheduler;
+	
+	@Autowired
+	private PermissionService permissionService; 
 	
 	String taskUUID;
 	TenantTask task;
@@ -67,22 +71,29 @@ public class TenantJobRunner implements Runnable {
 		
 		tenantService.setCurrentTenant(tenant);
 		
-		for(TaskRunnerContext ctx : ApplicationServiceImpl.getInstance().getBeans(TaskRunnerContext.class)) {
-			ctx.setupContext();
-		}
+		// TODO run as a different user
+		permissionService.setupSystemContext();
 		
-		if(task.isLogging() && log.isInfoEnabled()) {
-			log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());
-		}
 		try {
-			task.run();
-		} catch(Throwable e) {
-			log.error("Task ended with error", e);
-	    } finally {
-			tenantService.clearCurrentTenant();
+			for(TaskRunnerContext ctx : ApplicationServiceImpl.getInstance().getBeans(TaskRunnerContext.class)) {
+				ctx.setupContext();
+			}
+			
+			if(task.isLogging() && log.isInfoEnabled()) {
+				log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());
+			}
+			try {
+				task.run();
+			} catch(Throwable e) {
+				log.error("Task ended with error", e);
+		    } finally {
+				tenantService.clearCurrentTenant();
+			}
+
+		} finally {
+			permissionService.clearUserContext();
 		}
 	}
-
 	public void cancel(boolean mayInterrupt) {
 		future.cancel(mayInterrupt);
 	}

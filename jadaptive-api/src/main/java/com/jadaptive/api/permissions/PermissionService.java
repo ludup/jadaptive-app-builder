@@ -74,4 +74,6 @@ public interface PermissionService {
 
 	void assertOwnership(UUIDDocument e);
 
+	User getSystemUser();
+
 }
