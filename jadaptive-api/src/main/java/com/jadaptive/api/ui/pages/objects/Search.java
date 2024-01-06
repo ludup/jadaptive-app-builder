@@ -2,14 +2,18 @@ package com.jadaptive.api.ui.pages.objects;
 
 import java.io.FileNotFoundException;
 import java.util.Collection;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.entity.SearchUtils;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
@@ -52,13 +56,13 @@ public class Search extends AbstractSearchPage  {
 		}
 	}
 	
-	protected Collection<AbstractObject> generateTable(ObjectTemplate template, String searchField, String searchValue,
-			Integer start, Integer length) {
-		return objectService.table(template.getResourceKey(), searchField, searchValue, start, length);
+	protected Collection<AbstractObject> generateTable(ObjectTemplate template,
+			Integer start, Integer length, Map<String,FieldTemplate> searchFieldTemplates, SearchField... fields) {
+		return objectService.tableObjects(template.getResourceKey(), start, length, fields);
 	}
 
-	protected long generateCount(ObjectTemplate template, String searchField2, String searchValue2) {
-		return  objectService.count(template.getCollectionKey(), searchField, searchValue);
+	protected long generateCount(ObjectTemplate template, SearchField... fields) {
+		return  objectService.countObjects(template.getCollectionKey(), fields);
 	}
 
 }

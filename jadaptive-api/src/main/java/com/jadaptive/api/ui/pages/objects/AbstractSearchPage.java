@@ -3,6 +3,8 @@ package com.jadaptive.api.ui.pages.objects;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,8 +18,10 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.countries.Country;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.SearchUtils;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
@@ -161,7 +165,8 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			searchField = template.getDefaultColumn();
 		}
 		
-		generateSearchFields(template, searchColumns, document, "", searchField);
+		Map<String,FieldTemplate> searchFieldTemplates = new HashMap<>();
+		generateSearchColumns(template, searchColumns, document, "", searchField, searchFieldTemplates);
 		document.selectFirst(".searchColumn").val(searchField);
 		
 		Element table = document.selectFirst("#tableholder");
@@ -173,13 +178,15 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		if(log.isInfoEnabled()) {
 			log.info("Searching for {} {}", searchField, searchValue);
 		}
-		long totalObjects = generateCount(template, searchField, searchValue);
+		
+		SearchField[] search = SearchUtils.generateSearch(searchField, searchValue, searchFieldTemplates);
+		long totalObjects = generateCount(template, search);
 		
 		if(start > 0 && totalObjects <= start) {
 			start -= length;
 		}
 		
-		Collection<AbstractObject> objects = generateTable(template, searchField, searchValue, start, length);
+		Collection<AbstractObject> objects = generateTable(template, start, length, searchFieldTemplates, search);
 		
 		boolean readOnly = false;
 		if(template.getScope()!=ObjectScope.PERSONAL && template.getPermissionProtected()) {
@@ -204,9 +211,13 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 	}
 	
-	private void generateSearchFields(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField) {
+	private void generateSearchColumns(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField, Map<String,FieldTemplate> processedFields) {
 		
 		for(FieldTemplate field : template.getFields()) {
+			if(processedFields.containsKey(field.getResourceKey())) {
+				continue;
+			}
+			processedFields.put(field.getResourceKey(), field);
 			if(field.isSearchable()) {
 				input.addInputValue(field.getResourceKey(), String.format("%s.name", field.getResourceKey()), true, template.getBundle()).attr("data-formvar", parentPrefix + field.getFormVariable());
 				if(searchField.equals(parentPrefix + field.getFormVariable())) {
@@ -216,8 +227,13 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 				addSearchValueField(template, parentPrefix, field, document, searchField.equals(parentPrefix + field.getFormVariable()));
 			}
 			if(field.getFieldType() == FieldType.OBJECT_EMBEDDED) {
-				generateSearchFields(templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY)), input, document, parentPrefix + field.getResourceKey() + ".", searchField);
+				generateSearchColumns(templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY)), input, document, parentPrefix + field.getResourceKey() + ".", searchField, processedFields);
 			}
+		}
+		
+		for(String childTemplate : template.getChildTemplates()) {
+			ObjectTemplate t = templateService.get(childTemplate);
+			generateSearchColumns(t, input, document, parentPrefix, searchField, processedFields);
 		}
 	}
 
@@ -417,10 +433,9 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	}
 
 	protected abstract Collection<AbstractObject> generateTable(ObjectTemplate template, 
-			String searchField, String searchValue,
-			Integer start, Integer length);
+			Integer start, Integer length, Map<String, FieldTemplate> searchFieldTemplates, SearchField... fields);
 	
-	protected abstract long generateCount(ObjectTemplate template, String searchField, String searchValue);
+	protected abstract long generateCount(ObjectTemplate template, SearchField... fields);
 
 	private Element renderPagination(long totalObjects, Element pagnation) {
 		

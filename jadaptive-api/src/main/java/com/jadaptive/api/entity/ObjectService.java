@@ -52,9 +52,9 @@ public interface ObjectService {
 
 	AbstractObject fromStashToAbstractObject(String resourceKey);
 
-	long countObjects(String resourceKey, String searchField, String searchValue, SearchField... fields);
+	long countObjects(String resourceKey, SearchField... fields);
 
-	Collection<AbstractObject> tableObjects(String resourceKey, String searchField, String searchValue, int offset,
+	Collection<AbstractObject> tableObjects(String resourceKey, int offset,
 			int limit, SearchField... fields);
 
 	UUIDDocument toUUIDDocument(AbstractObject entity);

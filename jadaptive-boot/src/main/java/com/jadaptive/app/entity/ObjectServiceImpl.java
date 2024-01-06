@@ -2,7 +2,6 @@ package com.jadaptive.app.entity;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +25,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectRepository;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.entity.SearchUtils;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.ReflectionUtils;
@@ -54,7 +54,6 @@ import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 import com.jadaptive.utils.UUIDObjectUtils;
-import com.jadaptive.utils.Utils;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.type.TypeDescription;
@@ -708,28 +707,29 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		switch(template.getScope()) {
 		case PERSONAL:
 			return objectRepository.table(template, offset, limit,
-						generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.table(template, offset, limit, 
-						generateSearchFields(searchField, searchValue, template));
+						SearchUtils.generateSearch(searchField, searchValue, template));
 			}
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return objectRepository.table(template, offset, limit, 
-					generateSearchFields(searchField, searchValue, template, SearchField.or(
+					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.or(
 							SearchField.all("users.uuid", getCurrentUser().getUuid()),
 							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
-			return tableViaObjectBean(template, offset, limit, SortOrder.ASC, searchField, generateSearchFields(searchField, searchValue, template));
+			return tableViaObjectBean(template, offset, limit, SortOrder.ASC, searchField, 
+					SearchUtils.generateSearch(searchField, searchValue, template));
 		}
 		
 	}
 	
 	@Override
-	public Collection<AbstractObject> tableObjects(String resourceKey, String searchField, String searchValue, int offset, int limit, SearchField... fields) {
+	public Collection<AbstractObject> tableObjects(String resourceKey, int offset, int limit, SearchField... fields) {
 		ObjectTemplate template = templateService.get(resourceKey);
-		return tableViaObjectBean(template, offset, limit, SortOrder.ASC, searchField, generateSearchFields(searchField, searchValue, template, fields));
+		return tableViaObjectBean(template, offset, limit, SortOrder.ASC, template.getDefaultColumn(), fields);
 	}
 	
 	@Override
@@ -739,123 +739,28 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		switch(template.getScope()) {
 		case PERSONAL:
 			return objectRepository.count(template, 
-						generateSearchFields(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.count(template,  
-						generateSearchFields(searchField, searchValue, template));
+						SearchUtils.generateSearch(searchField, searchValue, template));
 			}
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return objectRepository.count(template, 
-					generateSearchFields(searchField, searchValue, template, SearchField.or(
+					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.or(
 							SearchField.all("users.uuid", getCurrentUser().getUuid()),
 							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
-			return countViaObjectBean(template, generateSearchFields(searchField, searchValue, template));
+			return countViaObjectBean(template, SearchUtils.generateSearch(searchField, searchValue, template));
 		}
 		
 	}
 	
 	@Override
-	public long countObjects(String resourceKey, String searchField, String searchValue, SearchField... fields) {
+	public long countObjects(String resourceKey, SearchField... fields) {
 		ObjectTemplate template = templateService.get(resourceKey);
-		return countViaObjectBean(template, generateSearchFields(searchField, searchValue, template, fields));
-	}
-
-	private SearchField[] generateSearchFields(String searchField, String searchValue, ObjectTemplate template, SearchField... additional) {
-		List<SearchField> fields = new ArrayList<>();
-		if(StringUtils.isNotBlank(searchValue)) {
-			FieldTemplate f = template.getField(searchField);
-			if(Objects.nonNull(f)) {
-				switch(f.getFieldType()) {
-				case OBJECT_REFERENCE:
-					if(Utils.isUUID(searchValue)) {
-						if(f.getCollection()) {
-							fields.add(SearchField.in(searchField + ".uuid", searchValue));
-						} else {
-							fields.add(SearchField.eq(searchField + ".uuid", searchValue));
-						}
-					} else {
-						if(f.getCollection()) {
-							fields.add(SearchField.like(searchField + ".name", searchValue));
-						} else {
-							fields.add(SearchField.like(searchField + ".name", searchValue));
-						}
-					}
-					
-					break;
-				
-				case DECIMAL:
-				{
-					if(searchValue.startsWith(">=")) {
-						fields.add(SearchField.gte(searchField, Double.parseDouble(searchValue.substring(2))));
-					} else if(searchValue.startsWith("<=")) {
-						fields.add(SearchField.lte(searchField, Double.parseDouble(searchValue.substring(2))));
-					} else if(searchValue.startsWith(">")) {
-						fields.add(SearchField.gt(searchField, Double.parseDouble(searchValue.substring(1))));
-					} else if(searchValue.startsWith("<")) {
-						fields.add(SearchField.lt(searchField, Double.parseDouble(searchValue.substring(1))));
-					} else {
-						fields.add(SearchField.eq(searchField, Double.parseDouble(searchValue)));
-					}
-					break;
-				}
-				case INTEGER:
-				{
-					if(searchValue.startsWith(">=")) {
-						fields.add(SearchField.gte(searchField, Integer.parseInt(searchValue.substring(2))));
-					} else if(searchValue.startsWith("<=")) {
-						fields.add(SearchField.lte(searchField, Integer.parseInt(searchValue.substring(2))));
-					} else if(searchValue.startsWith(">")) {
-						fields.add(SearchField.gt(searchField, Integer.parseInt(searchValue.substring(1))));
-					} else if(searchValue.startsWith("<")) {
-						fields.add(SearchField.lt(searchField, Integer.parseInt(searchValue.substring(1))));
-					} else {
-						fields.add(SearchField.eq(searchField, Integer.parseInt(searchValue)));
-					}
-					break;
-				}
-				case LONG:
-				{
-					if(searchValue.startsWith(">=")) {
-						fields.add(SearchField.gte(searchField, Long.parseLong(searchValue.substring(2))));
-					} else if(searchValue.startsWith("<=")) {
-						fields.add(SearchField.lte(searchField, Long.parseLong(searchValue.substring(2))));
-					} else if(searchValue.startsWith(">")) {
-						fields.add(SearchField.gt(searchField, Long.parseLong(searchValue.substring(1))));
-					} else if(searchValue.startsWith("<")) {
-						fields.add(SearchField.lt(searchField, Long.parseLong(searchValue.substring(1))));
-					} else {
-						fields.add(SearchField.eq(searchField, Long.parseLong(searchValue)));
-					}
-					break;
-				}
-				case TIMESTAMP:
-				case DATE:
-					if(searchValue.startsWith(">=")) {
-						fields.add(SearchField.gte(searchField, Utils.parseDate(searchValue.substring(2), "yyyy-MM-dd")));
-					} else if(searchValue.startsWith("<=")) {
-						fields.add(SearchField.lte(searchField, Utils.parseDate(searchValue.substring(2), "yyyy-MM-dd")));
-					} else if(searchValue.startsWith(">")) {
-						fields.add(SearchField.gt(searchField, Utils.parseDate(searchValue.substring(1), "yyyy-MM-dd")));
-					} else if(searchValue.startsWith("<")) {
-						fields.add(SearchField.lt(searchField, Utils.parseDate(searchValue.substring(1), "yyyy-MM-dd")));
-					} else {
-						fields.add(SearchField.eq(searchField, Utils.parseDate(searchValue, "yyyy-MM-dd")));
-					}
-					break;
-				case BOOL:
-					fields.add(SearchField.eq(searchField, Boolean.parseBoolean(searchValue)));
-					break;
-				default:
-					fields.add(SearchField.like(searchField, searchValue));
-					break;
-				}
-			}
-		}
-		fields.addAll(Arrays.asList(additional));
-		return fields.toArray(new SearchField[0]);
+		return countViaObjectBean(template, fields);
 	}
 
 	private void buildFormHandlers() {

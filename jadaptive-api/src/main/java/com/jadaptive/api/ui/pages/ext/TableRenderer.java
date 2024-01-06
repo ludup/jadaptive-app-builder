@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -103,22 +104,24 @@ public class TableRenderer {
 			table.appendChild(Html.thead().appendChild(el = Html.tr()));
 			
 			view = templateClazz.getAnnotation(TableView.class);
-			int columns = 0;
+	
 			if(Objects.isNull(view)) {
 				throw new IllegalStateException(templateClazz.getSimpleName() + " requires @TableView annotation to render this page");
 			}
-			for(String column : view.defaultColumns()) {
-				FieldTemplate t = template.getField(column);
-				if(Objects.nonNull(t)) {
-					el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey()))));
-				} else {
-					el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column))));
-				}
-				columns++;
-			}
 			
+			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
+			renderTableColumns(view, el, template, columns);
+			
+			for(String childTemplate : template.getChildTemplates()) {
+				ObjectTemplate t = templateService.get(childTemplate);
+				TableView v = templateService.getTemplateClass(childTemplate).getAnnotation(TableView.class);
+				if(Objects.nonNull(v)) {
+					renderTableColumns(v, el, t, columns);
+				}
+			}
+			// Actions
 			el.appendChild(Html.td());
-			columns++;
+
 			
 			table.appendChild(el = Html.tbody());
 			
@@ -142,13 +145,13 @@ public class TableRenderer {
 					
 					Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
 					
-					for(String column : view.defaultColumns()) {
+					for(String column : columns.keySet()) {
 						if(dynamicColumns.containsKey(column)) {
 							DynamicColumn dc = dynamicColumns.get(column);
 							DynamicColumnService service = ApplicationServiceImpl.getInstance().getBean(dc.service());
 							row.appendChild(Html.td().appendChild(service.renderColumn(column, obj, rowTemplate)));
 						} else {
-							FieldTemplate t = template.getField(column);
+							FieldTemplate t = columns.get(column).getField(column);
 							row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t)));
 						}
 					}
@@ -188,6 +191,19 @@ public class TableRenderer {
 		
 	}
 	
+	private void renderTableColumns(TableView view, Element el, ObjectTemplate template, Map<String,ObjectTemplate> columns) {
+		
+		for(String column : view.defaultColumns()) {
+			FieldTemplate t = template.getField(column);
+			if(Objects.nonNull(t)) {
+				el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey()))));
+			} else {
+				el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column))));
+			}
+			columns.put(column, template);
+		}
+	}
+
 	private Collection<TableAction> generateActions(String resourceKey) {
 		var t = templateService.getTableActions(resourceKey);
 		if(Objects.nonNull(t)) {
