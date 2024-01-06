@@ -15,13 +15,15 @@ window.onload = function() {
 	
 	$('.searchColumn').change(function() {
 		var currentField = $(this).closest('.searchRow').find('input[name="searchValue"]');
+		var currentParent = currentField.closest('.searchValueField');
+		var currentModifier = currentParent.find('input[name="searchModifier"]');
+		var currentText = currentParent.find('input[name="searchValueText"]');
+		
 		currentField.val('');
 		currentField.attr("name", "unused");
-		var currentModifier = $(this).closest('.searchRow').find('input[name="searchModifier"]');
 		currentModifier.val('');
 		currentModifier.attr("name", "unusedModifier");
-		
-		var currentParent = currentField.closest('.searchValueField');
+		currentText.attr("name", "unusedText");
 		currentParent.addClass("d-none");
 
 		var targetColumn = '.' + $(this).val();
@@ -30,15 +32,14 @@ window.onload = function() {
 		var targetField = $(this).closest('.searchRow').find(targetColumn);
 		var targetParent = targetField.closest('.searchValueField');
         var targetModifier = targetParent.find(".unusedModifier");
+        var targetText = targetParent.find('input[name="unusedText"]');
 		
-		targetField.attr("name", "searchValue");
+		
 		targetParent.removeClass("d-none");
+		targetField.attr("name", "searchValue");
 		targetModifier.attr("name", "searchModifier");
+		targetText.attr("name", "searchValueText");
 		
 	});
-	
-	$('form').submit(function() {	
-		$('.unused').remove();
-		$('.unusedModifier').remove();
-	});
+
 };

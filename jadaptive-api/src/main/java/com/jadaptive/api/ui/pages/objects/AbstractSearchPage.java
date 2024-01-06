@@ -336,7 +336,6 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 		case OBJECT_REFERENCE:
 		{
-			String searchText = StringUtils.defaultString(searchValueText, Request.get().getParameter("searchValueText"));
 			ObjectTemplate referenceTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
 			FieldSearchFormInput input = new FieldSearchFormInput(
 					template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle(), 
@@ -348,7 +347,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 				Element e = input.renderInput(holder,  "",  "", true, false);
 				e.addClass("d-none searchValueField");
 			} else {
-				Element e = input.renderInput(holder,  searchValue,  searchText, true, false);
+				Element e = input.renderInput(holder,  searchValue,  searchValueText, true, false);
 				e.addClass("searchValueField");
 			}
 			
