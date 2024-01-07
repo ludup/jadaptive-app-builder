@@ -2,6 +2,7 @@ package com.jadaptive.api.ui.pages.ext;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.entity.AbstractObject;
@@ -61,6 +63,9 @@ public class TableRenderer {
 	
 	@Autowired
 	private InternationalService internationalService; 
+	
+	@Autowired
+	private ApplicationService appService;
 	
 	int start;
 	int length;
@@ -263,6 +268,14 @@ public class TableRenderer {
 					} catch(AccessDeniedException e) {
 						continue;
 					}
+				}
+				
+				try {
+					if(!appService.autowire(action.filter().getConstructor().newInstance()).showAction(obj)) {
+						continue;
+					}
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 				}
 				
 				Object val = obj.getValue(template.getDefaultColumn());

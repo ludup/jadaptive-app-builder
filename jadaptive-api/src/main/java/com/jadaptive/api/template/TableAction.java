@@ -38,6 +38,8 @@ public @interface TableAction  {
 	String targetKey() default "";
 	
 	String[] permissions() default {};
+	
+	Class<? extends ActionFilter> filter() default NoActionFilter.class;
 
 
 }
