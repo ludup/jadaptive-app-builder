@@ -115,6 +115,17 @@ public class TableRenderer {
 			}
 			
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
+			
+			ObjectTemplate tmp = template;
+			while(tmp.hasParent()) {
+				ObjectTemplate t = templateService.get(tmp.getParentTemplate());
+				TableView v = templateService.getTemplateClass(tmp.getParentTemplate()).getAnnotation(TableView.class);
+				if(Objects.nonNull(v)) {
+					renderTableColumns(v, el, t, columns);
+				}
+				tmp = t;
+			}
+			
 			renderTableColumns(view, el, template, columns);
 			
 			for(String childTemplate : template.getChildTemplates()) {
