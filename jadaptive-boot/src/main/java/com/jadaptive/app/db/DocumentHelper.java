@@ -579,7 +579,7 @@ public class DocumentHelper {
 								m.invoke(obj, ref);
 								
 							} else {
-								String resourceKey = getTemplateResourceKey(parameter.getType());
+								resourceKey = getTemplateResourceKey(parameter.getType());
 
 								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, (String)objectUUID);
 								Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
