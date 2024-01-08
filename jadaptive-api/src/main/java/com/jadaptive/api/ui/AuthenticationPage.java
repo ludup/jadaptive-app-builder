@@ -114,10 +114,9 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			sessionUtils.verifySameSiteRequest(Request.get());
 			
 			if(doForm(document, state, form)) {
-				throw new PageRedirect(pageCache.resolvePage(authenticationService.completeAuthentication(state)));
+				throw new PageRedirect(pageCache.resolvePage(authenticationService.completeAuthentication(state, this)));
 			}
     	
-			
 			Request.response().setStatus(HttpStatus.FORBIDDEN.value());
 	    	Feedback.error("default", "error.invalidCredentials");
 	    	
@@ -129,7 +128,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
     		Feedback.error("userInterface","error.invalidCredentials");
     	}
 		
-		authenticationService.reportAuthenticationFailure(state);
+		authenticationService.reportAuthenticationFailure(state, this);
 		
 		throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentState().getCurrentPage()));
 	}

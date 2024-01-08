@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
+import com.jadaptive.api.auth.AuthenticatorPage;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
@@ -26,7 +27,7 @@ import com.jadaptive.api.ui.pages.auth.Password.LoginForm;
 @Component
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "i18n"} )
-public class Password extends AuthenticationPage<LoginForm> {
+public class Password extends AuthenticationPage<LoginForm> implements AuthenticatorPage {
 
 	static Logger log = LoggerFactory.getLogger(Password.class);
 	
@@ -90,5 +91,10 @@ public class Password extends AuthenticationPage<LoginForm> {
 	
 	public interface LoginForm {
 		String getPassword();
+	}
+
+	@Override
+	public String getAuthenticatorUUID() {
+		return AuthenticationService.PASSWORD_MODULE_UUID;
 	}
 }

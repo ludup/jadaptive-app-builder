@@ -23,7 +23,7 @@ public interface AuthenticationService {
 
 	AuthenticationState getCurrentState() throws FileNotFoundException;
 
-	Class<? extends Page> completeAuthentication(AuthenticationState state);
+	Class<? extends Page> completeAuthentication(AuthenticationState state, Page page);
 
 	Class<? extends Page> resetAuthentication(@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
 
@@ -33,7 +33,7 @@ public interface AuthenticationService {
 
 	void decorateAuthenticationPage(Document content);
 
-	void reportAuthenticationFailure(AuthenticationState state);
+	void reportAuthenticationFailure(AuthenticationState state, Page page);
 
 	Class<? extends Page> getAuthenticationPage(String authenticator);
 

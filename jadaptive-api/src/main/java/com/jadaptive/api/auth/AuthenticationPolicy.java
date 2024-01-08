@@ -1,6 +1,7 @@
 package com.jadaptive.api.auth;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -137,7 +138,10 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 
 	public String getBundle() {
 		ObjectDefinition def = getClass().getAnnotation(ObjectDefinition.class);
-		return StringUtils.defaultIfEmpty(def.bundle(), def.resourceKey());
+		if(Objects.nonNull(def)) {
+			return StringUtils.defaultIfEmpty(def.bundle(), def.resourceKey());
+		}
+		return getResourceKey();
 	}
 	
 }

@@ -26,6 +26,7 @@ import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
+import com.jadaptive.api.auth.AuthenticatorPage;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.auth.events.AuthenticationFailedEvent;
@@ -144,7 +145,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public void reportAuthenticationFailure(AuthenticationState state) {
+	public void reportAuthenticationFailure(AuthenticationState state, Page page) {
 		permissionService.setupSystemContext();
 
 		try {
@@ -156,6 +157,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 			if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
 				AuthenticationModule module = registeredModulesByPage.get(state.getCurrentPage());
+				if(Objects.isNull(module)) {
+					log.warn("User failed authentication on page {} but no module is present!!!", state.getCurrentPage().getSimpleName());
+					return;
+				}
 				eventService.publishEvent(new AuthenticationFailedEvent(module, 
 						state.getAttemptedUsername(),
 						"", Request.getRemoteAddress()));
@@ -247,20 +252,24 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public Class<? extends Page> completeAuthentication(AuthenticationState state) {
+	public Class<? extends Page> completeAuthentication(AuthenticationState state, Page page) {
 
 		if (Objects.isNull(state.getUser()) || !userService.supportsLogin(state.getUser())) {
 			throw new AccessDeniedException("Invalid credentials");
 		}
 
 		
-		if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
-			AuthenticationModule module = registeredModulesByPage.get(state.getCurrentPage());
-			if(Objects.nonNull(module)) {
-				eventService.publishEvent(new AuthenticationSuccessEvent(module, 
-						Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
-						Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
-			}
+		if(state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage()) {
+			AuthenticationModule module = moduleDatabase.get(PASSWORD_MODULE_UUID, AuthenticationModule.class);
+			eventService.publishEvent(new AuthenticationSuccessEvent(module, 
+					Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
+					Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+			
+		} else if(page instanceof AuthenticatorPage) {
+			AuthenticationModule module = moduleDatabase.get(((AuthenticatorPage)page).getAuthenticatorUUID(), AuthenticationModule.class);
+			eventService.publishEvent(new AuthenticationSuccessEvent(module, 
+					Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
+					Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
 		}
 		
 		if (state.completePage()) {
