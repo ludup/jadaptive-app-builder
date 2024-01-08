@@ -496,11 +496,12 @@ public class DocumentHelper {
 			clz = clz.replace("FieldDefinition", "FieldTemplate");
 			T obj;
 			
+			String resourceKey = document.getString("resourceKey");
+			
 			try {
 				clz = processClassNameChanges(clz, classLoader);
 				obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
 			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
-				String resourceKey = document.getString("resourceKey");
 				if(Objects.nonNull(resourceKey)) {
 					obj = (T) ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey).getConstructor().newInstance();
 				} else {		
@@ -547,7 +548,7 @@ public class DocumentHelper {
 						try {
 							m.invoke(obj, value);
 						} catch(Throwable e) {
-							log.error("Failed to process field {} value {} as parameter {}", name, value, parameter.getType().getSimpleName());
+							log.error("Failed to process field {} value {} as parameter {} for {} uuid {}", name, value, parameter.getType().getSimpleName(), resourceKey, uuid);
 						}
 					}
 				} else if(parameter.getType().equals(Date.class)) {
