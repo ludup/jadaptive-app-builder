@@ -549,6 +549,7 @@ public class DocumentHelper {
 							m.invoke(obj, value);
 						} catch(Throwable e) {
 							log.error("Failed to process field {} value {} as parameter {} for {} uuid {}", name, value, parameter.getType().getSimpleName(), resourceKey, uuid);
+							throw e;
 						}
 					}
 				} else if(parameter.getType().equals(Date.class)) {
