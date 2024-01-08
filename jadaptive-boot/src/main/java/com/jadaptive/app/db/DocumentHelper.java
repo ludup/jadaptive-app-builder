@@ -544,7 +544,11 @@ public class DocumentHelper {
 					if(!parameter.getType().equals(String.class) && value instanceof String) {
 						m.invoke(obj, fromString(parameter.getType(), columnDefinition.type(), (String) value));
 					} else {
-						m.invoke(obj, value);
+						try {
+							m.invoke(obj, value);
+						} catch(Throwable e) {
+							log.error("Failed to process field {} value {} as parameter {}", name, value, parameter.getType().getSimpleName());
+						}
 					}
 				} else if(parameter.getType().equals(Date.class)) {
 					m.invoke(obj, document.getDate(name));
