@@ -49,7 +49,7 @@ public class SystemEvent extends UUIDEvent {
 	
 	public static final String EVENT_VIEW = "event";
 	
-	@ObjectField(type = FieldType.TIMESTAMP)
+	@ObjectField(type = FieldType.TIMESTAMP, searchable = true)
 	@ObjectView(value = SystemEvent.EVENT_VIEW, weight = 200)
 	Date timestamp;
 	
@@ -71,11 +71,11 @@ public class SystemEvent extends UUIDEvent {
 	@ExcludeView(values = FieldView.TABLE)
 	String extendedInformation;
 	
-	@ObjectField(type = FieldType.ENUM)
+	@ObjectField(type = FieldType.ENUM, searchable = true)
 	@ObjectView(value = "", renderer = FieldRenderer.BOOTSTRAP_BADGE, weight = Integer.MIN_VALUE)
 	EventState state = EventState.SUCCESS;
 	
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@ObjectView(value = EVENT_VIEW, weight = 9997, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
 	String username;
 	
