@@ -729,7 +729,24 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public Collection<AbstractObject> tableObjects(String resourceKey, int offset, int limit, SearchField... fields) {
 		ObjectTemplate template = templateService.get(resourceKey);
-		return tableViaObjectBean(template, offset, limit, SortOrder.ASC, template.getDefaultColumn(), fields);
+		
+		switch(template.getScope()) {
+		case PERSONAL:
+			return objectRepository.table(template, offset, limit,
+					SearchUtils.combine(fields, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+		case ASSIGNED:
+			if(isAdministrator(getCurrentUser())) {
+				return objectRepository.table(template, offset, limit, fields);
+			}
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return objectRepository.table(template, offset, limit, 
+					SearchUtils.combine(fields, SearchField.or(
+							SearchField.all("users.uuid", getCurrentUser().getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
+		case GLOBAL:
+		default:
+			return tableViaObjectBean(template, offset, limit, SortOrder.ASC, template.getDefaultColumn(), fields);
+		}
 	}
 	
 	@Override
@@ -760,7 +777,24 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public long countObjects(String resourceKey, SearchField... fields) {
 		ObjectTemplate template = templateService.get(resourceKey);
-		return countViaObjectBean(template, fields);
+		
+		switch(template.getScope()) {
+		case PERSONAL:
+			return objectRepository.count(template, 
+					SearchUtils.combine(fields, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+		case ASSIGNED:
+			if(isAdministrator(getCurrentUser())) {
+				return objectRepository.count(template,  fields);
+			}
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return objectRepository.count(template, 
+					SearchUtils.combine(fields, SearchField.or(
+							SearchField.all("users.uuid", getCurrentUser().getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
+		case GLOBAL:
+		default:
+			return countViaObjectBean(template, fields);
+		}
 	}
 
 	private void buildFormHandlers() {
