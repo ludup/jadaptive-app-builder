@@ -23,6 +23,7 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = AuthenticationPolicy.RESOURCE_KEY, scope = ObjectScope.GLOBAL, defaultColumn = "name")
+@ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "factors", weight = -9999)
 @ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "optional", weight = -8888)
 @ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "blockedIPs", weight = -7777)
 @ObjectViewDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, value = "allowedIPs", weight = -6666)
