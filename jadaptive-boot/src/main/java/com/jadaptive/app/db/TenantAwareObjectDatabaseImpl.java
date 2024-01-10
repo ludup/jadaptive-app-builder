@@ -127,8 +127,13 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 
 	@Override
-	public Long sum(Class<T> resourceClass, String groupBy, SearchField... fields) {
-		return sumObjects(getCurrentTenant().getUuid(), resourceClass, groupBy, fields);
+	public Long sumLongValues(Class<T> resourceClass, String groupBy, SearchField... fields) {
+		return sumLongValues(getCurrentTenant().getUuid(), resourceClass, groupBy, fields);
+	}
+	
+	@Override
+	public Double sumDoubleValues(Class<T> resourceClass, String groupBy, SearchField... fields) {
+		return sumDoubleValues(getCurrentTenant().getUuid(), resourceClass, groupBy, fields);
 	}
 
 	@Override

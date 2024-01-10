@@ -905,9 +905,18 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 	
-	protected <T extends UUIDEntity> Long sumObjects(String database, Class<T> clz, String groupBy, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> Long sumLongValues(String database, Class<T> clz, String groupBy, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
-			return db.sum(getCollectionName(clz), database, groupBy, fields);
+			return db.sumLongValues(getCollectionName(clz), database, groupBy, fields);
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
+		}		
+	}
+	
+	protected <T extends UUIDEntity> Double sumDoubleValues(String database, Class<T> clz, String groupBy, SearchField... fields) throws RepositoryException, ObjectException {
+		try {
+			return db.sumDoubleValues(getCollectionName(clz), database, groupBy, fields);
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);

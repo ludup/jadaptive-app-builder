@@ -22,4 +22,6 @@ public interface ProductService {
 
 	boolean isTenantLicensing();
 
+	boolean isRevenueGenerating();
+
 }

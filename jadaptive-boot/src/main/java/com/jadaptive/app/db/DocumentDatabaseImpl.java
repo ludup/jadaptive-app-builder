@@ -371,7 +371,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	}
 	
 	@Override
-	public Long sum(String table, String database, String groupBy, SearchField... fields) {
+	public Long sumLongValues(String table, String database, String groupBy, SearchField... fields) {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		AggregateIterable<Document> results;
@@ -415,6 +415,53 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		Document doc = results.first();
 		return doc.getLong("total");
+	}
+	
+	@Override
+	public Double sumDoubleValues(String table, String database, String groupBy, SearchField... fields) {
+		
+		MongoCollection<Document> collection = getCollection(table, database);
+		AggregateIterable<Document> results;
+		
+		ClientSession session= currentSession.get();
+		
+		if(fields.length > 0) {
+		
+			if(Objects.nonNull(session)) {
+				results = collection.aggregate(session,
+					    Arrays.asList(
+					        Aggregates.match(buildFilter(fields)),
+					        Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+					    ));
+			} else {
+				results = collection.aggregate(
+					    Arrays.asList(
+					        Aggregates.match(buildFilter(fields)),
+					        Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+					    ));
+			}
+			
+		} else {
+			if(Objects.nonNull(session)) {
+				results = collection.aggregate(session,
+					    Arrays.asList(
+					    	Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+					    ));
+			} else {
+				results = collection.aggregate(
+					    Arrays.asList(
+					    	Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
+					    ));
+			}
+			
+		}
+		
+		if(!results.cursor().hasNext()) {
+			return 0D;
+		}
+		
+		Document doc = results.first();
+		return doc.getDouble("total");
 	}
 	
 	@Override

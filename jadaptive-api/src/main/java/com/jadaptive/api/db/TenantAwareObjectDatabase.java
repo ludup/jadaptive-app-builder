@@ -39,12 +39,14 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 	Collection<T> table(String searchField, String searchValue, int start, int length, Class<T> resourceClass,
 			SortOrder order, String sortField);
 
-	Long sum(Class<T> resourceClass, String groupBy, SearchField... fields);
+	Long sumLongValues(Class<T> resourceClass, String groupBy, SearchField... fields);
 
 	void deleteAll();
 
 	void stashObject(T obj);
 
 	void delete(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException;
+
+	Double sumDoubleValues(Class<T> resourceClass, String groupBy, SearchField... fields);
 
 }

@@ -190,7 +190,7 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public Long sum(String table, String database, String groupBy, SearchField... fields) {
+	public Long sumLongValues(String table, String database, String groupBy, SearchField... fields) {
 		// TODO Auto-generated method stub
 		return 0L;
 	}
@@ -211,6 +211,12 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	public boolean isTransactionActive() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public Double sumDoubleValues(String table, String database, String groupBy, SearchField... fields) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

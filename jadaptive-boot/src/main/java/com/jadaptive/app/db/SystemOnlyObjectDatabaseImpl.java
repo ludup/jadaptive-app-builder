@@ -123,6 +123,6 @@ public class SystemOnlyObjectDatabaseImpl<T extends UUIDEntity>
 
 	@Override
 	public Long sum(Class<T> resourceClass, String groupBy, SearchField... fields) {
-		return sumObjects(getCurrentTenant().getUuid(), resourceClass, groupBy, fields);
+		return sumLongValues(getCurrentTenant().getUuid(), resourceClass, groupBy, fields);
 	}
 }

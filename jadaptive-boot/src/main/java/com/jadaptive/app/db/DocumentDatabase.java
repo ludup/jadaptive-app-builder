@@ -57,12 +57,14 @@ public interface DocumentDatabase {
 
 	void doInTransaction(Runnable r);
 
-	Long sum(String table, String database, String groupBy, SearchField... fields);
+	Long sumLongValues(String table, String database, String groupBy, SearchField... fields);
 
 	void dropIndexes(String table, String database);
 
 	Set<String> getIndexNames(String table, String database);
 
 	boolean isTransactionActive();
+
+	Double sumDoubleValues(String table, String database, String groupBy, SearchField... fields);
 
 }

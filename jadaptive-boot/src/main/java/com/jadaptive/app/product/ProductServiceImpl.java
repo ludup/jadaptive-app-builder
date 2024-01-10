@@ -11,6 +11,7 @@ import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.product.Product;
 import com.jadaptive.api.product.ProductLogoSource;
 import com.jadaptive.api.product.ProductService;
+import com.jadaptive.api.stats.ResourceService;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -111,6 +112,16 @@ public class ProductServiceImpl implements ProductService {
 			return product.isTenantLicensing();
 		} catch (NoSuchBeanDefinitionException e1) {
 			return defaultProduct.isTenantLicensing();
+		}
+	}
+
+	@Override
+	public boolean isRevenueGenerating() {
+		try {
+			Product product = appService.getBean(Product.class);
+			return product.isRevenueGenerating();
+		} catch (NoSuchBeanDefinitionException e1) {
+			return defaultProduct.isRevenueGenerating();
 		}
 	}
 

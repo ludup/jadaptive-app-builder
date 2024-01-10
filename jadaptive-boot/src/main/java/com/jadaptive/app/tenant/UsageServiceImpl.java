@@ -146,7 +146,7 @@ public class UsageServiceImpl implements UsageService {
 	
 	@Override
 	public Long sum(String key, Date from, Date to) {
-		return usageDatabase.sum(Usage.class, "value", 
+		return usageDatabase.sumLongValues(Usage.class, "value", 
 				SearchField.in("keys", key), 
 				SearchField.gte("created", from),
 				SearchField.lt("created", to));
@@ -155,14 +155,14 @@ public class UsageServiceImpl implements UsageService {
 	
 	@Override
 	public Long sum(String key) {
-		return usageDatabase.sum(Usage.class, "value", 
+		return usageDatabase.sumLongValues(Usage.class, "value", 
 				SearchField.in("keys", key));
 	}
 
 	
 	@Override
 	public Long sumOr(Date from, Date to, String... keys) {
-		return usageDatabase.sum(Usage.class, "value", 
+		return usageDatabase.sumLongValues(Usage.class, "value", 
 				SearchField.in("keys", Arrays.asList(keys)), 
 				SearchField.gte("created", from),
 				SearchField.lt("created", to));
@@ -170,7 +170,7 @@ public class UsageServiceImpl implements UsageService {
 	
 	@Override
 	public Long sumAnd(Date from, Date to, String... keys) {
-		return usageDatabase.sum(Usage.class, "value", 
+		return usageDatabase.sumLongValues(Usage.class, "value", 
 				SearchField.all("keys", Arrays.asList(keys)), 
 				SearchField.gte("created", from),
 				SearchField.lt("created", to));
