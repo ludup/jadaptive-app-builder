@@ -14,6 +14,7 @@ public class CollectionTextFormInput {
 	Element table;
 	protected ObjectTemplate template;
 	protected TemplateViewField field;
+	Element input;
 	
 	public CollectionTextFormInput(ObjectTemplate template, TemplateViewField field) {
 		this.template = template;
@@ -22,8 +23,7 @@ public class CollectionTextFormInput {
 
 	public void renderInput(TemplateView panel, Element rootElement, 
 			Collection<String> selectedValues, boolean readOnly) {
-		
-		Element input;
+
 		Element div;
 		rootElement.appendChild(div = new Element("div").addClass("row collectionTextInput")
 				.attr("data-resourcekey", field.getResourceKey())
@@ -39,7 +39,7 @@ public class CollectionTextFormInput {
 				input.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", field.getResourceKey()))
 						.addClass("input-group position-relative dropdown mb-3")
-					.appendChild(new Element("input")
+					.appendChild(input = new Element("input")
 							.attr("id", String.format("%sText", field.getResourceKey()))
 							.addClass("form-control collectionTextInputText")
 							.attr("autocomplete", "off")
@@ -99,6 +99,10 @@ public class CollectionTextFormInput {
 									.appendChild(Html.i("fa-solid", "fa-fw", "fa-trash", "me-2"))));		
 			}
 		}
+	}
+	
+	public Element getInputElement() {
+		return input;
 	}
 
 }

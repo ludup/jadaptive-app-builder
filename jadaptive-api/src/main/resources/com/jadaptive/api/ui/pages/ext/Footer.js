@@ -10,9 +10,9 @@ $(function() {
 
 	$(document).on('click', '.replacement-item', function(e) {
 		e.preventDefault();
-		$(this).closest(".dropdown").find('input[type="text"]').val($(this).data('resourcekey'));
-		$(this).closest(".dropdown").find('.jdropdown-text').html($(this).data('resourcekey'));
-		$(this).closest(".dropdown").find('.dropdown-menu').removeClass('show');
+		$(this).closest(".input-group").find('input').val($(this).data('resourcekey'));
+		$(this).closest(".input-group").find('textarea').val($(this).data('resourcekey'));
+		$(this).closest(".input-group").find('.dropdown-menu').removeClass('show');
 	});
 
 	$(document).on('click keyup', '.jdropdown', function(e) {

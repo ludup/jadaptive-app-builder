@@ -4,10 +4,13 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.ui.Html;
 
 public class TextAreaFormInput extends FieldInputRender {
 
 	int rows;
+	Element input;
+	
 	public TextAreaFormInput(ObjectTemplate template, TemplateViewField field, int rows) {
 		super(template, field);
 		this.rows = rows;
@@ -16,7 +19,7 @@ public class TextAreaFormInput extends FieldInputRender {
 	@Override
 	public void renderInput(Element rootElement, String value, String... classes) {
 
-		Element input;
+
 		rootElement.appendChild(new Element("div")
 				.addClass("row mb-3")
 				.appendChild(new Element("div")
@@ -26,11 +29,11 @@ public class TextAreaFormInput extends FieldInputRender {
 						.addClass("form-label")
 						.attr("jad:bundle", getBundle())
 						.attr("jad:i18n", String.format("%s.name", getResourceKey())))
-				.appendChild(input = new Element("textarea")
+				.appendChild(Html.div("input-group").appendChild(input = new Element("textarea")
 						.attr("name", getFormVariableWithParents())
 						.attr("rows", String.valueOf(rows))
 						.addClass(getResourceKey() + " form-control")
-						.val(value))
+						.val(value)))
 				.appendChild(new Element("small")
 						.addClass("form-text")
 						.addClass("text-muted")
@@ -40,6 +43,10 @@ public class TextAreaFormInput extends FieldInputRender {
 		if(!disableIDAttribute) {
 			input.attr("id", getResourceKey());
 		}
+	}
+
+	public Element getInputElement() {
+		return input;
 	}
 
 }

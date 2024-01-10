@@ -4,11 +4,13 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.ui.Html;
 import com.jadaptive.utils.Utils;
 
 public abstract class FormInputRender extends FieldInputRender {
 	
 	private boolean decorate = true;
+	Element input;
 	
 	public FormInputRender(ObjectTemplate template, TemplateViewField field) {
 		super(template, field);
@@ -25,7 +27,6 @@ public abstract class FormInputRender extends FieldInputRender {
 	public final void renderInput(Element rootElement, String value, String... classes) {
 		
 		Element myElement;
-		Element input;
 		
 		rootElement.appendChild(myElement = 
 				new Element("div").addClass(Utils.csv(" ", classes) + " row mb-3"));
@@ -42,12 +43,12 @@ public abstract class FormInputRender extends FieldInputRender {
 						.attr("jad:i18n", String.format("%s.name", getResourceKey()))));
 		}
 		
-		parent.appendChild(input = new Element("input")
+		parent.appendChild(Html.div("input-group").appendChild(input = new Element("input")
 						.attr("name", getFormVariableWithParents())
 						.addClass(resourceKey + " form-control")
 						.attr("value", value)
 						.attr("autocomplete", "off")
-						.attr("type", getInputType()));
+						.attr("type", getInputType())));
 		if(decorate) {
 			parent.appendChild(new Element("small")
 					.addClass("form-text")
@@ -62,6 +63,10 @@ public abstract class FormInputRender extends FieldInputRender {
 		
 		onRender(myElement, value);
 
+	}
+	
+	public Element getInputElement() {
+		return input;
 	}
 
 	protected void onRender(Element rootElement, String value) { }

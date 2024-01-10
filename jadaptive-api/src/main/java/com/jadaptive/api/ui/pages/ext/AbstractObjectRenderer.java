@@ -53,6 +53,7 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.renderers.I18nOption;
 import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
+import com.jadaptive.api.ui.renderers.ReplacementDropdown;
 import com.jadaptive.api.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.api.ui.renderers.form.BootstrapBadgeRender;
 import com.jadaptive.api.ui.renderers.form.CollectionSearchFormInput;
@@ -70,7 +71,6 @@ import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
-import com.jadaptive.api.ui.renderers.form.ReplacementFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimeFormInput;
@@ -584,9 +584,19 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					return;
 				}
 				
+				
+				
+				
 				CollectionTextFormInput render = new CollectionTextFormInput(currentTemplate.get(), fieldView);
 				render.renderInput(panel, element, 
 						values, (view == FieldView.READ || fieldView.getField().isReadOnly()));
+				
+				List<String> replacementVars = replacementVariables.get();
+				if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
+					ReplacementDropdown replacement = new ReplacementDropdown("replacements", "");
+					render.getInputElement().before(replacement.renderInput());
+					replacement.renderTemplateReplacements(replacementVars);
+				} 
 				break;
 			}
 			}
@@ -669,14 +679,16 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			default:
 			{
 				List<String> replacementVars = replacementVariables.get();
+				
+				TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
+				render.renderInput(element, getFieldValue(fieldView, obj));
+				
 				if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
-					ReplacementFormInput render = new ReplacementFormInput(currentTemplate.get(), fieldView);
-					render.renderInput(element, getFieldValue(fieldView, obj));
-					render.renderTemplateReplacements(replacementVars);
-				} else {
-					TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
-					render.renderInput(element, getFieldValue(fieldView, obj));
-				}
+					ReplacementDropdown replacement = new ReplacementDropdown("replacements", "");
+					render.getInputElement().before(replacement.renderInput());
+					replacement.renderTemplateReplacements(replacementVars);
+				} 
+				
 				
 				break;
 			}
@@ -750,6 +762,13 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			{
 				TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), fieldView, field.getMetaValueInt("rows", 10));
 				render.renderInput(element, getFieldValue(fieldView, obj));
+				
+				List<String> replacementVars = replacementVariables.get();
+				if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
+					ReplacementDropdown replacement = new ReplacementDropdown("replacements", "");
+					render.getInputElement().before(replacement.renderInput());
+					replacement.renderTemplateReplacements(replacementVars);
+				} 
 				break;
 			}
 			}
@@ -759,6 +778,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		{
 			PasswordFormInput render = new PasswordFormInput(currentTemplate.get(), fieldView);
 			render.renderInput(element, getFieldValue(fieldView, obj));
+			List<String> replacementVars = replacementVariables.get();
+			if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
+				ReplacementDropdown replacement = new ReplacementDropdown("replacements", "");
+				render.getInputElement().before(replacement.renderInput());
+				replacement.renderTemplateReplacements(replacementVars);
+			} 
 			break;
 		}
 		case TIMESTAMP:
@@ -832,6 +857,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		{
 			NumberFormInput render = new NumberFormInput(currentTemplate.get(), fieldView);
 			render.renderInput(element, getFieldValue(fieldView, obj));
+
 			break;
 		}
 		case OBJECT_EMBEDDED:
