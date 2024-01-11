@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
-import com.jadaptive.api.entity.SearchUtils;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldTemplate;

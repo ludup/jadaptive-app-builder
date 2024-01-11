@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
@@ -16,8 +15,8 @@ public class CssEditorFormInput extends FieldInputRender {
 	private Document document;
 	private boolean readOnly;
 
-	public CssEditorFormInput(ObjectTemplate template, TemplateViewField field, Document document, boolean readOnly) {
-		super(template, field);
+	public CssEditorFormInput(TemplateViewField field, Document document, boolean readOnly) {
+		super(field);
 		this.document = document;
 		this.readOnly = readOnly;
 	}

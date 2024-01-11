@@ -275,7 +275,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				FieldTemplate field = fieldView.getField();
 				if(field.isHidden()) {
 					if(!field.getCollection()) {
-						HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), fieldView);
+						HiddenFormInput render = new HiddenFormInput(fieldView);
 						render.renderInput(element, getFieldValue(fieldView, obj));
 					}
 					continue;
@@ -370,7 +370,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					 * 
 					 * TODO encrypt these
 					 */
-					HiddenFormInput render = new HiddenFormInput(currentTemplate.get(), fieldView);
+					HiddenFormInput render = new HiddenFormInput(fieldView);
 					render.renderInput(element, getFieldValue(fieldView, obj));
 				}
 				return;
@@ -640,7 +640,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		switch(field.getFieldType()) {
 		case COUNTRY:
 		{
-			DropdownFormInput dropdown = new DropdownFormInput(currentTemplate.get(), fieldView);
+			DropdownFormInput dropdown = new DropdownFormInput(fieldView);
 			dropdown.renderInput(element, "");
 			for(Country country : internationalService.getCountries()) {
 				dropdown.addInputValue(country.getCode(), country.getName());
@@ -656,7 +656,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			switch(fieldView.getRenderer()) {
 			case BOOTSTRAP_BADGE:
 			{
-				BootstrapBadgeRender render = new BootstrapBadgeRender(currentTemplate.get(), fieldView);
+				BootstrapBadgeRender render = new BootstrapBadgeRender(fieldView);
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
@@ -713,19 +713,19 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			switch(fieldView.getRenderer()) {
 			case CSS_EDITOR:
 			{
-				CssEditorFormInput render = new CssEditorFormInput(currentTemplate.get(), fieldView, currentDocument.get(), view == FieldView.READ);
+				CssEditorFormInput render = new CssEditorFormInput(fieldView, currentDocument.get(), view == FieldView.READ);
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
 			case HTML_EDITOR:
 			{
-				HtmlEditorFormInput render = new HtmlEditorFormInput(currentTemplate.get(), fieldView, currentDocument.get(), view == FieldView.READ);
+				HtmlEditorFormInput render = new HtmlEditorFormInput(fieldView, currentDocument.get(), view == FieldView.READ);
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
 			case JAVA_EDITOR:
 			{
-				JavascriptEditorFormInput render = new JavascriptEditorFormInput(currentTemplate.get(), fieldView, currentDocument.get(), view == FieldView.READ);
+				JavascriptEditorFormInput render = new JavascriptEditorFormInput(fieldView, currentDocument.get(), view == FieldView.READ);
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
@@ -745,7 +745,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			case I18N:
 			{
 				String i18nValue = i18nService.format(panel.getBundle(), Locale.getDefault(), getFieldValue(fieldView, obj));
-				TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), fieldView, field.getMetaValueInt("rows", 15));
+				TextAreaFormInput render = new TextAreaFormInput(fieldView, field.getMetaValueInt("rows", 15));
 				render.renderInput(element, i18nValue);
 				break;
 			}
@@ -753,14 +753,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			{
 				String value = getFieldValue(fieldView, obj);
 				if(StringUtils.isNotBlank(value) || view!=FieldView.READ) {
-					TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), fieldView, field.getMetaValueInt("rows", 15));
+					TextAreaFormInput render = new TextAreaFormInput(fieldView, field.getMetaValueInt("rows", 15));
 					render.renderInput(element, value);
 				}
 				break;
 			}
 			default:
 			{
-				TextAreaFormInput render = new TextAreaFormInput(currentTemplate.get(), fieldView, field.getMetaValueInt("rows", 10));
+				TextAreaFormInput render = new TextAreaFormInput(fieldView, field.getMetaValueInt("rows", 10));
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				
 				List<String> replacementVars = replacementVariables.get();
@@ -788,7 +788,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case TIMESTAMP:
 		{
-			TimestampFormInput render = new TimestampFormInput(currentTemplate.get(), fieldView);
+			TimestampFormInput render = new TimestampFormInput(fieldView);
 			render.renderInput(element, getFieldValue(fieldView, obj));
 			break;
 		}
@@ -814,7 +814,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case BOOL:
 		{
-			BooleanFormInput render = new BooleanFormInput(currentTemplate.get(), fieldView);
+			BooleanFormInput render = new BooleanFormInput(fieldView);
 			render.renderInput(element, getFieldValue(fieldView, obj));
 			if(field.isReadOnly() || view == FieldView.READ) {
 				render.disable();
@@ -823,7 +823,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case PERMISSION:
 		{
-			DropdownFormInput render = new DropdownFormInput(currentTemplate.get(), fieldView);
+			DropdownFormInput render = new DropdownFormInput(fieldView);
 			render.renderInput(element, getFieldValue(fieldView, obj));
 			render.renderValues(permissionService.getAllPermissions(), getFieldValue(fieldView, obj));
 		
@@ -834,7 +834,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			switch(fieldView.getRenderer()) {
 			case BOOTSTRAP_BADGE:
 			{
-				BootstrapBadgeRender render = new BootstrapBadgeRender(currentTemplate.get(), fieldView);
+				BootstrapBadgeRender render = new BootstrapBadgeRender(fieldView);
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
@@ -842,7 +842,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				Class<?> values;
 				try {
 					values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
-					DropdownFormInput render = new DropdownFormInput(currentTemplate.get(), fieldView);
+					DropdownFormInput render = new DropdownFormInput(fieldView);
 					render.renderInput(element, getFieldValue(fieldView, obj));
 					render.renderValues((Enum<?>[])values.getEnumConstants(), getFieldValue(fieldView, obj), view == FieldView.READ);
 				} catch (ClassNotFoundException e) {

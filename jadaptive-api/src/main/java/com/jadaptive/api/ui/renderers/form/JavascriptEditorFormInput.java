@@ -6,7 +6,6 @@ import java.util.Base64;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
@@ -17,8 +16,8 @@ public class JavascriptEditorFormInput extends FieldInputRender {
 	private Document document;
 	private boolean readOnly;
 
-	public JavascriptEditorFormInput(ObjectTemplate template, TemplateViewField field, Document document, boolean readOnly) {
-		super(template, field);
+	public JavascriptEditorFormInput(TemplateViewField field, Document document, boolean readOnly) {
+		super(field);
 		this.document = document;
 		this.readOnly = readOnly;
 	}

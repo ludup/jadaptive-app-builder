@@ -246,7 +246,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		switch(field.getFieldType()) {
 		case BOOL:
 		{
-			BooleanFormInput input = new BooleanFormInput(template,field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
+			BooleanFormInput input = new BooleanFormInput(field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			
 			input.disableDecoration();
 			input.disableIDAttribute();
@@ -268,7 +268,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 				e.addClass("d-none searchValueField row");
 			}
 			
-			DropdownFormInput dropdown = new DropdownFormInput(template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
+			DropdownFormInput dropdown = new DropdownFormInput(field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			dropdown.disableDecoration();
 			dropdown.disableIDAttribute();
 			dropdown.renderInput(e, "");
@@ -329,7 +329,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 				e.addClass("d-none searchValueField row");
 			}
 			
-			DropdownFormInput dropdown = new DropdownFormInput(template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
+			DropdownFormInput dropdown = new DropdownFormInput(field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			dropdown.disableDecoration();
 			dropdown.disableIDAttribute();
 			dropdown.renderInput(e, "");

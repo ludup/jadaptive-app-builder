@@ -2,7 +2,6 @@ package com.jadaptive.api.ui.renderers.form;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.Html;
 
@@ -11,10 +10,18 @@ public class TextAreaFormInput extends FieldInputRender {
 	int rows;
 	Element input;
 	
-	public TextAreaFormInput(ObjectTemplate template, TemplateViewField field, int rows) {
-		super(template, field);
+	public TextAreaFormInput(TemplateViewField field, int rows) {
+		super(field);
 		this.rows = rows;
 	}
+	
+	
+
+	public TextAreaFormInput(String resourceKey, String formVariable, String bundle, int rows) {
+		super(resourceKey, formVariable, bundle);
+		this.rows = rows;
+	}
+
 
 	@Override
 	public void renderInput(Element rootElement, String value, String... classes) {

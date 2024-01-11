@@ -13,11 +13,11 @@ public abstract class FormInputRender extends FieldInputRender {
 	Element input;
 	
 	public FormInputRender(ObjectTemplate template, TemplateViewField field) {
-		super(template, field);
+		super(field);
 	}
 	
 	public FormInputRender(ObjectTemplate template, String resourceKey, String formVariable, String bundle) {
-		super(template, resourceKey, formVariable, bundle);
+		super(resourceKey, formVariable, bundle);
 	}
 	
 	public void disableDecoration() {

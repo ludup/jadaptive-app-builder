@@ -2,13 +2,12 @@ package com.jadaptive.api.ui.renderers.form;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 
 public class BootstrapBadgeRender extends FieldInputRender {
 	
-	public BootstrapBadgeRender(ObjectTemplate template, TemplateViewField field) {
-		super(template, field);
+	public BootstrapBadgeRender(TemplateViewField field) {
+		super(field);
 	}
 	
 	public final void renderInput(Element rootElement, String value, String... classes) {

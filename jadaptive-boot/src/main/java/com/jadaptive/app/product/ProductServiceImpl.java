@@ -11,7 +11,6 @@ import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.product.Product;
 import com.jadaptive.api.product.ProductLogoSource;
 import com.jadaptive.api.product.ProductService;
-import com.jadaptive.api.stats.ResourceService;
 
 @Service
 public class ProductServiceImpl implements ProductService {

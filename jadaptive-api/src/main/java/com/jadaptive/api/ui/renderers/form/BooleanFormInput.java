@@ -2,7 +2,6 @@ package com.jadaptive.api.ui.renderers.form;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.utils.Utils;
 
@@ -10,12 +9,12 @@ public class BooleanFormInput extends FieldInputRender {
 
 	Element input;
 	
-	public BooleanFormInput(ObjectTemplate template, TemplateViewField field) {
-		super(template, field);
+	public BooleanFormInput(TemplateViewField field) {
+		super(field);
 	}
 
-	public BooleanFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle) {
-		super(template, resourceKey, formVariable, bundle);
+	public BooleanFormInput(String resourceKey, String formVariable, String bundle) {
+		super(resourceKey, formVariable, bundle);
 	}
 
 	@Override

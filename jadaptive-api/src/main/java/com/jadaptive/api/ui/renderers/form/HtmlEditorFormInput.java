@@ -6,7 +6,6 @@ import java.util.Base64;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
@@ -17,14 +16,14 @@ public class HtmlEditorFormInput extends FieldInputRender {
 	private Document document;
 	private boolean readOnly;
 
-	public HtmlEditorFormInput(ObjectTemplate template, TemplateViewField field, Document document, boolean readOnly) {
-		super(template, field);
+	public HtmlEditorFormInput(TemplateViewField field, Document document, boolean readOnly) {
+		super(field);
 		this.document = document;
 		this.readOnly = readOnly;
 	}
 	
-	public HtmlEditorFormInput(ObjectTemplate template, Document document, String resourceKey, String formVariable, String bundle) {
-		super(template, resourceKey, formVariable, bundle);
+	public HtmlEditorFormInput(Document document, String resourceKey, String formVariable, String bundle) {
+		super(resourceKey, formVariable, bundle);
 		this.document = document;
 	}
 

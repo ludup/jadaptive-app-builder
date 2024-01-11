@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.PageHelper;
@@ -16,8 +15,8 @@ public class ReplacementFormInput extends FieldInputRender {
 	Element dropdownInput;
 	Element valueElement;
 	
-	public ReplacementFormInput(ObjectTemplate template, TemplateViewField field) {
-		super(template, field);
+	public ReplacementFormInput(TemplateViewField field) {
+		super(field);
 	}
 
 	@Override

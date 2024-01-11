@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageHelper;
 
@@ -16,12 +15,12 @@ public class DropdownFormInput extends FieldInputRender {
 	Element nameElement;
 	Element valueElement;
 	
-	public DropdownFormInput(ObjectTemplate template, TemplateViewField field) {
-		super(template, field);
+	public DropdownFormInput(TemplateViewField field) {
+		super(field);
 	}
 	
-	public DropdownFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle) {
-		super(template, resourceKey, formVariable, bundle);
+	public DropdownFormInput(String resourceKey, String formVariable, String bundle) {
+		super(resourceKey, formVariable, bundle);
 	}
 
 	@Override

@@ -3,14 +3,13 @@ package com.jadaptive.api.ui.renderers.form;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.utils.Utils;
 
 public class TimestampFormInput extends FieldInputRender {
 
-	public TimestampFormInput(ObjectTemplate template, TemplateViewField field) {
-		super(template, field);
+	public TimestampFormInput(TemplateViewField field) {
+		super(field);
 	}
 
 	public final void renderInput(Element rootElement, String value, String... classes) {

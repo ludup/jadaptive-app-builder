@@ -6,12 +6,9 @@ import java.util.Objects;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.FieldTemplate;
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 
 public abstract class FieldInputRender {
-
-	protected ObjectTemplate template;
 
 	String resourceKey;
 	String formVariable;
@@ -20,8 +17,7 @@ public abstract class FieldInputRender {
 	boolean decorate = true;
 	boolean disableIDAttribute = false;
 	
-	public FieldInputRender(ObjectTemplate template, TemplateViewField field) {
-		this.template = template;
+	public FieldInputRender(TemplateViewField field) {
 		this.resourceKey = field.getResourceKey();
 		this.formVariable = field.getFormVariable();
 		this.bundle = field.getBundle();
@@ -39,8 +35,7 @@ public abstract class FieldInputRender {
 		formVariableWithParents = formVariable.toString();
 	}
 	
-	public FieldInputRender(ObjectTemplate template, String resourceKey,String formVariable, String bundle) {
-		this.template = template;
+	public FieldInputRender(String resourceKey,String formVariable, String bundle) {
 		this.resourceKey = resourceKey;
 		this.formVariable = formVariable;
 		this.bundle = bundle;
