@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -29,8 +28,6 @@ import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.PageProcessors;
-import com.jadaptive.api.ui.PageResources;
-import com.jadaptive.api.ui.PageResourcesHelper;
 import com.jadaptive.api.ui.pages.ext.EnableBootstrapTheme;
 import com.jadaptive.plugins.dashboard.DashboardWidget;
 
