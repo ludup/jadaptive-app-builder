@@ -2,13 +2,20 @@ package com.jadaptive.plugins.dashboard.pages;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +27,10 @@ import com.jadaptive.api.ui.DashboardType;
 import com.jadaptive.api.ui.HomePage;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.PageProcessors;
+import com.jadaptive.api.ui.PageResources;
+import com.jadaptive.api.ui.PageResourcesHelper;
 import com.jadaptive.api.ui.pages.ext.EnableBootstrapTheme;
 import com.jadaptive.plugins.dashboard.DashboardWidget;
 
@@ -106,6 +116,29 @@ public class Dashboard extends AuthenticatedPage {
 								.attr("jad:bundle", widget.getBundle())
 								.appendChild(Html.i("fa-solid", "fa-question-circle")));
 					}
+					
+					
+					URL html = widget.getClass().getResource(widget.getClass().getSimpleName() + ".html");
+					if(Objects.nonNull(html)) {
+						try(InputStream in = html.openStream()) {
+							Document doc = Jsoup.parse(IOUtils.toString(in, "UTF-8"));
+							Elements children = doc.selectFirst("body").children();
+							if(Objects.nonNull(children)) {
+								for(Element elem : children) {
+									elem.appendTo(w);
+								}
+							}
+						}
+					}
+					URL stylesheet = widget.getClass().getResource(widget.getClass().getSimpleName() + ".css");
+					if(Objects.nonNull(stylesheet)) {
+						PageHelper.appendStylesheet(document,"/app/style/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".css");
+					}
+					URL script = widget.getClass().getResource(widget.getClass().getSimpleName() + ".js");
+					if(Objects.nonNull(script)) {
+						PageHelper.appendHeadScript(document, "/app/script/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".js");
+					}
+					
 					
 					try {
 						widget.renderWidget(document, w);
