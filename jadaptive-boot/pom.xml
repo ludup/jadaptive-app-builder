@@ -155,12 +155,6 @@
 			<artifactId>byte-buddy</artifactId>
 			<version>1.12.1</version> <!--$NO-MVN-MAN-VER$-->
 		</dependency>
-		
-		<dependency>
-			<groupId>com.install4j</groupId>
-			<artifactId>install4j-runtime</artifactId>
-			<version>10.0.6</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -181,14 +175,6 @@
 
 
 	<repositories>
-		<repository>
-			<id>ej-technologies</id>
-			<url>https://maven.ej-technologies.com/repository</url>
-			<releases/>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
 		<repository>
 			<id>oss-snapshots</id>
 			<snapshots>
