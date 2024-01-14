@@ -399,7 +399,7 @@ public class SessionUtils {
 			response.setHeader("X-Content-Type-Options", "nosniff");
 			response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 			response.setHeader("Content-Security-Policy", 
-					"default-src 'none'; font-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self';");
+					"default-src 'none'; form-action 'self'; font-src 'self' https://fonts.gstatic.com/; script-src 'self'; style-src 'self' https://fonts.googleapis.com/; connect-src 'self'; img-src 'self' data: https://www.gravatar.com/; object-src 'self'; frame-ancestors 'self';");
 		}
 	}
 
