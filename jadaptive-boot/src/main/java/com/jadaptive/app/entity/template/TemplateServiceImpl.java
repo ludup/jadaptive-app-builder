@@ -103,8 +103,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		do {
 			TableAction[] actions = tmp.getAnnotationsByType(TableAction.class);
 			if(Objects.nonNull(actions)) {
-				if(log.isInfoEnabled()) {
-					log.info("Building table actions for {}", resourceKey);
+				if(log.isDebugEnabled()) {
+					log.debug("Building table actions for {}", resourceKey);
 				}
 				for(TableAction action : actions) {
 					if(StringUtils.isBlank(action.targetKey())) {

@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 
+import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageHelper;
 
@@ -119,6 +120,22 @@ public class DropdownFormInput extends FieldInputRender {
 		
 		nameElement.val(processEnumName(selected));
 		valueElement.val(String.valueOf(selected));
+	}
+	
+	public void renderCollectionValues(Collection<? extends NamedDocument> values, String defaultValue) {
+		
+		NamedDocument selected = null;
+		for(NamedDocument value : values) {
+			addInputValue(value.getName(), value.getUuid());
+			if(value.getUuid().equals(defaultValue)) {
+				selected = value;
+			}
+		}
+		
+		if(Objects.nonNull(selected)) {
+			nameElement.val(selected.getName());
+			valueElement.val(selected.getUuid());
+		}
 	}
 	
 	private String processEnumName(String name) {

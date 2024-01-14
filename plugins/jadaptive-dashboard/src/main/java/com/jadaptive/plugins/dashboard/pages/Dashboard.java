@@ -127,19 +127,21 @@ public class Dashboard extends AuthenticatedPage {
 							}
 						}
 					}
-					URL stylesheet = widget.getClass().getResource(widget.getClass().getSimpleName() + ".css");
-					if(Objects.nonNull(stylesheet)) {
-						PageHelper.appendStylesheet(document,"/app/style/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".css");
-					}
-					URL script = widget.getClass().getResource(widget.getClass().getSimpleName() + ".js");
-					if(Objects.nonNull(script)) {
-						PageHelper.appendHeadScript(document, "/app/script/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".js");
-					}
-					
 					
 					try {
 						widget.renderWidget(document, w);
 						row.appendChild(e);
+						
+						URL stylesheet = widget.getClass().getResource(widget.getClass().getSimpleName() + ".css");
+						if(Objects.nonNull(stylesheet)) {
+							PageHelper.appendStylesheet(document,"/app/style/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".css");
+						}
+						URL script = widget.getClass().getResource(widget.getClass().getSimpleName() + ".js");
+						if(Objects.nonNull(script)) {
+							PageHelper.appendHeadScript(document, "/app/script/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".js");
+						}
+						
+						
 						count++;
 					} catch(Throwable ex) {
 						log.error("Consumed exception whilst processing dashboard widget {}", widget.getName(), ex);
