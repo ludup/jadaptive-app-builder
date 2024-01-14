@@ -235,6 +235,17 @@ public abstract class HtmlPage implements Page {
 						} else {
 							return value;
 						}
+					} else if(method.getName().startsWith("is") && method.getName().length() > 2) {
+						String name = method.getName().substring(2,3).toLowerCase();
+						if(method.getName().length() > 3) {
+							name += method.getName().substring(3);
+						}
+						String value = Request.get().getParameter(name);
+						if(method.getReturnType().isAssignableFrom(boolean.class)) {
+							return StringUtils.isBlank(value) ? false : Boolean.parseBoolean(value);
+						} else {
+							return value;
+						}
 					} else {
 						throw new UnsupportedOperationException();
 					}
