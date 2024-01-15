@@ -126,7 +126,7 @@ public class DropdownFormInput extends FieldInputRender {
 		
 		NamedDocument selected = null;
 		for(NamedDocument value : values) {
-			addInputValue(value.getName(), value.getUuid());
+			addInputValue(value.getUuid(), value.getName());
 			if(value.getUuid().equals(defaultValue)) {
 				selected = value;
 			}
