@@ -91,25 +91,25 @@ public class RsaEncryptionProvider {
 	private void setOwnerPermissions(Path path) throws IOException {
 		
 		try {
-			if(SystemUtils.IS_OS_WINDOWS) {
+			if(!SystemUtils.IS_OS_WINDOWS) {
 				
-				AclFileAttributeView aclAttr = Files.getFileAttributeView(path, AclFileAttributeView.class);
-				
-				UserPrincipalLookupService upls = path.getFileSystem().getUserPrincipalLookupService();
-				UserPrincipal user = upls.lookupPrincipalByName(System.getProperty("user.name"));
-				AclEntry.Builder builder = AclEntry.newBuilder();       
-				builder.setPermissions( EnumSet.of(AclEntryPermission.READ_DATA, AclEntryPermission.EXECUTE, 
-				        AclEntryPermission.READ_ACL, AclEntryPermission.READ_ATTRIBUTES, AclEntryPermission.READ_NAMED_ATTRS,
-				        AclEntryPermission.WRITE_ACL, AclEntryPermission.DELETE
-				));
-				builder.setPrincipal(user);
-				builder.setType(AclEntryType.ALLOW);
-				aclAttr.setAcl(Collections.singletonList(builder.build()));
-				
-				if(log.isInfoEnabled()) {
-					log.info("Set strict permissions on {}", path.toAbsolutePath());
-				}
-			} else {
+//				AclFileAttributeView aclAttr = Files.getFileAttributeView(path, AclFileAttributeView.class);
+//				
+//				UserPrincipalLookupService upls = path.getFileSystem().getUserPrincipalLookupService();
+//				UserPrincipal user = 
+//				AclEntry.Builder builder = AclEntry.newBuilder();       
+//				builder.setPermissions( EnumSet.of(AclEntryPermission.READ_DATA, AclEntryPermission.EXECUTE, 
+//				        AclEntryPermission.READ_ACL, AclEntryPermission.READ_ATTRIBUTES, AclEntryPermission.READ_NAMED_ATTRS,
+//				        AclEntryPermission.WRITE_ACL, AclEntryPermission.DELETE
+//				));
+//				builder.setPrincipal(user);
+//				builder.setType(AclEntryType.ALLOW);
+//				aclAttr.setAcl(Collections.singletonList(builder.build()));
+//				
+//				if(log.isInfoEnabled()) {
+//					log.info("Set strict permissions on {}", path.toAbsolutePath());
+//				}
+//			} else {
 				
 				Set<PosixFilePermission> ownerWritable;
 				if(Files.isDirectory(path)) {
