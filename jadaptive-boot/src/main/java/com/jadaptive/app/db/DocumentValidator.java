@@ -272,6 +272,11 @@ public class DocumentValidator {
 							value, v, field);
 					return;
 				}
+				case EMAIL:
+				{
+					validateRegex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", value, v, field);
+					return;
+				}
 				case REGEX:
 				{
 					validateRegex(v.getValue(), value, v, field);

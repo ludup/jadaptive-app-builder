@@ -18,6 +18,7 @@ public enum ValidationType {
 	CIDR_V6, 
 	EMPTY, 
 	HOSTNAME, 
-	PORT;
+	PORT,
+	EMAIL;
 
 }
