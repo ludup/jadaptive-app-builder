@@ -377,7 +377,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			if(fieldTemplate.getCollection()) {
 				AbstractObject existing = null;
 				for(AbstractObject child : parentObject.getObjectCollection(fieldName)) {
-					if(child.getUuid().equalsIgnoreCase(childObject.getUuid())) {
+					if(Objects.nonNull(child.getUuid()) && child.getUuid().equalsIgnoreCase(childObject.getUuid())) {
 						existing = child;
 					}
 				}
