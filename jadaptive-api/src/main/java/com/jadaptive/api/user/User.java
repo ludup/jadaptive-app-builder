@@ -1,5 +1,6 @@
 package com.jadaptive.api.user;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -17,7 +18,6 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
-import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
@@ -25,10 +25,10 @@ import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
 @ObjectServiceBean(bean = UserService.class)
-@ObjectViews({ @ObjectViewDefinition(bundle = "users", value = "contact", weight=100),
-	@ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)})
-@TableView(defaultColumns = { "username", "name", "lastLogin" },
-	requiresUpdate = true, sortField = "username")
+@ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)
+@ObjectViewDefinition(bundle = "users", value = "email", weight=100)
+@ObjectViewDefinition(bundle = "users", value = "telephone", weight=200)
+@TableView(defaultColumns = { "username", "name", "lastLogin" }, requiresUpdate = true, sortField = "username")
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
 public abstract class User extends AbstractUUIDEntity implements NamedDocument {
@@ -50,12 +50,13 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	String name;
 
 	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
-	@Validator(type = ValidationType.REGEX, value = Utils.EMAIL_PATTERN)
-	@ObjectView("contact")
+	@Validator(type = ValidationType.EMAIL)
+	@ObjectView("emails")
+	@Validator(type = ValidationType.EMAIL)
 	String email;
 
 	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
-	@ObjectView("contact")
+	@ObjectView("telephone")
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	String mobilePhone;
 	
@@ -67,6 +68,16 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@ObjectField(type = FieldType.TEXT, readOnly = true)
 	@ObjectView(value = DETAILS_VIEW, renderer = FieldRenderer.OPTIONAL)
 	Collection<String> aliases;
+
+	@ObjectField(type = FieldType.TEXT, automaticEncryption = true)
+	@Validator(type = ValidationType.EMAIL)
+	@ObjectView("emails")
+	Collection<String> otherEmail = new ArrayList<>();
+	
+	@ObjectField(type = FieldType.TEXT, automaticEncryption = true)
+	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
+	@ObjectView("telephone")
+	Collection<String> otherTelephone = new ArrayList<>();
 
 	public String getUsername() {
 		return username;
@@ -114,6 +125,22 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	public void setAliases(Collection<String> aliases) {
 		this.aliases = aliases;
+	}
+
+	public Collection<String> getOtherEmail() {
+		return otherEmail;
+	}
+
+	public void setOtherEmail(Collection<String> otherEmail) {
+		this.otherEmail = otherEmail;
+	}
+
+	public Collection<String> getOtherTelephone() {
+		return otherTelephone;
+	}
+
+	public void setOtherTelephone(Collection<String> otherTelephone) {
+		this.otherTelephone = otherTelephone;
 	}
 	
 }

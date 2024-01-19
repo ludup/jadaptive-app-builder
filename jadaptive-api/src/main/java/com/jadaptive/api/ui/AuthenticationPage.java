@@ -126,7 +126,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
     		Feedback.error("userInterface","error.invalidCredentials");
     	} catch (UnauthorizedException e) {
     		Feedback.error("userInterface","error.invalidCredentials");
-    	}
+    	} 
 		
 		authenticationService.reportAuthenticationFailure(state, this);
 		

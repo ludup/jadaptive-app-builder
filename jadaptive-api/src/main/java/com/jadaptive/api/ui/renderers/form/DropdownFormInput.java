@@ -1,6 +1,7 @@
 package com.jadaptive.api.ui.renderers.form;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 
 import org.jsoup.nodes.Element;
@@ -31,15 +32,19 @@ public class DropdownFormInput extends FieldInputRender {
 		Element e;
 		rootElement.appendChild( e =new Element("div").addClass("row mb-3"));
 		
+		Element div;
+		
+		e.appendChild(div = new Element("div")
+				.addClass("col-12")
+				.addClass("dropdownInput"));
+		
 		if(decorate) {
-				e.appendChild(new Element("div")
-						.addClass("col-12")
-						.addClass("dropdownInput")
-				.appendChild(new Element("label")
+				
+				div.appendChild(new Element("label")
 						.attr("for", getFormVariable())
 						.addClass("form-label")
 						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.name", getResourceKey()))));
+						.attr("jad:i18n", String.format("%s.name", getResourceKey())));
 		}
 		
 		e.appendChild(dropdownInput = new Element("div")
@@ -120,6 +125,23 @@ public class DropdownFormInput extends FieldInputRender {
 		
 		nameElement.val(processEnumName(selected));
 		valueElement.val(String.valueOf(selected));
+	}
+	
+	public void renderValues(Map<String,String> values, String defaultValue) {
+		
+		Map.Entry<String,String> selected = null;
+		for(Map.Entry<String,String> value : values.entrySet()) {
+			
+			addInputValue(value.getKey(), value.getValue());
+			if(value.getKey().equals(defaultValue)) {
+				selected = value;
+			}
+		}
+		
+		if(Objects.nonNull(selected)) {
+			nameElement.val(selected.getValue());
+			valueElement.val(selected.getKey());
+		}
 	}
 	
 	public void renderCollectionValues(Collection<? extends NamedDocument> values, String defaultValue) {

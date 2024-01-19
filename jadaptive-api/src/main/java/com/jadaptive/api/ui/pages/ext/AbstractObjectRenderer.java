@@ -581,10 +581,17 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				if(values.isEmpty() && 
 						field.isReadOnly() &&
 						(fieldView.getRenderer() == FieldRenderer.OPTIONAL)) {
+					// TODO Hidden encrypted
 					return;
 				}
 				
-				
+				if(fieldView.requiresDecryption()) {
+					Collection<String> tmp = new ArrayList<>();
+					for(String value : values) {
+						tmp.add(encryptionService.decrypt(value));
+					}
+					values = tmp;
+				}
 				
 				
 				CollectionTextFormInput render = new CollectionTextFormInput(currentTemplate.get(), fieldView);
