@@ -247,6 +247,22 @@ public class Utils {
 		return value;
 	}
 	
+	public static String beforeLast(String value, String string) {
+		int idx = value.lastIndexOf(string);
+		if(idx > -1) {
+			return value.substring(0,idx);
+		}
+		return value;
+	}
+	
+	public static String afterLast(String value, String string) {
+		int idx = value.lastIndexOf(string);
+		if(idx > -1 && idx+string.length() < value.length()) {
+			return value.substring(idx+string.length());
+		}
+		return "";
+	}
+	
 	public static String base64Encode(byte[] bytes) {
 		return java.util.Base64.getEncoder().encodeToString(bytes);
 	}
