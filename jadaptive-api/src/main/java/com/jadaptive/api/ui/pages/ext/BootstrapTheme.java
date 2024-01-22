@@ -44,7 +44,7 @@ public enum BootstrapTheme {
 		
 		switch(current) {
 		case DEFAULT:
-			return SUPERHERO.name().toLowerCase();
+			return DARKLY.name().toLowerCase();
 		default:
 			return current.name().toLowerCase();
 		}
