@@ -71,4 +71,6 @@ public interface RoleService {
 
 	void saveOrUpdate(Role role);
 
+	Collection<User> getUsers(AssignableUUIDEntity object);
+
 }

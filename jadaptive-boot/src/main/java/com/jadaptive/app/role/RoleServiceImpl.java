@@ -280,6 +280,15 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	}
 	
 	@Override
+	public Collection<User> getUsers(AssignableUUIDEntity object) {
+		
+		Set<User> tmp = new HashSet<>();
+		tmp.addAll(object.getUsers());
+		tmp.addAll(getUsersByRoles(object.getRoles()));
+		return tmp;
+	}
+	
+	@Override
 	public Collection<Role> getRolesByUser(User user) {
 		List<Role> results = new ArrayList<>(getAllUserRoles(user));
 		results.addAll(repository.searchObjects(Role.class, SearchField.all("users.uuid", user.getUuid())));

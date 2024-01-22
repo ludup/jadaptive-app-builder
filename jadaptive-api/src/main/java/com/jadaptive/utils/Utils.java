@@ -607,7 +607,7 @@ public class Utils {
 	}
 	
 	public static String generateUsername(String name, char fillingCharacter, int length) {
-		name = WordUtils.capitalizeFully(name);
+		name = WordUtils.capitalizeFully(stripNonAlphanumeric(name));
 		String[] elements = name.split(" ");
 		StringBuffer buf = new StringBuffer();
 		for(int i=0;i<length;i++) {
@@ -655,4 +655,5 @@ public class Utils {
 		}
 		return buf.toString();
 	}
+	
 }
