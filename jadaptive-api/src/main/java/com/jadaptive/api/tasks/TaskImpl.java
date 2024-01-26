@@ -10,4 +10,8 @@ public interface TaskImpl<T extends Task> extends ExtensionPoint {
 
 	@SuppressWarnings("unchecked")
 	default TaskResult executeTask(Task task, String executionId) { return doTask((T) task, executionId); }
+	
+	default String getIconGroup() { return "fa-solid"; }
+	
+	String getIcon();
 }
