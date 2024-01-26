@@ -2,6 +2,7 @@ package com.jadaptive.api.ui.wizards;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -36,6 +37,9 @@ public class WizardServiceImpl implements WizardService {
 
 	@Override
 	public void clearState(String resourceKey, HttpServletRequest request) {
-		wizards.get(resourceKey).clearState(request);
+		WizardFlow wiz = wizards.get(resourceKey);
+		if(Objects.nonNull(wiz)) {
+			wiz.clearState(request);
+		}
 	}
 }
