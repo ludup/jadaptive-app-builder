@@ -2,6 +2,10 @@ package com.jadaptive.api.ui;
 
 import java.io.FileNotFoundException;
 import java.util.Objects;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -86,7 +90,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 				|| !pageCache.getDefaultPage().equals(Login.class)) {
 			Element el = doc.selectFirst("#actions");
 			if(Objects.nonNull(el)) {
-				el.appendChild(Html.a("/app/api/reset-login")
+				el.appendChild(Html.a(state.getResetURL())
 					.addClass("text-decoration-none d-block")
 					.appendChild(new Element("sup")
 							.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "resetLogin.text"))));
@@ -114,7 +118,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			sessionUtils.verifySameSiteRequest(Request.get());
 			
 			if(doForm(document, state, form)) {
-				throw new PageRedirect(pageCache.resolvePage(authenticationService.completeAuthentication(state, this)));
+				throw new PageRedirect(pageCache.resolvePage(authenticationService.completeAuthentication(state, Optional.of(this))));
 			}
     	
 			Request.response().setStatus(HttpStatus.FORBIDDEN.value());
@@ -132,5 +136,13 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 		throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentState().getCurrentPage()));
 	}
+
+	@Override
+	protected void afterProcess(String uri, HttpServletRequest request, HttpServletResponse response)
+			throws FileNotFoundException {
+		authenticationService.decorateAuthenticationPage(getCurrentDocument());
+	}
+	
+	
 	
 }

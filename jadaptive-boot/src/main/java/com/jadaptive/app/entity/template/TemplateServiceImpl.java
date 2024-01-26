@@ -473,10 +473,10 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			}
 			
 			ObjectExtension e = clz.getAnnotation(ObjectExtension.class);
-			ObjectViews annonatedViews = tmp.getAnnotation(ObjectViews.class);
+			ObjectViewDefinition[] annonatedViews = tmp.getAnnotationsByType(ObjectViewDefinition.class);
 
 			if(Objects.nonNull(annonatedViews)) {
-				for(ObjectViewDefinition def : annonatedViews.value()) {
+				for(ObjectViewDefinition def : annonatedViews) {
 					if(Objects.nonNull(e)) {
 						views.put(def.value(), new TemplateView(def, true,
 								e.resourceKey(), 

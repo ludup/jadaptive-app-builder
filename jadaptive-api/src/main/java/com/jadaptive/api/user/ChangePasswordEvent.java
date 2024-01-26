@@ -1,10 +1,9 @@
-package com.jadaptive.app.user;
+package com.jadaptive.api.user;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.AuditedObject;
 import com.jadaptive.api.template.ObjectDefinition;
-import com.jadaptive.api.user.User;
 
 @AuditedObject
 @ObjectDefinition(resourceKey = ChangePasswordEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, 

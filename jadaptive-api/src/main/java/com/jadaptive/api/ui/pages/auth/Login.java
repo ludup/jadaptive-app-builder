@@ -28,8 +28,10 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.Html;
+import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
+import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.ui.pages.auth.Login.LoginForm;
 import com.jadaptive.api.user.FakeUser;
@@ -52,6 +54,9 @@ public class Login extends AuthenticationPage<LoginForm> {
 	private PermissionService permissionService;;
 
 	@Autowired
+	private PageCache pageCache;
+	
+	@Autowired
 	private  TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
 	
 	public Login() {
@@ -71,7 +76,11 @@ public class Login extends AuthenticationPage<LoginForm> {
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		if(!state.getCurrentPage().equals(Login.class)) {
-			authenticationService.clearAuthenticationState();
+			/**
+			 * This may break other stuff like reset
+			 */
+			throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage()));
+//			authenticationService.clearAuthenticationState();
 		}
 		
 		doc.selectFirst("#authenticationHeader").appendChild(Html.i18n(state.getPolicy().getBundle(), String.format("%s.name", state.getPolicy().getResourceKey())));
@@ -101,44 +110,26 @@ public class Login extends AuthenticationPage<LoginForm> {
 				user = new FakeUser(form.getUsername());
 			}
 			state.setUser(user);
-			AuthenticationPolicy assigned = policyService.getAssignedPolicy(user, Request.getRemoteAddress(), state.getPolicy().getClass());
+			boolean passwordRequired = state.getPolicy().getPasswordOnFirstPage() && state.getPolicy().getPasswordRequired();
+			boolean passwordVerified = false;
 			
-			if(Objects.nonNull(assigned)) {
-				authenticationService.processRequiredAuthentication(state, assigned);
-				
-				if(StringUtils.isNotBlank(Request.get().getParameter("password"))) {
-					if(userService.verifyPassword(state.getUser(), Request.get().getParameter("password").toCharArray())) {
-						
-						permissionService.setupUserContext(user);
-						
-						try {
-							
-							state.setAttribute(AuthenticationService.PASSWORD, Request.get().getParameter("password"));
-							state.getRequiredPages().remove(Password.class);
-							AuthenticationModule passwordModule = moduleDatabase.get(
-									AuthenticationService.PASSWORD_MODULE_UUID,
-									AuthenticationModule.class);
-							if(state.getOptionalAuthentications().contains(passwordModule)) {
-								state.getOptionalAuthentications().remove(passwordModule);
-								state.setOptionalCompleted(1);
-							}
-							return true;
-						
-						} finally {
-							permissionService.clearUserContext();
-						}
-					} else {
-				    	return false;
-					}
-				}
-				
-				
-			
-				return true;
+			if(StringUtils.isNotBlank(Request.get().getParameter("password"))) {
+				if(userService.verifyPassword(state.getUser(), Request.get().getParameter("password").toCharArray())) {
+					state.setAttribute(AuthenticationService.PASSWORD, Request.get().getParameter("password"));
+					passwordVerified = true;
+				} 
 			}
 			
-			if(log.isWarnEnabled()) {
-				log.warn("A suitable policy could not be found for {}", user.getUsername());
+			AuthenticationPolicy assigned = policyService.getAssignedPolicy(user, 
+					Request.getRemoteAddress(), 
+					state.getPolicy().getClass());
+			
+			if(Objects.nonNull(assigned) && !state.getPolicy().equals(assigned)) {
+				authenticationService.changePolicy(state, assigned, passwordVerified);
+			}
+			
+			if(passwordVerified || !passwordRequired) {
+				return true;
 			}
 
     	} catch(AccessDeniedException e) {

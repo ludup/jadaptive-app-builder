@@ -23,6 +23,10 @@ public class SAMLIdpAuthenticationPolicy extends AuthenticationPolicy {
 	@ObjectView(value = "factors")
 	Boolean passwordOnFirstPage;
 	
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
+	@ObjectView(value = "factors")
+	Boolean passwordRequired;
+	
 	public Boolean getPasswordOnFirstPage() {
 		return passwordOnFirstPage;
 	}
@@ -34,6 +38,15 @@ public class SAMLIdpAuthenticationPolicy extends AuthenticationPolicy {
 	@Override
 	public boolean isSessionRequired() {
 		return false;
+	}
+	
+	@Override
+	public Boolean getPasswordRequired() {
+		return false;
+	}
+
+	public void setPasswordRequired(Boolean passwordRequired) {
+		this.passwordRequired = passwordRequired;
 	}
 
 }

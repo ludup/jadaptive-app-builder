@@ -337,7 +337,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		}
 		
 		if(!result.cursor().hasNext()) {
-			throw new ObjectNotFoundException(String.format("No entity %s was not found", table));
+			throw new ObjectNotFoundException(String.format("No max results for %s was not found", table));
 		}
 		return result.first();
 	}

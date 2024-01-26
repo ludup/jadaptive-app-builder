@@ -51,9 +51,10 @@ public class Header extends AbstractPageExtension {
 		
 		
 		if(!permissionService.hasUserContext()) {
-				document.select("#searchForm").remove();
+			document.select("#searchForm").remove();
 			document.select("#topMenu").remove();
 			document.select("#logoff").remove();
+			document.select("nav button").remove();
 		} else if(Objects.nonNull(page.getClass().getAnnotation(ModalPage.class))) {
 			document.select("#topMenu").remove();
 		} else {
@@ -174,7 +175,7 @@ public class Header extends AbstractPageExtension {
 		boolean loggedIn = sessionUtils.hasActiveSession(Request.get());
 		if(loggedIn) {
 			
-			document.selectFirst("#actions").appendChild(new Element("div")
+			document.selectFirst("#headerActions").appendChild(new Element("div")
 					.addClass("float-end me-3")
 					.appendChild(new Element("div")
 							.attr("id", "logoff")

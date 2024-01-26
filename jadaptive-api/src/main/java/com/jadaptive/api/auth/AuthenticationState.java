@@ -11,6 +11,7 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.ui.pages.user.ChangePassword;
 import com.jadaptive.api.user.User;
 
 public class AuthenticationState {
@@ -24,8 +25,8 @@ public class AuthenticationState {
 	String userAgent;
 	Map<String,Object> attrs = new HashMap<>();
 	boolean decorateWindow = true;
-	String resetURL = "/app/ui/login-reset";
-	String resetText = "Restart Authentication";
+	String resetURL = "/app/api/reset-login";
+	String resetText = "Reset";
 	int failedAttempts = 0;
 	int currentPostAuthenticationIndex = 0;
 	Redirect homePage;
@@ -33,7 +34,7 @@ public class AuthenticationState {
 	Class<? extends Page> optionalSelectionPage;
 	Class<? extends Page> selectedPage = null;
 	List<Class<? extends Page>> completedOptionsPages = new ArrayList<>();
-	
+	boolean passwordEnabled;
 	int optionalCompleted = 0;
 	int optionalRequired = 0;
 	
@@ -211,6 +212,10 @@ public class AuthenticationState {
 		this.homePage = new PageRedirect(homePage);
 	}
 	
+	public void setHomePage(Redirect homePage) {
+		this.homePage = homePage;
+	}
+	
 	public void setHomePage(String uri) {
 		this.homePage = new UriRedirect(uri);
 	}
@@ -257,5 +262,21 @@ public class AuthenticationState {
 
 	public boolean isFirstPage() {
 		return currentPageIndex == 0;
+	}
+
+	public boolean isPasswordEnabled() {
+		return passwordEnabled;
+	}
+
+	public void setPasswordEnabled(boolean passwordEnabled) {
+		this.passwordEnabled = passwordEnabled;
+	}
+
+	public void insertNextPostAuthentication(PostAuthenticatorPage page) {
+		this.postAuthenticationPages.add(currentPostAuthenticationIndex+1, page);
+	}
+	
+	public void insertPostAuthentication(PostAuthenticatorPage page) {
+		this.postAuthenticationPages.add(page);
 	}
 }

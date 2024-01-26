@@ -17,6 +17,17 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	void setCurrentTenant(Tenant tenant);
 
+	default void runAsTenant(Tenant tenant, Runnable task) {
+		var was = getCurrentTenant();
+		try {
+			setCurrentTenant(tenant);
+			task.run();
+		}
+		finally {
+			setCurrentTenant(was);
+		}
+	}
+
 	void clearCurrentTenant();
 
 	Iterable<Tenant> allObjects();

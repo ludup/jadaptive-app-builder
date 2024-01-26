@@ -4,13 +4,14 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
+import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.pages.user.ChangePassword.PasswordForm;
@@ -25,10 +26,7 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 
 	@Autowired
 	private PermissionService permissionService; 
-	
-	@Autowired
-	private TenantService tenantService; 
-	
+		
 	public ChangePassword() {
 		super(PasswordForm.class);
 	}
@@ -40,16 +38,21 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 
 	public boolean doForm(Document document, AuthenticationState state, PasswordForm form) throws AccessDeniedException {
 
-		return tenantService.execute(()->{
-			permissionService.setupUserContext(state.getUser());
-			try {
-				User user = state.getUser();
-				userService.changePassword(user, form.getPassword().toCharArray(), false);
-				return true;
-			} finally {
-				permissionService.clearUserContext();
-			}
-		});
+		
+		permissionService.setupUserContext(state.getUser());
+		try {
+			User user = state.getUser();
+			userService.changePassword(user, form.getPassword().toCharArray(), false);
+			state.setAttribute(AuthenticationService.PASSWORD, form.getPassword());
+			return true;
+		} catch(Throwable e) { 
+			Feedback.error(e.getMessage());
+		} finally {
+			permissionService.clearUserContext();
+		}
+		
+		return false;
+		
 	}
 
 	public interface PasswordForm {

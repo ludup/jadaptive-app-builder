@@ -32,15 +32,19 @@ public class AuthenticatedController extends ExceptionHandlingController {
 	@Autowired
 	private SessionUtils sessionUtils;
 	
-	protected Tenant getCurrentTenant() {
+	public Tenant getCurrentTenant() {
 		return tenantService.getCurrentTenant();
 	}
 	
-	protected void setupUserContext(User user) {
+	public void setupUserContext(User user) {
 		permissionService.setupUserContext(user);
 	}
 	
-	protected void setupUserContext(HttpServletRequest request) {
+	public void setupUserContext() {
+		setupUserContext(getCurrentUser());
+	}
+	
+	public void setupUserContext(HttpServletRequest request) {
 		
 		User user = sessionUtils.getCurrentUser();
 		if(Objects.isNull(user)) {
@@ -63,19 +67,19 @@ public class AuthenticatedController extends ExceptionHandlingController {
 		permissionService.setupUserContext(user);
 	}
 	
-	protected void setupSystemContext() {
+	public void setupSystemContext() {
 		permissionService.setupSystemContext();
 	}
 	
-	protected void clearUserContext() {
+	public void clearUserContext() {
 		permissionService.clearUserContext();
 	}
 	
-	protected User getCurrentUser() {
+	public User getCurrentUser() {
 		return permissionService.getCurrentUser();
 	}
 	
-	protected boolean hasUserContext() {
+	public boolean hasUserContext() {
 		return permissionService.hasUserContext();
 	}
 	
@@ -103,7 +107,7 @@ public class AuthenticatedController extends ExceptionHandlingController {
 		return permissionService.isValidPermission(permission);
 	}
 	
-	protected Session getCurrentSession() throws UnauthorizedException, SessionTimeoutException {
+	public Session getCurrentSession() throws UnauthorizedException, SessionTimeoutException {
 		return sessionUtils.getSession(Request.get());
 	}
 }

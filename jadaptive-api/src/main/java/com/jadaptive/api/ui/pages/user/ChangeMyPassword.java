@@ -48,9 +48,13 @@ public class ChangeMyPassword extends AuthenticatedPage implements FormProcessor
 			return;
 		}
 		
-		userService.changePassword(user, form.getNewPassword().toCharArray(), false);
-		
-		Feedback.success("default", "success.passwordChanged");
+		try {
+			userService.changePassword(user, form.getNewPassword().toCharArray(), false);
+			Feedback.success("default", "success.passwordChanged");
+			
+		} catch(IllegalStateException e) {
+			Feedback.error(e.getMessage());
+		}
 
 	}
 	public interface PasswordForm {

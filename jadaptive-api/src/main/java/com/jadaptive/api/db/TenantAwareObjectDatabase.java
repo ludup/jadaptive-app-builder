@@ -1,8 +1,10 @@
 package com.jadaptive.api.db;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.SortOrder;
@@ -14,6 +16,15 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 	T get(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException;
 	
 	T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException;
+	
+	default Optional<T> getOr(Class<T> resourceClass, SearchField... fields) {
+		try {
+			return Optional.of(get(resourceClass, fields));
+		}
+		catch(ObjectNotFoundException onfe) {
+			return Optional.empty();
+		}
+	}
 
 	void delete(T obj) throws RepositoryException, ObjectException;
 

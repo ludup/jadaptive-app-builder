@@ -28,6 +28,10 @@ public class UserLoginAuthenticationPolicy extends AuthenticationPolicy {
 	@ObjectView(value = "factors")
 	Boolean passwordOnFirstPage;
 	
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
+	@ObjectView(value = "factors")
+	Boolean passwordRequired;
+	
 	public Boolean getPasswordOnFirstPage() {
 		return passwordOnFirstPage;
 	}
@@ -40,4 +44,14 @@ public class UserLoginAuthenticationPolicy extends AuthenticationPolicy {
 	public boolean isSessionRequired() {
 		return true;
 	}
+	
+	@Override
+	public Boolean getPasswordRequired() {
+		return passwordRequired;
+	}
+	
+	public void setPasswordRequired(Boolean passwordRequired) {
+		this.passwordRequired = passwordRequired;
+	}
+
 }
