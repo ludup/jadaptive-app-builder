@@ -1,5 +1,6 @@
 package com.jadaptive.app.permissions;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +17,10 @@ import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +31,7 @@ import com.jadaptive.api.app.PropertyService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.AuthenticatedContext;
 import com.jadaptive.api.permissions.OwnershipService;
 import com.jadaptive.api.permissions.OwnershipServiceBean;
 import com.jadaptive.api.permissions.PermissionService;
@@ -52,6 +58,7 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 
 @Service
+@Aspect
 public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements PermissionService, TenantAware {
 
 
@@ -122,6 +129,73 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 	};
 
+	@Around("@annotation(com.jadaptive.api.permissions.AuthenticatedContext)")
+	public Object logExecutionTime(ProceedingJoinPoint pjp) throws Throwable {
+		var sig = pjp.getSignature();
+		if (sig instanceof MethodSignature) {
+			var ms = (MethodSignature) sig;
+			var m = ms.getMethod();
+			var annot = m.getAnnotation(AuthenticatedContext.class);
+			if (annot == null) {
+				/**
+				 * INFO BPS 30/07/22 - Check the implementation class for annotation too. AOP
+				 * gives us the interface method above, but the implementation can be annotated
+				 * too. So we look for a method with the same name and signature.
+				 */
+				var clz = pjp.getTarget().getClass();
+				try {
+					var mth = clz.getMethod(m.getName(), m.getParameterTypes());
+					annot = mth.getAnnotation(AuthenticatedContext.class);
+				} catch (Exception e) {
+				}
+			}
+			if (annot != null) {
+				if (annot.preferActive()) {
+					try(var c = userContext()) {
+						return pjp.proceed();
+					} catch (Throwable e) {
+						log.error("Exception thrown from user context annotated method", e);
+						throw e;
+					}
+				} else if (annot.system()) {
+					try (var c = systemContext()) {
+						return pjp.proceed();
+					} catch (Throwable e) {
+						log.error("Exception thrown from system context annotated method", e);
+						throw e;
+					}
+				} else {
+					throw new UnsupportedOperationException("Not supported in services.");
+				}
+			}
+		}
+		return pjp.proceed();
+	}
+	
+	protected UncheckedCloseable systemContext() {
+		setupSystemContext();
+		return new UncheckedCloseable() {
+			@Override
+			public void close() {
+				clearUserContext();
+			}
+		};
+	}
+	
+	protected UncheckedCloseable userContext() {
+		return userContext(getCurrentUser());
+	}
+	
+	protected UncheckedCloseable userContext(User user) {
+		setupUserContext(user);
+		return new UncheckedCloseable() {
+			@Override
+			public void close() {
+				clearUserContext();
+			}
+		};
+	}
+	
 	@Override
 	public void registerStandardPermissions(String resourceKey) {
 		
@@ -148,8 +222,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public User getCurrentUser() {
 		Stack<User> userStack = currentUser.get();
 		if(Objects.isNull(userStack) || userStack.isEmpty()) {
-			if(log.isErrorEnabled()) {
-				log.error("Calling getCurrentUser without having previously setup a user context on the current thread!!!!");
+			if(log.isWarnEnabled()) {
+				log.warn("Access denied because there is no user in the current context");
 			}
 			throw new AccessDeniedException();
 		}
@@ -566,4 +640,10 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 //			}
 //		}
 //	}
+	
+	@FunctionalInterface
+	public interface UncheckedCloseable extends Closeable {
+		@Override
+		void close();
+	}
 }

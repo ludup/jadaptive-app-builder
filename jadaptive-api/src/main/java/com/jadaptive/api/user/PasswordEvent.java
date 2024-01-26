@@ -1,4 +1,4 @@
-package com.jadaptive.app.user;
+package com.jadaptive.api.user;
 
 import com.jadaptive.api.events.UserGeneratedEvent;
 

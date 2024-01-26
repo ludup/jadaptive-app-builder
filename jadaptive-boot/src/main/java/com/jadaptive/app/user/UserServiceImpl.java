@@ -26,13 +26,16 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.user.ChangePasswordEvent;
 import com.jadaptive.api.user.FakeUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
+import com.jadaptive.api.user.SetPasswordEvent;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
 import com.jadaptive.api.user.UserDatabase;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.api.user.VerifyPasswordEvent;
 import com.jadaptive.utils.Utils;
 
 @Service
@@ -131,6 +134,7 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
 		
 		try {
+			eventService.publishEvent(new VerifyPasswordEvent(user, newPassword));
 			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 			eventService.publishEvent(new SetPasswordEvent(user));
 		} catch(Throwable e) {
@@ -146,6 +150,7 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
 		
 		try {
+			eventService.publishEvent(new VerifyPasswordEvent(user, newPassword));
 			verifyPassword(user, oldPassword);
 			getDatabase(user).setPassword(user, newPassword, false);
 			eventService.publishEvent(new ChangePasswordEvent());
@@ -162,6 +167,7 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
 		
 		try {
+			eventService.publishEvent(new VerifyPasswordEvent(user, newPassword));
 			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 			eventService.publishEvent(new ChangePasswordEvent());
 		} catch(Throwable e) {

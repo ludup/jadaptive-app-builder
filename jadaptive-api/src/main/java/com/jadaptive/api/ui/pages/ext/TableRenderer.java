@@ -130,9 +130,12 @@ public class TableRenderer {
 			
 			for(String childTemplate : template.getChildTemplates()) {
 				ObjectTemplate t = templateService.get(childTemplate);
-				TableView v = templateService.getTemplateClass(childTemplate).getAnnotation(TableView.class);
-				if(Objects.nonNull(v)) {
-					renderTableColumns(v, el, t, columns);
+				Class<?> clz = templateService.getTemplateClass(childTemplate);
+				if(Objects.nonNull(clz)) {
+					TableView v = clz.getAnnotation(TableView.class);
+					if(Objects.nonNull(v)) {
+						renderTableColumns(v, el, t, columns);
+					}
 				}
 			}
 			// Actions

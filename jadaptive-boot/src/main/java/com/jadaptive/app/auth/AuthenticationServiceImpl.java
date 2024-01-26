@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.jsoup.nodes.Document;
@@ -32,6 +33,7 @@ import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.auth.events.AuthenticationFailedEvent;
 import com.jadaptive.api.auth.events.AuthenticationSuccessEvent;
 import com.jadaptive.api.cache.CacheService;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -44,10 +46,12 @@ import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionType;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
 import com.jadaptive.api.ui.pages.auth.Password;
@@ -57,7 +61,7 @@ import com.jadaptive.api.user.UserService;
 @Service
 @Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION }, defaultPermissions = {
 		AuthenticationService.USER_LOGIN_PERMISSION })
-public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService, StartupAware {
+public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService, StartupAware, TenantAware {
 
 	public static final String USERNAME_RESOURCE_KEY = "username";
 
@@ -119,10 +123,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		if (state.canReset()) {
 			Element el = content.selectFirst("#actions");
 			if (Objects.nonNull(el)) {
-				el.append("<a href=\"" + state.getResetURL() + "\"><small>" + state.getResetText() + "</small></a>");
+				el.append("<a class=\"text-decoration-none\" href=\"" + state.getResetURL() + "\"><sup>" + state.getResetText() + "</sup></a>");
 			}
 		}
-
+		
 		if (!state.isDecorateWindow()) {
 			Element el = content.selectFirst("header");
 			if (Objects.nonNull(el)) {
@@ -135,13 +139,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			}
 		}
 
-		if (state.hasUser()) {
-			Element el = content.selectFirst("#username");
-			if (Objects.nonNull(el)) {
-				el.val(state.getUser().getUsername());
-				el.attr("readOnly", "true");
-			}
-		}
 	}
 
 	@Override
@@ -252,34 +249,47 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public Class<? extends Page> completeAuthentication(AuthenticationState state, Page page) {
+	public Class<? extends Page> completeAuthentication(AuthenticationState state, Optional<Page> page) {
 
 		if (Objects.isNull(state.getUser()) || !userService.supportsLogin(state.getUser())) {
 			throw new AccessDeniedException("Invalid credentials");
 		}
-
 		
-		if(state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage()) {
-			AuthenticationModule module = moduleDatabase.get(PASSWORD_MODULE_UUID, AuthenticationModule.class);
-			eventService.publishEvent(new AuthenticationSuccessEvent(module, 
-					Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
-					Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
-			
-		} else if(page instanceof AuthenticatorPage) {
-			AuthenticationModule module = moduleDatabase.get(((AuthenticatorPage)page).getAuthenticatorUUID(), AuthenticationModule.class);
-			eventService.publishEvent(new AuthenticationSuccessEvent(module, 
-					Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
-					Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+		if(page.isPresent()) {
+			Page p = page.get();
+			if(state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage()
+					|| (p instanceof AuthenticatorPage 
+							&& PASSWORD_MODULE_UUID.equals(((AuthenticatorPage)p).getAuthenticatorUUID()))) {
+				
+				AuthenticationModule module = getPasswordAuthenticationModule();
+				eventService.publishEvent(new AuthenticationSuccessEvent(module, 
+						Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
+						Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+				
+			} else if(p instanceof AuthenticatorPage) {
+				AuthenticationModule module = moduleDatabase.get(((AuthenticatorPage)p).getAuthenticatorUUID(), AuthenticationModule.class);
+				eventService.publishEvent(new AuthenticationSuccessEvent(module, 
+						Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
+						Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+			}
 		}
 		
 		if (state.completePage()) {
-
-			if(state.isAuthenticationComplete() && state.isOptionalComplete() && !state.hasPostAuthentication()) {
-				setupPostAuthentication(state);
-			}
 			
+			if(log.isInfoEnabled()) {
+				log.info("User {} has completed authentication", state.getUser().getUsername());
+			}
 			if(!state.hasPostAuthentication()) {
+			
+				if(log.isInfoEnabled()) {
+					log.info("User {} has completed POST authentication", state.getUser().getUsername());
+				}
+				
 				if(state.getPolicy().isSessionRequired()) {
+					
+					if(log.isInfoEnabled()) {
+						log.info("Creating session for {}", state.getUser().getUsername());
+					}
 					createSession(state);
 				}
 				
@@ -308,6 +318,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //				}
 			}
 			
+		}
+		
+		if(log.isInfoEnabled()) {
+			log.info("User {} is being asked to complete authenication page {}", 
+					state.getUser().getUsername(),
+					state.getCurrentPage().getSimpleName());
 		}
 
 		return state.getCurrentPage();
@@ -344,6 +360,20 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //    }
 
 
+	private AuthenticationModule getPasswordAuthenticationModule() {
+		
+		AuthenticationModule m = new AuthenticationModule();
+		m.setUuid(PASSWORD_MODULE_UUID);
+		m.setAuthenticatorKey(PASSWORD);
+		m.setIdentityCapture(false);
+		m.setSecretCapture(true);
+		m.setName("Password");
+		m.setRequiresEmailAddress(false);
+		m.setRequiresPhoneNumber(false);
+		m.setSystem(true);
+		
+		return m;
+	}	
 	private void createSession(AuthenticationState state) {
 		
 		setupUserContext(state.getUser());
@@ -399,17 +429,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //				AuthenticationScope scope = defaultSavedRequest==null? 
 //						AuthenticationScope.USER_LOGIN :
 //							AuthenticationScope.SAML_IDP;
-				
-				AuthenticationPolicy policy = policyService.getDefaultPolicy(UserLoginAuthenticationPolicy.class);
-				state = new AuthenticationState(
-						policy,
-						new PageRedirect(pageCache.getHomePage()));
-				state.setRemoteAddress(Request.getRemoteAddress());
-				state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
-
-				state.getRequiredPages().add(Login.class);
-
-				Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
+				state = createAuthenticationState();
+				processRequiredAuthentication(state, state.getPolicy());
 			}
 
 			return state;
@@ -420,20 +441,67 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy)
-			throws FileNotFoundException {
-
+	public AuthenticationState createAuthenticationState() throws FileNotFoundException {				
+		return createAuthenticationState(policyService.getDefaultPolicy(UserLoginAuthenticationPolicy.class));
+	}
+	
+	@Override 
+	public void changePolicy(AuthenticationState state, AuthenticationPolicy policy, boolean verifiedPassword) {
+		
+		AuthenticationPolicy defaultPolicy;
+		if(policy.isTemporary()) {
+			defaultPolicy = policy;
+		} else {
+			defaultPolicy = policyService.getDefaultPolicy(policy.getClass());
+		}
+		
+		boolean hasLoginPage = state.getRequiredPages().contains(Login.class);
 		state.getRequiredPages().clear();
-		state.getRequiredPages().add(Login.class);
-
+		
+		if(policy.getPasswordOnFirstPage() || Objects.isNull(state.getUser()) || hasLoginPage) {
+			state.getRequiredPages().add(Login.class);
+		}
+		
+		if(!verifiedPassword) {
+			if(policy.getPasswordRequired() || (policy.equals(defaultPolicy) && policy.getPasswordOnFirstPage())) {
+				state.getRequiredPages().add(Password.class);
+			}
+		}
+		
+		for(AuthenticationModule m : policy.getRequiredAuthenticators()) {
+			state.getRequiredPages().add(
+					registeredAuthenticationPages.get(m.getAuthenticatorKey()));
+		}
+		
+		state.setPasswordEnabled(policy.getPasswordOnFirstPage() || policy.getPasswordRequired() || policy.getPasswordProvided());
 		state.getOptionalAuthentications().clear();
+		state.getOptionalAuthentications().addAll(policy.getOptionalAuthenticators());
 		state.setOptionalCompleted(0);
-		state.setOptionalRequired(policy.getOptionalRequired());
+		state.setOptionalRequired(Math.min(policy.getOptionalRequired(), state.getOptionalAuthentications().size()));
 		state.setOptionalSelectionPage(OptionalAuthentication.class);
 
 		state.setPolicy(policy);
 		
+		setupPostAuthentication(state);
+		
 		validateModules(policy, state.getRequiredPages(), state.getOptionalAuthentications());
+	}
+
+	private void processRequiredAuthentication(AuthenticationState state, 
+			AuthenticationPolicy policy)
+			throws FileNotFoundException {
+
+		if(Objects.nonNull(state.getUser()) && !policy.isTemporary()) {
+			policy = policyService.getAssignedPolicy(state.getUser(),
+					Request.getRemoteAddress(), 
+					policy.getClass());
+		}
+		
+		if(policy.getPasswordOnFirstPage() || Objects.isNull(state.getUser())) {
+			state.getRequiredPages().add(Login.class);
+		}
+		
+		changePolicy(state, policy, false);
 
 	}
 
@@ -445,11 +513,14 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	private void validateModules(AuthenticationPolicy policy, List<Class<? extends Page>> required,
 			List<AuthenticationModule> optional) {
 
+		if(policy.getPasswordRequired() || policy.getPasswordProvided()) {
+			return;
+		}
+		
 		boolean hasSecret = false;
 
 		for (AuthenticationModule module : policy.getRequiredAuthenticators()) {
 			hasSecret |= module.isSecretCapture();
-			required.add(getAuthenticationPage(module.getAuthenticatorKey()));
 		}
 
 		optional.addAll(policy.getOptionalAuthenticators());
@@ -495,6 +566,9 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		if (registeredAuthenticationPages.containsKey(authenticator)) {
 			return registeredAuthenticationPages.get(authenticator);
 		}
+		if(PASSWORD.equals(authenticator)) {
+			return Password.class;
+		}
 		throw new IllegalStateException(String.format("%s is not an installed authenticator", authenticator));
 	}
 
@@ -508,11 +582,83 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return moduleDatabase.list(AuthenticationModule.class);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onApplicationStartup() {
-		registerAuthenticationPage(getAuthenticationModule(PASSWORD_MODULE_UUID), Password.class, Login.class);
+		/**
+		 * Removing this because we now specify password as a switch on policy
+		 */
+//		registerAuthenticationPage(getAuthenticationModule(PASSWORD_MODULE_UUID), Password.class, Login.class);
 	}
+
+	@Override
+	public AuthenticationState createAuthenticationState(AuthenticationPolicy policy) throws FileNotFoundException {
+		return createAuthenticationState(policy, new PageRedirect(pageCache.getHomePage()));
+	}
+	
+	@Override
+	public AuthenticationState createAuthenticationState(AuthenticationPolicy policy, Redirect homePage, User user) throws FileNotFoundException {
+		AuthenticationState state = new AuthenticationState(policy, homePage);
+		
+		state.setRemoteAddress(Request.getRemoteAddress());
+		state.setUser(user);
+		state.setHomePage(homePage);
+		state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
+
+		processRequiredAuthentication(state, policy);
+		
+		Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
+		return state;
+		
+	}
+
+	@Override
+	public AuthenticationState createAuthenticationState(AuthenticationPolicy policy, Redirect homePage)
+			throws FileNotFoundException {
+		return createAuthenticationState(policy, homePage, null);
+	}
+	
+	public void initializeSystem(boolean newSchema) {
+		initializeTenant(getCurrentTenant(), newSchema);
+	};
+	
+	public void initializeTenant(Tenant tenant, boolean newSchema) {
+		
+		if(moduleDatabase.count(AuthenticationModule.class, SearchField.eq("uuid", PASSWORD_MODULE_UUID)) > 0) {
+			for(AuthenticationPolicy policy : policyService.allObjects()) {
+				boolean remove = false;
+				AuthenticationModule toRemove = null;
+				for(AuthenticationModule m : policy.getRequiredAuthenticators()) {
+					if(PASSWORD.equals(m.getAuthenticatorKey())) {
+						remove = true;
+						toRemove = m;
+					}
+				}
+				if(remove) {
+					policy.getRequiredAuthenticators().remove(toRemove);
+					policy.setPasswordRequired(true);
+				}
+				remove = false;
+				toRemove = null;
+				for(AuthenticationModule m : policy.getOptionalAuthenticators()) {
+					if(PASSWORD.equals(m.getAuthenticatorKey())) {
+						remove = true;
+						toRemove = m;
+					}
+				}
+				if(remove) {
+					policy.getOptionalAuthenticators().remove(toRemove);
+				}
+				policyService.saveOrUpdate(policy);
+			}
+			
+			AuthenticationModule m = moduleDatabase.get(PASSWORD_MODULE_UUID, AuthenticationModule.class);
+			m.setSystem(false);
+			moduleDatabase.saveOrUpdate(m);
+			moduleDatabase.delete(m);
+		}
+	};
+	
+	
 	
 //	class NoAuthAuthenticationToken extends AbstractAuthenticationToken {
 //

@@ -1,6 +1,7 @@
 package com.jadaptive.api.auth;
 
 import java.io.FileNotFoundException;
+import java.util.Optional;
 
 import org.jsoup.nodes.Document;
 
@@ -8,6 +9,8 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.Redirect;
+import com.jadaptive.api.user.User;
 
 public interface AuthenticationService {
 
@@ -23,7 +26,7 @@ public interface AuthenticationService {
 
 	AuthenticationState getCurrentState() throws FileNotFoundException;
 
-	Class<? extends Page> completeAuthentication(AuthenticationState state, Page page);
+	Class<? extends Page> completeAuthentication(AuthenticationState state, Optional<Page> page);
 
 	Class<? extends Page> resetAuthentication(@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
 
@@ -37,8 +40,6 @@ public interface AuthenticationService {
 
 	Class<? extends Page> getAuthenticationPage(String authenticator);
 
-	void processRequiredAuthentication(AuthenticationState state, AuthenticationPolicy policy) throws FileNotFoundException;
-
 	void validateModules(AuthenticationPolicy policy);
 
 	Iterable<AuthenticationModule> getAuthenticationModules();
@@ -49,5 +50,15 @@ public interface AuthenticationService {
 
 	@SuppressWarnings("unchecked")
 	void registerAuthenticationPage(AuthenticationModule module, Class<? extends AuthenticationPage<?>>... pages);
+
+	AuthenticationState createAuthenticationState(AuthenticationPolicy policy) throws FileNotFoundException;
+
+	AuthenticationState createAuthenticationState(AuthenticationPolicy policy, Redirect homePage) throws FileNotFoundException;
+
+	AuthenticationState createAuthenticationState() throws FileNotFoundException;
+
+	AuthenticationState createAuthenticationState(AuthenticationPolicy policy, Redirect homePage, User user) throws FileNotFoundException;
+
+	void changePolicy(AuthenticationState state, AuthenticationPolicy assigned, boolean verifiedPassword);
 	
 }

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
@@ -47,6 +48,9 @@ public abstract class HtmlPage implements Page {
 	
 	@Autowired
 	private ClassLoaderService classService; 
+	
+	@Autowired
+	private AuthenticationService authenticationService; 
 	
 	private ThreadLocal<List<PageExtension>> extensions = new ThreadLocal<>();
 	
@@ -97,8 +101,6 @@ public abstract class HtmlPage implements Page {
 	
 	public final void doGet(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {	
 		
-		beforeProcess(uri, request, response);
-		
 		Document document = generateHTMLDocument(uri);
 		
 		if(!isCacheable()) {
@@ -107,7 +109,6 @@ public abstract class HtmlPage implements Page {
 			sessionUtils.setCachable(response, getMaxAge());
 		}
 		
-		afterProcess(uri, request, response);
 		ResponseHelper.sendContent(document.toString(), "text/html;charset=UTF-8;", request, response);
 	}
 
@@ -118,6 +119,9 @@ public abstract class HtmlPage implements Page {
 		currentDocument.set(document);
 		
 		try {
+			
+			beforeProcess(uri, Request.get(), Request.response());
+			
 			processPageDependencies(document);
 			
 			if(Objects.nonNull(extenders)) {
@@ -145,6 +149,8 @@ public abstract class HtmlPage implements Page {
 					extender.processEnd(document, uri, this);
 				}
 			}
+			
+			afterProcess(uri, Request.get(), Request.response());
 		
 		} finally {
 			currentDocument.remove();
@@ -190,12 +196,12 @@ public abstract class HtmlPage implements Page {
 
 	public final void doPost(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		
-		beforeProcess(uri, request, response);
-		
 		try {
 
 			Document doc = resolveDocument(this);
 			currentDocument.set(doc);
+
+			beforeProcess(uri, request, response);
 			
 			processPageDependencies(doc);
 			
@@ -252,7 +258,14 @@ public abstract class HtmlPage implements Page {
 				});
 				
 				beforeForm(doc, request, response);
-				m.invoke(this, doc, formProxy);
+				try {
+					m.invoke(this, doc, formProxy);
+				} catch(InvocationTargetException e) {
+					if(e.getTargetException() instanceof Redirect) {
+						throw (Redirect) e.getTargetException();
+					}
+					Feedback.error(e.getTargetException().getMessage());
+				} 
 				
 			} else {
 				processPost(doc, uri, request, response);
@@ -274,11 +287,13 @@ public abstract class HtmlPage implements Page {
 				}
 			}
 
+			afterProcess(uri, request, response);
+			
 			ResponseHelper.sendContent(doc.toString(), "text/html; charset=UTF-8;", request, response);
 			
 			
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException
-					| IllegalArgumentException | InvocationTargetException e) {
+					| IllegalArgumentException e) {
 			if(e.getCause() instanceof Redirect) {
 				throw (Redirect) e.getCause();
 			}

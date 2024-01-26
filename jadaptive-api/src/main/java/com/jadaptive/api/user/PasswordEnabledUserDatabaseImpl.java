@@ -68,6 +68,10 @@ public abstract class PasswordEnabledUserDatabaseImpl
 	public boolean verifyPassword(User u, char[] password) {
 		
 		try {
+			if(!(u instanceof PasswordEnabledUser)) {
+				return false;
+			}
+			
 			PasswordEnabledUser user = (PasswordEnabledUser)u;
 			byte[] salt = Base64.getDecoder().decode(user.getSalt());
 			byte[] encodedPassword = PasswordUtils.getEncryptedPassword(

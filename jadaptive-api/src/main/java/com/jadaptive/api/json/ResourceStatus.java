@@ -1,10 +1,14 @@
 package com.jadaptive.api.json;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name="resourceStatus")
-public class ResourceStatus<T> {
+public class ResourceStatus<T>  implements Serializable {
 
+	private static final long serialVersionUID = -9000307782767880219L;
+	
 	private boolean success = true;
 	private String message = "";
 	private T resource;

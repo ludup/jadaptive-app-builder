@@ -77,7 +77,7 @@ public class PageCache {
 			}
 		} catch(NoSuchBeanDefinitionException e) { }
 		
-		throw new FileNotFoundException();
+		throw new FileNotFoundException(resourceUri);
 		
 	}
 	

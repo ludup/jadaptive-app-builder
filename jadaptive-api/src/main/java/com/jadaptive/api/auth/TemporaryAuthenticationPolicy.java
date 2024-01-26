@@ -6,7 +6,7 @@ public class TemporaryAuthenticationPolicy extends AuthenticationPolicy {
 
 		@Override
 		public boolean isSessionRequired() {
-			return false;
+			return true;
 		}
 		
 		@Override
@@ -17,4 +17,10 @@ public class TemporaryAuthenticationPolicy extends AuthenticationPolicy {
 		public boolean isTemporary() {
 			return true;
 		}
+		
+		@Override
+		public Boolean getPasswordRequired() {
+			return false;
+		}
+
 }

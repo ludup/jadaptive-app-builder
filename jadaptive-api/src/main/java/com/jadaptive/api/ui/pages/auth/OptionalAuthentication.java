@@ -86,11 +86,11 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			if(!state.hasCompleted(pageClass)) {
 				authenticators.appendChild(Html.div("card my-3")
 					.appendChild(Html.div("card-body")
-						.appendChild(new Element("h5")
+						.appendChild(new Element("h6")
 								.addClass("card-title mb-1")
 								.appendChild(Html.i(page.getIconGroup(), page.getIcon(), "me-1"))
 								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.title")))
-						.appendChild(new Element("p")
+						.appendChild(new Element("span")
 								.addClass("card-text")
 								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.body")
 										.addClass("small")))
