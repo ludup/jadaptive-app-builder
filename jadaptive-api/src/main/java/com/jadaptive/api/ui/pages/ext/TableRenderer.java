@@ -357,7 +357,7 @@ public class TableRenderer {
 					} else {
 
 						createStashAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
-								template.getCollectionKey(), "fa-plus", "fa-solid",
+								template.getCollectionKey(), "fa-plus", "fa-solid", "primary",
 								"create", "readWrite");					
 					}
 				}
