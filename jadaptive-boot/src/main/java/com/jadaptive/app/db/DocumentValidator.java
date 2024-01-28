@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.I18N;
+import com.jadaptive.api.countries.Country;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -46,7 +47,6 @@ public class DocumentValidator {
 			validateEnum(value, field);
 			return value;
 		case TIME:
-			
 			return value;
 		case PERMISSION:
 			validatePermission(value, field);
@@ -58,11 +58,20 @@ public class DocumentValidator {
 			return value;
 		case OBJECT_REFERENCE:
 			return validateReference(value, field);
+		case COUNTRY:
+			validateText(value, field);
+			return value;
 		default:
-			throw new ValidationException(
-					String.format("Missing field type %s in validate method", field.getFieldType().name()));
+			return value;
 		}
 
+	}
+
+	private static String validateCountry(FieldTemplate field, String value) {
+		/**
+		 * TODO
+		 */
+		return null;
 	}
 
 	private static Object validateReference(String value, FieldTemplate field) {

@@ -830,7 +830,7 @@ public class DocumentHelper {
 		case TIME:
 		case COUNTRY:
 		{
-			return value;
+			return DocumentValidator.validate(def,value);
 		}
 		default:
 			throw new IllegalStateException("Unhandled field type " + def.getFieldType() + " in DocumentHelper.fromString");
