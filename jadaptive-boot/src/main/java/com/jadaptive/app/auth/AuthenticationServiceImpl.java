@@ -484,7 +484,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		setupPostAuthentication(state);
 		
-		validateModules(policy, state.getRequiredPages(), state.getOptionalAuthentications());
+		validateModules(policy);
 	}
 
 	private void processRequiredAuthentication(AuthenticationState state, 
@@ -507,11 +507,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Override
 	public void validateModules(AuthenticationPolicy policy) {
-		validateModules(policy, new ArrayList<>(), new ArrayList<>());
-	}
-
-	private void validateModules(AuthenticationPolicy policy, List<Class<? extends Page>> required,
-			List<AuthenticationModule> optional) {
 
 		if(policy.getPasswordRequired() || policy.getPasswordProvided()) {
 			return;
@@ -523,9 +518,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			hasSecret |= module.isSecretCapture();
 		}
 
-		optional.addAll(policy.getOptionalAuthenticators());
-
-		if (optional.size() < policy.getOptionalRequired()) {
+		if (policy.getOptionalAuthenticators().size() < policy.getOptionalRequired()) {
 			throw new IllegalStateException(
 					"Invalid authentication policy! Minumum number of optional factors exceeds available optional factors");
 		}
@@ -534,7 +527,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			throw new IllegalStateException("Invalid authentication policy! No secret capture modules are configured");
 		}
 
-		if (required.isEmpty() && (optional.isEmpty() || policy.getOptionalRequired() == 0)) {
+		if (policy.getRequiredAuthenticators().isEmpty() && (policy.getOptionalAuthenticators().isEmpty() || policy.getOptionalRequired() == 0)) {
 			throw new IllegalStateException("Invalid authentication policy! No valid modules");
 		}
 	}
