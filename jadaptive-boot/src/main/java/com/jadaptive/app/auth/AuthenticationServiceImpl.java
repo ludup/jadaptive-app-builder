@@ -48,6 +48,7 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.ui.AuthenticationPage;
+import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
@@ -121,11 +122,16 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		AuthenticationState state = getCurrentState();
 
 		if (state.canReset()) {
+			
 			Element el = content.selectFirst("#actions");
-			if (Objects.nonNull(el)) {
-				el.append("<a class=\"text-decoration-none\" href=\"" + state.getResetURL() + "\"><sup>" + state.getResetText() + "</sup></a>");
+			if(Objects.nonNull(el)) {
+				el.appendChild(Html.a(state.getResetURL())
+					.addClass("text-decoration-none d-block")
+					.appendChild(new Element("sup")
+							.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "resetLogin.text"))));
 			}
-		}
+		} 
+		
 		
 		if (!state.isDecorateWindow()) {
 			Element el = content.selectFirst("header");

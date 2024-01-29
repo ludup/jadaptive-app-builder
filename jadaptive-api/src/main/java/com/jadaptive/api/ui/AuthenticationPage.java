@@ -83,19 +83,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 						.attr("id", "csrftoken"));
 		}
 		
-		AuthenticationState state = authenticationService.getCurrentState();
-		
-		if(!(state.getPolicy() instanceof UserLoginAuthenticationPolicy || state.getPolicy().isTemporary())
-			
-				|| !pageCache.getDefaultPage().equals(Login.class)) {
-			Element el = doc.selectFirst("#actions");
-			if(Objects.nonNull(el)) {
-				el.appendChild(Html.a(state.getResetURL())
-					.addClass("text-decoration-none d-block")
-					.appendChild(new Element("sup")
-							.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "resetLogin.text"))));
-			}
-		} 
+
 	}
 	
 	protected boolean isAllowFormExternalRedirect() {
