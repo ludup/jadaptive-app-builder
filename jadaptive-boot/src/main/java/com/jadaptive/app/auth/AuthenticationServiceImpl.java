@@ -463,7 +463,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		}
 		
 		if(!verifiedPassword) {
-			if(policy.getPasswordRequired() || (policy.equals(defaultPolicy) && policy.getPasswordOnFirstPage())) {
+			if(policy.getPasswordRequired() && !policy.getPasswordOnFirstPage()) {
 				state.getRequiredPages().add(Password.class);
 			}
 		}

@@ -1,12 +1,9 @@
 [{
     "uuid": "abc8affe-0409-4ed5-8f0c-e9de715779cb",
-	"resourceKey": "authenticationPolicy",
+    "_clz": "com.jadaptive.api.auth.UserLoginAuthenticationPolicy",
+	"resourceKey": "userLoginPolicy",
 	"name": "Default Authentication Policy",
-	"requiredAuthenticators": [
-		{ "uuid": "b76a4b67-ac70-45c2-95ca-9d7e14b3f695",
-		  "name": "Password"
-		}
-	],
+	"requiredAuthenticators": [],
 	"roles": [{
 	            "uuid": "c4b54f49-c478-46cc-8cfa-aaebaa4ea50f",
 	            "name": "Everyone"
