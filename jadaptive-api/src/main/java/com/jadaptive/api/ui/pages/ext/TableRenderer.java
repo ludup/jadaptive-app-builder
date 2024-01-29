@@ -168,10 +168,16 @@ public class TableRenderer {
 						if(dynamicColumns.containsKey(column)) {
 							DynamicColumn dc = dynamicColumns.get(column);
 							DynamicColumnService service = ApplicationServiceImpl.getInstance().getBean(dc.service());
-							row.appendChild(Html.td().appendChild(service.renderColumn(column, obj, rowTemplate)));
+							Element col = service.renderColumn(column, obj, rowTemplate);
+							row.appendChild(Html.td().appendChild(col == null ? Html.span("<missing dynamic column " + column + ">") : col));
 						} else {
 							FieldTemplate t = columns.get(column).getField(column);
-							row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t)));
+							if(t == null) {
+								row.appendChild(Html.td().appendChild(Html.span("<missing column: " + column + ">")));
+							}
+							else {
+								row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t)));
+							}
 						}
 					}
 					
