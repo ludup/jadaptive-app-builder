@@ -220,6 +220,8 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 							parentTemplate.getFields(),
 							t,
 							parentTemplate);
+				map.put(prefix + t.getResourceKey(), t);
+				continue;
 			default:
 				if(Objects.nonNull(parentField)) {
 					t.setParentField(parentField.getResourceKey());
