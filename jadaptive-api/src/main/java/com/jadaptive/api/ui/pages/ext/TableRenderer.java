@@ -421,7 +421,6 @@ public class TableRenderer {
 		element.appendChild(
 				new Element("a").attr("href", "#")
 				.attr("data-action", 
-						//Objects.nonNull(stashURL) ? stashURL : 
 						replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
 				.attr("data-url",
 						replaceVariables("/app/ui/object-" + resourceKey + "/{resourceKey}", parentObject) + "/" + field.getResourceKey() + "/" + field.getValidationValue(ValidationType.RESOURCE_KEY))
@@ -432,8 +431,8 @@ public class TableRenderer {
 						.attr("jad:i18n", String.format("%s.name", resourceKey))));
 	}
 	
-	private void createMultipleOptionAction(Element element, String id, Collection<ObjectTemplate> actions,
-			String bundle) {
+	private void createMultipleOptionAction(Element element, String id, 
+			Collection<ObjectTemplate> actions, String bundle) {
 		
 		Element menu;
 		element.appendChild(
@@ -456,11 +455,26 @@ public class TableRenderer {
 							.attr("aria-labelledby", id)));
 		
 		for(ObjectTemplate action : actions) {
-			menu.appendChild(new Element("a")
-					.addClass("dropdown-item")
-					.attr("href",String.format("/app/ui/%s/%s", id, action.getResourceKey()))
-					.attr("jad:bundle", action.getBundle())
-					.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
+			if(Objects.nonNull(parentObject)) {
+
+				menu.appendChild(new Element("a")
+						.addClass("dropdown-item stash")
+						.attr("href", "#")
+						.attr("jad:bundle", action.getBundle())
+						.attr("data-action", 
+								replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+						.attr("data-url",
+								replaceVariables("/app/ui/object-create/{resourceKey}", parentObject) 
+								+ "/" + field.getResourceKey() + "/" + action.getResourceKey())
+						.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
+				
+			} else {
+				menu.appendChild(new Element("a")
+						.addClass("dropdown-item")
+						.attr("href",String.format("/app/ui/%s/%s", id, action.getResourceKey()))
+						.attr("jad:bundle", action.getBundle())
+						.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
+			}
 		}
 	}
 	
@@ -550,16 +564,16 @@ public class TableRenderer {
 	}
 	
 	String getStringValue(FieldTemplate field, AbstractObject rootObject) {
-
-		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
-			AbstractObject obj = rootObject.getChild(field.getParentField());
-			if(Objects.nonNull(obj)) {
-				return safeCast(obj.getValue(field.getResourceKey()));
-			} 
-			return "";
-		} else {
+//
+//		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
+//			AbstractObject obj = rootObject.getChild(field.getParentField());
+//			if(Objects.nonNull(obj)) {
+//				return safeCast(obj.getValue(field.getResourceKey()));
+//			} 
+//			return "";
+//		} else {
 			return safeCast(rootObject.getValue(field.getResourceKey()));
-		}
+//		}
 		
 	}
 	
