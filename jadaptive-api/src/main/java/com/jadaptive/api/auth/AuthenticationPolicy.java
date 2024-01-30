@@ -86,6 +86,10 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 
 	public abstract Boolean getPasswordRequired();
 	
+	public Boolean isSecondaryOnly() {
+		return false;
+	}
+	
 	public void setPasswordRequired(boolean required) {
 		
 	}

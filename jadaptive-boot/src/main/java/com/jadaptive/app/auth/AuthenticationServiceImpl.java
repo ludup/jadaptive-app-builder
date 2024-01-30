@@ -514,7 +514,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public void validateModules(AuthenticationPolicy policy) {
 
-		if(policy.getPasswordRequired() || policy.getPasswordProvided()) {
+		if(policy.getPasswordRequired() || policy.getPasswordProvided() || policy.isSecondaryOnly()) {
 			return;
 		}
 		
