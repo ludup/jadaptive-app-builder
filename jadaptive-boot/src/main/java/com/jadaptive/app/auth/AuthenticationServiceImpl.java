@@ -454,12 +454,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override 
 	public void changePolicy(AuthenticationState state, AuthenticationPolicy policy, boolean verifiedPassword) {
 		
-		AuthenticationPolicy defaultPolicy;
-		if(policy.isTemporary()) {
-			defaultPolicy = policy;
-		} else {
-			defaultPolicy = policyService.getDefaultPolicy(policy.getClass());
-		}
+//		AuthenticationPolicy defaultPolicy;
+//		if(policy.isTemporary()) {
+//			defaultPolicy = policy;
+//		} else {
+//			defaultPolicy = policyService.getDefaultPolicy(policy.getClass());
+//		}
 		
 		boolean hasLoginPage = state.getRequiredPages().contains(Login.class);
 		state.getRequiredPages().clear();
