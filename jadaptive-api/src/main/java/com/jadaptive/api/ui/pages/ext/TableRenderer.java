@@ -169,7 +169,7 @@ public class TableRenderer {
 							DynamicColumn dc = dynamicColumns.get(column);
 							DynamicColumnService service = ApplicationServiceImpl.getInstance().getBean(dc.service());
 							Element col = service.renderColumn(column, obj, rowTemplate);
-							row.appendChild(Html.td().appendChild(col == null ? Html.span("<missing dynamic column " + column + ">") : col));
+							row.appendChild(Html.td().appendChild(col == null ? Html.span("") : col));
 						} else {
 							FieldTemplate t = columns.get(column).getField(column);
 							if(t == null) {
