@@ -478,6 +478,17 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
 		
+		FieldTemplate t = template.getField(sortField);
+		if(Objects.nonNull(t)) {
+			switch(t.getFieldType()) {
+			case OBJECT_REFERENCE:
+				sortField += ".name";
+				break;
+			default:
+				break;
+			}
+		}
+		
 		if(Objects.nonNull(clz)) {
 		
 			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
@@ -488,7 +499,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			}
 		}
 		
-		return objectRepository.table(template, start, length, fields);
+		return objectRepository.table(template, start, length,  sortField, order, fields);
 		
 	}
 	
@@ -701,20 +712,20 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 
 	@Override
-	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit) {
+	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit, String sortColumn, SortOrder order) {
 		ObjectTemplate template = templateService.get(resourceKey);
 
 		switch(template.getScope()) {
 		case PERSONAL:
-			return objectRepository.table(template, offset, limit,
+			return objectRepository.table(template, offset, limit, sortColumn, order,
 					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
-				return objectRepository.table(template, offset, limit, 
+				return objectRepository.table(template, offset, limit, sortColumn, order,
 						SearchUtils.generateSearch(searchField, searchValue, template));
 			}
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-			return objectRepository.table(template, offset, limit, 
+			return objectRepository.table(template, offset, limit, sortColumn, order,
 					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.or(
 							SearchField.all("users.uuid", getCurrentUser().getUuid()),
 							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
@@ -727,25 +738,29 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
-	public Collection<AbstractObject> tableObjects(String resourceKey, int offset, int limit, SearchField... fields) {
+	public Collection<AbstractObject> tableObjects(String resourceKey, int offset, int limit, String sortColumn, SortOrder order, SearchField... fields) {
 		ObjectTemplate template = templateService.get(resourceKey);
+		
+		if(StringUtils.isBlank(sortColumn)) {
+			sortColumn = template.getDefaultColumn();
+		}
 		
 		switch(template.getScope()) {
 		case PERSONAL:
-			return objectRepository.table(template, offset, limit,
+			return objectRepository.table(template, offset, limit, sortColumn, order,
 					SearchUtils.combine(fields, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
-				return objectRepository.table(template, offset, limit, fields);
+				return objectRepository.table(template, offset, limit, sortColumn, order, fields);
 			}
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-			return objectRepository.table(template, offset, limit, 
+			return objectRepository.table(template, offset, limit, sortColumn, order,
 					SearchUtils.combine(fields, SearchField.or(
 							SearchField.all("users.uuid", getCurrentUser().getUuid()),
 							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
-			return tableViaObjectBean(template, offset, limit, SortOrder.ASC, template.getDefaultColumn(), fields);
+			return tableViaObjectBean(template, offset, limit, order, sortColumn, fields);
 		}
 	}
 	

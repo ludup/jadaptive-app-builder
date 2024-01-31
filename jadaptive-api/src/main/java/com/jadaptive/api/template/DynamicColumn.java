@@ -12,5 +12,7 @@ public @interface DynamicColumn  {
 	String resourceKey();
 	
 	Class<? extends DynamicColumnService> service();
+	
+	String sortColumn() default "";
 
 }

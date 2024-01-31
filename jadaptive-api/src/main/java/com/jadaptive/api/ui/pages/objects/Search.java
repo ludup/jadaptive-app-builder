@@ -57,7 +57,7 @@ public class Search extends AbstractSearchPage  {
 	
 	protected Collection<AbstractObject> generateTable(ObjectTemplate template,
 			Integer start, Integer length, Map<String,FieldTemplate> searchFieldTemplates, SearchField... fields) {
-		return objectService.tableObjects(template.getResourceKey(), start, length, fields);
+		return objectService.tableObjects(template.getResourceKey(), start, length, sortColumn, sortOrder, fields);
 	}
 
 	protected long generateCount(ObjectTemplate template, SearchField... fields) {

@@ -35,6 +35,7 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableAction.Window;
@@ -72,6 +73,8 @@ public class TableRenderer {
 	
 	long totalObjects;
 	Collection<AbstractObject> objects;
+	String sortColumn;
+	SortOrder sortOrder;
 	
 	ObjectTemplate template;
 	Class<?> templateClazz;
@@ -114,6 +117,7 @@ public class TableRenderer {
 				throw new IllegalStateException(templateClazz.getSimpleName() + " requires @TableView annotation to render this page");
 			}
 			
+			Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
 			
 			ObjectTemplate tmp = template;
@@ -121,12 +125,12 @@ public class TableRenderer {
 				ObjectTemplate t = templateService.get(tmp.getParentTemplate());
 				TableView v = templateService.getTemplateClass(tmp.getParentTemplate()).getAnnotation(TableView.class);
 				if(Objects.nonNull(v)) {
-					renderTableColumns(v, el, t, columns);
+					renderTableColumns(v, el, t, columns, dynamicColumns);
 				}
 				tmp = t;
 			}
 			
-			renderTableColumns(view, el, template, columns);
+			renderTableColumns(view, el, template, columns, dynamicColumns);
 			
 			for(String childTemplate : template.getChildTemplates()) {
 				ObjectTemplate t = templateService.get(childTemplate);
@@ -134,7 +138,7 @@ public class TableRenderer {
 				if(Objects.nonNull(clz)) {
 					TableView v = clz.getAnnotation(TableView.class);
 					if(Objects.nonNull(v)) {
-						renderTableColumns(v, el, t, columns);
+						renderTableColumns(v, el, t, columns, dynamicColumns);
 					}
 				}
 			}
@@ -162,7 +166,7 @@ public class TableRenderer {
 							.val(Base64.getUrlEncoder().encodeToString(c.getBytes("UTF-8"))));
 					}
 					
-					Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
+					
 					
 					for(String column : columns.keySet()) {
 						if(dynamicColumns.containsKey(column)) {
@@ -216,15 +220,53 @@ public class TableRenderer {
 		
 	}
 	
-	private void renderTableColumns(TableView view, Element el, ObjectTemplate template, Map<String,ObjectTemplate> columns) {
+	private void renderTableColumns(TableView view, Element el, ObjectTemplate template, 
+			Map<String,ObjectTemplate> columns, Map<String,DynamicColumn> dynamicColumns) {
 		
 		for(String column : view.defaultColumns()) {
-			FieldTemplate t = template.getField(column);
-			if(Objects.nonNull(t)) {
-				el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey()))));
-			} else {
-				el.appendChild(Html.td().appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column))));
+			
+			boolean isSortedBy = column.equals(sortColumn);
+			
+			DynamicColumn dyn = dynamicColumns.get(column);
+			if(Objects.nonNull(dyn)) {
+				//if(StringUtils.isBlank(dyn.sortColumn())) {
+					el.appendChild(Html.td().appendChild(
+							Html.i18n(template.getBundle(),String.format("%s.name", column))));
+					columns.put(column, template);
+					continue;
+				//}
+				// Too late to change the search
+				// sortColumn = dyn.sortColumn();
 			}
+			
+			FieldTemplate t = template.getField(column);
+			
+			Element e;
+			if(Objects.nonNull(t)) {
+				el.appendChild(Html.td().appendChild(
+						e = Html.a("#")
+							.addClass("sortColumn text-decoration-none")
+							.attr("data-column", column)
+							.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey())))));
+			} else {
+				el.appendChild(Html.td().appendChild(
+						e = Html.a("#")
+							.addClass("sortColumn text-decoration-none")
+							.attr("data-column", column)
+							.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column)))));
+			}
+			
+			if(isSortedBy) {
+				switch(sortOrder) {
+				case ASC:
+					e.appendChild(Html.i("fa-solid", "fa-caret-down", "ms-1"));
+					break;
+				default:
+					e.appendChild(Html.i("fa-solid", "fa-caret-up", "ms-1"));
+					break;
+				}
+			}
+			
 			columns.put(column, template);
 		}
 	}
@@ -663,4 +705,14 @@ public class TableRenderer {
 	public void setStashURL(String stashURL) {
 		this.stashURL = stashURL;
 	}
+
+	public void setSortColumn(String sortColumn) {
+		this.sortColumn = sortColumn;
+	}
+
+	public void setSortOrder(SortOrder sortOrder) {
+		this.sortOrder = sortOrder;
+	}
+	
+	
 }

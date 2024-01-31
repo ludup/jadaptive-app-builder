@@ -13,6 +13,18 @@ window.onload = function() {
 		r.data('formvar', f);
 	});
 	
+	$('.sortColumn').click(function(e) {
+		e.preventDefault();
+		$('#sortColumn').val($(this).data('column'));
+		if($('#sortOrder').val() === 'ASC') {
+			$('#sortOrder').val('DESC');
+		} else {
+			$('#sortOrder').val('ASC');
+		}
+		$('#form').submit();
+		
+	});
+	
 	$('.searchColumn').change(function() {
 		var currentField = $(this).closest('.searchRow').find('input[name="searchValue"]');
 		var currentParent = currentField.closest('.searchValueField');

@@ -140,11 +140,10 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 
 	@Override
-	public Collection<AbstractObject> table(ObjectTemplate def, int offset, int limit, SearchField... fields) {
+	public Collection<AbstractObject> table(ObjectTemplate def, int offset, int limit, String sortColumn, SortOrder order, SearchField... fields) {
 		List<AbstractObject> results = new ArrayList<>();
-		SortOrder order = templateService.getTableSortOrder(def);
-		String sortField = templateService.getTableSortField(def);
-		for(Document document : db.searchTable(def.getCollectionKey(), getDatabase(def), offset, limit, order, sortField, fields)) {
+		
+		for(Document document : db.searchTable(def.getCollectionKey(), getDatabase(def), offset, limit, order, sortColumn, fields)) {
 			results.add(buildEntity(def, document));
 		}
 		

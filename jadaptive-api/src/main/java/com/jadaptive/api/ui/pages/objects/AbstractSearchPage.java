@@ -29,6 +29,7 @@ import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.ui.FormProcessor;
 import com.jadaptive.api.ui.Html;
@@ -64,6 +65,8 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	protected String searchValue;
 	protected String searchValueText;
 	protected String searchModifier;
+	protected String sortColumn;
+	protected SortOrder sortOrder;
 	
 	public final void processForm(Document document, SearchForm form) throws IOException {
 		
@@ -86,6 +89,12 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		length =  Math.max(length, 10);
 		
 		setCachedValue("length", String.valueOf(length));
+		
+		sortColumn = StringUtils.defaultString(form.getSortColumn(), form.getSearchColumn());
+		setCachedValue("sortColumn", sortColumn);
+		
+		sortOrder = SortOrder.valueOf(StringUtils.defaultString(form.getSortOrder(), "ASC"));
+		setCachedValue("sortOrder", sortOrder.name());
 		
 		generateTable(document);
 	}
@@ -147,6 +156,27 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			}
 		}
 		
+		sortColumn = Request.get().getParameter("sortColumn");
+		if(Objects.isNull(sortColumn)) {
+			sortColumn = getCachedValue("sortColumn", StringUtils.defaultString(Request.get().getParameter("sortColumn"), template.getDefaultColumn()));
+			if(StringUtils.isBlank(sortColumn)) {
+				sortColumn = null;
+			}
+		}
+		
+		String order = Request.get().getParameter("sortOrder");
+		if(Objects.isNull(order)) {
+			order = getCachedValue("sortOrder", StringUtils.defaultString(Request.get().getParameter("sortOrder"), "ASC"));
+			if(StringUtils.isBlank(order)) {
+				order = null;
+			}
+		}
+		
+		sortOrder = SortOrder.ASC;
+		if(Objects.nonNull(order)) {
+			sortOrder = SortOrder.valueOf(order.toUpperCase());
+		}
+		
 		start = getCachedInt("start", (String) Request.get().getParameter("start"), 0);
 		length = getCachedInt("length", (String) Request.get().getParameter("length"), 10);
 		
@@ -204,6 +234,8 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		renderer.setTotalObjects(totalObjects);
 		renderer.setTemplate(template);
 		renderer.setTemplateClazz(templateClazz);
+		renderer.setSortColumn(sortColumn);
+		renderer.setSortOrder(sortOrder);
 		
 		table.insertChildren(0, renderer.render());
 
@@ -235,6 +267,15 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			ObjectTemplate t = templateService.get(childTemplate);
 			generateSearchColumns(t, input, document, parentPrefix, searchField, processedFields);
 		}
+		
+		document.selectFirst("form").appendChild(
+				Html.input("hidden", "sortColumn", template.getDefaultColumn())
+						.attr("id", "sortColumn")
+						.attr("data-column", template.getDefaultColumn()));
+		document.selectFirst("form").appendChild(Html.input("hidden", "sortOrder", sortOrder.name())
+				.attr("id", "sortOrder"));
+		
+		
 	}
 
 	private void addSearchValueField(ObjectTemplate template, String parentPrefix, FieldTemplate field, Document document, boolean initial) {
@@ -553,6 +594,8 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	
 	public interface SearchForm {
 		String getSearchColumn();
+		String getSortOrder();
+		String getSortColumn();
 		String getSearchValueText();
 		String getSearchValue();
 		String getSearchModifier();

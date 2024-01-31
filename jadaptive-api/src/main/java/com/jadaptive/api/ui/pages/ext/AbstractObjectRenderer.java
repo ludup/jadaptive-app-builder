@@ -40,6 +40,7 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.template.TemplateViewField;
@@ -502,6 +503,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			table.setObjects(objects);
 			table.setTemplate(objectTemplate);
 			table.setTemplateClazz(templateService.getTemplateClass(objectTemplate.getResourceKey()));
+			table.setSortColumn(objectTemplate.getDefaultColumn());
+			table.setSortOrder(SortOrder.ASC);
 			
 			element.insertChildren(0, table.render());
 			break;

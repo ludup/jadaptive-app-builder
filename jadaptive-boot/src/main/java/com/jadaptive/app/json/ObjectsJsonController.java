@@ -33,6 +33,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.app.entity.MongoEntity;
@@ -185,6 +186,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	@ResponseStatus(value=HttpStatus.OK)
 	public BootstrapTableResult<AbstractObject> tableObjects(HttpServletRequest request, 
 			@PathVariable String resourceKey,
+			@RequestParam(required=false, defaultValue = "") String sort,
 			@RequestParam(required=false, defaultValue = "asc") String order,
 			@RequestParam(required=false, defaultValue = "0") int offset,
 			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, ObjectException {
@@ -202,7 +204,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 							int length, String sortBy)
 							throws UnauthorizedException,
 							AccessDeniedException {
- 						return objectService.table(resourceKey, searchColumn, searchPattern, offset, limit);
+ 						return objectService.table(resourceKey, searchColumn, searchPattern, offset, limit, sort, SortOrder.valueOf(order.toUpperCase()));
 					}
 
 					@Override

@@ -7,6 +7,7 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.ValidationException;
 
 public interface ObjectService {
@@ -24,8 +25,6 @@ public interface ObjectService {
 	void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException;
 
 	void deleteAll(String resourceKey) throws ObjectException;
-
-	Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit);
 
 	long count(String resourceKey, String searchField, String searchValue);
 
@@ -55,9 +54,12 @@ public interface ObjectService {
 	long countObjects(String resourceKey, SearchField... fields);
 
 	Collection<AbstractObject> tableObjects(String resourceKey, int offset,
-			int limit, SearchField... fields);
+			int limit, String sortColumn, SortOrder order, SearchField... fields);
 
 	UUIDDocument toUUIDDocument(AbstractObject entity);
+
+	Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit,
+			String sortColumn, SortOrder order);
 
 	
 }
