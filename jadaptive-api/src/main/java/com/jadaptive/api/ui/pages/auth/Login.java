@@ -124,9 +124,11 @@ public class Login extends AuthenticationPage<LoginForm> {
 					Request.getRemoteAddress(), 
 					state.getPolicy().getClass());
 			
-			if(Objects.nonNull(assigned) && !state.getPolicy().equals(assigned)) {
-				authenticationService.changePolicy(state, assigned, passwordVerified);
+			if(Objects.isNull(assigned)) {
+				assigned = state.getPolicy();
 			}
+			
+			authenticationService.changePolicy(state, assigned, passwordVerified);
 			
 			if(passwordVerified || !passwordRequired) {
 				return true;
