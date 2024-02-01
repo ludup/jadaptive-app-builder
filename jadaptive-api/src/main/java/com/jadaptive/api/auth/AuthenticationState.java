@@ -66,7 +66,6 @@ public class AuthenticationState {
 		} else {
 			
 			if(!hasPostAuthentication()) {
-				Request.get().getSession().setAttribute(AuthenticationService.AUTHENTICATION_STATE_ATTR, null);
 				if(Objects.nonNull(homePage)) {
 					throw homePage;
 				}
