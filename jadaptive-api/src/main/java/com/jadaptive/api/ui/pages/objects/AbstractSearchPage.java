@@ -269,7 +269,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 		
 		document.selectFirst("form").appendChild(
-				Html.input("hidden", "sortColumn", template.getDefaultColumn())
+				Html.input("hidden", "sortColumn", sortColumn)
 						.attr("id", "sortColumn")
 						.attr("data-column", template.getDefaultColumn()));
 		document.selectFirst("form").appendChild(Html.input("hidden", "sortOrder", sortOrder.name())
