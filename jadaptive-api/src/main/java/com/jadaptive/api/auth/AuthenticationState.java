@@ -11,7 +11,6 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.UriRedirect;
-import com.jadaptive.api.ui.pages.user.ChangePassword;
 import com.jadaptive.api.user.User;
 
 public class AuthenticationState {
@@ -165,6 +164,19 @@ public class AuthenticationState {
 	
 	public void setAttribute(String name, Object value) {
 		attrs.put(name, value);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T getAttribute(Class<T> key) {
+		return (T)attrs.get(key.getName());
+	}
+	
+	public <T> void setAttribute(Class<T> key, T value) {
+		attrs.put(key.getName(), value);
+	}
+	
+	public void removeAttribute(Class<?> key) {
+		attrs.remove(key.getName());
 	}
 	
 	public void removeAttribute(String name) {
