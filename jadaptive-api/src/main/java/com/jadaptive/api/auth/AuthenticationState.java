@@ -76,7 +76,9 @@ public class AuthenticationState {
 	}
 	
 	public boolean hasFinished() {
-		return isAuthenticationComplete() && !hasPostAuthentication();
+		return isAuthenticationComplete() 
+				&& isOptionalComplete()
+				&& !hasPostAuthentication();
 	}
 	
 	public boolean isAuthenticationComplete() {
