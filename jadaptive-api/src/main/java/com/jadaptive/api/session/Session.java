@@ -1,5 +1,7 @@
 package com.jadaptive.api.session;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -63,6 +65,7 @@ public class Session extends AbstractUUIDEntity {
 	
 	User impersonatingUser;
 	Tenant impersontatingTenant;
+	Map<String,Object> attrs = new HashMap<>();
 	
 	public Session() {
 
@@ -181,5 +184,34 @@ public class Session extends AbstractUUIDEntity {
 
 	public boolean isImpersontating() {
 		return Objects.nonNull(impersonatingUser);
+	}
+	
+	public Object getAttribute(String name) {
+		return attrs.get(name);
+	}
+	
+	public void setAttribute(String name, Object value) {
+		attrs.put(name, value);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T getAttribute(Class<T> key) {
+		return (T)attrs.get(key.getName());
+	}
+	
+	public <T> void setAttribute(Class<T> key, T value) {
+		attrs.put(key.getName(), value);
+	}
+	
+	public void removeAttribute(Class<?> key) {
+		attrs.remove(key.getName());
+	}
+	
+	public void removeAttribute(String name) {
+		attrs.remove(name);
+	}
+	
+	public Map<String,Object> getAttributes() {
+		return attrs;
 	}
 }

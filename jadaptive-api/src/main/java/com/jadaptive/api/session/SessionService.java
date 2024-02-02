@@ -1,5 +1,6 @@
 package com.jadaptive.api.session;
 
+import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
@@ -18,7 +19,7 @@ public interface SessionService extends UUIDObjectService<Session> {
 
 	Iterable<Session> iterateSessions();
 
-	Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type);
+	Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type, AuthenticationState state);
 
 	void impersonate(Tenant tenant, Session session);
 

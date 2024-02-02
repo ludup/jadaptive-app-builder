@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SingletonObjectDatabase;
@@ -70,7 +71,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	private RoleService roleService; 
 	
 	@Override
-	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type) {
+	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type, AuthenticationState state) {
 		
 		SessionConfiguration sessionConfig = configService.getObject(SessionConfiguration.class);
 		
@@ -85,6 +86,10 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		session.setUser(user);
 		session.setState(SessionState.ACTIVE);
 
+		if(Objects.nonNull(state)) {
+			session.getAttributes().putAll(state.getAttributes());
+		}
+		
 		Map<String,Session> tenantSessions = getCache(tenant); 
 		tenantSessions.put(session.getUuid(), session);
 		

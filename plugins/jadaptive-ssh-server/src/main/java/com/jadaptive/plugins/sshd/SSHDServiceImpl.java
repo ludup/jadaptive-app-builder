@@ -187,7 +187,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 					if(Objects.nonNull(tenant)) {
 						tenantService.executeAs(tenant, ()->{
 							con.setProperty(SSHDService.SESSION, sessionService.createSession(tenant, user, 
-									con.getRemoteIPAddress(), con.getRemoteIdentification(), SessionType.SSH));
+									con.getRemoteIPAddress(), con.getRemoteIdentification(), SessionType.SSH, null));
 						});
 					}
 					

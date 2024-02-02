@@ -75,12 +75,12 @@ public class Login extends AuthenticationPage<LoginForm> {
 	protected void doGenerateContent(Document doc) throws FileNotFoundException {
 		
 		AuthenticationState state = authenticationService.getCurrentState();
+		if(state.hasFinished()) {
+			authenticationService.clearAuthenticationState();
+		}
+		state = authenticationService.getCurrentState();
 		if(!state.getCurrentPage().equals(Login.class)) {
-			/**
-			 * This may break other stuff like reset
-			 */
 			throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage()));
-//			authenticationService.clearAuthenticationState();
 		}
 		
 		doc.selectFirst("#authenticationHeader").appendChild(Html.i18n(state.getPolicy().getBundle(), String.format("%s.name", state.getPolicy().getResourceKey())));

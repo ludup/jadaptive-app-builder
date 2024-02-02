@@ -65,6 +65,7 @@ public class AuthenticationState {
 		} else {
 			
 			if(!hasPostAuthentication()) {
+				Request.get().getSession().setAttribute(AuthenticationService.AUTHENTICATION_STATE_ATTR, null);
 				if(Objects.nonNull(homePage)) {
 					throw homePage;
 				}
@@ -72,6 +73,10 @@ public class AuthenticationState {
 			}
 			return postAuthenticationPages.get(currentPostAuthenticationIndex).getClass();
 		}
+	}
+	
+	public boolean hasFinished() {
+		return isAuthenticationComplete() && !hasPostAuthentication();
 	}
 	
 	public boolean isAuthenticationComplete() {
@@ -289,5 +294,9 @@ public class AuthenticationState {
 	
 	public void insertPostAuthentication(PostAuthenticatorPage page) {
 		this.postAuthenticationPages.add(page);
+	}
+	
+	public Map<String,Object> getAttributes() {
+		return attrs;
 	}
 }

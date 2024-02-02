@@ -202,7 +202,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					throw new AccessDeniedException();
 				}
 
-				return sessionService.createSession(tenant, user, remoteAddress, userAgent, SessionType.HTTPS);
+				return sessionService.createSession(tenant, user, remoteAddress, userAgent, SessionType.HTTPS, null);
 
 			} finally {
 				clearUserContext();
@@ -388,7 +388,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			assertPermission(USER_LOGIN_PERMISSION);
 
 			Session session = sessionService.createSession(getCurrentTenant(), state.getUser(),
-					state.getRemoteAddress(), state.getUserAgent(), SessionType.HTTPS);
+					state.getRemoteAddress(), state.getUserAgent(), SessionType.HTTPS, state);
 			sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
 
 		} finally {
