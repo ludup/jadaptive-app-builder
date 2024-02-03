@@ -57,6 +57,8 @@ public interface AuthenticationService {
 
 	AuthenticationState createAuthenticationState() throws FileNotFoundException;
 
+	AuthenticationState createAuthenticationState(Redirect redirect) throws FileNotFoundException;
+
 	AuthenticationState createAuthenticationState(AuthenticationPolicy policy, Redirect homePage, User user) throws FileNotFoundException;
 
 	void changePolicy(AuthenticationState state, AuthenticationPolicy assigned, boolean verifiedPassword);

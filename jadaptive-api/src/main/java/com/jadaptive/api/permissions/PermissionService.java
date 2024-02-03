@@ -1,5 +1,6 @@
 package com.jadaptive.api.permissions;
 
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -57,6 +58,8 @@ public interface PermissionService {
 	void assertAdministrator();
 
 	void assertAssignment(AssignableUUIDEntity obj);
+	
+	
 
 	<T> T as(User user, Callable<T> call);
 
@@ -75,5 +78,17 @@ public interface PermissionService {
 	void assertOwnership(UUIDDocument e);
 
 	User getSystemUser();
+
+	UncheckedCloseable systemContext();
+
+	UncheckedCloseable userContext();
+
+	UncheckedCloseable userContext(User user);
+	
+	@FunctionalInterface
+	public interface UncheckedCloseable extends Closeable {
+		@Override
+		void close();
+	}
 
 }
