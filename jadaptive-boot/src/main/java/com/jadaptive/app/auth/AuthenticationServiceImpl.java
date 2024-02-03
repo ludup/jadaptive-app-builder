@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -50,14 +49,12 @@ import com.jadaptive.api.session.SessionType;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
-import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
-import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
 import com.jadaptive.api.ui.pages.auth.Password;
@@ -442,11 +439,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //						AuthenticationScope.USER_LOGIN :
 //							AuthenticationScope.SAML_IDP;
 				
-				String originalUrl = (String)httpSession.getAttribute(AuthenticatedPage.ORIGINAL_URI);
-				if(StringUtils.isBlank(originalUrl))
-					state = createAuthenticationState();
-				else
-					state = createAuthenticationState(new UriRedirect(originalUrl));
+				state = createAuthenticationState();
 				
 				processRequiredAuthentication(state, state.getPolicy());
 			}

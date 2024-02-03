@@ -17,8 +17,6 @@ import com.jadaptive.api.user.User;
 
 public abstract class AuthenticatedPage extends HtmlPage {
 
-	public static final String ORIGINAL_URI = "originalUri";
-
 	@Autowired
 	private SessionUtils sessionUtils;
 	
@@ -36,13 +34,6 @@ public abstract class AuthenticatedPage extends HtmlPage {
 		super.beforeProcess(uri, request, response);
 		
 		if(!sessionUtils.hasActiveSession(request)) {
-			var reqUrl = request.getRequestURL();
-			var query = request.getQueryString();
-			if(query != null) {
-				reqUrl.append('?');
-				reqUrl.append(query);
-			}
-			request.getSession().setAttribute(ORIGINAL_URI, reqUrl.toString());
 			throw new PageRedirect(pageCache.resolveDefault());
 		}
 		
