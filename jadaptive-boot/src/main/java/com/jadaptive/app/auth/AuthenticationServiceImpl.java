@@ -12,6 +12,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpSession;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -425,7 +427,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 		try {
 
-			AuthenticationState state = (AuthenticationState) Request.get().getSession()
+			HttpSession httpSession = Request.get().getSession();
+			AuthenticationState state = (AuthenticationState) httpSession
 					.getAttribute(AUTHENTICATION_STATE_ATTR);
 			if (Objects.isNull(state)) {
 
@@ -435,7 +438,9 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //				AuthenticationScope scope = defaultSavedRequest==null? 
 //						AuthenticationScope.USER_LOGIN :
 //							AuthenticationScope.SAML_IDP;
+				
 				state = createAuthenticationState();
+				
 				processRequiredAuthentication(state, state.getPolicy());
 			}
 
@@ -449,6 +454,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public AuthenticationState createAuthenticationState() throws FileNotFoundException {				
 		return createAuthenticationState(policyService.getDefaultPolicy(UserLoginAuthenticationPolicy.class));
+	}
+
+	@Override
+	public AuthenticationState createAuthenticationState(Redirect redirect) throws FileNotFoundException {				
+		return createAuthenticationState(policyService.getDefaultPolicy(UserLoginAuthenticationPolicy.class), redirect);
 	}
 	
 	@Override 

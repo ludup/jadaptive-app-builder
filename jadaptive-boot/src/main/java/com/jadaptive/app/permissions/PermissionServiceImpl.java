@@ -171,8 +171,9 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		}
 		return pjp.proceed();
 	}
-	
-	protected UncheckedCloseable systemContext() {
+
+	@Override
+	public UncheckedCloseable systemContext() {
 		setupSystemContext();
 		return new UncheckedCloseable() {
 			@Override
@@ -181,12 +182,14 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			}
 		};
 	}
-	
-	protected UncheckedCloseable userContext() {
+
+	@Override
+	public UncheckedCloseable userContext() {
 		return userContext(getCurrentUser());
 	}
 	
-	protected UncheckedCloseable userContext(User user) {
+	@Override
+	public UncheckedCloseable userContext(User user) {
 		setupUserContext(user);
 		return new UncheckedCloseable() {
 			@Override
@@ -640,10 +643,4 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 //			}
 //		}
 //	}
-	
-	@FunctionalInterface
-	public interface UncheckedCloseable extends Closeable {
-		@Override
-		void close();
-	}
 }
