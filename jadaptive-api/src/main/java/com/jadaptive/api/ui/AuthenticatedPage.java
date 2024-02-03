@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
@@ -26,16 +27,25 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	@Autowired
 	private PageCache pageCache;
 	
-	ThreadLocal<Session> currentSession = new ThreadLocal<>();
+	@Autowired
+	private AuthenticationService authenticationService;
 	
+	ThreadLocal<Session> currentSession = new ThreadLocal<>();
+
+	@Override
+	public void onCreate() throws FileNotFoundException {
+		super.onCreate();
+		
+		if(!sessionUtils.hasActiveSession(Request.get())) {
+			authenticationService.createAuthenticationState(new UriRedirect(Request.get().getRequestURI()));
+			throw new PageRedirect(pageCache.resolveDefault());
+		}
+	}
+
 	@Override
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response)
 			throws FileNotFoundException {
 		super.beforeProcess(uri, request, response);
-		
-		if(!sessionUtils.hasActiveSession(request)) {
-			throw new PageRedirect(pageCache.resolveDefault());
-		}
 		
 		currentSession.set(sessionUtils.getActiveSession(Request.get()));
 		
