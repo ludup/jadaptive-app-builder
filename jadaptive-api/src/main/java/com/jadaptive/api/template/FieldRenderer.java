@@ -10,5 +10,6 @@ public enum FieldRenderer {
 	OPTIONAL, 
 	CSS_EDITOR, 
 	HTML_VIEW,
-	JAVA_EDITOR
+	JAVA_EDITOR,
+	COLOR_CHOOSER
 }

@@ -690,7 +690,19 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			{
 				List<String> replacementVars = replacementVariables.get();
 				
-				TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
+				TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView) {
+
+					@Override
+					public String getInputType() {
+						switch(fieldView.getRenderer()) {
+						case COLOR_CHOOSER:
+							return "color";
+						default:
+							return super.getInputType();
+						}
+					}
+					
+				};
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				
 				if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
