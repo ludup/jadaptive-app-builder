@@ -54,9 +54,10 @@ public abstract class AuthenticatedPage extends HtmlPage {
 			throws FileNotFoundException {
 		super.beforeProcess(uri, request, response);
 		
-		currentSession.set(sessionUtils.getActiveSession(Request.get()));
+		var session = sessionUtils.getActiveSession(Request.get());
+		currentSession.set(session);
 		
-		if(!currentSession.get().getTenant().isSystem() && isSystem()) {
+		if((session == null || !session.getTenant().isSystem()) && isSystem()) {
 			throw new FileNotFoundException();
 		}
 	}
