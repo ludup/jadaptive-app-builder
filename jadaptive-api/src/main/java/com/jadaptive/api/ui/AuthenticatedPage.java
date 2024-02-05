@@ -36,8 +36,15 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	public void onCreate() throws FileNotFoundException {
 		super.onCreate();
 		
-		if(!sessionUtils.hasActiveSession(Request.get())) {
-			authenticationService.createAuthenticationState(new UriRedirect(Request.get().getRequestURI()));
+		var request = Request.get();
+		if(!sessionUtils.hasActiveSession(request)) {
+			var reqUrl = request.getRequestURL();
+			var query = request.getQueryString();
+			if(query != null) {
+				reqUrl.append('?');
+				reqUrl.append(query);
+			}
+			authenticationService.createAuthenticationState(new UriRedirect(reqUrl.toString()));
 			throw new PageRedirect(pageCache.resolveDefault());
 		}
 	}
