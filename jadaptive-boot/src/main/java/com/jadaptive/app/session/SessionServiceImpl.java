@@ -127,7 +127,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 								+ c.getTime());
 					}
 		
-					if (c.before(currentTime)) {
+					if (c.before(currentTime) || session.isClosePending()) {
 						
 						/**
 						 * The value passed could have been cached so we
@@ -140,7 +140,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 								c.add(Calendar.MINUTE, s.getSessionTimeout());
 							}
 							
-							if (c.before(currentTime)) {
+							if (c.before(currentTime) || session.isClosePending()) {
 								if (log.isDebugEnabled()) {
 									log.debug("Session has timed out");
 								}
@@ -306,6 +306,11 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		
 		getCache(tenant).remove(session.getUuid());
 		
+	}
+
+	@Override
+	public void markClosed(Session session) {
+		session.setClosePending(true);
 	}
 
 }

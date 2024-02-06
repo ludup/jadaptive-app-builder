@@ -66,6 +66,7 @@ public class Session extends AbstractUUIDEntity {
 	User impersonatingUser;
 	Tenant impersontatingTenant;
 	Map<String,Object> attrs = new HashMap<>();
+	boolean closePending = false;
 	
 	public Session() {
 
@@ -213,5 +214,13 @@ public class Session extends AbstractUUIDEntity {
 	
 	public Map<String,Object> getAttributes() {
 		return attrs;
+	}
+
+	public boolean isClosePending() {
+		return closePending;
+	}
+
+	public void setClosePending(boolean closePending) {
+		this.closePending = closePending;
 	}
 }

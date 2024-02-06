@@ -25,4 +25,6 @@ public interface SessionService extends UUIDObjectService<Session> {
 
 	void unimpersonate(Session session);
 
+	void markClosed(Session session);
+
 }
