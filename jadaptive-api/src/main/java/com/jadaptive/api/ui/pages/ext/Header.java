@@ -185,7 +185,7 @@ public class Header extends AbstractPageExtension {
 			
 			Session session = sessionUtils.getActiveSession(Request.get());
 			if(session.isImpersontating()) {
-				document.selectFirst("#actions").appendChild(new Element("div")
+				document.selectFirst("#headerActions").appendChild(new Element("div")
 						.addClass("float-end me-3")
 						.appendChild(new Element("div")
 								.attr("id", "revert")

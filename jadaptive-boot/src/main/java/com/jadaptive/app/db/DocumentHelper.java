@@ -53,7 +53,6 @@ import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.repository.UUIDReference;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -253,14 +252,18 @@ public class DocumentHelper {
 	}
 
 	public static AbstractObject buildRootObject(HttpServletRequest request, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
-		return buildRootObject(request.getParameterMap(), resourceKey, template);
+		return buildObject(request, resourceKey, "", template);
 	}
 	
-	public static AbstractObject buildRootObject(Map<String,String[]> parameters, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
-		return buildObject(parameters, resourceKey, "", template);
+	public static AbstractObject buildRootObject(HttpServletRequest request, Map<String, String[]> parameters, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
+		return buildObject(request, parameters, resourceKey, "", template);
+	}
+
+	public static AbstractObject buildObject(HttpServletRequest request, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
+		return buildObject(request, request.getParameterMap(), resourceKey, formVariablePrefix, template);
 	}
 	
-	private static AbstractObject buildObject(Map<String,String[]> parameters, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
+	public static AbstractObject buildObject(HttpServletRequest request, Map<String, String[]> parameters, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
 
 		if(log.isDebugEnabled()) {
 			log.debug("Building object {} using template {}", resourceKey, template.getResourceKey());
@@ -292,7 +295,7 @@ public class DocumentHelper {
 			if(field.getCollection()) {
 				obj.setValue(field, convertValues(field, parameters));
 			} else {
-				obj.setValue(field, convertValue(field, parameters, formVariablePrefix));
+				obj.setValue(field, convertValue(request, field, parameters, formVariablePrefix));
 			}
 
 		}
@@ -300,7 +303,7 @@ public class DocumentHelper {
 		return obj;
 	}
 	
-	private static Object convertValue(FieldTemplate field, Map<String,String[]> parameters, String formVariablePrefix) throws IOException, ValidationException {
+	private static Object convertValue(HttpServletRequest request, FieldTemplate field, Map<String,String[]> parameters, String formVariablePrefix) throws IOException, ValidationException {
 		
 		String value = getParameter(parameters, field, formVariablePrefix);
 
@@ -314,7 +317,7 @@ public class DocumentHelper {
 			tmp.append(formVariablePrefix);
 			tmp.append(field.getFormVariable());
 			tmp.append(".");
-			return buildObject(parameters, 
+			return buildObject(request,  
 					template.getResourceKey(),
 					tmp.toString(),
 					template).getDocument();
@@ -338,8 +341,8 @@ public class DocumentHelper {
 				return Boolean.valueOf(value);
 			}
 		case IMAGE:
-			if(Request.get() instanceof StandardMultipartHttpServletRequest) {
-				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)Request.get()).getMultiFileMap().get(field.getFormVariable());
+			if(request instanceof StandardMultipartHttpServletRequest) {
+				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
 				if(file.isEmpty()) {
 					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 				}
@@ -380,8 +383,8 @@ public class DocumentHelper {
 			}
 			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 		case FILE:
-			if(Request.get() instanceof StandardMultipartHttpServletRequest) {
-				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)Request.get()).getMultiFileMap().get(field.getFormVariable());
+			if(request instanceof StandardMultipartHttpServletRequest) {
+				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
 				if(Objects.isNull(file)) {
 					return null;
 				}
@@ -411,7 +414,7 @@ public class DocumentHelper {
 			return fromString(field, value);
 		}
 	}
-	
+
 	private static List<Object> convertValues(FieldTemplate field, Map<String,String[]> parameters) throws IOException, ValidationException {
 		
 		String fieldName = field.getFormVariable();
@@ -474,11 +477,9 @@ public class DocumentHelper {
 		return result;
 	}
 
-
 	private static UUIDReference generateReference(String uuid, String name) {
 		return new UUIDReference(uuid, name);
 	}
-
 
 	@SuppressWarnings("unchecked")
 	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) throws ObjectException, ValidationException {

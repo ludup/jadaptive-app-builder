@@ -19,6 +19,7 @@ import org.supercsv.prefs.CsvPreference;
 
 import com.jadaptive.api.csv.CsvImportService;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.app.db.DocumentHelper;
 
@@ -86,7 +87,7 @@ public class CsvImportServiceImpl implements CsvImportService {
 
                     try {
 	                    entityService.saveOrUpdate(
-	                    		DocumentHelper.buildRootObject(objectParameters, 
+	                    		DocumentHelper.buildRootObject(Request.get(), objectParameters, 
 	                    		template.getResourceKey(), template));
 	                    
 	                    count++;
