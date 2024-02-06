@@ -88,12 +88,12 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 					.appendChild(Html.div("card-body")
 						.appendChild(new Element("h6")
 								.addClass("card-title mb-1")
-								.appendChild(Html.i(page.getIconGroup(), page.getIcon(), "me-1"))
+								.appendChild(Html.i(page.getIconGroup(), page.getIcon(), "me-2"))
 								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.title")))
-						.appendChild(new Element("span")
-								.addClass("card-text")
-								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.body")
-										.addClass("small")))
+//						.appendChild(new Element("span")
+//								.addClass("card-text")
+//								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.body")
+//										.addClass("small")))
 						.appendChild(Html.a("#").addClass("select stretched-link float-end")
 								.attr("data-authenticator", module.getUuid()))));
 			}

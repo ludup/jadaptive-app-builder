@@ -316,21 +316,21 @@ public abstract class HtmlPage implements Page {
 			if(Objects.isNull(element)) {
 				element = doc.selectFirst("#content");
 				if(Objects.nonNull(element)) {
-					element.prependChild(Html.div("col-12")
+					element.prependChild(Html.div("col-12", "mt-3")
 								.appendChild(Html.div("alert", feedback.getAlert())
 								.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
 								.appendChild(getTextElement(feedback))));
 				} else {
 					element = doc.selectFirst("main");
 					if(Objects.nonNull(element)) {
-						element.appendChild(Html.div("col-12")
+						element.appendChild(Html.div("col-12", "mt-3")
 								.appendChild(Html.div("alert", feedback.getAlert())
 								.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
 								.appendChild(getTextElement(feedback))));
 					}
 				}
 			} else {
-				element.appendChild(Html.div("alert", feedback.getAlert())
+				element.appendChild(Html.div("alert", feedback.getAlert(), "mt-3")
 						.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
 						.appendChild(getTextElement(feedback)));
 			}
