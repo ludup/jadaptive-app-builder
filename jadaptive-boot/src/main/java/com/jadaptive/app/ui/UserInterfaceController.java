@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.Objects;
 
 import javax.lang.model.UnknownEntityException;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -76,10 +77,7 @@ public class UserInterfaceController extends AuthenticatedController {
 			Feedback.error(BUNDLE, "sessionTimeout.text");
 			return new RequestStatusImpl(false);
 		}
-		
 	}
-	
-	
 	
 	@ExceptionHandler(UnauthorizedException.class)
 	public void handleException(HttpServletRequest request,
@@ -107,16 +105,15 @@ public class UserInterfaceController extends AuthenticatedController {
 		}
 	}
 	
-	
 	@ExceptionHandler(FileNotFoundException.class)
-	public void FileNotFoundException(FileNotFoundException e, HttpServletResponse response) throws IOException {
-	    response.sendRedirect(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER)));
+	public void FileNotFoundException(FileNotFoundException e, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		request.getRequestDispatcher(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER))).forward(request, response);
 	}
 	
 	@ExceptionHandler(Throwable.class)
-	public void Throwable(Throwable e, HttpServletResponse response) throws IOException {
+	public void Throwable(Throwable e, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 		log.error("Captured error", e);
-	    response.sendRedirect(ErrorPage.generateErrorURI(e, Request.get().getHeader(HttpHeaders.REFERER)));
+		request.getRequestDispatcher(ErrorPage.generateErrorURI(e, request.getHeader(HttpHeaders.REFERER))).forward(request, response);
 	}
 	
 	@ExceptionHandler(Redirect.class)
