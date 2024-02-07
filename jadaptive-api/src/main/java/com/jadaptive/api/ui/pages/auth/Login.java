@@ -2,6 +2,7 @@ package com.jadaptive.api.ui.pages.auth;
 
 import java.io.FileNotFoundException;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -76,7 +77,8 @@ public class Login extends AuthenticationPage<LoginForm> {
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		if(state.hasFinished()) {
-			authenticationService.clearAuthenticationState();
+			authenticationService.completeAuthentication(state, Optional.empty());
+			return;
 		}
 		state = authenticationService.getCurrentState();
 		if(!state.getCurrentPage().equals(Login.class)) {

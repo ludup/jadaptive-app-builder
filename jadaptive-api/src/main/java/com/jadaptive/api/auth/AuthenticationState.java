@@ -81,6 +81,10 @@ public class AuthenticationState {
 				&& !hasPostAuthentication();
 	}
 	
+	public boolean isNew() {
+		return currentPageIndex == 0 && optionalCompleted == 0 && currentPostAuthenticationIndex == 0 && failedAttempts == 0;
+	}
+	
 	public boolean isAuthenticationComplete() {
 		return currentPageIndex >= requiredAuthenticationPages.size();
 	}
