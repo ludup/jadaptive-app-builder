@@ -31,6 +31,8 @@ public @interface ObjectField {
 		
 		boolean nameField() default false;
 		
+		boolean resettable() default false;
+		
 		String formVariable() default "";
 		
 		String references() default "";
