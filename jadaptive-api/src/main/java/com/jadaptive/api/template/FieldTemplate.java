@@ -82,10 +82,21 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	@ObjectField(type = FieldType.BOOL)
 	boolean requireAllPermissions = false;
 	
+	@ObjectField(type = FieldType.BOOL)
+	boolean resettable = false;
+	
 	@ObjectField(type = FieldType.TEXT_AREA)
 	String meta;
 	
 	public FieldTemplate() {
+	}
+
+	public boolean isResettable() {
+		return resettable;
+	}
+
+	public void setResettable(boolean resettable) {
+		this.resettable = resettable;
 	}
 
 	public String getResourceKey() {
