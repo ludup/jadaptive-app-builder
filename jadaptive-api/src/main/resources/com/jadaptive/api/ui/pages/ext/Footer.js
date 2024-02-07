@@ -415,6 +415,13 @@ $(function() {
 		});
 	});
 	
+	$('.copyLink').click(function(e) {
+		e.preventDefault();
+		var copyText = $(this).attr('href');
+	  	navigator.clipboard.writeText(copyText);
+		$(this).append($('<span class="ms-3 text-success text-decoration-none"><sup>${default:copied.text}</sup></span>').fadeOut(2000));
+	});
+	
 	$('.removeAction').on('click', function(e) {
 		e.preventDefault();
 		var name = $(this).data('name');
