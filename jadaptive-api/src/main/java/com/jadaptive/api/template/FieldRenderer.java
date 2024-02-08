@@ -11,5 +11,6 @@ public enum FieldRenderer {
 	CSS_EDITOR, 
 	HTML_VIEW,
 	JAVA_EDITOR,
-	COLOR_CHOOSER
+	COLOR_CHOOSER, 
+	CHECKBOX
 }

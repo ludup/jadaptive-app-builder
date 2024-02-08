@@ -5,10 +5,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
@@ -21,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.ui.AuthenticatedPage;
+import com.jadaptive.api.ui.BasicDashboardTypes;
 import com.jadaptive.api.ui.DashboardType;
 import com.jadaptive.api.ui.HomePage;
 import com.jadaptive.api.ui.Html;
@@ -42,6 +50,9 @@ public class Dashboard extends AuthenticatedPage {
 	
 	@Autowired
 	private ApplicationService applicationService; 
+
+	@Autowired
+	private I18nService i18nService;
 	
 	@Override
 	public String getUri() {
@@ -62,15 +73,55 @@ public class Dashboard extends AuthenticatedPage {
 			}
 		});
 		
-		int home = 0;
-		int insights = 0;
-		for(DashboardType type : DashboardType.values()) {
+		Set<DashboardType> allTypes = new LinkedHashSet<>();
+		allTypes.addAll(Arrays.asList(BasicDashboardTypes.values()));
+		widgets.forEach(w -> allTypes.add(w.getType()));
+		List<DashboardType> sortedTypes = new ArrayList<>(allTypes);
+		Collections.sort(sortedTypes, (s1,s2) -> Integer.valueOf(s1.weight()).compareTo(s2.weight()));
+		
+		Map<DashboardType, Integer> typeCount = new HashMap<>();
+		
+		Element tabContent = document.getElementById("nav-tabContent");
+		Element tabButtons = document.getElementById("nav-tab");
+		int tabs = 0;
+		
+		for(DashboardType type : sortedTypes) {
 		
 			int count = 0;
 			Element left;
 			Element right;
 			Element root;
-			Element element = document.selectFirst("div[jad:type='" + type.name() + "']");
+			
+			String tabId = type.cssId();
+			
+			Element tabEl = tabContent.appendElement("div").
+						addClass("tab-pane").
+						addClass("fade").
+						attr("role", "tabpanel").
+						attr("aria-labelledby", "nav-" + tabId + "-tab").
+						attr("id", "nav-" + tabId);
+			
+			if(tabs == 0) {
+				tabEl.addClass("show active");
+			}
+			
+			Element tabButton = tabButtons.appendElement("button").
+						addClass("nav-link").
+						attr("id", "nav-" + tabId + "-tab").
+						attr("data-bs-toggle", "tab").
+						attr("data-bs-target", "#nav-" + tabId).
+						attr("type", "button").
+						attr("role", "tab").
+						attr("aria-controls", "nav-" + tabId);
+			
+			if(tabs == 0) {
+				tabButton.addClass("active");
+			}
+			tabButton.attr("aria-selected", tabs == 0);
+			tabButton.html(i18nService.format(type.bundle(), Locale.getDefault(), type.resourceKey() + ".name"));
+			
+			Element element = tabEl.appendElement("div").addClass("mt-5").attr("jad:type", type.name());
+			
 			element.appendChild(root = new Element("div").addClass("row"));
 			root.appendChild(left = new Element("div").addClass("col-md-6"));
 			root.appendChild(right = new Element("div").addClass("col-md-6"));;
@@ -79,14 +130,11 @@ public class Dashboard extends AuthenticatedPage {
 				
 				if(widget.getType()==type && widget.wantsDisplay()) {
 					
-					switch(type) {
-					case INSIGHTS:
-						insights++;
-						break;
-					default:
-						home++;
-						break;
+					Integer ccount = typeCount.get(widget.getType());
+					if(ccount == null) {
+						ccount = 0;
 					}
+					typeCount.put(type, ccount + 1);
 					Element row = count % 2 == 0 ? left : right;
 					Element w;
 					Element help;
@@ -148,15 +196,15 @@ public class Dashboard extends AuthenticatedPage {
 					}
 				}
 			}
+			
+			tabs++;
 		}
 		
-		if(home==0) {
-			document.selectFirst("#nav-home-tab").addClass("d-none");
-			document.selectFirst("#nav-home").addClass("d-none");
-		} 
-		if(insights==0) {
-			document.selectFirst("#nav-insights-tab").addClass("d-none");
-			document.selectFirst("#nav-insights").addClass("d-none");		
+		for(Map.Entry<DashboardType, Integer> en : typeCount.entrySet()) {
+			if(en.getValue() == 0) {
+				document.selectFirst("#nav-" + en.getKey().cssId() +  "-tab").addClass("d-none");
+				document.selectFirst("#nav-" + en.getKey().cssId()).addClass("d-none");
+			}
 		} 
 	}
 

@@ -25,23 +25,12 @@ public class BooleanFormInput extends FieldInputRender {
 		rootElement.appendChild(e = new Element("div")
 				.addClass(Utils.csv(" ", classes) + " row mb-3"));
 		
-		if(decorate) {
-			e.appendChild(new Element("label")
-				.attr("for", getFormVariable())
-				.addClass("form-label")
-				.attr("jad:bundle", getBundle())
-				.attr("jad:i18n", String.format("%s.name", getResourceKey())));
-		}
+		renderTop(e);
+		
+		Element container = createContainer();
 		
 		e.appendChild(new Element("div")
-						.addClass("col-12")
-				.appendChild(new Element("div")
-						.addClass("col-12 form-check form-switch")
-				.appendChild(input = new Element("input")
-					.attr("name", getFormVariable())
-					.attr("type", "checkbox")
-					.addClass(resourceKey + " form-check-input")
-					.val("true"))));
+				.addClass("col-12").appendChild(container));
 		
 		if(decorate) {
 				e.appendChild(new Element("div")
@@ -63,6 +52,31 @@ public class BooleanFormInput extends FieldInputRender {
 
 	public void disable() {
 		input.attr("disabled", "disabled");
+	}
+
+	protected void renderTop(Element e) {
+	}
+
+	protected final Element createLabel() {
+		return new Element("label")
+			.attr("for", getFormVariable())
+			.addClass("form-label")
+			.attr("jad:bundle", getBundle())
+			.attr("jad:i18n", String.format("%s.name", getResourceKey()));
+	}
+
+	protected Element createContainer() {
+		return createContainerElement().appendChild(createLabel());
+	}
+
+	protected final Element createContainerElement() {
+		return new Element("div")
+			.addClass("col-12 form-check")
+			.appendChild(input = new Element("input")
+				.attr("name", getFormVariable())
+				.attr("type", "checkbox")
+				.addClass(resourceKey + " form-check-input")
+				.val("true"));
 	}
 
 }

@@ -72,6 +72,7 @@ import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
+import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimeFormInput;
@@ -836,7 +837,15 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case BOOL:
 		{
-			BooleanFormInput render = new BooleanFormInput(fieldView);
+			BooleanFormInput render;
+			switch(fieldView.getRenderer()) {
+			case CHECKBOX:
+				render = new BooleanFormInput(fieldView);
+				break;
+			default:
+				render = new SwitchFormInput(fieldView);
+				break;
+			}
 			render.renderInput(element, getFieldValue(fieldView, obj));
 			if(field.isReadOnly() || view == FieldView.READ) {
 				render.disable();

@@ -42,6 +42,7 @@ import com.jadaptive.api.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
+import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 
 public abstract class AbstractSearchPage extends TemplatePage implements FormProcessor<SearchForm> {
 
@@ -287,7 +288,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		switch(field.getFieldType()) {
 		case BOOL:
 		{
-			BooleanFormInput input = new BooleanFormInput(field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
+			SwitchFormInput input = new SwitchFormInput(field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			
 			input.disableDecoration();
 			input.disableIDAttribute();

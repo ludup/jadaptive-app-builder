@@ -15,7 +15,6 @@ import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -528,9 +527,7 @@ public abstract class HtmlPage implements Page {
 			return resolveDocument(clz, resource, canFail);
 		}
 		if(Objects.nonNull(url)) {
-			try(InputStream in = url.openStream()) {
-				return Jsoup.parse(IOUtils.toString(in, "UTF-8"));
-			}
+			return loadDocument(url);
 		} else {
 			if(canFail) {
 				throw new IOException("Missing document for " + resource);
@@ -540,6 +537,12 @@ public abstract class HtmlPage implements Page {
 			return doc;
 		}
 		
+	}
+
+	protected Document loadDocument(URL url) throws IOException {
+		try(InputStream in = url.openStream()) {
+			return Jsoup.parse(in, "UTF-8", url.toExternalForm());
+		}
 	}
 
 	private Document getCustomizedContent(Class<?> clz) {

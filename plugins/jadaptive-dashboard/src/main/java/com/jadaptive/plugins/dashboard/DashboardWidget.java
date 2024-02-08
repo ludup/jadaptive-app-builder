@@ -4,6 +4,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.ExtensionPoint;
 
+import com.jadaptive.api.ui.BasicDashboardTypes;
 import com.jadaptive.api.ui.DashboardType;
 
 public interface DashboardWidget extends ExtensionPoint {
@@ -29,6 +30,6 @@ public interface DashboardWidget extends ExtensionPoint {
 	}
 	
 	default DashboardType getType() {
-		return DashboardType.SERVER_INFORMATION;
+		return BasicDashboardTypes.SERVER_INFORMATION;
 	}
 }
