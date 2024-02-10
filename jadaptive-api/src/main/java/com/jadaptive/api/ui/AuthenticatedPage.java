@@ -35,7 +35,9 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	@Override
 	public void onCreate() throws FileNotFoundException {
 		super.onCreate();
-		
+	}
+
+	public static void redirectIfLoginNeeded(PageCache pageCache, AuthenticationService authenticationService, SessionUtils sessionUtils) throws FileNotFoundException {
 		var request = Request.get();
 		if(!sessionUtils.hasActiveSession(request)) {
 			var reqUrl = request.getRequestURL();
@@ -53,6 +55,8 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response)
 			throws FileNotFoundException {
 		super.beforeProcess(uri, request, response);
+		
+		redirectIfLoginNeeded(pageCache, authenticationService, sessionUtils);
 		
 		var session = sessionUtils.getActiveSession(Request.get());
 		currentSession.set(session);
