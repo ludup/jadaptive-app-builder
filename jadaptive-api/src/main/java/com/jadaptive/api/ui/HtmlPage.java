@@ -480,11 +480,11 @@ public abstract class HtmlPage implements Page {
 	protected void resolveScript(String uri, Document document, PageResources ext) {
 		URL url = ext.getClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
-			PageHelper.appendHeadScript(document, "/app/js/" + uri + ".js");
+			PageHelper.appendBodyScript(document, "/app/js/" + uri + ".js");
 		} else {
 			url = classService.getResource(ext.getJsResource());
 			if(Objects.nonNull(url)) {
-				PageHelper.appendHeadScript(document, "/app/script/" + ext.getJsResource());
+				PageHelper.appendBodyScript(document, "/app/script/" + ext.getJsResource());
 			}
 		}
 	}
