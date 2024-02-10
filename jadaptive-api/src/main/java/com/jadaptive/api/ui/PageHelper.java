@@ -33,6 +33,33 @@ public class PageHelper {
 		document.prependChild(head);
 		return head;
 	}
+	
+	public static void appendBodyScript(Document document, String uri) {
+		appendBodyScript(document, uri, false);
+	}
+	
+	public static void appendBodyScript(Document document, String uri, boolean async) {
+		appendBodyScript(document, uri, async, null);
+	}
+	
+	public static void appendBodyScript(Document document, String uri, boolean async, String id) {
+		Element body = PageHelper.getOrCreateTag(document, "body");
+		
+		for(Element e : body.getElementsByTag("script")) {
+			if(uri.equals(e.attr("src"))) {
+				return;
+			}
+		}
+		Element e = new Element("script")
+				.attr("src", uri)
+				.attr("async", async)
+				.attr("type", "text/javascript");
+		if(Objects.nonNull(id)) {
+			e.attr("id", id);
+		}
+		PageHelper.appendLast(body, "script", e);
+	}
+	
 	public static void appendHeadScript(Document document, String uri) {
 		appendHeadScript(document, uri, false);
 	}
