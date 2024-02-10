@@ -1,4 +1,4 @@
-package com.jadaptive.api.auth;
+package com.jadaptive.api.auth.oauth2;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -10,8 +10,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +26,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Authorization;
+import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Token;
+import com.jadaptive.api.ui.Feedback;
 
 @Controller
 public class OAuth2CompleteController {
@@ -34,111 +36,22 @@ public class OAuth2CompleteController {
 	
 	static final Logger LOG = LoggerFactory.getLogger(OAuth2CompleteController.class);
 
-	public static class OAuth2Token {
-		private String token;
-		private String refreshToken;
-		private long expires;
-
-		public OAuth2Token(String token, String refreshToken, long expires) {
-			super();
-			this.token = token;
-			this.refreshToken = refreshToken;
-			this.expires = expires;
-		}
-
-		public String getToken() {
-			return token;
-		}
-
-		public String getRefreshToken() {
-			return refreshToken;
-		}
-
-		public long getExpires() {
-			return expires;
-		}
-
-	}
+	@Autowired
+	private OAuth2AuthorizationService oAuth2AuthorizationService; 
 	
-	public interface OAuth2Authorized {
-		void handleAuthorization(OAuth2Token token, HttpServletRequest request, HttpServletResponse response,
-				OAuth2Authorization authorization) throws Exception;
-	}
-
-	public static class OAuth2Authorization {
-		public static final String ATTRIBUTE_NAME = OAuth2Authorization.class.getName();
-
-		private final String state;
-		private String browserUri;
-		private final String tokenUri;
-		private final String codeVerifier;
-		private final String redirectUri;
-		private final String clientId;
-		private final OAuth2Authorized onAuthorized;
-
-		public OAuth2Authorization(String browserUri, 
-				OAuth2Request req, OAuth2Authorized onAuthorized) {
-			this.clientId = req.clientId();
-			this.browserUri = browserUri;
-			this.codeVerifier = req.codeVerifier();
-			this.redirectUri = req.redirectUri();
-			this.state = req.state();
-			this.onAuthorized = onAuthorized;
-
-			tokenUri = req.baseUri() + "/app/api/oauth2/token"; 
-			
-		}
-
-		public String getRedirectUri() {
-			return redirectUri;
-		}
-
-		public String getCodeVerifier() {
-			return codeVerifier;
-		}
-
-		public String getTokenUri() {
-			return tokenUri;
-		}
-
-		public String getBrowserUri() {
-			return browserUri;
-		}
-
-		public String getState() {
-			return state;
-		}
-
-		protected void setBrowserUri(String browserUri) {
-			this.browserUri = browserUri;
-		}
-
-		protected final void handleAuthorization(OAuth2Token token, HttpServletRequest request,
-				HttpServletResponse response,
-				OAuth2Authorization authorization) throws Exception {
-			onAuthorized.handleAuthorization(token, request, response, authorization);
-		}
-
-		public String getClientId() {
-			return clientId;
-		}
-
-	}
-
-	private Map<String, OAuth2Authorization> authorizations = new HashMap<>();
 
 	@RequestMapping(value = OAuth2CompleteController.PATH_PREFIX, method = RequestMethod.GET, produces = "text/plain")
 	@ResponseBody
 	@ResponseStatus(code = HttpStatus.OK)
 	public void completeOAuth(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		synchronized (authorizations) {
+		synchronized (oAuth2AuthorizationService) {
 			var state = request.getParameter("state");
 			if (state == null) {
 				LOG.error("No state parameter provided for oauth2 handler.");
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return;
 			}
-			var c = authorizations.get(state);
+			var c = oAuth2AuthorizationService.get(state);
 			if (c == null) {
 				LOG.warn("LogonState has expired.");
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -186,17 +99,6 @@ public class OAuth2CompleteController {
 				parameters.put("client_id", c.getClientId());
 				parameters.put("code_verifier", c.getCodeVerifier());
 
-//				var headers = new HashMap<String, String>();
-
-				/*
-				 * TODO this is really really bad and relies on a really really bad hack in the
-				 * hypersocket server.
-				 * 
-				 * TODO do we need this here?
-				 */
-//				headers.put("Origin", "moz-extension://");
-				
-				
 				var form = parameters.entrySet()
 					    .stream()
 					    .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
@@ -232,24 +134,12 @@ public class OAuth2CompleteController {
 			} catch (Exception e) {
 				LOG.error("Failed to complete authorization (" + c.getTokenUri() + ").", e);
 
-				request.getSession().setAttribute("flashStyle", "danger");
-				request.getSession().setAttribute("flash", e.getMessage());
+				Feedback.error("userInterface", "oauth2.completionFailed", e.getMessage());
 				
 				redirectTo = c.getBrowserUri();
 			}
 
 			response.sendRedirect(redirectTo);
 		}
-	}
-
-	public void expectAuthorize(OAuth2Authorization auth) {
-		synchronized (authorizations) {
-			authorizations.put(auth.getState(), auth);
-			// TODO expire the authorizations after certain amount time
-		}
-	}
-
-	public static String genToken() {
-		return UUID.randomUUID().toString().replace("-", "");
 	}
 }

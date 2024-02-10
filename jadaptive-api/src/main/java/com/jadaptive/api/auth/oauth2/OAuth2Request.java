@@ -1,4 +1,4 @@
-package com.jadaptive.api.auth;
+package com.jadaptive.api.auth.oauth2;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -62,6 +62,11 @@ public class OAuth2Request {
 			return this;
 		}
 
+
+		public Builder withState() {
+			return withState(OAuth2AuthorizationService.genToken());
+		}
+
 		public Builder withState(String state) {
 			this.state = state;
 			return this;
@@ -75,7 +80,7 @@ public class OAuth2Request {
 		public Builder withPKE() {
 			try {
 				
-				codeVerifier = OAuth2CompleteController.genToken(); 
+				codeVerifier = OAuth2AuthorizationService.genToken(); 
 				
 				MessageDigest digest = MessageDigest.getInstance("SHA256");
 				digest.reset();
@@ -190,10 +195,13 @@ public class OAuth2Request {
 			}
 			
 			var res = baseUri + 
-					"/app/oauth2?" + clientIdTxt + 
-					"state=" + URLEncoder.encode(state, "UTF-8") + "&" +
+					"/oauth2-start?" + clientIdTxt + 
 					"response_type=code&" +
 					"redirect_uri=" + URLEncoder.encode(redirectUri, "UTF-8");
+			
+			if(state != null) {
+				res += "&state=" + URLEncoder.encode(state, "UTF-8");
+			}
 			
 			for(var scope : scopes) {
 				res += "&scope=" + URLEncoder.encode(scope, "UTF-8");
