@@ -1,11 +1,13 @@
 package com.jadaptive.api.ui;
 
 import java.io.FileNotFoundException;
+import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,19 +16,26 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
-import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
-import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
-import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.user.UserService;
 
 public abstract class AuthenticationPage<T> extends HtmlPage implements FormProcessor<T> {
+	
+	private static final String UNDECORATED = "authentication.undecorated";
+
+	public static void setUndecorated(HttpSession session) {
+		session.setAttribute(UNDECORATED, true);
+	}
+	
+	private static boolean isUndecorated(HttpSession session) {
+		return Boolean.TRUE.equals(session.getAttribute(UNDECORATED));
+	}
 
 	static Logger log = LoggerFactory.getLogger(AuthenticationPage.class);
 	
@@ -62,13 +71,29 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	
 	@Override
 	protected final void generateContent(Document doc) throws FileNotFoundException {
-		
+		var req = Request.get();
 		try {
-			sessionUtils.getSession(Request.get());
+			sessionUtils.getSession(req);
 			throw new UriRedirect();
 		} catch (UnauthorizedException e) {
 			
 			doGenerateContent(doc);
+		}
+		
+		if(isUndecorated(req.getSession())) {
+			try {
+				var cardBody = doc.getElementsByClass("card-body").first();
+				var loginContainer = doc.getElementById("login-container");
+				var par = loginContainer.parent();
+				loginContainer.remove();
+				cardBody.children().forEach(par::appendChild);
+				doc.getElementsByTag("footer").forEach(e -> e.remove());
+				doc.getElementsByTag("header").forEach(e -> e.remove());
+			}
+			catch(Exception e) {
+				log.warn(MessageFormat.format("The session requested an undecorated login, but {0} does not support it.", getClass().getName()));
+			}
+			
 		}
 		
 		Element form = doc.selectFirst("form");

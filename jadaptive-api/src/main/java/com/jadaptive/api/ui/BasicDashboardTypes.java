@@ -3,7 +3,8 @@ package com.jadaptive.api.ui;
 public enum BasicDashboardTypes implements DashboardType {
 
 	SERVER_INFORMATION,
-	INSIGHTS;
+	INSIGHTS,
+	ACCOUNT;
 
 	@Override
 	public int weight() {
