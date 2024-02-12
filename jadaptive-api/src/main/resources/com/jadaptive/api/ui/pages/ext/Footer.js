@@ -302,6 +302,21 @@ $(function() {
 		JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
 	});
 	
+	$('.copyToClipboard').on('click', function(e) {
+		e.preventDefault();
+		var targetSelector = $(this).data('target');
+		var targetAttrName = $(this).data('target-attribute');
+		var target = $(this);
+		if(targetSelector) {
+			target = $(targetSelector);
+		}
+		if(targetAttrName)
+			navigator.clipboard.writeText(target.attr(targetAttrName));
+		else
+			navigator.clipboard.writeText(target.text());
+		JadaptiveUtils.success($('#feedback'), "Text has been copied to the clipboard.");
+	});
+	
 	$('.spinClick').on('click', function() {
 		JadaptiveUtils.startAwesomeSpin($(this).children('i'));
 	});
@@ -446,5 +461,18 @@ $(function() {
 		        }
 		    }
 		});
+	});
+	
+	$('.input-resetter').on('click', function(e) {
+		var resetType = $(this).data('reset-type'); 
+		var resetFor = $(this).data('reset-for');
+		if(resetType === 'image') {
+			$('input[name=' + resetFor + '_previous]').val('');
+			$('#' + resetFor + '_preview').attr('src', '');
+			$(this).parent().remove();
+		} 
+		else {
+			// TODO other types
+		}
 	});
 });
