@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService.UncheckedCloseable;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDObjectService;
 
@@ -26,6 +27,12 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 		finally {
 			setCurrentTenant(was);
 		}
+	}
+	
+	default UncheckedCloseable tenant(Tenant tenant) {
+		var was = getCurrentTenant();
+		setCurrentTenant(tenant);
+		return () -> setCurrentTenant(was);
 	}
 
 	void clearCurrentTenant();
