@@ -62,9 +62,6 @@ public class RadioFormInput extends FieldInputRender {
 		}
 		
 		for(Enum<?> value : values) {
-			if(value.name().equals(defaultValue) || String.valueOf(value.ordinal()).equals(defaultValue)) {
-				selected = value;
-			}
 
 			var col = e.appendElement("div").
 				addClass("col-12");
