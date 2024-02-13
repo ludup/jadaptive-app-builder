@@ -328,29 +328,42 @@ $(function() {
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
 		$('.processDepends').each(function() {
+			debugger; 
 			var dependsOn = $(this).data('depends-on');
 			var dependsValue = $(this).attr('data-depends-value');
 			
-			var input = $('#' + dependsOn);
+			var allInput = $('#' + dependsOn);
+			if(!allInput.length) {
+				allInput = $('input[name=' + dependsOn + ']');
+			}
 			var matchValues = dependsValue.split(',');
 			var matches = false;
-			$.each(matchValues, function(i, obj) {
-				
-				var expectedResult = !obj.startsWith("!");
-				if(!expectedResult) {
-					obj = obj.substring(1);
-				}
-				var value;
-				if(input.attr('type') === 'checkbox') {
-					value = input.is(':checked').toString();
-				} else {
-					value = input.val();
-				}
-				if(obj == value) {
-					matches = expectedResult;
+			allInput.each(function(i, input) {
+				input = $(input);
+				$.each(matchValues, function(i, obj) {
+					
+					var expectedResult = !obj.startsWith("!");
+					if(!expectedResult) {
+						obj = obj.substring(1);
+					}
+					var value;
+					if(input.attr('type') === 'radio') {
+						value = input.is(':checked') ? input.val() : '';
+					} 
+					else if(input.attr('type') === 'checkbox') {
+						value = input.is(':checked').toString();
+					} else {
+						value = input.val();
+					}
+					if(obj == value) {
+						matches = expectedResult;
+						return true;
+					}
+					return false;
+				});
+				if(matches) {
 					return true;
 				}
-				return false;
 			});
 			if(matches) {
 				$(this).removeClass('d-none');

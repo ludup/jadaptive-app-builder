@@ -72,6 +72,7 @@ import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
+import com.jadaptive.api.ui.renderers.form.RadioFormInput;
 import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
@@ -867,6 +868,20 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			{
 				BootstrapBadgeRender render = new BootstrapBadgeRender(fieldView);
 				render.renderInput(element, getFieldValue(fieldView, obj));
+				break;
+			}
+			case RADIO_BUTTON:
+			{
+
+				Class<?> values;
+				try {
+					values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
+					RadioFormInput render = new RadioFormInput(fieldView);
+					render.renderInput(element, getFieldValue(fieldView, obj));
+					render.renderValues((Enum<?>[])values.getEnumConstants(), getFieldValue(fieldView, obj), view == FieldView.READ);
+				} catch (ClassNotFoundException e) {
+					throw new IllegalStateException(e.getMessage(), e);
+				}
 				break;
 			}
 			default:
