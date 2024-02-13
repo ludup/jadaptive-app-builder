@@ -85,6 +85,8 @@ public class RadioFormInput extends FieldInputRender {
 			
 			var label = div.appendElement("label").
 				addClass("form-check-label").
+				attr("jad:bundle", bundle).
+				attr("jad:i18n", getFormVariable() + "." + value.name() + ".name").
 				attr("type", "radio").html(processEnumName(value.name()));
 			
 			if(!disableIDAttribute) {

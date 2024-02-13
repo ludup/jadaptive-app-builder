@@ -19,6 +19,7 @@ public enum ValidationType {
 	EMPTY, 
 	HOSTNAME, 
 	PORT,
+	TIME_24,
 	EMAIL;
 
 }
