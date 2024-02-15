@@ -501,9 +501,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			throws FileNotFoundException {
 
 		if(Objects.nonNull(state.getUser()) && !policy.isTemporary()) {
-			policy = policyService.getAssignedPolicy(state.getUser(),
+			AuthenticationPolicy assignedPolicy = policyService.getAssignedPolicy(state.getUser(),
 					Request.getRemoteAddress(), 
 					policy.getClass());
+			if(Objects.nonNull(assignedPolicy)) {
+				policy = assignedPolicy;
+			}
 		}
 		
 		if(policy.getPasswordOnFirstPage() || Objects.isNull(state.getUser())) {
