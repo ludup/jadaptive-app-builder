@@ -4,19 +4,6 @@ $(document).ready(function() {
 		e.preventDefault();
 	});
 	
-	$('.input-resetter').on('click', function(e) {
-		var resetType = $(this).data('reset-type'); 
-		var resetFor = $(this).data('reset-for');
-		if(resetType === 'image') {
-			$('input[name=' + resetFor + '_previous]').val('');
-			$('#' + resetFor + '_preview').attr('src', '');
-			$(this).parent().remove();
-		} 
-		else {
-			// TODO other types
-		}
-	});
-	
     $('#saveButton').click(function(e) {
         e.preventDefault();
     

@@ -1,5 +1,7 @@
 package com.jadaptive.api.user;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -141,6 +143,10 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	public void setOtherTelephone(Collection<String> otherTelephone) {
 		this.otherTelephone = otherTelephone;
+	}
+
+	public String getDisplayName() {
+		return isBlank(name) ? getUsername() : name;
 	}
 	
 }

@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.I18N;
-import com.jadaptive.api.countries.Country;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -228,6 +227,13 @@ public class DocumentValidator {
 				{
 					if(StringUtils.isNotBlank(value)) {
 						validateRegex(Utils.HTTP_URL_PATTERN, value, v, field);
+					}
+					break;
+				}
+				case TIME_24:
+				{
+					if(StringUtils.isNotBlank(value)) {
+						validateRegex(Utils.TIME_24_PATTERN, value, v, field);
 					}
 					break;
 				}

@@ -53,6 +53,7 @@ public class Utils {
 
 	public static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 	public static final String HTTP_URL_PATTERN = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$";
+	public static final String TIME_24_PATTERN = "^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$";
 	
 	public static final String ALLOWED_CHARACTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	public static final String PHONE_PATTERN = "^[+]*[-\\s\\.\\d()]*$";

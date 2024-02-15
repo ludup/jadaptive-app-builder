@@ -2,6 +2,7 @@ package com.jadaptive.api.ui.pages.ext;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -72,6 +73,7 @@ import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
+import com.jadaptive.api.ui.renderers.form.RadioFormInput;
 import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
@@ -869,13 +871,27 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
+			case RADIO_BUTTON:
+			{
+
+				Class<?> values;
+				try {
+					values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
+					RadioFormInput render = new RadioFormInput(fieldView);
+					render.renderInput(element, getFieldValue(fieldView, obj));
+					render.renderValues(filterEnums((Enum<?>[])values.getEnumConstants(), field), getFieldValue(fieldView, obj), view == FieldView.READ);
+				} catch (ClassNotFoundException e) {
+					throw new IllegalStateException(e.getMessage(), e);
+				}
+				break;
+			}
 			default:
 				Class<?> values;
 				try {
 					values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
 					DropdownFormInput render = new DropdownFormInput(fieldView);
 					render.renderInput(element, getFieldValue(fieldView, obj));
-					render.renderValues((Enum<?>[])values.getEnumConstants(), getFieldValue(fieldView, obj), view == FieldView.READ);
+					render.renderValues(filterEnums((Enum<?>[])values.getEnumConstants(), field), getFieldValue(fieldView, obj), view == FieldView.READ);
 				} catch (ClassNotFoundException e) {
 					throw new IllegalStateException(e.getMessage(), e);
 				}
@@ -908,6 +924,19 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			thisElement.attr("readonly", "readonly");
 		}
 		
+	}
+	
+	private Enum<?>[] filterEnums(Enum<?>[] enums, FieldTemplate fieldTemplate) {
+		var str = fieldTemplate.getMetaValue("include", "");
+		var includes = StringUtils.isBlank(str) ? Collections.emptyList() : Arrays.asList(str.split(":"));
+		
+		str = fieldTemplate.getMetaValue("exclude", "");
+		var excludes = StringUtils.isBlank(str) ? Collections.emptyList() : Arrays.asList(str.split(":"));
+		
+		return Arrays.asList(enums).stream().filter(f-> {
+			return ( includes.size() == 0 || includes.contains(f.name()) ) &&
+				     !excludes.contains(f.name());
+		}).toList().toArray(new Enum<?>[0]);
 	}
 
 	private void processDynamicElements(Elements thisElement, TemplateViewField fieldView, AbstractObject obj) {

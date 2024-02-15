@@ -4,11 +4,6 @@ $(document).ready(function() {
 		e.preventDefault();
 	});
 	
-	$('.input-resetter').on('click', function(e) {
-		var field = $('#' + $(this).data('resettable'));
-		alert('Reset ' + field);
-	});
-	 
 	$('#saveButton').on('click', function(e) {
 		e.preventDefault();
 		

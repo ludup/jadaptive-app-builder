@@ -38,7 +38,6 @@ import com.jadaptive.api.ui.pages.ext.TableRenderer;
 import com.jadaptive.api.ui.pages.objects.AbstractSearchPage.SearchForm;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
-import com.jadaptive.api.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
