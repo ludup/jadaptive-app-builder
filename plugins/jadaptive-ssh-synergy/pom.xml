@@ -19,7 +19,7 @@
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.projectUrl>https://github.com/ludup/jadpative-common</plugin.projectUrl>
 		<plugin.dependencies></plugin.dependencies>
-		<synergy.version>3.1.0-SNAPSHOT</synergy.version>
+		<synergy.version>3.1.0</synergy.version>
 	</properties>
 
 	<dependencies>		
@@ -78,7 +78,7 @@
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-synergy-s3</artifactId>
-			<version>3.1.0-SNAPSHOT</version>
+			<version>${synergy.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
