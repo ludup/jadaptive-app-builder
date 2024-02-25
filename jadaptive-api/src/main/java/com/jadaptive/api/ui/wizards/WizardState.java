@@ -121,6 +121,10 @@ public class WizardState {
 		return stateObjects.get(pages.get(getCurrentStep()-1).getStateKey());
 	}
 	
+	public UUIDEntity setStateObject(String key, UUIDEntity object) {
+		return stateObjects.put(key, object);
+	}
+	
 	public void setCurrentObject(UUIDEntity obj) {
 		stateObjects.put(pages.get(getCurrentStep()-1).getStateKey(), obj);
 	}

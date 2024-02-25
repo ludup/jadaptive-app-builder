@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -133,6 +134,10 @@ public class ReflectionUtils {
 				
 				if(m.getAnnotation(JadaptiveIgnore.class) != null) {
 					continue;
+				}
+				if(clz.isRecord()) {
+//					if(m.isSynthetic()) 
+						results.put(m.getName(), m);
 				}
 				if(m.getName().startsWith("get") && m.getName().length() > 3 && m.getParameterCount()==0) {
 					results.put(m.getName(), m);

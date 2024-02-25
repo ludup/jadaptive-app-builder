@@ -39,6 +39,9 @@ var Wizard = (function () {
 			});
 		},
 		postForm: function(success, cancel) {
+			if(!success) {
+				success = onNext;
+			}
 			$.ajax({
 		           type: "POST",
 		           url: $('form').attr('action'),
@@ -69,8 +72,13 @@ var Wizard = (function () {
 })();
 
 $(function() {
-	
-	if($('.wizardNext').length > 0) {
+	if($("form").length > 0) {
+		$("form").on('submit', function(e) {
+			e.preventDefault();
+			Wizard.postForm();
+		});
+	}
+	else if($('.wizardNext').length > 0) {
 		$('.wizardNext').click( function(e) {
 			e.preventDefault();
 			Wizard.next();
@@ -129,7 +137,6 @@ $(function() {
            data: new FormData(form[0]),
            success: function(data)
            {
-			   debugger;
                 if(data.success) {
                    window.location = redirect;
                } else {
