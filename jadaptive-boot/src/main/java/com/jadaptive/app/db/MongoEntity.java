@@ -1,4 +1,4 @@
-package com.jadaptive.app.entity;
+package com.jadaptive.app.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.app.entity.AbstractObjectDeserializer;
+import com.jadaptive.app.entity.AbstractObjectSerializer;
 
 @JsonDeserialize(using=AbstractObjectDeserializer.class)
 @JsonSerialize(using=AbstractObjectSerializer.class)

@@ -98,9 +98,13 @@ public class I18N {
 		if(resourceBundle.equals("dynamic")) {
 			
 			String localizedString = dynamic.get(key);
-			MessageFormat messageFormat = new MessageFormat(localizedString);
-			messageFormat.setLocale(locale);
-			return messageFormat.format(formatParameters(arguments));
+			if(Objects.nonNull(localizedString)) {
+				MessageFormat messageFormat = new MessageFormat(localizedString);
+				messageFormat.setLocale(locale);
+				return messageFormat.format(formatParameters(arguments));
+			}
+			
+			return "[i18n/" + resourceBundle + "/" + key + "]"; 
 			
 		} else {
 		

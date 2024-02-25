@@ -36,7 +36,7 @@ public class BooleanFormInput extends FieldInputRender {
 				e.appendChild(new Element("div")
 						.addClass("col-12"))
 				.appendChild(new Element("p")
-				.addClass("form-text text-muted text-small mt-3")
+				.addClass("form-text text-muted text-small")
 				.attr("jad:bundle", getBundle())
 				.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
 		}

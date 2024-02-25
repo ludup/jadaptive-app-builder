@@ -43,6 +43,9 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.db.AbstractObjectDatabase;
+import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
@@ -53,6 +56,7 @@ import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.repository.UUIDReference;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -62,9 +66,9 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
-import com.jadaptive.app.ClassLoaderServiceImpl;
-import com.jadaptive.app.encrypt.EncryptionServiceImpl;
-import com.jadaptive.app.entity.MongoEntity;
+//import com.jadaptive.app.ClassLoaderServiceImpl;
+//import com.jadaptive.app.encrypt.EncryptionServiceImpl;
+//import com.jadaptive.app.entity.MongoEntity;
 import com.jadaptive.utils.Utils;
 
 public class DocumentHelper {
@@ -173,8 +177,8 @@ public class DocumentHelper {
 
 	private static String checkForAndPerformEncryption(ObjectField columnDefinition, String value) {
 		if(Objects.nonNull(columnDefinition) && (columnDefinition.manualEncryption() || columnDefinition.automaticEncryption())) {
-			if(Objects.nonNull(value) && !EncryptionServiceImpl.getInstance().isEncrypted(value)) {
-				return EncryptionServiceImpl.getInstance().encrypt(value);
+			if(Objects.nonNull(value) && !ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).isEncrypted(value)) {
+				return ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).encrypt(value);
 			}
 		}
 		return value;
@@ -182,8 +186,8 @@ public class DocumentHelper {
 	
 	private static String checkForAndPerformDecryption(ObjectField columnDefinition, String value) {
 		if(Objects.nonNull(columnDefinition) && columnDefinition.automaticEncryption()) {
-			if(Objects.nonNull(value) && EncryptionServiceImpl.getInstance().isEncrypted(value)) {
-				return EncryptionServiceImpl.getInstance().decrypt(value);
+			if(Objects.nonNull(value) && ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).isEncrypted(value)) {
+				return ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).decrypt(value);
 			}
 		}
 		return value;
@@ -255,21 +259,21 @@ public class DocumentHelper {
 		return buildObject(request, resourceKey, "", template);
 	}
 	
-	public static AbstractObject buildRootObject(HttpServletRequest request, Map<String, String[]> parameters, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
-		return buildObject(request, parameters, resourceKey, "", template);
+	public static AbstractObject buildRootObject(Map<String, String[]> parameters, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
+		return buildObject(parameters, resourceKey, "", template);
 	}
 
 	public static AbstractObject buildObject(HttpServletRequest request, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
-		return buildObject(request, request.getParameterMap(), resourceKey, formVariablePrefix, template);
+		return buildObject(request.getParameterMap(), resourceKey, formVariablePrefix, template);
 	}
 	
-	public static AbstractObject buildObject(HttpServletRequest request, Map<String, String[]> parameters, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
+	public static AbstractObject buildObject(Map<String, String[]> parameters, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
 
 		if(log.isDebugEnabled()) {
 			log.debug("Building object {} using template {}", resourceKey, template.getResourceKey());
 		}
 		
-		MongoEntity obj = new MongoEntity(resourceKey);
+		AbstractObject obj = ApplicationServiceImpl.getInstance().getBean(AbstractObjectDatabase.class).createObject(resourceKey);
 		String uuid = getParameter(parameters, formVariablePrefix + "uuid");
 		if(StringUtils.isNotBlank(uuid)) {
 			obj.setUuid(uuid);
@@ -295,7 +299,7 @@ public class DocumentHelper {
 			if(field.getCollection()) {
 				obj.setValue(field, convertValues(field, parameters));
 			} else {
-				obj.setValue(field, convertValue(request, field, parameters, formVariablePrefix));
+				obj.setValue(field, convertValue(field, parameters, formVariablePrefix));
 			}
 
 		}
@@ -303,7 +307,7 @@ public class DocumentHelper {
 		return obj;
 	}
 	
-	private static Object convertValue(HttpServletRequest request, FieldTemplate field, Map<String,String[]> parameters, String formVariablePrefix) throws IOException, ValidationException {
+	private static Object convertValue(FieldTemplate field, Map<String,String[]> parameters, String formVariablePrefix) throws IOException, ValidationException {
 		
 		String value = getParameter(parameters, field, formVariablePrefix);
 
@@ -317,7 +321,7 @@ public class DocumentHelper {
 			tmp.append(formVariablePrefix);
 			tmp.append(field.getFormVariable());
 			tmp.append(".");
-			return buildObject(request,  
+			return buildObject(parameters,  
 					template.getResourceKey(),
 					tmp.toString(),
 					template).getDocument();
@@ -341,8 +345,8 @@ public class DocumentHelper {
 				return Boolean.valueOf(value);
 			}
 		case IMAGE:
-			if(request instanceof StandardMultipartHttpServletRequest) {
-				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
+			if(Request.get() instanceof StandardMultipartHttpServletRequest) {
+				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)Request.get()).getMultiFileMap().get(field.getFormVariable());
 				if(file.isEmpty()) {
 					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 				}
@@ -383,8 +387,8 @@ public class DocumentHelper {
 			}
 			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 		case FILE:
-			if(request instanceof StandardMultipartHttpServletRequest) {
-				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)request).getMultiFileMap().get(field.getFormVariable());
+			if(Request.get() instanceof StandardMultipartHttpServletRequest) {
+				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)Request.get()).getMultiFileMap().get(field.getFormVariable());
 				if(Objects.isNull(file)) {
 					return null;
 				}
@@ -433,7 +437,8 @@ public class DocumentHelper {
 			for(String value : values) {
 				if(StringUtils.isNotBlank(value)) {
 					String json = new String(Base64.getUrlDecoder().decode(value), "UTF-8");
-					result.add(mapper.readValue(json, MongoEntity.class).getDocument());
+					result.add(mapper.readValue(json,
+							ApplicationServiceImpl.getInstance().getBean(AbstractObjectDatabase.class).getObjectClass()));
 				}
 			}
 
@@ -506,7 +511,7 @@ public class DocumentHelper {
 				if(Objects.nonNull(resourceKey)) {
 					obj = (T) ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey).getConstructor().newInstance();
 				} else {		
-					obj = (T) ClassLoaderServiceImpl.getInstance().findClass(clz).getConstructor().newInstance();
+					obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
 				}
 			}
 			

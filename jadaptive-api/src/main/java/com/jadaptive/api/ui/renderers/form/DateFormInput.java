@@ -13,6 +13,9 @@ public class DateFormInput extends FormInputRender {
 		super(template, resourceKey, formVariable, bundle);
 	}
 	
+	public DateFormInput(String resourceKey,String formVariable, String bundle) {
+		super(resourceKey, formVariable, bundle);
+	}
 	
 	
 	@Override

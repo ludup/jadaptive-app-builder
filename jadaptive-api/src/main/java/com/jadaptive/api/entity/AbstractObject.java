@@ -46,4 +46,6 @@ public interface AbstractObject extends UUIDDocument {
 
 	AbstractObject getChild(String resourceKey);
 
+	void setValue(String fieldName, String value);
+
 }

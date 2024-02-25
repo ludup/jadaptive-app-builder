@@ -47,7 +47,10 @@ public class EmbeddedMongoWithTransactionsConfig {
     public static final String DFLT_REPLICASET_NAME = "rs0";
     public static final int DFLT_STOP_TIMEOUT_MILLIS = 200;
 
-    private Version.Main mFeatureAwareVersion = Version.Main.V7_0;
+    private Version.Main mFeatureAwareVersion = Version.Main.valueOf(
+    		System.getProperty("jadaptive.mongoVersion",
+    				Version.Main.V7_0.name()));
+    
     private String mReplicaSetName = DFLT_REPLICASET_NAME;
     //private long mStopTimeoutMillis = DFLT_STOP_TIMEOUT_MILLIS;
 
@@ -92,7 +95,9 @@ public class EmbeddedMongoWithTransactionsConfig {
     	}
         
         Runtime.getRuntime().addShutdownHook(new Thread(()->{
+        	try {
         	state.close();
+        	} catch(Throwable e) { }
         }));
 
         File replicaSetInitiated = new File(databasePath, ".replicaSet");

@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.upload.Upload;
 import com.jadaptive.api.upload.UploadHandler;
+import com.jadaptive.api.upload.UploadIterator;
+import com.jadaptive.utils.ParameterHelper;
 import com.sshtools.common.publickey.SshKeyUtils;
 import com.sshtools.common.publickey.SshPrivateKeyFile;
 import com.sshtools.common.publickey.SshPrivateKeyFileFactory;
@@ -31,15 +34,16 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 	private AuthorizedKeyService keyService;  
 	
 	@Override
-	public void handleUpload(String handlerName, String uri, Map<String, String> parameters, String filename,
-			InputStream in) throws IOException, SessionTimeoutException, UnauthorizedException {
+	public void handleUpload(String handlerName, String uri, Map<String, String[]> parameters, UploadIterator uploads) throws IOException, SessionTimeoutException, UnauthorizedException {
 		
+		Upload upload = uploads.next();
+		InputStream in = upload.openStream();
 		try { 
-
+			
 			String contents = IOUtils.readUTF8StringFromStream(in);
 			
 			SshPublicKey key;
-			String name = parameters.get("name");
+			String name = ParameterHelper.getValue(parameters,"name");
 			try { 
 				SshPublicKeyFile kfile = SshPublicKeyFileFactory.parse(IOUtils.toInputStream(contents, "UTF-8"));
 				key = kfile.toPublicKey();
@@ -52,7 +56,7 @@ public class PublicKeyUploadHandler extends AuthenticatedService implements Uplo
 			} catch(IOException e) {
 
 				SshPrivateKeyFile kfile = SshPrivateKeyFileFactory.parse(IOUtils.toInputStream(contents, "UTF-8"));
-				key = kfile.toKeyPair(parameters.get("passphrase")).getPublicKey();
+				key = kfile.toKeyPair(ParameterHelper.getValue(parameters,"passphrase")).getPublicKey();
 				if(StringUtils.isBlank(name)) {
 					name = kfile.getComment();
 					if(StringUtils.isBlank(name)) {

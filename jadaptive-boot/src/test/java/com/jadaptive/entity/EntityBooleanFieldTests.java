@@ -18,7 +18,7 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationException;
-import com.jadaptive.app.entity.MongoEntity;
+import com.jadaptive.app.db.MongoEntity;
 
 public class EntityBooleanFieldTests extends AbstractDeserializerTest {
 

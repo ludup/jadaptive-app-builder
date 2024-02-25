@@ -136,14 +136,29 @@ var UploadWidget = {
 				}
 				
 				var countFiles = 0;
-				$('.file-input').each(function(idx, file) {
+				var totalSize = 0;
+				$('.file-input').each(function() {
 					for(i=0;i<this.files.length;i++) {
 						if($("[data-filename='" + this.files[i].name + "']").length > 0) {
-							fd.append('file', this.files[i]);
+							totalSize += this.files[i].size;
 							countFiles++;
 						}
 					}
 				});
+				
+				if(countFiles==1) {
+					fd.append("contentLength", totalSize);
+				}
+				
+				$('.file-input').each(function() {
+					for(i=0;i<this.files.length;i++) {
+						if($("[data-filename='" + this.files[i].name + "']").length > 0) {
+							fd.append('file', this.files[i]);
+						}
+					}
+				});
+			    
+			    
 			    
 				$('#progressBar').css("width", 0).attr('aria-valuenow', "0");
 				$('#helpText').hide(); 

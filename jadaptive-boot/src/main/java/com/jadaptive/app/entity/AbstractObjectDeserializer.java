@@ -34,6 +34,7 @@ import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.DocumentValidator;
+import com.jadaptive.app.db.MongoEntity;
 import com.jadaptive.utils.Utils;
 
 
