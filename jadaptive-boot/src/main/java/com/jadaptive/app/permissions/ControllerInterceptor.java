@@ -101,7 +101,7 @@ public class ControllerInterceptor implements HandlerInterceptor {
 			thrw = (Throwable)request.getAttribute(DispatcherServlet.EXCEPTION_ATTRIBUTE);
 		}
 		if(thrw != null && !(thrw instanceof Redirect)) {
-			log.error("API failure.", thrw);
+			log.error("API failure on {} URL {}", request.getMethod(), request.getRequestURL().toString(), thrw);
 		}
 	}
 }

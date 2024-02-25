@@ -2,6 +2,8 @@ package com.jadaptive.api.ui.pages.ext;
 
 import java.io.FileNotFoundException;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +33,13 @@ public class Logoff extends AuthenticatedPage {
 	protected void generateAuthenticatedContent(Document doc) throws FileNotFoundException {
 
 		try {
-			sessionService.closeSession(sessionUtils.getActiveSession(Request.get()));
+			HttpServletRequest req = Request.get();
+			try {
+				sessionService.closeSession(sessionUtils.getActiveSession(req));
+			}
+			finally {
+				req.getSession().invalidate();
+			}
 		} catch (AccessDeniedException | ObjectNotFoundException e) {
 		}
 		throw new PageRedirect(pageCache.resolveDefault());

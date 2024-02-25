@@ -74,6 +74,7 @@ import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.RadioFormInput;
+import com.jadaptive.api.ui.renderers.form.SetPasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
@@ -275,6 +276,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			Element viewElement = createViewElement(view, element, first && !view.isRoot());
 			
+			boolean firstField = true;
 			for(TemplateViewField fieldView : view.getFields()) {
 				FieldTemplate field = fieldView.getField();
 				if(field.isHidden()) {
@@ -289,6 +291,15 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					renderField(viewElement, obj, fieldView, scope, view);
 					break;
 				}
+				
+				if(firstField) {
+					var firstInput = viewElement.select("input").first();
+					if(firstInput != null) {
+						firstInput.attr("autofocus", "true");
+					}
+				}
+				
+				firstField = false;
 			}
 			
 			if(!view.getChildViews().isEmpty()) {
@@ -801,7 +812,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case PASSWORD:
 		{
-			PasswordFormInput render = new PasswordFormInput(currentTemplate.get(), fieldView);
+			PasswordFormInput render = fieldView.getRenderer() == FieldRenderer.SET_PASSWORD ? 
+					new SetPasswordFormInput(currentTemplate.get(), fieldView) :
+					new PasswordFormInput(currentTemplate.get(), fieldView);
 			render.renderInput(element, getFieldValue(fieldView, obj));
 			List<String> replacementVars = replacementVariables.get();
 			if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
@@ -957,6 +970,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					}
 					FieldTemplate depends = currentTemplate.get().getField(fieldView.getDependsOn());
 					if(Objects.nonNull(obj)) {
+						if(depends == null)
+							throw new IllegalArgumentException("The field '" + fieldView.getDependsOn() + "' that '" + fieldView.getResourceKey() + "' depends on does not exist.");
 						Object value = obj.getValue(depends);
 						if(Objects.isNull(value)) {
 							value = depends.getDefaultValue();

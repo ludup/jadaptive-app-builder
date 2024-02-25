@@ -120,4 +120,7 @@ public abstract class WizardSection extends AbstractPageExtension {
 	public String getStepSummaryi18n() {
 		return getName() + ".summary";
 	}
+
+	public void afterProcess(Document document, WizardState state) {
+	}
 }

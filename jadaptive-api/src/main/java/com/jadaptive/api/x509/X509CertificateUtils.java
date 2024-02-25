@@ -33,6 +33,7 @@ import java.util.List;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
@@ -373,6 +374,8 @@ public class X509CertificateUtils {
 			builder.addRDN(BCStyle.L, l);
 			builder.addRDN(BCStyle.ST, s);
 			builder.addRDN(BCStyle.CN, cn);
+			if(StringUtils.isNotBlank(c))
+				builder.addRDN(BCStyle.C, c);
 			
 			Date notBefore = new Date(System.currentTimeMillis() - 1000L * 60
 					* 60 * 24 * 30);

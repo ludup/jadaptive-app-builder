@@ -35,11 +35,12 @@ public class OptionsFormInput {
 			optionsElement.appendChild(new Element("div")
 					.addClass("col-md-3")
 					.appendChild(input = new Element("input")
+					.attr("id", field.getFormVariable() + "_input")
 					.attr("name", field.getFormVariable())
 					.attr("type", "checkbox")
 					.val(option.getUuid()))
 						.appendChild(new Element("label")
-								.attr("for", field.getFormVariable())
+								.attr("for", field.getFormVariable() + "_input")
 								.addClass("form-label")
 								.text((String)option.getValue("name"))));
 		

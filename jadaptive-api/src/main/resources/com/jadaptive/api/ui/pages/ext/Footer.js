@@ -72,6 +72,8 @@ $(function() {
 		}
 	});
 	
+	/* BPS - What is this for? It is stopping Enter key form submission everywhere */
+	/*
 	$(document).on('keypress', 'input[type="text"]', function(e) {
 		
 		if (e.keyCode === 13) {
@@ -79,6 +81,7 @@ $(function() {
 			return false;
 		}
 	});
+	*/
 	
 	$(document).on('keyup', '.multipleTagSource', function(e) {
 		
@@ -275,16 +278,31 @@ $(function() {
 
 	});
 	
-	$('.filter-dropdown').on('keyup', function(e) {
-		var text = $(this).val().trim();
-		debugger;
+	$('.filter-dropdown').on('keypress', function(e) {
+		var text = $(this).val().trim().toLowerCase();
 		$(this).parent().find('.dropdown-menu a').each(function(idx, obj) {
-			if(text === '' || $(this).text().startsWith(text)) {
+			if(text === '' || $(this).text().toLowerCase().startsWith(text)) {
 				$(this).show();
 			} else {
 				$(this).hide();
 			}
 		});
+	});
+	
+	$('.filter-dropdown').on('keyup', function(e) {
+		if(e.keyCode == 40) {
+			var text = $(this).val().trim().toLowerCase();
+			$(this).parent().find('.dropdown-menu a').each(function(idx, obj) {
+				if(text === '' || $(this).text().toLowerCase().startsWith(text)) {
+					$(this).show();
+					$(this).focus();
+					return false;
+				}
+			});
+			e.stopPropagation();
+			return;
+		}
+				
 	});
 
 	$('input[name="theme"]').on('change', function(e) {

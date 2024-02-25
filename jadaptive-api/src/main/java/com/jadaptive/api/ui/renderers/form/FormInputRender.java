@@ -47,12 +47,7 @@ public abstract class FormInputRender extends FieldInputRender {
 						.attr("jad:i18n", String.format("%s.name", getResourceKey()))));
 		}
 		
-		parent.appendChild(Html.div("input-group").appendChild(input = new Element("input")
-						.attr("name", getFormVariableWithParents())
-						.addClass(resourceKey + " form-control")
-						.attr("value", value)
-						.attr("autocomplete", "off")
-						.attr("type", getInputType())));
+		parent.appendChild(Html.div("input-group").appendChild(input = createInputElement(value)));
 		if(decorate) {
 			parent.appendChild(new Element("small")
 					.addClass("form-text")
@@ -71,6 +66,19 @@ public abstract class FormInputRender extends FieldInputRender {
 	
 	public Element getInputElement() {
 		return input;
+	}
+
+	protected Element createInputElement(String value) {
+		return new Element("input")
+						.attr("name", getFormVariableWithParents())
+						.addClass(resourceKey + " form-control")
+						.attr("value", value)
+						.attr("autocomplete", getAutocomplete())
+						.attr("type", getInputType());
+	}
+
+	protected String getAutocomplete() {
+		return "off";
 	}
 
 	protected void onRender(Element rootElement, String value) { }

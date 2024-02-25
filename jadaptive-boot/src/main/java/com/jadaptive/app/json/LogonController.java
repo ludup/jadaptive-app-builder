@@ -120,7 +120,12 @@ public class LogonController {
 				return new RequestStatusImpl(false, "Session already closed");
 			}
 			
-			sessionService.closeSession(session);
+			try {
+				request.getSession().invalidate();
+			}
+			finally {
+				sessionService.closeSession(session);
+			}
 			
 			return new RequestStatusImpl(true, "Session closed");
 		} catch(UnauthorizedException e) {

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
@@ -66,7 +67,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		super.beforeProcess(uri, request, response);
 		state = wizardService.getWizard(resourceKey).getState(request);
 		if(state.getFlow().requiresUserSession() && !sessionUtils.hasActiveSession(Request.get())) {
-			throw new FileNotFoundException();
+			throw new AccessDeniedException();
 		}
 
 		currentState.set(state);
@@ -168,7 +169,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			} 
 	     
 			if(state.hasBackButton()) {
-				actions.appendChild(new Element("a")
+				actions.appendChild(new Element("button")
 						.attr("id", "backButton")
 						.addClass("btn btn-danger float-start wizardBack")
 						.appendChild(new Element("i")
@@ -179,7 +180,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			}
 			
 			if(state.hasNextButton()) {
-				actions.appendChild(new Element("a")
+				Element form = body.selectFirst("form");
+				if(form.id().equals("")) {
+					form.attr("id", resourceKey + "_form");
+				}
+				actions.appendChild(new Element("button")
+							.attr("type", "submit")
+							.attr("form",  form.id())
 							.attr("id", "nextButton")
 							.addClass("btn btn-success float-end wizardNext")
 							.appendChild(new Element("i")
@@ -188,7 +195,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 								.attr("jad:bundle", "default")
 								.attr("jad:i18n", "next.name")));
 			} else if(state.isFinishPage()) {
-				actions.appendChild(new Element("a")
+				actions.appendChild(new Element("button")
 							.attr("id", "finishButton")
 							.addClass("btn btn-primary float-end wizardFinish")
 						.appendChild(new Element("i")
@@ -201,6 +208,8 @@ public class Wizard extends HtmlPage implements ObjectPage {
 					section.processReview(document, state);
 				}
 			}
+
+			ext.afterProcess(document, state);
 			
 			return null;
 		});
