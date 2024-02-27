@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.app.SecurityPropertyService;
-import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
@@ -60,9 +59,6 @@ public class LogonController {
 	
 	@Autowired
 	private SessionService sessionService; 
-	
-	@Autowired
-	private AuthenticationPolicyService policyService;
 	
 	@Autowired
 	private PageCache pageCache;

@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
@@ -47,9 +46,6 @@ public abstract class HtmlPage implements Page {
 	
 	@Autowired
 	private ClassLoaderService classService; 
-	
-	@Autowired
-	private AuthenticationService authenticationService; 
 	
 	private ThreadLocal<List<PageExtension>> extensions = new ThreadLocal<>();
 	

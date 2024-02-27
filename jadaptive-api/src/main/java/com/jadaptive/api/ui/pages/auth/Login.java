@@ -15,15 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
-import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
-import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticationPage;
@@ -50,15 +47,9 @@ public class Login extends AuthenticationPage<LoginForm> {
 	
 	@Autowired
 	private AuthenticationPolicyService policyService;
-	
-	@Autowired
-	private PermissionService permissionService;;
 
 	@Autowired
 	private PageCache pageCache;
-	
-	@Autowired
-	private  TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
 	
 	public Login() {
 		super(LoginForm.class);

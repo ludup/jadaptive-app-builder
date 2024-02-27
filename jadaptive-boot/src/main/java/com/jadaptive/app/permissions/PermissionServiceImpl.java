@@ -1,6 +1,5 @@
 package com.jadaptive.app.permissions;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

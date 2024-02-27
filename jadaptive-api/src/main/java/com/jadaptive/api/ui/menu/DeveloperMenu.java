@@ -1,6 +1,5 @@
 package com.jadaptive.api.ui.menu;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 

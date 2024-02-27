@@ -45,7 +45,6 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
-import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableView;
