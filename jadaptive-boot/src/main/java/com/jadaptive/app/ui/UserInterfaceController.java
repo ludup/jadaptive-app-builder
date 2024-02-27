@@ -118,7 +118,9 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@ExceptionHandler(Redirect.class)
 	public void Redirect(Redirect e, HttpServletResponse response) throws IOException {
-		log.info("Redirecting to {}", e.getUri());
+		if(log.isDebugEnabled()) {
+			log.debug("Redirecting to {}", e.getUri());
+		}
 		response.sendRedirect(e.getUri());	
 	}
 
