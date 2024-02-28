@@ -39,9 +39,6 @@ var Wizard = (function () {
 			});
 		},
 		postForm: function(success, cancel) {
-			if(!success) {
-				success = onNext;
-			}
 			$.ajax({
 		           type: "POST",
 		           url: $('form').attr('action'),
@@ -75,7 +72,7 @@ $(function() {
 	if($("form").length > 0) {
 		$("form").on('submit', function(e) {
 			e.preventDefault();
-			Wizard.postForm();
+			Wizard.next();
 		});
 	}
 	else if($('.wizardNext').length > 0) {
