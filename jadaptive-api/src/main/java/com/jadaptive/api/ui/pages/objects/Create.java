@@ -41,7 +41,7 @@ public class Create extends ObjectTemplatePage {
 	
 	protected void beforeGenerateContent(Document document) {
 
-		if(Objects.isNull(object)) {
+		//if(Objects.isNull(object)) {
 			if(!uiService.canCreate(template)) {
 				throw new PageRedirect(new MessagePage("default",
 						"title.createNotAllowed", 
@@ -49,6 +49,6 @@ public class Create extends ObjectTemplatePage {
 						"fa-exclamation-square",
 						String.format("/app/ui/search/%s", template.getResourceKey())));
 			}
-		}
+		//}
 	}
 }

@@ -660,4 +660,19 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	public void registerTemporaryTemplate(ObjectTemplate template) {
 		temporaryTemplates.put(template.getResourceKey(), template);
 	}
+
+	@Override
+	public void disableCreation(String resourceKey) {
+		ObjectTemplate template = get(resourceKey);
+		template.setCreatable(false);		
+		saveOrUpdate(template);
+	}
+	
+	@Override
+	public void disableUpdate(String resourceKey) {
+		ObjectTemplate template = get(resourceKey);
+		template.setUpdatable(false);		
+		saveOrUpdate(template);
+	}
+	
 }

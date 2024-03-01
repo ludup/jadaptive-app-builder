@@ -205,7 +205,9 @@ public class Wizard extends HtmlPage implements ObjectPage {
 								.attr("jad:i18n", "finish.name")));
 				
 				for(WizardSection section : state.getSections()) {
-					section.processReview(document, state);
+					if(!section.isHidden()) {
+						section.processReview(document, state);
+					}
 				}
 			}
 

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.AbstractObjectDatabase;
+import com.jadaptive.api.db.CachePolicy;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.db.Transactional;
@@ -206,23 +207,26 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			db.insertOrUpdate(document, getCollectionName(obj.getClass()), database);
 			obj.setUuid(document.getString("_id"));
 		
+			if(isCaching(obj.getClass())) {
+				Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
+				if(log.isDebugEnabled()) {
+					log.debug("CACHE: Saving database value and caching {}", obj.getClass().getSimpleName());
+				}
+				if(getCachePolicy(obj.getClass()) == CachePolicy.CLEAR_COLLECTION) {
+					cachedObjects.clear();
+				}
+				cachedObjects.put(obj.getUuid(), obj);
+				if(Objects.isNull(previous)) {
+					if(log.isDebugEnabled()) {
+						log.debug("CACHE: New object added to {} collection so clearing iterator cache", obj.getClass().getSimpleName());
+					}
+					Map<String,UUIDList> cachedUUIDs = getIteratorCache(obj.getClass());
+					cachedUUIDs.clear();
+				}
+			}
+			
 			if(!isEvent && !(obj instanceof ObjectTemplate)) {
 			
-				if(isCaching(obj.getClass())) {
-					Map<String,T> cachedObjects = getCache((Class<T>)obj.getClass());
-					if(log.isDebugEnabled()) {
-						log.debug("CACHE: Saving database value and caching {}", obj.getClass().getSimpleName());
-					}
-					cachedObjects.put(obj.getUuid(), obj);
-					if(Objects.isNull(previous)) {
-						if(log.isDebugEnabled()) {
-							log.debug("CACHE: New object added to {} collection so clearing iterator cache", obj.getClass().getSimpleName());
-						}
-						Map<String,UUIDList> cachedUUIDs = getIteratorCache(obj.getClass());
-						cachedUUIDs.clear();
-					}
-				}
-				
 				if(Objects.isNull(previous)) {
 					onObjectCreated(obj);
 				} else {
@@ -236,6 +240,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 	}
 	
+	private CachePolicy getCachePolicy(Class<? extends UUIDEntity> clz) {
+		return clz.getAnnotation(ObjectCache.class).cachePolicy();
+	}
+
 	protected <T extends UUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, ObjectException {
 		try {
 			

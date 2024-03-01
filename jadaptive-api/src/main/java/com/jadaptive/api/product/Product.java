@@ -3,6 +3,7 @@ package com.jadaptive.api.product;
 import org.pf4j.ExtensionPoint;
 
 import com.jadaptive.api.app.ApplicationVersion;
+import com.jadaptive.api.product.ProductService.ProductId;
 
 public interface Product extends ExtensionPoint {
 
@@ -45,5 +46,9 @@ public interface Product extends ExtensionPoint {
 	default boolean isRevenueGenerating() {
 		return true;
 	}
+
+	default ProductId getProductId() {
+		return ProductId.FRAMEWORK;
+	};
 	
 }

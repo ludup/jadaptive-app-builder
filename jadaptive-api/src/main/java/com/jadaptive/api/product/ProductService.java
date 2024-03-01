@@ -2,6 +2,29 @@ package com.jadaptive.api.product;
 
 public interface ProductService {
 
+	public enum ProductId {
+		FRAMEWORK,
+		SECURE_FILE_EXCHANGE_CLOUD,
+		SECURE_FILE_EXCHANGE_OMPREM,
+		SECURE_FILE_EXCHANGE_EC2,
+		LOGONBOX_EXPRESS_CLOUD,
+		LOGONBOX_EXPRESS_ONPREM,
+		LOGONBOX_EXPRESS_EC2,
+		LOGONBOX_VPN_ONPREM,
+		LOGONBOX_VPN_EC2, 
+		SSH_GATEWAY_CLOUD,
+		SSH_GATEWAY_ONPREM,
+		SSH_GATEWAY_EC2,
+		VMSEE_CLOUD,
+		VMSEE_ONPREM,
+		VMSEE_EC2,
+		SECURE_NODE,
+		LICENSE_SERVER,
+		WINDOWS_CONNECT
+	}
+	
+	ProductId getProductId(); 
+	
 	String getVersion();
 	
 	String getCopyright();

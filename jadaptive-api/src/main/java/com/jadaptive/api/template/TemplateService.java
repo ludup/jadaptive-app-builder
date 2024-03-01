@@ -66,4 +66,8 @@ public interface TemplateService {
 
 	void registerTemporaryTemplate(ObjectTemplate template);
 
+	void disableCreation(String resourceKey);
+
+	void disableUpdate(String resourceKey);
+
 }

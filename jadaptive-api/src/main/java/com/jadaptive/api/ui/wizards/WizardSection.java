@@ -123,4 +123,8 @@ public abstract class WizardSection extends AbstractPageExtension {
 
 	public void afterProcess(Document document, WizardState state) {
 	}
+
+	public boolean isHidden() {
+		return false;
+	}
 }

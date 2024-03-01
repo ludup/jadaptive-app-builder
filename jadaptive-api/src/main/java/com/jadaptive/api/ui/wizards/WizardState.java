@@ -17,6 +17,7 @@ import com.jadaptive.api.ui.Page;
 public class WizardState {
 
 	Integer currentStep = 0;
+	Integer displayStep = 0;
 	List<WizardSection> pages = new ArrayList<>();
 	WizardSection startPage;
 	WizardSection finishPage;

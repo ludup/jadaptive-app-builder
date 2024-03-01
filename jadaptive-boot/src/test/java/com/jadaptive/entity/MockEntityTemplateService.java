@@ -149,5 +149,15 @@ public class MockEntityTemplateService implements TemplateService {
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public void disableCreation(String resourceKey) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void disableUpdate(String resourceKey) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
