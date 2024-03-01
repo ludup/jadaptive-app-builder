@@ -1,6 +1,7 @@
 package com.jadaptive.entity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -98,8 +99,14 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 			.endObject().toString();
 
 		System.out.println(json);
-		getNumberField(true, new FieldValidator(ValidationType.RANGE, "0-9999999", "default")).readValue(json, MongoEntity.class);
-
+		
+		assertThrows(
+		           IOException.class,
+		           () -> getNumberField(true, new FieldValidator(ValidationType.RANGE, "0-9999999", "default")).readValue(json, MongoEntity.class),
+		           "Expected validation exception but readValue did not throw it"
+		    );
+		;
+		
 	}
 	
 
@@ -113,7 +120,12 @@ public class EntityNumberFieldTests extends AbstractDeserializerTest {
 
 		System.out.println(json);
 		
-		getNumberField(true).readValue(json, MongoEntity.class);
+		assertThrows(
+		           IOException.class,
+		           () -> getNumberField(true, new FieldValidator(ValidationType.REQUIRED, "", "default")).readValue(json, MongoEntity.class),
+		           "Expected validation exception but readValue did not throw it"
+		    );
+		;
 
 
 	}
