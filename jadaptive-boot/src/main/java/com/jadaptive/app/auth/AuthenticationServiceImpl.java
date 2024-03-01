@@ -46,7 +46,6 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionType;
-import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.ui.AuthenticationPage;
@@ -81,9 +80,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Autowired
 	private CacheService cacheService;
-
-	@Autowired
-	private SessionUtils sessionUtils;
 
 	@Autowired
 	private PageCache pageCache;
@@ -176,7 +172,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public Session logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent) {
+	public LogonCompletedResult logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent) {
 
 		permissionService.setupSystemContext();
 
@@ -204,7 +200,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					throw new AccessDeniedException();
 				}
 
-				return sessionService.createSession(tenant, user, remoteAddress, userAgent, SessionType.HTTPS, null);
+				return new LogonCompletedResult(Optional.of(sessionService.createSession(tenant, user, remoteAddress, userAgent, SessionType.HTTPS, null))) {
+					@Override
+					public void close() {
+						sessionService.closeSession(session().orElseThrow(() -> new IllegalStateException("Already closed.")));
+					}
+				};
 
 			} finally {
 				clearUserContext();
@@ -257,7 +258,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public Class<? extends Page> completeAuthentication(AuthenticationState state, Optional<Page> page) {
+	public AuthenticationCompletedResult completeAuthentication(AuthenticationState state, Optional<Page> page) {
 
 		if (Objects.isNull(state.getUser()) || !userService.supportsLogin(state.getUser())) {
 			throw new AccessDeniedException("Invalid credentials");
@@ -298,7 +299,35 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					if(log.isInfoEnabled()) {
 						log.info("Creating session for {}", state.getUser().getUsername());
 					}
-					createSession(state);
+					setupUserContext(state.getUser());
+
+					try {
+						assertPermission(USER_LOGIN_PERMISSION);
+						Session session = sessionService.createSession(getCurrentTenant(), state.getUser(),
+								state.getRemoteAddress(), state.getUserAgent(), SessionType.HTTPS, state);
+						Redirect redir;
+						try {
+							redir = new PageRedirect(pageCache.getPage(state.getCurrentPage()));
+						}
+						catch(Redirect r) {
+							redir = r;
+						}
+						return new AuthenticationCompletedResult(
+								redir, 
+								Optional.of(session)
+						) {
+							@Override
+						    public void close() {
+								sessionService.closeSession(session().orElseThrow(() -> new IllegalStateException("Already closed.")));
+						    }
+						};
+					}
+					catch(Exception e) {
+						e.printStackTrace();
+					}
+					finally {
+						clearUserContext();
+					}
 				}
 				
 //				if(state.getScope() == AuthenticationScope.SAML_IDP) {
@@ -328,13 +357,19 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			
 		}
 		
+		Class<? extends Page> currentPage2 = state.getCurrentPage();
 		if(log.isInfoEnabled()) {
 			log.info("User {} is being asked to complete authenication page {}", 
 					state.getUser().getUsername(),
-					state.getCurrentPage().getSimpleName());
+					currentPage2.getSimpleName());
 		}
 
-		return state.getCurrentPage();
+		return new AuthenticationCompletedResult(new PageRedirect(pageCache.getPage(currentPage2)), Optional.empty()) {
+			@Override
+			public void close() {
+				throw new IllegalStateException("Session was never open.");
+			}
+		};
 
 	}
 	
@@ -382,21 +417,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		return m;
 	}	
-	private void createSession(AuthenticationState state) {
-		
-		setupUserContext(state.getUser());
-
-		try {
-			assertPermission(USER_LOGIN_PERMISSION);
-
-			Session session = sessionService.createSession(getCurrentTenant(), state.getUser(),
-					state.getRemoteAddress(), state.getUserAgent(), SessionType.HTTPS, state);
-			sessionUtils.addSessionCookies(Request.get(), Request.response(), session);
-
-		} finally {
-			clearUserContext();
-		}
-	}
 
 	private void setupPostAuthentication(AuthenticationState state) {
 		

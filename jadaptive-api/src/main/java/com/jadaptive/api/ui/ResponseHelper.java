@@ -53,6 +53,22 @@ public class ResponseHelper {
 		response.getOutputStream().write(buf);
 		response.getOutputStream().flush();
 	}
+	
+	public static  void sendContent(InputStream content, long contentLength, String contentType, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException, IOException {
+		
+		if(log.isDebugEnabled()) {
+			log.debug("Returning resource {} with type {}", request.getRequestURI(), contentType);
+		}
+		
+		response.setStatus(HttpStatus.OK.value());
+		
+		response.setContentType(contentType);
+		if(contentLength > -1)
+			response.setContentLengthLong(contentLength);
+		
+		content.transferTo(response.getOutputStream());
+		response.getOutputStream().flush();
+	}
 
 	public static  void send404NotFound(String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
 		

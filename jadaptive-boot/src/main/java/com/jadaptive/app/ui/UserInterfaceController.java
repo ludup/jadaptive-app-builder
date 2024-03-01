@@ -24,18 +24,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.i18n.I18nService;
-import com.jadaptive.api.json.RequestStatus;
-import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.ErrorPage;
@@ -64,20 +60,6 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@Autowired
 	private I18nService i18n;
-	
-	@RequestMapping(value="/app/verify", method = RequestMethod.GET, produces = "application/json")
-	@ResponseBody
-	public RequestStatus verifySession(HttpServletRequest request, HttpServletResponse response)  {
-
-		Session session;
-		try {
-			session = sessionUtils.getSession(request);
-			return new RequestStatusImpl(session!=null);
-		} catch (UnauthorizedException e) {
-			Feedback.error(BUNDLE, "sessionTimeout.text");
-			return new RequestStatusImpl(false);
-		}
-	}
 	
 	@ExceptionHandler(UnauthorizedException.class)
 	public void handleException(HttpServletRequest request,

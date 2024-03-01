@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
@@ -50,17 +48,15 @@ public class AuthenticatedController extends ExceptionHandlingController {
 		if(Objects.isNull(user)) {
 			user = (User) request.getSession().getAttribute(SESSION_SCOPE_USER);
 			if(Objects.isNull(user)) {
-				Session session = sessionUtils.getActiveSession(request);
-				if(Objects.isNull(session)) {
-					log.warn("Unauthencated acccess from "
-						+ Request.getRemoteAddress() 
-						+ " to "
-						+ request.getMethod() 
-						+ " " 
-						+ request.getRequestURI().toString());
+				var session = Session.getOr(request);
+				if(session.isEmpty()) {
+					log.warn("Unauthenticated acccess from {} to {} {}",
+						Request.getRemoteAddress(),
+						request.getMethod(),
+						request.getRequestURI().toString());
 					throw new AccessDeniedException();
 				}
-				user = session.getUser();
+				user = session.get().getUser();
 			}
 		}
 		
@@ -107,7 +103,4 @@ public class AuthenticatedController extends ExceptionHandlingController {
 		return permissionService.isValidPermission(permission);
 	}
 	
-	public Session getCurrentSession() throws UnauthorizedException, SessionTimeoutException {
-		return sessionUtils.getSession(Request.get());
-	}
 }

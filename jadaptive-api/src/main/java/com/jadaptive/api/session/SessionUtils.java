@@ -1,5 +1,7 @@
 package com.jadaptive.api.session;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,7 +24,6 @@ import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.db.SingletonObjectDatabase;
-import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.user.User;
@@ -30,6 +31,46 @@ import com.jadaptive.utils.Utils;
 
 @Component
 public class SessionUtils {
+	
+	@FunctionalInterface
+	public interface IoRunnable {
+		void runIo() throws IOException;
+	}
+
+	public static Closeable scopedIoWithoutSessionTimeout(HttpServletRequest request) throws IOException {
+		var session = request.getSession(false);
+		var was = -1;
+		if(session != null) {
+			was = session.getMaxInactiveInterval();
+			session.setMaxInactiveInterval(0);
+		}
+		var fwas = was;
+		return new Closeable() {
+			@Override
+			public void close() throws IOException {
+				if(session != null) {
+					session.setMaxInactiveInterval(fwas);
+				}
+			}
+		};
+	}
+	
+	public static void runIoWithoutSessionTimeout(HttpServletRequest request, IoRunnable r) throws IOException {
+		var session = request.getSession(false);
+		var was = -1;
+		if(session != null) {
+			was = session.getMaxInactiveInterval();
+			session.setMaxInactiveInterval(0);
+		}
+		try {
+			r.runIo();
+		}
+		finally {
+			if(session != null) {
+				session.setMaxInactiveInterval(was);
+			}
+		}
+	}
 
 	static Logger log = LoggerFactory.getLogger(SessionUtils.class);
 	
@@ -38,7 +79,6 @@ public class SessionUtils {
 	//public static final String AUTHENTICATED_SESSION = "authenticatedSession";
 	
 	public static final String SESSION_ID = "sessionId";
-	public static final String SESSION_COOKIE = "JADAPTIVE_SESSION";
 	
 	public static final String USER_LOCALE = "userLocale";
 	public static final String LOCALE_COOKIE = "JADAPTIVE_LOCALE";
@@ -65,90 +105,10 @@ public class SessionUtils {
 	public User getCurrentUser() {
 		return permissionService.getCurrentUser();
 	}
-	
-	public Session getActiveSession(HttpServletRequest request) {
-		return getActiveSession(request, true);
+
+	public int getTimeout() {
+		return sessionConfig.getObject(SessionConfiguration.class).getTimeout();
 	}
-	
-	public Session getActiveSession(HttpServletRequest request, boolean touchSession) {
-		
-		Session session = null;
-		
-		permissionService.setupSystemContext();
-		
-		try {
-			
-			if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
-				session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
-			} else if(request.getHeader(SESSION_COOKIE) != null) {
-				session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
-			}
-			
-			if(Objects.nonNull(request.getCookies())) {
-				for (Cookie c : request.getCookies()) {
-					if (c.getName().equals(SESSION_COOKIE)) {
-						session = sessionService.getSession(c.getValue());
-						if (session != null) {
-							break;
-						}
-					}
-				}
-			}
-			if(touchSession && session!=null) {
-				if(!sessionService.isLoggedOn(session, true)) {
-					session = null;
-				}
-			}
-			
-		} catch(UnauthorizedException | ObjectNotFoundException e) { 
-
-		} finally {
-			permissionService.clearUserContext();
-		}
-
-		return session;
-	}
-
-	public Session touchSession(HttpServletRequest request,
-			HttpServletResponse response, Session session) {
-
-		sessionService.touch(session);
-		addSessionCookies(request, response, session);
-
-		return session;
-
-	}
-
-	public Session getSession(HttpServletRequest request)
-			throws UnauthorizedException {
-
-		/**
-		 * This method SHOULD NOT touch the session.
-		 */
-		Session session = null;
-		
-		if(request.getParameterMap().containsKey(SESSION_COOKIE)) {
-			session = sessionService.getSession(request.getParameter(SESSION_COOKIE));
-		} else if(request.getHeader(SESSION_COOKIE) != null) {
-			session = sessionService.getSession((String)request.getHeader(SESSION_COOKIE));
-		}
-		
-		if(request.getCookies()!=null) {
-			for (Cookie c : request.getCookies()) {
-				if (c.getName().equals(SESSION_COOKIE)) {
-					session = sessionService.getSession(c.getValue());
-					break;
-				}
-			}
-		}
-		
-		if (session != null && sessionService.isLoggedOn(session, false)) {
-			return session;
-		}
-		
-		throw new UnauthorizedException();
-	}
-
 	
 	public void verifySameSiteRequest(HttpServletRequest request) throws UnauthorizedException {
 		
@@ -251,24 +211,6 @@ public class SessionUtils {
 		
 		return false;
 	}
-
-	public void addSessionCookies(HttpServletRequest request,
-			HttpServletResponse response, Session session) {
-
-		if(Boolean.TRUE.equals(request.getAttribute("processedCookies"))) {
-			return;
-		}
-		
-		Cookie cookie = new Cookie(SESSION_COOKIE, session.getUuid());
-		cookie.setMaxAge((session.getSessionTimeout() > 0 ? 60 * session.getSessionTimeout() : Integer.MAX_VALUE));
-		cookie.setSecure(true);
-		cookie.setHttpOnly(true);
-		cookie.setPath("/");
-		addCookie(cookie, response);
-		
-		request.setAttribute("processedCookies", Boolean.TRUE);
-	
-	}
 	
 	public void addCookie(Cookie cookie, HttpServletResponse response) {
 
@@ -361,27 +303,12 @@ public class SessionUtils {
 
 	}
 
-	public void touchSession(Session session) throws SessionTimeoutException {
-
-		if (!sessionService.isLoggedOn(session, true)) {
-			throw new SessionTimeoutException();
-		}
-	}
-	
-	public void touch(Session session) {
+	public void touch(Session session) throws SessionTimeoutException  {
 		sessionService.touch(session);
 	}
 
-	public boolean hasActiveSession(HttpServletRequest request) {
-		try {
-			return getActiveSession(request)!=null;
-		} catch (ObjectNotFoundException e) {
-			return false;
-		}
-	}
-
 	public User getCurrentUser(HttpServletRequest request) throws UnauthorizedException, SessionTimeoutException {
-		return getSession(request).getUser();
+		return Session.get(request).getUser();
 	}
 
 	public String setupCSRFToken(HttpServletRequest request) {
@@ -408,7 +335,7 @@ public class SessionUtils {
 	}
 	
 	public void setCachable(HttpServletResponse response, int age) {
-		if(!Boolean.getBoolean("jadaptive.development")) {
+		if(!Boolean.getBoolean("jadaptive.development") || Boolean.getBoolean("jadaptive.cachable")) {
 			response.setHeader("Cache-Control", "max-age=" + age + ", must-revalidate");
 		}
 	}

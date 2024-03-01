@@ -21,6 +21,7 @@ import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.user.UserService;
@@ -51,7 +52,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	@Autowired
 	private PageCache pageCache;  
 	
-	Class<T> formClass;
+	private Class<T> formClass;
 	
 	protected AuthenticationPage(Class<T> formClass) {
 		this.formClass = formClass;
@@ -72,13 +73,12 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	@Override
 	protected final void generateContent(Document doc) throws FileNotFoundException {
 		var req = Request.get();
-		try {
-			sessionUtils.getSession(req);
+		var session = Session.getOr(req);
+		if(session.isPresent()) {
 			throw new UriRedirect();
-		} catch (UnauthorizedException e) {
-			
-			doGenerateContent(doc);
 		}
+		
+		doGenerateContent(doc); 
 		
 		if(isUndecorated(req.getSession())) {
 			try {
@@ -128,10 +128,13 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 		try {
 		
-			sessionUtils.verifySameSiteRequest(Request.get());
+			var request = Request.get();
+			
+			sessionUtils.verifySameSiteRequest(request);
 			
 			if(doForm(document, state, form)) {
-				throw new PageRedirect(pageCache.resolvePage(authenticationService.completeAuthentication(state, Optional.of(this))));
+				throw authenticationService.completeAuthentication(state, Optional.of(this)).
+							maybeAttachToSession(request, sessionUtils.getTimeout());
 			}
     	
 			Request.response().setStatus(HttpStatus.FORBIDDEN.value());

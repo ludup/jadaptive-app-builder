@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,6 +31,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.auth.AuthenticationService.LogonCompletedResult;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemSingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
@@ -40,7 +42,6 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.PluginInterceptor;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantService;
@@ -135,7 +136,7 @@ public class SessionFilter implements Filter {
 			postHandle(req, resp);
 			
 		} catch(Throwable e) { 
-			e.printStackTrace();
+			log.error("Filter handling failed.", e);
 			throw e;
 		} finally {
 			tenantService.clearCurrentTenant();
@@ -171,13 +172,12 @@ public class SessionFilter implements Filter {
 	private boolean preHandle(HttpServletRequest request, HttpServletResponse response) throws ServletException {
 		
 		try {
-			
-			Session session = null;
-			
-			try {
-				session = sessionUtils.getSession(request);
-			} catch (UnauthorizedException e) {
+			if(request.getRequestURI().equals("/app/verify")) {
+				/* We do not want this call to access the session */
+				return true;
 			}
+			
+			var sessionOr = Session.getOr(request);
 			
 			/**
 			 * Get the security.properties hierarchy from the web application
@@ -186,13 +186,13 @@ public class SessionFilter implements Filter {
 			
 			if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))
 					&& Objects.nonNull(request.getHeader(HttpHeaders.AUTHORIZATION))) {
-				session = performBasicAuthentication(request, response);
+				sessionOr = performBasicAuthentication(request, response);
 			}
 			
-			if(Objects.isNull(session) && Boolean.parseBoolean(properties.getProperty("authentication.allowAnonymous", "false"))) {
+			if(sessionOr.isEmpty() && Boolean.parseBoolean(properties.getProperty("authentication.allowAnonymous", "false"))) {
 				permissionService.setupSystemContext();
-			} else if(Objects.nonNull(session)) {
-				sessionUtils.touchSession(session);
+			} else if(sessionOr.isPresent()) {
+				var session = sessionOr.get();
 				tenantService.setCurrentTenant(session.getTenant());	
 				permissionService.setupUserContext(session.getUser());
 			} 
@@ -229,7 +229,7 @@ public class SessionFilter implements Filter {
 		return true;
 	}
 
-	private Session performBasicAuthentication(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	private Optional<Session> performBasicAuthentication(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		
 		String[] authorization = request.getHeader(HttpHeaders.AUTHORIZATION).split(" ");
 		if(authorization.length > 1) {
@@ -242,19 +242,19 @@ public class SessionFilter implements Filter {
 				String username = encoded.substring(0, idx);
 				String password = encoded.substring(idx+1);
 				
-				Session session = authenticationService.logonUser(
+				LogonCompletedResult result = authenticationService.logonUser(
 						username, 
 						password, 
 						tenantService.getCurrentTenant(), 
 						Request.getRemoteAddress(), 
 						request.getHeader(HttpHeaders.USER_AGENT));
 				
-				sessionUtils.addSessionCookies(request, response, session);
+				Session.set(request, result);
 				
-				return session;
+				return result.session();
 			}
 		}
-		return null;
+		return Optional.empty();
 	}
 	
 	private boolean checkRedirects(HttpServletRequest request, HttpServletResponse response) throws IOException {

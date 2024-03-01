@@ -6,7 +6,7 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.app.TomcatSSLConfiguration.DefaultSSLConnectorCustomizer;
+import com.jadaptive.app.TomcatConfiguration.DefaultSSLConnectorCustomizer;
 import com.jadaptive.utils.TomcatUtil;
 
 /**

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.auth.AuthenticationService.LogonCompletedResult;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.SessionStatus;
@@ -29,8 +30,6 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionService;
-import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.PageCache;
@@ -46,9 +45,6 @@ public class LogonController {
 	private TenantService tenantService; 
 	
 	@Autowired
-	private SessionUtils sessionUtils;
-	
-	@Autowired
 	private PermissionService permissionService; 
 	
 	@Autowired
@@ -56,9 +52,6 @@ public class LogonController {
 	
 	@Autowired
 	private AuthenticationService authenticationService; 
-	
-	@Autowired
-	private SessionService sessionService; 
 	
 	@Autowired
 	private PageCache pageCache;
@@ -79,13 +72,12 @@ public class LogonController {
 			}
 			
 			
-			
-			Session session = authenticationService.logonUser(username, password,
+			LogonCompletedResult result = authenticationService.logonUser(username, password,
 					tenantService.getCurrentTenant(), 
 					Request.getRemoteAddress(), 
 					request.getHeader(HttpHeaders.USER_AGENT));
 			
-			sessionUtils.addSessionCookies(request, response, session);
+			Session.set(request, result);
 			
 			String homePage = (String) request.getSession().getAttribute(SessionFilter.PRE_LOGON_ORIGINAL_URL);
 			if(Objects.isNull(homePage)) {
@@ -94,7 +86,7 @@ public class LogonController {
 			if(log.isInfoEnabled()) {
 				log.info("Logged user {} on with home {}", username, StringUtils.defaultIfBlank(homePage, "default"));
 			}
-			return new SessionStatus(session, homePage);
+			return new SessionStatus(result.session().get(), homePage);
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("POST api/logon/basic", e);
@@ -111,18 +103,7 @@ public class LogonController {
 	public RequestStatus logoff(HttpServletRequest request, HttpServletResponse response)  {
 
 		try {
-			Session session = sessionUtils.getSession(request);
-			if(session.isClosed()) {
-				return new RequestStatusImpl(false, "Session already closed");
-			}
-			
-			try {
-				request.getSession().invalidate();
-			}
-			finally {
-				sessionService.closeSession(session);
-			}
-			
+			request.getSession().invalidate();
 			return new RequestStatusImpl(true, "Session closed");
 		} catch(UnauthorizedException e) {
 			return new RequestStatusImpl(false, e.getMessage());
@@ -134,9 +115,8 @@ public class LogonController {
 	@ResponseStatus(value=HttpStatus.OK)
 	public RequestStatus touchSession(HttpServletRequest request, HttpServletResponse response)  {
 
-
-		Session session = sessionUtils.getActiveSession(request);
-		if(!sessionService.isLoggedOn(session, true)) {
+		var session = Session.getOr(request);
+		if(session.isEmpty()) {
 			return new RequestStatusImpl(false, "Session closed");
 		}
 		

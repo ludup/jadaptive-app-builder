@@ -1,7 +1,6 @@
 package com.jadaptive.app.session;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -26,9 +24,9 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionConfiguration;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.session.SessionState;
+import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionType;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.session.events.SessionClosedEvent;
@@ -44,10 +42,6 @@ import com.jadaptive.api.user.UserService;
 public class SessionServiceImpl extends AuthenticatedService implements SessionService {
 
 	static Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
-	
-
-	@Autowired
-	private SingletonObjectDatabase<SessionConfiguration> configService;
 	
 	@Autowired
 	private EventService eventService; 
@@ -73,13 +67,10 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Override
 	public Session createSession(Tenant tenant, User user, String remoteAddress, String userAgent, SessionType type, AuthenticationState state) {
 		
-		SessionConfiguration sessionConfig = configService.getObject(SessionConfiguration.class);
-		
 		Session session = new Session();
 		session.setUuid(UUID.randomUUID().toString());
 		session.setRemoteAddress(remoteAddress);
 		session.setType(type);
-		session.setSessionTimeout(sessionConfig.getTimeout());
 		session.setSignedIn(new Date());
 		session.setTenant(tenant);
 		session.setUserAgent(userAgent);
@@ -103,77 +94,11 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	protected Map<String,Session> getCache(Tenant tenant) {
 		return cacheService.getCacheOrCreate(String.format("%s-sessions", tenant.getUuid()), String.class, Session.class);
 	}
-
-	@Override
-	public boolean isLoggedOn(Session session, boolean touch) {
-		
-		setupSystemContext();
-
-		try {
-			
-			if (session.getSignedOut() == null) {
-	
-				if(session.getSessionTimeout() > 0) {
-					Calendar currentTime = Calendar.getInstance();
-					Calendar c = Calendar.getInstance();
-					if(session.getLastUpdated()!=null) {
-						c.setTime(session.getLastUpdated());
-						c.add(Calendar.MINUTE, session.getSessionTimeout());
-					}
-					if (log.isTraceEnabled()) {
-						log.trace("Checking session timeout currentTime="
-								+ currentTime.getTime() + " lastUpdated="
-								+ session.getLastUpdated() + " timeoutThreshold="
-								+ c.getTime());
-					}
-		
-					if (c.before(currentTime) || session.isClosePending()) {
-						
-						/**
-						 * The value passed could have been cached so we
-						 * bring the last value updated back in
-						 */
-						try {
-							Session s = getSession(session.getUuid());
-							if(s.getLastUpdated()!=null) {
-								c.setTime(s.getLastUpdated());
-								c.add(Calendar.MINUTE, s.getSessionTimeout());
-							}
-							
-							if (c.before(currentTime) || session.isClosePending()) {
-								if (log.isDebugEnabled()) {
-									log.debug("Session has timed out");
-								}
-								closeSession(s);
-				
-								if (log.isDebugEnabled()) {
-									log.debug("Session "
-											+ s.getUser().getUsername() + "/"
-											+ s.getUuid() + " is now closed");
-								}
-								
-								return false;
-							}
-						} catch (UnauthorizedException e) {
-							return false;
-						}
-					}
-				}
-				if (touch) {
-					touch(session);
-				}
-				return true;
-			} else {
-				return false;
-			}
-			
-		} finally {
-			clearUserContext();
-		}
-	}
 	
 	@Override
-	public void touch(Session session) {
+	public void touch(Session session) throws SessionTimeoutException {
+		if(session.isClosed())
+			throw new SessionTimeoutException ("Session is closed.");
 		session.setLastUpdated(new Date());
 		getCache(session.getTenant()).put(session.getUuid(), session);
 	}
@@ -184,8 +109,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		log.info("Closing session " + session.getUser().getUsername() + "/"
 				+ session.getUuid() 
 				+ " lastUpdated=" + 
-					(Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : "") 
-						+ " timeout=" + session.getSessionTimeout());
+					(Objects.nonNull(session.getLastUpdated()) ? session.getLastUpdated().toString() : ""));
 		
 		if (session.getSignedOut() != null) {
 			log.error("Attempting to close a session which is already closed!");
@@ -306,11 +230,6 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		
 		getCache(tenant).remove(session.getUuid());
 		
-	}
-
-	@Override
-	public void markClosed(Session session) {
-		session.setClosePending(true);
 	}
 
 }

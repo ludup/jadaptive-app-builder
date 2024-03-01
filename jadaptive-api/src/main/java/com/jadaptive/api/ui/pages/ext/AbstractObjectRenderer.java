@@ -153,12 +153,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			 
 			
 			Element row;
-			Element form = contents.selectFirst("form");
-			if(Objects.isNull(form)) {
-				contents.selectFirst("body").appendChild(form = new Element("form"));
-			}
+			Element form = getForm(contents);
 			
-					
 			form.addClass("jadaptiveForm")
 				.attr("id", "objectForm")
 				.attr("method", "POST")
@@ -183,14 +179,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			 			.attr("name", "hidden")
 						.val(Objects.nonNull(object) ?  String.valueOf(object.isHidden()) : "false")));
 				
-			Session session = sessionUtils.getActiveSession(Request.get());
-			if(Objects.nonNull(session)) {
+			Session.getOr().ifPresent(session -> {
 				form.appendChild(Html.input("hidden", 
 						SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
 							sessionUtils.setupCSRFToken(Request.get()))
 							.attr("id", "csrftoken"));
-						
-			}
+			});
 			
 			sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
 			
@@ -240,6 +234,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			childObjects.remove();
 		}
     }
+
+	private Element getForm(Document contents) {
+		Element form = contents.selectFirst("form");
+		if(Objects.isNull(form)) {
+			contents.selectFirst("body").appendChild(form = new Element("form"));
+		}
+		return form;
+	}
 
 	protected abstract String getActionURL();
 

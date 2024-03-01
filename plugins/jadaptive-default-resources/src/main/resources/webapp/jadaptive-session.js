@@ -23,14 +23,16 @@ $.ajaxSetup({
 
 
 var verifySession = function() {
-	$.getJSON('/app/verify', function(data) {
-		if(!data.success) {
-			if(!window.location.pathname.startsWith('/app/ui/login')) {
-				window.location = '/app/ui/login';
-			}
-		} else {
-			setTimeout(verifySession, 10000);
+	$.ajax({
+		url: '/app/verify'
+	}).done(function() {
+		setTimeout(verifySession, 10000);
+	}).fail(function(xhr) {
+		if(xhr.status == 410 && !window.location.pathname.startsWith('/app/ui/login')) {
+			window.location = '/app/ui/login';
 		}
+		else
+			setTimeout(verifySession, 10000);
 	});
 };
 

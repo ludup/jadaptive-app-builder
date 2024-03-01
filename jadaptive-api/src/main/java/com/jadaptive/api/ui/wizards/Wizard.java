@@ -20,7 +20,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.Session;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.ModalPage;
@@ -49,15 +49,12 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	private ClassLoaderService classService; 
 	
 	@Autowired
-	private SessionUtils sessionUtils;
-	
-	@Autowired
 	private PermissionService permissionService; 
 	
-	String resourceKey;
-	WizardState state;
+	private String resourceKey;
+	private WizardState state;
 	
-	static ThreadLocal<WizardState> currentState = new ThreadLocal<>();
+	private static ThreadLocal<WizardState> currentState = new ThreadLocal<>();
 	
 	public WizardState getState() {
 		return state;
@@ -66,7 +63,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
 		super.beforeProcess(uri, request, response);
 		state = wizardService.getWizard(resourceKey).getState(request);
-		if(state.getFlow().requiresUserSession() && !sessionUtils.hasActiveSession(Request.get())) {
+		if(state.getFlow().requiresUserSession() && Session.getOr(request).isEmpty()) {
 			throw new AccessDeniedException();
 		}
 

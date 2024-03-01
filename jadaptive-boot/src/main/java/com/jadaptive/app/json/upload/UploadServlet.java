@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -25,8 +26,6 @@ import org.springframework.http.HttpStatus;
 
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionStickyInputStream;
-import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.ResponseHelper;
 import com.jadaptive.api.upload.UploadHandler;
@@ -79,15 +78,15 @@ public class UploadServlet extends HttpServlet {
 			ResponseHelper.send404NotFound(uri, req, resp);
 			return;
 		}
-		Session session = sessionUtils.getActiveSession(req);
+		Optional<Session> session = Session.getOr(req);
 		
 		if(handler.isSessionRequired() && Objects.isNull(session)) {
 			ResponseHelper.send403Forbidden(req, resp);
 			return;
 		}
 		
-		if(Objects.nonNull(session)) {
-			permissionService.setupUserContext(session.getUser());
+		if(session.isPresent()) {
+			permissionService.setupUserContext(session.get().getUser());
 		}
 
 		Map<String,String> parameters = new HashMap<>();
@@ -112,29 +111,11 @@ public class UploadServlet extends HttpServlet {
 				    if(StringUtils.isBlank(item.getName())) {
 				    	continue;
 				    }
-				    
-				    InputStream stream = item.openStream();
-				    
-				    if(Objects.nonNull(session)) {
-					    stream = new SessionStickyInputStream(
-					    		stream, 
-					    		session) {
-					    	protected void touchSession(Session session) throws IOException {
-								if((System.currentTimeMillis() - lastTouch) >  30000) {
-									try {
-										sessionUtils.touchSession(session);
-									} catch (SessionTimeoutException e) {
-										throw new IOException(e.getMessage(), e);
-									}
-								}
-							}
-					    };
-				    }
-		
-				    try {
-				    	handler.handleUpload(handlerName, uri, parameters, item.getName(), stream);    
-				    } finally {
-				    	stream.close();
+
+			    	try(var scope = SessionUtils.scopedIoWithoutSessionTimeout(req)) {
+			    		try(InputStream stream = item.openStream()) {
+					    	handler.handleUpload(handlerName, uri, parameters, item.getName(), stream);
+				    	}
 				    }
 			    }
 			    

@@ -11,16 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.user.User;
 
 public abstract class AuthenticatedPage extends HtmlPage {
 
-	@Autowired
-	private SessionUtils sessionUtils;
-	
 	@Autowired
 	private PermissionService permissionService;
 	
@@ -30,16 +25,13 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	@Autowired
 	private AuthenticationService authenticationService;
 	
-	ThreadLocal<Session> currentSession = new ThreadLocal<>();
-
 	@Override
 	public void onCreate() throws FileNotFoundException {
 		super.onCreate();
 	}
 
-	public static void redirectIfLoginNeeded(PageCache pageCache, AuthenticationService authenticationService, SessionUtils sessionUtils) throws FileNotFoundException {
-		var request = Request.get();
-		if(!sessionUtils.hasActiveSession(request)) {
+	public static void redirectIfLoginNeeded(PageCache pageCache, AuthenticationService authenticationService, HttpServletRequest request) throws FileNotFoundException {
+		if(Session.getOr(request).isEmpty()) {
 			var reqUrl = request.getRequestURL();
 			var query = request.getQueryString();
 			if(query != null) {
@@ -56,10 +48,9 @@ public abstract class AuthenticatedPage extends HtmlPage {
 			throws FileNotFoundException {
 		super.beforeProcess(uri, request, response);
 		
-		redirectIfLoginNeeded(pageCache, authenticationService, sessionUtils);
+		redirectIfLoginNeeded(pageCache, authenticationService, request);
 		
-		var session = sessionUtils.getActiveSession(Request.get());
-		currentSession.set(session);
+		var session = Session.get(request);
 		
 		if((session == null || !session.getTenant().isSystem()) && isSystem()) {
 			throw new FileNotFoundException();
@@ -68,12 +59,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 
 	@Override
 	public final void generateContent(Document document) throws IOException {
-		
-		try {
-			generateAuthenticatedContent(document);			
-		} finally {
-			currentSession.remove();
-		}
+		generateAuthenticatedContent(document);			
 	}
 
 	@Override

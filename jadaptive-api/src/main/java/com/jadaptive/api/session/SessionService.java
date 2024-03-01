@@ -9,11 +9,9 @@ public interface SessionService extends UUIDObjectService<Session> {
 
 	public static final String SESSION_USAGE = "sessionTimeMs";
 	
-	boolean isLoggedOn(Session session, boolean touch);
-
 	void closeSession(Session session);
 
-	void touch(Session session);
+	void touch(Session session) throws SessionTimeoutException;
 
 	Session getSession(String uuid) throws UnauthorizedException;
 
@@ -24,7 +22,5 @@ public interface SessionService extends UUIDObjectService<Session> {
 	void impersonate(Tenant tenant, Session session);
 
 	void unimpersonate(Session session);
-
-	void markClosed(Session session);
 
 }

@@ -1,14 +1,10 @@
 package com.jadaptive.api.ui.pages.user;
 
-import java.util.Objects;
-
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.FormProcessor;
@@ -26,9 +22,6 @@ import com.jadaptive.api.user.UserService;
 public class ChangeMyPassword extends AuthenticatedPage implements FormProcessor<PasswordForm>{
 
 	@Autowired
-	private SessionUtils sessionUtils;
-	
-	@Autowired
 	private UserService userService;
 	
 	@Override
@@ -37,10 +30,7 @@ public class ChangeMyPassword extends AuthenticatedPage implements FormProcessor
 	}
 
 	public void processForm(Document document, PasswordForm form) {
-		Session session = sessionUtils.getActiveSession(Request.get());
-		if(Objects.isNull(session)) {
-			
-		}
+		Session session = Session.get();
 		User user = session.getUser();
 		
 		if(!userService.verifyPassword(user, form.getCurrentPassword().toCharArray())) {

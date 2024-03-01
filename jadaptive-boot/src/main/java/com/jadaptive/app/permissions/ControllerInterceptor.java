@@ -14,7 +14,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.jadaptive.api.permissions.AuthenticatedContext;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.session.Session;
 import com.jadaptive.api.ui.Redirect;
 
 public class ControllerInterceptor implements HandlerInterceptor {
@@ -23,9 +23,6 @@ public class ControllerInterceptor implements HandlerInterceptor {
 	
 	@Autowired
 	private PermissionService permissionService; 
-	
-	@Autowired
-	private SessionUtils sessionUtils;
 	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -40,7 +37,7 @@ public class ControllerInterceptor implements HandlerInterceptor {
 				checkMethod(method);
 
 				var contrl = (AuthenticatedController) method.getBean();
-				if (acAnnotation.preferActive() && sessionUtils.hasActiveSession(request)) {
+				if (acAnnotation.preferActive() && Session.getOr(request).isPresent()) {
 					if (acAnnotation.system())
 						contrl.setupSystemContext();
 					else

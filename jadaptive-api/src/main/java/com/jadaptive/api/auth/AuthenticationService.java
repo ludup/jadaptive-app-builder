@@ -1,7 +1,12 @@
 package com.jadaptive.api.auth;
 
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
 
 import org.jsoup.nodes.Document;
 
@@ -13,7 +18,44 @@ import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.user.User;
 
 public interface AuthenticationService {
+	
+	public abstract class LogonCompletedResult implements HttpSessionBindingListener, Closeable {
+		private Optional<Session> session;
+		
+		public LogonCompletedResult(Optional<Session> session) {
+			super();
+			this.session = session;
+		}
+		
+		public Optional<Session> session() {
+			return session;
+		}
+		
+	    public final void valueUnbound(HttpSessionBindingEvent event) {
+	    	close();
+	    }
+	    
+	    public abstract void close();
+	}
+	
+	public abstract class AuthenticationCompletedResult extends LogonCompletedResult {
+		private Redirect page;
+		
+		public AuthenticationCompletedResult(Redirect page, Optional<Session> session) {
+			super(session);
+			this.page = page;
+		}
 
+		public Redirect maybeAttachToSession(HttpServletRequest request, int timeoutMinutes) {
+			session().ifPresent(session -> { 
+				Session.set(request, AuthenticationCompletedResult.this);
+				request.getSession().setMaxInactiveInterval(timeoutMinutes * 60);
+			});
+			return page;
+		}
+		
+	}
+	
 	public static final String USER_LOGIN_PERMISSION =  "users.login";
 	public static final String ALTERNATIVE_PASSWORD = "alternativePassword";
 	public static final String AUTHENTICATION_STATE_ATTR = "authenticationState";
@@ -22,11 +64,11 @@ public interface AuthenticationService {
 	
 	public static final String PASSWORD_MODULE_UUID = "b76a4b67-ac70-45c2-95ca-9d7e14b3f695";
 	
-	Session logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent);
+	LogonCompletedResult logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent);
 
 	AuthenticationState getCurrentState() throws FileNotFoundException;
 
-	Class<? extends Page> completeAuthentication(AuthenticationState state, Optional<Page> page);
+	AuthenticationCompletedResult completeAuthentication(AuthenticationState state, Optional<Page> page);
 
 	Class<? extends Page> resetAuthentication(@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
 

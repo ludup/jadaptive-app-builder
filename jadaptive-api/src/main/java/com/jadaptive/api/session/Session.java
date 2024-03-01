@@ -1,12 +1,19 @@
 package com.jadaptive.api.session;
+import java.text.MessageFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jadaptive.api.auth.AuthenticationService.LogonCompletedResult;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -21,6 +28,34 @@ import com.jadaptive.api.user.User;
 @ObjectServiceBean(bean = SessionService.class)
 @TableView(defaultColumns = { "user", "signedIn", "remoteAddress", "type", "state", "userAgent"})
 public class Session extends AbstractUUIDEntity {
+	
+	public final static void set(HttpServletRequest request, LogonCompletedResult result) {
+		request.getSession().setAttribute(Session.class.getName(), result.session().get());
+		request.getSession().setAttribute(LogonCompletedResult.class.getName(), result);
+	}
+	
+	public final static Session get() {
+		return get(Request.get());
+	}
+
+	public final static Session get(HttpServletRequest req) {
+		return get(req.getSession(false));
+	}
+	
+	public final static Session get(HttpSession session) {
+		return getOr(session).orElseThrow(() -> new UnauthorizedException(MessageFormat.format("No current {0} in the {1}", Session.class.getName(), HttpSession.class.getName())));
+	}
+
+	public final static Optional<Session> getOr() {
+		return getOr(Request.get());
+	}
+
+	public final static Optional<Session> getOr(HttpServletRequest req) {
+		return getOr(req.getSession(false));
+	}
+	public final static Optional<Session> getOr(HttpSession session) {
+		return Optional.ofNullable(session == null ? null : (Session)session.getAttribute(Session.class.getName()));
+	}
 
 	private static final long serialVersionUID = -3842259533277443038L;
 
@@ -53,10 +88,6 @@ public class Session extends AbstractUUIDEntity {
 	@Validator(type = ValidationType.REQUIRED)
 	String userAgent;
 	
-	@ObjectField(type = FieldType.INTEGER)
-	@Validator(type = ValidationType.REQUIRED)
-	Integer sessionTimeout;
-	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = User.RESOURCE_KEY, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
 	User user;
@@ -66,7 +97,6 @@ public class Session extends AbstractUUIDEntity {
 	User impersonatingUser;
 	Tenant impersontatingTenant;
 	Map<String,Object> attrs = new HashMap<>();
-	boolean closePending = false;
 	
 	public Session() {
 
@@ -134,14 +164,6 @@ public class Session extends AbstractUUIDEntity {
 
 	public void setUserAgent(String userAgent) {
 		this.userAgent = userAgent;
-	}
-
-	public Integer getSessionTimeout() {
-		return sessionTimeout;
-	}
-
-	public void setSessionTimeout(Integer sessionTimeout) {
-		this.sessionTimeout = sessionTimeout;
 	}
 
 	public User getUser() {
@@ -214,13 +236,5 @@ public class Session extends AbstractUUIDEntity {
 	
 	public Map<String,Object> getAttributes() {
 		return attrs;
-	}
-
-	public boolean isClosePending() {
-		return closePending;
-	}
-
-	public void setClosePending(boolean closePending) {
-		this.closePending = closePending;
 	}
 }

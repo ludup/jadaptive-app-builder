@@ -1,7 +1,6 @@
 package com.jadaptive.api.events;
 
 import java.util.Date;
-import java.util.Objects;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
@@ -15,7 +14,6 @@ import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.UUIDEvent;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
@@ -119,19 +117,17 @@ public class SystemEvent extends UUIDEvent {
 	private void attachSession() {
 		if(Request.isAvailable()) {
 			this.ipAddress = Request.isAvailable() ? Request.getRemoteAddress() : null;
-			Session session = ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).getActiveSession(Request.get(), false);
-			if(Objects.nonNull(session)) {
+			Session.getOr().ifPresentOrElse(session -> {
 				this.name = session.getUser().getName();
 				this.username = session.getUser().getUsername();
-			} else {
+			}, () -> {
 				PermissionService permissionService = ApplicationServiceImpl.getInstance().getBean(PermissionService.class);
 				if(permissionService.hasUserContext()) {
 					User user = permissionService.getCurrentUser();
 					this.name = user.getName();
 					this.username = user.getUsername();
 				}
-				
-			}
+			});
 		}
 	}
 
