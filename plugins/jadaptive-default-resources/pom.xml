@@ -28,6 +28,46 @@
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
+        <dependency> 
+            <groupId>npm</groupId>
+            <artifactId>bootstrap-table</artifactId>
+            <version>1.22.1</version>
+        </dependency>
+        <dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>bootbox</artifactId>
+		    <version>6.0.0</version>
+		</dependency>
+        <dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>bootstrap</artifactId>
+		    <version>5.2.2</version>
+		</dependency>
+        <dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>codemirror</artifactId>
+		    <version>5.65.16</version>
+		</dependency>
+        <dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>jquery</artifactId>
+		    <version>3.6.3</version>
+		</dependency>
+        <dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>jquery-ui</artifactId>
+		    <version>1.12.1</version>
+		</dependency>
+        <dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>bootswatch</artifactId>
+		    <version>5.3.3</version>
+		</dependency>
+        <dependency>
+		    <groupId>npm.fortawesome</groupId>
+		    <artifactId>fontawesome-free</artifactId>
+		    <version>6.5.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -51,4 +91,11 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<repositories>
+		<repository>
+		    <id>npm2mvn</id>
+		    <url>https://npm2mvn.jadaptive.com</url>
+		</repository>
+	</repositories>
 </project>
