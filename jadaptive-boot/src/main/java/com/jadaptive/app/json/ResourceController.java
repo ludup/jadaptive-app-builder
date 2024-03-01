@@ -5,15 +5,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
@@ -77,6 +78,11 @@ public class ResourceController extends ExceptionHandlingController {
 				return;
 			}
 			
+			if(resourceUri.startsWith("/npm2mvn/")) {
+				resolveNpm(uri, resourceUri.substring(8), request, response);
+				return;
+			}
+			
 			Path resource = resolveResource(request, resourceUri);
 			
 			if(Files.exists(resource) && Files.isDirectory(resource) && !uri.endsWith("/")) {
@@ -125,17 +131,19 @@ public class ResourceController extends ExceptionHandlingController {
 
 	private void tryClasspathFailover(HttpServletRequest request, HttpServletResponse response, String uri) throws FileNotFoundException, IOException {
 		
-		InputStream in = getClass().getClassLoader().getResourceAsStream("webapp" + uri);
-
-		if(Objects.nonNull(in)) {
-			if(log.isDebugEnabled()) {
-				log.debug("Returning content from InputStream for webapp{}", uri);
+		URL url = getClass().getClassLoader().getResource("webapp" + uri);
+		if(url != null) {
+			URLConnection conx = url.openConnection();
+			try(InputStream in = conx.getInputStream()) {
+				if(log.isDebugEnabled()) {
+					log.debug("Returning content from InputStream for webapp{}", uri);
+				}
+				
+				sessionUtils.setCachable(response, 600);
+				
+				ResponseHelper.sendContent(in, conx.getContentLengthLong(), getContentType(uri), request, response);
+				return;
 			}
-			
-			sessionUtils.setCachable(response, 600);
-			
-			ResponseHelper.sendContent(IOUtils.toString(in, "UTF-8"), getContentType(uri), request, response);
-			return;
 		}
 		
 		if(log.isDebugEnabled()) {
@@ -323,6 +331,69 @@ public class ResourceController extends ExceptionHandlingController {
 	}
 
 
-	
+	private void resolveNpm(String uri, String resourceUri, HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String[] parts = resourceUri.split("/");
+		String version = parts[3];
+		PluginWrapper plugin = null;
+		if(version.equals("current")) {
+			InputStream in = getClass().getClassLoader().getResourceAsStream("META-INF/LOCATOR." + parts[1] + "." + parts[2] + ".properties");
+			if(in == null) {
+				for(PluginWrapper w : pluginManager.getPlugins()) {
+					in = w.getPluginClassLoader().getResourceAsStream("META-INF/LOCATOR." + parts[1] + "." + parts[2] + ".properties");
+					if(in != null) {
+						plugin = w;
+						break;
+					}
+				}
+				if(in == null)
+					throw new FileNotFoundException();
+			}
+			try {
+				Properties properties = new Properties();
+				properties.load(in);
+				version = properties.getProperty("version");
+				if(version == null) {
+					throw new FileNotFoundException();
+				}
+				parts[3] = version;
+				resourceUri =  String.join("/", parts);
+			}
+			finally {
+				in.close();
+			}
+		}
+		URL url = null;
+		if(plugin == null) {
+			for(PluginWrapper w : pluginManager.getPlugins()) {
+				URL thisUrl = w.getPluginClassLoader().getResource("npm2mvn/" + FileUtils.checkStartsWithNoSlash(resourceUri));
+				if(thisUrl != null) {
+					url = thisUrl;
+					break;
+				}
+			}
+			
+		}
+		else {
+			url = plugin.getPluginClassLoader().getResource("npm2mvn/" + FileUtils.checkStartsWithNoSlash(resourceUri));
+		}
+		
+		if(url == null) {
+			throw new FileNotFoundException();
+		}
+		else {
+			URLConnection conx = url.openConnection();
+			try(InputStream in = conx.getInputStream()) {
+				if(log.isDebugEnabled()) {
+					log.debug("Returning content from InputStream for webapp{}", uri);
+				}
+				
+				sessionUtils.setCachable(response, 600);
+				
+				ResponseHelper.sendContent(in, conx.getContentLengthLong(), getContentType(uri), request, response);
+				return;
+			}
+		}
+		
+	}
 
 }
