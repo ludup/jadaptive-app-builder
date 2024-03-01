@@ -14,8 +14,8 @@ public class Codemirror extends AbstractPageExtension {
 	@Override
 	public void process(Document document, Element element, Page page) {
 		
-		PageHelper.appendHeadScript(document, "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.1/codemirror.min.js");
-		PageHelper.appendStylesheet(document, "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.1/codemirror.min.css");
+		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.js");
+		PageHelper.appendStylesheet(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.css");
 				
 	}
 

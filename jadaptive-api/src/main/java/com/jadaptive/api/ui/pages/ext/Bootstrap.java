@@ -35,8 +35,8 @@ public class Bootstrap extends AbstractPageExtension {
 	
 		if(Objects.isNull(runtimePathJs)) {
 			
-			runtimePathJs = "/app/content/bootstrap-5.2.2-dist/js/bootstrap.bundle.min.js";
-			runtimePathCss = "/app/content/bootstrap-5.2.2-dist/css/bootstrap.min.css";
+			runtimePathJs = "/app/content/npm2mvn/npm/bootstrap/current/js/bootstrap.bundle.min.js";
+			runtimePathCss = "/app/content/npm2mvn/npm/bootstrap/current/css/bootstrap.min.css";
 			
 			Collection<Class<?>> classes = classService.resolveAnnotatedClasses(EnableBootstrapTheme.class);
 			if(!classes.isEmpty()) {
@@ -49,15 +49,15 @@ public class Bootstrap extends AbstractPageExtension {
 							"webapp" + a.path());
 					
 					if(themePath.exists()) {
-						runtimePathJs = "/app/content/" + FileUtils.checkStartsWithNoSlash(FileUtils.checkEndsWithSlash(a.path())) + "js/bootstrap.bundle.min.js";
-						runtimePathCss = "/app/content/" + FileUtils.checkStartsWithNoSlash(FileUtils.checkEndsWithSlash(a.path())) + "css/bootstrap.min.css"; 
+						runtimePathJs = "/app/content/npm2mvn/npm/" + FileUtils.checkStartsWithNoSlash(FileUtils.checkEndsWithSlash(a.path())) + "js/bootstrap.bundle.min.js";
+						runtimePathCss = "/app/content/npm2mvn/npm/" + FileUtils.checkStartsWithNoSlash(FileUtils.checkEndsWithSlash(a.path())) + "css/bootstrap.min.css"; 
 					}
 				}
 			}
 		}
 		
 		PageHelper.appendHeadScript(document, runtimePathJs, false, "bootstrapEnabled");
-		PageHelper.appendHeadScript(document, "/app/content/bootbox/bootbox.all.min.js");
+		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/bootbox/current/bootbox.all.min.js");
 		PageHelper.appendStylesheet(document, runtimePathCss, "bootstrapCss");
 		PageHelper.appendStylesheet(document, runtimePathCss, "printBootstrap", "print");
 

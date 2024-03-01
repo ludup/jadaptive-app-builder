@@ -13,10 +13,10 @@ public class BootstrapTable extends AbstractPageExtension {
 
 	@Override
 	public void process(Document document, Element element, Page page) {
-		PageHelper.appendHeadScript(document, "/app/content/bootstrap-table/bootstrap-table.min.js");
-		PageHelper.appendHeadScript(document, "/app/content/bootstrap-table/extensions/mobile/bootstrap-table-mobile.min.js");
+		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/bootstrap-table/current/bootstrap-table.min.js");
+		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/bootstrap-table/current/extensions/mobile/bootstrap-table-mobile.min.js");
 
-		PageHelper.appendStylesheet(document, "/app/content/bootstrap-table/bootstrap-table.min.css");
+		PageHelper.appendStylesheet(document, "/app/content/npm2mvn/npm/bootstrap-table/current/bootstrap-table.min.css");
 	}
 
 	@Override

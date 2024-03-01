@@ -13,8 +13,8 @@ public class JQueryUI extends AbstractPageExtension {
 
 	@Override
 	public void process(Document document, Element element, Page page) {
-		PageHelper.appendStylesheet(document, "/app/content/jquery/jquery-ui.min.css");
-		PageHelper.appendHeadScript(document, "/app/content/jquery/jquery-ui.min.js");
+		PageHelper.appendStylesheet(document, "/app/content/npm2mvn/npm/jquery/current/jquery-ui.min.css");
+		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/jquery/current/jquery-ui.min.js");
 	}
 
 	@Override

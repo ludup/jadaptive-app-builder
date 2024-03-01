@@ -17,7 +17,7 @@ import com.jadaptive.api.ui.PageHelper;
 @Component
 public class Fontawesome extends AbstractPageExtension {
 
-	final String free = "/app/content/fontawesome-free-6.4.0-web/css/all.css";
+	final String free = "/app/content/npm2mvn/npm.fortawesome/fontawesome-free/current/css/all.css";
 	final String pro = "/app/content/fontawesome-pro-6.4.0-web/css/all.css";
 	boolean isPro = false;
 	String iconSet = "fa-solid";

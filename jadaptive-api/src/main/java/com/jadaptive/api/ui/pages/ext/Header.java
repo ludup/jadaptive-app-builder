@@ -18,9 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.product.ProductService;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.CustomizablePage;
 import com.jadaptive.api.ui.ModalPage;
@@ -41,10 +39,7 @@ public class Header extends AbstractPageExtension {
 	private ApplicationMenuService menuService;
 	
 	@Autowired
-	private ProductService productService; 
-	
-	@Autowired
-	private SessionUtils sessionUtils;
+	private ProductService productService;
 	
 	@Override
 	public void process(Document document, Element element, Page page) {
@@ -172,9 +167,7 @@ public class Header extends AbstractPageExtension {
 					.attr("rel", "icon");
 		}
 		
-		boolean loggedIn = sessionUtils.hasActiveSession(Request.get());
-		if(loggedIn) {
-			
+		Session.getOr().ifPresent(session -> {
 			document.selectFirst("#headerActions").appendChild(new Element("div")
 					.addClass("float-end me-3")
 					.appendChild(new Element("div")
@@ -183,7 +176,6 @@ public class Header extends AbstractPageExtension {
 								.attr("href", "/app/ui/logoff")
 								.addClass("text-light fa-solid fa-sign-out-alt text-decoration-none"))));
 			
-			Session session = sessionUtils.getActiveSession(Request.get());
 			if(session.isImpersontating()) {
 				document.selectFirst("#headerActions").appendChild(new Element("div")
 						.addClass("float-end me-3")
@@ -193,8 +185,7 @@ public class Header extends AbstractPageExtension {
 									.attr("href", "/app/ui/revert-impersonation")
 									.addClass("text-light fa-solid fa-person text-decoration-none"))));
 			}
-		}
-
+		});
 	}
 
 	@Override

@@ -13,7 +13,7 @@ public class JQuery extends AbstractPageExtension {
 
 	@Override
 	public void process(Document document, Element element, Page page) {
-		PageHelper.appendHeadScript(document, "/app/content/jquery/jquery-3.6.3.min.js");
+		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/jquery/current/jquery.min.js");
 	}
 
 	@Override

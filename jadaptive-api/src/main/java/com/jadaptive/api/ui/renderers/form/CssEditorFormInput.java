@@ -25,10 +25,10 @@ public class CssEditorFormInput extends FieldInputRender {
 	public void renderInput(Element rootElement, String value, String... classes) throws IOException {
 
 
-		PageHelper.appendHeadScript(document, "/app/content/codemirror/lib/codemirror.js");
-		PageHelper.appendHeadScript(document, "/app/content/codemirror/addon/display/autorefresh.js");
-		PageHelper.appendHeadScript(document, "/app/content/codemirror/mode/css/css.js");
-		PageHelper.appendStylesheet(document, "/app/content/codemirror/lib/codemirror.css");
+		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.js");
+		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/addon/display/autorefresh.js");
+		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/mode/css/css.js");
+		PageHelper.appendStylesheet(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.css");
 				
 		Element input;
 		rootElement.appendChild(new Element("div")
