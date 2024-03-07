@@ -60,15 +60,20 @@ public class WizardController extends AuthenticatedController {
 			UnauthorizedException, SessionTimeoutException, FileNotFoundException {
 
 			WizardState state = wizardService.getWizard(resourceKey).getState(request);
-			while(!state.isFinished()) {
-				WizardSection section = state.moveNext();
-				if(!section.isHidden()) {
-					state.incrementStep();
-					throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
+			Wizard.setCurrentState(state);
+			try {
+				while(!state.isFinished()) {
+					WizardSection section = state.moveNext();
+					if(!section.isHidden()) {
+						state.incrementStep();
+						throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
+					}
 				}
+				
+				throw new PageRedirect(state.getCompletePage());
+			} finally {
+				Wizard.clearCurrentState();
 			}
-			
-			throw new PageRedirect(state.getCompletePage());
 			
 	}
 	
@@ -81,7 +86,8 @@ public class WizardController extends AuthenticatedController {
 			UnauthorizedException, SessionTimeoutException, FileNotFoundException {
 
 			WizardState state = wizardService.getWizard(resourceKey).getState(request);
-			
+			Wizard.setCurrentState(state);
+			try {
 			while(!state.isStartPage()) {
 				WizardSection section = state.moveBack();
 				if(!section.isHidden()) {
@@ -91,6 +97,9 @@ public class WizardController extends AuthenticatedController {
 			
 			state.decrementStep();
 			throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
+			} finally {
+				Wizard.clearCurrentState();
+			}
 	}
 	
 	@RequestMapping(value = "/app/api/wizard/finish/{resourceKey}", method = { RequestMethod.POST, RequestMethod.GET }, produces = { "application/json" })

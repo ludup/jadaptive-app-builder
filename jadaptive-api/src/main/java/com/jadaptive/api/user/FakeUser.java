@@ -16,10 +16,10 @@ public class FakeUser extends User {
 		return true;
 	}
 
-	@Override
-	public Boolean isHidden() {
-		return true;
-	}
+//	@Override
+//	public Boolean isHidden() {
+//		return true;
+//	}
 
 	@Override
 	public void setUuid(String string) {

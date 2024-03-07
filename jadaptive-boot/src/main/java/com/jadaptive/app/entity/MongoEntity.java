@@ -68,7 +68,7 @@ public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 			}
 		}
 		setSystem((Boolean)document.getOrDefault("system", Boolean.FALSE));
-		setHidden((Boolean)document.getOrDefault("hidden", Boolean.FALSE));
+		//setHidden((Boolean)document.getOrDefault("hidden", Boolean.FALSE));
 		if(!Objects.isNull(parent)) {
 			parent.addChild(resourceKey, this);
 		}
@@ -138,11 +138,11 @@ public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 		super.setSystem(system);
 	}
 
-	@Override
-	public void setHidden(Boolean hidden) {
-		document.put("hidden",  hidden);
-		super.setHidden(hidden);
-	}
+//	@Override
+//	public void setHidden(Boolean hidden) {
+//		document.put("hidden",  hidden);
+//		super.setHidden(hidden);
+//	}
 
 	@Override
 	public Object getValue(String fieldName) {

@@ -46,8 +46,8 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	@ObjectField(type = FieldType.BOOL)
 	boolean collection;
 	
-//	@ObjectField(type = FieldType.BOOL)
-//	boolean required;
+	@ObjectField(type = FieldType.BOOL)
+	boolean hidden;
 	
 	@ObjectField(type = FieldType.BOOL)
 	boolean manuallyEncrypted;
@@ -264,6 +264,14 @@ public class FieldTemplate extends TemplateUUIDEntity {
 
 	public String getParentKey() {
 		return parentKey;
+	}
+
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	public void setHidden(boolean hidden) {
+		this.hidden = hidden;
 	}
 
 	public void setParentKey(String parentKey) {

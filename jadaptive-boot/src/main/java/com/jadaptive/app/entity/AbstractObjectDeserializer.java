@@ -108,7 +108,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		}
 		
 		e.setSystem(getBooleanNodeValue(node, "system"));
-		e.setHidden(getBooleanNodeValue(node, "hidden"));
+		//e.setHidden(getBooleanNodeValue(node, "hidden"));
 		
 		iterateFields(node, template.getFields(), e);
 		

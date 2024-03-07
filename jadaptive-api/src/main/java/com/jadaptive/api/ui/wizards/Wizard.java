@@ -78,6 +78,14 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	public static WizardState getCurrentState() {
 		return currentState.get();
 	}
+	
+	public static void setCurrentState(WizardState state) {
+		currentState.set(state);
+	}
+	
+	public static void clearCurrentState() {
+		currentState.remove();
+	}
 
 	public Class<?> getResourceClass() {
 		return Wizard.class;

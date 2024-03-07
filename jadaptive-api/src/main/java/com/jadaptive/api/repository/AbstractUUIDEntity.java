@@ -49,13 +49,13 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 		this.system = system;
 	}
 
-	public Boolean isHidden() {
-		return hidden==null ? Boolean.FALSE : hidden;
-	}
-
-	public void setHidden(Boolean hidden) {
-		this.hidden = hidden;
-	}
+//	public Boolean isHidden() {
+//		return hidden==null ? Boolean.FALSE : hidden;
+//	}
+//
+//	public void setHidden(Boolean hidden) {
+//		this.hidden = hidden;
+//	}
 
 	public boolean isSummarise() {
 		return summarise;

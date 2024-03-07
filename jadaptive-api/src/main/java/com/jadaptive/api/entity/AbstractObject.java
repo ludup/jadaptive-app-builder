@@ -24,7 +24,7 @@ public interface AbstractObject extends UUIDDocument {
 
 	Map<String, Object> getDocument();
 
-	Boolean isHidden();
+//	Boolean isHidden();
 
 	Collection<AbstractObject> getObjectCollection(String resourceKey);
 
@@ -32,7 +32,7 @@ public interface AbstractObject extends UUIDDocument {
 
 	void setSystem(Boolean val);
 
-	void setHidden(Boolean val);
+//	void setHidden(Boolean val);
 
 	Map<String, AbstractObject> getChildren();
 

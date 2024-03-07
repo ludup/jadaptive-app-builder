@@ -58,7 +58,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		gen.writeStringField("uuid", value.getUuid());
 		gen.writeStringField("resourceKey", value.getResourceKey());
 		gen.writeBooleanField("system", value.isSystem());
-		gen.writeBooleanField("hidden", value.isHidden());
+		//gen.writeBooleanField("hidden", value.isHidden());
 
 		writeFields(gen, template.getFields(), value);
 
@@ -81,7 +81,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		gen.writeStringField("uuid", value.getUuid());
 		gen.writeStringField("resourceKey", value.getResourceKey());
 		gen.writeBooleanField("system", value.isSystem());
-		gen.writeBooleanField("hidden", value.isHidden());
+		//gen.writeBooleanField("hidden", value.isHidden());
 
 		writeFields(gen, template.getFields(), value);
 

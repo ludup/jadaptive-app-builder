@@ -278,10 +278,10 @@ public class DocumentHelper {
 		if(Objects.nonNull(system)) {
 			obj.setSystem(Boolean.valueOf(system));
 		}
-		String hidden = getParameter(parameters, formVariablePrefix + "hidden");
-		if(Objects.nonNull(hidden)) {
-			obj.setHidden(Boolean.valueOf(hidden));
-		}
+//		String hidden = getParameter(parameters, formVariablePrefix + "hidden");
+//		if(Objects.nonNull(hidden)) {
+//			obj.setHidden(Boolean.valueOf(hidden));
+//		}
 
 		if(StringUtils.isNotBlank(template.getTemplateClass())) {
 			obj.setValue("_clz", template.getTemplateClass());

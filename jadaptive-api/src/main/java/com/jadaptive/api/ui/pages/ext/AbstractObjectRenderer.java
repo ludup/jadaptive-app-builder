@@ -174,10 +174,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						.attr("type", "hidden")
 						.attr("name", "resourceKey")
 						.val(Objects.nonNull(object) ? object.getResourceKey() : template.getResourceKey())
-				.appendChild(new Element("input")
-						.attr("type", "hidden")
-			 			.attr("name", "hidden")
-						.val(Objects.nonNull(object) ?  String.valueOf(object.isHidden()) : "false")));
+//				.appendChild(new Element("input")
+//						.attr("type", "hidden")
+//			 			.attr("name", "hidden")
+//						.val(Objects.nonNull(object) ?  String.valueOf(object.isHidden()) : "false"))
+				);
 				
 			Session.getOr().ifPresent(session -> {
 				form.appendChild(Html.input("hidden", 

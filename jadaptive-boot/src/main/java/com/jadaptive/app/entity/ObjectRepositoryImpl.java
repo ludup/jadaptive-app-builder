@@ -69,7 +69,7 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	private AbstractObject buildEntity(ObjectTemplate def, Document document) {
 		MongoEntity e = new MongoEntity(document);
 		e.setUuid(document.getString("_id"));
-		e.setHidden(document.getBoolean("hidden"));
+		//e.setHidden(document.getBoolean("hidden"));
 		e.setSystem(document.getBoolean("system"));
 		return e;
 	}
