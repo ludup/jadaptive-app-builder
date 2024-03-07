@@ -9,7 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.auth.AuthenticationPolicy;
+import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.user.User;
@@ -25,12 +28,18 @@ public abstract class AuthenticatedPage extends HtmlPage {
 	@Autowired
 	private AuthenticationService authenticationService;
 	
+	@Autowired
+	private AuthenticationPolicyService policyService; 
+	
 	@Override
 	public void onCreate() throws FileNotFoundException {
 		super.onCreate();
 	}
 
-	public static void redirectIfLoginNeeded(PageCache pageCache, AuthenticationService authenticationService, HttpServletRequest request) throws FileNotFoundException {
+	public static void redirectIfLoginNeeded(PageCache pageCache, 
+			AuthenticationService authenticationService, 
+			AuthenticationPolicy policy,
+			HttpServletRequest request) throws FileNotFoundException {
 		if(Session.getOr(request).isEmpty()) {
 			var reqUrl = request.getRequestURL();
 			var query = request.getQueryString();
@@ -38,7 +47,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 				reqUrl.append('?');
 				reqUrl.append(query);
 			}
-			authenticationService.createAuthenticationState(new UriRedirect(reqUrl.toString()));
+			authenticationService.createAuthenticationState(policy, new UriRedirect(reqUrl.toString()));
 			throw new PageRedirect(pageCache.resolveDefault());
 		}
 	}
@@ -48,7 +57,9 @@ public abstract class AuthenticatedPage extends HtmlPage {
 			throws FileNotFoundException {
 		super.beforeProcess(uri, request, response);
 		
-		redirectIfLoginNeeded(pageCache, authenticationService, request);
+		redirectIfLoginNeeded(pageCache, authenticationService, 
+				policyService.getDefaultPolicy(UserLoginAuthenticationPolicy.class),
+				request);
 		
 		var session = Session.get(request);
 		
