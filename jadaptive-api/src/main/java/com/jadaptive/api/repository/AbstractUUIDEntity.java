@@ -57,13 +57,13 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 //		this.hidden = hidden;
 //	}
 
-	public boolean isSummarise() {
-		return summarise;
-	}
+//	public boolean isSummarise() {
+//		return summarise;
+//	}
 
-	public void setSummarise(boolean summarise) {
-		this.summarise = summarise;
-	}
+//	public void setSummarise(boolean summarise) {
+//		this.summarise = summarise;
+//	}
 
 	@Override
 	public int hashCode() {

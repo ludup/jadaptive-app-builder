@@ -50,6 +50,9 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	boolean hidden;
 	
 	@ObjectField(type = FieldType.BOOL)
+	boolean summarise;
+	
+	@ObjectField(type = FieldType.BOOL)
 	boolean manuallyEncrypted;
 	
 	@ObjectField(type = FieldType.BOOL)
@@ -284,6 +287,14 @@ public class FieldTemplate extends TemplateUUIDEntity {
 
 	public void setParentField(String parentField) {
 		this.parentField = parentField;
+	}
+
+	public boolean isSummarise() {
+		return summarise;
+	}
+
+	public void setSummarise(boolean summarise) {
+		this.summarise = summarise;
 	}
 
 	public int getValidationValueInt(ValidationType val, int defaultValue) {
