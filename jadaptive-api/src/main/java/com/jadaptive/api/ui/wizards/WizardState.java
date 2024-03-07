@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.Page;
@@ -17,7 +18,7 @@ import com.jadaptive.api.ui.Page;
 public class WizardState {
 
 	Integer currentStep = 0;
-	Integer displayStep = 0;
+	Integer displayStep = 1;
 	List<WizardSection> pages = new ArrayList<>();
 	WizardSection startPage;
 	WizardSection finishPage;
@@ -42,8 +43,8 @@ public class WizardState {
 		currentStep = Objects.nonNull(getStartPage()) ? 0 : 1;
 	}
 	
-	public Integer getCurrentStep() {
-		return currentStep;
+	public Integer getDisplayStep() {
+		return displayStep;
 	}
 	
 	public boolean isFinishPage() {
@@ -119,7 +120,7 @@ public class WizardState {
 	}
 
 	public UUIDEntity getCurrentObject() {
-		return stateObjects.get(pages.get(getCurrentStep()-1).getStateKey());
+		return stateObjects.get(pages.get(currentStep-1).getStateKey());
 	}
 	
 	public UUIDEntity setStateObject(String key, UUIDEntity object) {
@@ -127,7 +128,7 @@ public class WizardState {
 	}
 	
 	public void setCurrentObject(UUIDEntity obj) {
-		stateObjects.put(pages.get(getCurrentStep()-1).getStateKey(), obj);
+		stateObjects.put(pages.get(currentStep-1).getStateKey(), obj);
 	}
 
 	public void saveObject(UUIDEntity object) {
@@ -140,6 +141,10 @@ public class WizardState {
 
 	public UUIDEntity getObject(WizardSection section) {
 		return stateObjects.get(section.getStateKey());
+	}
+	
+	public void setObject(WizardSection section, UUIDEntity obj) {
+		stateObjects.put(section.getStateKey(), obj);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -162,7 +167,7 @@ public class WizardState {
 			removePage(setupSection);
 		}
 		ApplicationServiceImpl.getInstance().autowire(setupSection);
-		pages.add(getCurrentStep(), setupSection);
+		pages.add(currentStep, setupSection);
 		
 	}
 	
@@ -265,5 +270,13 @@ public class WizardState {
 			}
 		}
 		return false;
+	}
+
+	public void incrementStep() {
+		displayStep++;
+	}
+	
+	public void decrementStep() {
+		displayStep--;
 	}
 }

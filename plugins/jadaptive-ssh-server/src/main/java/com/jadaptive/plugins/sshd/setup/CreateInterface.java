@@ -16,7 +16,7 @@ public class CreateInterface extends WizardUUIDEntity {
 
 	public static final String RESOURCE_KEY = "createInterface";
 	
-	@ObjectField(defaultValue = "::", type = FieldType.TEXT)
+	@ObjectField(defaultValue = "0.0.0.0", type = FieldType.TEXT)
 	@Validator(type = ValidationType.REQUIRED)
 	String addressToBind;
 	

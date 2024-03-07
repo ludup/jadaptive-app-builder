@@ -137,7 +137,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 							.attr("jad:bundle", "setup")
 							.attr("jad:i18n", "step.name"))
 						.appendChild(new Element("span")
-								.text(" " + String.valueOf(state.getCurrentStep())))
+								.text(" " + String.valueOf(state.getDisplayStep())))
 						.appendChild(new Element("span")
 										.text(" - "))
 						.appendChild(new Element("span")

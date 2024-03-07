@@ -63,6 +63,7 @@ public class WizardController extends AuthenticatedController {
 			while(!state.isFinished()) {
 				WizardSection section = state.moveNext();
 				if(!section.isHidden()) {
+					state.incrementStep();
 					throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
 				}
 			}
@@ -88,6 +89,7 @@ public class WizardController extends AuthenticatedController {
 				}
 			}
 			
+			state.decrementStep();
 			throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
 	}
 	

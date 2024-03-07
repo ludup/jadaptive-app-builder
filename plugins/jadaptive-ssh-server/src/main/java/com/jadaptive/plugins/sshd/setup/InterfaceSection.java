@@ -1,10 +1,15 @@
 package com.jadaptive.plugins.sshd.setup;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.setup.SetupSection;
+import com.jadaptive.api.ui.wizards.Wizard;
 import com.jadaptive.api.ui.wizards.WizardState;
 import com.jadaptive.plugins.sshd.SSHInterface;
 import com.jadaptive.plugins.sshd.SSHInterfaceService;
@@ -31,6 +36,28 @@ public abstract class InterfaceSection extends SetupSection {
 	@Override
 	public Class<?> getResourceClass() {
 		return CreateInterface.class;
+	}
+	
+	protected boolean isHiddenIfPortIsFree() {
+		return false;
+	}
+	
+	protected abstract int getDefaultPort();
+	
+	public boolean isHidden() {
+		if(isHiddenIfPortIsFree()) {
+			try(Socket sock = new Socket()) {
+				sock.connect(InetSocketAddress.createUnresolved("localhost", getDefaultPort()), 5000);
+				return false;
+			} catch(IOException e) {
+				CreateInterface iface = new CreateInterface();
+				iface.setAddressToBind("0.0.0.0");
+				iface.setPort(getDefaultPort());
+				Wizard.getCurrentState().setObject(this, iface);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	@Override
