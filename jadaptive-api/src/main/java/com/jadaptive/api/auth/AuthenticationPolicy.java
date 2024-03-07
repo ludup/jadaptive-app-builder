@@ -14,12 +14,14 @@ import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.TableView;
+import com.jadaptive.api.template.UniqueIndex;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
@@ -33,6 +35,7 @@ import com.jadaptive.api.template.Validator;
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
 @GenerateEventTemplates(AuthenticationPolicy.RESOURCE_KEY)
 @LicensedFeature(value = AuthenticationPolicy.FEATURE_NAME, group = FeatureGroup.PROFESSIONAL)
+@UniqueIndex(columns = { "resourceKey", "weight"})
 public abstract class AuthenticationPolicy extends AssignableUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = -4581883248747380399L;
@@ -61,7 +64,7 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 	@ObjectView(value = "optional", weight = 10)
 	Collection<AuthenticationModule> optionalAuthenticators = new ArrayList<>();
 
-	@ObjectField(type = FieldType.INTEGER, unique = true, defaultValue = "0")	
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "0")	
 	Integer weight = 0;
 	
 	@ObjectField(type = FieldType.TEXT, defaultValue = "")
