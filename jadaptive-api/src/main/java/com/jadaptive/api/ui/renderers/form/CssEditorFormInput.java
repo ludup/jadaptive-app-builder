@@ -1,5 +1,8 @@
 package com.jadaptive.api.ui.renderers.form;
 
+import static com.jadaptive.utils.Npm.scripts;
+import static com.jadaptive.utils.Npm.stylesheets;
+
 import java.io.IOException;
 
 import org.jsoup.nodes.Document;
@@ -25,10 +28,10 @@ public class CssEditorFormInput extends FieldInputRender {
 	public void renderInput(Element rootElement, String value, String... classes) throws IOException {
 
 
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.js");
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/addon/display/autorefresh.js");
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/mode/css/css.js");
-		PageHelper.appendStylesheet(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.css");
+		scripts(document, "codemirror", "lib/codemirror.js");
+		scripts(document, "codemirror", "addon/display/autorefresh.js");
+		scripts(document, "codemirror", "mode/css/css.js");
+		stylesheets(document, "codemirror", "lib/codemirror.css");
 				
 		Element input;
 		rootElement.appendChild(new Element("div")

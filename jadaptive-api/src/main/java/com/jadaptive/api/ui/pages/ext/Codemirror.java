@@ -1,22 +1,22 @@
 package com.jadaptive.api.ui.pages.ext;
 
+import static com.jadaptive.utils.Npm.scripts;
+import static com.jadaptive.utils.Npm.stylesheets;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
-import com.jadaptive.api.ui.PageHelper;
 
 @Component
 public class Codemirror extends AbstractPageExtension {
 
 	@Override
 	public void process(Document document, Element element, Page page) {
-		
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.js");
-		PageHelper.appendStylesheet(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.css");
-				
+		scripts(document, "codemirror", "lib/codemirror.js");
+		stylesheets(document, "codemirror", "lib/codemirror.css");
 	}
 
 	@Override

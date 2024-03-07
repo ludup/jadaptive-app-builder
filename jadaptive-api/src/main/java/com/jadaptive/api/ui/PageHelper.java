@@ -67,7 +67,13 @@ public class PageHelper {
 	public static void appendHeadScript(Document document, String uri, boolean async) {
 		appendHeadScript(document, uri, async, null);
 	}
+
 	public static void appendHeadScript(Document document, String uri, boolean async, String id) {
+		appendHeadScript(document, uri, async, id, "text/javascript");
+		
+	}
+	
+	public static void appendHeadScript(Document document, String uri, boolean async, String id, String type) {
 		Element head = PageHelper.getOrCreateTag(document, "head");
 		
 		for(Element e : head.getElementsByTag("script")) {
@@ -78,11 +84,24 @@ public class PageHelper {
 		Element e = new Element("script")
 				.attr("src", uri)
 				.attr("async", async)
-				.attr("type", "text/javascript");
+				.attr("type", type);
 		if(Objects.nonNull(id)) {
 			e.attr("id", id);
 		}
 		PageHelper.appendLast(head, "script", e);
+	}
+	
+	public static void appendHeadModule(Document document, String uri) {
+		appendHeadModule(document, uri, false);
+	}
+	
+	public static void appendHeadModule(Document document, String uri, boolean async) {
+		appendHeadModule(document, uri, async, null);
+	}
+
+	public static void appendHeadModule(Document document, String uri, boolean async, String id) {
+		appendHeadScript(document, uri, async, id, "module");
+		
 	}
 	
 	public static void appendStylesheet(Document document, String uri) {

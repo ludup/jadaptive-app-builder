@@ -1,5 +1,8 @@
 package com.jadaptive.api.ui.renderers.form;
 
+import static com.jadaptive.utils.Npm.scripts;
+import static com.jadaptive.utils.Npm.stylesheets;
+
 import java.io.IOException;
 import java.util.Base64;
 
@@ -9,6 +12,7 @@ import org.jsoup.nodes.Element;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
+import com.jadaptive.utils.Npm;
 
 @PageDependencies(extensions = {"codemirror"})
 public class HtmlEditorFormInput extends FieldInputRender {
@@ -29,14 +33,15 @@ public class HtmlEditorFormInput extends FieldInputRender {
 
 	@Override
 	public void renderInput(Element rootElement, String value, String... classes) throws IOException {
-	
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.js");
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/addon/display/autorefresh.js");
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/mode/xml/xml.js");
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/mode/javascript/javascript.js");
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/mode/css/css.js");
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/codemirror/current/mode/htmlmixed/htmlmixed.js");
-		PageHelper.appendStylesheet(document, "/app/content/npm2mvn/npm/codemirror/current/lib/codemirror.css");
+		scripts(document, "codemirror", 
+			"lib/codemirror.js",
+			"addon/display/autorefresh.js",
+			"mode/xml/xml.js",
+			"mode/javascript/javascript.js",
+			"mode/css/css.js",
+			"mode/htmlmixed/htmlmixed.js"
+		);
+		stylesheets(document, "codemirror", "lib/codemirror.css");
 				
 		Element input;
 		

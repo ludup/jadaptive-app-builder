@@ -100,6 +100,8 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			body.attr("jad:wizard", resourceKey);
 			
 			WizardSection ext = state.getCurrentPage();
+			ext.beforeProcess(document, state);
+			
 			Element el = document.selectFirst("#wizardContent");
 
 			injectHtmlSection(document, el, ext);

@@ -1,5 +1,7 @@
 package com.jadaptive.api.ui.pages.ext;
 
+import static com.jadaptive.utils.Npm.scripts;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.Objects;
@@ -57,9 +59,10 @@ public class Bootstrap extends AbstractPageExtension {
 		}
 		
 		PageHelper.appendHeadScript(document, runtimePathJs, false, "bootstrapEnabled");
-		PageHelper.appendHeadScript(document, "/app/content/npm2mvn/npm/bootbox/current/bootbox.all.min.js");
 		PageHelper.appendStylesheet(document, runtimePathCss, "bootstrapCss");
 		PageHelper.appendStylesheet(document, runtimePathCss, "printBootstrap", "print");
+		
+		scripts(document, "bootbox", "bootbox.all.min.js");
 
 	}
 
