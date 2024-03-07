@@ -15,6 +15,7 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 	
 	Boolean system;
 	Boolean hidden;
+	boolean summarise;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, hidden = true)
 	@ExcludeView(values = FieldView.TABLE)
@@ -54,6 +55,14 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 
 	public void setHidden(Boolean hidden) {
 		this.hidden = hidden;
+	}
+
+	public boolean isSummarise() {
+		return summarise;
+	}
+
+	public void setSummarise(boolean summarise) {
+		this.summarise = summarise;
 	}
 
 	@Override

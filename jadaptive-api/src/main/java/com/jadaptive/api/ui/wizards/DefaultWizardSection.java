@@ -64,6 +64,7 @@ public class DefaultWizardSection extends WizardSection {
 						.attr("jad:bundle", template.getBundle())
 						.attr("jad:i18n", String.format("review.%s.desc", template.getResourceKey())))
 				.appendChild(row = new Element("div")
+				 	.attr("id", "summary-section-" + template.getResourceKey())
 					.addClass("row")));
 		
 		AbstractObject object = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).toAbstractObject(uuidObject);
@@ -74,8 +75,7 @@ public class DefaultWizardSection extends WizardSection {
 	
 	private void renderObject(AbstractObject object, ObjectTemplate template, Element row) {
 		for(FieldTemplate field : template.getFields()) { 
-			
-			if(field.isHidden()) {
+			if(field.isHidden() && !field.isSummarise()) {
 				continue;
 			}
 			
@@ -107,6 +107,7 @@ public class DefaultWizardSection extends WizardSection {
 			switch(field.getFieldType()) {
 			case PASSWORD:
 				row.appendChild(new Element("div")
+						.attr("id", "summary-field-" + field.getResourceKey())
 						.addClass("col-3")
 						.appendChild(new Element("span")
 										.attr("jad:bundle", template.getBundle())
@@ -115,7 +116,8 @@ public class DefaultWizardSection extends WizardSection {
 						.addClass("col-9")
 						.appendChild(new Element("span")
 								.appendChild(new Element("strong")
-								.text(Utils.maskingString(object.getValue(field).toString(), 2, "*")))));
+									.attr("id", "summary-value-" + field.getResourceKey())
+									.text(Utils.maskingString(object.getValue(field).toString(), 2, "*")))));
 				break;
 			case OBJECT_REFERENCE:
 			case OBJECT_EMBEDDED:
@@ -125,6 +127,7 @@ public class DefaultWizardSection extends WizardSection {
 					Collection<AbstractObject> values = object.getObjectCollection(field.getResourceKey());
 					
 					row.appendChild(new Element("div")
+							.attr("id", "summary-field-" + field.getResourceKey())
 							.addClass("col-3")
 							.appendChild(new Element("span")
 											.attr("jad:bundle", template.getBundle())
@@ -132,7 +135,7 @@ public class DefaultWizardSection extends WizardSection {
 						.appendChild(new Element("div")
 							.addClass("col-9")
 							.appendChild(new Element("span")
-									.appendChild(new Element("strong")
+									.appendChild(new Element("strong").attr("id", "summary-value-" + field.getResourceKey())
 									.text(createObjectCSVString(values, field)))));
 				} else {
 					
@@ -147,6 +150,7 @@ public class DefaultWizardSection extends WizardSection {
 			case COUNTRY:
 
 				row.appendChild(new Element("div")
+						.attr("id", "summary-field-" + field.getResourceKey())
 						.addClass("col-3")
 						.appendChild(new Element("span")
 										.attr("jad:bundle", template.getBundle())
@@ -155,12 +159,14 @@ public class DefaultWizardSection extends WizardSection {
 						.addClass("col-9")
 						.appendChild(new Element("span")
 								.appendChild(new Element("strong")
+								.attr("id", "summary-value-" + field.getResourceKey())
 								.text(ApplicationServiceImpl.getInstance().getBean(InternationalService.class)
 										.getCountryName(object.getValue(field).toString())))));
 				break;
 				
 			default:
 				row.appendChild(new Element("div")
+						.attr("id", "summary-field-" + field.getResourceKey())
 						.addClass("col-3")
 						.appendChild(new Element("span")
 										.attr("jad:bundle", template.getBundle())
@@ -169,6 +175,7 @@ public class DefaultWizardSection extends WizardSection {
 						.addClass("col-9")
 						.appendChild(new Element("span")
 								.appendChild(new Element("strong")
+								.attr("id", "summary-value-" + field.getResourceKey())
 								.text(object.getValue(field).toString()))));
 				break;
 			}

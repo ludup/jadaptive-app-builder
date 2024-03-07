@@ -17,6 +17,8 @@ public @interface ObjectField {
 
 		boolean hidden() default false;
 
+		boolean summarise() default false;
+
 		boolean manualEncryption() default false;
 		
 		boolean automaticEncryption() default false;
