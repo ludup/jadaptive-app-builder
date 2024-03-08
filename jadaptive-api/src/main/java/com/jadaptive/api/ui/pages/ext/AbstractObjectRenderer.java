@@ -282,16 +282,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			boolean firstField = true;
 			for(TemplateViewField fieldView : view.getFields()) {
 				FieldTemplate field = fieldView.getField();
-				if(field.isHidden()) {
-					if(!field.getCollection()) {
-						HiddenFormInput render = new HiddenFormInput(fieldView);
-						render.renderInput(element, getFieldValue(fieldView, obj));
-					}
-					continue;
-				}
+
 				switch(field.getFieldType()) {
 				default:
-					renderField(viewElement, obj, fieldView, scope, view);
+					Element e = Html.div("field");
+					renderField(e, obj, fieldView, scope, view);
+					viewElement.appendChild(e);
 					break;
 				}
 				
@@ -371,30 +367,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		FieldTemplate field = fieldView.getField();
 		
-		Set<String> ignores = ignoreResources.get();
-		if(Objects.nonNull(ignores) && ignores.contains(field.getResourceKey())) {
-			return;
-		}
-		
-		if(!tenantService.getCurrentTenant().isSystem() && fieldView.isSystemOnly()) {
-			return;
-		}
-		
-		if(!field.getViews().isEmpty()) {
-			if(!field.getViews().contains(scope)) {
-				if(scope != FieldView.READ) {
-					/**
-					 * Edit will need hidden fields 
-					 * 
-					 * TODO encrypt these
-					 */
-					HiddenFormInput render = new HiddenFormInput(fieldView);
-					render.renderInput(element, getFieldValue(fieldView, obj));
-				}
-				return;
-			}
-		}
-		
 		if(field.getCollection()) {
 			renderCollection(element, obj, fieldView, scope, panel); 
 		} else {
@@ -424,8 +396,39 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				renderFormField(element, obj, fieldView, scope, panel);
 			}
 			
-			Elements thisElement = element.select("#" + field.getResourceKey());
-			processDynamicElements(thisElement, fieldView, obj);
+			
+		}
+		
+		Elements thisElement = element.select("#" + field.getResourceKey());
+		processDynamicElements(thisElement, fieldView, obj);
+		
+		if(!field.getViews().isEmpty()) {
+			if(!field.getViews().contains(scope)) {
+				if(scope != FieldView.READ) {
+					/**
+					 * Edit will need hidden fields 
+					 * 
+					 * TODO encrypt these
+					 */
+					element.addClass("d-none");
+					return;
+				}
+			}
+		}
+		
+		if(field.isHidden()) {
+			element.addClass("d-none");
+		} else if(Objects.isNull(obj) && 
+				field.isReadOnly() &&
+				fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
+			element.addClass("d-none");
+		}
+		
+		Set<String> ignores = ignoreResources.get();
+		if(Objects.nonNull(ignores) && ignores.contains(field.getResourceKey())) {
+			element.addClass("d-none");
+		} else if(!tenantService.getCurrentTenant().isSystem() && fieldView.isSystemOnly()) {
+			element.addClass("d-none");
 		}
 	}
 	
@@ -439,12 +442,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			for(FieldTemplate parentField : parents) {
 				obj = obj.getChild(parentField);
 			}
-		}
-		
-		if(Objects.isNull(obj) && 
-				field.isReadOnly() &&
-				fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
-			return;
 		}
 		
 		switch(field.getFieldType()) {
