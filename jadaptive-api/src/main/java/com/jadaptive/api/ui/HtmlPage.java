@@ -303,7 +303,7 @@ public abstract class HtmlPage implements Page {
 		
 	}
 
-	private void injectFeedback(Document doc, HttpServletRequest request) {
+	protected void injectFeedback(Document doc, HttpServletRequest request) {
 		Feedback feedback = (Feedback) request.getSession().getAttribute("feedback");
 		if(Objects.nonNull(feedback)) {
 			request.getSession().removeAttribute("feedback");

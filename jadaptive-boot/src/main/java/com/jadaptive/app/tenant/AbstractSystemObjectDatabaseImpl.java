@@ -3,6 +3,7 @@ package com.jadaptive.app.tenant;
 import java.util.Collection;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.SearchField;
@@ -12,6 +13,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
@@ -58,16 +60,21 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 		return getObject(uuid, TenantService.SYSTEM_UUID, getResourceClass());
 	}
 	
-	protected String getCollectionName(Class<?> clz) {
-		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
-		while(template!=null && template.type() == ObjectType.OBJECT) {
-			clz = clz.getSuperclass();
-			template = clz.getAnnotation(ObjectDefinition.class);
-		} 
+
+	protected String getCollectionName(Class<?> clx) {
+		
+		Class<?> base = TemplateUtils.getBaseClass(clx);
+		if(Objects.isNull(base)) {
+			base = clx;
+		}
+		
+		ObjectDefinition template = base.getAnnotation(ObjectDefinition.class);
+		
 		if(Objects.nonNull(template)) {
 			return template.resourceKey();
 		}
-		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
+		
+		throw new ObjectException(String.format("Missing template for class %s", clx.getSimpleName()));
 	}
 	
 	public T get(SearchField... fields) throws RepositoryException, ObjectException {

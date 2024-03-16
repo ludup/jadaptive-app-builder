@@ -12,7 +12,7 @@ import com.jadaptive.api.entity.ObjectType;
 @Target(ElementType.TYPE)
 public @interface ObjectDefinition {
 		
-		String resourceKey() default "";
+		String resourceKey();
 		
 		String bundle() default "";
 		

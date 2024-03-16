@@ -1,5 +1,7 @@
 package com.jadaptive.api.ui;
 
+import java.util.Objects;
+
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.utils.Utils;
@@ -44,9 +46,11 @@ public class Html {
 	
 	public static Element i18n(String bundle, String i18n, Object... args) {
 		Element el = new Element("span").attr("jad:bundle", bundle).attr("jad:i18n", i18n);
-		for(int i=0;i<args.length;i++) {
-			if(args[i]!=null) {
-				el.attr(String.format("jad:arg%d",i), args[i].toString());
+		if(Objects.nonNull(args)) {
+			for(int i=0;i<args.length;i++) {
+				if(args[i]!=null) {
+					el.attr(String.format("jad:arg%d",i), args[i].toString());
+				}
 			}
 		}
 		return el;

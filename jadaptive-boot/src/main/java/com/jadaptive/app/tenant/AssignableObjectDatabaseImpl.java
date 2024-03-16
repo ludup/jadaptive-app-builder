@@ -9,7 +9,7 @@ import com.jadaptive.api.db.AssignableObjectDatabase;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.repository.AssignableUUIDEntity;
+import com.jadaptive.api.repository.AssignableDocument;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.template.SortOrder;
@@ -17,7 +17,7 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.utils.UUIDObjectUtils;
 
 @Repository
-public class AssignableObjectDatabaseImpl<T extends AssignableUUIDEntity> implements AssignableObjectDatabase<T> {
+public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implements AssignableObjectDatabase<T> {
 	
 	@Autowired
 	private RoleService roleService; 

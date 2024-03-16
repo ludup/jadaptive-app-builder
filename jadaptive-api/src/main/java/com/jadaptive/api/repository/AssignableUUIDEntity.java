@@ -16,7 +16,7 @@ import com.jadaptive.api.user.User;
 @ObjectViews({ 
 	@ObjectViewDefinition(value = AssignableUUIDEntity.USERS_VIEW, bundle = "users", weight = Integer.MAX_VALUE-1),
 	@ObjectViewDefinition(value = AssignableUUIDEntity.ROLES_VIEW, bundle = "roles", weight = Integer.MAX_VALUE)})
-public abstract class AssignableUUIDEntity extends AbstractUUIDEntity {
+public abstract class AssignableUUIDEntity extends AbstractUUIDEntity implements AssignableDocument {
 
 	private static final long serialVersionUID = -5734236381558890213L;
 	

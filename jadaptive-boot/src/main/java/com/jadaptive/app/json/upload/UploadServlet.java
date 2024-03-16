@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.ResponseHelper;
 import com.jadaptive.api.upload.UploadHandler;
 import com.jadaptive.api.user.UserService;
@@ -53,8 +54,7 @@ public class UploadServlet extends HttpServlet {
 	
 	@Override
 	protected void service(HttpServletRequest httpRequest, HttpServletResponse httpResponse)
-			throws ServletException, IOException {
-		
+			throws ServletException, IOException {	
 		super.service(httpRequest, httpResponse);
 	}
 	
@@ -87,7 +87,7 @@ public class UploadServlet extends HttpServlet {
 		
 		if(session.isPresent()) {
 			permissionService.setupUserContext(session.get().getUser());
-		}
+		} 
 
 		Map<String,String> parameters = new HashMap<>();
 		
@@ -111,7 +111,7 @@ public class UploadServlet extends HttpServlet {
 				    if(StringUtils.isBlank(item.getName())) {
 				    	continue;
 				    }
-
+				    
 			    	try(var scope = SessionUtils.scopedIoWithoutSessionTimeout(req)) {
 			    		try(InputStream stream = item.openStream()) {
 					    	handler.handleUpload(handlerName, uri, parameters, item.getName(), stream);
@@ -125,9 +125,10 @@ public class UploadServlet extends HttpServlet {
 
 		} catch (Throwable e) {
 			log.error("Upload failure", e);
+			Feedback.error(e.getMessage());
 			handler.sendFailedResponse(resp, handlerName, uri, parameters, e);
 		} finally {
-			if(Objects.nonNull(session)) {
+			if(session.isPresent()) {
 				permissionService.clearUserContext();
 			}
 		}

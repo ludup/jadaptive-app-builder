@@ -88,8 +88,6 @@ public interface AuthenticationService {
 
 	AuthenticationModule getAuthenticationModule(String uuid);
 
-	void assertLoginThesholds(String username, String remoteAddress);
-
 	@SuppressWarnings("unchecked")
 	void registerAuthenticationPage(AuthenticationModule module, Class<? extends AuthenticationPage<?>>... pages);
 
@@ -104,5 +102,7 @@ public interface AuthenticationService {
 	AuthenticationState createAuthenticationState(AuthenticationPolicy policy, Redirect homePage, User user) throws FileNotFoundException;
 
 	void changePolicy(AuthenticationState state, AuthenticationPolicy assigned, boolean verifiedPassword);
+
+	void assertLoginThesholds();
 	
 }

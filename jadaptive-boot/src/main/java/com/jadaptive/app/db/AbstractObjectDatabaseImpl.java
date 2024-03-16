@@ -75,22 +75,20 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		return clz.getAnnotation(ObjectCache.class) != null;
 	}
 	
-	protected String getCollectionName(Class<?> clz) {
+	protected String getCollectionName(Class<?> clx) {
 		
-		ObjectDefinition template = clz.getAnnotation(ObjectDefinition.class);
-		
-		while(template==null || template.type() == ObjectType.OBJECT) {
-			clz = clz.getSuperclass();
-			template = clz.getAnnotation(ObjectDefinition.class);
-		} 
-		if(Objects.nonNull(template)) {
-			String resourceKey = template.resourceKey();
-			if(StringUtils.isBlank(resourceKey)) {
-				resourceKey = TemplateUtils.lookupClassResourceKey(clz);
-			}
-			return templateRepository.get(resourceKey).getCollectionKey();
+		Class<?> base = TemplateUtils.getBaseClass(clx);
+		if(Objects.isNull(base)) {
+			base = clx;
 		}
-		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
+		
+		ObjectDefinition template = base.getAnnotation(ObjectDefinition.class);
+		
+		if(Objects.nonNull(template)) {
+			return template.resourceKey();
+		}
+		
+		throw new ObjectException(String.format("Missing template for class %s", clx.getSimpleName()));
 	}
 	
 	protected ObjectTemplate getObjectTemplate(Class<?> clz) {

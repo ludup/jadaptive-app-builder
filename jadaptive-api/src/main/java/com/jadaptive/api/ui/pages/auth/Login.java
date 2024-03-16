@@ -92,7 +92,7 @@ public class Login extends AuthenticationPage<LoginForm> {
 		
 		try {
 			
-			authenticationService.assertLoginThesholds(form.getUsername(), state.getRemoteAddress());
+			authenticationService.assertLoginThesholds();
 			
 			state.setAttemptedUsername(form.getUsername());
 			User user; 

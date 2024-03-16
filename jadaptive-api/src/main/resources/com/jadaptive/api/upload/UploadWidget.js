@@ -119,7 +119,7 @@ var UploadWidget = {
 
 			$(_self._options.feedbackDiv + ' .alert').remove();
 
-			var doUpload = function(onComplete) {
+			var doUpload = function(onComplete, onError) {
 				if($('.file-input').length <= 1) {
 					$(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="' + $('body').data('iconset') + ' fa-exclamation-circle"></i> There are no files selected!</p>');
 					return;
@@ -181,10 +181,19 @@ var UploadWidget = {
 	//							}, 2000);
 	 
 			        	   } else {
-			        		   $(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="' + $('body').data('iconset') + ' fa-exclamation-circle"></i> ' + data.message + '</p>');
-								_self.clearFiles();
+			        		   _self.clearFiles();
+							    if(onError) {
+								   onError(data.message);
+								} else {
+									$(_self._options.feedbackDiv).prepend('<p class="alert alert-danger"><i class="' + $('body').data('iconset') + ' fa-exclamation-circle"></i> ' + data.message + '</p>');
+								}
 			        	   }
 			           },
+			           error: function (xhr, ajaxOptions, thrownError) {
+				          if(onError) {
+							  onError(thrownError);
+						  }
+				       },
 			           complete: function() {
 			        	    JadaptiveUtils.stopAwesomeSpin($('#uploadButton i'), 'fa-upload');
 						    $('#uploadButton').attr('disabled', false);

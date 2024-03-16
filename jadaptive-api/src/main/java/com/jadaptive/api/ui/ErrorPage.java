@@ -5,8 +5,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Objects;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -68,6 +71,10 @@ public class ErrorPage extends HtmlPage {
 	public String getUri() {
 		return "error";
 	}
+	
+	protected void injectFeedback(Document doc, HttpServletRequest request) {
+		
+	}
 
 	@Override
 	protected void generateContent(Document document) throws IOException {
@@ -91,14 +98,21 @@ public class ErrorPage extends HtmlPage {
 		}
 		Throwable e = (Throwable) Request.get().getSession().getAttribute(THROWABLE);
 		if(Objects.isNull(e)) {
-			throw new UriRedirect();
-		}
-		
-		document.selectFirst("#message").text(StringUtils.defaultString(e.getMessage()));
-		try(StringWriter w = new StringWriter()) {
-			try(PrintWriter pw = new PrintWriter(w)) {
-				e.printStackTrace(pw);
-				document.selectFirst("#stacktrace").text(w.toString());
+			Feedback feedback = (Feedback) Request.get().getSession().getAttribute("feedback");
+			if(Objects.nonNull(feedback)) {
+				Request.get().getSession().removeAttribute("feedback");
+				document.selectFirst("#message").appendChild(Html.i18n(feedback.getBundle(),
+						feedback.getI18n(), feedback.getArgs()));
+			} else {
+				throw new UriRedirect();
+			}
+		} else {
+			document.selectFirst("#message").text(StringUtils.defaultString(e.getMessage()));
+			try(StringWriter w = new StringWriter()) {
+				try(PrintWriter pw = new PrintWriter(w)) {
+					e.printStackTrace(pw);
+					document.selectFirst("#stacktrace").text(w.toString());
+				}
 			}
 		}
 	}

@@ -42,6 +42,9 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.permissions.Permissions;
+import com.jadaptive.api.quotas.IPQuota;
+import com.jadaptive.api.quotas.QuotaService;
+import com.jadaptive.api.quotas.QuotaThreshold;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
@@ -66,6 +69,8 @@ import com.jadaptive.api.user.UserService;
 public class AuthenticationServiceImpl extends AuthenticatedService implements AuthenticationService, StartupAware, TenantAware {
 
 	public static final String USERNAME_RESOURCE_KEY = "username";
+
+	private static final String FAILED_LOGIN_ATTEMPTS_UUID = "8302adcf-a308-426d-a491-aabef5b78bf4";
 
 	static Logger log = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
@@ -96,8 +101,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Autowired
 	private EventService eventService; 
 	
-//	@Autowired
-//	private UserDetailsService springUsers;
+	@Autowired
+	private QuotaService quotaService;
 	
 	Map<String, Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
 
@@ -153,8 +158,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 			state.incrementFailedAttempts();
 
-			flagFailedLogin(state.getAttemptedUsername());
-			flagFailedLogin(Request.getRemoteAddress());
+			flagFailedLogin();
 
 			if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
 				AuthenticationModule module = registeredModulesByPage.get(state.getCurrentPage());
@@ -189,12 +193,13 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 				assertPermission(USER_LOGIN_PERMISSION);
 
+				assertLoginThesholds();
+				
 				if (!userService.verifyPassword(user, password.toCharArray())) {
-					flagFailedLogin(username);
-					flagFailedLogin(remoteAddress);
+					flagFailedLogin();
 
 					if (log.isInfoEnabled()) {
-						log.info("Flagged failed login from {} and {}", username, remoteAddress);
+						log.info("Flagged failed login from {}", remoteAddress);
 					}
 
 					throw new AccessDeniedException();
@@ -217,44 +222,14 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 	
 	@Override
-	public void assertLoginThesholds(String username, String remoteAddress) {
-		assertLoginThreshold(username);
-		assertLoginThreshold(remoteAddress);
+	public void assertLoginThesholds() {
+		QuotaThreshold quota = quotaService.getAssignedThreshold(quotaService.getKey(FAILED_LOGIN_ATTEMPTS_UUID));
+		quotaService.assertQuota(quota, AuthenticationPolicy.RESOURCE_KEY, "failedLoginThreshold.error");
 	}
-
-	private void assertLoginThreshold(String key) {
-		Integer count = getCache().get(getCacheKey(key));
-		if (Objects.nonNull(count)) {
-			if (count > getFailedLoginThreshold()) {
-				if (log.isInfoEnabled()) {
-					log.info("Rejecting login due to too many failues from {}", key);
-				}
-				throw new AccessDeniedException("Too many failed login attempts for " + key);
-			}
-		}
-	}
-
-	private Integer getFailedLoginThreshold() {
-		return 5;
-	}
-
-	private Map<String, Integer> getCache() {
-		return cacheService.getCacheOrCreate("failedLogings", String.class, Integer.class,
-				TimeUnit.MINUTES.toMillis(5));
-	}
-
-	private String getCacheKey(String username) {
-		return String.format("%s.%s", getCurrentTenant().getUuid(), username);
-	}
-
-	private void flagFailedLogin(String username) {
-		Map<String, Integer> cache = getCache();
-		String cacheKey = getCacheKey(username);
-		Integer count = cache.get(cacheKey);
-		if (Objects.isNull(count)) {
-			count = Integer.valueOf(0);
-		}
-		cache.put(cacheKey, ++count);
+	
+	private void flagFailedLogin() {
+		QuotaThreshold quota = quotaService.getAssignedThreshold(quotaService.getKey(FAILED_LOGIN_ATTEMPTS_UUID));
+		quotaService.incrementQuota(quota, AuthenticationPolicy.RESOURCE_KEY, "failedLoginThreshold.error");
 	}
 
 	@Override
@@ -263,6 +238,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		if (Objects.isNull(state.getUser()) || !userService.supportsLogin(state.getUser())) {
 			throw new AccessDeniedException("Invalid credentials");
 		}
+		
+		assertLoginThesholds();
 		
 		if(page.isPresent()) {
 			Page p = page.get();
@@ -680,6 +657,19 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			m.setSystem(false);
 			moduleDatabase.saveOrUpdate(m);
 			moduleDatabase.delete(m);
+		}
+		
+		if(!quotaService.hasKey(FAILED_LOGIN_ATTEMPTS_UUID)) {
+			quotaService.registerKey(FAILED_LOGIN_ATTEMPTS_UUID, "Failed Login Attempts");
+			IPQuota quota = new IPQuota();
+			quota.setKey(quotaService.getKey(FAILED_LOGIN_ATTEMPTS_UUID));
+			quota.setPeriodUnit(TimeUnit.MINUTES);
+			quota.setPeriodValue(5);
+			quota.setValue("5");
+			quota.setAllAddresses(Boolean.TRUE);
+			quota.setSystem(true);
+			
+			quotaService.createQuota(quota);
 		}
 	};
 	

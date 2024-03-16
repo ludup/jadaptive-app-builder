@@ -20,6 +20,7 @@ public enum ValidationType {
 	HOSTNAME, 
 	PORT,
 	TIME_24,
-	EMAIL;
+	EMAIL, 
+	BYTESIZE;
 
 }

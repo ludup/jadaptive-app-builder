@@ -25,6 +25,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.soap.SOAPException;
@@ -655,6 +657,74 @@ public class Utils {
 			
 		}
 		return buf.toString();
+	}
+	
+	public static Long fromByteSize(String val) {
+		  if(val.matches("\\d+")) {
+			  return Long.parseLong(val);
+		  }
+		  
+		  Pattern p = Pattern.compile("(\\d+)(.*)");
+		  Matcher m = p.matcher(val);
+		  if(!m.matches()) {
+			  throw new IllegalArgumentException(String.format("Invalid input %s", val));
+		  }
+		  String n = m.group(1);
+		  String t = m.group(2);
+		  
+		  t = t.toUpperCase();
+		  
+		  Long v = Long.parseLong(n);
+		  
+		  switch(t) {
+		  case "P":
+		  case "PB":
+			  return v * 1000 * 1000 * 1000 * 1000 * 1000;
+		  case "PIB":
+			  	return v * 1024 * 1024 * 1024 * 1024 * 1024;
+		  case "T":
+		  case "TB":
+			  return v * 1000 * 1000 * 1000 * 1000;
+		  case "TIB":
+			  return v * 1024 * 1024 * 1024 * 1024;
+		  case "G":
+		  case "GB":
+			  return v * 1000 * 1000 * 1000;
+		  case "GIB":
+			  return v * 1024 * 1024 * 1024;
+		  case "M":
+		  case "MB":
+			  return v * 1000 * 1000;
+		  case "MIB":
+			  return v * 1024 * 1024;
+		  case "K":
+		  case "KB":
+			  return v * 1000;
+		  case "KIB":
+			  return v * 1024;
+		  default:
+			  throw new IllegalArgumentException(String.format("Invalid input %s", val));
+		  }
+	  }
+
+	public static String toByteSize(double t) {
+		return toByteSize(t, 2);
+	}
+
+	public static String toByteSize(double t, int decimalPlaces) {
+		
+		if(decimalPlaces < 0) {
+			throw new IllegalArgumentException("Number of decimal places must be > 0");
+		}
+		String[] sizes = { "B", "KB", "MB", "GB", "TB", "PB" };
+		int idx = 0;
+		double x = t;
+		while(x / 1000 >= 1) {
+			idx++;
+			x = (x / 1000);
+		}
+		
+		return String.format("%." + decimalPlaces + "f%s", x, sizes[idx]);
 	}
 	
 }

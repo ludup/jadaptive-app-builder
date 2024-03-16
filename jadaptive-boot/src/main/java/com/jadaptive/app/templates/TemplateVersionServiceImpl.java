@@ -525,7 +525,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				templateRepository.saveOrUpdate(parentTemplate);
 			}
 			
-			Class<?> baseClass = getBaseClass(clz);
+			Class<?> baseClass = TemplateUtils.getBaseClass(clz);
 			ObjectDefinition collection = null; 
 			if(Objects.nonNull(baseClass)) {
 				collection = baseClass.getAnnotation(ObjectDefinition.class);
@@ -1194,21 +1194,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return displayKey;
 	}
 	
-	private Class<?> getBaseClass(Class<?> clz) {
-		
-		Class<?> parent = clz.getSuperclass();
-		Class<?> templateBase = null;
-		while(parent!=null){
-			
-			ObjectDefinition t = parent.getAnnotation(ObjectDefinition.class);
-			if(Objects.nonNull(t)) {
-				templateBase = parent;
-			}
-			parent = parent.getSuperclass();
-		}
-		
-		return templateBase;
-	}
+	
 
 	private void resolveFields(Class<?> clz, List<Field> fields, boolean recurse) {
 		
