@@ -105,7 +105,7 @@
 				<plugin>
 					<groupId>com.sshtools</groupId>
 					<artifactId>pf4j-plugin-generator</artifactId>
-					<version>0.1.1</version>
+					<version>0.1.2-SNAPSHOT</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
