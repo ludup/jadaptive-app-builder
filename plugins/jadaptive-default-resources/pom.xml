@@ -55,11 +55,6 @@
 		</dependency>
         <dependency>
 		    <groupId>npm</groupId>
-		    <artifactId>jquery-ui</artifactId>
-		    <version>1.12.1</version>
-		</dependency>
-        <dependency>
-		    <groupId>npm</groupId>
 		    <artifactId>bootswatch</artifactId>
 		    <version>5.3.3</version>
 		</dependency>

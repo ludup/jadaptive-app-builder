@@ -31,7 +31,7 @@ public class Footer extends AbstractPageExtension {
 			BootstrapTheme current = getThemeFromCookie(BootstrapTheme.DEFAULT);
 			
 			if(BootstrapTheme.hasCss(current)) {
-				PageHelper.appendStylesheet(document, String.format("/app/content/npm2mvn/npm/bootswatch/current/%s/bootstrap.min.css", BootstrapTheme.getThemeCssName(current)), "bootstrapTheme");	
+				PageHelper.appendStylesheet(document, String.format("/app/content/npm2mvn/npm/bootswatch/current/dist/%s/bootstrap.min.css", BootstrapTheme.getThemeCssName(current)), "bootstrapTheme");	
 			}
 
 			Element footer = document.selectFirst("#footer");

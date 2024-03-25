@@ -15,9 +15,9 @@ public class BootstrapTable extends AbstractPageExtension {
 
 	@Override
 	public void process(Document document, Element element, Page page) {
-		scripts(document, "bootstrap-table", "bootstrap-table.min.js");
-		scripts(document, "bootstrap-table", "extensions/mobile/bootstrap-table-mobile.min.js");
-		stylesheets(document, "bootstrap-table", "bootstrap-table.min.css");
+		scripts(document, "bootstrap-table", "dist/bootstrap-table.min.js");
+		scripts(document, "bootstrap-table", "dist/extensions/mobile/bootstrap-table-mobile.min.js");
+		stylesheets(document, "bootstrap-table", "dist/bootstrap-table.min.css");
 	}
 
 	@Override

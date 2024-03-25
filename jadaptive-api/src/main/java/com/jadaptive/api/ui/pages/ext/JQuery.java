@@ -14,7 +14,7 @@ public class JQuery extends AbstractPageExtension {
 
 	@Override
 	public void process(Document document, Element element, Page page) {
-		scripts(document, "jquery", "jquery.min.js");
+		scripts(document, "jquery", "dist/jquery.min.js");
 	}
 
 	@Override
