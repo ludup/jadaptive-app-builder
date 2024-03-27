@@ -34,7 +34,6 @@ import com.jadaptive.api.auth.PostAuthenticatorPage;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.auth.events.AuthenticationFailedEvent;
 import com.jadaptive.api.auth.events.AuthenticationSuccessEvent;
-import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.events.EventService;
@@ -82,9 +81,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Autowired
 	private PermissionService permissionService;
-
-	@Autowired
-	private CacheService cacheService;
 
 	@Autowired
 	private PageCache pageCache;

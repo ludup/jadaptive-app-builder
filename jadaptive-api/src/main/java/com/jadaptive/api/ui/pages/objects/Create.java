@@ -1,7 +1,5 @@
 package com.jadaptive.api.ui.pages.objects;
 
-import java.util.Objects;
-
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -2,7 +2,6 @@ package com.jadaptive.api.quotas;
 
 import java.util.Collection;
 
-import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.AssignableDocument;
 import com.jadaptive.api.role.Role;

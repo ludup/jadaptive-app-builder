@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(value=Include.NON_NULL)
 public class ResourceList<T> extends ResourceStatus<T> {
 
+	private static final long serialVersionUID = -170667128130340102L;
+
 	public static final int DEFAULT_MAXIMUM_RESOURCES = 1000;
 	
 	private Collection<T> resources;

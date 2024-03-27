@@ -12,7 +12,6 @@ import org.jsoup.nodes.Element;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
-import com.jadaptive.utils.Npm;
 
 @PageDependencies(extensions = {"codemirror"})
 public class HtmlEditorFormInput extends FieldInputRender {

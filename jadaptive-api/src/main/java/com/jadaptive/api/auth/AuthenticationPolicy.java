@@ -14,7 +14,6 @@ import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;

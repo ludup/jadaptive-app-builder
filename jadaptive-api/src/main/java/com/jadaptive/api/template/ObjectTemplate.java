@@ -12,7 +12,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.app.ApplicationServiceImpl;
-import com.jadaptive.api.db.CachePolicy;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.JadaptiveIgnore;

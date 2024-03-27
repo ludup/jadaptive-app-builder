@@ -65,7 +65,6 @@ import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.FileFormInput;
-import com.jadaptive.api.ui.renderers.form.HiddenFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.ImageFormInput;
 import com.jadaptive.api.ui.renderers.form.JavascriptEditorFormInput;
