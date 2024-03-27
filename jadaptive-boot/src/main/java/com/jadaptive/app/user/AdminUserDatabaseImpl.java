@@ -143,4 +143,10 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	public void registerLogin(User user) {
 		objectDatabase.saveOrUpdate((AdminUser)user);
 	}
+
+
+	@Override
+	public User findUser(String username) {
+		return objectDatabase.get(AdminUser.class, SearchField.eq("username", username));
+	}
 }

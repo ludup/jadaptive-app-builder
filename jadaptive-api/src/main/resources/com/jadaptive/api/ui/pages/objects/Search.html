@@ -25,8 +25,8 @@
 	</div>
   </div>
   <div class="row">
-      <div id="searchForm" class="col-12 mb-3">
       <form id="form" method="POST" action="/app/ui/search/${page.template.resourceKey}"> 
+      <div id="searchForm" class="col-12 mb-3">
       	<div class="searchRow row mb-5">
 	      	<div class="col-md-4">
 	      		<label class="form-label w-100" jad:bundle="default" jad:i18n="search.column.name" >Search Column</label>
@@ -40,15 +40,13 @@
 	      		<button class="btn btn-primary float-en searchTable spinClick"><i class="fa-solid fa-search"></i> <span jad:bundle="default" jad:i18n="search.name"></span></button>
 	      	</div>
 	    </div>
+	    </div>
         <hr>
       	<input type="hidden" name="start" id="start" value="${page.start}">
       	<div id="tableholder" class="col-12 mb-3">
   	  	
 	  	</div>
 	  </form>
-	  
-
-  </div>
   </div>
 
 </main>

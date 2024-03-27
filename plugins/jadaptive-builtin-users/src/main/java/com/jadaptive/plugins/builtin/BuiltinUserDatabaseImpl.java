@@ -178,5 +178,10 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 	public void registerLogin(User user) {
 		objectDatabase.saveOrUpdate((BuiltinUser)user);
 	}
+	
+	@Override
+	public User findUser(String username) {
+		return objectDatabase.get(BuiltinUser.class, SearchField.eq("username", username));
+	}
 
 }

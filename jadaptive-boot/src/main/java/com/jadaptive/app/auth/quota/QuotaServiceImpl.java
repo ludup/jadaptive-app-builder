@@ -275,7 +275,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			q.setQuotaStarted(new Date());
 			
 			if(log.isInfoEnabled()) {
-				log.info("Created quota for group {} on key {} to {} every {} seconds", group, quota.getKey().getName(), quota, quota.getPeriodUnit() + quota.getPeriodUnit().toString());
+				log.info("Created quota for group {} on key {} to {} every {} {}", group, quota.getKey().getName(), quota, quota.getPeriodValue(), quota.getPeriodUnit().toString());
 			}
 		}
 		
@@ -284,7 +284,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			q.setValue(0L);
 			
 			if(log.isInfoEnabled()) {
-				log.info("Reset quota for group {} on key {} to {} every {} seconds", group, quota.getKey().getName(), quota, quota.getPeriodUnit() + quota.getPeriodUnit().toString());
+				log.info("Reset quota for group {} on key {} to {} every {} {}", group, quota.getKey().getName(), quota, quota.getPeriodValue(), quota.getPeriodUnit().toString());
 			}
 			
 			objectDatbase.saveOrUpdate(q);

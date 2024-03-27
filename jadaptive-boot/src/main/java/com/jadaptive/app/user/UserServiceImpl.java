@@ -102,29 +102,27 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override
 	public User getUser(String username) {
 
-		try {
-			return userRepository.get(User.class, 
-					SearchField.or(
-					SearchField.eq("username", username),
-					SearchField.in("aliases", username)));
-		} catch(ObjectNotFoundException e) {
-			for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {
-				if(userDatabase.getCapabilities().contains(UserDatabaseCapabilities.IMPORT)) {
-					try {
-						User user = userDatabase.importUser(username);
-						if(Objects.nonNull(user)) {
-							if(StringUtils.isBlank(user.getUuid())) {
-								user.setUuid(UUID.randomUUID().toString());
-							}
-							return user;
-						}
-					} catch(ObjectNotFoundException e2) { }
-				}
-			}
-			
-			throw new ObjectNotFoundException(String.format("%s not found", username));
-		
+		for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {
+			try {
+				return userDatabase.findUser(username);
+			} catch(ObjectNotFoundException e) { }
 		}
+
+		for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {
+			if(userDatabase.getCapabilities().contains(UserDatabaseCapabilities.IMPORT)) {
+				try {
+					User user = userDatabase.importUser(username);
+					if(Objects.nonNull(user)) {
+						if(StringUtils.isBlank(user.getUuid())) {
+							user.setUuid(UUID.randomUUID().toString());
+						}
+						return user;
+					}
+				} catch(ObjectNotFoundException e2) { }
+			}
+		}
+		
+		throw new ObjectNotFoundException(String.format("%s not found", username));
 	}
 
 	@Override

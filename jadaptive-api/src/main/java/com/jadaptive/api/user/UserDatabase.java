@@ -1,5 +1,6 @@
 package com.jadaptive.api.user;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.pf4j.ExtensionPoint;
@@ -43,4 +44,6 @@ public interface UserDatabase extends ExtensionPoint {
 	};
 	
 	void registerLogin(User user);
+
+	User findUser(String username);
 }
