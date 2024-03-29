@@ -112,6 +112,12 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
+	public long deleteIfExists(String table, String database, SearchField... fields) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
 	public Iterable<Document> search(String table, String database, SearchField... fields) {
 		// TODO Auto-generated method stub
 		return null;

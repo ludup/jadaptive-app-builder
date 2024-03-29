@@ -503,6 +503,14 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Override
 	public void delete(String table, String database, SearchField... fields) {
 
+		if(deleteIfExists(table, database, fields) == 0) {
+			throw new ObjectException("Object not deleted!");
+		}
+	}
+	
+	@Override
+	public long deleteIfExists(String table, String database, SearchField... fields) {
+
 		MongoCollection<Document> collection = getCollection(table, database);
 		DeleteResult result;
 		
@@ -513,9 +521,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			result = collection.deleteMany(buildFilter(fields));
 		}
 		
-		if(result.getDeletedCount() == 0) {
-			throw new ObjectException("Object not deleted!");
-		}
+		return result.getDeletedCount();
 	}
 	
 	@Override

@@ -108,7 +108,7 @@ public class DocumentValidator {
 
 			if (!Objects.isNull(field.getValidators())) {
 				for (FieldValidator v : field.getValidators()) {
-					switch (v.getType()) {
+					switch (v.getType()) {					
 					case RANGE:
 						String[] range = v.getValue().split("-");
 						if (range.length != 2) {
@@ -125,6 +125,11 @@ public class DocumentValidator {
 						} catch (NumberFormatException e) {
 							throw new ValidationException(String.format(
 									"Invalid range %s value in validator use \"<min>,<max>\" format", v.getValue()));
+						}
+						break;
+					case EMPTY:
+						if(value == 0) {
+							return;
 						}
 						break;
 					case PORT:

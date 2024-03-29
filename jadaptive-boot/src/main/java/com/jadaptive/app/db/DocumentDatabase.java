@@ -18,6 +18,8 @@ public interface DocumentDatabase {
 	void deleteByUUID(String uuid, String table, String database);
 	
 	void delete(String table, String database, SearchField... fields);
+	
+	long deleteIfExists(String table, String database, SearchField... fields);
 
 	Long count(String table, String database, SearchField... fields);
 
