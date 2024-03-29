@@ -571,10 +571,15 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			if(isCaching(obj.getClass())) {
 				@SuppressWarnings("unchecked")
 				Map<String,T> cachedObjects = getCache((Class<T>) obj.getClass());
-				if(log.isDebugEnabled()) {
-					log.debug("CACHE: Deleting cached {} with uuid", obj.getClass().getSimpleName(), obj.getUuid());
+			
+				if(getCachePolicy(obj.getClass()) == CachePolicy.CLEAR_COLLECTION) {
+					cachedObjects.clear();
+				} else {
+					if(log.isDebugEnabled()) {
+						log.debug("CACHE: Deleting cached {} with uuid", obj.getClass().getSimpleName(), obj.getUuid());
+					}
+					cachedObjects.remove(obj.getUuid());
 				}
-				cachedObjects.remove(obj.getUuid());
 			}
 			onObjectDeleted(obj);
 		} catch(Throwable e) {
