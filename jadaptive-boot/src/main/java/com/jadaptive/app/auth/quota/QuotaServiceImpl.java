@@ -145,7 +145,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		if(hasUserContext()) {
 			for(QuotaThreshold q : userQuotas.getAssignedObjects(UserQuota.class,
 					getCurrentUser(), 
-					SearchField.eq("key.uuid", key.getUuid()))) {
+					SearchField.in("key.uuid", key.getUuid()))) {
 				if(Objects.isNull(minimumValue)) {
 					minimumValue = q;
 					continue;
@@ -157,7 +157,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			
 			for(QuotaThreshold q : sessionQuotas.getAssignedObjects(SessionQuota.class,
 					getCurrentUser(), 
-					SearchField.eq("key.uuid", key.getUuid()))) {
+					SearchField.in("key.uuid", key.getUuid()))) {
 				if(Objects.isNull(minimumValue)) {
 					minimumValue = q;
 					continue;
@@ -169,8 +169,8 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		}
 		
 		for(TenantQuota q : systemTenantQuotas.searchObjects(TenantQuota.class,
-				SearchField.eq("tenant.uuid", getCurrentTenant().getUuid()), 
-				SearchField.eq("key.uuid", key.getUuid()))) {
+				SearchField.in("tenant.uuid", getCurrentTenant().getUuid()), 
+				SearchField.in("key.uuid", key.getUuid()))) {
 			if(q.getAllTenants()) {
 				if(Objects.isNull(minimumValue)) {
 					minimumValue = q;

@@ -104,6 +104,17 @@ var UploadWidget = {
 			});
 		return countFiles;
 	},
+	size: function() {
+		var size = 0;
+			$('.file-input').each(function(idx, file) {
+				for(i=0;i<this.files.length;i++) {
+					if($("[data-filename='" + this.files[i].name + "']").length > 0) {
+						size += this.files[i].size;
+					}
+				}
+			});
+		return size;
+	},
 	reset: function() {
 			$('#progressBar').css("width", 0).attr('aria-valuenow', "0");
 			$('#helpText').show(); 
@@ -136,6 +147,17 @@ var UploadWidget = {
 				}
 				
 				var countFiles = 0;
+				var totalSize = 0;
+				$('.file-input').each(function(idx, file) {
+					for(i=0;i<this.files.length;i++) {
+						if($("[data-filename='" + this.files[i].name + "']").length > 0) {
+							totalSize += this.files[i].size;
+						}
+					}
+				});
+				
+				fd.append('totalSize', totalSize);
+				
 				$('.file-input').each(function(idx, file) {
 					for(i=0;i<this.files.length;i++) {
 						if($("[data-filename='" + this.files[i].name + "']").length > 0) {
