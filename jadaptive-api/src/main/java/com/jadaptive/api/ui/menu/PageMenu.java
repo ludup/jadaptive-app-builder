@@ -30,4 +30,6 @@ public @interface PageMenu {
 	
 	String withoutPermission() default "";
 	
+	String feature() default "";
+	
 }

@@ -145,6 +145,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		if(hasUserContext()) {
 			for(QuotaThreshold q : userQuotas.getAssignedObjects(UserQuota.class,
 					getCurrentUser(), 
+					SearchField.eq("resourceKey", UserQuota.RESOURCE_KEY),
 					SearchField.in("key.uuid", key.getUuid()))) {
 				if(Objects.isNull(minimumValue)) {
 					minimumValue = q;
@@ -157,6 +158,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			
 			for(QuotaThreshold q : sessionQuotas.getAssignedObjects(SessionQuota.class,
 					getCurrentUser(), 
+					SearchField.eq("resourceKey", SessionQuota.RESOURCE_KEY),
 					SearchField.in("key.uuid", key.getUuid()))) {
 				if(Objects.isNull(minimumValue)) {
 					minimumValue = q;
@@ -169,6 +171,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		}
 		
 		for(TenantQuota q : systemTenantQuotas.searchObjects(TenantQuota.class,
+				SearchField.eq("resourceKey", TenantQuota.RESOURCE_KEY),
 				SearchField.in("tenant.uuid", getCurrentTenant().getUuid()), 
 				SearchField.in("key.uuid", key.getUuid()))) {
 			if(q.getAllTenants()) {
@@ -183,7 +186,8 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		}
 		
 		for(IPQuota q : ipQuotas.searchObjects(IPQuota.class,
-				SearchField.eq("key.uuid", key.getUuid()))) {
+				SearchField.eq("resourceKey", IPQuota.RESOURCE_KEY),
+				SearchField.in("key.uuid", key.getUuid()))) {
 			if(q.getAllAddresses() ||  matchesIPAddress(q, Request.getRemoteAddress())) {
 			
 				if(Objects.isNull(minimumValue)) {
@@ -197,7 +201,8 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		}
 		
 		for(IPQuota q : systemIPQuotas.list(IPQuota.class,
-				SearchField.eq("key.uuid", key.getUuid()))) {
+				SearchField.eq("resourceKey", IPQuota.RESOURCE_KEY),
+				SearchField.in("key.uuid", key.getUuid()))) {
 			if(q.getAllAddresses() ||  matchesIPAddress(q, Request.getRemoteAddress())) {
 			
 				if(Objects.isNull(minimumValue)) {

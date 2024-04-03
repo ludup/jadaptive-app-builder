@@ -1,6 +1,5 @@
 package com.jadaptive.app.ui.menu;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,16 +9,20 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.templates.TemplateUtils;
+import com.jadaptive.api.tenant.FeatureEnablementService;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuExtender;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
@@ -59,6 +62,14 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 				if(Objects.nonNull(pageMenus)) {
 					for(PageMenu m : pageMenus) {
 						
+						boolean enabled = true;
+						if(StringUtils.isNotBlank(m.feature())) {
+							try {
+								enabled = ApplicationServiceImpl.getInstance().getBean(FeatureEnablementService.class).isEnabled(m.feature());
+							} catch(NoSuchBeanDefinitionException e) {
+								enabled = false;
+							}
+						}
 						String path = m.path();
 						String uuid = m.uuid();
 						String bundle = m.bundle();
@@ -66,24 +77,23 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 						
 						if(UUIDEntity.class.isAssignableFrom(clz)) {
 							try {
-								UUIDEntity e = (UUIDEntity) clz.getConstructor().newInstance();
+								String resourceKey = TemplateUtils.lookupClassResourceKey(clz);
 								if(StringUtils.isBlank(path)) {
-									path = "/app/ui/search/" + e.getResourceKey();
+									path = "/app/ui/search/" + resourceKey;
 								}
 								if(StringUtils.isBlank(bundle)) {
-									bundle = e.getResourceKey();
+									bundle = resourceKey;
 								}
 								if(StringUtils.isBlank(uuid)) {
 									uuid = UUID.randomUUID().toString();
 								}
 								if(StringUtils.isBlank(i18n)) {
-									i18n = e.getResourceKey() + ".names";
+									i18n = resourceKey + ".names";
 								}
-							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-									| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+							} catch (IllegalArgumentException | SecurityException e) {
 							}
 						}
-						annotatedMenus.add(new DynamicMenu(m, path, bundle, uuid, i18n));
+						annotatedMenus.add(new DynamicMenu(m, path, bundle, uuid, i18n, enabled));
 					}
 				}
 			}
@@ -146,14 +156,21 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		String bundle;
 		String uuid;
 		String i18n;
+		boolean enabled;
 		PageMenu m;
 		
-		DynamicMenu(PageMenu m, String path, String bundle, String uuid, String i18n) {
+		DynamicMenu(PageMenu m, String path, String bundle, String uuid, String i18n, boolean enabled) {
 			this.m = m;
 			this.path = path;
 			this.bundle = bundle;
 			this.uuid = uuid;
 			this.i18n = i18n;
+			this.enabled = enabled;
+		}
+		
+		@Override
+		public boolean isEnabled() {
+			return enabled;
 		}
 		
 		@Override

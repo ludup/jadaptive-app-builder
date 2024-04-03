@@ -151,8 +151,8 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
         try (ScanResult scanResult =
                 new ClassGraph()                   
                     .enableAllInfo()     
-                    .addClassLoader(getClass().getClassLoader())
-                    .whitelistPackages(Application.class.getPackage().getName())   
+                    .addClassLoader(Application.class.getClassLoader())
+                    .whitelistPackages("com.jadaptive.app", "com.jadaptive.api")  
                     .scan()) {                  
             for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(clz.getName())) {
             	try {

@@ -12,7 +12,7 @@ import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.user.User;
 
-@ObjectDefinition(resourceKey = UserQuota.RESOURCE_KEY, system = true)
+@ObjectDefinition(resourceKey = UserQuota.RESOURCE_KEY, bundle = QuotaThreshold.RESOURCE_KEY)
 @ObjectViewDefinition(value = UserQuota.USERS_VIEW, weight = 99998)
 @ObjectViewDefinition(value = UserQuota.ROLES_VIEW, weight = 99999)
 @GenerateEventTemplates

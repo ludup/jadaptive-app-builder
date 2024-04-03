@@ -11,7 +11,7 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
-@ObjectDefinition(resourceKey = IPQuota.RESOURCE_KEY, system = true)
+@ObjectDefinition(resourceKey = IPQuota.RESOURCE_KEY, bundle = QuotaThreshold.RESOURCE_KEY)
 @ObjectViewDefinition(value = IPQuota.IP_VIEW, weight = 99999)
 @GenerateEventTemplates
 public class IPQuota extends QuotaThreshold {

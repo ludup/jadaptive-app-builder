@@ -10,7 +10,7 @@ import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.tenant.Tenant;
 
-@ObjectDefinition(resourceKey = TenantQuota.RESOURCE_KEY, system = true)
+@ObjectDefinition(resourceKey = TenantQuota.RESOURCE_KEY, system = true, bundle = QuotaThreshold.RESOURCE_KEY)
 @ObjectViewDefinition(value = TenantQuota.TENANTS_VIEW, weight = 99999)
 @GenerateEventTemplates
 public class TenantQuota extends QuotaThreshold {

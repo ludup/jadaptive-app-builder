@@ -3,6 +3,8 @@ package com.jadaptive.api.quotas;
 import java.util.concurrent.TimeUnit;
 
 import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.permissions.FeatureGroup;
+import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -16,10 +18,11 @@ import com.jadaptive.api.ui.menu.ApplicationMenuService;
 import com.jadaptive.api.ui.menu.PageMenu;
 
 @ObjectDefinition(resourceKey = QuotaThreshold.RESOURCE_KEY, scope = ObjectScope.GLOBAL)
-@PageMenu(i18n = QuotaThreshold.RESOURCE_KEY, icon = "fa-traffic-light-stop", parent = ApplicationMenuService.ADMINISTRATION_MENU, bundle = QuotaThreshold.RESOURCE_KEY)
+@PageMenu(i18n = QuotaThreshold.RESOURCE_KEY + ".names", icon = "fa-traffic-light-stop", parent = ApplicationMenuService.ADMINISTRATION_MENU, bundle = QuotaThreshold.RESOURCE_KEY, feature = "Quotas")
 @TableView(defaultColumns = {"key", "periodValue", "periodUnit", "value"})
 @ObjectViewDefinition(value = QuotaThreshold.QUOTA_VIEW, weight = 0)
 @ObjectViewDefinition(value = QuotaThreshold.OPTIONS_VIEW, weight = 1000)
+@LicensedFeature(group = FeatureGroup.PROFESSIONAL, value = "Quotas")
 public abstract class QuotaThreshold extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 1389709000295821056L;
