@@ -8,6 +8,8 @@ import javax.servlet.http.Cookie;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.servlet.Request;
@@ -23,15 +25,25 @@ import com.jadaptive.utils.Utils;
 @CustomizablePage
 public class Footer extends AbstractPageExtension {
 	
+	private static final Logger log = LoggerFactory.getLogger(Footer.class);
+	
 	@Override
 	public void process(Document document, Element element, Page page) throws IOException {
 
 		Element bootstrap = HtmlPage.getCurrentDocument().selectFirst("#bootstrapCss");
+		if(log.isDebugEnabled()) {
+			log.debug("Bootstrap css is {}", bootstrap);
+		}
 		if(Objects.nonNull(bootstrap)) {
 			BootstrapTheme current = getThemeFromCookie(BootstrapTheme.DEFAULT);
-			
+			if(log.isDebugEnabled()) {
+				log.debug("Bootstrap theme is {}", current);
+			}
 			if(BootstrapTheme.hasCss(current)) {
-				PageHelper.appendStylesheet(document, String.format("/app/content/npm2mvn/npm/bootswatch/current/dist/%s/bootstrap.min.css", BootstrapTheme.getThemeCssName(current)), "bootstrapTheme");	
+				if(log.isDebugEnabled()) {
+					log.debug("Applying theme {}", current);
+				}
+				PageHelper.appendStylesheet(document, BootstrapTheme.getThemeCssUrl(current), "bootstrapTheme");	
 			}
 
 			Element footer = document.selectFirst("#footer");

@@ -14,13 +14,7 @@ import com.jadaptive.utils.Utils;
 public class PageHelper {
 	
 	public static void appendLast(Element parent, String lastOfTag, Element node) {
-		
-		Elements elements = parent.select(lastOfTag);
-		if(elements.isEmpty()) {
-			parent.appendChild(node);
-		} else {
-			elements.last().after(node);
-		}
+		parent.appendChild(node);
 	}
 
 	public static Element getOrCreateTag(Document document, String tag) {
