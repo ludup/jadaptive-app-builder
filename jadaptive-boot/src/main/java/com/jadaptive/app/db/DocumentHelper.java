@@ -318,6 +318,7 @@ public class DocumentHelper {
 			tmp.append(field.getFormVariable());
 			tmp.append(".");
 			return buildObject(request,  
+					parameters,
 					template.getResourceKey(),
 					tmp.toString(),
 					template).getDocument();
