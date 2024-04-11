@@ -258,8 +258,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 					if(collection.countDocuments(
 							Filters.and(Filters.eq(field, document.get(field)),
 									Filters.not(Filters.eq("_id", existingUUID)))) > 0L) {
-						throw new RepositoryException(String.format("An object already exists with the same %s value!", 
-								WordUtils.capitalize(field)));
+						throw new RepositoryException(String.format("An object already exists with the same %s value '%s'!", 
+								WordUtils.capitalize(field), document.get(field)));
 					}
 				}
 			}
