@@ -14,4 +14,6 @@ public interface TaskImpl<T extends Task> extends ExtensionPoint {
 	default String getIconGroup() { return "fa-solid"; }
 	
 	String getIcon();
+
+	String getBundle();
 }

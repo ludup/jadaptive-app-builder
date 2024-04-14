@@ -51,6 +51,7 @@ import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.db.DocumentHelper;
+import com.jadaptive.app.db.MongoEntity;
 import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 import com.jadaptive.utils.UUIDObjectUtils;
@@ -92,6 +93,11 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public AbstractObject createNew(ObjectTemplate template) {
 		return createViaObjectBean(template);
+	}
+	
+	@Override
+	public AbstractObject createNew(String resourceKey) {
+		return createViaObjectBean(templateService.get(resourceKey));
 	}
 	
 	@Override

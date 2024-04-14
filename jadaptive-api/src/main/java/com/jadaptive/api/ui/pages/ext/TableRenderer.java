@@ -397,17 +397,17 @@ public class TableRenderer {
 				}
 			
 				if(creatableTemplates.size() > 1) {
-					createMultipleOptionAction(element, "create", creatableTemplates, template.getCollectionKey());
+					createMultipleOptionAction(element, "create", creatableTemplates, template.getBundle());
 				} else if(creatableTemplates.size() == 1) {
 					
 					ObjectTemplate singleTemplate = creatableTemplates.get(0);
 					if(Objects.isNull(parentObject)) {
-						createTableAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
+						createTableAction(element, String.format("create/%s", singleTemplate.getBundle()), 
 								template.getCollectionKey(), "fa-plus", "fa-solid",
 								"primary", "create", "readWrite");					
 					} else {
 
-						createStashAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
+						createStashAction(element, String.format("create/%s", singleTemplate.getBundle()), 
 								template.getCollectionKey(), "fa-plus", "fa-solid", "primary",
 								"create", "readWrite");					
 					}
@@ -415,11 +415,11 @@ public class TableRenderer {
 			} else {
 				
 				if(Objects.isNull(parentObject)) {
-					createTableAction(element, String.format("create/%s", template.getResourceKey()), 
+					createTableAction(element, String.format("create/%s", template.getBundle()), 
 						template.getCollectionKey(), "fa-plus", "fa-solid",
 						"primary", "create", "readWrite");
 				} else {
-					createStashAction(element, String.format("create/%s", template.getResourceKey()), 
+					createStashAction(element, String.format("create/%s", template.getBundle()), 
 							template.getCollectionKey(), "fa-plus", "fa-solid",
 							"primary", "create", "readWrite");	
 				}

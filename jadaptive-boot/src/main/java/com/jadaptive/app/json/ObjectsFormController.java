@@ -44,7 +44,7 @@ import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.app.db.DocumentHelper;
-import com.jadaptive.app.entity.MongoEntity;
+import com.jadaptive.app.db.MongoEntity;
 
 @Controller
 public class ObjectsFormController {

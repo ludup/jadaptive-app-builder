@@ -8,6 +8,10 @@ public class PasswordFormInput extends FormInputRender {
 	public PasswordFormInput(ObjectTemplate template, TemplateViewField field) {
 		super(template, field);
 	}
+	
+	public PasswordFormInput(String resourceKey,String formVariable, String bundle) {
+		super(resourceKey, formVariable, bundle);
+	}
 
 	@Override
 	public String getInputType() {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
@@ -34,7 +35,7 @@ public class I18N extends AbstractPageExtension {
 
 	void replaceAttributes(Document document, boolean remove) {
 		for(Element e : document.getElementsByAttribute("jad:i18n")) {
-			String bundle = e.attr("jad:bundle");
+			String bundle = StringUtils.defaultIfEmpty(e.attr("jad:bundle"), "missing");
 			boolean optional = e.hasAttr("jad:optional");
 			List<Object> args = new ArrayList<>();
 			int arg = 0;

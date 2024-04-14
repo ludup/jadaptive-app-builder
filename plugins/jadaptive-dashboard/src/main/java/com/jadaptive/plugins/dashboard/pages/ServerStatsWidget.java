@@ -71,12 +71,13 @@ public class ServerStatsWidget implements DashboardWidget {
 
 	@Override
 	public boolean wantsDisplay() {
-		try {
-			permissionService.assertAdministrator();
-			return true;
-		} catch(AccessDeniedException e) {
-			return false;
-		}
+//		try {
+//			permissionService.assertAdministrator();
+//			return true;
+//		} catch(AccessDeniedException e) {
+//			return false;
+//		}
+		return false;
 	}
 
 }

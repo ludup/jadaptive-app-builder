@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemOnlyObjectDatabase;
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.repository.RepositoryException;
@@ -31,6 +32,16 @@ public class SystemOnlyObjectDatabaseImpl<T extends UUIDEntity>
 	
 	protected Tenant getCurrentTenant() {
 		return tenantService.getSystemTenant();
+	}
+	
+	@Override
+	public AbstractObject createObject(String resourceKey) {
+		return new MongoEntity(resourceKey);
+	}
+	
+	@Override
+	public Class<?> getObjectClass() {
+		return MongoEntity.class;
 	}
 	
 	@Override

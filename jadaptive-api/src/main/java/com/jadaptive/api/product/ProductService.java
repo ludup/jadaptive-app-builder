@@ -20,7 +20,8 @@ public interface ProductService {
 		VMSEE_EC2,
 		SECURE_NODE,
 		LICENSE_SERVER,
-		WINDOWS_CONNECT
+		WINDOWS_CONNECT,
+		GABBLE_CLOUD
 	}
 	
 	ProductId getProductId(); 

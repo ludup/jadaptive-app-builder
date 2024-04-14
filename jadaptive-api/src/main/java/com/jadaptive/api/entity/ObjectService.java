@@ -61,5 +61,7 @@ public interface ObjectService {
 	Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit,
 			String sortColumn, SortOrder order);
 
+	AbstractObject createNew(String resourceKey);
+
 	
 }

@@ -31,6 +31,7 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.db.DocumentHelper;
+import com.jadaptive.app.db.MongoEntity;
 
 @Repository
 public class ObjectRepositoryImpl implements ObjectRepository {

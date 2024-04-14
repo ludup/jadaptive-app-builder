@@ -148,25 +148,26 @@ var UploadWidget = {
 				
 				var countFiles = 0;
 				var totalSize = 0;
+
 				$('.file-input').each(function(idx, file) {
 					for(i=0;i<this.files.length;i++) {
 						if($("[data-filename='" + this.files[i].name + "']").length > 0) {
 							totalSize += this.files[i].size;
+							countFiles++;
 						}
 					}
 				});
 				
 				fd.append('totalSize', totalSize);
 				
-				$('.file-input').each(function(idx, file) {
+				$('.file-input').each(function() {
 					for(i=0;i<this.files.length;i++) {
 						if($("[data-filename='" + this.files[i].name + "']").length > 0) {
 							fd.append('file', this.files[i]);
-							countFiles++;
 						}
 					}
 				});
-			    
+ 
 				$('#progressBar').css("width", 0).attr('aria-valuenow', "0");
 				$('#helpText').hide(); 
 				$('#uploadButton').attr('disabled', 'disabled');

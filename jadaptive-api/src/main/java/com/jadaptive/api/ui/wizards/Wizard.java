@@ -114,6 +114,10 @@ public class Wizard extends HtmlPage implements ObjectPage {
 
 			injectHtmlSection(document, el, ext);
 			
+			Element n = document.selectFirst("form");
+			if(Objects.isNull(n)) {
+				
+			}
 			/**
 			 * This is here to remove the previous style of wizard where an info alert
 			 * panel is used. We now render this automatically below so this code removes

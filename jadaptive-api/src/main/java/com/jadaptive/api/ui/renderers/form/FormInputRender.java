@@ -20,6 +20,10 @@ public abstract class FormInputRender extends FieldInputRender {
 		super(resourceKey, formVariable, bundle);
 	}
 	
+	public FormInputRender(String resourceKey,String formVariable, String bundle) {
+		super(resourceKey, formVariable, bundle);
+	}
+	
 	public void disableDecoration() {
 		this.decorate = false;
 	}
