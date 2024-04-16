@@ -396,14 +396,14 @@ public class TableRenderer {
 					}
 				}
 			
-				if(creatableTemplates.size() > 1) {
+				if(creatableTemplates.size() > 0) {
 					createMultipleOptionAction(element, "create", creatableTemplates, template.getBundle());
-				} else if(creatableTemplates.size() == 1) {
+				} /*else if(creatableTemplates.size() == 1) {
 					
 					ObjectTemplate singleTemplate = creatableTemplates.get(0);
 					if(Objects.isNull(parentObject)) {
 						createTableAction(element, String.format("create/%s", singleTemplate.getBundle()), 
-								template.getCollectionKey(), "fa-plus", "fa-solid",
+								singleTemplate.getCollectionKey(), "fa-plus", "fa-solid",
 								"primary", "create", "readWrite");					
 					} else {
 
@@ -411,7 +411,7 @@ public class TableRenderer {
 								template.getCollectionKey(), "fa-plus", "fa-solid", "primary",
 								"create", "readWrite");					
 					}
-				}
+				}*/
 			} else {
 				
 				if(Objects.isNull(parentObject)) {

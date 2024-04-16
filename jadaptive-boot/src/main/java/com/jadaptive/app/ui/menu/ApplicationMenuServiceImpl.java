@@ -190,7 +190,7 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		
 		@Override
 		public String getParent() {
-			return m.parent();
+			return StringUtils.isBlank(m.parent()) ? null : m.parent();
 		}
 		
 		@Override

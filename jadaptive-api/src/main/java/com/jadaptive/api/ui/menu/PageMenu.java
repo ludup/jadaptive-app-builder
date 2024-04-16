@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Repeatable(PageMenus.class)
 public @interface PageMenu {
 
-	String parent();
+	String parent() default "";
 
 	int weight() default 9999;
 
