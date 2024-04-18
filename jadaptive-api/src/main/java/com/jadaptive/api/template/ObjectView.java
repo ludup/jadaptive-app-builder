@@ -21,9 +21,9 @@ public @interface ObjectView {
 	
 	boolean disableLabels() default false;
 	
-	String dependsOn() default "";
+	/*String dependsOn() default "";
 	
-	String dependsValue() default "";
+	String dependsValue() default "";*/
 	
 	boolean autosave() default false;
 	

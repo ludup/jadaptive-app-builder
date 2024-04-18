@@ -47,6 +47,7 @@ import com.jadaptive.api.template.TemplateView;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.ViewType;
+import com.jadaptive.api.templates.ObjectDynamicField;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Html;
@@ -397,7 +398,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			
 		}
-		
 		Elements thisElement = element.select("#" + field.getResourceKey());
 		processDynamicElements(thisElement, fieldView, obj);
 		
@@ -953,24 +953,28 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 	private void processDynamicElements(Elements thisElement, TemplateViewField fieldView, AbstractObject obj) {
 
-		Element row = thisElement.parents().select(".row").first();
+		Map<String,ObjectDynamicField> optionalFields = generateDynamicFields(currentTemplate.get());
+		Element row = thisElement.parents().select(".field").first();
 		if(Objects.nonNull(row)) {
 			
-			if(fieldView.isOptional()) {
-				row.attr("data-depends-on", fieldView.getDependsOn());
-				row.attr("data-depends-value", fieldView.getDependsValue());
+			if(optionalFields.containsKey(fieldView.getVariable())) {
+				
+				String dependsOn = optionalFields.get(fieldView.getVariable()).dependsOn();
+				String dependsValue = optionalFields.get(fieldView.getVariable()).dependsValue();
+				row.attr("data-depends-on", dependsOn);
+				row.attr("data-depends-value", dependsValue);
 				row.addClass("processDepends");
-				String[] matchValues = fieldView.getDependsValue().split(",");
+				String[] matchValues = dependsValue.split(",");
 				boolean matches = false;
 				for(String matchValue : matchValues) {
 					boolean expectedResult = !matchValue.startsWith("!");
 					if(!expectedResult) {
 						matchValue = matchValue.substring(1);
 					}
-					FieldTemplate depends = currentTemplate.get().getField(fieldView.getDependsOn());
+					FieldTemplate depends = currentTemplate.get().getField(dependsOn);
 					if(Objects.nonNull(obj)) {
 						if(depends == null)
-							throw new IllegalArgumentException("The field '" + fieldView.getDependsOn() + "' that '" + fieldView.getResourceKey() + "' depends on does not exist.");
+							throw new IllegalArgumentException("The field '" + dependsOn + "' that '" + fieldView.getResourceKey() + "' depends on does not exist.");
 						Object value = obj.getValue(depends);
 						if(Objects.isNull(value)) {
 							value = depends.getDefaultValue();
@@ -997,6 +1001,20 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 	}
 	
+	private Map<String, ObjectDynamicField> generateDynamicFields(ObjectTemplate objectTemplate) {
+		
+		Map<String,ObjectDynamicField> tmp = new HashMap<>();
+		
+		Class<?> clz = templateService.getTemplateClass(objectTemplate.getResourceKey());
+		ObjectDynamicField[] fields = clz.getAnnotationsByType(ObjectDynamicField.class);
+		if(Objects.nonNull(fields)) {
+			for(ObjectDynamicField field : fields) {
+				tmp.put(field.field(), field);
+			}
+		}
+		return tmp;
+	}
+
 	private String getDefaultValue(TemplateViewField field) {
 		return encodeValue(field, field.getField().getDefaultValue());
 	}

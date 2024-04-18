@@ -45,6 +45,20 @@ public class TemplateViewField {
 			return objectPath;
 		}
 	}
+	
+	public String getVariable() {
+		if(Objects.isNull(objectPath) || objectPath.isEmpty()) {
+			return field.getFormVariable();
+		} 
+		
+		StringBuffer buf = new StringBuffer();
+		for(FieldTemplate t : objectPath) {
+			buf.append(t.getFormVariable());
+			buf.append(".");
+		}
+		buf.append(field.getFormVariable());
+		return buf.toString();
+	}
 
 	public boolean isDisableEncoding() {
 		return disableEncoding;
@@ -91,17 +105,17 @@ public class TemplateViewField {
 		return field.isManuallyEncrypted() || field.isAutomaticallyEncrypted();
 	}
 	
-	public boolean isOptional() {
-		return Objects.nonNull(view) && StringUtils.isNotBlank(view.dependsOn());
-	}
-	
-	public String getDependsOn() {
-		return view.dependsOn();
-	}
-	
-	public String getDependsValue() {
-		return view.dependsValue();
-	}
+//	public boolean isOptional() {
+//		return Objects.nonNull(view) && StringUtils.isNotBlank(view.dependsOn());
+//	}
+//	
+//	public String getDependsOn() {
+//		return view.dependsOn();
+//	}
+//	
+//	public String getDependsValue() {
+//		return view.dependsValue();
+//	}
 	
 	public boolean isAutoSave() {
 		return Objects.nonNull(view) && view.autosave();

@@ -346,16 +346,14 @@ $(function() {
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
 		$('.processDepends').each(function() {
-			debugger; 
+			var field = $(this);
 			var dependsOn = $(this).data('depends-on');
 			var dependsValue = $(this).attr('data-depends-value');
 			
-			var allInput = $('#' + dependsOn);
-			if(!allInput.length) {
-				allInput = $('input[name=' + dependsOn + ']');
-			}
+			var allInput = $('input[name="' + dependsOn + '"]');
+			
 			var matchValues = dependsValue.split(',');
-			var matches = false;
+
 			allInput.each(function(i, input) {
 				input = $(input);
 				$.each(matchValues, function(i, obj) {
@@ -374,20 +372,20 @@ $(function() {
 						value = input.val();
 					}
 					if(obj == value) {
-						matches = expectedResult;
+						if(expectedResult) {
+							field.removeClass('d-none');
+						} else {
+							field.addClass('d-none');
+						}
 						return true;
+					} else {
+						field.removeClass('d-none');
 					}
 					return false;
 				});
-				if(matches) {
-					return true;
-				}
+				
 			});
-			if(matches) {
-				$(this).removeClass('d-none');
-			} else {
-				$(this).addClass('d-none');
-			}
+			
 		});
 	});
 	
