@@ -10,10 +10,12 @@ import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
+import com.jadaptive.api.templates.ObjectDynamicField;
 
 @ObjectDefinition(resourceKey = IPQuota.RESOURCE_KEY, bundle = QuotaThreshold.RESOURCE_KEY)
 @ObjectViewDefinition(value = IPQuota.IP_VIEW, weight = 99999)
 @GenerateEventTemplates
+@ObjectDynamicField(field = "ipAddresses", dependsOn = "allAddresses", dependsValue = "false")
 public class IPQuota extends QuotaThreshold {
 
 	private static final long serialVersionUID = 6344677508192690706L;
@@ -25,7 +27,7 @@ public class IPQuota extends QuotaThreshold {
 	Boolean allAddresses;
 	
 	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(value = IP_VIEW, dependsOn = "allAddresses", dependsValue = "false")
+	@ObjectView(value = IP_VIEW)
 	@Validator(type = ValidationType.IPV4)
 	@Validator(type = ValidationType.IPV6)
 	@Validator(type = ValidationType.CIDR_V4)
