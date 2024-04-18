@@ -1,5 +1,7 @@
 package com.jadaptive.app.scheduler;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
@@ -47,5 +49,34 @@ public class LockableTaskScheduler implements TaskScheduler {
 
 	public void setPoolSize(Integer poolSize) {
 		scheduler.setPoolSize(poolSize);
+	}
+
+	@Override
+	public ScheduledFuture<?> schedule(Runnable task, Instant startTime) {
+		return scheduler.schedule(task, new Date(startTime.toEpochMilli()));
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Duration period) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

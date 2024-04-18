@@ -4,9 +4,6 @@ import java.io.FileNotFoundException;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -34,6 +31,9 @@ import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.ui.pages.auth.Login.LoginForm;
 import com.jadaptive.api.user.FakeUser;
 import com.jadaptive.api.user.User;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )

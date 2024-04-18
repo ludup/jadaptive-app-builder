@@ -146,7 +146,10 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			for(QuotaThreshold q : userQuotas.getAssignedObjects(UserQuota.class,
 					getCurrentUser(), 
 					SearchField.eq("resourceKey", UserQuota.RESOURCE_KEY),
-					SearchField.in("key.uuid", key.getUuid()))) {
+					SearchField.eq("key.uuid", key.getUuid()))) {
+				if(!q.getKey().equals(key)) {
+					continue;
+				}
 				if(Objects.isNull(minimumValue)) {
 					minimumValue = q;
 					continue;
@@ -159,7 +162,10 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			for(QuotaThreshold q : sessionQuotas.getAssignedObjects(SessionQuota.class,
 					getCurrentUser(), 
 					SearchField.eq("resourceKey", SessionQuota.RESOURCE_KEY),
-					SearchField.in("key.uuid", key.getUuid()))) {
+					SearchField.eq("key.uuid", key.getUuid()))) {
+				if(!q.getKey().equals(key)) {
+					continue;
+				}
 				if(Objects.isNull(minimumValue)) {
 					minimumValue = q;
 					continue;
@@ -173,7 +179,10 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		for(TenantQuota q : systemTenantQuotas.searchObjects(TenantQuota.class,
 				SearchField.eq("resourceKey", TenantQuota.RESOURCE_KEY),
 				SearchField.in("tenant.uuid", getCurrentTenant().getUuid()), 
-				SearchField.in("key.uuid", key.getUuid()))) {
+				SearchField.eq("key.uuid", key.getUuid()))) {
+			if(!q.getKey().equals(key)) {
+				continue;
+			}
 			if(q.getAllTenants()) {
 				if(Objects.isNull(minimumValue)) {
 					minimumValue = q;
@@ -187,7 +196,10 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		
 		for(IPQuota q : ipQuotas.searchObjects(IPQuota.class,
 				SearchField.eq("resourceKey", IPQuota.RESOURCE_KEY),
-				SearchField.in("key.uuid", key.getUuid()))) {
+				SearchField.eq("key.uuid", key.getUuid()))) {
+			if(!q.getKey().equals(key)) {
+				continue;
+			}
 			if(q.getAllAddresses() ||  matchesIPAddress(q, Request.getRemoteAddress())) {
 			
 				if(Objects.isNull(minimumValue)) {
@@ -202,7 +214,10 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		
 		for(IPQuota q : systemIPQuotas.list(IPQuota.class,
 				SearchField.eq("resourceKey", IPQuota.RESOURCE_KEY),
-				SearchField.in("key.uuid", key.getUuid()))) {
+				SearchField.eq("key.uuid", key.getUuid()))) {
+			if(!q.getKey().equals(key)) {
+				continue;
+			}
 			if(q.getAllAddresses() ||  matchesIPAddress(q, Request.getRemoteAddress())) {
 			
 				if(Objects.isNull(minimumValue)) {

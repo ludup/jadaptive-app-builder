@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.lang.model.UnknownEntityException;
-import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +27,8 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.NamePairValue;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class PermissionController extends BootstrapTableController<NamePairValue> {

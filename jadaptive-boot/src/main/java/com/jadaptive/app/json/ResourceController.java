@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.FileNameMap;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -12,15 +13,11 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.MimeMappings;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Controller;
@@ -37,6 +34,9 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.ResponseHelper;
 import com.jadaptive.utils.FileUtils;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class ResourceController extends ExceptionHandlingController {
@@ -55,7 +55,7 @@ public class ResourceController extends ExceptionHandlingController {
 	@Autowired
 	private SessionUtils sessionUtils;
 	
-	private MimeMappings mimeTypes = new MimeMappings(MimeMappings.DEFAULT);
+	//private MimeMappings mimeTypes = new MimeMappings(MimeMappings.DEFAULT);
 	
 	@RequestMapping(value="/ping", method = RequestMethod.GET, produces = "text/plain")
 	@ResponseBody
@@ -155,7 +155,10 @@ public class ResourceController extends ExceptionHandlingController {
 	}
 
 	private String getContentType(Path resource) {
-		String type = mimeTypes.get(getExtension(resource.getFileName().toString()));
+		
+		FileNameMap fileNameMap = URLConnection.getFileNameMap();
+	    String type = fileNameMap.getContentTypeFor(resource.getFileName().toString());
+		
 		if(Objects.isNull(type)) {
 			return "application/octet-stream";
 		}
@@ -163,20 +166,23 @@ public class ResourceController extends ExceptionHandlingController {
 	}
 	
 	private String getContentType(String resource) {
-		String type = mimeTypes.get(getExtension(resource));
+		
+		FileNameMap fileNameMap = URLConnection.getFileNameMap();
+	    String type = fileNameMap.getContentTypeFor(resource);
+		
 		if(Objects.isNull(type)) {
 			return "application/octet-stream";
 		}
 		return type;
 	}
 
-	private String getExtension(String filename) {
-		int idx = filename.toString().lastIndexOf(".");
-		if(idx > -1) {
-			return filename.substring(idx+1);
-		}
-		return filename;
-	}
+//	private String getExtension(String filename) {
+//		int idx = filename.toString().lastIndexOf(".");
+//		if(idx > -1) {
+//			return filename.substring(idx+1);
+//		}
+//		return filename;
+//	}
 
 	private Path resolveResource(HttpServletRequest request, String resourceUri) throws FileNotFoundException {
 		

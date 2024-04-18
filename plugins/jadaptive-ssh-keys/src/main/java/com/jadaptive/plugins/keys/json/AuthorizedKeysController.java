@@ -4,9 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.IOUtils;
 import org.pf4j.Extension;
 import org.slf4j.Logger;
@@ -27,6 +24,9 @@ import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.keys.AuthorizedKeyService;
 import com.jadaptive.plugins.keys.PublicKeyType;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 @Extension

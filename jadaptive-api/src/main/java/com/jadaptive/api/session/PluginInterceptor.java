@@ -1,9 +1,9 @@
 package com.jadaptive.api.session;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.pf4j.ExtensionPoint;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface PluginInterceptor extends ExtensionPoint {
 

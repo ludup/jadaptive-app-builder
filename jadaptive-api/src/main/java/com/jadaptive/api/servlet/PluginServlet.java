@@ -1,8 +1,8 @@
 package com.jadaptive.api.servlet;
 
-import javax.servlet.http.HttpServlet;
-
 import org.pf4j.ExtensionPoint;
+
+import jakarta.servlet.http.HttpServlet;
 
 public class PluginServlet extends HttpServlet implements ExtensionPoint {
 

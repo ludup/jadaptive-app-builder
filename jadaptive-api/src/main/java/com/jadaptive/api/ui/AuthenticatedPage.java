@@ -3,9 +3,6 @@ package com.jadaptive.api.ui;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,6 +13,9 @@ import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.user.User;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class AuthenticatedPage extends HtmlPage {
 

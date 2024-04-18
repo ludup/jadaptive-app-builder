@@ -28,7 +28,6 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -43,7 +42,6 @@ import org.springframework.web.multipart.support.StandardMultipartHttpServletReq
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
-import com.jadaptive.api.db.AbstractObjectDatabase;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
@@ -70,6 +68,8 @@ import com.jadaptive.api.template.ValidationType;
 //import com.jadaptive.app.encrypt.EncryptionServiceImpl;
 //import com.jadaptive.app.entity.MongoEntity;
 import com.jadaptive.utils.Utils;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class DocumentHelper {
 

@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import org.apache.commons.fileupload2.core.FileItemInput;
+import org.apache.commons.fileupload2.core.FileItemInputIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.FileItemIterator;
 import org.apache.tomcat.util.http.fileupload.FileItemStream;
@@ -16,9 +18,9 @@ public class UploadIterator implements Iterator<Upload> {
 
 	static final Logger log = LoggerFactory.getLogger(UploadIterator.class);
 	
-	FileItemIterator iter;
-	FileItemStream next = null;
-	public UploadIterator(FileItemIterator iter, FileItemStream next) throws FileUploadException, IOException {
+	FileItemInputIterator iter;
+	FileItemInput next = null;
+	public UploadIterator(FileItemInputIterator iter, FileItemInput next) throws FileUploadException, IOException {
 		this.iter = iter;
 		this.next = next;
 	}
@@ -30,7 +32,7 @@ public class UploadIterator implements Iterator<Upload> {
 		} else {
 			try {
 				return iter.hasNext();
-			} catch (FileUploadException | IOException e) {
+			} catch (IOException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
 		}
@@ -61,7 +63,7 @@ public class UploadIterator implements Iterator<Upload> {
 				}
 				break;
 			}
-		} catch (FileUploadException | IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 		

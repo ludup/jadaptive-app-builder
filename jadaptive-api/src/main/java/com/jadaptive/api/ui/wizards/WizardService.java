@@ -1,6 +1,6 @@
 package com.jadaptive.api.ui.wizards;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface WizardService {
 

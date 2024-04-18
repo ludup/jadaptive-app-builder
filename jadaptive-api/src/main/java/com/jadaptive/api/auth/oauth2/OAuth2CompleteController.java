@@ -12,9 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +26,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Authorization;
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Token;
 import com.jadaptive.api.ui.Feedback;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class OAuth2CompleteController {

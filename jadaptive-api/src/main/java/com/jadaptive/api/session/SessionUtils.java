@@ -13,10 +13,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +24,10 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class SessionUtils {
@@ -266,7 +266,7 @@ public class SessionUtils {
 		
 	}
 
-	public Locale getLocale(HttpServletRequest request) {
+	public Locale getLocale(jakarta.servlet.http.HttpServletRequest request) {
 
 		if (request.getSession().getAttribute(USER_LOCALE) == null) {
 

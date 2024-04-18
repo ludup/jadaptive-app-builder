@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.jadaptive</groupId>
 	<artifactId>jadaptive</artifactId>
@@ -15,7 +13,7 @@
 		<artifactId>oss-parent</artifactId>
 		<version>7</version>
 	</parent>
-	
+
 	<licenses>
 		<license>
 			<name>Apache License, Version 2.0</name>
@@ -24,7 +22,7 @@
 			<comments>A commercial-friendly OSS license</comments>
 		</license>
 	</licenses>
-	
+
 	<distributionManagement>
 		<repository>
 			<id>libs-releases-local</id>
@@ -97,6 +95,9 @@
 					<annotationProcessors>
 						<annotationProcessor>org.pf4j.processor.ExtensionAnnotationProcessor</annotationProcessor>
 					</annotationProcessors>
+					<compilerArgs>
+						<arg>-parameters</arg>
+					</compilerArgs>
 				</configuration>
 			</plugin>
 		</plugins>

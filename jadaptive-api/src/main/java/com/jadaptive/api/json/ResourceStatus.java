@@ -2,9 +2,6 @@ package com.jadaptive.api.json;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-@XmlRootElement(name="resourceStatus")
 public class ResourceStatus<T>  implements Serializable {
 
 	private static final long serialVersionUID = -9000307782767880219L;

@@ -1,9 +1,9 @@
 package com.jadaptive.app;
 
-import javax.servlet.ServletContext;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import jakarta.servlet.ServletContext;
 
 @Component
 public class ServletContextHolder {

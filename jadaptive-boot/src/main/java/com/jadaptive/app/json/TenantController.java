@@ -1,7 +1,6 @@
 package com.jadaptive.app.json;
 
 import javax.lang.model.UnknownEntityException;
-import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +20,8 @@ import com.jadaptive.api.json.EntityStatus;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class TenantController {

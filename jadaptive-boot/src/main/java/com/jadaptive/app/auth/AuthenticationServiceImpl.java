@@ -12,8 +12,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpSession;
-
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -61,6 +59,8 @@ import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
 import com.jadaptive.api.ui.pages.auth.Password;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
+
+import jakarta.servlet.http.HttpSession;
 
 @Service
 @Permissions(keys = { AuthenticationService.USER_LOGIN_PERMISSION }, defaultPermissions = {

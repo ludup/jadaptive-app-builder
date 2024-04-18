@@ -4,10 +4,6 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
-
 import org.jsoup.nodes.Document;
 
 import com.jadaptive.api.session.Session;
@@ -16,6 +12,10 @@ import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.user.User;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSessionBindingEvent;
+import jakarta.servlet.http.HttpSessionBindingListener;
 
 public interface AuthenticationService {
 	

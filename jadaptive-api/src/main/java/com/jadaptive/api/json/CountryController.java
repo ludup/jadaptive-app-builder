@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.lang.model.UnknownEntityException;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +22,8 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.session.UnauthorizedException;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class CountryController extends BootstrapTableController<Country> {

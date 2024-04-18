@@ -2,11 +2,11 @@ package com.jadaptive.api.ui.wizards;
 
 import java.io.FileNotFoundException;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.pf4j.ExtensionPoint;
 
 import com.jadaptive.api.ui.Page;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface WizardFlow extends ExtensionPoint {
 

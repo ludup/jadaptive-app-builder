@@ -3,8 +3,6 @@ package com.jadaptive.api.ui.pages.ext;
 import java.io.IOException;
 import java.util.Objects;
 
-import javax.servlet.http.Cookie;
-
 import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -20,6 +18,8 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
 import com.jadaptive.utils.Utils;
+
+import jakarta.servlet.http.Cookie;
 
 @Component
 @CustomizablePage

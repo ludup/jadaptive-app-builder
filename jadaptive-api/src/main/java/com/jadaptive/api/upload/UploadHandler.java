@@ -3,8 +3,6 @@ package com.jadaptive.api.upload;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.pf4j.ExtensionPoint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +10,8 @@ import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface UploadHandler extends ExtensionPoint {
 

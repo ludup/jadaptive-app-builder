@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.Objects;
 
 import javax.lang.model.UnknownEntityException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -45,6 +43,9 @@ import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.MongoEntity;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class ObjectsFormController {

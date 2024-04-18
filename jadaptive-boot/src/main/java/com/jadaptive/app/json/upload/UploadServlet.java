@@ -6,17 +6,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.apache.commons.fileupload2.core.FileItemInput;
+import org.apache.commons.fileupload2.core.FileItemInputIterator;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.http.fileupload.FileItemIterator;
-import org.apache.tomcat.util.http.fileupload.FileItemStream;
-import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +27,12 @@ import com.jadaptive.api.upload.UploadIterator;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.FileUtils;
 import com.jadaptive.utils.ParameterHelper;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(name="uploadServlet", description="Servlet for handing file uploads", urlPatterns = { "/upload/*" })
 public class UploadServlet extends HttpServlet {
@@ -89,23 +89,26 @@ public class UploadServlet extends HttpServlet {
 		if(session.isPresent()) {
 			permissionService.setupUserContext(session.get().getUser());
 		} 
+		
+		if(!JakartaServletFileUpload.isMultipartContent(req)) {
+			throw new IOException("Upload must be a multipart request!");
+		}
 
 		Map<String,String[]> parameters = new HashMap<>();
 		
 		try {
 			// Create a new file upload handler
-			ServletFileUpload upload = new ServletFileUpload();
+			JakartaServletFileUpload<?,?> upload = new JakartaServletFileUpload<>();
 
 			// Parse the request
-			FileItemIterator iter = upload.getItemIterator(req);
-			
-			
-			while (iter.hasNext()) {
-			    FileItemStream item = iter.next();
+			FileItemInputIterator iter = upload.getItemIterator(req);
+
+			while(iter.hasNext()) {
+			    FileItemInput item = iter.next();
 
 			    if (item.isFormField()) {
 			    	String name = item.getFieldName();
-			        String value = IOUtils.toString(item.openStream(), "UTF-8");
+			        String value = IOUtils.toString(item.getInputStream(), "UTF-8");
 			        ParameterHelper.setValue(parameters, name, value);
 			    } else {
 				    

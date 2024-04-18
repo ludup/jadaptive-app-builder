@@ -2,13 +2,13 @@ package com.jadaptive.api.ui.wizards;
 
 import java.io.FileNotFoundException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.jsoup.nodes.Document;
 
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.UriRedirect;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public abstract class WizardPage extends HtmlPage {
 

@@ -13,8 +13,6 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +43,8 @@ import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.Utils;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class TenantServiceImpl implements TenantService, JsonTemplateEnabledService<Tenant>, UUIDObjectService<Tenant> {

@@ -2,13 +2,13 @@ package com.jadaptive.api.tenant;
 
 import java.util.concurrent.Callable;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService.UncheckedCloseable;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDObjectService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface TenantService extends UUIDObjectService<Tenant> {
 

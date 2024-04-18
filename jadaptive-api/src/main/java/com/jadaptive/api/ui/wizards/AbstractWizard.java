@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,6 +20,8 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.UriRedirect;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	

@@ -3,7 +3,6 @@ package com.jadaptive.app.json;
 import java.util.Collection;
 
 import javax.lang.model.UnknownEntityException;
-import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +36,8 @@ import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.app.db.MongoEntity;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
 public class ObjectsJsonController extends BootstrapTableController<AbstractObject>{

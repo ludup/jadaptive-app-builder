@@ -8,9 +8,6 @@ import java.net.URL;
 import java.util.Objects;
 
 import javax.lang.model.UnknownEntityException;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -41,6 +38,10 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageExtension;
 import com.jadaptive.api.ui.Redirect;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class UserInterfaceController extends AuthenticatedController {
@@ -127,8 +128,8 @@ public class UserInterfaceController extends AuthenticatedController {
 
 	}
 	
-	@RequestMapping(value="/app/css/{name}", method = RequestMethod.GET)
-	public void doStylesheet(HttpServletRequest request, HttpServletResponse response, @PathVariable String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
+	@RequestMapping(value="/app/css/{name}", method = RequestMethod.GET, produces = { "text/css" })
+	public void doStylesheet(HttpServletRequest request, HttpServletResponse response, @PathVariable("name") String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
 		sessionUtils.setCachable(response, 600);
 		
@@ -157,8 +158,8 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	
 	
-	@RequestMapping(value="/app/js/{name}", method = RequestMethod.GET)
-	public void doScript(HttpServletRequest request, HttpServletResponse response, @PathVariable String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
+	@RequestMapping(value="/app/js/{name}", method = RequestMethod.GET, produces = { "text/javascript" })
+	public void doScript(HttpServletRequest request, HttpServletResponse response, @PathVariable("name") String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 		
 		sessionUtils.setCachable(response, 600);
 		
@@ -166,7 +167,7 @@ public class UserInterfaceController extends AuthenticatedController {
 			try {
 				Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".js", "")));
 				URL url = page.getClass().getResource(page.getJsResource());
-				response.setContentType("application/javascript");
+				response.setContentType("text/javascript");
 				response.setStatus(HttpStatus.OK.value());
 				
 				try(InputStream in = new ReaderInputStream(
@@ -177,7 +178,7 @@ public class UserInterfaceController extends AuthenticatedController {
 				try {
 					PageExtension page = pageCache.resolveExtension(name.replace(".js", ""));
 					URL url = page.getClass().getResource(page.getJsResource());
-					response.setContentType("application/javascript");
+					response.setContentType("text/javascript");
 					response.setStatus(HttpStatus.OK.value());
 					try(InputStream in = new ReaderInputStream(
 							new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name), "UTF-8")) {

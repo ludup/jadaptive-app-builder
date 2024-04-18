@@ -2,8 +2,6 @@ package com.jadaptive.api.permissions;
 
 import java.util.Objects;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +12,8 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class AuthenticatedController extends ExceptionHandlingController {
 

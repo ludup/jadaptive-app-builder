@@ -3,13 +3,14 @@ package com.jadaptive.api.upload;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.tomcat.util.http.fileupload.FileItemHeaders;
-import org.apache.tomcat.util.http.fileupload.FileItemStream;
+import org.apache.commons.fileupload2.core.FileItemHeaders;
+import org.apache.commons.fileupload2.core.FileItemInput;
+
 
 public class Upload {
 
-	FileItemStream item;
-	public Upload(FileItemStream item) {
+	FileItemInput item;
+	public Upload(FileItemInput item) {
 		this.item = item;
 	}
 	
@@ -22,7 +23,7 @@ public class Upload {
 	}
 
 	public InputStream openStream() throws IOException {
-		return item.openStream();
+		return item.getInputStream();
 	}
 	
 	public String getContentType() {
