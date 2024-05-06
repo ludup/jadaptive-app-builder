@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.servlet.Request;
