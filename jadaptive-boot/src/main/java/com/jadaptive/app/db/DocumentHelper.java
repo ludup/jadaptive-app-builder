@@ -69,7 +69,7 @@ import com.jadaptive.api.template.ValidationType;
 //import com.jadaptive.app.entity.MongoEntity;
 import com.jadaptive.utils.Utils;
 
-import jakarta.servlet.http.HttpServletRequest;
+//import jakarta.servlet.http.HttpServletRequest;
 
 public class DocumentHelper {
 
@@ -255,17 +255,17 @@ public class DocumentHelper {
 		return val[0];
 	}
 
-	public static AbstractObject buildRootObject(HttpServletRequest request, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
-		return buildObject(request, resourceKey, "", template);
-	}
+//	public static AbstractObject buildRootObject(HttpServletRequest request, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
+//		return buildObject(request, resourceKey, "", template);
+//	}
 	
 	public static AbstractObject buildRootObject(Map<String, String[]> parameters, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
 		return buildObject(parameters, resourceKey, "", template);
 	}
 
-	public static AbstractObject buildObject(HttpServletRequest request, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
-		return buildObject(request.getParameterMap(), resourceKey, formVariablePrefix, template);
-	}
+//	public static AbstractObject buildObject(HttpServletRequest request, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
+//		return buildObject(request.getParameterMap(), resourceKey, formVariablePrefix, template);
+//	}
 	
 	public static AbstractObject buildObject(Map<String, String[]> parameters, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
 
@@ -345,65 +345,53 @@ public class DocumentHelper {
 				return Boolean.valueOf(value);
 			}
 		case IMAGE:
-			if(Request.get() instanceof StandardMultipartHttpServletRequest) {
-				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)Request.get()).getMultiFileMap().get(field.getFormVariable());
-				if(file.isEmpty()) {
-					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
-				}
-				if(file.size() > 1) {
-					throw new IllegalStateException("Multiple file parts for single value!");
-				}
-				MultipartFile f = file.get(0);
-				
-				String encoded = Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
-				if(StringUtils.isBlank(encoded)) {
-					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
-				}
-				try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
-					BufferedImage bimg = ImageIO.read(in);
-					if(Objects.isNull(bimg)) {
-						throw new ValidationException(String.format("The file %s does not appear to contain an image!", f.getOriginalFilename()));
-					}
-					
-					int width          = bimg.getWidth();
-					int height         = bimg.getHeight();
-					
-					int maxHeight = field.getValidationValueInt(ValidationType.IMAGE_HEIGHT, -1);
-					int maxWidth = field.getValidationValueInt(ValidationType.IMAGE_WIDTH, -1);
-					
-					if(maxWidth > -1 && maxWidth < width) {
-						throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
-					}
-					
-					if(maxHeight > -1 && maxHeight < height) {
-						throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
-					}
-					
-					if(StringUtils.isNotBlank(f.getOriginalFilename()) && f.getSize() > 0) {
-						return String.format("data:%s;base64, %s", f.getContentType(), encoded);
-					}
+		{
+			
+			String encoded = getParameter(parameters, field, formVariablePrefix);
+			if(StringUtils.isBlank(encoded)) {
+				return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
+			}
+			
+			String contentType = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_contentType");
+			String filename = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
+			
+			
+			try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
+				BufferedImage bimg = ImageIO.read(in);
+				if(Objects.isNull(bimg)) {
+					throw new ValidationException(String.format("The file %s does not appear to contain an image!", filename));
 				}
 				
+				int width          = bimg.getWidth();
+				int height         = bimg.getHeight();
+				
+				int maxHeight = field.getValidationValueInt(ValidationType.IMAGE_HEIGHT, -1);
+				int maxWidth = field.getValidationValueInt(ValidationType.IMAGE_WIDTH, -1);
+				
+				if(maxWidth > -1 && maxWidth < width) {
+					throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+				}
+				
+				if(maxHeight > -1 && maxHeight < height) {
+					throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+				}
+				
+				return String.format("data:%s;base64, %s", contentType, encoded);	
 			}
-			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
-		case FILE:
-			if(Request.get() instanceof StandardMultipartHttpServletRequest) {
-				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)Request.get()).getMultiFileMap().get(field.getFormVariable());
-				if(Objects.isNull(file)) {
-					return null;
-				}
-				if(file.isEmpty()) {
-					return null;
-				}
-				if(file.size() > 1) {
-					throw new IllegalStateException("Multiple file parts for single value!");
-				}
-				MultipartFile f = file.get(0);
-				if(StringUtils.isNotBlank(f.getOriginalFilename()) && f.getSize() > 0) {
-					return Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
-				}
+		}
+		case ATTACHMENT:
+		{
+			String uuid = getParameter(parameters, field, formVariablePrefix);
+			
+			if(StringUtils.isNotBlank(uuid)) {
+				String name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
+				Document doc = new Document();
+				convertObjectToDocument(generateReference(uuid, name), doc);
+				return doc;
 			}
-			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
+			
+			return null;
+		}
 		default:
 			if(Objects.isNull(value)) {
 				

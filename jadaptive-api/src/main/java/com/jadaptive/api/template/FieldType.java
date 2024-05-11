@@ -20,7 +20,8 @@ public enum FieldType {
 	FILE,
 	COUNTRY, 
 	OPTIONS,
-	TIME;
+	TIME,
+	ATTACHMENT;
 	
 	ValidationType[] options;
 	boolean canDefault = false;

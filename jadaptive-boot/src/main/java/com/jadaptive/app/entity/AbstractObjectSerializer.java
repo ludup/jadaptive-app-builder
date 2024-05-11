@@ -180,6 +180,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 			case TIME:
 				gen.writeStringField(t.getResourceKey(), value.toString());
 				break;
+			case ATTACHMENT:
 			case OBJECT_REFERENCE:
 				gen.writeObjectField(t.getResourceKey(), value);
 				break;

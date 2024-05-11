@@ -522,6 +522,10 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			element.insertChildren(0, table.render());
 			break;
 		}
+//		case FILE:
+//		{
+//			element.appendChild(Html.div()).attr("jad-id", "uploadWidget");
+//		}
 		case OBJECT_REFERENCE:
 		{
 			String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
@@ -739,8 +743,19 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case FILE:
 		{
+			String uuid = getFieldValue(fieldView, obj);
 			FileFormInput render = new FileFormInput(currentTemplate.get(), fieldView);
-			render.renderInput(element, getFieldValue(fieldView, obj));
+			render.renderInput(element, uuid);
+			break;
+		}
+		case ATTACHMENT:
+		{
+			String uuid = getFieldValue(fieldView, obj);
+			if(StringUtils.isNotBlank(uuid)) {
+				AbstractObject file = obj.getChild(field);
+				element.appendChild(Html.span((String)file.getValue("name"))
+						.addClass("text-muted"));
+			}
 			break;
 		}
 		case TEXT_AREA:
@@ -1079,6 +1094,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				break;
 			}
 			break;
+		case ATTACHMENT:
 		case OBJECT_REFERENCE:
 		{
 			AbstractObject ref = obj.getChild(field.getField());
