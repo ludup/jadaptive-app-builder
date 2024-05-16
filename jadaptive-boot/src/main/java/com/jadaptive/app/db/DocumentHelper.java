@@ -624,7 +624,7 @@ public class DocumentHelper {
 						for(Object embedded : list) {
 							if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 								Document embeddedDocument = (Document) embedded;
-								elements.add(convertDocumentToObject(UUIDEntity.class, embeddedDocument, classLoader));
+								elements.add(convertDocumentToObject(type, embeddedDocument, classLoader));
 							} else if(embedded instanceof Document) {
 								UUIDReference ref = DocumentHelper.convertDocumentToObject(UUIDReference.class, (Document) embedded);
 								AbstractObject e = (AbstractObject) 
