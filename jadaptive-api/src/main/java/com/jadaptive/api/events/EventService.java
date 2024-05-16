@@ -41,6 +41,8 @@ public interface EventService {
 
 	<T extends UUIDEntity> void saved(Class<T> clz, EventListener<ObjectEvent<T>> handler);
 
+	<T extends UUIDEntity> void saving(Class<T> clz, EventListener<ObjectEvent<T>> handler);
+
 	
 
 }

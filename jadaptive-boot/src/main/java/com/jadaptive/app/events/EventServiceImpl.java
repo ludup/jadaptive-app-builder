@@ -198,6 +198,12 @@ public class EventServiceImpl implements EventService {
 		on(Events.created(templateService.getTemplateResourceKey(clz)), handler);
 		on(Events.updated(templateService.getTemplateResourceKey(clz)), handler);
 	}
+	
+	@Override
+	public <T extends UUIDEntity> void saving(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+		on(Events.creating(templateService.getTemplateResourceKey(clz)), handler);
+		on(Events.updating(templateService.getTemplateResourceKey(clz)), handler);
+	}
 
 	@Override
 	public <T extends UUIDEntity> void deleted(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
