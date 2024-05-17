@@ -158,7 +158,12 @@ public class Utils {
 		try {
 			return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss.SSS Z").parse(date);
 		} catch (ParseException e) {
-			throw new IllegalStateException(e.getMessage(), e);
+			try {
+				return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+			} catch (ParseException e1) {
+				throw new IllegalStateException(e.getMessage(), e1);
+			}
+			
 		}
 	}
 	
