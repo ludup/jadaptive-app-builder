@@ -31,14 +31,48 @@ public class Request {
 		threadRequests.remove();
 		threadResponses.remove();
 	}
-	
+
 	public static String getRemoteAddress() {
-		String xForwardedFor = Request.get().getHeader("X-Forwarded-For");
+		return getRemoteAddress(Request.get());
+	}
+	
+	public static String getRemoteAddress(HttpServletRequest req) {
+		String xForwardedFor = req.getHeader("X-Forwarded-For");
 		if(StringUtils.isNotBlank(xForwardedFor)) {
 			String[] results = xForwardedFor.split(",");
 			return results[0];
 		}
-		return Request.get().getRemoteAddr();
+		return req.getRemoteAddr();
+	}
+
+	public static String getThisHost() {
+		return getThisHost(Request.get());
+	}
+	
+	public static String getThisHostname(HttpServletRequest req) {
+		String hostAndPort = getThisHost(req);
+		int idx = hostAndPort.indexOf(':');
+		return idx == -1 ? hostAndPort : hostAndPort.substring(0, idx);
+	}
+	
+	public static int getThisPort(HttpServletRequest req) {
+		String hostAndPort = getThisHost(req);
+		int idx = hostAndPort.indexOf(':');
+		return idx == -1 ? ( req.isSecure() ? 443 : 80 ) : Integer.parseInt(hostAndPort.substring(idx + 1));
+	}
+	
+	public static String getThisHost(HttpServletRequest req) {
+		String host = req.getHeader("X-Forwarded-Host");
+		if(host == null || host.length() == 0)
+			host = req.getHeader("X-Host");
+		
+		if(host!=null) {
+			int idx;
+			if ((idx = host.indexOf(":")) > -1) {
+				host = host.substring(0, idx);
+			}
+		}
+		return host;
 	}
 
 	public static String generateBaseUrl(HttpServletRequest request) {
