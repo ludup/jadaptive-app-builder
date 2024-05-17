@@ -51,27 +51,25 @@ public class Request {
 	
 	public static String getThisHostname(HttpServletRequest req) {
 		String hostAndPort = getThisHost(req);
+		if(hostAndPort == null)
+			return null;
 		int idx = hostAndPort.indexOf(':');
 		return idx == -1 ? hostAndPort : hostAndPort.substring(0, idx);
 	}
 	
 	public static int getThisPort(HttpServletRequest req) {
 		String hostAndPort = getThisHost(req);
+		int defport = req.isSecure() ? 443 : 80;
+		if(hostAndPort == null)
+			return defport;
 		int idx = hostAndPort.indexOf(':');
-		return idx == -1 ? ( req.isSecure() ? 443 : 80 ) : Integer.parseInt(hostAndPort.substring(idx + 1));
+		return idx == -1 ? ( defport ) : Integer.parseInt(hostAndPort.substring(idx + 1));
 	}
 	
 	public static String getThisHost(HttpServletRequest req) {
 		String host = req.getHeader("X-Forwarded-Host");
 		if(host == null || host.length() == 0)
-			host = req.getHeader("X-Host");
-		
-		if(host!=null) {
-			int idx;
-			if ((idx = host.indexOf(":")) > -1) {
-				host = host.substring(0, idx);
-			}
-		}
+			host = req.getHeader("Host");
 		return host;
 	}
 
