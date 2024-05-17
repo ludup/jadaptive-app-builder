@@ -24,7 +24,7 @@ public interface ObjectService {
 
 	void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException;
 
-	void deleteAll(String resourceKey) throws ObjectException;
+//	void deleteAll(String resourceKey) throws ObjectException;
 
 	long count(String resourceKey, String searchField, String searchValue);
 
@@ -60,6 +60,8 @@ public interface ObjectService {
 
 	Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit,
 			String sortColumn, SortOrder order);
+
+	void cascadeDelete(ObjectTemplate template, AbstractObject e);
 
 	
 }

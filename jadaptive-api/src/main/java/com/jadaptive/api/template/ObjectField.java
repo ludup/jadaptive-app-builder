@@ -40,4 +40,6 @@ public @interface ObjectField {
 		String references() default "";
 
 		String meta() default "";
+		
+		boolean cascadeDeldte() default false;
 }
