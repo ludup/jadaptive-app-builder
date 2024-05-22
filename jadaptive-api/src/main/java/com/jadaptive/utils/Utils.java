@@ -122,9 +122,9 @@ public class Utils {
 			return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 		} catch(IllegalStateException e) {
 			try {
-				return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS");
+				return parseDate(date, "yyyy-MM-dd HH:mm:ss.SSS");
 			} catch(IllegalStateException e2) {
-				return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss");
+				return parseDate(date, "yyyy-MM-dd HH:mm:ss");
 			}
 		}
 	}
