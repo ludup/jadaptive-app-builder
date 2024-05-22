@@ -118,7 +118,15 @@ public class Utils {
 	}
 	
 	public static Date parseTimestamp(String date) {
-		return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		try {
+			return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		} catch(IllegalStateException e) {
+			try {
+				return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS");
+			} catch(IllegalStateException e2) {
+				return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss");
+			}
+		}
 	}
 	
 	public static String formatISODate(Date date) {
