@@ -130,7 +130,11 @@ public class I18N {
 		try {
 			return getResourceOrException(locale, resourceBundle, key, arguments);
 		} catch (MissingResourceException mre) {
-			return "[i18n/" + resourceBundle + "/" + key + "]";
+			try {
+				return getResourceOrException(locale, "default", key, arguments);
+			} catch (MissingResourceException mre2) {
+				return "[i18n/" + resourceBundle + "/" + key + "]";
+			}
 		}
 	}
 	
