@@ -26,7 +26,8 @@ public class OAuth2Request {
 		private String codeVerifier;
 		
 		private String[] scopes;
-		private String responseType;
+		private String responseType ;
+		private String grantType;
 		private String nonce;
 		private String codeChallengeMethod;
 
@@ -38,6 +39,7 @@ public class OAuth2Request {
 			clientSecret = request.clientSecret;
 			scopes = request.scopes;
 			responseType = request.responseType;
+			grantType = request.grantType;
 			nonce= request.nonce;
 			codeChallenge = request.codeChallenge;
 			codeChallengeMethod = request.codeChallengeMethod;
@@ -51,6 +53,7 @@ public class OAuth2Request {
 			clientSecret = req.getParameter("client_secret");
 			scopes = req.getParameterValues("scope");
 			responseType = req.getParameter("response_type");
+			grantType = req.getParameter("grant_type");
 			nonce= req.getParameter("nonce");
 			codeChallenge = req.getParameter("code_challenge");
 			codeChallengeMethod = req.getParameter("code_challenge_method");
@@ -141,6 +144,11 @@ public class OAuth2Request {
 			return this;
 		}
 
+		public Builder withGrantType(String grantType) {
+			this.grantType = grantType;
+			return this;
+		}
+
 		public Builder withNonce(String nonce) {
 			this.nonce = nonce;
 			return this;
@@ -167,6 +175,7 @@ public class OAuth2Request {
 	
 	private final String[] scopes;
 	private final String responseType;
+	private final String grantType;
 	private final String nonce;
 	private final String codeChallengeMethod;
 	
@@ -181,6 +190,7 @@ public class OAuth2Request {
 		this.codeVerifier = builder.codeVerifier;
 		this.scopes = builder.scopes;
 		this.responseType = builder.responseType;
+		this.grantType = builder.grantType;
 		this.nonce = builder.nonce;
 		this.codeChallengeMethod = builder.codeChallengeMethod;
 	}
@@ -195,9 +205,14 @@ public class OAuth2Request {
 			}
 			
 			var res = baseUri + 
-					"/oauth2-start?" + clientIdTxt + 
-					"response_type=code&" +
+					"/oauth2-start?" + clientIdTxt +
 					"redirect_uri=" + URLEncoder.encode(redirectUri, "UTF-8");
+			
+			if(responseType != null)
+				res += "&response_type=" + responseType;
+			
+			if(grantType != null)
+				res += "&grant_type=" + grantType;
 			
 			if(state != null) {
 				res += "&state=" + URLEncoder.encode(state, "UTF-8");
@@ -237,6 +252,10 @@ public class OAuth2Request {
 
 	public String requestedResponseType() {
 		return responseType;
+	}
+
+	public String requestedGrantType() {
+		return grantType;
 	}
 
 	public String[] requestedScopes() {
