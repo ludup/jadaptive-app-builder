@@ -63,10 +63,13 @@ public class Dashboard extends AuthenticatedPage {
 	@Override
 	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
 		
+		log.info("REMOVEME: Starting Dashboard");
 		super.generateAuthenticatedContent(document);
 		
+		log.info("REMOVEME: Getting widgets");
 		List<DashboardWidget> widgets = new ArrayList<>(applicationService.getBeans(DashboardWidget.class));
 		
+		log.info("REMOVEME: Sorting widgets");
 		Collections.sort(widgets, (o1,o2) ->  o1.weight().compareTo(o2.weight()));
 		
 		List<DashboardType> sortedTypes = getTypes(widgets);
@@ -76,9 +79,14 @@ public class Dashboard extends AuthenticatedPage {
 		Element tabButtons = document.getElementById("nav-tab");
 		int tabs = 0;
 		
+		log.info("REMOVEME: Into user context");
 		try(var ctx = permissionService.userContext()) {
+			
+			log.info("REMOVEME: Iterating widgets");
+			
 			for(DashboardType type : sortedTypes) {
 			
+				log.info("REMOVEME: Processing {} widgets", type.name());
 				int count = 0;
 				Element left;
 				Element right;
@@ -118,9 +126,16 @@ public class Dashboard extends AuthenticatedPage {
 				root.appendChild(left = new Element("div").addClass("col-md-6"));
 				root.appendChild(right = new Element("div").addClass("col-md-6"));;
 				
+				log.info("REMOVEME: Adding {} widgets", type.name());
+				
 				for(DashboardWidget widget : widgets) {
 					
+					log.info("REMOVEME: Processing {}", widget.getName());
+					
 					if(widget.getType()==type && widget.wantsDisplay()) {
+						
+						log.info("REMOVEME: Displaying {}", widget.getName());
+						
 						remainingTypes.remove(widget.getType());
 						Element row = count % 2 == 0 ? left : right;
 						Element w;
@@ -149,9 +164,10 @@ public class Dashboard extends AuthenticatedPage {
 									.appendChild(Html.i("fa-solid", "fa-question-circle")));
 						}
 						
-						
+						log.info("REMOVEME: Getting {} HTML", widget.getName());
 						URL html = widget.getClass().getResource(widget.getClass().getSimpleName() + ".html");
 						if(Objects.nonNull(html)) {
+							log.info("REMOVEME: Reading {} HTML", widget.getName());
 							try(InputStream in = html.openStream()) {
 								Document doc = Jsoup.parse(IOUtils.toString(in, "UTF-8"));
 								Elements children = doc.selectFirst("body").children();
@@ -164,18 +180,23 @@ public class Dashboard extends AuthenticatedPage {
 						}
 						
 						try {
+							log.info("REMOVEME: Rendering {}", widget.getName());
 							widget.renderWidget(document, w);
 							row.appendChild(e);
 							
+							log.info("REMOVEME: Getting {} CSS", widget.getName());
 							URL stylesheet = widget.getClass().getResource(widget.getClass().getSimpleName() + ".css");
 							if(Objects.nonNull(stylesheet)) {
 								PageHelper.appendStylesheet(document,"/app/style/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".css");
 							}
+							
+							log.info("REMOVEME: Getting {} JS", widget.getName());
 							URL script = widget.getClass().getResource(widget.getClass().getSimpleName() + ".js");
 							if(Objects.nonNull(script)) {
 								PageHelper.appendHeadScript(document, "/app/script/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".js");
 							}
 							
+							log.info("REMOVEME: Finished {}", widget.getName());
 							
 							count++;
 						} catch(Throwable ex) {
@@ -192,6 +213,8 @@ public class Dashboard extends AuthenticatedPage {
 				document.selectFirst("#nav-" + t.cssId()).addClass("d-none");
 			} 
 		}
+		
+		log.info("REMOVEME: Ending Dashboard");
 	}
 
 	static List<DashboardType> getTypes(List<DashboardWidget> widgets) {
