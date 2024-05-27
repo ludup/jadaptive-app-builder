@@ -63,7 +63,9 @@ window.onload = function() {
 			var form = new FormData();
 
 			$('input[name="selectedUUID').each(function() {
-				form.append("uuid", $(this).val());
+				if ($(this).is(":checked")) {
+					form.append("uuid", $(this).val());
+				}
 			});
 			
 		    var actionUrl = $(this).data('url');
@@ -74,7 +76,7 @@ window.onload = function() {
 		        data: form,
 		        contentType: false,
    				processData: false, 
-		        success: function()
+		        done: function()
 		        {
 		          window.location.reload();
 		        }
