@@ -76,7 +76,7 @@ window.onload = function() {
 		        data: form,
 		        contentType: false,
    				processData: false, 
-		        done: function()
+		        complete: function()
 		        {
 		          window.location.reload();
 		        }
