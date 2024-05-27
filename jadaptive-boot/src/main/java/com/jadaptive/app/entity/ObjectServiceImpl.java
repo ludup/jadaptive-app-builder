@@ -193,37 +193,36 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	@Override
 	public void cascadeDelete(ObjectTemplate template, AbstractObject e) {
 		
+		
 		if(log.isInfoEnabled()) {
 			log.info("Checking cascade delete fields for {}/{}", template.getResourceKey(), e.getUuid());
 		}
+		
 		for(FieldTemplate t : template.getFields()) {
 			switch(t.getFieldType()) {
 			case OBJECT_EMBEDDED:
-				cascadeDelete(templateService.get(
-						t.getValidationValue(ValidationType.RESOURCE_KEY)),
-						e.getChild(t));
+				if(t.getCollection()) {
+					for(AbstractObject c : e.getObjectCollection(t.getResourceKey())) {
+						cascadeDelete(templateService.get(
+								t.getValidationValue(ValidationType.RESOURCE_KEY)),
+								c);
+					}
+				} else {
+					cascadeDelete(templateService.get(
+							t.getValidationValue(ValidationType.RESOURCE_KEY)),
+							e.getChild(t));
+				}
 				break;
 			case OBJECT_REFERENCE:
 				if(t.isCascadeDelete()) {
-					AbstractObject ref = e.getChild(t);
-					if(Objects.nonNull(ref)) {
-						
-						ObjectTemplate refTemplate = templateService.get(t.getValidationValue(ValidationType.RESOURCE_KEY));
-						AbstractObject refObject = getViaObjectBean(template,ref.getUuid());
-						
-						try {
-							assertForiegnReferences(refTemplate, refObject.getUuid());
-							if(log.isInfoEnabled()) {
-								log.info("Cascading delete on object {}/{}", refTemplate.getResourceKey(), refObject.getUuid());
-							}
-							deleteViaObjectBean(refObject, refTemplate);
-						} catch(ObjectException e2) {
-							if(log.isInfoEnabled()) {
-								log.info("NOT Cascading delete object {}/{} because other references still exit", 
-										refTemplate.getResourceKey(), refObject.getUuid());
-							}
+					if(t.getCollection()) {
+						for(AbstractObject c : e.getObjectCollection(t.getResourceKey())) {
+							cascadeReference(c, template, t);
 						}
+					} else {
+						cascadeReference(e.getChild(t), template, t);
 					}
+					
 				}
 				break;
 			default:
@@ -232,6 +231,29 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 	}
 	
+	private void cascadeReference(AbstractObject ref, ObjectTemplate template, FieldTemplate t) {
+		
+		if(Objects.nonNull(ref)) {
+			
+			ObjectTemplate refTemplate = templateService.get(t.getValidationValue(ValidationType.RESOURCE_KEY));
+			AbstractObject refObject = getViaObjectBean(template,ref.getUuid());
+			
+			try {
+				assertForiegnReferences(refTemplate, refObject.getUuid());
+				if(log.isInfoEnabled()) {
+					log.info("Cascading delete on object {}/{}", refTemplate.getResourceKey(), refObject.getUuid());
+				}
+				deleteViaObjectBean(refObject, refTemplate);
+			} catch(ObjectException e2) {
+				if(log.isInfoEnabled()) {
+					log.info("NOT Cascading delete object {}/{} because other references still exit", 
+							refTemplate.getResourceKey(), refObject.getUuid());
+				}
+			}
+		}
+		
+	}
+
 	@Override
 	public void rebuildReferences(ObjectTemplate template) {
 		
