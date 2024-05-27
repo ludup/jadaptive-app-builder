@@ -58,11 +58,11 @@ window.onload = function() {
 	$('.selectionAction').click(function(e) {
 		e.preventDefault();
 		
-		//if($('input[name="selectionUUID').length > 0) {
+		if($('input[name="selectedUUID"]').length > 0) {
 			
 			var form = new FormData();
-			form.append("uuid", "some-uuid");
-			$('input[name="selectionUUID').each(function() {
+
+			$('input[name="selectedUUID').each(function() {
 				form.append("uuid", $(this).val());
 			});
 			
@@ -80,7 +80,9 @@ window.onload = function() {
 		        }
 		    });
 			
-		//}
+		} else {
+			alert("No rows selected!");
+		}
 	})
 
 };
