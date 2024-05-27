@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 @Repeatable(value = TableActions.class)
 public @interface TableAction  {
 	
-	enum Target { TABLE, ROW };
+	enum Target { TABLE, ROW, SELECTION };
 	
 	enum Window { SELF, BLANK }
 	

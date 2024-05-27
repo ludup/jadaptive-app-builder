@@ -104,13 +104,8 @@ public class TableRenderer {
 	public Elements render() throws IOException {
 		
 		try {
+			
 			Elements tableholder = new Elements();
-			Element table;
-			tableholder.add(table = Html.table("table").attr("data-toggle", "table"));
-			
-			Element el;
-			table.appendChild(Html.thead().appendChild(el = Html.tr()));
-			
 			view = templateClazz.getAnnotation(TableView.class);
 	
 			if(Objects.isNull(view)) {
@@ -119,6 +114,34 @@ public class TableRenderer {
 			
 			Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
+			Collection<TableAction> tableActions = generateActions(template.getCollectionKey());
+			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions);
+			
+			if(hasMultipleSelection) {
+				Element ae;
+				tableholder.add(Html.div("row")
+						.appendChild(ae = Html.div("col-12")));
+				
+				for(TableAction action : tableActions) {
+					if(action.target() == Target.SELECTION) {
+						ae.appendChild(Html.a("#")
+								.attr("data-url", action.url())
+								.addClass("btn btn-primary selectionAction")
+								.appendChild(Html.i(action.iconGroup(), action.icon(), "me-2"))
+								.appendChild(Html.i18n(action.bundle(), action.resourceKey() + ".name")));
+					}
+				}
+			}
+			
+			Element el;
+			Element table;
+			tableholder.add(table = Html.table("table").attr("data-toggle", "table"));
+			
+			table.appendChild(Html.thead().appendChild(el = Html.tr()));
+			
+			if(hasMultipleSelection) {
+				el.appendChild(Html.td());
+			}
 			
 			ObjectTemplate tmp = template;
 			while(tmp.hasParent()) {
@@ -158,6 +181,10 @@ public class TableRenderer {
 						rowTemplate = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(obj.getResourceKey());
 					}
 					Element row = Html.tr();
+					
+					if(hasMultipleSelection) {
+						row.appendChild(Html.td().appendChild(Html.input("checkbox", "selectedUUID", obj.getUuid())));
+					}
 					
 					if(Objects.nonNull(parentObject)) {
 						String c = json.writeValueAsString(obj);
@@ -206,7 +233,7 @@ public class TableRenderer {
 					Html.div("col-md-12 float-start text-start")
 						.attr("id", "objectActions")));
 			
-			generateTableActions(tableholder.select("#objectActions").first(), generateActions(template.getCollectionKey()));
+			generateTableActions(tableholder.select("#objectActions").first(), tableActions);
 			
 			if(readOnly) {
 				tableholder.select(".readWrite").remove();
@@ -220,6 +247,15 @@ public class TableRenderer {
 		
 	}
 	
+	private boolean checkMultipleSelectionActions(Collection<TableAction> tableActions) {
+		for(TableAction action : tableActions) {
+			if(action.target() == Target.SELECTION) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void renderTableColumns(TableView view, Element el, ObjectTemplate template, 
 			Map<String,ObjectTemplate> columns, Map<String,DynamicColumn> dynamicColumns) {
 		

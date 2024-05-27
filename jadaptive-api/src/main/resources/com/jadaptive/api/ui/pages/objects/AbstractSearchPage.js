@@ -53,5 +53,34 @@ window.onload = function() {
 		targetText.attr("name", "searchValueText");
 		
 	});
+	
+	
+	$('.selectionAction').click(function(e) {
+		e.preventDefault();
+		
+		//if($('input[name="selectionUUID').length > 0) {
+			
+			var form = new FormData();
+			form.append("uuid", "some-uuid");
+			$('input[name="selectionUUID').each(function() {
+				form.append("uuid", $(this).val());
+			});
+			
+		    var actionUrl = $(this).data('url');
+		    
+		    $.ajax({
+		        type: "POST",
+		        url: actionUrl,
+		        data: form,
+		        contentType: false,
+   				processData: false, 
+		        success: function()
+		        {
+		          window.location.reload();
+		        }
+		    });
+			
+		//}
+	})
 
 };
