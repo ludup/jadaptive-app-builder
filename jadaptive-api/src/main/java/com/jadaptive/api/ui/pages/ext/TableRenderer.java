@@ -29,6 +29,7 @@ import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.template.CreateURL;
 import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.template.FieldRenderer;
@@ -419,46 +420,10 @@ public class TableRenderer {
 		
 		if(uiService.canCreate(template)) {
 			
-			if(!template.getChildTemplates().isEmpty()) {
-				
-				List<ObjectTemplate> creatableTemplates = new ArrayList<>();
-				
-				ObjectTemplate collectionTemplate = templateRepository.get(template.getCollectionKey());
-				
-				for(String template : collectionTemplate.getChildTemplates()) {
-					ObjectTemplate childTemplate = templateRepository.get(template);
-					if(childTemplate.isCreatable()) {
-						creatableTemplates.add(childTemplate);
-					}
-				}
-			
-				if(creatableTemplates.size() > 1) {
-					createMultipleOptionAction(element, "create", creatableTemplates, template.getCollectionKey());
-				} else if(creatableTemplates.size() == 1) {
-					
-					ObjectTemplate singleTemplate = creatableTemplates.get(0);
-					if(Objects.isNull(parentObject)) {
-						createTableAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
-								template.getCollectionKey(), "fa-plus", "fa-solid",
-								"primary", "create", "readWrite");					
-					} else {
-
-						createStashAction(element, String.format("create/%s", singleTemplate.getResourceKey()), 
-								template.getCollectionKey(), "fa-plus", "fa-solid", "primary",
-								"create", "readWrite");					
-					}
-				}
+			if(!template.getChildTemplates().isEmpty()) {	
+				createMultipleCreate(element, template);
 			} else {
-				
-				if(Objects.isNull(parentObject)) {
-					createTableAction(element, String.format("create/%s", template.getResourceKey()), 
-						template.getCollectionKey(), "fa-plus", "fa-solid",
-						"primary", "create", "readWrite");
-				} else {
-					createStashAction(element, String.format("create/%s", template.getResourceKey()), 
-							template.getCollectionKey(), "fa-plus", "fa-solid",
-							"primary", "create", "readWrite");	
-				}
+				createSingleCreate(element, template);
 			}
 		}
 
@@ -474,6 +439,48 @@ public class TableRenderer {
 		
 	}
 	
+	private void createSingleCreate(Element element, ObjectTemplate t) {
+		
+		if(Objects.isNull(parentObject)) {
+			
+			String createURI =  String.format("/app/ui/create/%s", t.getResourceKey());
+			Class<?> clz = templateService.getTemplateClass(t.getResourceKey());
+			CreateURL url = clz.getAnnotation(CreateURL.class);
+			if(Objects.nonNull(url)) {
+				createURI = url.value();
+			}
+			
+			createTableAction(element, createURI, 
+				template.getCollectionKey(), "fa-plus", "fa-solid",
+				"primary", "create", "readWrite");
+		} else {
+			createStashAction(element, 
+					template.getCollectionKey(), "fa-plus", "fa-solid",
+					"primary", "create", "readWrite");	
+		}
+	}
+
+	private void createMultipleCreate(Element element, ObjectTemplate t) {
+		
+		List<ObjectTemplate> creatableTemplates = new ArrayList<>();
+		
+		ObjectTemplate collectionTemplate = templateRepository.get(t.getCollectionKey());
+		
+		for(String template : collectionTemplate.getChildTemplates()) {
+			ObjectTemplate childTemplate = templateRepository.get(template);
+			if(childTemplate.isCreatable()) {
+				creatableTemplates.add(childTemplate);
+			}
+		}
+	
+		if(creatableTemplates.size() > 1) {
+			createMultipleOptionAction(element, creatableTemplates, template.getCollectionKey());
+		} else if(creatableTemplates.size() == 1) {
+			ObjectTemplate singleTemplate = creatableTemplates.get(0);
+			createSingleCreate(element, singleTemplate);
+		}
+	}
+
 	private void createTableAction(Element element, String url, String bundle, String icon, String iconGroup, String buttonClass, String resourceKey, String... additionalClasses) {
 		
 		List<String> classes = new ArrayList<>(Arrays.asList(additionalClasses));
@@ -481,7 +488,7 @@ public class TableRenderer {
 		classes.add("btn-" + buttonClass);
 		classes.add("me-3");
 		element.appendChild(
-				new Element("a").attr("href", String.format("/app/ui/%s", replaceParameters(url)))
+				new Element("a").attr("href", replaceParameters(url))
 				.addClass(StringUtils.join(classes, " "))
 				.appendChild(Html.i(iconGroup, icon, "me-1"))
 				.appendChild(new Element("span")
@@ -489,7 +496,7 @@ public class TableRenderer {
 						.attr("jad:i18n", String.format("%s.name", resourceKey))));
 	}
 	
-	private void createStashAction(Element element, String url, String bundle, String icon, String iconGroup, String buttonClass, String resourceKey, String... additionalClasses) {
+	private void createStashAction(Element element, String bundle, String icon, String iconGroup, String buttonClass, String resourceKey, String... additionalClasses) {
 		
 		List<String> classes = new ArrayList<>(Arrays.asList(additionalClasses));
 		classes.add("stash");
@@ -509,7 +516,7 @@ public class TableRenderer {
 						.attr("jad:i18n", String.format("%s.name", resourceKey))));
 	}
 	
-	private void createMultipleOptionAction(Element element, String id, 
+	private void createMultipleOptionAction(Element element,
 			Collection<ObjectTemplate> actions, String bundle) {
 		
 		Element menu;
@@ -522,15 +529,15 @@ public class TableRenderer {
 							.attr("data-bs-toggle", "dropdown")
 							.attr("aria-haspopup", "true")
 							.attr("aria-expanded", "false")
-							.attr("id", id)
+							.attr("id", "create")
 							.appendChild(new Element("i")
 								.addClass("fa-solid fa-plus me-1"))
 							.appendChild(new Element("span")
 								.attr("jad:bundle", bundle)
-								.attr("jad:i18n", String.format("%s.name", id))))
+								.attr("jad:i18n", String.format("%s.name", "create"))))
 					.appendChild(menu = new Element("div")
 							.addClass("dropdown-menu")
-							.attr("aria-labelledby", id)));
+							.attr("aria-labelledby", "create")));
 		
 		for(ObjectTemplate action : actions) {
 			if(Objects.nonNull(parentObject)) {
@@ -547,16 +554,24 @@ public class TableRenderer {
 						.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
 				
 			} else {
+				
+				String createURI = String.format("/app/ui/create/%s", action.getResourceKey());
+				Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
+				CreateURL url = clz.getAnnotation(CreateURL.class);
+				if(Objects.nonNull(url)) {
+					createURI = url.value();
+				}
+				
 				menu.appendChild(new Element("a")
 						.addClass("dropdown-item")
-						.attr("href",String.format("/app/ui/%s/%s", id, action.getResourceKey()))
+						.attr("href", createURI)
 						.attr("jad:bundle", action.getBundle())
 						.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
 			}
 		}
 	}
 	
-	private Object replaceParameters(String str) {
+	private String replaceParameters(String str) {
 		return str.replace("${resourceKey}", template.getResourceKey());
 	}
 

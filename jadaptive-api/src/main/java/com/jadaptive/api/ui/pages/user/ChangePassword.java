@@ -16,6 +16,7 @@ import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.pages.user.ChangePassword.PasswordForm;
 import com.jadaptive.api.user.PasswordChangeRequired;
+import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
@@ -87,5 +88,10 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 	    	}
 		}
 		return false;
+	}
+
+	@Override
+	public boolean canAuthenticate(AuthenticationState state) {
+		return state.getUser() instanceof PasswordEnabledUser;
 	}
 }

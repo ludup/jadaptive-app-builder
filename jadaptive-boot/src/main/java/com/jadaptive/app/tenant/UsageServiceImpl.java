@@ -169,10 +169,22 @@ public class UsageServiceImpl implements UsageService {
 	}
 	
 	@Override
+	public Long sumOr(String... keys) {
+		return usageDatabase.sumLongValues(Usage.class, "value", 
+				SearchField.in("keys", Arrays.asList(keys)));
+	}
+	
+	@Override
 	public Long sumAnd(Date from, Date to, String... keys) {
 		return usageDatabase.sumLongValues(Usage.class, "value", 
 				SearchField.all("keys", Arrays.asList(keys)), 
 				SearchField.gte("created", from),
 				SearchField.lt("created", to));
+	}
+	
+	@Override
+	public Long sumAnd(String... keys) {
+		return usageDatabase.sumLongValues(Usage.class, "value", 
+				SearchField.all("keys", Arrays.asList(keys)));
 	}
 }

@@ -41,5 +41,4 @@ public @interface TableAction  {
 	
 	Class<? extends ActionFilter> filter() default NoActionFilter.class;
 
-
 }

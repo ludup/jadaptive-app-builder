@@ -150,4 +150,9 @@ public class Login extends AuthenticationPage<LoginForm> {
 	public interface LoginForm {
 		String getUsername();
 	}
+
+	@Override
+	public boolean canAuthenticate(AuthenticationState state) {
+		return true;
+	}
 }

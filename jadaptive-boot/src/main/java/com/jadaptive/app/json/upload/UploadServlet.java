@@ -61,7 +61,14 @@ public class UploadServlet extends HttpServlet {
 	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.sendError(HttpStatus.METHOD_NOT_ALLOWED.value());
+		
+		String uri = FileUtils.checkStartsWithNoSlash(req.getPathInfo());
+		String handlerName = FileUtils.firstPathElement(uri);
+		uri = FileUtils.stripParentPath(handlerName, uri);
+
+		UploadHandler handler = getUploadHandler(handlerName);
+		
+		req.getRequestDispatcher(handler.getPageURL(uri)).forward(req, resp);
 	}
 
 

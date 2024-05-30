@@ -70,11 +70,15 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		return "fa-key";
 	}
 	
+	protected boolean isRedirectInSession() {
+		return true;
+	}
+	
 	@Override
 	protected final void generateContent(Document doc) throws FileNotFoundException {
 		var req = Request.get();
 		var session = Session.getOr(req);
-		if(session.isPresent()) {
+		if(session.isPresent() && isRedirectInSession()) {
 			throw new UriRedirect();
 		}
 		
@@ -158,7 +162,9 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			throws FileNotFoundException {
 		authenticationService.decorateAuthenticationPage(getCurrentDocument());
 	}
+
+	public abstract boolean canAuthenticate(AuthenticationState state);
 	
-	
+//	public abstract String getAuthenticatorUUUD();
 	
 }
