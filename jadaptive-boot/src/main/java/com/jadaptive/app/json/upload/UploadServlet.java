@@ -1,7 +1,6 @@
 package com.jadaptive.app.json.upload;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -30,8 +29,10 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.ResponseHelper;
 import com.jadaptive.api.upload.UploadHandler;
+import com.jadaptive.api.upload.UploadIterator;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.FileUtils;
+import com.jadaptive.utils.ParameterHelper;
 
 @WebServlet(name="uploadServlet", description="Servlet for handing file uploads", urlPatterns = { "/upload/*" })
 public class UploadServlet extends HttpServlet {
@@ -96,7 +97,7 @@ public class UploadServlet extends HttpServlet {
 			permissionService.setupUserContext(session.get().getUser());
 		} 
 
-		Map<String,String> parameters = new HashMap<>();
+		Map<String,String[]> parameters = new HashMap<>();
 		
 		try {
 			// Create a new file upload handler
@@ -112,7 +113,7 @@ public class UploadServlet extends HttpServlet {
 			    if (item.isFormField()) {
 			    	String name = item.getFieldName();
 			        String value = IOUtils.toString(item.openStream(), "UTF-8");
-			        parameters.put(name, value);
+			        ParameterHelper.setValue(parameters, name, value);
 			    } else {
 				    
 				    if(StringUtils.isBlank(item.getName())) {
@@ -120,10 +121,9 @@ public class UploadServlet extends HttpServlet {
 				    }
 				    
 			    	try(var scope = SessionUtils.scopedIoWithoutSessionTimeout(req)) {
-			    		try(InputStream stream = item.openStream()) {
-					    	handler.handleUpload(handlerName, uri, parameters, item.getName(), stream);
-				    	}
-				    }
+			    		handler.handleUpload(handlerName, uri, parameters, new UploadIterator(iter, item));  
+				    }  
+				   break;
 			    }
 			    
 			}

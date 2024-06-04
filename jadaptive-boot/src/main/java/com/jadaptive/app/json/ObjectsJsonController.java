@@ -36,7 +36,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.Feedback;
-import com.jadaptive.app.entity.MongoEntity;
+import com.jadaptive.app.db.MongoEntity;
 
 @Controller
 public class ObjectsJsonController extends BootstrapTableController<AbstractObject>{

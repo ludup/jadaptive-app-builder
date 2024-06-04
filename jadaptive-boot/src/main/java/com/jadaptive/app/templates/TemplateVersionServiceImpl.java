@@ -86,7 +86,7 @@ import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
-import com.jadaptive.app.entity.MongoEntity;
+import com.jadaptive.app.db.MongoEntity;
 import com.jadaptive.app.json.ObjectMapperHolder;
 import com.jadaptive.utils.Utils;
 import com.jadaptive.utils.Version;

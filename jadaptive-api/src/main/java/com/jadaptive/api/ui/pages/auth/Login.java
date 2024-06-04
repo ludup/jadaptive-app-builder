@@ -68,7 +68,8 @@ public class Login extends AuthenticationPage<LoginForm> {
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		if(state.hasFinished()) {
-			authenticationService.completeAuthentication(state, Optional.empty());
+			authenticationService.completeAuthentication(state, Optional.empty())
+				.maybeAttachToSession(Request.get(), sessionUtils.getTimeout());;
 			return;
 		}
 		state = authenticationService.getCurrentState();
@@ -154,5 +155,10 @@ public class Login extends AuthenticationPage<LoginForm> {
 	@Override
 	public boolean canAuthenticate(AuthenticationState state) {
 		return true;
+	}
+	
+	@Override
+	public String getAuthenticatorUUID() {
+		return "61f4edd8-054c-457f-8dd1-4f929ab606a7";
 	}
 }

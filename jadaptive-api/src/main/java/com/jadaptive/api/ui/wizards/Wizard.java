@@ -188,10 +188,11 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			
 			if(state.hasNextButton()) {
 				Element form = body.selectFirst("form");
-				if(form.id().equals("")) {
-					form.attr("id", resourceKey + "_form");
-				}
-				actions.appendChild(new Element("button")
+				if(Objects.nonNull(form)) {
+					if(form.id().equals("")) {
+						form.attr("id", resourceKey + "_form");
+					}
+					actions.appendChild(new Element("button")
 							.attr("type", "submit")
 							.attr("form",  form.id())
 							.attr("id", "nextButton")
@@ -201,6 +202,18 @@ public class Wizard extends HtmlPage implements ObjectPage {
 							.appendChild(new Element("span")
 								.attr("jad:bundle", "default")
 								.attr("jad:i18n", "next.name")));
+				} else {
+					actions.appendChild(new Element("button")
+							.attr("id", "nextButton")
+							.addClass("btn btn-success float-end wizardNext")
+							.appendChild(new Element("i")
+								.addClass("fa-solid fa-arrow-circle-right me-1"))
+							.appendChild(new Element("span")
+								.attr("jad:bundle", "default")
+								.attr("jad:i18n", "next.name")));
+				}
+				
+				
 			} else if(state.isFinishPage()) {
 				actions.appendChild(new Element("button")
 							.attr("id", "finishButton")

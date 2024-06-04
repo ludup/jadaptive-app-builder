@@ -70,9 +70,9 @@ public interface AuthenticationService {
 
 	AuthenticationCompletedResult completeAuthentication(AuthenticationState state, Optional<Page> page);
 
-	Class<? extends Page> resetAuthentication(@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
-
-	Class<? extends Page> resetAuthentication(String authenticationFlow, @SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
+//	Class<? extends Page> resetAuthentication(@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
+//
+//	Class<? extends Page> resetAuthentication(String authenticationFlow, @SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
 
 	void clearAuthenticationState();
 
@@ -86,7 +86,9 @@ public interface AuthenticationService {
 
 	Iterable<AuthenticationModule> getAuthenticationModules();
 
-	AuthenticationModule getAuthenticationModule(String uuid);
+	AuthenticationModule getAuthenticationModuleByUUID(String uuid);
+	
+	AuthenticationModule getAuthenticationModuleByResourceKey(String uuid);
 
 	@SuppressWarnings("unchecked")
 	void registerAuthenticationPage(AuthenticationModule module, Class<? extends AuthenticationPage<?>>... pages);

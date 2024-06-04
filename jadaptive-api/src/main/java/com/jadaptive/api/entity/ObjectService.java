@@ -63,5 +63,7 @@ public interface ObjectService {
 
 	void cascadeDelete(ObjectTemplate template, AbstractObject e);
 
+	AbstractObject createNew(String resourceKey);
+
 	
 }

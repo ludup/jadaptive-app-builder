@@ -12,6 +12,10 @@ public class NumberFormInput extends FormInputRender {
 	public NumberFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle) {
 		super(template, resourceKey, formVariable, bundle);
 	}
+	
+	public NumberFormInput(String resourceKey,String formVariable, String bundle) {
+		super(resourceKey, formVariable, bundle);
+	}
 
 	@Override
 	public String getInputType() {

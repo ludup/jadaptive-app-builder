@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
@@ -16,6 +17,7 @@ import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.AbstractObjectDatabaseImpl;
 import com.jadaptive.app.db.DocumentDatabase;
+import com.jadaptive.app.db.MongoEntity;
 
 public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEntity> 
 		extends AbstractObjectDatabaseImpl implements AbstractTenantAwareObjectDatabase<T> {
@@ -27,6 +29,16 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 
 	@Autowired
 	protected TenantService tenantService;
+	
+	@Override
+	public AbstractObject createObject(String resourceKey) {
+		return new MongoEntity(resourceKey);
+	}
+	
+	@Override
+	public Class<?> getObjectClass() {
+		return MongoEntity.class;
+	}
 	
 	@Override
 	public Iterable<T> list() throws RepositoryException, ObjectException {

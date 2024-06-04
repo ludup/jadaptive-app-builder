@@ -94,4 +94,9 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 	public boolean canAuthenticate(AuthenticationState state) {
 		return state.getUser() instanceof PasswordEnabledUser;
 	}
+
+	@Override
+	public String getAuthenticatorUUID() {
+		return "3de1dfd7-375f-460b-9f91-c9dee8c6ba9a";
+	}
 }

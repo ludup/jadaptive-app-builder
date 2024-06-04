@@ -91,7 +91,7 @@ public class CsvImportServiceImpl implements CsvImportService {
 
                     try {
 	                    entityService.saveOrUpdate(
-	                    		DocumentHelper.buildRootObject(Request.get(), objectParameters, 
+	                    		DocumentHelper.buildRootObject(objectParameters, 
 	                    		template.getResourceKey(), template));
 	                    
 	                    count++;

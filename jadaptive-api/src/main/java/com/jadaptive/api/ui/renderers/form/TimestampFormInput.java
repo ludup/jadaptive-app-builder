@@ -11,6 +11,10 @@ public class TimestampFormInput extends FieldInputRender {
 	public TimestampFormInput(TemplateViewField field) {
 		super(field);
 	}
+	
+	public TimestampFormInput(String resourceKey,String formVariable, String bundle) {
+		super(resourceKey, formVariable, bundle);
+	}
 
 	public final void renderInput(Element rootElement, String value, String... classes) {
 		

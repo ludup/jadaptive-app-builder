@@ -95,12 +95,12 @@ public class Password extends AuthenticationPage<LoginForm> implements Authentic
 	}
 
 	@Override
-	public String getAuthenticatorUUID() {
-		return AuthenticationService.PASSWORD_MODULE_UUID;
+	public boolean canAuthenticate(AuthenticationState state) {
+		return state.getUser() instanceof PasswordEnabledUser;
 	}
 
 	@Override
-	public boolean canAuthenticate(AuthenticationState state) {
-		return state.getUser() instanceof PasswordEnabledUser;
+	public String getAuthenticatorUUID() {
+		return AuthenticationService.PASSWORD_MODULE_UUID;
 	}
 }

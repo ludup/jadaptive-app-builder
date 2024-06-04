@@ -188,10 +188,19 @@ public class DefaultWizardSection extends WizardSection {
 						.appendChild(new Element("span")
 								.appendChild(new Element("strong")
 								.attr("id", "summary-value-" + field.getResourceKey())
-								.text(object.getValue(field).toString()))));
+								.text(getValue(object, field)))));
 				break;
 			}
 			
+		}
+	}
+
+	private String getValue(AbstractObject object, FieldTemplate field) {
+		
+		if(field.isAutomaticallyEncrypted() || field.isManuallyEncrypted()) {
+			return "** ENCRYTPED **";
+		} else {
+			return object.getValue(field).toString();
 		}
 	}
 

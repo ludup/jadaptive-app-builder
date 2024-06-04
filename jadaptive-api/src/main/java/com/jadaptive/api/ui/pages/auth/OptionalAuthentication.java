@@ -68,9 +68,10 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			}
 		}
 		
-		if((state.getOptionalRequired() - state.getOptionalCompleted() == 1) && pages.size()==1) {
-			state.setSelectedPage(authenticationService.getAuthenticationPage(state.getOptionalAuthentications().iterator().next().getAuthenticatorKey()));
-			throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage()));
+		if(pages.size()==1) {
+			Page page = pages.iterator().next();
+			state.setSelectedPage(page.getClass());
+			throw new PageRedirect(page);
 		}
 
 		if(state.getOptionalCompleted() > 0) {
@@ -101,8 +102,8 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 								.addClass("card-text")
 								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.body")
 										.addClass("small")))
-//						.appendChild(Html.a("#").addClass("select stretched-link float-end")
-//								.attr("data-authenticator", page.getAuthenticatorUUUD()))
+						.appendChild(Html.a("#").addClass("select stretched-link float-end")
+								.attr("data-authenticator", page.getAuthenticatorUUID()))
 				));
 			}
 
@@ -137,5 +138,10 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 	@Override
 	public boolean canAuthenticate(AuthenticationState state) {
 		return true;
+	}
+
+	@Override
+	public String getAuthenticatorUUID() {
+		return "4d1a81e9-e4be-454b-a4d2-78cff54d3cf0";
 	}
 }

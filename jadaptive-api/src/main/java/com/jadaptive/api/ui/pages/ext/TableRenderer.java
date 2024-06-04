@@ -49,6 +49,7 @@ import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
 import com.jadaptive.api.ui.renderers.form.BootstrapBadgeRender;
 import com.jadaptive.utils.Utils;
 
+@TableView(defaultColumns = { "uuid" })
 public class TableRenderer {
 
 	@Autowired
@@ -110,7 +111,7 @@ public class TableRenderer {
 			view = templateClazz.getAnnotation(TableView.class);
 	
 			if(Objects.isNull(view)) {
-				throw new IllegalStateException(templateClazz.getSimpleName() + " requires @TableView annotation to render this page");
+				view = getClass().getAnnotation(TableView.class);
 			}
 			
 			Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
@@ -443,16 +444,21 @@ public class TableRenderer {
 		
 		if(Objects.isNull(parentObject)) {
 			
-			String createURI =  String.format("/app/ui/create/%s", t.getResourceKey());
 			Class<?> clz = templateService.getTemplateClass(t.getResourceKey());
-			CreateURL url = clz.getAnnotation(CreateURL.class);
-			if(Objects.nonNull(url)) {
-				createURI = url.value();
+			CreateURL[] urls = clz.getAnnotationsByType(CreateURL.class);
+			if(Objects.nonNull(urls) && urls.length > 0) {
+				for(CreateURL url : urls) {
+					createTableAction(element, url.value(), 
+							StringUtils.defaultIfEmpty(url.i18n(), template.getCollectionKey()), "fa-plus", "fa-solid",
+							"primary", "create", "readWrite");
+				}
+			} else {
+				createTableAction(element, String.format("/app/ui/create/%s", t.getResourceKey()), 
+						template.getCollectionKey(), "fa-plus", "fa-solid",
+						"primary", "create", "readWrite");
 			}
 			
-			createTableAction(element, createURI, 
-				template.getCollectionKey(), "fa-plus", "fa-solid",
-				"primary", "create", "readWrite");
+			
 		} else {
 			createStashAction(element, 
 					template.getCollectionKey(), "fa-plus", "fa-solid",
@@ -482,6 +488,10 @@ public class TableRenderer {
 	}
 
 	private void createTableAction(Element element, String url, String bundle, String icon, String iconGroup, String buttonClass, String resourceKey, String... additionalClasses) {
+		
+		if(!url.startsWith("/")) {
+			url = "/app/ui/" + url;
+		}
 		
 		List<String> classes = new ArrayList<>(Arrays.asList(additionalClasses));
 		classes.add("btn"); 
@@ -555,18 +565,24 @@ public class TableRenderer {
 				
 			} else {
 				
-				String createURI = String.format("/app/ui/create/%s", action.getResourceKey());
-				Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
-				CreateURL url = clz.getAnnotation(CreateURL.class);
-				if(Objects.nonNull(url)) {
-					createURI = url.value();
+				Class<?> clz = templateService.getTemplateClass(action.getResourceKey());
+				CreateURL[] urls = clz.getAnnotationsByType(CreateURL.class);
+				if(Objects.nonNull(urls) && urls.length > 0) {
+					for(CreateURL url : urls) {
+						menu.appendChild(new Element("a")
+								.addClass("dropdown-item")
+								.attr("href", url.value())
+								.attr("jad:bundle", action.getBundle())
+								.attr("jad:i18n", String.format("%s.name", url.i18n())));
+					}
+				} else {
+					menu.appendChild(new Element("a")
+							.addClass("dropdown-item")
+							.attr("href",  String.format("/app/ui/create/%s", action.getResourceKey()))
+							.attr("jad:bundle", action.getBundle())
+							.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
 				}
-				
-				menu.appendChild(new Element("a")
-						.addClass("dropdown-item")
-						.attr("href", createURI)
-						.attr("jad:bundle", action.getBundle())
-						.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
+
 			}
 		}
 	}

@@ -12,6 +12,10 @@ public class TextFormInput extends FormInputRender {
 	public TextFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle) {
 		super(template, resourceKey, formVariable, bundle);
 	}
+	
+	public TextFormInput(String resourceKey,String formVariable, String bundle) {
+		super(resourceKey, formVariable, bundle);
+	}
 
 
 	@Override
