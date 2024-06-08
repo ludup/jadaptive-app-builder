@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 public class SearchField {
 
@@ -30,7 +30,7 @@ public class SearchField {
 	
 	private SearchField(Type type, String searchField, Object... searchValue) {
 		super();
-		if(StringUtils.isEmpty(searchField) || searchField.equalsIgnoreCase("UUID")) {
+		if(ObjectUtils.isEmpty(searchField) || searchField.equalsIgnoreCase("UUID")) {
 			searchField = "_id";
 		}
 		this.searchField = searchField;

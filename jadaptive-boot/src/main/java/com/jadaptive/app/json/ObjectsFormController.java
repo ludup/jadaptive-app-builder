@@ -102,7 +102,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 				        String value = IOUtils.toString(item.getInputStream(), "UTF-8");
 				        ParameterHelper.setValue(parameters, name, value);
 				    } else {
-					    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType());
+					    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName());
 				    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
 				    }
 				    

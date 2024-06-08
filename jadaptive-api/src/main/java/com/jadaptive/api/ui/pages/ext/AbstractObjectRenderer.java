@@ -80,6 +80,7 @@ import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimeFormInput;
 import com.jadaptive.api.ui.renderers.form.TimestampFormInput;
+import com.jadaptive.api.ui.renderers.form.UploadFormInput;
 import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectRenderer extends AbstractPageExtension {
@@ -556,6 +557,13 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					(view == FieldView.READ || fieldView.getField().isReadOnly()));
 			break;
 		}
+		case ATTACHMENT:
+		{
+			UploadFormInput input = new UploadFormInput(fieldView);
+			input.renderInput(element, "");
+			break;
+			
+		}
 		case PASSWORD:
 			break;
 		case OPTIONS:
@@ -751,6 +759,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case ATTACHMENT:
 		{
 			String uuid = getFieldValue(fieldView, obj);
+			FileFormInput render = new FileFormInput(currentTemplate.get(), fieldView);
+			render.renderInput(element, uuid);
 			if(StringUtils.isNotBlank(uuid)) {
 				AbstractObject file = obj.getChild(field);
 				element.appendChild(Html.span((String)file.getValue("name"))

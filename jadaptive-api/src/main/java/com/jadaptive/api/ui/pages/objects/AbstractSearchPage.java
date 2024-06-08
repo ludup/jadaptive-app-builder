@@ -90,10 +90,10 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		setCachedValue("length", String.valueOf(length));
 		
-		sortColumn = StringUtils.defaultString(form.getSortColumn(), form.getSearchColumn());
+		sortColumn = Objects.toString(form.getSortColumn(), form.getSearchColumn());
 		setCachedValue("sortColumn", sortColumn);
 		
-		sortOrder = SortOrder.valueOf(StringUtils.defaultString(form.getSortOrder(), "ASC"));
+		sortOrder = SortOrder.valueOf(Objects.toString(form.getSortOrder(), "ASC"));
 		setCachedValue("sortOrder", sortOrder.name());
 		
 		generateTable(document);
@@ -129,12 +129,12 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		searchField = Request.get().getParameter("column");
 		if(Objects.isNull(searchField)) {
-			searchField = getCachedValue("searchField", StringUtils.defaultString(Request.get().getParameter("column"), template.getDefaultColumn()));
+			searchField = getCachedValue("searchField", Objects.toString(Request.get().getParameter("column"), template.getDefaultColumn()));
 		}
 		
 		searchValue = Request.get().getParameter("filter");
 		if(Objects.isNull(searchValue)) {
-			searchValue = getCachedValue("searchValue", StringUtils.defaultString(Request.get().getParameter("filter"), template.getDefaultFilter()));
+			searchValue = getCachedValue("searchValue", Objects.toString(Request.get().getParameter("filter"), template.getDefaultFilter()));
 			if(StringUtils.isBlank(searchValue)) {
 				searchValue = null;
 			}
@@ -142,7 +142,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		searchValueText = Request.get().getParameter("searchValueText");
 		if(Objects.isNull(searchValueText)) {
-			searchValueText = getCachedValue("searchValueText", StringUtils.defaultString(Request.get().getParameter("searchValueText"), ""));
+			searchValueText = getCachedValue("searchValueText", Objects.toString(Request.get().getParameter("searchValueText"), ""));
 			if(StringUtils.isBlank(searchValueText)) {
 				searchValueText = null;
 			}
@@ -150,7 +150,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		searchModifier = Request.get().getParameter("searchModifier");
 		if(Objects.isNull(searchModifier)) {
-			searchModifier = getCachedValue("searchModifier", StringUtils.defaultString(Request.get().getParameter("searchModifier"), ""));
+			searchModifier = getCachedValue("searchModifier", Objects.toString(Request.get().getParameter("searchModifier"), ""));
 			if(StringUtils.isBlank(searchModifier)) {
 				searchModifier = null;
 			}
@@ -158,7 +158,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		sortColumn = Request.get().getParameter("sortColumn");
 		if(Objects.isNull(sortColumn)) {
-			sortColumn = getCachedValue("sortColumn", StringUtils.defaultString(Request.get().getParameter("sortColumn"), template.getDefaultColumn()));
+			sortColumn = getCachedValue("sortColumn", Objects.toString(Request.get().getParameter("sortColumn"), template.getDefaultColumn()));
 			if(StringUtils.isBlank(sortColumn)) {
 				sortColumn = null;
 			}
@@ -166,7 +166,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		String order = Request.get().getParameter("sortOrder");
 		if(Objects.isNull(order)) {
-			order = getCachedValue("sortOrder", StringUtils.defaultString(Request.get().getParameter("sortOrder"), "ASC"));
+			order = getCachedValue("sortOrder", Objects.toString(Request.get().getParameter("sortOrder"), "ASC"));
 			if(StringUtils.isBlank(order)) {
 				order = null;
 			}
@@ -345,7 +345,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			modifiers.add(new I18nOption("userInterface","lte.name", "<="));
 			
 			e.appendChild(Html.div("col-3").appendChild(modifier.renderInput()));
-			modifier.renderValues(modifiers, StringUtils.defaultString(searchModifier));
+			modifier.renderValues(modifiers, Objects.toString(searchModifier));
 			
 			Element valueElement = Html.div("col-9");
 			e.appendChild(valueElement);

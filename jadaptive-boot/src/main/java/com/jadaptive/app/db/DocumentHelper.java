@@ -29,7 +29,6 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -37,8 +36,6 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
@@ -54,7 +51,6 @@ import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.repository.UUIDReference;
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;

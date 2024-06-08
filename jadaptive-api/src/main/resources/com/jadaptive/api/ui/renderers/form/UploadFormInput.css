@@ -1,0 +1,11 @@
+.hidden {
+	display: none;
+}
+
+.dashed-border {
+  border: 1px dashed;
+}
+
+.is-dragover {
+  background-color: #ccc;	
+}

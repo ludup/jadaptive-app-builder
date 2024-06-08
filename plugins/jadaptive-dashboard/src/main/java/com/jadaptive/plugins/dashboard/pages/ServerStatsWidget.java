@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.plugins.dashboard.DashboardWidget;
 
@@ -15,9 +14,6 @@ public class ServerStatsWidget implements DashboardWidget {
 
 	@Autowired
 	private ApplicationService applicationService; 
-	
-	@Autowired
-	private PermissionService permissionService; 
 	
 	@Override
 	public String getIcon() {

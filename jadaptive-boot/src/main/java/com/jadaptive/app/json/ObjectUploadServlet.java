@@ -1,6 +1,8 @@
 package com.jadaptive.app.json;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +11,7 @@ import org.apache.commons.fileupload2.core.FileItemInputIterator;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,13 +25,14 @@ import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
-import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.app.db.DocumentHelper;
+import com.jadaptive.utils.FileUtils;
 import com.jadaptive.utils.ParameterHelper;
 
 import jakarta.servlet.ServletException;
@@ -42,13 +46,10 @@ public class ObjectUploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8476101184614381108L;
 
-	private static Logger log = org.slf4j.LoggerFactory.getLogger(ObjectUploadServlet.class);
+	private static Logger log = LoggerFactory.getLogger(ObjectUploadServlet.class);
 	
 	@Autowired
 	private TemplateService templateService; 
-	
-	@Autowired
-	private TemplateVersionService versionService;
 	
 	@Autowired
 	private ObjectService objectService; 
@@ -64,78 +65,86 @@ public class ObjectUploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
 		
-		String resourceKey = com.jadaptive.utils.FileUtils.lastPathElement(request.getRequestURI());
+		sessionUtils.verifySameSiteRequest(request);
 		
-		try {
+		String resourceKey = FileUtils.lastPathElement(request.getRequestURI());
+		Map<String,String[]> parameters = new HashMap<>();
+		
+		try(var scope = SessionUtils.scopedIoWithoutSessionTimeout(request)) {
+
+			/**
+			 * Return the attachments uploaded. TODO stash these in case of validation
+			 * failure so they can be attached in subsequent operation
+			 */
+			@SuppressWarnings("unused")
+			var attachments = generateFormParameters(request, parameters);
 			
-			//sessionUtils.verifySameSiteRequest(request);
-			
-			ObjectTemplate template = templateService.get(resourceKey);
-			request.getSession().removeAttribute(resourceKey);
-			
-			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
-			String uuid = objectService.saveOrUpdate(obj);
-			
-			if(template.isSingleton()) {
-				Feedback.success("default", "object.saved", I18N.getResource(
-						sessionUtils.getLocale(request), 
-						template.getBundle(),
-						template.getResourceKey() + ".name"));
-			} else {
-				Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+			try {
+				ObjectTemplate template = templateService.get(resourceKey);
+				request.getSession().removeAttribute(resourceKey);
+				
+				AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
+				String uuid = objectService.saveOrUpdate(obj);
+				
+				if(template.isSingleton()) {
+					Feedback.success("default", "object.saved", I18N.getResource(
+							sessionUtils.getLocale(request), 
+							template.getBundle(),
+							template.getResourceKey() + ".name"));
+				} else {
+					Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+				}
+				
+				resp.setStatus(200);
+				resp.setContentType("application/json");
+				json.writer().writeValue(resp.getOutputStream(), new UUIDStatus(uuid));
+				
+				
+		    } catch(ValidationException ex) { 
+				Feedback.error(ex.getMessage());
+				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, ex.getMessage()));
+			} catch (UriRedirect e) {
+				json.writer().writeValue(resp.getOutputStream(), new RedirectStatus(e.getUri()));
+			} catch (ObjectException e) {
+				Feedback.error(e.getMessage());
+				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, e.getMessage()));
+			} catch (Throwable e) {
+				Feedback.error(e.getMessage());
+				if(log.isErrorEnabled()) {
+					log.error("POST api/objects/{}", resourceKey, e);
+				}
+				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, e.getMessage()));
 			}
-			
-			json.writer().writeValue(resp.getOutputStream(), new UUIDStatus(uuid));
-		}  catch(ValidationException ex) { 
-			Feedback.error(ex.getMessage());
-			json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, ex.getMessage()));
-		} catch (UriRedirect e) {
-			json.writer().writeValue(resp.getOutputStream(), new RedirectStatus(e.getUri()));
-		} catch (ObjectException e) {
-			Feedback.error(e.getMessage());
-			json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, e.getMessage()));
-		} catch (Throwable e) {
-			Feedback.error(e.getMessage());
-			if(log.isErrorEnabled()) {
-				log.error("POST api/objects/{}", resourceKey, e);
-			}
-			json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, e.getMessage()));
 		}
 	}
 	
-	private Map<String,String[]> generateFormParameters(HttpServletRequest req) {
+	private Collection<FileAttachment> generateFormParameters(HttpServletRequest req, Map<String,String[]> parameters) throws IOException {
 		
-		Map<String,String[]> parameters = new HashMap<>();
+		// Create a new file upload handler
+		JakartaServletFileUpload<?,?> upload = new JakartaServletFileUpload<>();
+
+		var attachments = new ArrayList<FileAttachment>();
+
+		FileItemInputIterator iter = upload.getItemIterator(req);
+
+		while(iter.hasNext()) {
+		    FileItemInput item = iter.next();
+
+		    if (item.isFormField()) {
+		    	String name = item.getFieldName();
+		        String value = IOUtils.toString(item.getInputStream(), "UTF-8");
+		        ParameterHelper.setValue(parameters, name, value);
+		    } else {
+		    	
+			    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName());
+		    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
+		    	ParameterHelper.setValue(parameters, item.getFieldName() + "_name", attachment.getFilename());
+		    	attachments.add(attachment);
+		    }
+		    
+		}
 		
-		
-			try {
-				// Create a new file upload handler
-				JakartaServletFileUpload<?,?> upload = new JakartaServletFileUpload<>();
-
-				// Parse the request
-				FileItemInputIterator iter = upload.getItemIterator(req);
-
-				while(iter.hasNext()) {
-				    FileItemInput item = iter.next();
-
-				    if (item.isFormField()) {
-				    	String name = item.getFieldName();
-				        String value = IOUtils.toString(item.getInputStream(), "UTF-8");
-				        ParameterHelper.setValue(parameters, name, value);
-				    } else {
-				    	
-					    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType());
-				    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
-				    	ParameterHelper.setValue(parameters, item.getFieldName() + "_name", attachment.getFilename());
-				    }
-				    
-				}
-			} catch (IOException e) {
-				throw new IllegalStateException(e.getMessage(), e);
-			}
-
-			return parameters;
-		 
+		return attachments;
 	}
 	
 

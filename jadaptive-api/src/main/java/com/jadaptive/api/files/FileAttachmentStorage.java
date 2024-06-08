@@ -6,6 +6,8 @@ import java.io.InputStream;
 
 import org.pf4j.ExtensionPoint;
 
+import com.jadaptive.api.template.FieldTemplate;
+
 public interface FileAttachmentStorage extends ExtensionPoint {
 
 	String getUuid();
@@ -14,5 +16,5 @@ public interface FileAttachmentStorage extends ExtensionPoint {
 	
 	long getMaximumSize();
 
-	FileAttachment createAttachment(InputStream in, String filename, String contentType) throws IOException;
+	FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable) throws IOException;
 }

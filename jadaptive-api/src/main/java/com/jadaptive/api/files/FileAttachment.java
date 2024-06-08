@@ -32,6 +32,9 @@ public class FileAttachment extends AbstractUUIDEntity {
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = FileStorageProvider.RESOURCE_KEY)
 	FileStorageProvider provider;
 	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String formVariable;
+	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
@@ -84,6 +87,13 @@ public class FileAttachment extends AbstractUUIDEntity {
 	public void setSize(Long size) {
 		this.size = size;
 	}
-	
+
+	public String getFormVariable() {
+		return formVariable;
+	}
+
+	public void setFormVariable(String formVariable) {
+		this.formVariable = formVariable;
+	}
 	
 }

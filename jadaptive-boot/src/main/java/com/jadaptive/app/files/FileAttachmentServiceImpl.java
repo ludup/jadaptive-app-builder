@@ -17,6 +17,7 @@ import com.jadaptive.api.files.FileAttachment;
 import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.files.FileAttachmentStorage;
 import com.jadaptive.api.files.FileStorageProvider;
+import com.jadaptive.api.template.FieldTemplate;
 
 @Service
 public class FileAttachmentServiceImpl implements FileAttachmentService, StartupAware {
@@ -52,10 +53,10 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 	
 	
 	@Override
-	public FileAttachment createAttachment(InputStream in, String filename, String contentType) throws IOException {
+	public FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable) throws IOException {
 		
 		FileAttachmentStorage provider = getProvider();
-		return provider.createAttachment(in, filename, contentType);
+		return provider.createAttachment(in, filename, contentType, formVariable);
 	}
 	
 	@Override

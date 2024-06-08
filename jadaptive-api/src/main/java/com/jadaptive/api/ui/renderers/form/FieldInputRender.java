@@ -1,14 +1,20 @@
 package com.jadaptive.api.ui.renderers.form;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Objects;
 
+import org.apache.commons.io.IOUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.ui.PageResources;
 
-public abstract class FieldInputRender {
+public abstract class FieldInputRender implements PageResources {
 
 	String resourceKey;
 	String formVariable;
@@ -65,5 +71,32 @@ public abstract class FieldInputRender {
 	}
 	
 	public abstract void renderInput(Element rootElement, String value, String... classes) throws IOException;
+	
+	protected void load(Element e) throws IOException {
+		
+		URL url = getClass().getResource(getClass().getSimpleName()+ ".html");
+		if(Objects.isNull(url)) {
+			throw new IOException("Missing resource file " + getClass().getSimpleName() + ".html");
+		}
+		try(InputStream in = url.openStream()) {
+			Document doc = Jsoup.parse(IOUtils.toString(in, "UTF-8"));
+			Element body = doc.selectFirst("body");
+			for(Element child : body.children()) {
+				e.appendChild(child);
+			}
+		}
+	}
+	
+	public String getHtmlResource() {
+		return String.format("%s.html", getResourceClass().getSimpleName());
+	}
+	
+	public String getJsResource() {
+		return String.format("%s.js", getResourceClass().getSimpleName());
+	}
+	
+	public String getCssResource() {
+		return String.format("%s.css", getResourceClass().getSimpleName());
+	}
 
 }

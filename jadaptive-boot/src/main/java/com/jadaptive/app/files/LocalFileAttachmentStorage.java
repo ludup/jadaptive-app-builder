@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -22,6 +21,7 @@ import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.files.FileAttachment;
 import com.jadaptive.api.files.FileAttachmentStorage;
 import com.jadaptive.api.files.FileStorageProvider;
+import com.jadaptive.api.template.FieldTemplate;
 
 @Extension
 public class LocalFileAttachmentStorage implements FileAttachmentStorage {
@@ -55,7 +55,7 @@ public class LocalFileAttachmentStorage implements FileAttachmentStorage {
 	}
 
 	@Override
-	public FileAttachment createAttachment(InputStream in, String filename, String contentType) throws IOException {
+	public FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable) throws IOException {
 		
 		String uuid = java.util.UUID.randomUUID().toString();
 		FileAttachment attachment = new FileAttachment();
@@ -63,6 +63,7 @@ public class LocalFileAttachmentStorage implements FileAttachmentStorage {
 		attachment.setFilename(filename);
 		attachment.setProvider(providerDatabase.get(UUID, FileStorageProvider.class));
 		attachment.setContentType(contentType);
+		attachment.setFormVariable(formVariable);
 		
 		File file = new File(LOCATION, uuid);
 		try(FileOutputStream fout = new FileOutputStream(file)) {
