@@ -48,4 +48,6 @@ public interface UploadHandler extends ExtensionPoint {
 		
 		onUploadsFailure(params, e);
 	}
+
+	default String getPageURL(String uri) {  throw new IllegalStateException(); }
 }

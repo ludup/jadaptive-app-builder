@@ -17,11 +17,11 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 	Boolean hidden;
 	boolean summarise;
 	
-	@ObjectField(type = FieldType.TIMESTAMP, hidden = true)
+	@ObjectField(type = FieldType.TIMESTAMP, hidden = true, searchable = true)
 	@ExcludeView(values = FieldView.TABLE)
 	Date created;
 	
-	@ObjectField(type = FieldType.TIMESTAMP, hidden = true)
+	@ObjectField(type = FieldType.TIMESTAMP, hidden = true, searchable = true)
 	@ExcludeView(values = FieldView.TABLE)
 	Date lastModified;
 

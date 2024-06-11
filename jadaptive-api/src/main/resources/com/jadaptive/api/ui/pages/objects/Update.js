@@ -16,21 +16,38 @@ $(document).ready(function() {
         
     	$.ajax({
            type: "POST",
-           url: url,
+           url: '/app/api/form/validate/' + form.data('resourcekey'),
            cache: false,
            contentType: false,
     	   processData: false,
            data: new FormData(form[0]),
            success: function(data)
            {
-               if(data.redirect) {
-                	window.location = data.location;
-               } else if(data.success) {
-                   window.location = '/app/ui/search/' + form.data('resourcekey');
-               } else {
-               	   $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
-               	   $('#feedbackText').text(data.message);
-               }
+	           if(data.success) {
+	               $.ajax({
+			           type: "POST",
+			           url: url,
+			           cache: false,
+			           contentType: false,
+			    	   processData: false,
+			           data: new FormData(form[0]),
+			           success: function(data)
+			           {
+			               if(data.redirect) {
+			                	window.location = data.location;
+			               } else if(data.success) {
+			                   window.location = '/app/ui/search/' + form.data('resourcekey');
+			               } else {
+			               	   JadaptiveUtils.error(data.message);
+			               }
+			           },
+			           complete: function() {
+			           		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
+			           }
+			         });
+			     } else {
+				     JadaptiveUtils.error(data.message);
+				 }
            },
            complete: function() {
            		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');

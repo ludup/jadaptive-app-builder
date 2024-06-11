@@ -17,7 +17,6 @@ import com.jadaptive.api.files.FileAttachment;
 import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.files.FileAttachmentStorage;
 import com.jadaptive.api.files.FileStorageProvider;
-import com.jadaptive.api.template.FieldTemplate;
 
 @Service
 public class FileAttachmentServiceImpl implements FileAttachmentService, StartupAware {

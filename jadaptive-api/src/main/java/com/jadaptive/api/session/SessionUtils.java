@@ -23,6 +23,7 @@ import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.user.User;
+import com.jadaptive.utils.ParameterHelper;
 import com.jadaptive.utils.Utils;
 
 import jakarta.servlet.http.Cookie;
@@ -111,11 +112,15 @@ public class SessionUtils {
 	}
 	
 	public void verifySameSiteRequest(HttpServletRequest request) throws UnauthorizedException {
+		verifySameSiteRequest(request, request.getParameterMap());
+	}
+	
+	public void verifySameSiteRequest(HttpServletRequest request, Map<String,String[]> parameters) throws UnauthorizedException {
 		
 		SessionConfiguration config = sessionConfig.getObject(SessionConfiguration.class);
 		
 		if(config.getEnableCsrf()) {
-			String requestToken = request.getParameter(CSRF_TOKEN_ATTRIBUTE);
+			String requestToken = ParameterHelper.getValue(parameters, CSRF_TOKEN_ATTRIBUTE);
 			if(Objects.isNull(requestToken)) {
 				requestToken = request.getHeader("CsrfToken");
 			}

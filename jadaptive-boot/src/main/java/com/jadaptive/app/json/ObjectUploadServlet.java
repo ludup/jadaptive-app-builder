@@ -25,7 +25,6 @@ import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
 import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
@@ -65,8 +64,6 @@ public class ObjectUploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
 		
-		sessionUtils.verifySameSiteRequest(request);
-		
 		String resourceKey = FileUtils.lastPathElement(request.getRequestURI());
 		Map<String,String[]> parameters = new HashMap<>();
 		
@@ -79,7 +76,13 @@ public class ObjectUploadServlet extends HttpServlet {
 			@SuppressWarnings("unused")
 			var attachments = generateFormParameters(request, parameters);
 			
+			sessionUtils.verifySameSiteRequest(request, parameters);
+			
+			resp.setStatus(200);
+			resp.setContentType("application/json");
+			
 			try {
+				
 				ObjectTemplate template = templateService.get(resourceKey);
 				request.getSession().removeAttribute(resourceKey);
 				
@@ -95,8 +98,6 @@ public class ObjectUploadServlet extends HttpServlet {
 					Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
 				}
 				
-				resp.setStatus(200);
-				resp.setContentType("application/json");
 				json.writer().writeValue(resp.getOutputStream(), new UUIDStatus(uuid));
 				
 				

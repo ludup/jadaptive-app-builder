@@ -30,4 +30,8 @@ public interface UsageService {
 
 	void delete(String key);
 
+	Long sumAnd(String... keys);
+
+	Long sumOr(String... keys);
+
 }

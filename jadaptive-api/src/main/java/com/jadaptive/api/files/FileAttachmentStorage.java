@@ -6,8 +6,6 @@ import java.io.InputStream;
 
 import org.pf4j.ExtensionPoint;
 
-import com.jadaptive.api.template.FieldTemplate;
-
 public interface FileAttachmentStorage extends ExtensionPoint {
 
 	String getUuid();

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,17 +44,17 @@ public class EntityUploadHandler implements UploadHandler {
 		ObjectTemplate template = templateService.get(templateName);
 		
 		boolean containsHeader = Boolean.parseBoolean(
-				Objects.toString(ParameterHelper.getValue(parameters,"containsHeader"), "false"));
-		String quoteChar = Objects.toString(ParameterHelper.getValue(parameters,"quoteChar"), "\"");
-		String delimiterChar = Objects.toString(ParameterHelper.getValue(parameters,"delimiterChar"), ",");
+				StringUtils.defaultIfBlank(ParameterHelper.getValue(parameters,"containsHeader"), "false"));
+		String quoteChar = StringUtils.defaultIfBlank(ParameterHelper.getValue(parameters,"quoteChar"), "\"");
+		String delimiterChar = StringUtils.defaultIfBlank(ParameterHelper.getValue(parameters,"delimiterChar"), ",");
 		boolean surroundingSpacesNeedQuotes = Boolean.parseBoolean(
-				Objects.toString(ParameterHelper.getValue(parameters,"surroundingSpacesNeedQuotes"), "false"));
+				StringUtils.defaultIfBlank(ParameterHelper.getValue(parameters,"surroundingSpacesNeedQuotes"), "false"));
 		boolean ignoreEmptyLines = Boolean.parseBoolean(
-				Objects.toString(ParameterHelper.getValue(parameters,"ignoreEmptyLines"), "true"));
+				StringUtils.defaultIfBlank(ParameterHelper.getValue(parameters,"ignoreEmptyLines"), "true"));
 		int maxLinesPerRow = Integer.parseInt(
-				Objects.toString(ParameterHelper.getValue(parameters,"maxLinesPerRow"), "0"));
+				StringUtils.defaultIfBlank(ParameterHelper.getValue(parameters,"maxLinesPerRow"), "0"));
 		boolean skipComments =  Boolean.parseBoolean(
-				Objects.toString(ParameterHelper.getValue(parameters,"skipComments"), "false"));
+				StringUtils.defaultIfBlank(ParameterHelper.getValue(parameters,"skipComments"), "false"));
 		
 		String orderedFields = ParameterHelper.getValue(parameters,"orderedFields");
 		

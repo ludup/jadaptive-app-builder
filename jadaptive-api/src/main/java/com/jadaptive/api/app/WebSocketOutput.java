@@ -1,9 +1,12 @@
 package com.jadaptive.api.app;
 
-public interface WebSocketOutput {
+import java.io.Closeable;
+
+public interface WebSocketOutput extends Closeable {
 
 	void receive(byte[] data);
 
+	@Override
 	void close();
 
 }

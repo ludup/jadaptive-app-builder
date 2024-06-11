@@ -66,12 +66,12 @@ public class DocumentValidator {
 
 	}
 
-	private static String validateCountry(FieldTemplate field, String value) {
-		/**
-		 * TODO
-		 */
-		return null;
-	}
+//	private static String validateCountry(FieldTemplate field, String value) {
+//		/**
+//		 * TODO
+//		 */
+//		return null;
+//	}
 
 	private static Object validateReference(String value, FieldTemplate field) {
 		

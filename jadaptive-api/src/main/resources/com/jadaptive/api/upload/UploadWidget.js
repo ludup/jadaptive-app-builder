@@ -88,6 +88,12 @@ var UploadWidget = {
 		_self = this;
 		_self._options.disableFeedback = true;	
 	},
+	hideButton: function() {
+		$('#uploadButton').addClass("d-none");	
+	},
+	showButton: function() {
+		$('#uploadButton').removeClass("d-none");	
+	},
 	clearFiles: function() {
 		$('.file-input').remove();
 		$('.file-index').remove();
@@ -159,6 +165,19 @@ var UploadWidget = {
 				});
 				
 				fd.append('totalSize', totalSize);
+
+				$('.file-input').each(function() {
+					for(i=0;i<this.files.length;i++) {
+						if($("[data-filename='" + this.files[i].name + "']").length > 0) {
+							totalSize += this.files[i].size;
+							countFiles++;
+						}
+					}
+				});
+				
+				if(countFiles==1) {
+					fd.append("contentLength", totalSize);
+				}
 				
 				$('.file-input').each(function() {
 					for(i=0;i<this.files.length;i++) {
@@ -167,7 +186,9 @@ var UploadWidget = {
 						}
 					}
 				});
- 
+			    
+			    
+			    
 				$('#progressBar').css("width", 0).attr('aria-valuenow', "0");
 				$('#helpText').hide(); 
 				$('#uploadButton').attr('disabled', 'disabled');

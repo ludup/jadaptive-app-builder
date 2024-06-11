@@ -73,6 +73,9 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	@ObjectField(type = FieldType.BOOL)
 	boolean alternativeId;
 	
+	@ObjectField(type = FieldType.BOOL)
+	boolean cascadeDelete;
+	
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = FieldValidator.RESOURCE_KEY)
 	Collection<FieldValidator> validators = new ArrayList<>();
 	
@@ -342,5 +345,13 @@ public class FieldTemplate extends TemplateUUIDEntity {
 					StringUtils.substringAfter(value, "="));
 		}
 		return data;
+	}
+
+	public boolean isCascadeDelete() {
+		return cascadeDelete;
+	}
+
+	public void setCascadeDelete(boolean cascadeDelete) {
+		this.cascadeDelete = cascadeDelete;
 	}
 }

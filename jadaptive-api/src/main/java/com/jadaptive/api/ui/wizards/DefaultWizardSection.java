@@ -188,7 +188,7 @@ public class DefaultWizardSection extends WizardSection {
 						.appendChild(new Element("span")
 								.appendChild(new Element("strong")
 								.attr("id", "summary-value-" + field.getResourceKey())
-								.text(getValue(object, field).toString()))));
+								.text(getValue(object, field)))));
 				break;
 			}
 			

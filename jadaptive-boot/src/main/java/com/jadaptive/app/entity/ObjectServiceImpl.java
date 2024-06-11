@@ -193,10 +193,73 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				continue; // Need object template attribute here?
 			}
 			validateCollectionReference(reference, template.getResourceKey(), uuid, "");
-			
 		}
 	}
 	
+	@Override
+	public void cascadeDelete(ObjectTemplate template, AbstractObject e) {
+		
+		
+		if(log.isInfoEnabled()) {
+			log.info("Checking cascade delete fields for {}/{}", template.getResourceKey(), e.getUuid());
+		}
+		
+		for(FieldTemplate t : template.getFields()) {
+			switch(t.getFieldType()) {
+			case OBJECT_EMBEDDED:
+				if(t.getCollection()) {
+					for(AbstractObject c : e.getObjectCollection(t.getResourceKey())) {
+						cascadeDelete(templateService.get(
+								t.getValidationValue(ValidationType.RESOURCE_KEY)),
+								c);
+					}
+				} else {
+					cascadeDelete(templateService.get(
+							t.getValidationValue(ValidationType.RESOURCE_KEY)),
+							e.getChild(t));
+				}
+				break;
+			case OBJECT_REFERENCE:
+				if(t.isCascadeDelete()) {
+					if(t.getCollection()) {
+						for(AbstractObject c : e.getObjectCollection(t.getResourceKey())) {
+							cascadeReference(c, template, t);
+						}
+					} else {
+						cascadeReference(e.getChild(t), template, t);
+					}
+					
+				}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	
+	private void cascadeReference(AbstractObject ref, ObjectTemplate template, FieldTemplate t) {
+		
+		if(Objects.nonNull(ref)) {
+			
+			ObjectTemplate refTemplate = templateService.get(t.getValidationValue(ValidationType.RESOURCE_KEY));
+			AbstractObject refObject = getViaObjectBean(template,ref.getUuid());
+			
+			try {
+				assertForiegnReferences(refTemplate, refObject.getUuid());
+				if(log.isInfoEnabled()) {
+					log.info("Cascading delete on object {}/{}", refTemplate.getResourceKey(), refObject.getUuid());
+				}
+				deleteViaObjectBean(refObject, refTemplate);
+			} catch(ObjectException e2) {
+				if(log.isInfoEnabled()) {
+					log.info("NOT Cascading delete object {}/{} because other references still exit", 
+							refTemplate.getResourceKey(), refObject.getUuid());
+				}
+			}
+		}
+		
+	}
+
 	@Override
 	public void rebuildReferences(ObjectTemplate template) {
 		
@@ -449,34 +512,34 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	
-	private void deleteAllViaObjectBean(ObjectTemplate template) {
-		
-		assertWrite(template);
-		
-		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(template.getResourceKey());
-
-		if(Objects.nonNull(clz)) {
-			
-			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
-			
-			if(Objects.nonNull(annotation)) {
-				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-				bean.deleteAll();
-				return;
-			}
-			
-			GenerateEventTemplates eventAnnotation = ReflectionUtils.getAnnotation(clz, GenerateEventTemplates.class);
-			
-			if(Objects.nonNull(eventAnnotation)) {
-				AbstractTenantAwareObjectDatabase<?> bean = createService(clz, template);
-				bean.deleteAll();
-				return;
-			}
-		}
-		
-		objectRepository.deleteAll(template);
-		
-	}
+//	private void deleteAllViaObjectBean(ObjectTemplate template) {
+//		
+//		assertWrite(template);
+//		
+//		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(template.getResourceKey());
+//
+//		if(Objects.nonNull(clz)) {
+//			
+//			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+//			
+//			if(Objects.nonNull(annotation)) {
+//				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+//				bean.deleteAll();
+//				return;
+//			}
+//			
+//			GenerateEventTemplates eventAnnotation = ReflectionUtils.getAnnotation(clz, GenerateEventTemplates.class);
+//			
+//			if(Objects.nonNull(eventAnnotation)) {
+//				AbstractTenantAwareObjectDatabase<?> bean = createService(clz, template);
+//				bean.deleteAll();
+//				return;
+//			}
+//		}
+//		
+//		objectRepository.deleteAll(template);
+//		
+//	}
 	
 	private Collection<AbstractObject> tableViaObjectBean(ObjectTemplate template, int start, int length, SortOrder order, String sortField, SearchField... fields) {
 		
@@ -658,23 +721,25 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new ObjectException("You cannot delete a system object");
 		}
 		
+		cascadeDelete(template, e);
+		
 		deleteViaObjectBean(e, template);
 		
 	}
 
-	@Override
-	public void deleteAll(String resourceKey) throws ObjectException {
-		
-		assertWrite(resourceKey);
-		
-		ObjectTemplate template = templateService.get(resourceKey);
-		if(template.getType()==ObjectType.SINGLETON) {	
-			throw new ObjectException("You cannot delete a Singleton Entity");
-		}
-		
-		deleteAllViaObjectBean(template);
-		
-	}
+//	@Override
+//	public void deleteAll(String resourceKey) throws ObjectException {
+//		
+//		assertWrite(resourceKey);
+//		
+//		ObjectTemplate template = templateService.get(resourceKey);
+//		if(template.getType()==ObjectType.SINGLETON) {	
+//			throw new ObjectException("You cannot delete a Singleton Entity");
+//		}
+//		
+//		deleteAllViaObjectBean(template);
+//		
+//	}
 
 	@Override
 	public Integer getTemplateOrder() {

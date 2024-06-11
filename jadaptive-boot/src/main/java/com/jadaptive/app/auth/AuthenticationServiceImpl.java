@@ -2,7 +2,6 @@ package com.jadaptive.app.auth;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -103,7 +102,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	Map<String, Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
 
 	Map<Class<? extends Page>, AuthenticationModule> registeredModulesByPage = new HashMap<>();
-
+	Map<String,AuthenticationModule> registeredModulesByResourceKey = new HashMap<>();
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void registerAuthenticationPage(AuthenticationModule module, Class<? extends AuthenticationPage<?>>... pages) {
@@ -111,6 +111,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			throw new IllegalArgumentException();
 		}
 		registeredAuthenticationPages.put(module.getAuthenticatorKey(), pages[0]);
+		registeredModulesByResourceKey.put(module.getAuthenticatorKey(), module);
 		for(var c : pages) {
 			registeredModulesByPage.put(c, module);
 		}
@@ -458,7 +459,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	public void changePolicy(AuthenticationState state, AuthenticationPolicy policy, boolean verifiedPassword) {
 		
 		boolean hasLoginPage = state.getRequiredPages().contains(Login.class);
-		state.getRequiredPages().clear();
+		state.clearRequiredAuthentications();
 		
 		if(policy.getPasswordOnFirstPage() || Objects.isNull(state.getUser()) || hasLoginPage) {
 			state.getRequiredPages().add(Login.class);
@@ -466,18 +467,21 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		if(!verifiedPassword) {
 			if(policy.getPasswordRequired() && !policy.getPasswordOnFirstPage()) {
-				state.getRequiredPages().add(Password.class);
+				state.addRequiredAuthentication(Password.class, null);
 			}
 		}
 		
 		for(AuthenticationModule m : policy.getRequiredAuthenticators()) {
-			state.getRequiredPages().add(
-					registeredAuthenticationPages.get(m.getAuthenticatorKey()));
+			state.addRequiredAuthentication(
+					registeredAuthenticationPages.get(m.getAuthenticatorKey()),
+					m);
 		}
 		
 		state.setPasswordEnabled(policy.getPasswordOnFirstPage() || policy.getPasswordRequired() || policy.getPasswordProvided());
-		state.getOptionalAuthentications().clear();
-		state.getOptionalAuthentications().addAll(policy.getOptionalAuthenticators());
+		state.clearOptionalAuthentications();
+		for(AuthenticationModule m : policy.getOptionalAuthenticators()) {
+			state.addOptionalAuthentication(getAuthenticationPage(m.getAuthenticatorKey()), m);
+		}
 		state.setOptionalCompleted(0);
 		state.setOptionalRequired(Math.min(policy.getOptionalRequired(), state.getOptionalAuthentications().size()));
 		state.setOptionalSelectionPage(OptionalAuthentication.class);
@@ -537,22 +541,22 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		}
 	}
 
-	@Override
-	public Class<? extends Page> resetAuthentication(
-			@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages) {
-		return resetAuthentication(DEFAULT_AUTHENTICATION_FLOW, additionalPages);
-	}
-
-	@Override
-	public Class<? extends Page> resetAuthentication(String authenticationFlow,
-			@SuppressWarnings("unchecked") Class<? extends Page>... additionalClasses) {
-
-		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
-		AuthenticationState state = getCurrentState();
-
-		state.getRequiredPages().addAll(Arrays.asList(additionalClasses));
-		return state.getCurrentPage();
-	}
+//	@Override
+//	public Class<? extends Page> resetAuthentication(
+//			@SuppressWarnings("unchecked") Class<? extends Page>... additionalPages) {
+//		return resetAuthentication(DEFAULT_AUTHENTICATION_FLOW, additionalPages);
+//	}
+//
+//	@Override
+//	public Class<? extends Page> resetAuthentication(String authenticationFlow,
+//			@SuppressWarnings("unchecked") Class<? extends Page>... additionalClasses) {
+//
+//		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
+//		AuthenticationState state = getCurrentState();
+//
+//		state.getRequiredPages().addAll(Arrays.asList(additionalClasses));
+//		return state.getCurrentPage();
+//	}
 
 	@Override
 	public void clearAuthenticationState() {
@@ -571,8 +575,13 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public AuthenticationModule getAuthenticationModule(String uuid) {
+	public AuthenticationModule getAuthenticationModuleByUUID(String uuid) {
 		return moduleDatabase.get(uuid, AuthenticationModule.class);
+	}
+	
+	@Override
+	public AuthenticationModule getAuthenticationModuleByResourceKey(String resourceKey) {
+		return registeredModulesByResourceKey.get(resourceKey);
 	}
 
 	@Override

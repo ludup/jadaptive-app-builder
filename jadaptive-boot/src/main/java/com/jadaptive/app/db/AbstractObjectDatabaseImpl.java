@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.cache.CacheService;
+import com.jadaptive.api.csv.CsvImportService;
 import com.jadaptive.api.db.AbstractObjectDatabase;
 import com.jadaptive.api.db.CachePolicy;
 import com.jadaptive.api.db.SearchField;
@@ -66,6 +67,9 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 	@Autowired
 	private TransactionService transactionService; 
+	
+	@Autowired
+	private CsvImportService importService;
 	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
@@ -182,10 +186,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			
 			Date now = Utils.now();
 			AbstractUUIDEntity e = (AbstractUUIDEntity)obj;
-			if(Objects.isNull(previous) || Objects.isNull(e.getCreated())) {
+			if(Objects.isNull(previous) && Objects.isNull(e.getCreated())) {
 				e.setCreated(now);
 			}
-			e.setLastModified(now);
+			if(Objects.isNull(e.getLastModified()) || !importService.isImporting()) {
+				e.setLastModified(now);
+			}
 		}
 		
 		Document document = new Document();

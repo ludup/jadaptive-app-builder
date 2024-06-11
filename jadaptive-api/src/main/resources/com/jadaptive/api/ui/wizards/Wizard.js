@@ -50,10 +50,14 @@ var Wizard = (function () {
 		           success: function(data)
 		           {
 		           	   	if(data.success) {
-							if(success)
+							if(success) {
 		           				success();
-		           			else
+							}
+		           			else if(data.redirect) {
+								window.location = data.location;
+							} else {
 		           				window.location = "/app/api/wizard/next/" + $('body').attr('jad:wizard');
+							}
 		           	   	} else {
 		           	    	JadaptiveUtils.error($('#feedback'), data.message);
 							JadaptiveUtils.stopAwesomeSpin($('#nextButton i'));

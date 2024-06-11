@@ -24,22 +24,22 @@ public class LockableTaskScheduler implements TaskScheduler {
 
 	@Override
 	public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
-		return scheduler.schedule(task, startTime);
+		return scheduler.schedule(task, Instant.ofEpochMilli(startTime.getTime()));
 	}
 
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Date startTime, long period) {
-		return scheduler.scheduleAtFixedRate(task, startTime, period);
+		return scheduler.scheduleAtFixedRate(task, Instant.ofEpochMilli(startTime.getTime()), Duration.ofMillis(period));
 	}
 
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
-		return scheduler.scheduleAtFixedRate(task, period);
+		return scheduler.scheduleAtFixedRate(task, Duration.ofMillis(period));
 	}
 
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Date startTime, long delay) {
-		return scheduler.scheduleWithFixedDelay(task, startTime, delay);
+		return scheduler.scheduleWithFixedDelay(task, Instant.ofEpochMilli(startTime.getTime()), Duration.ofMillis(delay));
 	}
 
 	@Override
@@ -53,30 +53,26 @@ public class LockableTaskScheduler implements TaskScheduler {
 
 	@Override
 	public ScheduledFuture<?> schedule(Runnable task, Instant startTime) {
-		return scheduler.schedule(task, new Date(startTime.toEpochMilli()));
+		return scheduler.schedule(task, startTime);
 	}
 
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Instant startTime, Duration period) {
-		// TODO Auto-generated method stub
-		return null;
+		return scheduler.scheduleAtFixedRate(task, startTime, period);
 	}
 
 	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, Duration period) {
-		// TODO Auto-generated method stub
-		return null;
+		return scheduler.scheduleAtFixedRate(task, period);
 	}
 
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Instant startTime, Duration delay) {
-		// TODO Auto-generated method stub
-		return null;
+		return scheduler.scheduleWithFixedDelay(task, startTime, delay);
 	}
 
 	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, Duration delay) {
-		// TODO Auto-generated method stub
-		return null;
+		return scheduler.scheduleWithFixedDelay(task, delay);
 	}
 }

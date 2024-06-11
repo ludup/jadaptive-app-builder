@@ -1,5 +1,6 @@
 package com.jadaptive.app.scheduler;
 
+import java.time.Instant;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
@@ -16,7 +17,6 @@ import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.utils.Utils;
 
 public class TenantJobRunner implements Runnable {
 
@@ -53,7 +53,7 @@ public class TenantJobRunner implements Runnable {
 	
 	public void runNow(TenantTask task) {
 		this.task = task;
-		taskScheduler.schedule(this, Utils.now());
+		taskScheduler.schedule(this, Instant.now());
 	}
 	
 	@Override

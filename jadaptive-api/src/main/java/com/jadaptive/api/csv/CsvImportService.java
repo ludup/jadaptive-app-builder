@@ -14,4 +14,6 @@ public interface CsvImportService {
 	long importCsv(ObjectTemplate template, InputStream in, 
 			boolean containsHeader, String... orderedFields) throws IOException;
 
+	boolean isImporting();
+
 }

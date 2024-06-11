@@ -603,7 +603,7 @@ public class DocumentHelper {
 					Class<?> type = (Class<?>) o.getActualTypeArguments()[0];
 					List<?> list = (List<?>) document.get(name);
 					if(Objects.isNull(list)) {
-						m.invoke(obj, new HashSet<>());
+						m.invoke(obj, new ArrayList<>());
 						continue;
 					}
 					if(UUIDEntity.class.isAssignableFrom(type)) {
@@ -611,7 +611,7 @@ public class DocumentHelper {
 						for(Object embedded : list) {
 							if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 								Document embeddedDocument = (Document) embedded;
-								elements.add(convertDocumentToObject(UUIDEntity.class, embeddedDocument, classLoader));
+								elements.add(convertDocumentToObject(type, embeddedDocument, classLoader));
 							} else if(embedded instanceof Document) {
 								UUIDReference ref = DocumentHelper.convertDocumentToObject(UUIDReference.class, (Document) embedded);
 								AbstractObject e = (AbstractObject) 
@@ -630,7 +630,7 @@ public class DocumentHelper {
 					} else {
 						
 						if(list.isEmpty()) {
-							m.invoke(obj, new HashSet<>());
+							m.invoke(obj, new ArrayList<>());
 						} else {
 							if(type.equals(String.class)) {
 								m.invoke(obj, buildStringCollection(columnDefinition, list));

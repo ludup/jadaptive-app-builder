@@ -118,7 +118,15 @@ public class Utils {
 	}
 	
 	public static Date parseTimestamp(String date) {
-		return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		try {
+			return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+		} catch(IllegalStateException e) {
+			try {
+				return parseDate(date, "yyyy-MM-dd HH:mm:ss.SSS");
+			} catch(IllegalStateException e2) {
+				return parseDate(date, "yyyy-MM-dd HH:mm:ss");
+			}
+		}
 	}
 	
 	public static String formatISODate(Date date) {
@@ -158,7 +166,12 @@ public class Utils {
 		try {
 			return new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss.SSS Z").parse(date);
 		} catch (ParseException e) {
-			throw new IllegalStateException(e.getMessage(), e);
+			try {
+				return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+			} catch (ParseException e1) {
+				throw new IllegalStateException(e.getMessage(), e1);
+			}
+			
 		}
 	}
 	

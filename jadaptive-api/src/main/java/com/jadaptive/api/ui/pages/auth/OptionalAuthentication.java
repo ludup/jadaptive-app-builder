@@ -1,6 +1,7 @@
 package com.jadaptive.api.ui.pages.auth;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -58,11 +59,21 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
 		
-		if(state.getOptionalRequired()==1 && state.getOptionalAuthentications().size()==1) {
-			state.setSelectedPage(authenticationService.getAuthenticationPage(state.getOptionalAuthentications().iterator().next().getAuthenticatorKey()));
-			throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage()));
+		var pages = new ArrayList<AuthenticationPage<?>>();
+		for(AuthenticationModule m : state.getOptionalAuthentications()) {
+			Class<? extends Page> pageClass = authenticationService.getAuthenticationPage(m.getAuthenticatorKey());
+			AuthenticationPage<?> page = (AuthenticationPage<?>)pageCache.resolvePage(pageClass);
+			if(!state.hasCompleted(pageClass) && page.canAuthenticate(state)) {
+				pages.add(page);
+			}
 		}
 		
+		if(pages.size()==1) {
+			Page page = pages.iterator().next();
+			state.setSelectedPage(page.getClass());
+			throw new PageRedirect(page);
+		}
+
 		if(state.getOptionalCompleted() > 0) {
 			int remaining = state.getOptionalRequired() - state.getOptionalCompleted();
 			doc.selectFirst("#message")
@@ -76,26 +87,24 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 					.attr("jad:i18n", "selectToContinue.last");
 			}
 		}
-		
+
 		Element authenticators = doc.selectFirst("#authenticators");
-		for(AuthenticationModule module : state.getOptionalAuthentications()) {
+		for(AuthenticationPage<?> page : pages) {
 			
-			Class<? extends Page> pageClass = authenticationService.getAuthenticationPage(module.getAuthenticatorKey());
-			AuthenticationPage<?> page = (AuthenticationPage<?>)pageCache.resolvePage(pageClass);
-			
-			if(!state.hasCompleted(pageClass)) {
+			if(!state.hasCompleted(page.getClass()) && page.canAuthenticate(state)) {
 				authenticators.appendChild(Html.div("card my-3")
 					.appendChild(Html.div("card-body")
 						.appendChild(new Element("h6")
 								.addClass("card-title mb-1")
 								.appendChild(Html.i(page.getIconGroup(), page.getIcon(), "me-2"))
 								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.title")))
-//						.appendChild(new Element("span")
-//								.addClass("card-text")
-//								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.body")
-//										.addClass("small")))
+						.appendChild(new Element("span")
+								.addClass("card-text")
+								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.body")
+										.addClass("small")))
 						.appendChild(Html.a("#").addClass("select stretched-link float-end")
-								.attr("data-authenticator", module.getUuid()))));
+								.attr("data-authenticator", page.getAuthenticatorUUID()))
+				));
 			}
 
 		}
@@ -124,5 +133,15 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 	@Override
 	public String getBundle() {
 		return "userInterface";
+	}
+
+	@Override
+	public boolean canAuthenticate(AuthenticationState state) {
+		return true;
+	}
+
+	@Override
+	public String getAuthenticatorUUID() {
+		return "4d1a81e9-e4be-454b-a4d2-78cff54d3cf0";
 	}
 }

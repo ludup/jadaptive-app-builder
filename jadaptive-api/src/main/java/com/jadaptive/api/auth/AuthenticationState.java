@@ -1,6 +1,7 @@
 package com.jadaptive.api.auth;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +17,9 @@ import com.jadaptive.api.user.User;
 public class AuthenticationState {
 
 	User user;
+	Map<Class<? extends Page>,AuthenticationModule> requiredAuthenticationModulez = new HashMap<>();
 	List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
-	List<AuthenticationModule> optionalAuthentications = new ArrayList<>();
+	Map<Class<? extends Page>,AuthenticationModule> optionalAuthentications = new HashMap<>();
 	List<PostAuthenticatorPage> postAuthenticationPages = new ArrayList<>();
 	int currentPageIndex = 0;
 	String remoteAddress;
@@ -32,6 +34,7 @@ public class AuthenticationState {
 	String attemptedUsername;
 	Class<? extends Page> optionalSelectionPage;
 	Class<? extends Page> selectedPage = null;
+	AuthenticationModule selectedAuthenticator = null;
 	List<Class<? extends Page>> completedOptionsPages = new ArrayList<>();
 	boolean passwordEnabled;
 	int optionalCompleted = 0;
@@ -75,6 +78,20 @@ public class AuthenticationState {
 		}
 	}
 	
+	public AuthenticationModule getCurrentAuthenticator() {
+		if(!isAuthenticationComplete()) {
+			return  requiredAuthenticationModulez.get(requiredAuthenticationPages.get(currentPageIndex));
+		} if(!isOptionalComplete()) { 
+			if(Objects.nonNull(selectedPage)) {
+				return selectedAuthenticator;
+			} else {
+				return null;
+			}
+		} else {
+			return null;
+		}
+	}
+	
 	public boolean hasFinished() {
 		return isAuthenticationComplete() 
 				&& isOptionalComplete()
@@ -108,6 +125,7 @@ public class AuthenticationState {
 					optionalCompleted++;
 					completedOptionsPages.add(selectedPage);
 					selectedPage = null;
+					selectedAuthenticator = null;
 				}
 				return isOptionalComplete();
 			}
@@ -135,8 +153,8 @@ public class AuthenticationState {
 		return requiredAuthenticationPages;
 	}
 	
-	public List<AuthenticationModule> getOptionalAuthentications() {
-		return optionalAuthentications;
+	public Collection<AuthenticationModule> getOptionalAuthentications() {
+		return optionalAuthentications.values();
 	}
 	
 	public List<PostAuthenticatorPage> getPostAuthenticationPages() {
@@ -276,6 +294,7 @@ public class AuthenticationState {
 	
 	public void setSelectedPage(Class<? extends Page> selectedPage) {
 		this.selectedPage = selectedPage;
+		this.selectedAuthenticator = optionalAuthentications.get(selectedPage);
 	}
 
 	public boolean hasCompleted(Class<? extends Page> page) {
@@ -304,5 +323,23 @@ public class AuthenticationState {
 	
 	public Map<String,Object> getAttributes() {
 		return attrs;
+	}
+
+	public void clearRequiredAuthentications() {
+		requiredAuthenticationModulez.clear();
+		requiredAuthenticationPages.clear();
+	}
+
+	public void addRequiredAuthentication(Class<? extends Page> clz, AuthenticationModule authenticationModule) {
+		requiredAuthenticationModulez.put(clz, authenticationModule);
+		requiredAuthenticationPages.add(clz);
+	}
+
+	public void clearOptionalAuthentications() {
+		optionalAuthentications.clear();
+	}
+	
+	public void addOptionalAuthentication(Class<? extends Page> clz, AuthenticationModule authenticationModule) {
+		optionalAuthentications.put(clz, authenticationModule);
 	}
 }

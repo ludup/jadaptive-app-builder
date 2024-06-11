@@ -23,6 +23,7 @@ $(document).ready(function() {
            data: new FormData(form[0]),
            success: function(data)
            {
+	           debugger;
                if(data.redirect) {
                 	window.location = data.location;
                } else if(data.success) {

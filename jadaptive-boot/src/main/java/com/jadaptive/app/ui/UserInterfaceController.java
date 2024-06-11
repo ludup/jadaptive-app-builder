@@ -170,8 +170,8 @@ public class UserInterfaceController extends AuthenticatedController {
 				response.setContentType("text/javascript");
 				response.setStatus(HttpStatus.OK.value());
 				
-				try(InputStream in = new ReaderInputStream(
-						new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name), "UTF-8")) {
+				try(InputStream in = ReaderInputStream.builder().setCharset("UTF-8")
+						.setReader(new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name)).get()) {
 					IOUtils.copy(in, response.getOutputStream());
 				}
 			} catch(FileNotFoundException e) {
@@ -180,8 +180,8 @@ public class UserInterfaceController extends AuthenticatedController {
 					URL url = page.getClass().getResource(page.getJsResource());
 					response.setContentType("text/javascript");
 					response.setStatus(HttpStatus.OK.value());
-					try(InputStream in = new ReaderInputStream(
-							new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name), "UTF-8")) {
+					try(InputStream in = ReaderInputStream.builder().setCharset("UTF-8")
+							.setReader(new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name)).get()) {
 						IOUtils.copy(in, response.getOutputStream());
 					}
 				} catch(FileNotFoundException e2) {
@@ -208,8 +208,8 @@ public class UserInterfaceController extends AuthenticatedController {
 			}
 			response.setContentType("application/javascript");
 			response.setStatus(HttpStatus.OK.value());
-			try(InputStream in = new ReaderInputStream(
-					new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name), "UTF-8")) {
+			try(InputStream in = ReaderInputStream.builder().setCharset("UTF-8")
+					.setReader(new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name)).get()) {
 				IOUtils.copy(in, response.getOutputStream());
 			}
 			

@@ -64,8 +64,8 @@ public class WidgetRenderer implements PageExtension {
 			
 			String widgetName = e.attr("jad:widget");
 			String name = e.attr("jad:name");
-			String formVar = Objects.toString(e.attr("jad:formVar"), name);
-			String bundle = Objects.toString( e.attr("bundle"), getBundle(page));
+			String formVar = StringUtils.defaultIfBlank(e.attr("jad:formVar"), name);
+			String bundle = StringUtils.defaultIfBlank( e.attr("bundle"), getBundle(page));
 			String value  = getValue(page, e, name, formVar);
 			boolean readOnly = getReadOnly(e);
 		

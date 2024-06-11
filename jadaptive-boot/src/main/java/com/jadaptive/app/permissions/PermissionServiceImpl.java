@@ -531,10 +531,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Override
 	public void assertAdministrator() {
 		if(!isAdministrator(getCurrentUser())) {
-			if(log.isWarnEnabled()) {
-				log.warn("User {} denied administrative access", 
-						getCurrentUser().getUsername());
-			}
 			throw new AccessDeniedException(String.format("%s is not an Administrator", 
 					getCurrentUser().getName()));
 		}

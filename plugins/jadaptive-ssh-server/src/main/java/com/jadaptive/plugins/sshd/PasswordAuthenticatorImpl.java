@@ -41,8 +41,8 @@ public class PasswordAuthenticatorImpl extends PasswordAuthenticationProvider {
 	public boolean verifyPassword(SshConnection con, String username, String password)
 			throws PasswordChangeException, IOException {
 		
-		tenantService.setCurrentTenant(tenantService.resolveTenantName(con.getUsername()));
-		String tenantUsername = tenantService.resolveUserName(con.getUsername());
+		tenantService.setCurrentTenant(tenantService.resolveTenantName(username));
+		String tenantUsername = tenantService.resolveUserName(username);
 		
 		try {
 			

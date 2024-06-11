@@ -76,7 +76,9 @@ public class EmbeddedMongoWithTransactionsConfig {
     	
         ImmutableMongod mongod = Mongod.builder()
     		   .databaseDir(Start.to(DatabaseDir.class).initializedWith(DatabaseDir.of(databasePath.toPath())))
-               .processConfig(Start.to(ProcessConfig.class).initializedWith(ImmutableProcessConfig.builder().daemonProcess(true).build()))
+               .processConfig(Start.to(ProcessConfig.class)
+            		   .initializedWith(ImmutableProcessConfig.builder()
+            				   .daemonProcess(true).build()))
     		   .mongodArguments(Start.to(MongodArguments.class)
                     .initializedWith(mongodArguments))
 	                .net(Start.to(Net.class)

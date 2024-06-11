@@ -86,7 +86,6 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		
 		Map<String,String[]> parameters = new HashMap<>();
 		
-		
 			try {
 				// Create a new file upload handler
 				JakartaServletFileUpload<?,?> upload = new JakartaServletFileUpload<>();
@@ -159,6 +158,33 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("POST api/objects/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		}
+	}
+	
+	@RequestMapping(value="/app/api/form/validate/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+			consumes = { "multipart/form-data" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus validateForm(HttpServletRequest request, @PathVariable String resourceKey)  {
+
+		try {
+			
+			sessionUtils.verifySameSiteRequest(request);
+			
+			ObjectTemplate template = templateService.get(resourceKey);
+			request.getSession().removeAttribute(resourceKey);
+			
+			DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
+			return new RequestStatusImpl(true);
+		}  catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/form/validate/{}", resourceKey, e);
 			}
 			return handleException(e, "POST", resourceKey);
 		}

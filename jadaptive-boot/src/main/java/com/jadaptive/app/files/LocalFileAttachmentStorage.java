@@ -21,7 +21,6 @@ import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.files.FileAttachment;
 import com.jadaptive.api.files.FileAttachmentStorage;
 import com.jadaptive.api.files.FileStorageProvider;
-import com.jadaptive.api.template.FieldTemplate;
 
 @Extension
 public class LocalFileAttachmentStorage implements FileAttachmentStorage {

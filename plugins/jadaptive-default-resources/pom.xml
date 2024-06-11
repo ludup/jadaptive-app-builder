@@ -63,6 +63,12 @@
 		    <artifactId>fontawesome-free</artifactId>
 		    <version>6.5.1</version>
 		</dependency>
+		<dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>tinymce</artifactId>
+		    <version>7.1.2</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

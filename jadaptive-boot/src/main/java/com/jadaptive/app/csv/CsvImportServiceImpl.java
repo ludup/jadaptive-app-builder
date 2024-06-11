@@ -30,6 +30,8 @@ public class CsvImportServiceImpl implements CsvImportService {
 	@Autowired
 	private ObjectService entityService;
 
+	ThreadLocal<Boolean> importing = ThreadLocal.withInitial(() -> Boolean.FALSE);
+	
 	@Override
 	public long importCsv(ObjectTemplate template, InputStream in, boolean containsHeader, String... orderedFields)
 			throws IOException {
@@ -61,6 +63,8 @@ public class CsvImportServiceImpl implements CsvImportService {
         			quoteChar, delimiterChar, containsHeader);
         }
         try {
+        	
+        		importing.set(Boolean.TRUE);
                 listReader = new CsvListReader(new InputStreamReader(in), csvPreferences.build());
                 
                 if(containsHeader) {
@@ -105,11 +109,18 @@ public class CsvImportServiceImpl implements CsvImportService {
                 return count;
                 
         } finally {
+        	
+        	importing.set(Boolean.FALSE);
             if( listReader != null ) {
                     listReader.close();
             }
         }
   
+	}
+
+	@Override
+	public boolean isImporting() {
+		return importing.get();
 	}
 
 }

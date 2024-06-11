@@ -485,7 +485,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			break;
 		}
 		case INTEGER:
-			break;
 		case LONG:
 			break;
 		case OBJECT_EMBEDDED:

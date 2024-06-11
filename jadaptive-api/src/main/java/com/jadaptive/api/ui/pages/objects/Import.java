@@ -69,17 +69,12 @@ public class Import extends ObjectTemplatePage {
 		
 		Collection<FieldTemplate> deferred = new ArrayList<>();
 		for(FieldTemplate field : template.getFields()) {
-			switch(field.getResourceKey()) {
-			case "created":
-			case "lastModified":
-				continue;
-			default:
-				if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
-					deferred.add(field);
-				} else {
-					addField(select, field, template, formVariablePrefix);
-				}
+			if(field.getFieldType()==FieldType.OBJECT_EMBEDDED) {
+				deferred.add(field);
+			} else {
+				addField(select, field, template, formVariablePrefix);
 			}
+			
 		}
 		
 		for(FieldTemplate field : deferred) {

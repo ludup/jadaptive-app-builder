@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.csv.CsvImportService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
 import com.jadaptive.api.entity.ObjectException;
@@ -54,6 +55,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	
 	@Autowired
 	protected MongoDatabaseService mongo;
+	
+	@Autowired
+	private CsvImportService importService; 
 	
 	ThreadLocal<ClientSession> currentSession = new ThreadLocal<>();
 	
@@ -188,13 +192,18 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 
 		Date now = new Date();
-		document.put("lastModified", now);
+		
+		if(!importService.isImporting()) {
+			document.put("lastModified", now);
+		}
 
 		assertUniqueConstraints(collection, document, document.getString("_id"));
 		
 		if(StringUtils.isBlank(document.getString("_id"))) {
 			
-			document.put("created", now);
+			if(!document.containsKey("created")) {
+				document.put("created", now);
+			}
 			document.put("_id", UUID.randomUUID().toString());
 			
 //			String contentHash = DocumentHelper.generateContentHash(document);
@@ -258,8 +267,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 					if(collection.countDocuments(
 							Filters.and(Filters.eq(field, document.get(field)),
 									Filters.not(Filters.eq("_id", existingUUID)))) > 0L) {
-						throw new RepositoryException(String.format("An object already exists with the same %s value!", 
-								WordUtils.capitalize(field)));
+						throw new RepositoryException(String.format("An object already exists with the same %s value '%s'!", 
+								WordUtils.capitalize(field), document.get(field)));
 					}
 				}
 			}

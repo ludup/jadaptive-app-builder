@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Authorization;
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Token;
+import com.jadaptive.api.http.HttpHelpers;
 import com.jadaptive.api.ui.Feedback;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -96,15 +98,21 @@ public class OAuth2CompleteController {
 				parameters.put("grant_type", "authorization_code");
 				parameters.put("code", code);
 				parameters.put("redirect_uri", c.getRedirectUri());
-				parameters.put("client_id", c.getClientId());
-				parameters.put("code_verifier", c.getCodeVerifier());
+				if(StringUtils.isNotBlank(c.getClientId()))
+					parameters.put("client_id", c.getClientId());
+				if(StringUtils.isNotBlank(c.getCodeVerifier()))
+					parameters.put("code_verifier", c.getCodeVerifier());
 
 				var form = parameters.entrySet()
 					    .stream()
 					    .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
 					    .collect(Collectors.joining("&"));
 				
-				var client = HttpClient.newHttpClient();
+				var clientBldr = HttpClient.newBuilder();
+				if(Boolean.getBoolean("jadaptive.oauth.insecureTokenRequest")) {
+					clientBldr.sslContext(HttpHelpers.insecureContext());
+				}
+				var client = clientBldr.build();
 				var tokenRequest = HttpRequest.newBuilder()
 						.uri(new URI(c.getTokenUri()))
 					    .headers("Content-Type", "application/x-www-form-urlencoded")
