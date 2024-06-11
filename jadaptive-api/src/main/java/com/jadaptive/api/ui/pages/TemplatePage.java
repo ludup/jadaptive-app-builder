@@ -52,14 +52,18 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		return templateClazz;
 	}
 	
+	protected ObjectTemplate findTemplate() {
+		return templateService.get(getResourceKey());
+	}
 
 	public void onCreate() throws FileNotFoundException {
 		
 		super.onCreate();
 		try {
-			template = templateService.get(resourceKey);
-			templateClazz = templateService.getTemplateClass(resourceKey);
-			displayKey = resourceKey;
+			resourceKey = getResourceKey();
+			template = findTemplate();
+			templateClazz = templateService.getTemplateClass(getResourceKey());
+			displayKey = getResourceKey();
 
 			if(!tenantService.getCurrentTenant().isSystem() && template.isSystem()) {
 				throw new FileNotFoundException(String.format("%s not found", resourceKey));
