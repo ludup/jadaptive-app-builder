@@ -43,7 +43,7 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 
 	@Override
 	public String getResourceKey() {
-		return Objects.nonNull(object) ? object.getResourceKey() : template.getResourceKey();
+		return Objects.nonNull(object) ? object.getResourceKey() : resourceKey;
 	}
 	
 	protected void assertPermissions() {

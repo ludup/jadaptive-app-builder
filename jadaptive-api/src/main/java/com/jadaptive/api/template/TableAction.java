@@ -39,6 +39,8 @@ public @interface TableAction  {
 	
 	String[] permissions() default {};
 	
+	boolean matchAllPermissions() default false;
+	
 	Class<? extends ActionFilter> filter() default NoActionFilter.class;
 
 }

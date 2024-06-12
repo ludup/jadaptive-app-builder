@@ -57,6 +57,8 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		
 		super.onCreate();
 		try {
+			resourceKey = getResourceKey();
+			
 			template = templateService.get(resourceKey);
 			templateClazz = templateService.getTemplateClass(resourceKey);
 			displayKey = resourceKey;

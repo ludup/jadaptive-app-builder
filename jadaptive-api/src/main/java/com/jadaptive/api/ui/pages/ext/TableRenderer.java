@@ -252,6 +252,17 @@ public class TableRenderer {
 	private boolean checkMultipleSelectionActions(Collection<TableAction> tableActions) {
 		for(TableAction action : tableActions) {
 			if(action.target() == Target.SELECTION) {
+				if(action.permissions().length > 0) {
+					try {
+						if(action.matchAllPermissions()) {
+							permissionService.assertAllPermission(action.permissions());
+						} else {
+							permissionService.assertAnyPermission(action.permissions());
+						}
+					} catch(AccessDeniedException e) {
+						return false;
+					}
+				}
 				return true;
 			}
 		}
