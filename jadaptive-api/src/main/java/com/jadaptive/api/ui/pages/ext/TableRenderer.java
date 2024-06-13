@@ -392,12 +392,12 @@ public class TableRenderer {
 				Object val = obj.getValue(template.getDefaultColumn());
 				if(action.confirmationRequired()) {
 					if(StringUtils.isNotBlank(template.getDefaultColumn())) {
-						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), "deleteAction")
+						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
 							.attr("data-name", val == null ? "" : val.toString())
 							.attr("data-url", replaceVariables(action.url(), obj))
 							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
 					} else {
-						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), "deleteAction")
+						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
 							.attr("data-name", obj.getUuid())
 							.attr("data-url", replaceVariables(action.url(), obj))
 							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");

@@ -33,6 +33,8 @@ public @interface TableAction  {
 	
 	boolean writeAction() default false;
 	
+	boolean deleteAction() default false;
+	
 	boolean confirmationRequired() default false;
 	
 	String targetKey() default "";
