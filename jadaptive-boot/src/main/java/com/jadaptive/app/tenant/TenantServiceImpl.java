@@ -36,6 +36,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
@@ -78,17 +79,16 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Autowired
 	private SingletonObjectDatabase<TenantConfiguration> tenantConfig;
 
-	Tenant systemTenant;
+	private Tenant systemTenant;
 	
-	Map<String,Tenant> tenantsByDomain = new HashMap<>();
-	Map<String,Tenant> tenantsByName = new HashMap<>();
-	Map<String,Tenant> tenantsByCode = new HashMap<>();
-	Map<String,Tenant> tenantsByUUID = new HashMap<>();
+	private Map<String,Tenant> tenantsByDomain = new HashMap<>();
+	private Map<String,Tenant> tenantsByName = new HashMap<>();
+	private Map<String,Tenant> tenantsByCode = new HashMap<>();
+	private Map<String,Tenant> tenantsByUUID = new HashMap<>();
 	
-	boolean setupMode = false;
-	boolean ready = false;
+	private boolean ready = false;
 	
-	List<Runnable> onSetupComplete = new ArrayList<>();
+	private List<Runnable> onSetupComplete = new ArrayList<>();
 
 	@EventListener
 	public void onApplicationStartup(ApplicationReadyEvent evt) {
@@ -100,7 +100,6 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			if(newSchema) {
 				repository.newSchema();
 				systemTenant = createTenant(SYSTEM_UUID, "System", "localhost", true);
-				setupMode = true;
 			} else {
 				systemTenant = repository.getSystemTenant();
 			}
@@ -140,6 +139,14 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			for(StartupAware startup : startups) {
 				startup.onApplicationStartup();
 			}
+			
+			eventService.updated(Tenant.class, tevt -> {
+				if(tevt.getObject().getUuid().equals(systemTenant.getUuid())) {
+					systemTenant = tevt.getObject();
+				}
+				resetCache(tevt.getObject());
+				setupCache(tevt.getObject());
+			});
 			
 		} finally {
 			permissionService.clearUserContext();
@@ -256,6 +263,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		tenant.setOwnerEmail(emailAddress);
 		
 		repository.saveTenant(tenant);
+	}
+
+	@Override
+	public UUIDDocument createNew(ObjectTemplate template) {
+		return new Tenant();
 	}
 
 	@Override

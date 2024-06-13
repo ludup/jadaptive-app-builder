@@ -38,6 +38,10 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	void clearCurrentTenant();
 
 	Iterable<Tenant> allObjects();
+	
+	default UncheckedCloseable systemTenant() {
+		return tenant(getSystemTenant());
+	}
 
 	Tenant getSystemTenant() throws RepositoryException, ObjectException;
 
