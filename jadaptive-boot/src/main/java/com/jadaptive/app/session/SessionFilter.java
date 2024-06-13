@@ -2,6 +2,8 @@ package com.jadaptive.app.session;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.URI;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -100,24 +102,40 @@ public class SessionFilter implements Filter {
 			Tenant tenant = tenantService.getCurrentTenant();
 
 			if(Objects.nonNull(tenant)) {
-				if(!tenant.isValidHostname(request.getServerName())) {
+				if(!tenant.isValidHostname(request.getServerName()) && !req.getServerName().equals(InetAddress.getLocalHost().getHostName()) ) {
 					TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
-					if(config.getRequireValidDomain()) {
-						if(req.getServerName().equalsIgnoreCase(config.getRegistrationDomain())) {
-							if(req.getRequestURI().equals("/")) {
-								if(req.getServerPort() != -1 && req.getServerPort() != 443) {
-									resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
-											config.getRegistrationDomain(),
-											request.getServerPort()));
-								} else {
-									resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
-								}	
-								return;
+					if(req.getServerName().equalsIgnoreCase(config.getRegistrationDomain())) {
+						if(req.getRequestURI().equals("/")) {
+							if(req.getServerPort() != -1 && req.getServerPort() != 443) {
+								resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
+										config.getRegistrationDomain(),
+										request.getServerPort()));
+							} else {
+								resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
+							}	
+							return;
+						}
+					} else {
+						if(config.getRequireValidDomain()) {
+							String redir;
+							if(StringUtils.isBlank(config.getInvalidDomainRedirect())) {
+								if(StringUtils.isBlank(config.getRootDomain())) {
+									resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+									return;
+								}
+								else {
+									redir = "https://" + config.getRootDomain();	
+								}
+							}
+							else {
+								redir = config.getInvalidDomainRedirect();
 							}
 							
-						} else {
-							resp.sendRedirect(config.getInvalidDomainRedirect());
-							return;
+							URI redirUri = URI.create(redir);
+							if(!redirUri.getHost().equals(req.getServerName())) {
+								resp.sendRedirect(redir);
+								return;
+							}
 						}
 					}
 				}
