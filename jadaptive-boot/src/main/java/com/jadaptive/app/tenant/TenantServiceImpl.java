@@ -31,6 +31,7 @@ import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
@@ -174,6 +175,12 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		permissionService.assertWrite(TENANT_RESOURCE_KEY);
 	}
 	
+	@Override
+	public void assertSystemTenant() {
+		if(!getSystemTenant().equals(getCurrentTenant()))
+			throw new AccessDeniedException();
+	}
+
 	@Override
 	public Iterable<Tenant> allObjects()  {
 		try {

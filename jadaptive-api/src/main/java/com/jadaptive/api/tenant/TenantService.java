@@ -57,6 +57,8 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 
 	void assertManageTenant() throws AccessDeniedException;
 
+	void assertSystemTenant() throws AccessDeniedException;
+
 	Tenant resolveTenantName(String username);
 
 	Tenant getTenantByName(String name);
