@@ -177,7 +177,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	@Override
 	public void assertSystemTenant() {
-		if(!getSystemTenant().equals(getCurrentTenant()))
+		if(!isSystemTenant())
 			throw new AccessDeniedException();
 	}
 
