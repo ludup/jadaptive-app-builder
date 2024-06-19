@@ -102,10 +102,11 @@ public class SessionFilter implements Filter {
 			Tenant tenant = tenantService.getCurrentTenant();
 
 			if(Objects.nonNull(tenant)) {
-				if(!tenant.isValidHostname(request.getServerName()) && !req.getServerName().equals(InetAddress.getLocalHost().getHostName()) ) {
-					log.info("REMOVEME isValidHostname for {} is false in tenant {} - {}", request.getServerName(), tenantService.getCurrentTenant().getName(), tenantService.getCurrentTenant().getDomain());
-					TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
-					if(req.getServerName().equalsIgnoreCase(config.getRegistrationDomain())) {
+				String serverName = req.getServerName();
+				TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
+				if(!isValidHostname(config, tenant, serverName) && !serverName.equals(InetAddress.getLocalHost().getHostName()) ) {
+					log.info("REMOVEME isValidHostname for {} is false in tenant {} - {}", serverName, tenantService.getCurrentTenant().getName(), tenantService.getCurrentTenant().getDomain());
+					if(serverName.equalsIgnoreCase(config.getRegistrationDomain())) {
 						if(req.getRequestURI().equals("/")) {
 							if(req.getServerPort() != -1 && req.getServerPort() != 443) {
 								resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
@@ -138,7 +139,7 @@ public class SessionFilter implements Filter {
 							log.info("REMOVEME redirect is {}", redir);
 							
 							URI redirUri = URI.create(redir);
-							if(!redirUri.getHost().equals(req.getServerName())) {
+							if(!redirUri.getHost().equals(serverName)) {
 								resp.sendRedirect(redir);
 								return;
 							}
@@ -165,6 +166,10 @@ public class SessionFilter implements Filter {
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
+	}
+
+	private boolean isValidHostname(TenantConfiguration config, Tenant tenant, String serverName) {
+		return tenant.isValidHostname(serverName) || (tenant.isSystem() && serverName.equals(config.getRootDomain()));
 	}
 
 	private void postHandle(HttpServletRequest request, HttpServletResponse response) throws ServletException {
