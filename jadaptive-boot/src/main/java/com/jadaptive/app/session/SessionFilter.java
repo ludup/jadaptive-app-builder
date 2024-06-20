@@ -163,7 +163,13 @@ public class SessionFilter implements Filter {
 	}
 
 	private boolean isValidHostname(TenantConfiguration config, Tenant tenant, String serverName) {
-		return tenant.isValidHostname(serverName) || (tenant.isSystem() && serverName.equals(config.getRootDomain()));
+		return tenant.isValidHostname(serverName) || 
+			 ( tenant.isSystem() && ( 
+					serverName.equals(config.getRootDomain()) ||
+					serverName.equals(tenant.getDomain()) ||
+					serverName.equals(tenant.getHostname() + "." + config.getRootDomain())
+			    )
+			 );
 	}
 
 	private void postHandle(HttpServletRequest request, HttpServletResponse response) throws ServletException {
