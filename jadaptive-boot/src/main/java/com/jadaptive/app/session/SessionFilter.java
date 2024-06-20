@@ -105,7 +105,6 @@ public class SessionFilter implements Filter {
 				String serverName = req.getServerName();
 				TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
 				if(!isValidHostname(config, tenant, serverName) && !serverName.equals(InetAddress.getLocalHost().getHostName()) ) {
-					log.info("REMOVEME isValidHostname for {} is false in tenant {} - {}", serverName, tenantService.getCurrentTenant().getName(), tenantService.getCurrentTenant().getDomain());
 					if(serverName.equalsIgnoreCase(config.getRegistrationDomain())) {
 						if(req.getRequestURI().equals("/")) {
 							if(req.getServerPort() != -1 && req.getServerPort() != 443) {
@@ -119,7 +118,6 @@ public class SessionFilter implements Filter {
 						}
 					} else {
 						if(config.getRequireValidDomain()) {
-							log.info("REMOVEME require valid domain");
 							String redir;
 							if(StringUtils.isBlank(config.getInvalidDomainRedirect())) {
 								if(StringUtils.isBlank(config.getRootDomain())) {
@@ -127,17 +125,13 @@ public class SessionFilter implements Filter {
 									return;
 								}
 								else {
-									log.info("REMOVEME using root domain");
 									redir = "https://" + config.getRootDomain();	
 								}
 							}
 							else {
 								redir = config.getInvalidDomainRedirect();
-								log.info("REMOVEME using invalid domain redirect ");
 							}
 
-							log.info("REMOVEME redirect is {}", redir);
-							
 							URI redirUri = URI.create(redir);
 							if(!redirUri.getHost().equals(serverName)) {
 								resp.sendRedirect(redir);
