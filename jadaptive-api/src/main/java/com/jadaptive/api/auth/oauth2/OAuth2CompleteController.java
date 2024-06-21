@@ -6,7 +6,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
-import java.net.http.HttpClient.Builder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -132,12 +131,14 @@ public class OAuth2CompleteController {
 					throw new IllegalStateException(err + ". " + (description == null ? "" : " " + description));
 				}
 
+				var tokenTypeVal = tokenResponseObj.get("token_type");
+				var tokenType = tokenTypeVal == null ? "Bearer" : tokenTypeVal.asText();
 				var accessToken = tokenResponseObj.get("access_token").asText();
 				var refreshToken = tokenResponseObj.has("refresh_token")
 						? tokenResponseObj.get("refresh_token").asText()
 						: null;
 				var expires = System.currentTimeMillis() + (tokenResponseObj.get("expires_in").asInt() * 1000);
-				var token = new OAuth2Token(accessToken, refreshToken, expires);
+				var token = new OAuth2Token(accessToken, refreshToken, tokenType, state, expires);
 
 				c.handleAuthorization(token, request, response, c);
 			} catch (Exception e) {
