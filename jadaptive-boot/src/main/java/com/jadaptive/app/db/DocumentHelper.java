@@ -28,7 +28,9 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -387,23 +389,23 @@ public class DocumentHelper {
 			}
 			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 		case FILE:
-			if(Request.get() instanceof StandardMultipartHttpServletRequest) {
-				List<MultipartFile> file = ((StandardMultipartHttpServletRequest)Request.get()).getMultiFileMap().get(field.getFormVariable());
-				if(Objects.isNull(file)) {
-					return null;
+			try {
+				if(!Request.get().getParts().isEmpty()) {
+					Part part = Request.get().getPart(field.getFormVariable());
+					if(Objects.isNull(part)) {
+						return null;
+					}
+					if(part.getSize() == 0) {
+						return null;
+					}
+					if(StringUtils.isNotBlank(part.getSubmittedFileName()) && part.getSize() > 0) {
+						return Base64.getEncoder().encodeToString(IOUtils.toByteArray(part.getInputStream()));
+					}
 				}
-				if(file.isEmpty()) {
-					return null;
-				}
-				if(file.size() > 1) {
-					throw new IllegalStateException("Multiple file parts for single value!");
-				}
-				MultipartFile f = file.get(0);
-				if(StringUtils.isNotBlank(f.getOriginalFilename()) && f.getSize() > 0) {
-					return Base64.getEncoder().encodeToString(IOUtils.toByteArray(f.getInputStream()));
-				}
+			} catch (IOException | ServletException e) {
+				log.error("Failed to parse FILE part for {}", field.getResourceKey());
 			}
-			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
+			return null;
 		default:
 			if(Objects.isNull(value)) {
 				

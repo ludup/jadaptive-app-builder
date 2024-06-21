@@ -42,7 +42,7 @@ public abstract class StashedObjectPage extends ObjectTemplatePage {
 
 	@Override
 	public String getResourceKey() {
-		return Objects.nonNull(childObject) ? childObject.getResourceKey() : childResourceKey;
+		return Objects.nonNull(childObject) ? childObject.getResourceKey() : resourceKey;
 	}
 	
 	protected void assertPermissions() {
