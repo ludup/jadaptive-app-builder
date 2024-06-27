@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,9 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	public WizardState getState(HttpServletRequest request) {
 		
 		
-		WizardState state = (WizardState) request.getSession().getAttribute(getStateAttribute());
+		String stateAttribute = getStateAttribute();
+		HttpSession session = request.getSession();
+		WizardState state = (WizardState) session.getAttribute(stateAttribute);
 		boolean isSystem = tenantService.getCurrentTenant().isSystem();
 		
 		if(Objects.isNull(state)) {
@@ -112,7 +115,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 					sections.toArray((new WizardSection[0]))); 
 			
 			init(state);
-			request.getSession().setAttribute(getStateAttribute(), state);
+			session.setAttribute(stateAttribute, state);
 		}
 		
 		assertPermissions(state);

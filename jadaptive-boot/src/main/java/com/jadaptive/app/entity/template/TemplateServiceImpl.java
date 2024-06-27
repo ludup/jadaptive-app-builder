@@ -88,6 +88,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	private Map<String,List<ExtensionRegistration>> extensionsByTemplate = new HashMap<>();
 	private Map<String,List<TableAction>> actionsByTarget = new HashMap<>();
 	private Map<String,ObjectTemplate> temporaryTemplates = new HashMap<>();
+
+	private boolean extensionTemplatesGenerated;
 	
 	@Override
 	public void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template) {
@@ -180,7 +182,6 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 	@SuppressWarnings("unchecked")
 	private void generateExtensionTemplates() {
-		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
 			if(log.isInfoEnabled()) {
@@ -224,6 +225,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
                 registerExtension((Class<? extends UUIDDocument>) classInfo.loadClass());
             }
         }
+		extensionTemplatesGenerated = true;
+		
 		
 	}
 	private void registerExtension(Class<? extends UUIDDocument> loadClass) {
@@ -240,7 +243,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Override
 	public Collection<ExtensionRegistration> getTemplateExtensions(ObjectTemplate template) {
 		
-		if(extensionsByTemplate.isEmpty()) {
+		if(!extensionTemplatesGenerated) {
 			generateExtensionTemplates();
 		}
 		
