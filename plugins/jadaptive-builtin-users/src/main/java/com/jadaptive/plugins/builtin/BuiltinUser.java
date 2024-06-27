@@ -16,7 +16,7 @@ import com.jadaptive.utils.PasswordEncryptionType;
 
 @ObjectDefinition(resourceKey = BuiltinUser.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
 @ObjectServiceBean(bean = UserService.class)
-@ObjectViewDefinition(bundle = "users", value = "passwordOptions", weight=300)
+@ObjectViewDefinition(bundle = "users", value = "passwordOptions", weight=9999)
 @GenerateEventTemplates
 public class BuiltinUser extends PasswordEnabledUser {
 
