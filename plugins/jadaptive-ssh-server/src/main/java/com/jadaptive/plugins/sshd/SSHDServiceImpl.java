@@ -106,6 +106,8 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	LoadBalancerPolicy lbPolicy= new LoadBalancerPolicy();
 	
 	String softwareVersionComments = "JADAPTIVE";
+
+	private boolean initialised;
 	
 	public SSHDServiceImpl() {
 		super();
@@ -218,6 +220,8 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			}
 		} catch (IOException e) {
 			LOG.error("SSHD service failed to start", e);
+		} finally {
+			initialised = true;
 		}
 	}
 	
@@ -424,7 +428,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	@Override
 	public void addInterface(String addressToBind, int portToBind) throws IOException {
 		super.addInterface(addressToBind, portToBind);
-		if(!getEngine().isStarted()) {
+		if(initialised && !getEngine().isStarted()) {
 			getEngine().startup();
 		}
 	}
@@ -433,7 +437,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	public void addInterface(String addressToBind, int portToBind, ProtocolContextFactory<?> contextFactory)
 			throws IOException {
 		super.addInterface(addressToBind, portToBind, contextFactory);
-		if(!getEngine().isStarted()) {
+		if(initialised && !getEngine().isStarted()) {
 			getEngine().startup();
 		}
 	}
