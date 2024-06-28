@@ -104,7 +104,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 					log.debug("Aborting transaction");
 				}
 				currentSession.get().abortTransaction();
-				if(t instanceof RepositoryException || t instanceof ObjectException) {
+				if(t instanceof RuntimeException) {
 					throw t;
 				}
 				throw new IllegalStateException("Transaction failed with " + t.getMessage(), t);

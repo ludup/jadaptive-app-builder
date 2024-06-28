@@ -22,6 +22,7 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.UriRedirect;
 
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
@@ -49,14 +50,23 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	public void finish(WizardState state) {
 		
 		beforeTransaction(state);
-		transactionService.executeTransaction(()-> {
-			startTransaction(state);
-			for(WizardSection section : state.getSections()) {
-				section.finish(state);
-			}
-			finishTransaction(state);
-			state.completed();
-		});
+		try {
+			transactionService.executeTransaction(()-> {
+				startTransaction(state);
+				for(WizardSection section : state.getSections()) {
+					section.finish(state);
+				}
+				finishTransaction(state);
+				state.completed();
+			});
+		}
+		catch(IllegalStateException ise) {
+			if(ise.getCause() instanceof Redirect redir) 
+				throw redir;
+			else 
+				throw ise;
+			
+		}
 		afterTransaction(state);
 	}
 	

@@ -31,6 +31,7 @@ import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Authorizat
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Token;
 import com.jadaptive.api.http.HttpHelpers;
 import com.jadaptive.api.ui.Feedback;
+import com.jadaptive.api.ui.Redirect;
 
 @Controller
 public class OAuth2CompleteController {
@@ -141,6 +142,8 @@ public class OAuth2CompleteController {
 				var token = new OAuth2Token(accessToken, refreshToken, tokenType, state, expires);
 
 				c.handleAuthorization(token, request, response, c);
+			} catch(Redirect redir) {
+				throw redir;
 			} catch (Exception e) {
 				LOG.error("Failed to complete authorization (" + c.getTokenUri() + ").", e);
 

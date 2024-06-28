@@ -228,6 +228,10 @@ public class WizardState {
 	public void setParameter(String name, Object value) {
 		stateParameters.put(name, value);
 	}
+	
+	public Object removeParameter(String name) {
+		return stateParameters.remove(name);
+	}
 
 	public Page getCompletePage() throws FileNotFoundException {
 		return flow.getCompletePage();

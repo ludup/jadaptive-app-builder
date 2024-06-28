@@ -8,9 +8,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.ui.wizards.Wizard;
 import com.jadaptive.api.ui.wizards.WizardState;
+import com.jadaptive.plugins.sshd.SSHDService;
 import com.jadaptive.plugins.sshd.SSHInterface;
 import com.jadaptive.plugins.sshd.SSHInterfaceService;
 import com.jadaptive.utils.ObjectUtils;
@@ -21,6 +23,12 @@ public abstract class InterfaceSection extends SetupSection {
 
 	@Autowired
 	protected SSHInterfaceService interfaceService; 
+
+	@Autowired
+	protected TransactionService transactionService;
+	
+	@Autowired
+	protected SSHDService sshdService; 
 	
 	public InterfaceSection(String bundle) {
 		super(bundle, 
@@ -102,10 +110,12 @@ public abstract class InterfaceSection extends SetupSection {
 	public final void finish(WizardState state) {
 		
 		CreateInterface iface = ObjectUtils.assertObject(state.getObject(this), CreateInterface.class);
-
 		SSHInterface sshIface = createInterface(iface);
 		sshIface.setSecurityLevel(SecurityLevel.STRONG);
 		interfaceService.saveOrUpdate(sshIface);
+		transactionService.tx().undoable(() -> {
+			sshdService.removeInterface(sshIface);
+		});
 		
 	}
 

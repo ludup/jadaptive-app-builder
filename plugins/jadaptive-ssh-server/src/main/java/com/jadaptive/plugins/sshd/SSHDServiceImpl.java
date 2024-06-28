@@ -56,6 +56,7 @@ import com.sshtools.server.vsession.ShellCommandFactory;
 import com.sshtools.server.vsession.VirtualChannelFactory;
 import com.sshtools.server.vsession.VirtualSessionPolicy;
 import com.sshtools.server.vsession.commands.fs.FileSystemCommandFactory;
+import com.sshtools.synergy.nio.ProtocolContextFactory;
 import com.sshtools.synergy.nio.SshEngineContext;
 import com.sshtools.synergy.ssh.ChannelNG;
 import com.sshtools.vsession.commands.ssh.SshClientsCommandFactory;
@@ -64,7 +65,7 @@ import com.sshtools.vsession.commands.ssh.SshClientsCommandFactory;
 @Service
 public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAware {
 
-	static Logger log = LoggerFactory.getLogger(SSHDServiceImpl.class);
+	private static Logger LOG = LoggerFactory.getLogger(SSHDServiceImpl.class);
 
 	public static final String SSH_SERVER = "SSH Server";
 	
@@ -121,8 +122,8 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	
 	private void processConfigurationChanges(SSHDConfiguration sshdConfig) {
 		
-		if(log.isInfoEnabled()) {
-			log.info("Applying SSHD configuration to local policies security={}", sshdConfig.getSecurityLevel().name());
+		if(LOG.isInfoEnabled()) {
+			LOG.info("Applying SSHD configuration to local policies security={}", sshdConfig.getSecurityLevel().name());
 		}
 		
 		setSecurityLevel(sshdConfig.getSecurityLevel());
@@ -145,12 +146,12 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		try {
 			ipPolicy.getBlacklist().reset(sshdConfig.getBlockedIPs());
 		} catch (UnknownHostException e) {
-			log.error("Invalid IP in blocked IP list", e);
+			LOG.error("Invalid IP in blocked IP list", e);
 		}
 		try {
 			ipPolicy.getWhitelist().reset(sshdConfig.getAllowedIPs());
 		} catch (UnknownHostException e) {
-			log.error("Invalid IP in allowed IP list", e);
+			LOG.error("Invalid IP in allowed IP list", e);
 		}
 			
 	}
@@ -210,9 +211,13 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 				}
 			});
 
-			start(true);
+			if(getEngine().getContext().getListeningInterfaces().length > 0)
+				start(true);
+			else {
+				LOG.info("No SSH interfaces configured, not starting.");
+			}
 		} catch (IOException e) {
-			log.error("SSHD service failed to start", e);
+			LOG.error("SSHD service failed to start", e);
 		}
 	}
 	
@@ -284,8 +289,8 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 				mounts.addAll(mount.getAdditionalMounts());
 				if(mount.hasHome()) {
 					if(Objects.nonNull(home)) {
-						if(log.isWarnEnabled()) {
-							log.warn("A plugin attempted to configure a home mount but it was already defined.");
+						if(LOG.isWarnEnabled()) {
+							LOG.warn("A plugin attempted to configure a home mount but it was already defined.");
 						}
 						continue;
 					}
@@ -414,6 +419,23 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	public void addInterface(SSHInterface iface) throws IOException {
 		SSHInterfaceFactory<?,?> factory = appContext.getBean(iface.getInterfaceFactory());
 		addInterface(iface.getAddressToBind(),  iface.getPortToBind(), new SSHDInterface<>(factory, iface));
+	}
+
+	@Override
+	public void addInterface(String addressToBind, int portToBind) throws IOException {
+		super.addInterface(addressToBind, portToBind);
+		if(!getEngine().isStarted()) {
+			getEngine().startup();
+		}
+	}
+
+	@Override
+	public void addInterface(String addressToBind, int portToBind, ProtocolContextFactory<?> contextFactory)
+			throws IOException {
+		super.addInterface(addressToBind, portToBind, contextFactory);
+		if(!getEngine().isStarted()) {
+			getEngine().startup();
+		}
 	}
 
 	@Override
