@@ -3,8 +3,6 @@ package com.jadaptive.app.tenant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +22,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SingletonObjectDatabase;
@@ -94,9 +91,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@EventListener
 	public void onApplicationStartup(ApplicationReadyEvent evt) {
 		
-		permissionService.setupSystemContext();
-		
-		try {			
+		try(var ctx = permissionService.systemContext()) {			
 			boolean newSchema = repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh");
 			if(newSchema) {
 				repository.newSchema();
@@ -104,8 +99,6 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			} else {
 				systemTenant = repository.getSystemTenant();
 			}
-			
-			
 			
 			templateService.registerAnnotatedTemplates(newSchema);
 			
@@ -128,18 +121,10 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 
 			this.ready = true;
 			
-            List<StartupAware> startups = new ArrayList<>(applicationService.getBeans(StartupAware.class));
-            Collections.<StartupAware>sort(startups, new Comparator<StartupAware>() {
-
-				@Override
-				public int compare(StartupAware o1, StartupAware o2) {
-					return o2.getStartupPosition().compareTo(o1.getStartupPosition());
-				}
-			});
-            
-			for(StartupAware startup : startups) {
-				startup.onApplicationStartup();
-			}
+			applicationService.getBeans(StartupAware.class).
+				stream().
+				sorted((o1,o2) -> o2.getStartupPosition().compareTo(o1.getStartupPosition())).
+				forEach(StartupAware::onApplicationStartup);
 			
 			eventService.updated(Tenant.class, tevt -> {
 				if(tevt.getObject().getUuid().equals(systemTenant.getUuid())) {
@@ -149,9 +134,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				setupCache(tevt.getObject());
 			});
 			
-		} finally {
-			permissionService.clearUserContext();
-		}
+		} 
 	}
 
 	@Override
@@ -190,7 +173,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		}
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	public Tenant initialiseTenant(Tenant tenant, boolean newSchema) {
 		
 		setCurrentTenant(tenant);
@@ -198,44 +181,27 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		setupCache(tenant);
 		
 		try {
-			
-			Collection<JsonTemplateEnabledService> templateServices
-				= ApplicationServiceImpl.getInstance().getBeans(
-						JsonTemplateEnabledService.class);
-			
-			List<TenantAware> awareServices = new ArrayList<>(applicationService.getBeans(TenantAware.class));
-			Collections.sort(awareServices, new Comparator<TenantAware>() {
-
-				@Override
-				public int compare(TenantAware o1, TenantAware o2) {
-					return o1.getOrder().compareTo(o2.getOrder());
+			applicationService.getBeans(TenantAware.class).
+				stream().
+				sorted((o1,o2) -> o1.getOrder().compareTo(o2.getOrder())).
+				forEach(aware -> {
+					if(tenant.isSystem()) {
+						aware.initializeSystem(newSchema);
+					} else {
+						aware.initializeTenant(tenant, newSchema);
+					}
 				}
-				
-			});
+			);
 			
-			for(TenantAware aware : awareServices) {
-				if(tenant.isSystem()) {
-					aware.initializeSystem(newSchema);
-				} else {
-					aware.initializeTenant(tenant, newSchema);
-				}
-			}
-
-			List<JsonTemplateEnabledService> ordered = new ArrayList<JsonTemplateEnabledService>(templateServices);
-			
-			Collections.<JsonTemplateEnabledService>sort(ordered, new  Comparator<JsonTemplateEnabledService>() {
-				@Override
-				public int compare(JsonTemplateEnabledService o1, JsonTemplateEnabledService o2) {
-					return o1.getTemplateOrder().compareTo(o2.getTemplateOrder());
-				}
-			});
-			
-			
-			for(JsonTemplateEnabledService<?> repository : ordered) {
-				if(tenant.isSystem() || !repository.isSystemOnly()) { 
+			applicationService.getBeans(JsonTemplateEnabledService.class).
+				stream().
+				filter(repository -> tenant.isSystem() || !repository.isSystemOnly()).
+				sorted((o1, o2) -> o1.getTemplateOrder().compareTo(o2.getTemplateOrder())).
+				forEach(repository -> {
 					templateService.processTemplates(tenant, repository);		
 				}
-			}
+			);
+			
 			
 			templateService.loadExtendedTemplates(tenant);
 		} finally {
@@ -372,20 +338,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public void deleteTenant(Tenant tenant) {
 		
 		permissionService.assertWrite(TENANT_RESOURCE_KEY);
-
-		List<TenantAware> awareServices = new ArrayList<>(applicationService.getBeans(TenantAware.class));
-		Collections.sort(awareServices, new Comparator<TenantAware>() {
-
-			@Override
-			public int compare(TenantAware o1, TenantAware o2) {
-				return o1.getOrder().compareTo(o2.getOrder());
-			}
-			
-		});
 		
-		for(TenantAware aware : awareServices) {
-			aware.deleteTenant(tenant);
-		}
+		applicationService.getBeans(TenantAware.class).
+			stream().
+			sorted((o1, o2) -> o1.getOrder().compareTo(o2.getOrder())).
+			forEach(aware -> aware.deleteTenant(tenant));
 		
 		repository.deleteTenant(tenant);
 		resetCache(tenant);

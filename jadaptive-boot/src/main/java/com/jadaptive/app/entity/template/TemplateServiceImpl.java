@@ -139,6 +139,11 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 //	}
 //	
 	
+	@Override
+	public Integer getOrder() {
+		return Integer.MIN_VALUE;
+	}
+
 	private void addTableAction(TableAction action, String resourceKey) {
 		
 		if(!actionsByTarget.containsKey(resourceKey)) {
