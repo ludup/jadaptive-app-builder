@@ -7,8 +7,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.TableView;
-import com.jadaptive.api.ui.menu.ApplicationMenuService;
-import com.jadaptive.api.ui.menu.PageMenu;
 
 @ObjectDefinition(resourceKey = AuthenticationDevice.RESOURCE_KEY, scope = ObjectScope.PERSONAL, creatable = true, updatable = false, deletable = true)
 @TableView( defaultColumns = {"name", "device.type", "lastModified"}, otherColumns = { @DynamicColumn(resourceKey = "device.type", service = AuthenticationDeviceService.class)})

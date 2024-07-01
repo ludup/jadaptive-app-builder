@@ -21,7 +21,6 @@ import org.pf4j.PluginManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;

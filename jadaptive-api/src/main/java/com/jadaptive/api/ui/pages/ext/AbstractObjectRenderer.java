@@ -749,8 +749,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case FILE:
 		{
+			String value = getFieldValue(fieldView, obj);
 			FileFormInput render = new FileFormInput(currentTemplate.get(), fieldView);
-			render.renderInput(element, getFieldValue(fieldView, obj));
+			render.renderInput(element, value);
 			break;
 		}
 		case TEXT_AREA:
