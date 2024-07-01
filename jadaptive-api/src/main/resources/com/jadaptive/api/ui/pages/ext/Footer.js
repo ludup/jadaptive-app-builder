@@ -346,7 +346,6 @@ $(function() {
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
 		$('.processDepends').each(function() {
-			debugger; 
 			var dependsOn = $(this).data('depends-on');
 			var dependsValue = $(this).attr('data-depends-value');
 			

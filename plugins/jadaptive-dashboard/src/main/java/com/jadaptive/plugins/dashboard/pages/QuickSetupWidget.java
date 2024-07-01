@@ -1,8 +1,5 @@
 package com.jadaptive.plugins.dashboard.pages;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +10,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.QuickSetupItem;
+import com.jadaptive.api.ui.QuickSetupItem.Scope;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
 import com.jadaptive.plugins.dashboard.DashboardWidget;
@@ -54,13 +52,14 @@ public class QuickSetupWidget implements DashboardWidget {
 		DropdownInput input = new DropdownInput("setupTasks", "default");
 		element.appendChild(input.renderInput());
 		
-		List<I18nOption> options = new ArrayList<>();
-
-		for(QuickSetupItem item : applicationService.getBeans(QuickSetupItem.class)) {
-			options.add(new I18nOption(item.getBundle(), item.getI18n(), item.getLink()));
-		}
+		var isAdmin = permissionService.isAdministrator();
 		
-		input.renderValues(options, "");
+		input.renderValues(applicationService.getBeans(QuickSetupItem.class).
+			stream().
+			filter(item -> isShow(isAdmin, item)).
+			map(item -> new I18nOption(item.getBundle(), item.getI18n(), item.getLink())).
+			toList(), ""
+		);
 		
 		PageHelper.appendBodyScriptSnippet(document, "$('input[name=\"setupTasks\"]').change(function(e) {\r\n"
 				+ "			if($(this).val()!=='') {\r\n"
@@ -77,15 +76,22 @@ public class QuickSetupWidget implements DashboardWidget {
 	@Override
 	public boolean wantsDisplay() {
 		try {
-			permissionService.assertAdministrator();
+			var isAdmin = permissionService.isAdministrator();
 			for(QuickSetupItem item : applicationService.getBeans(QuickSetupItem.class)) {
-				if(item.isEnabled()) {
+				if( isShow(isAdmin, item)) {
 					return true;
 				}
 			}
 		} catch(AccessDeniedException e) {
 		}
 		return false;
+	}
+
+	private boolean isShow(boolean isAdmin, QuickSetupItem item) {
+		return ( ( item.scope() == Scope.ADMINISTRATOR && isAdmin ) || 
+			  ( item.scope() == Scope.USERS && !isAdmin ) || 
+			  ( item.scope() == Scope.ANY ) ) &&
+			item.isEnabled();
 	}
 
 }
