@@ -16,4 +16,12 @@ public interface DocumentService {
 
 	InputStream getFileTypeInputStream(String encodedFile);
 
+	String getFileTypeEncodedContent(String licenseKey);
+
+	byte[] getFileTypeDecodedContent(String encodedFile);
+
+	long getFileTypeContentLength(String encodedFile);
+
+	String encodeFileTypeValue(String filename, String contentType, long length, byte[] content);
+
 }

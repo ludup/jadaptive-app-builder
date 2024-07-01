@@ -28,6 +28,7 @@ import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.countries.Country;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.db.DocumentService;
 import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
@@ -117,6 +118,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	
 	@Autowired
 	private TenantService tenantService; 
+	
+	@Autowired
+	private DocumentService documentService; 
 	
 	protected ThreadLocal<Document> currentDocument = new ThreadLocal<>();
 	protected ThreadLocal<ObjectTemplate> currentTemplate = new ThreadLocal<>();
@@ -750,7 +754,10 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case FILE:
 		{
 			String value = getFieldValue(fieldView, obj);
-			FileFormInput render = new FileFormInput(currentTemplate.get(), fieldView);
+			FileFormInput render = new FileFormInput(currentTemplate.get(), fieldView,
+					documentService.getFileTypeFilename(value),
+					documentService.getFileTypeContentLength(value),
+					documentService.getFileTypeContentType(value));
 			render.renderInput(element, value);
 			break;
 		}

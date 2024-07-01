@@ -49,11 +49,7 @@ public abstract class FormInputRender extends FieldInputRender {
 		
 		parent.appendChild(Html.div("input-group").appendChild(input = createInputElement(value)));
 		if(decorate) {
-			parent.appendChild(new Element("small")
-					.addClass("form-text")
-					.addClass("text-muted")
-					.attr("jad:bundle", getBundle())
-					.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
+			createHelpElement(parent, value);
 		}
 		
 		if(!disableIDAttribute) {
@@ -64,6 +60,15 @@ public abstract class FormInputRender extends FieldInputRender {
 
 	}
 	
+	protected void createHelpElement(Element parent, String value) {
+		
+		parent.appendChild(new Element("small")
+				.addClass("form-text")
+				.addClass("text-muted")
+				.attr("jad:bundle", getBundle())
+				.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
+	}
+
 	public Element getInputElement() {
 		return input;
 	}
