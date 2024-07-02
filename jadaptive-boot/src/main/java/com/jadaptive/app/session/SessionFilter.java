@@ -47,6 +47,9 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.PageCache;
+import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.pages.auth.Startup;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
 
@@ -81,6 +84,9 @@ public class SessionFilter implements Filter {
 	@Autowired
 	private SystemSingletonObjectDatabase<TenantConfiguration> tenantConfig;
 	
+	@Autowired
+	private PageCache pageCache;
+	
 	Map<String,String> cachedRedirects = new HashMap<>();
 	
 	@Override
@@ -99,48 +105,57 @@ public class SessionFilter implements Filter {
 		tenantService.setCurrentTenant(req);
 		
 		try {
-			Tenant tenant = tenantService.getCurrentTenant();
-
-			if(Objects.nonNull(tenant)) {
-				String serverName = req.getServerName();
-				TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
-				if(!isValidHostname(config, tenant, serverName) && !serverName.equals(InetAddress.getLocalHost().getHostName()) ) {
-					if(serverName.equalsIgnoreCase(config.getRegistrationDomain())) {
-						if(req.getRequestURI().equals("/")) {
-							if(req.getServerPort() != -1 && req.getServerPort() != 443) {
-								resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
-										config.getRegistrationDomain(),
-										request.getServerPort()));
-							} else {
-								resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
-							}	
-							return;
-						}
-					} else {
-						if(config.getRequireValidDomain()) {
-							String redir;
-							if(StringUtils.isBlank(config.getInvalidDomainRedirect())) {
-								if(StringUtils.isBlank(config.getRootDomain())) {
-									resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-									return;
+			
+			if(!tenantService.isReady()) {
+				if(!req.getRequestURI().startsWith("/app/ui/startup") && !isContent(req)) {
+					resp.sendRedirect("/app/ui/startup");
+					return;
+				}
+			} else {
+				Tenant tenant = tenantService.getCurrentTenant();
+	
+				if(Objects.nonNull(tenant)) {
+					String serverName = req.getServerName();
+					TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
+					if(!isValidHostname(config, tenant, serverName) && !serverName.equals(InetAddress.getLocalHost().getHostName()) ) {
+						if(serverName.equalsIgnoreCase(config.getRegistrationDomain())) {
+							if(req.getRequestURI().equals("/")) {
+								if(req.getServerPort() != -1 && req.getServerPort() != 443) {
+									resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
+											config.getRegistrationDomain(),
+											request.getServerPort()));
+								} else {
+									resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
+								}	
+								return;
+							}
+						} else {
+							if(config.getRequireValidDomain()) {
+								String redir;
+								if(StringUtils.isBlank(config.getInvalidDomainRedirect())) {
+									if(StringUtils.isBlank(config.getRootDomain())) {
+										resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+										return;
+									}
+									else {
+										redir = "https://" + config.getRootDomain();	
+									}
 								}
 								else {
-									redir = "https://" + config.getRootDomain();	
+									redir = config.getInvalidDomainRedirect();
 								}
-							}
-							else {
-								redir = config.getInvalidDomainRedirect();
-							}
-
-							URI redirUri = URI.create(redir);
-							if(!redirUri.getHost().equals(serverName)) {
-								resp.sendRedirect(redir);
-								return;
+	
+								URI redirUri = URI.create(redir);
+								if(!redirUri.getHost().equals(serverName)) {
+									resp.sendRedirect(redir);
+									return;
+								}
 							}
 						}
 					}
 				}
 			}
+		
 
 			if(checkRedirects(req, resp)) {
 				return;
@@ -160,6 +175,14 @@ public class SessionFilter implements Filter {
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
+	}
+
+	private boolean isContent(HttpServletRequest req) {
+		return req.getRequestURI().startsWith("/app/content/")
+				|| req.getRequestURI().startsWith("/app/api/ready")
+				|| req.getRequestURI().startsWith("/app/css/")
+				|| req.getRequestURI().startsWith("/app/js/")
+				|| req.getRequestURI().startsWith("/favicon");
 	}
 
 	private boolean isValidHostname(TenantConfiguration config, Tenant tenant, String serverName) {

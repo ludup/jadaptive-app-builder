@@ -111,6 +111,13 @@ public class LogonController {
 		}
 	}
 	
+	@RequestMapping(value="/app/api/ready", method = RequestMethod.GET, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus ready(HttpServletRequest request, HttpServletResponse response)  {
+		return new RequestStatusImpl(tenantService.isReady());
+	}
+	
 	@RequestMapping(value="/app/api/session/touch", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
