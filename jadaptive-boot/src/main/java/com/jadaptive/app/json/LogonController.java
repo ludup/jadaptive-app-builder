@@ -34,6 +34,7 @@ import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
 import com.jadaptive.app.session.SessionFilter;
 
 @Controller
@@ -131,6 +132,14 @@ public class LogonController {
 		authenticationService.createAuthenticationState();
 		
 		throw new PageRedirect(pageCache.resolveDefault());
+	}
+	
+	@RequestMapping(value="/app/api/change-auth", method = { RequestMethod.GET }, produces = { "text/html"})
+	public void changeAuthenticator(HttpServletRequest request, HttpServletResponse response) throws IOException, AccessDeniedException, UnauthorizedException {
+
+		authenticationService.getCurrentState().setSelectedPage(null);
+		
+		throw new PageRedirect(pageCache.resolvePage(OptionalAuthentication.class));
 	}
 	
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
@@ -39,6 +40,7 @@ public class AuthenticationState {
 	boolean passwordEnabled;
 	int optionalCompleted = 0;
 	int optionalRequired = 0;
+	int optionalAvailable = 0;
 	
 	AuthenticationPolicy policy;
 	
@@ -55,8 +57,16 @@ public class AuthenticationState {
 		this.policy = policy;
 	}
 
+	public int getOptionalAvailable() {
+		return optionalAvailable;
+	}
+
+	public void setOptionalAvailable(int optionalAvailable) {
+		this.optionalAvailable = optionalAvailable;
+	}
+
 	public Class<? extends Page> getCurrentPage() {
-		if(!isAuthenticationComplete()) {
+		if(!isRequiredAuthenticationComplete()) {
 			return requiredAuthenticationPages.get(currentPageIndex);
 		} if(!isOptionalComplete()) { 
 			if(Objects.nonNull(selectedPage)) {
@@ -79,7 +89,7 @@ public class AuthenticationState {
 	}
 	
 	public AuthenticationModule getCurrentAuthenticator() {
-		if(!isAuthenticationComplete()) {
+		if(!isRequiredAuthenticationComplete()) {
 			return  requiredAuthenticationModulez.get(requiredAuthenticationPages.get(currentPageIndex));
 		} if(!isOptionalComplete()) { 
 			if(Objects.nonNull(selectedPage)) {
@@ -93,7 +103,7 @@ public class AuthenticationState {
 	}
 	
 	public boolean hasFinished() {
-		return isAuthenticationComplete() 
+		return isRequiredAuthenticationComplete() 
 				&& isOptionalComplete()
 				&& !hasPostAuthentication();
 	}
@@ -102,7 +112,7 @@ public class AuthenticationState {
 		return currentPageIndex == 0 && optionalCompleted == 0 && currentPostAuthenticationIndex == 0 && failedAttempts == 0;
 	}
 	
-	public boolean isAuthenticationComplete() {
+	public boolean isRequiredAuthenticationComplete() {
 		return currentPageIndex >= requiredAuthenticationPages.size();
 	}
 	
@@ -115,12 +125,12 @@ public class AuthenticationState {
 	}
 	
 	public boolean completePage() {
-		if(isAuthenticationComplete() && isOptionalComplete()) {
+		if(isRequiredAuthenticationComplete() && isOptionalComplete()) {
 			currentPostAuthenticationIndex++;
 			return !hasPostAuthentication();
 		} else {
 			currentPageIndex++;
-			if(isAuthenticationComplete()) {
+			if(isRequiredAuthenticationComplete()) {
 				if(Objects.nonNull(selectedPage)) {
 					optionalCompleted++;
 					completedOptionsPages.add(selectedPage);

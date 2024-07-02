@@ -13,6 +13,7 @@ import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
@@ -55,7 +56,7 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 		
 		var state = authenticationService.getCurrentState();
 		
-		if(!state.isAuthenticationComplete()) {
+		if(!state.isRequiredAuthenticationComplete()) {
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
 		
@@ -67,6 +68,8 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 				pages.add(page);
 			}
 		}
+		
+		state.setOptionalAvailable(pages.size());
 		
 		if(pages.size()==1) {
 			Page page = pages.iterator().next();
@@ -120,7 +123,7 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 	protected boolean doForm(Document document, AuthenticationState state, OptionalAuthenticationForm form)
 			throws AccessDeniedException, FileNotFoundException {
 
-		if(!state.isAuthenticationComplete()) {
+		if(!state.isRequiredAuthenticationComplete()) {
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
 		
