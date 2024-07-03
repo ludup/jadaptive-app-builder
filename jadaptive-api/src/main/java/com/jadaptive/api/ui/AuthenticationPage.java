@@ -88,15 +88,17 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		if(isUndecorated(req.getSession())) {
 			try {
 				var cardBody = doc.getElementsByClass("card-body").first();
-				var loginContainer = doc.getElementById("login-container");
-				var par = loginContainer.parent();
-				loginContainer.remove();
-				cardBody.children().forEach(par::appendChild);
-				doc.getElementsByTag("footer").forEach(e -> e.remove());
-				doc.getElementsByTag("header").forEach(e -> e.remove());
+				if(cardBody != null) {
+					var loginContainer = Objects.requireNonNull(doc.getElementById("login-container"));
+					var par =  Objects.requireNonNull(loginContainer.parent());
+					loginContainer.remove();
+					cardBody.children().forEach(par::appendChild);
+					doc.getElementsByTag("footer").forEach(e -> e.remove());
+					doc.getElementsByTag("header").forEach(e -> e.remove());
+				}
 			}
 			catch(Exception e) {
-				log.warn(MessageFormat.format("The session requested an undecorated login, but {0} does not support it.", getClass().getName()));
+				log.warn(MessageFormat.format("The session requested an undecorated login, but {0} does not support it.", getClass().getName()), e);
 			}
 			
 		}
