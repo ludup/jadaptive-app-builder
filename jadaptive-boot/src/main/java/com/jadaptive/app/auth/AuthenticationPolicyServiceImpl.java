@@ -157,9 +157,12 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 			 */
 			authenticationService.validateModules(policy);
 			if(Request.isAvailable() && policy instanceof UserLoginAuthenticationPolicy) {
-				if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getClass(), policy))) {
+				AuthenticationPolicy assigned = getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getClass(), policy);
+				if(Objects.isNull(assigned)) {
 					throw new IllegalStateException("The policy is invalid because it would lock the current user out from this location");
 				}
+				
+				
 			}
 		}
 	}
@@ -175,7 +178,8 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		if(!clz.equals(UserLoginAuthenticationPolicy.class)) {
 			return getWeightedPolicy(clz);
 		} else {
-			return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true));
+			return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true),
+					SearchField.eq("resourceKey", UserLoginAuthenticationPolicy.RESOURCE_KEY));
 		}
 		
 	}

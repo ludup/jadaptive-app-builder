@@ -35,6 +35,7 @@ import com.jadaptive.api.auth.events.AuthenticationFailedEvent;
 import com.jadaptive.api.auth.events.AuthenticationSuccessEvent;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -331,14 +332,21 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			
 		}
 		
-		Class<? extends Page> currentPage2 = state.getCurrentPage();
+		Class<? extends Page> currentPage = state.getCurrentPage();
 		if(log.isInfoEnabled()) {
 			log.info("User {} is being asked to complete authenication page {}", 
 					state.getUser().getUsername(),
-					currentPage2.getSimpleName());
+					currentPage.getSimpleName());
 		}
 
-		return new AuthenticationCompletedResult(new PageRedirect(pageCache.getPage(currentPage2)), Optional.empty()) {
+		AuthenticationPage<?> nextPage = (AuthenticationPage<?>) pageCache.getPage(currentPage);
+		if(!nextPage.canAuthenticate(state)) {
+			throw new ObjectException(
+					AuthenticationPolicy.RESOURCE_KEY,
+					"missingCredentials.text");
+		}
+		
+		return new AuthenticationCompletedResult(new PageRedirect(nextPage), Optional.empty()) {
 			@Override
 			public void close() {
 				throw new IllegalStateException("Session was never open.");
