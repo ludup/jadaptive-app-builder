@@ -179,6 +179,7 @@ public class SessionFilter implements Filter {
 
 	private boolean isContent(HttpServletRequest req) {
 		return req.getRequestURI().startsWith("/app/content/")
+				|| req.getRequestURI().startsWith("/app/api/update-state")
 				|| req.getRequestURI().startsWith("/app/api/ready")
 				|| req.getRequestURI().startsWith("/app/css/")
 				|| req.getRequestURI().startsWith("/app/js/")
