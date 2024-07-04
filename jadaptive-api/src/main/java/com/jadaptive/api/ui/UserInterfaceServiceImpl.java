@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
 
 @Service
@@ -42,7 +43,7 @@ public class UserInterfaceServiceImpl implements UserInterfaceService {
 		
 		List<HtmlPageExtender> exts = new ArrayList<>();
 		for(HtmlPageExtender extender : applicationService.getBeans(HtmlPageExtender.class)) {
-			if(extender.isExtending(htmlPage)) {
+			if(extender.isExtending(htmlPage, Request.get().getRequestURI())) {
 				exts.add(extender);
 			}
 		}
