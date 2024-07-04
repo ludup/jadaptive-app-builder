@@ -19,6 +19,7 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.UriRedirect;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,14 +49,23 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	public void finish(WizardState state) {
 		
 		beforeTransaction(state);
-		transactionService.executeTransaction(()-> {
-			startTransaction(state);
-			for(WizardSection section : state.getSections()) {
-				section.finish(state);
-			}
-			finishTransaction(state);
-			state.completed();
-		});
+		try {
+			transactionService.executeTransaction(()-> {
+				startTransaction(state);
+				for(WizardSection section : state.getSections()) {
+					section.finish(state);
+				}
+				finishTransaction(state);
+				state.completed();
+			});
+		}
+		catch(IllegalStateException ise) {
+			if(ise.getCause() instanceof Redirect redir) 
+				throw redir;
+			else 
+				throw ise;
+			
+		}
 		afterTransaction(state);
 	}
 	
@@ -71,7 +81,9 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	public WizardState getState(HttpServletRequest request) {
 		
 		
-		WizardState state = (WizardState) request.getSession().getAttribute(getStateAttribute());
+		String stateAttribute = getStateAttribute();
+		HttpSession session = request.getSession();
+		WizardState state = (WizardState) session.getAttribute(stateAttribute);
 		boolean isSystem = tenantService.getCurrentTenant().isSystem();
 		
 		if(Objects.isNull(state)) {
@@ -112,7 +124,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 					sections.toArray((new WizardSection[0]))); 
 			
 			init(state);
-			request.getSession().setAttribute(getStateAttribute(), state);
+			session.setAttribute(stateAttribute, state);
 		}
 		
 		assertPermissions(state);

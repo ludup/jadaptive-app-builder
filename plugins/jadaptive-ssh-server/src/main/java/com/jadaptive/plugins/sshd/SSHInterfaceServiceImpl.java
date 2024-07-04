@@ -48,6 +48,12 @@ public class SSHInterfaceServiceImpl extends AbstractUUIDObjectServceImpl<SSHInt
 	}
 	
 	@Override
+	public void deleteObject(SSHInterface object) {
+		// TODO Auto-generated method stub
+		super.deleteObject(object);
+	}
+
+	@Override
 	protected void afterSave(SSHInterface obj) {
 		
 		boolean success = false;

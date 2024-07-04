@@ -253,6 +253,17 @@ public class TableRenderer {
 	private boolean checkMultipleSelectionActions(Collection<TableAction> tableActions) {
 		for(TableAction action : tableActions) {
 			if(action.target() == Target.SELECTION) {
+				if(action.permissions().length > 0) {
+					try {
+						if(action.matchAllPermissions()) {
+							permissionService.assertAllPermission(action.permissions());
+						} else {
+							permissionService.assertAnyPermission(action.permissions());
+						}
+					} catch(AccessDeniedException e) {
+						return false;
+					}
+				}
 				return true;
 			}
 		}
@@ -390,12 +401,12 @@ public class TableRenderer {
 				Object val = obj.getValue(template.getDefaultColumn());
 				if(action.confirmationRequired()) {
 					if(StringUtils.isNotBlank(template.getDefaultColumn())) {
-						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), "deleteAction")
+						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
 							.attr("data-name", val == null ? "" : val.toString())
 							.attr("data-url", replaceVariables(action.url(), obj))
 							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
 					} else {
-						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), "deleteAction")
+						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
 							.attr("data-name", obj.getUuid())
 							.attr("data-url", replaceVariables(action.url(), obj))
 							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
@@ -575,23 +586,24 @@ public class TableRenderer {
 			} else {
 				
 				Class<?> clz = templateService.getTemplateClass(action.getResourceKey());
-				CreateURL[] urls = clz.getAnnotationsByType(CreateURL.class);
-				if(Objects.nonNull(urls) && urls.length > 0) {
-					for(CreateURL url : urls) {
+				if(Objects.nonNull(clz)) {
+					CreateURL[] urls = clz.getAnnotationsByType(CreateURL.class);
+					if(Objects.nonNull(urls) && urls.length > 0) {
+						for(CreateURL url : urls) {
+							menu.appendChild(new Element("a")
+									.addClass("dropdown-item")
+									.attr("href", url.value())
+									.attr("jad:bundle", action.getBundle())
+									.attr("jad:i18n", String.format("%s.name", url.i18n())));
+						}
+					} else {
 						menu.appendChild(new Element("a")
 								.addClass("dropdown-item")
-								.attr("href", url.value())
+								.attr("href",  String.format("/app/ui/create/%s", action.getResourceKey()))
 								.attr("jad:bundle", action.getBundle())
-								.attr("jad:i18n", String.format("%s.name", url.i18n())));
+								.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
 					}
-				} else {
-					menu.appendChild(new Element("a")
-							.addClass("dropdown-item")
-							.attr("href",  String.format("/app/ui/create/%s", action.getResourceKey()))
-							.attr("jad:bundle", action.getBundle())
-							.attr("jad:i18n", String.format("%s.name", action.getResourceKey())));
 				}
-
 			}
 		}
 	}

@@ -28,8 +28,8 @@ import com.jadaptive.utils.Utils;
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
 @ObjectServiceBean(bean = UserService.class)
 @ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)
-@ObjectViewDefinition(bundle = "users", value = "email", weight=100)
-@ObjectViewDefinition(bundle = "users", value = "telephone", weight=200)
+@ObjectViewDefinition(bundle = "users", value = User.EMAIL_VIEW, weight=100)
+@ObjectViewDefinition(bundle = "users", value = User.PHONE_VIEW, weight=200)
 @TableView(defaultColumns = { "username", "name", "lastLogin" }, requiresUpdate = true, sortField = "username")
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
@@ -38,6 +38,8 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	public static final String RESOURCE_KEY = "users";
 
 	public static final String DETAILS_VIEW = "details";
+	public static final String EMAIL_VIEW = "email";
+	public static final String PHONE_VIEW = "telephone";
 	
 	private static final long serialVersionUID = 2210375165051752363L;
 
@@ -53,12 +55,12 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
 	@Validator(type = ValidationType.EMAIL)
-	@ObjectView("emails")
+	@ObjectView(EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
 	String email;
 
 	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
-	@ObjectView("telephone")
+	@ObjectView(PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	String mobilePhone;
 	
@@ -73,12 +75,12 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	@ObjectField(type = FieldType.TEXT, automaticEncryption = true)
 	@Validator(type = ValidationType.EMAIL)
-	@ObjectView("emails")
+	@ObjectView(EMAIL_VIEW)
 	Collection<String> otherEmail = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.TEXT, automaticEncryption = true)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
-	@ObjectView("telephone")
+	@ObjectView(PHONE_VIEW)
 	Collection<String> otherTelephone = new ArrayList<>();
 
 	public String getUsername() {

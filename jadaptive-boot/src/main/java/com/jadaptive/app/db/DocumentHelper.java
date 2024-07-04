@@ -384,9 +384,70 @@ public class DocumentHelper {
 				Document doc = new Document();
 				convertObjectToDocument(generateReference(uuid, name), doc);
 				return doc;
+
+			try {
+				if(!Request.get().getParts().isEmpty()) {
+					Part part = Request.get().getPart(field.getFormVariable());
+					if(Objects.isNull(part)) {
+						return null;
+					}
+					if(part.getSize() == 0) {
+						return null;
+					}
+					
+					String encoded = Base64.getEncoder().encodeToString(IOUtils.toByteArray(part.getInputStream()));
+					if(StringUtils.isBlank(encoded)) {
+						return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
+					}
+					try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
+						BufferedImage bimg = ImageIO.read(in);
+						if(Objects.isNull(bimg)) {
+							throw new ValidationException(String.format("The file %s does not appear to contain an image!", part.getSubmittedFileName()));
+						}
+						
+						int width          = bimg.getWidth();
+						int height         = bimg.getHeight();
+						
+						int maxHeight = field.getValidationValueInt(ValidationType.IMAGE_HEIGHT, -1);
+						int maxWidth = field.getValidationValueInt(ValidationType.IMAGE_WIDTH, -1);
+						
+						if(maxWidth > -1 && maxWidth < width) {
+							throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+						}
+						
+						if(maxHeight > -1 && maxHeight < height) {
+							throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+						}
+						
+						if(StringUtils.isNotBlank(part.getSubmittedFileName()) && part.getSize() > 0) {
+							return String.format("data:%s;base64, %s", part.getContentType(), encoded);
+						}
+					}
+					
+				}
+			} catch (IOException | ServletException e) {
+				log.error("Failed to parse IMAGE part for {}", field.getResourceKey());
 			}
+			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 			
-			return null;
+		case FILE:
+			try {
+				if(!Request.get().getParts().isEmpty()) {
+					Part part = Request.get().getPart(field.getFormVariable());
+					if(Objects.isNull(part)) {
+						return null;
+					}
+					if(part.getSize() == 0) {
+						return null;
+					}
+					if(StringUtils.isNotBlank(part.getSubmittedFileName())) {
+						return String.format("%s;%s;%s", part.getSubmittedFileName(), part.getContentType(),  Base64.getEncoder().encodeToString(IOUtils.toByteArray(part.getInputStream())));
+					}
+				}
+			} catch (IOException | ServletException e) {
+				log.error("Failed to parse FILE part for {}", field.getResourceKey());
+			}
+			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 		}
 		default:
 			if(Objects.isNull(value)) {

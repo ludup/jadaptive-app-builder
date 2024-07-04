@@ -450,7 +450,43 @@ $(function() {
 					  	},
 					    type: 'DELETE',
 					    dataType: 'JSON',
-					    complete: function(result) {
+					    complete: function() {
+					        window.location = window.location.href;
+					    }
+					});
+		        }
+		    }
+		});
+	});
+	
+	$('.confirmAction').on('click', function(e) {
+		e.preventDefault();
+		var name = $(this).data('name');
+		var url = $(this).data('url');
+
+		bootbox.confirm({
+    		message: '${userInterface:confirm.text} ' + name + '?',
+		    buttons: {
+		        confirm: {
+		            label: 'Yes',
+		            className: 'btn-success'
+		        },
+		        cancel: {
+		            label: 'No',
+		            className: 'btn-danger'
+		        }
+		    },
+		    callback: function (result) {
+		        if(result)
+		        {
+		        	$.ajax({
+					    url: url,
+						beforeSend: function(request) {
+					    	request.setRequestHeader("CsrfToken", $('#csrftoken').val());
+					  	},
+					    type: 'GET',
+					    dataType: 'JSON',
+					    complete: function() {
 					        window.location = window.location.href;
 					    }
 					});

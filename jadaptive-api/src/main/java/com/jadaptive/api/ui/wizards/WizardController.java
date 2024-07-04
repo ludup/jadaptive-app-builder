@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.ResourceStatus;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -21,6 +22,7 @@ import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.session.SessionTimeoutException;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.UriRedirect;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -117,6 +119,8 @@ public class WizardController extends AuthenticatedController {
 			state.finish();
 			return new RequestStatusImpl(true);
 			
+		} catch(Redirect redir) {
+			return new RedirectStatus(redir.getUri());
 		} catch(Throwable e) {
 			log.error("Failed to finish setup", e);
 			return new RequestStatusImpl(false, e.getMessage());

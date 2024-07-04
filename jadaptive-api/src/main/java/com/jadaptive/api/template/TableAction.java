@@ -33,11 +33,15 @@ public @interface TableAction  {
 	
 	boolean writeAction() default false;
 	
+	boolean deleteAction() default false;
+	
 	boolean confirmationRequired() default false;
 	
 	String targetKey() default "";
 	
 	String[] permissions() default {};
+	
+	boolean matchAllPermissions() default false;
 	
 	Class<? extends ActionFilter> filter() default NoActionFilter.class;
 

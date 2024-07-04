@@ -28,6 +28,7 @@ import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Authorizat
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Token;
 import com.jadaptive.api.http.HttpHelpers;
 import com.jadaptive.api.ui.Feedback;
+import com.jadaptive.api.ui.Redirect;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -131,14 +132,18 @@ public class OAuth2CompleteController {
 					throw new IllegalStateException(err + ". " + (description == null ? "" : " " + description));
 				}
 
+				var tokenTypeVal = tokenResponseObj.get("token_type");
+				var tokenType = tokenTypeVal == null ? "Bearer" : tokenTypeVal.asText();
 				var accessToken = tokenResponseObj.get("access_token").asText();
 				var refreshToken = tokenResponseObj.has("refresh_token")
 						? tokenResponseObj.get("refresh_token").asText()
 						: null;
 				var expires = System.currentTimeMillis() + (tokenResponseObj.get("expires_in").asInt() * 1000);
-				var token = new OAuth2Token(accessToken, refreshToken, expires);
+				var token = new OAuth2Token(accessToken, refreshToken, tokenType, state, expires);
 
 				c.handleAuthorization(token, request, response, c);
+			} catch(Redirect redir) {
+				throw redir;
 			} catch (Exception e) {
 				LOG.error("Failed to complete authorization (" + c.getTokenUri() + ").", e);
 

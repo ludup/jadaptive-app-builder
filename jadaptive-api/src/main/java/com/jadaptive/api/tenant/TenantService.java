@@ -38,6 +38,10 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	void clearCurrentTenant();
 
 	Iterable<Tenant> allObjects();
+	
+	default UncheckedCloseable systemTenant() {
+		return tenant(getSystemTenant());
+	}
 
 	Tenant getSystemTenant() throws RepositoryException, ObjectException;
 
@@ -52,6 +56,8 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	Tenant getTenantByDomain(String name);
 
 	void assertManageTenant() throws AccessDeniedException;
+
+	void assertSystemTenant() throws AccessDeniedException;
 
 	Tenant resolveTenantName(String username);
 

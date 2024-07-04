@@ -195,7 +195,7 @@ public class DefaultWizardSection extends WizardSection {
 		}
 	}
 
-	private String getValue(AbstractObject object, FieldTemplate field) {
+	protected String getValue(AbstractObject object, FieldTemplate field) {
 		
 		if(field.isAutomaticallyEncrypted() || field.isManuallyEncrypted()) {
 			return "** ENCRYTPED **";
@@ -204,7 +204,7 @@ public class DefaultWizardSection extends WizardSection {
 		}
 	}
 
-	private String createObjectCSVString(Collection<AbstractObject> values, FieldTemplate field) {
+	protected String createObjectCSVString(Collection<AbstractObject> values, FieldTemplate field) {
 		
 		StringBuffer buf = new StringBuffer();
 		for(AbstractObject value : values) {
@@ -214,6 +214,20 @@ public class DefaultWizardSection extends WizardSection {
 			buf.append(value.getValue("name"));
 		}
 		return buf.toString();
+	}
+	
+	protected Element createReviewRow(String i18n, String value) {
+		return new Element("div")
+				.addClass("row")
+				.appendChild(new Element("div")
+						.addClass("col-3")
+						.appendChild(new Element("span")
+								.attr("jad:bundle", getBundle())
+								.attr("jad:i18n", i18n)))
+				.appendChild(new Element("div")
+							.addClass("col-9")
+							.appendChild(new Element("span")
+									.appendChild(new Element("strong").html(value))));
 	}
 
 	

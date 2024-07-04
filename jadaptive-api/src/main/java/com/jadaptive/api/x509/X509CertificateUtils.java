@@ -437,7 +437,7 @@ public class X509CertificateUtils {
 		return store;
 	}
 
-	public static byte[] generatePKCS10(PrivateKey privateKey,
+	public static String generatePKCS10(PrivateKey privateKey,
 			PublicKey publicKey, String CN, String OU, String O, String L,
 			String S, String C) throws Exception {
 
@@ -466,7 +466,7 @@ public class X509CertificateUtils {
 			if (p != null)
 				p.close();
 		}
-		return bout.toByteArray();
+		return new String(bout.toByteArray(), "UTF-8");
 
 	}
 

@@ -9,31 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface OAuth2AuthorizationService {
 
-	public static class OAuth2Token {
-		private String token;
-		private String refreshToken;
-		private long expires;
-
-		public OAuth2Token(String token, String refreshToken, long expires) {
-			super();
-			this.token = token;
-			this.refreshToken = refreshToken;
-			this.expires = expires;
-		}
-
-		public String getToken() {
-			return token;
-		}
-
-		public String getRefreshToken() {
-			return refreshToken;
-		}
-
-		public long getExpires() {
-			return expires;
-		}
-
-	}
+	public static record OAuth2Token(String token, String refreshToken, String tokenType, String state, long expires) { }
 	
 	public interface OAuth2Authorized {
 		void handleAuthorization(OAuth2Token token, HttpServletRequest request, HttpServletResponse response,
@@ -60,7 +36,7 @@ public interface OAuth2AuthorizationService {
 			this.state = req.state();
 			this.onAuthorized = onAuthorized;
 
-			tokenUri = req.baseUri() + "/app/api/oauth2/token"; 
+			tokenUri = req.baseUri() + "/oauth2/token"; 
 			
 		}
 

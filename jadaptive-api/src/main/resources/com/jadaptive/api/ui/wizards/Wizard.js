@@ -29,7 +29,10 @@ var Wizard = (function () {
 		finish: function() {
 			JadaptiveUtils.startAwesomeSpin($('#finishButton i'));
 			$.getJSON("/app/api/wizard/finish/" + $('body').attr('jad:wizard'), function(data) {
-				if(data.success) {
+				if(data.redirect) {
+					window.location = data.location;
+				}
+				else if(data.success) {
 					window.location = "/app/api/wizard/next/" + $('body').attr('jad:wizard');
 				} else {
 					JadaptiveUtils.error($('#feedback'), data.message);
@@ -153,4 +156,11 @@ $(function() {
 	
 	$('.stash').click(stashFunc);  
 	
+	if(window.location.href.endsWith('?finish')) {
+		/* This is used by anything (i.e. VMSee Authorization) that redirects away
+		 * from the finish page (e.g. OAuth authorization) and then back again when
+		 * everything is OK
+		 */
+		Wizard.finish();
+	}
 });
