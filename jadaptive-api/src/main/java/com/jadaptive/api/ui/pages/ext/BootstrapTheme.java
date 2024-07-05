@@ -29,6 +29,22 @@ public enum BootstrapTheme {
 	VAPOR,
 	YETI,
 	ZERPHYR;
+	
+	public boolean isDark() {
+		switch(this) {
+		case DEFAULT:
+		case CYBORG:
+		case DARKLY:
+		case QUARTZ:
+		case SLATE:
+		case SOLAR:
+		case SUPERHERO:
+		case VAPOR:
+			return true;
+		default:
+			return false;
+		}
+	}
 
 	public static boolean hasCss(BootstrapTheme current) {
 		
