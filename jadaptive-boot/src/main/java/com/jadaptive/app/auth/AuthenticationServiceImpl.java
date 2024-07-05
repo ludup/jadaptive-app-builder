@@ -339,14 +339,16 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					currentPage.getSimpleName());
 		}
 
-		AuthenticationPage<?> nextPage = (AuthenticationPage<?>) pageCache.getPage(currentPage);
-		if(!nextPage.canAuthenticate(state)) {
-			throw new ObjectException(
-					AuthenticationPolicy.RESOURCE_KEY,
-					"missingCredentials.text");
+		if(AuthenticationPage.class.isAssignableFrom(currentPage)) {
+			AuthenticationPage<?> nextPage = (AuthenticationPage<?>) pageCache.getPage(currentPage);
+			if(!nextPage.canAuthenticate(state)) {
+				throw new ObjectException(
+						AuthenticationPolicy.RESOURCE_KEY,
+						"missingCredentials.text");
+			}
 		}
 		
-		return new AuthenticationCompletedResult(new PageRedirect(nextPage), Optional.empty()) {
+		return new AuthenticationCompletedResult(new PageRedirect(pageCache.getPage(currentPage)), Optional.empty()) {
 			@Override
 			public void close() {
 				throw new IllegalStateException("Session was never open.");
