@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;

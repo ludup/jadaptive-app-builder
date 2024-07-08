@@ -48,8 +48,6 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.PageCache;
-import com.jadaptive.api.ui.PageRedirect;
-import com.jadaptive.api.ui.pages.auth.Startup;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
 

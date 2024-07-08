@@ -292,6 +292,12 @@ public class DocumentValidator {
 							value, v, field);
 					return;
 				}
+				case DOMAIN:
+				{
+//					validateRegex("^((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\\\.)+[A-Za-z]{2,6}$", 
+//							value, v, field);
+					return;
+				}
 				case EMAIL:
 				{
 					validateRegex("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$", value, v, field);

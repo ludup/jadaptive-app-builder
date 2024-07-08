@@ -2,6 +2,10 @@ package com.jadaptive.api.ui.pages.auth;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import javax.servlet.http.Cookie;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,6 +32,10 @@ import com.jadaptive.api.ui.pages.auth.OptionalAuthentication.OptionalAuthentica
 @PageProcessors(extensions = { "i18n"} )
 public class OptionalAuthentication extends AuthenticationPage<OptionalAuthenticationForm> {
 
+	private static final String DEFAULT_COOKIE_NAME = "selectedAuthenticator";
+
+	private static final String TRIED_DEFAULT = null;
+
 	@Autowired
 	private PageCache pageCache;
 	
@@ -43,6 +51,7 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 
 	public interface OptionalAuthenticationForm {
 		String getAuthenticator();
+		boolean getMakeDefault();
 	}
 
 	@Override
@@ -60,16 +69,33 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
 		
+		String defaultAuthenticator = null;
+		Page defaultPage = null;
+		for(Cookie c : Request.get().getCookies()) {
+			if(c.getName().equals(DEFAULT_COOKIE_NAME)) {
+				defaultAuthenticator = c.getValue();
+			}
+		}
+		
 		var pages = new ArrayList<AuthenticationPage<?>>();
 		for(AuthenticationModule m : state.getOptionalAuthentications()) {
 			Class<? extends Page> pageClass = authenticationService.getAuthenticationPage(m.getAuthenticatorKey());
 			AuthenticationPage<?> page = (AuthenticationPage<?>)pageCache.resolvePage(pageClass);
 			if(!state.hasCompleted(pageClass) && page.canAuthenticate(state)) {
+				if(Objects.nonNull(defaultAuthenticator) && page.getAuthenticatorUUID().equals(defaultAuthenticator) && state.getAttribute(TRIED_DEFAULT) != Boolean.TRUE) {
+					state.setSelectedPage(page.getClass());
+					state.setAttribute(TRIED_DEFAULT, Boolean.TRUE);
+					defaultPage = page;
+				}
 				pages.add(page);
 			}
 		}
 		
 		state.setOptionalAvailable(pages.size());
+		
+		if(Objects.nonNull(defaultPage)) {
+			throw new PageRedirect(defaultPage);
+		}
 		
 		if(pages.size()==1) {
 			Page page = pages.iterator().next();
@@ -129,6 +155,18 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 		
 		AuthenticationModule module = moduleDatabase.get(form.getAuthenticator(), AuthenticationModule.class);
 		state.setSelectedPage(authenticationService.getAuthenticationPage(module.getAuthenticatorKey()));
+		
+		
+		if(form.getMakeDefault()) {
+			Cookie c = new Cookie(DEFAULT_COOKIE_NAME, module.getUuid());
+			c.setHttpOnly(true);
+			c.setDomain(Request.get().getServerName());
+			c.setSecure(true);
+			c.setMaxAge((int) TimeUnit.DAYS.toSeconds(7));
+			
+			Request.response().addCookie(c);
+		}
+		
 		throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage()));
 		
 	}

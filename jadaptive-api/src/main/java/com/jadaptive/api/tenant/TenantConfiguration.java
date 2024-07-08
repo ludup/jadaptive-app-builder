@@ -40,10 +40,6 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	@ObjectView(DOMAIN_VIEW)
 	String invalidDomainRedirect;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
-	@ObjectView(ANALYTICS_VIEW)
-	String analyticsId = "";
-	
 	public String getRootDomain() {
 		return rootDomain;
 	}
@@ -75,15 +71,7 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	public void setInvalidDomainRedirect(String invalidDomainRedirect) {
 		this.invalidDomainRedirect = invalidDomainRedirect;
 	}
-
-	public String getAnalyticsId() {
-		return analyticsId;
-	}
-
-	public void setAnalyticsId(String analyticsId) {
-		this.analyticsId = analyticsId;
-	}
-
+	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;

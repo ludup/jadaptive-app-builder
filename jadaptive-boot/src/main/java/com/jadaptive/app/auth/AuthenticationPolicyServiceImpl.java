@@ -103,10 +103,26 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 			results = resolver.resolveUserPolicy(user, results);
 		}
 		
-		if(results.isEmpty()) {
-			if(permissionService.isAdministrator(user)) {
+		if(permissionService.isAdministrator(user)) {
+			
+			if(log.isInfoEnabled()) {
+				log.info("Administrator has multiple policies. Looking for a specific Administration policy first");
+			}
+			for(AuthenticationPolicy policy : results) {
+				if(policy.getRoles().contains(roleService.getAdministrationRole())) {
+					return policy;
+				}
+			}
+			
+			if(results.isEmpty()) {
+
+				if(log.isInfoEnabled()) {
+					log.info("Administrator not in any policy so returning default");
+				}
 				return getDefaultPolicy(policyClz);
 			}
+		}
+		if(results.isEmpty()) {
 			return null;
 		}
 		
