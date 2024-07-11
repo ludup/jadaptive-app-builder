@@ -49,7 +49,6 @@ public abstract class HtmlPage implements Page {
 	
 	private ThreadLocal<List<PageExtension>> extensions = new ThreadLocal<>();
 	
-	private Collection<HtmlPageExtender> extenders = null;
 	protected String resourcePath;
 	
 	static ThreadLocal<Document> currentDocument = new ThreadLocal<>();
@@ -83,9 +82,11 @@ public abstract class HtmlPage implements Page {
 	}
 	
 	public final void created() throws FileNotFoundException {
-	
-		extenders = applicationService.getBean(UserInterfaceService.class).getExtenders(this);
 		onCreated();
+	}
+	
+	protected Collection<HtmlPageExtender> extenders() {
+		return applicationService.getBean(UserInterfaceService.class).getExtenders(this);
 	}
 	
 	protected boolean isCacheable() { return false; }
@@ -118,7 +119,8 @@ public abstract class HtmlPage implements Page {
 			beforeProcess(uri, Request.get(), Request.response());
 			
 			processPageDependencies(document);
-			
+
+			var extenders = extenders();
 			if(Objects.nonNull(extenders)) {
 				for(HtmlPageExtender extender : extenders) {
 					extender.processStart(document, uri, this);
@@ -200,6 +202,7 @@ public abstract class HtmlPage implements Page {
 			
 			processPageDependencies(doc);
 			
+			var extenders = extenders();
 			if(Objects.nonNull(extenders)) {
 				for(HtmlPageExtender extender : extenders) {
 					extender.processStart(doc, uri, this);
