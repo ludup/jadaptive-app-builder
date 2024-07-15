@@ -6,46 +6,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.Page;
-import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.User;
 
 public class AuthenticationState {
 
-	User user;
-	Map<Class<? extends Page>,AuthenticationModule> requiredAuthenticationModulez = new HashMap<>();
-	List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
-	Map<Class<? extends Page>,AuthenticationModule> optionalAuthentications = new HashMap<>();
-	List<PostAuthenticatorPage> postAuthenticationPages = new ArrayList<>();
-	int currentPageIndex = 0;
-	String remoteAddress;
-	String userAgent;
-	Map<String,Object> attrs = new HashMap<>();
-	boolean decorateWindow = true;
-	String resetURL = "/app/api/reset-login";
-	String resetText = "Reset";
-	int failedAttempts = 0;
-	int currentPostAuthenticationIndex = 0;
-	Redirect homePage;
-	String attemptedUsername;
-	Class<? extends Page> optionalSelectionPage;
-	Class<? extends Page> selectedPage = null;
-	AuthenticationModule selectedAuthenticator = null;
-	List<Class<? extends Page>> completedOptionsPages = new ArrayList<>();
-	boolean passwordEnabled;
-	int optionalCompleted = 0;
-	int optionalRequired = 0;
-	int optionalAvailable = 0;
+	private User user;
+	private Map<Class<? extends Page>,AuthenticationModule> requiredAuthenticationModulez = new HashMap<>();
+	private List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
+	private Map<Class<? extends Page>,AuthenticationModule> optionalAuthentications = new HashMap<>();
+	private List<PostAuthenticatorPage> postAuthenticationPages = new ArrayList<>();
+	private int currentPageIndex = 0;
+	private String remoteAddress;
+	private String userAgent;
+	private Map<String,Object> attrs = new HashMap<>();
+	private boolean decorateWindow = true;
+	private String resetURL = "/app/api/reset-login";
+	private String resetText = "Reset";
+	private int failedAttempts = 0;
+	private int currentPostAuthenticationIndex = 0;
+	private Redirect homePage;
+	private String attemptedUsername;
+	private Class<? extends Page> optionalSelectionPage;
+	private Class<? extends Page> selectedPage = null;
+	private AuthenticationModule selectedAuthenticator = null;
+	private List<Class<? extends Page>> completedOptionsPages = new ArrayList<>();
+	private boolean passwordEnabled;
+	private int optionalCompleted = 0;
+	private int optionalRequired = 0;
+	private int optionalAvailable = 0;
 	
-	AuthenticationPolicy policy;
+	private AuthenticationPolicy policy;
 	
-	public AuthenticationState(AuthenticationPolicy policy, Redirect homePage) {
+	public AuthenticationState(AuthenticationPolicy policy) {
 		this.policy = policy;
-		this.homePage = homePage;
 	}
 
 	public AuthenticationPolicy getPolicy() {
@@ -64,14 +63,14 @@ public class AuthenticationState {
 		this.optionalAvailable = optionalAvailable;
 	}
 
-	public Class<? extends Page> getCurrentPage() {
+	public Optional<Class<? extends Page>> getCurrentPage() {
 		if(!isRequiredAuthenticationComplete()) {
-			return requiredAuthenticationPages.get(currentPageIndex);
+			return Optional.of(requiredAuthenticationPages.get(currentPageIndex));
 		} if(!isOptionalComplete()) { 
 			if(Objects.nonNull(selectedPage)) {
-				return selectedPage;
+				return Optional.of(selectedPage);
 			} else {
-				return optionalSelectionPage;
+				return Optional.of(optionalSelectionPage);
 			}
 			
 		} else {
@@ -81,9 +80,10 @@ public class AuthenticationState {
 				if(Objects.nonNull(homePage)) {
 					throw homePage;
 				}
-				throw new IllegalStateException("No home page set in authentication state");
+				else
+					return Optional.empty();
 			}
-			return postAuthenticationPages.get(currentPostAuthenticationIndex).getClass();
+			return Optional.of(postAuthenticationPages.get(currentPostAuthenticationIndex).getClass());
 		}
 	}
 	
@@ -251,14 +251,6 @@ public class AuthenticationState {
 
 	public void incrementFailedAttempts() {
 		failedAttempts++;
-	}
-
-	public Redirect getHomePage() {
-		return homePage;
-	}
-
-	public void setHomePage(Page homePage) {
-		this.homePage = new PageRedirect(homePage);
 	}
 	
 	public void setHomePage(Redirect homePage) {

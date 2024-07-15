@@ -21,6 +21,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.ui.pages.Welcome;
 import com.jadaptive.api.ui.pages.auth.Login;
@@ -32,7 +33,10 @@ public class PageCache {
 	static Logger log = LoggerFactory.getLogger(PageCache.class);
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private ApplicationService applicationService;
+	
+	@Autowired
+	private PermissionService permissionsService;
 	
 	@Autowired
 	private ClassLoaderService classService; 
@@ -41,7 +45,7 @@ public class PageCache {
 	Map<String,PageExtension> extensionsByName = new HashMap<>();
 	Map<String,Page> aliasCache = new HashMap<>();
 	Map<Class<? extends Page>, Page> pageCache = new HashMap<>();
-	Class<? extends Page> homePage;
+//	Class<? extends Page> homePage;
 	private Class<? extends Page> defaultPage = Login.class;
 	
 	
@@ -287,26 +291,40 @@ public class PageCache {
 		return resolvePage(getHomeClass());
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Class<? extends Page> getHomeClass() throws FileNotFoundException {
-		if(Objects.isNull(homePage)) {
-			Collection<?> classes = classService.resolveAnnotatedClasses(HomePage.class);
-			if(classes.isEmpty()) {
-				log.error("Product does not appear to have set a home page using the @HomePage annotation!");
+	public Class<? extends Page> getHomeClass() {
+//		if(Objects.isNull(homePage)) {
+			var resolvers = applicationService.getBeans(HomePageResolver.class);
+			if(resolvers.isEmpty()) {
+				log.error("Product does not appear to have any HomePageResolve implementations!");
 				return Welcome.class;
 			}
-			if(classes.size() > 1) {
-				log.warn("Product has multiple home page configured with the @HomePage annotation! Only one allowed");
+			
+			for(var resolve : resolvers.
+					stream().
+					sorted((o1, o2) -> Integer.valueOf(o1.getWeight()).compareTo(o2.getWeight())).
+					filter(res -> { 
+						try { 
+							var perms = res.getPermissions().toArray(new String[0]);
+							if(perms.length > 0)
+								permissionsService.assertAnyPermission(perms);
+							return true;
+						} 
+						catch(AccessDeniedException ade) {
+							return false;
+						}
+					}).
+					toList()) {
+				
+				var res = resolve.resolve();
+				if(res.isPresent()) {
+					return res.get();
+				}
 			}
-			Class<?> resolved = (Class<?>) classes.iterator().next();
-			if(!Page.class.isAssignableFrom(resolved)) {
-				log.error("@HomePage is on a class that is not a Page class!");
-				throw new IllegalStateException("@HomePage is on a class that is not a Page class!");
-			}
-			homePage = (Class<? extends Page>) classes.iterator().next();
-		}
+			
+			return Welcome.class;
+//		}
 		
-		return homePage;
+//		return homePage;
 	}
 
 

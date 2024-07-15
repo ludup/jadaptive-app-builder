@@ -461,7 +461,7 @@ public abstract class HtmlPage implements Page {
 	}
 
 	protected void resolveStylesheet(String uri, Document document, PageResources ext) {
-		URL url = ext.getClass().getResource(ext.getCssResource());
+		URL url = ext.getResourceClass().getResource(ext.getCssResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendStylesheet(document, "/app/css/" + uri + ".css");
 		} else {
@@ -477,7 +477,7 @@ public abstract class HtmlPage implements Page {
 	}
 
 	protected void resolveScript(String uri, Document document, PageResources ext) {
-		URL url = ext.getClass().getResource(ext.getJsResource());
+		URL url = ext.getResourceClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendBodyScript(document, "/app/js/" + uri + ".js");
 		} else {

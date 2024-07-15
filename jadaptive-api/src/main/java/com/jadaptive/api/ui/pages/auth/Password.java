@@ -45,7 +45,7 @@ public class Password extends AuthenticationPage<LoginForm> implements Authentic
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		
-		if(!state.getCurrentPage().equals(Password.class)) {
+		if(!Password.class.equals(state.getCurrentPage().orElse(null))) {
 			authenticationService.clearAuthenticationState();
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}

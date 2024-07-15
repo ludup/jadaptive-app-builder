@@ -167,7 +167,7 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			Request.response().addCookie(c);
 		}
 		
-		throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage()));
+		throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass())));
 		
 	}
 

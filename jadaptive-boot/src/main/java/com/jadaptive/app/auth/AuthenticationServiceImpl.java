@@ -159,9 +159,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			flagFailedLogin();
 
 			if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
-				AuthenticationModule module = registeredModulesByPage.get(state.getCurrentPage());
+				Class<? extends Page> currentPage = state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass());
+				AuthenticationModule module = registeredModulesByPage.get(currentPage);
 				if(Objects.isNull(module)) {
-					log.warn("User failed authentication on page {} but no module is present!!!", state.getCurrentPage().getSimpleName());
+					log.warn("User failed authentication on page {} but no module is present!!!", currentPage.getSimpleName());
 					return;
 				}
 				eventService.publishEvent(new AuthenticationFailedEvent(module, 
@@ -282,7 +283,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 								state.getRemoteAddress(), state.getUserAgent(), SessionType.HTTPS, state);
 						Redirect redir;
 						try {
-							redir = new PageRedirect(pageCache.getPage(state.getCurrentPage()));
+							redir = new PageRedirect(pageCache.getPage(state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass())));
 						}
 						catch(Redirect r) {
 							redir = r;
@@ -332,7 +333,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			
 		}
 		
-		Class<? extends Page> currentPage = state.getCurrentPage();
+		Class<? extends Page> currentPage = state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass());
 		if(log.isInfoEnabled()) {
 			log.info("User {} is being asked to complete authenication page {}", 
 					state.getUser().getUsername(),
@@ -450,7 +451,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 			return state;
 		} catch (FileNotFoundException | AccessDeniedException e1) {
-			throw new IllegalStateException();
+			throw new IllegalStateException(e1);
 		}
 
 	}
@@ -609,16 +610,15 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Override
 	public AuthenticationState createAuthenticationState(AuthenticationPolicy policy) throws FileNotFoundException {
-		return createAuthenticationState(policy, new PageRedirect(pageCache.getHomePage()));
+		return createAuthenticationState(policy, null);
 	}
 	
 	@Override
 	public AuthenticationState createAuthenticationState(AuthenticationPolicy policy, Redirect homePage, User user) throws FileNotFoundException {
-		AuthenticationState state = new AuthenticationState(policy, homePage);
-		
+		AuthenticationState state = new AuthenticationState(policy);
+		state.setHomePage(homePage);
 		state.setRemoteAddress(Request.getRemoteAddress());
 		state.setUser(user);
-		state.setHomePage(homePage);
 		state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
 
 		processRequiredAuthentication(state, policy);
@@ -686,6 +686,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			
 			quotaService.createQuota(quota);
 		}
+	}
+
+	@Override
+	public Class<? extends Page> getCurrentPage() {
+		return getCurrentState().getCurrentPage().orElseGet(() -> pageCache.getHomeClass());
 	};
 	
 	

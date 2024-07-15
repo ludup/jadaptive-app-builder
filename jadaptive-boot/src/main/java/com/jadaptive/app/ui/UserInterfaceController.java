@@ -134,7 +134,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 		try {
 			Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".css", "")));
-			URL url = page.getClass().getResource(page.getCssResource());
+			URL url = page.getResourceClass().getResource(page.getCssResource());
 			response.setContentType("text/css");
 			response.setStatus(HttpStatus.OK.value());
 			try(InputStream in = url.openStream()) {
@@ -165,7 +165,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		try {
 			try {
 				Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".js", "")));
-				URL url = page.getClass().getResource(page.getJsResource());
+				URL url = page.getResourceClass().getResource(page.getJsResource());
 				response.setContentType("application/javascript");
 				response.setStatus(HttpStatus.OK.value());
 				
@@ -176,7 +176,7 @@ public class UserInterfaceController extends AuthenticatedController {
 			} catch(FileNotFoundException e) {
 				try {
 					PageExtension page = pageCache.resolveExtension(name.replace(".js", ""));
-					URL url = page.getClass().getResource(page.getJsResource());
+					URL url = page.getResourceClass().getResource(page.getJsResource());
 					response.setContentType("application/javascript");
 					response.setStatus(HttpStatus.OK.value());
 					try(InputStream in = new ReaderInputStream(

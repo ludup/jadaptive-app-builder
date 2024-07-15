@@ -1,14 +1,13 @@
 package com.jadaptive.api.ui.pages.ext;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -44,7 +43,6 @@ public class Header extends AbstractPageExtension {
 	@Override
 	public void process(Document document, Element element, Page page) {
 		
-		
 		if(!permissionService.hasUserContext()) {
 			document.select("#searchForm").remove();
 			document.select("#topMenu").remove();
@@ -54,9 +52,9 @@ public class Header extends AbstractPageExtension {
 			document.select("#topMenu").remove();
 		} else {
 			
-			Map<String,List<ApplicationMenu>> sorted = new HashMap<>();
-			List<ApplicationMenu> parents = new ArrayList<>();
-			for(ApplicationMenu menu : menuService.getMenus()) {
+			var sorted = new HashMap<String,List<ApplicationMenu>>();
+			var parents = new ArrayList<ApplicationMenu>();
+			for(var menu : menuService.getMenus()) {
 				if(Objects.nonNull(menu.getParent()) && !sorted.containsKey(menu.getParent())) {
 					sorted.put(menu.getParent(), new ArrayList<>());
 				}
@@ -71,63 +69,81 @@ public class Header extends AbstractPageExtension {
 				}
 			}
 			
-			Collections.sort(parents, new Comparator<ApplicationMenu>() {
-				@Override
-				public int compare(ApplicationMenu o1, ApplicationMenu o2) {
-					return o1.weight().compareTo(o2.weight());
-				}
-			});
-			
-			Element topMenu = document.selectFirst("#topMenu");
-			
-			for(ApplicationMenu parent : parents) {
-				
-				if(!menuService.checkPermission(parent)) {
-					continue;
-				}
-				
-				Element parentElement = new Element("div")
-						.addClass("dropdown-menu")
-						.attr("aria-labelledby", "navbarDropdown");
-						
-				List<ApplicationMenu> children = sorted.get(parent.getUuid());
-				Collections.sort(children, new Comparator<ApplicationMenu>() {
-					@Override
-					public int compare(ApplicationMenu o1, ApplicationMenu o2) {
-						return o1.weight().compareTo(o2.weight());
-					}
-				});
-
-				for(ApplicationMenu child : children) {
-					
-					if(log.isDebugEnabled()) {
-						log.debug("Checking {} menu access to {}", permissionService.getCurrentUser().getUsername(), child.getI18n());
-					}
-					
-					if(!menuService.checkPermission(child)) {
+			var user = permissionService.getCurrentUser();
+			var menuItems = new LinkedHashMap<ApplicationMenu, List<ApplicationMenu>>();
+			for(var parent :  parents.stream().
+					filter(p -> menuService.checkPermission(p)).
+					sorted((o1, o2) -> o1.weight().compareTo(o2.weight())).toList()) {
+				var items = new ArrayList<ApplicationMenu>(sorted.get(parent.getUuid()).stream().
+					peek(c -> {
 						if(log.isDebugEnabled()) {
-							log.debug("{} does not have access to menu {}", permissionService.getCurrentUser().getUsername(), child.getI18n());
+							log.debug("Checking {} menu access to {}", user.getUsername(), c.getI18n());
 						}
-						continue;
-					}
-
+					}).
+					filter(c -> {
+						if(!menuService.checkPermission(c)) {
+							if(log.isDebugEnabled()) {
+								log.debug("{} does not have access to menu {}", permissionService.getCurrentUser().getUsername(), c.getI18n());
+							}
+							return false;
+						}
+						return true;
+					}).
+					sorted((o1,o2) -> o1.weight().compareTo(o2.weight())).toList());
+				if(items.size() > 0) {
+					menuItems.put(parent, items);
+				}
+			}
+			
+			var topMenu = document.selectFirst("#topMenu");
+			
+			if(menuItems.size() == 1) {
+				var parent = menuItems.keySet().iterator().next();
+				for(var child : menuItems.values().iterator().next()) {
 					Element link;
-					parentElement.appendChild(link = new Element("a")
-							.addClass("dropdown-item me-3")
-							.attr("href", child.getPath())
-							.appendChild(new Element("i")
-									.addClass(String.format("nav-icon me-2 %s fa-fw %s", child.getIconGroup(), child.getIcon())))
-							.appendChild(new Element("span")
-									.attr("jad:bundle", child.getBundle())
-										.attr("jad:i18n", child.getI18n())));
+					topMenu.appendChild(new Element("li")
+							.addClass("nav-item")
+							.appendChild(link = new Element("a")
+									.addClass("nav-link")
+									.attr("href", child.getPath())
+									.appendChild(new Element("i")
+											.addClass(String.format("nav-icon me-2 fa-solid fa-fw %s", child.getIcon())))
+									.appendChild(new Element("span")
+											.attr("jad:bundle", child.getBundle())
+											.attr("jad:i18n", child.getI18n()))));
 					
-					if(!child.isEnabled()) {
+					if(!child.isEnabled() || !parent.isEnabled()) {
 						link.addClass("disabled");
 						link.attr("href", "#");
 					}
 				}
-				
-				if(!parentElement.children().isEmpty()) {
+
+			}
+			else {
+				for(var en : menuItems.entrySet()) {
+					var parent = en.getKey();
+					
+					var parentElement = new Element("div")
+							.addClass("dropdown-menu")
+							.attr("aria-labelledby", "navbarDropdown");
+							
+					for(var child : en.getValue()) {
+						
+						Element link;
+						parentElement.appendChild(link = new Element("a")
+								.addClass("dropdown-item me-3")
+								.attr("href", child.getPath())
+								.appendChild(new Element("i")
+										.addClass(String.format("nav-icon me-2 %s fa-fw %s", child.getIconGroup(), child.getIcon())))
+								.appendChild(new Element("span")
+										.attr("jad:bundle", child.getBundle())
+											.attr("jad:i18n", child.getI18n())));
+						
+						if(!child.isEnabled()) {
+							link.addClass("disabled");
+							link.attr("href", "#");
+						}
+					}
 					
 					Element link;
 					topMenu.appendChild(new Element("li")
@@ -153,14 +169,14 @@ public class Header extends AbstractPageExtension {
 			}
 		}
 		
-		if(StringUtils.isNotBlank(productService.getLogoResource())) {
-			Element e = document.selectFirst("#logo");
+		if(isNotBlank(productService.getLogoResource())) {
+			var e = document.selectFirst("#logo");
 			if(Objects.nonNull(e)) {
 				e.attr("src", productService.getLogoResource());
 			}
 		}
 		
-		if(StringUtils.isNotBlank(productService.getFaviconResource())) {
+		if(isNotBlank(productService.getFaviconResource())) {
 			document.selectFirst("head")
 				.appendElement("link")
 					.attr("href", productService.getFaviconResource())

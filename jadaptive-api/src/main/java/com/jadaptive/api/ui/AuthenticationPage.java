@@ -118,7 +118,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			if(state.isRequiredAuthenticationComplete()
 					&& !state.isOptionalComplete()
 					&& state.getOptionalAvailable() > 1
-					&& !state.getCurrentPage().equals(OptionalAuthentication.class)) {
+					&& !OptionalAuthentication.class.equals(authenticationService.getCurrentPage())) {
 				actions.appendChild(Html.a("/app/api/change-auth")
 						.addClass("text-decoration-none d-block")
 						.appendChild(new Element("sup")
@@ -180,7 +180,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 		authenticationService.reportAuthenticationFailure(state, this);
 		
-		throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentState().getCurrentPage()));
+		throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentPage()));
 	}
 
 	@Override

@@ -73,8 +73,9 @@ public class Login extends AuthenticationPage<LoginForm> {
 			return;
 		}
 		state = authenticationService.getCurrentState();
-		if(!state.getCurrentPage().equals(Login.class)) {
-			throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage()));
+		var currentPage = authenticationService.getCurrentPage();
+		if(!currentPage.equals(Login.class)) {
+			throw new PageRedirect(pageCache.resolvePage(currentPage));
 		}
 		
 		doc.selectFirst("#authenticationHeader").appendChild(Html.i18n(state.getPolicy().getBundle(), String.format("%s.name", state.getPolicy().getResourceKey())));
