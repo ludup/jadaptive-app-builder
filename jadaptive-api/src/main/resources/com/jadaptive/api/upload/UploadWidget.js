@@ -18,8 +18,17 @@ function appendFile(fileInput) {
 			row.show();
 		}
 	
-		fileInput.parent().append('<input class="file-input file-index d-none" type="file" name="file" multiple/>');
+		if(UploadWidget._options.multiple)
+			fileInput.parent().append('<input class="file-input file-index d-none" type="file" name="file" multiple/>');
+		else
+			fileInput.parent().append('<input class="file-input file-index d-none" type="file" name="file"/>');
+		
 		$('.jfiles').removeClass('d-none');
+		
+
+		if(UploadWidget._options.auto) {
+			UploadWidget.upload();
+		}
 	}
 }
 $(function() {
@@ -82,7 +91,33 @@ var UploadWidget = {
 		_self._options.feedbackDiv = feedbackDiv ? feedbackDiv : "#uploadForm";
 		_self._options.callback = callback;
 		_self._options.validate = validate;
+		_self._options.multiple = true;
+		_self._options.auto = false;
 		_self.reset();
+	},
+	multiple: function(multiple) {
+		if(_self._options.multiple != multiple) {
+			_self._options.multiple = multiple;
+			if(multiple) {
+				$('#singleHelpText').addClass('d-none');
+				$('#helpText').removeClass('d-none');
+			}
+			else {
+				$('#singleHelpText').removeClass('d-none');
+				$('#helpText').addClass('d-none');
+			}
+		}
+	},
+	auto: function(auto) {
+		if(auto != _self._options.auto) {
+			_self._options.auto = auto;
+			if(auto) {
+				$('#uploadRow').addClass('d-none');
+			}
+			else {
+				$('#uploadRow').removeClass('d-none');
+			}
+		}
 	},
 	disableFeedback: function() {
 		_self = this;
@@ -91,7 +126,8 @@ var UploadWidget = {
 	clearFiles: function() {
 		$('.file-input').remove();
 		$('.file-index').remove();
-		$('#files').append('<input class="file-input d-none" type="file" name="file" multiple/>');
+		$('#files').append('<input class="file-input d-none" type="file" name="file" ' + 
+			(_self._options.multiple ? 'multiple':'') + '/>');
 	},
 	count: function() {
 		var countFiles = 0;
