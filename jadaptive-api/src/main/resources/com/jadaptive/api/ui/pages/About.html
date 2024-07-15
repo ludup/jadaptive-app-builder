@@ -4,21 +4,30 @@
 <title jad:bundle="userInterface" jad:i18n="aboutPage.title"></title>
 </head>
 <body>
-	<div class="bg-light p-5 rounded-lg m-3">
-		<a href="/" class="btn btn-secondary float-end" jad:bundle="userInterface" jad:i18n="aboutPage.close">Close</a>
-		<h2 id="productName">Product Name</h2>
-		<div class="mb-3 text-muted">
-			<em><span id="poweredBy"></span></em>
-		</div>
-		<div id="version"></div>
-		<div class="text-muted" id="vendor"></div>
-		<div class="text-muted" id="copyright"></div>
-	</div>
-	
-	<div class="ps-5 pe-5 pb-5 ms-3 me-3 mb-3">
-		<div class="mb-3"></div>
+	<div class="wrapper">
+		<header jad:id="header"></header>
+		<main class="container mt-5">
+			<div>
+				<div id="feedback"></div>
+							
+				<div class="mb-3 pb-3">
+					<h2 id="productName">Product Name</h2>
+					<div class="mb-3 text-muted">
+						<em><span id="poweredBy"></span></em>
+					</div>
+					<div id="version"></div>
+					<div class="text-muted" id="vendor"></div>
+					<div class="text-muted" id="copyright"></div>
+				</div>
 
-		<div id="abouts"></div>
+				<div class="pb-5 mb-3">
+					<div class="mb-3"></div>
+
+					<div id="abouts"></div>
+				</div>
+			</div>
+		</main>
 	</div>
+	<footer jad:id="footer"></footer>
 </body>
 </html>
