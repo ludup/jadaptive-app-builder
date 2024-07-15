@@ -44,6 +44,10 @@ public class Html {
 		return new Element("span").text(text);
 	}
 	
+	public static Element small(String text) {
+		return new Element("small").text(text);
+	}
+	
 	public static Element i18n(String bundle, String i18n, Object... args) {
 		Element el = new Element("span").attr("jad:bundle", bundle).attr("jad:i18n", i18n);
 		if(Objects.nonNull(args)) {
