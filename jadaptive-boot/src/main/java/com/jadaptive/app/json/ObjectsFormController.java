@@ -134,13 +134,15 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			AbstractObject obj = DocumentHelper.buildRootObject(request, template.getResourceKey(), template);
 			String uuid = objectService.saveOrUpdate(obj);
 			
-			if(template.isSingleton()) {
-				Feedback.success("default", "object.saved", I18N.getResource(
-						sessionUtils.getLocale(request), 
-						template.getBundle(),
-						template.getResourceKey() + ".name"));
-			} else {
-				Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+			if(!Feedback.isSet()) {
+				if(template.isSingleton()) {
+					Feedback.success("default", "object.saved", I18N.getResource(
+							sessionUtils.getLocale(request), 
+							template.getBundle(),
+							template.getResourceKey() + ".name"));
+				} else {
+					Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+				}
 			}
 			
 			return new UUIDStatus(uuid);
