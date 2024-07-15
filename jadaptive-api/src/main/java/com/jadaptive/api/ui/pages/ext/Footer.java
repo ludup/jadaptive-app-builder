@@ -57,8 +57,9 @@ public class Footer extends AbstractPageExtension {
 				IconWithDropdownInput input = new IconWithDropdownInput("theme", current.name().toLowerCase());
 				input.up().dark();
 				footer.appendChild(new Element("div")
-						.addClass("float-end me-3")
-						.appendChild(new Element("div").addClass("col-3 ms-3").appendChild(input.renderInput())));
+						.appendChild(new Element("div")
+							.addClass("ms-3")
+							.appendChild(input.renderInput())));
 				input.renderValues(BootstrapTheme.values(), current.name(), false, true);
 			}
 		}
