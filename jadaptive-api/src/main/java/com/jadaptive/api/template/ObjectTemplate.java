@@ -187,10 +187,9 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	}
 
 	public String getDefaultColumn() {
-		if(StringUtils.isNotBlank(nameField)) {
-			return nameField;
-		}
-		return StringUtils.isBlank(defaultColumn) ? "uuid" : defaultColumn;
+		return StringUtils.isBlank(defaultColumn) 
+				? ( StringUtils.isNotBlank(nameField) ? nameField : "uuid" ) 
+				: defaultColumn;
 	}
 
 	public void setDefaultColumn(String defaultColumn) {

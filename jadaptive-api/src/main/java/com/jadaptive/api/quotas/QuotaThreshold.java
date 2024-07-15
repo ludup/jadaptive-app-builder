@@ -17,7 +17,7 @@ import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 import com.jadaptive.api.ui.menu.PageMenu;
 
-@ObjectDefinition(resourceKey = QuotaThreshold.RESOURCE_KEY, scope = ObjectScope.GLOBAL)
+@ObjectDefinition(resourceKey = QuotaThreshold.RESOURCE_KEY, scope = ObjectScope.GLOBAL, defaultColumn = "key")
 @PageMenu(i18n = QuotaThreshold.RESOURCE_KEY + ".names", icon = "fa-traffic-light-stop", parent = ApplicationMenuService.ADMINISTRATION_MENU, bundle = QuotaThreshold.RESOURCE_KEY, feature = "Quotas")
 @TableView(defaultColumns = {"key", "periodValue", "periodUnit", "value"})
 @ObjectViewDefinition(value = QuotaThreshold.QUOTA_VIEW, weight = 0)
@@ -31,7 +31,7 @@ public abstract class QuotaThreshold extends AbstractUUIDEntity {
 	public static final String QUOTA_VIEW = "quotaView";
 	public static final String OPTIONS_VIEW = "quotaOptions";
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = QuotaKey.RESOURCE_KEY)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = QuotaKey.RESOURCE_KEY, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
 	@ObjectView(QUOTA_VIEW)
 	QuotaKey key;
