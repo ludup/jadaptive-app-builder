@@ -345,7 +345,7 @@ public class TableRenderer {
 		
 		IconWithDropdownInput dropdown = new IconWithDropdownInput("options", "default");
 		dropdown.icon("fa-ellipsis");
-		el.appendChild(dropdown.renderInput());
+		el.appendChild(dropdown.renderInput().addClass("mb-3"));
 		
 		if(canUpdate && !readOnly) {
 			if(Objects.isNull(parentObject)) {
