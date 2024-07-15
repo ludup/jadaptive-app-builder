@@ -1,12 +1,13 @@
 package com.jadaptive.plugins.dashboard.menus;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
+import com.jadaptive.plugins.dashboard.DashboardInitialiser;
 
 @Component
 public class DashboardMenu implements ApplicationMenu {
@@ -31,7 +32,7 @@ public class DashboardMenu implements ApplicationMenu {
 
 	@Override
 	public Collection<String> getPermissions() {
-		return Collections.emptyList();
+		return Arrays.asList(DashboardInitialiser.DASHBOARD_PERMISSION); 
 	}
 
 	@Override
