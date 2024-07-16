@@ -541,4 +541,12 @@ $(function() {
 			// TODO other types
 		}
 	});
+
+	/* All because we don't allow unsafe-inline styles */
+	$('div.auto-progress-bar').each(function(idx) {
+		var val = $(this).attr('aria-valuenow');
+		var max = $(this).attr('aria-valuemax');
+		var pc = parseInt((val / max) * 100);
+		$(this).width(pc + '%');
+	});
 });
