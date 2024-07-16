@@ -350,15 +350,13 @@ public class DocumentHelper {
 					if(Objects.isNull(part)) {
 						return null;
 					}
-					if(part.getSize() == 0) {
-						return null;
-					}
 					
-					String encoded = Base64.getEncoder().encodeToString(IOUtils.toByteArray(part.getInputStream()));
-					if(StringUtils.isBlank(encoded)) {
+					if(part.getSize() == 0) {
 						return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 					}
-					try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
+					
+					byte[] data = part.getInputStream().readAllBytes();
+					try(ByteArrayInputStream in = new ByteArrayInputStream(data)) {
 						BufferedImage bimg = ImageIO.read(in);
 						if(Objects.isNull(bimg)) {
 							throw new ValidationException(String.format("The file %s does not appear to contain an image!", part.getSubmittedFileName()));
@@ -379,7 +377,7 @@ public class DocumentHelper {
 						}
 						
 						if(StringUtils.isNotBlank(part.getSubmittedFileName()) && part.getSize() > 0) {
-							return String.format("data:%s;base64, %s", part.getContentType(), encoded);
+							return String.format("data:%s;base64, %s", part.getContentType(), Base64.getEncoder().encodeToString(data));
 						}
 					}
 					
