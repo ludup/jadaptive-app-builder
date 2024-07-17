@@ -1,16 +1,16 @@
 package com.jadaptive.api.ui.menu;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class ChangePasswordMenu implements ApplicationMenu {
+public class UserMenu implements ApplicationMenu {
 
 	@Override
 	public String getI18n() {
-		return "changePassword.name";
+		return "userMenu.name";
 	}
 
 	@Override
@@ -20,32 +20,33 @@ public class ChangePasswordMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/change-my-password";
-	}
-
-	@Override
-	public Collection<String> getPermissions() {
-		return Arrays.asList("users.changePassword");
+		return "";
 	}
 
 	@Override
 	public String getIcon() {
-		return "fa-key";
+		return "fa-user";
 	}
 
 	@Override
 	public String getParent() {
-		return ApplicationMenuService.USER_MENU;
+		return null;
 	}
 
 	@Override
 	public String getUuid() {
-		return "dc8e76be-6cac-4ba6-be46-b963f25e0953";
+		return ApplicationMenuService.USER_MENU;
 	}
 
 	@Override
 	public Integer weight() {
-		return 100;
+		return Integer.MIN_VALUE;
 	}
+	
+	public Collection<String> getPermissions() { 
+		return Collections.emptyList();
+	}
+	
+	
 
 }

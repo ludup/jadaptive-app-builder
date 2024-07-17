@@ -41,3 +41,27 @@ body {
   height: 24px;
   margin: 0;
 }
+
+.avatar-image-container {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+}
+
+.user-menu-toggle i {
+  font-size: 24px;
+}
+
+.user-menu-toggle img {
+  max-width: 24px;
+  max-height: 24px;
+}
+
+.users-user-avatar i {
+  font-size: 40px;
+}
+
+.users-user-avatar img {
+  max-width: 40px;
+  max-height: 40px;
+}

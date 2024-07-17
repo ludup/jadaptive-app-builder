@@ -1,6 +1,7 @@
 package com.jadaptive.api.ui.menu;
 
 import java.util.Collection;
+import java.util.Set;
 
 public interface ApplicationMenuService {
 
@@ -11,9 +12,12 @@ public interface ApplicationMenuService {
 	String REPORTING_MENU_UUID = "21e4615c-82ac-4b85-abf7-81640df4645c";
 	String ADMINISTRATION_MENU = "7f9f9207-6774-4565-95b4-3375abd795b9";
 	String DEVELOPER_MENU = "877b1296-5f85-4908-a9f1-27a549807164";
+	String USER_MENU = "390a4865-e96a-4382-929f-ab0db0591fe7";
 	
 	Collection<ApplicationMenu> getMenus();
 
 	boolean checkPermission(ApplicationMenu m);
+
+	boolean checkPermission(ApplicationMenu m, Set<String> resolvedPermissions);
 
 }

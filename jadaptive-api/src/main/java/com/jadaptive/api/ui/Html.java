@@ -133,6 +133,10 @@ public class Html {
 	public static Element thead() {
 		return new Element("thead");
 	}
+
+	public static Element hr() {
+		return new Element("hr");
+	}
 	
 	public static Element tr() {
 		return new Element("tr");

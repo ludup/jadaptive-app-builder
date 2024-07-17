@@ -1,16 +1,13 @@
 package com.jadaptive.api.ui.menu;
 
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.springframework.stereotype.Component;
 
 @Component
-public class ChangePasswordMenu implements ApplicationMenu {
+public class LogoffMenu implements ApplicationMenu {
 
 	@Override
 	public String getI18n() {
-		return "changePassword.name";
+		return "logoff.name";
 	}
 
 	@Override
@@ -20,17 +17,12 @@ public class ChangePasswordMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/change-my-password";
-	}
-
-	@Override
-	public Collection<String> getPermissions() {
-		return Arrays.asList("users.changePassword");
+		return "/app/ui/logoff";
 	}
 
 	@Override
 	public String getIcon() {
-		return "fa-key";
+		return "fa-sign-out-alt";
 	}
 
 	@Override
@@ -40,12 +32,12 @@ public class ChangePasswordMenu implements ApplicationMenu {
 
 	@Override
 	public String getUuid() {
-		return "dc8e76be-6cac-4ba6-be46-b963f25e0953";
+		return "60aa2937-2980-4e3b-9e1e-643adde08b8d";
 	}
 
 	@Override
 	public Integer weight() {
-		return 100;
+		return Integer.MAX_VALUE;
 	}
 
 }

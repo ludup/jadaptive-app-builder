@@ -11,6 +11,7 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
+import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
@@ -23,6 +24,7 @@ import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
+import com.jadaptive.api.template.Validators;
 import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
@@ -30,7 +32,9 @@ import com.jadaptive.utils.Utils;
 @ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)
 @ObjectViewDefinition(bundle = "users", value = User.EMAIL_VIEW, weight=100)
 @ObjectViewDefinition(bundle = "users", value = User.PHONE_VIEW, weight=200)
-@TableView(defaultColumns = { "username", "name", "lastLogin" }, requiresUpdate = true, sortField = "username")
+@TableView(defaultColumns = { "avatar", "username", "name", "lastLogin" }, otherColumns = {
+		@DynamicColumn(resourceKey = "avatar", service = UserService.class) },
+requiresUpdate = true, sortField = "username")
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
 public abstract class User extends AbstractUUIDEntity implements NamedDocument {
@@ -40,6 +44,7 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	public static final String DETAILS_VIEW = "details";
 	public static final String EMAIL_VIEW = "email";
 	public static final String PHONE_VIEW = "telephone";
+	public static final String AVATAR_VIEW = "avatar";
 	
 	private static final long serialVersionUID = 2210375165051752363L;
 
@@ -63,6 +68,16 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@ObjectView(PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	String mobilePhone;
+	
+	@ObjectField(type = FieldType.IMAGE, resettable = true)
+	@ObjectView(value = AVATAR_VIEW, weight = 9999)
+	@Validators({
+		@Validator(type = ValidationType.CLASSES, value = "p-3 bg-light"),
+		@Validator(type = ValidationType.IMAGE_HEIGHT, value = "512"),
+		@Validator(type = ValidationType.IMAGE_WIDTH, value = "512"),
+			
+	})
+	String avatar;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true)
 	@ExcludeView(values =  { FieldView.CREATE })
@@ -149,6 +164,14 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	public String getDisplayName() {
 		return isBlank(name) ? getUsername() : name;
+	}
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
 	}
 	
 }

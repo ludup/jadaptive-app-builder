@@ -3,10 +3,12 @@ package com.jadaptive.api.user;
 import java.util.Collection;
 import java.util.Map;
 
+import com.jadaptive.api.avatar.AvatarProvider;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.template.ObjectTemplate;
 
-public interface UserService extends UUIDObjectService<User> {
+public interface UserService extends UUIDObjectService<User>, AvatarProvider, DynamicColumnService {
 
 	public static final String CHANGE_PASSWORD_PERMISSION = "users.changePassword";
 	public static final String SET_PASSWORD_PERMISSION = "users.setPassword";

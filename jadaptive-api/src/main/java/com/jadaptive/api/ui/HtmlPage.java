@@ -1,5 +1,7 @@
 package com.jadaptive.api.ui;
 
+import static com.jadaptive.utils.Instrumentation.timed;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,38 +118,64 @@ public abstract class HtmlPage implements Page {
 		
 		try {
 			
-			beforeProcess(uri, Request.get(), Request.response());
-			
-			processPageDependencies(document);
+			try(var timed = timed("HtmlPage.generateHTMLDocument#beforeProcess(" + uri + ")")) {
+				beforeProcess(uri, Request.get(), Request.response());
+			}
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#processPageDependencies(" + uri + ")")) {
+				processPageDependencies(document);
+			}
 
 			var extenders = extenders();
 			if(Objects.nonNull(extenders)) {
-				for(HtmlPageExtender extender : extenders) {
-					extender.processStart(document, uri, this);
+				try(var timed = timed("HtmlPage.generateHTMLDocument#extender.processStart(" + uri + ")")) {
+					for(HtmlPageExtender extender : extenders) {
+						try(var timed2 = timed(extender.getClass().getName())) {
+							extender.processStart(document, uri, this);
+						}
+					}
 				}
 			}
-			
-			generateContent(document);
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#generateContent(" + uri + ")")) {
+				generateContent(document);
+			}
 			
 			if(Objects.nonNull(extenders)) {
-				for(HtmlPageExtender extender : extenders) {
-					extender.generateContent(document, this);
+				try(var timed = timed("HtmlPage.generateHTMLDocument#extender.generateContent(" + uri + ")")) {
+					for(HtmlPageExtender extender : extenders) {
+						try(var timed2 = timed(extender.getClass().getName())) {
+							extender.generateContent(document, this);
+						}
+					}
 				}
 			}
 			
 			if(Request.isAvailable()) {
 				injectFeedback(document, Request.get());
 			}
-			processPageExtensions(uri, document);
-			documentComplete(document);
-			
-			if(Objects.nonNull(extenders)) {
-				for(HtmlPageExtender extender : extenders) {
-					extender.processEnd(document, uri, this);
-				}
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#processPageExtensions(" + uri + ")")) {
+				processPageExtensions(uri, document);
+			}
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#documentComplete(" + uri + ")")) {
+				documentComplete(document);
 			}
 			
-			afterProcess(uri, Request.get(), Request.response());
+			if(Objects.nonNull(extenders)) {
+				try(var timed = timed("HtmlPage.generateHTMLDocument#extender.processEnd(" + uri + ")")) {
+					for(HtmlPageExtender extender : extenders) {
+						try(var timed2 = timed(extender.getClass().getName())) {
+							extender.processEnd(document, uri, this);
+						}
+					}
+				}
+			}
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#afterProcess(" + uri + ")")) {
+				afterProcess(uri, Request.get(), Request.response());
+			}
 		
 		} finally {
 			currentDocument.remove();
@@ -159,12 +187,22 @@ public abstract class HtmlPage implements Page {
 	
 	private void processPageExtensions(String uri, Document document) throws IOException {
 		
-		processDocumentExtensions(document);
-		
-		resolveScript(getUri(), document, this);
-		resolveStylesheet(getUri(), document, this);
 
-		processPageProcessors(document);
+		try(var timed = timed("HtmlPage.processPageExtensions#processDocumentExtensions(" + uri + ")")) {
+			processDocumentExtensions(document);
+		}
+
+		try(var timed = timed("HtmlPage.processPageExtensions#resolveScript(" + uri + ")")) {
+			resolveScript(getUri(), document, this);
+		}
+
+		try(var timed = timed("HtmlPage.processPageExtensions#resolveStylesheet(" + uri + ")")) {
+			resolveStylesheet(getUri(), document, this);
+		}
+
+		try(var timed = timed("HtmlPage.processPageExtensions#processPageProcessors(" + uri + ")")) {
+			processPageProcessors(document);
+		}
 	}
 
 	private void processPageDependencies(Document document) throws IOException {
@@ -350,7 +388,9 @@ public abstract class HtmlPage implements Page {
 	private void processDocumentExtensions(Document document) throws IOException {
 		Elements embeddedElement = document.getElementsByAttribute("jad:id");
 		for(Element embedded : embeddedElement) {
-			processEmbeddedExtensions(document, embedded);
+			try(var timed = timed("HtmlPage.processDocumentExtensions#embedded(" + embedded.attr("jad:id") + ")")) {
+				processEmbeddedExtensions(document, embedded);
+			}
 		}
 		
 		afterDocumentExtensions(document);

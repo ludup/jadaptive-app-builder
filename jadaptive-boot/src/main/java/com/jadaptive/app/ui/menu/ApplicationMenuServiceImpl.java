@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,7 @@ import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuExtender;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 import com.jadaptive.api.ui.menu.PageMenu;
+import com.jadaptive.utils.Instrumentation;
 
 @Service
 public class ApplicationMenuServiceImpl extends AuthenticatedService implements ApplicationMenuService { 
@@ -128,28 +130,66 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 	
 	@Override
 	public boolean checkPermission(ApplicationMenu m) {
-		for(String perm : m.getPermissions()) {
-			if(StringUtils.isNotBlank(perm)) {
-				try {
-					permissionService.assertPermission(perm);
-				} catch(AccessDeniedException e) { 
-					return false;
+		try(var ptimed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission(" + m.getI18n() + ")")) {
+			try(var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.with(" + m.getI18n() + ")")) {
+				for(String perm : m.getPermissions()) {
+					if(StringUtils.isNotBlank(perm)) {
+						try {
+							permissionService.assertPermission(perm);
+						} catch(AccessDeniedException e) { 
+							return false;
+						}
+					}
 				}
 			}
-		}
-		
-		for(String perm : m.getWithoutPermissions()) {
-			if(StringUtils.isNotBlank(perm)) {
-				try {
-					permissionService.assertPermission(perm);
-					return false;
-				} catch(AccessDeniedException e) { 
+	
+			try(var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.without(" + m.getI18n() + ")")) {
+				for(String perm : m.getWithoutPermissions()) {
+					if(StringUtils.isNotBlank(perm)) {
+						try {
+							permissionService.assertPermission(perm);
+							return false;
+						} catch(AccessDeniedException e) { 
+						}
+					}
 				}
 			}
+			
+			return true;
 		}
-		
-		return true;
 	}
+	
+	@Override
+	public boolean checkPermission(ApplicationMenu m, Set<String> resolvedPermissions) {
+		try(var ptimed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission(" + m.getI18n() + ")")) {
+			try(var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.with(" + m.getI18n() + ")")) {
+				for(String perm : m.getPermissions()) {
+					if(StringUtils.isNotBlank(perm)) {
+						try {
+							permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
+						} catch(AccessDeniedException e) { 
+							return false;
+						}
+					}
+				}
+			}
+	
+			try(var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.without(" + m.getI18n() + ")")) {
+				for(String perm : m.getWithoutPermissions()) {
+					if(StringUtils.isNotBlank(perm)) {
+						try {
+							permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
+							return false;
+						} catch(AccessDeniedException e) { 
+						}
+					}
+				}
+			}
+			
+			return true;
+		}
+	}
+	
 	class DynamicMenu implements ApplicationMenu {
 		
 		String path;

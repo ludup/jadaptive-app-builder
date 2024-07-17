@@ -1,16 +1,16 @@
-package com.jadaptive.api.ui.menu;
-
-import java.util.Arrays;
-import java.util.Collection;
+package com.jadaptive.api.avatar;
 
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.ui.menu.ApplicationMenu;
+import com.jadaptive.api.ui.menu.ApplicationMenuService;
+
 @Component
-public class ChangePasswordMenu implements ApplicationMenu {
+public class AvatarUploadMenu implements ApplicationMenu {
 
 	@Override
 	public String getI18n() {
-		return "changePassword.name";
+		return "uploadAvatar.name";
 	}
 
 	@Override
@@ -20,17 +20,12 @@ public class ChangePasswordMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/change-my-password";
-	}
-
-	@Override
-	public Collection<String> getPermissions() {
-		return Arrays.asList("users.changePassword");
+		return "/app/ui/avatar-upload";
 	}
 
 	@Override
 	public String getIcon() {
-		return "fa-key";
+		return "fa-camera";
 	}
 
 	@Override
@@ -40,12 +35,12 @@ public class ChangePasswordMenu implements ApplicationMenu {
 
 	@Override
 	public String getUuid() {
-		return "dc8e76be-6cac-4ba6-be46-b963f25e0953";
+		return "55a1530e-2e05-4ee1-88f8-5fc98911daae";
 	}
 
 	@Override
 	public Integer weight() {
-		return 100;
+		return 200;
 	}
 
 }
