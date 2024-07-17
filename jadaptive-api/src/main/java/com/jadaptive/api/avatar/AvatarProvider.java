@@ -2,7 +2,9 @@ package com.jadaptive.api.avatar;
 
 import java.util.Optional;
 
-public interface AvatarProvider {
+import org.pf4j.ExtensionPoint;
+
+public interface AvatarProvider extends ExtensionPoint {
 	
 	default int avatarWeight() {
 		return 0;
