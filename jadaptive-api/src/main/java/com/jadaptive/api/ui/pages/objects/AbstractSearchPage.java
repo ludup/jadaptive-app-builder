@@ -206,7 +206,8 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 		
 		if(log.isInfoEnabled()) {
-			log.info("Searching for {} {}", searchField, searchValue);
+			if(StringUtils.isNotBlank(searchValue))
+				log.info("Searching for {} {}", searchField, searchValue);
 		}
 		
 		SearchField[] search = SearchUtils.generateSearch(searchField, searchValue, searchFieldTemplates);
