@@ -292,39 +292,35 @@ public class PageCache {
 	}
 	
 	public Class<? extends Page> getHomeClass() {
-//		if(Objects.isNull(homePage)) {
-			var resolvers = applicationService.getBeans(HomePageResolver.class);
-			if(resolvers.isEmpty()) {
-				log.error("Product does not appear to have any HomePageResolve implementations!");
-				return Welcome.class;
-			}
-			
-			for(var resolve : resolvers.
-					stream().
-					sorted((o1, o2) -> Integer.valueOf(o1.getWeight()).compareTo(o2.getWeight())).
-					filter(res -> { 
-						try { 
-							var perms = res.getPermissions().toArray(new String[0]);
-							if(perms.length > 0)
-								permissionsService.assertAnyPermission(perms);
-							return true;
-						} 
-						catch(AccessDeniedException ade) {
-							return false;
-						}
-					}).
-					toList()) {
-				
-				var res = resolve.resolve();
-				if(res.isPresent()) {
-					return res.get();
-				}
-			}
-			
+		var resolvers = applicationService.getBeans(HomePageResolver.class);
+		if(resolvers.isEmpty()) {
+			log.error("Product does not appear to have any HomePageResolve implementations!");
 			return Welcome.class;
-//		}
+		}
 		
-//		return homePage;
+		for(var resolve : resolvers.
+				stream().
+				sorted((o1, o2) -> Integer.valueOf(o1.getWeight()).compareTo(o2.getWeight())).
+				filter(res -> { 
+					try { 
+						var perms = res.getPermissions().toArray(new String[0]);
+						if(perms.length > 0)
+							permissionsService.assertAnyPermission(perms);
+						return true;
+					} 
+					catch(AccessDeniedException ade) {
+						return false;
+					}
+				}).
+				toList()) {
+			
+			var res = resolve.resolve();
+			if(res.isPresent()) {
+				return res.get();
+			}
+		}
+		
+		return getDefaultPage();
 	}
 
 
