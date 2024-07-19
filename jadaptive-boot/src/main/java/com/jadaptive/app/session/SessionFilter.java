@@ -47,7 +47,6 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantService;
-import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.utils.ReplacementUtils;
 import com.jadaptive.utils.StaticResolver;
 
@@ -82,10 +81,7 @@ public class SessionFilter implements Filter {
 	@Autowired
 	private SystemSingletonObjectDatabase<TenantConfiguration> tenantConfig;
 	
-	@Autowired
-	private PageCache pageCache;
-	
-	Map<String,String> cachedRedirects = new HashMap<>();
+	private Map<String,String> cachedRedirects = new HashMap<>();
 	
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -115,7 +111,14 @@ public class SessionFilter implements Filter {
 				if(Objects.nonNull(tenant)) {
 					String serverName = req.getServerName();
 					TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
-					if(!isValidHostname(config, tenant, serverName) && !serverName.equals(InetAddress.getLocalHost().getHostName()) ) {
+					String hostName;
+					try {
+						hostName = InetAddress.getLocalHost().getHostName();
+					}
+					catch(Exception e) {
+						hostName = "localhost";
+					}
+					if(!isValidHostname(config, tenant, serverName) && !serverName.equals(hostName) ) {
 						if(serverName.equalsIgnoreCase(config.getRegistrationDomain())) {
 							if(req.getRequestURI().equals("/")) {
 								if(req.getServerPort() != -1 && req.getServerPort() != 443) {
