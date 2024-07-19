@@ -12,7 +12,7 @@ public class BootstrapComponents {
 				attr("role", "progressbar").
 //				attr("style", "width: " +  (long)(((double)val / (double)max ) * 100d) + "%;").
 				attr("aria-valuenow", String.valueOf(val)).
-				attr("aria-valuemax", "31").
+				attr("aria-valuemax", String.valueOf(max)).
 				attr("role", "progressbar");
 
 		bar.addClass("bg-" + background);
