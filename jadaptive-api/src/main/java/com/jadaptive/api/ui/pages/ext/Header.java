@@ -215,7 +215,7 @@ public class Header extends AbstractPageExtension {
 			
 			for(var parent :  parents.stream().
 					filter(p -> p.getUuid() ==  ApplicationMenuService.USER_MENU).
-					filter(p -> isAdmin || menuService.checkPermission(p, resolvedPermissions)).
+					filter(p -> isAdmin || menuService.checkPermission(p, resolvedPermissions, isAdmin)).
 					sorted((o1, o2) -> o1.weight().compareTo(o2.weight())).toList()) {
 				
 				var items = new ArrayList<ApplicationMenu>(sorted.get(parent.getUuid()).stream().
@@ -265,7 +265,7 @@ public class Header extends AbstractPageExtension {
 			User user, LinkedHashMap<ApplicationMenu, List<ApplicationMenu>> menuItems) {
 		for(var parent :  parents.stream().
 				filter(p -> p.getUuid() !=  ApplicationMenuService.USER_MENU).
-				filter(p -> isAdmin || menuService.checkPermission(p, resolvedPermissions)).
+				filter(p -> menuService.checkPermission(p, resolvedPermissions, isAdmin)).
 				sorted((o1, o2) -> o1.weight().compareTo(o2.weight())).toList()) {
 			var items = new ArrayList<ApplicationMenu>(sorted.get(parent.getUuid()).stream().
 				peek(c -> {
@@ -274,7 +274,7 @@ public class Header extends AbstractPageExtension {
 					}
 				}).
 				filter(c -> {
-					if(!isAdmin && !menuService.checkPermission(c, resolvedPermissions)) {
+					if(!menuService.checkPermission(c, resolvedPermissions, isAdmin)) {
 						if(log.isDebugEnabled()) {
 							log.debug("{} does not have access to menu {}", user.getUsername(), c.getI18n());
 						}

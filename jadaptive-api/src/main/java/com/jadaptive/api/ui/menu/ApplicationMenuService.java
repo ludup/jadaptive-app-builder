@@ -18,6 +18,6 @@ public interface ApplicationMenuService {
 
 	boolean checkPermission(ApplicationMenu m);
 
-	boolean checkPermission(ApplicationMenu m, Set<String> resolvedPermissions);
+	boolean checkPermission(ApplicationMenu m, Set<String> resolvedPermissions, boolean administrator);
 
 }

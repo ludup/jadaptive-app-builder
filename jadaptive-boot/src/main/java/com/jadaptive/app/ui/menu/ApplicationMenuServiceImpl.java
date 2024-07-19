@@ -160,13 +160,15 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 	}
 	
 	@Override
-	public boolean checkPermission(ApplicationMenu m, Set<String> resolvedPermissions) {
+	public boolean checkPermission(ApplicationMenu m, Set<String> resolvedPermissions, boolean administrator) {
 		try(var ptimed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission(" + m.getI18n() + ")")) {
 			try(var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.with(" + m.getI18n() + ")")) {
 				for(String perm : m.getPermissions()) {
 					if(StringUtils.isNotBlank(perm)) {
 						try {
-							permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
+							if(!administrator) {
+								permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
+							}
 						} catch(AccessDeniedException e) { 
 							return false;
 						}
@@ -178,7 +180,9 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 				for(String perm : m.getWithoutPermissions()) {
 					if(StringUtils.isNotBlank(perm)) {
 						try {
-							permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
+							if(!administrator) {
+								permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
+							}
 							return false;
 						} catch(AccessDeniedException e) { 
 						}
