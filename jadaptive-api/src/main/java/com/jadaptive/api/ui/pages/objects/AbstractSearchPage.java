@@ -240,7 +240,9 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		table.insertChildren(0, renderer.render());
 
-		renderPagination(totalObjects, table.selectFirst("#pagnation"));
+		Element pagnation = table.selectFirst("#pagnation");
+		pagnation.dataset().put("jad-filtered", String.valueOf(search.length > 0));
+		renderPagination(totalObjects, pagnation);
 		
 	}
 	
@@ -493,6 +495,9 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 
 		Element pageList;
 		pagnation.appendChild(Html.nav().appendChild(pageList = Html.ul("pagination")));
+		
+		pageList.dataset().put("jad-page-number", String.valueOf(currentPage));
+		pageList.dataset().put("jad-pages", String.valueOf(pages));
 		
 		Element pageSize = pagnation.nextElementSibling();
 		DropdownInput searchPage = new DropdownInput("length", "default");
