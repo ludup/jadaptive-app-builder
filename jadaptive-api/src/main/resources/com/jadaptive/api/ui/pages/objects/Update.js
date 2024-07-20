@@ -13,6 +13,7 @@ $(document).ready(function() {
     	var url = form.attr('action');
     
         JadaptiveUtils.startAwesomeSpin($('#saveButton i'), 'fa-save');
+		var fdata = JadaptiveUtils.processedFormData(form);
         
     	$.ajax({
            type: "POST",
@@ -20,7 +21,7 @@ $(document).ready(function() {
            cache: false,
            contentType: false,
     	   processData: false,
-           data: new FormData(form[0]),
+           data: fdata,
            success: function(data)
            {
                if(data.redirect) {
