@@ -23,6 +23,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.ReflectionUtils;
+import com.jadaptive.api.ui.pages.About;
 import com.jadaptive.api.ui.pages.Welcome;
 import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.utils.FileUtils;
@@ -319,8 +320,10 @@ public class PageCache {
 				return res.get();
 			}
 		}
-		
-		return getDefaultPage();
+		if(permissionsService.hasUserContext())
+			return About.class;
+		else
+			return getDefaultPage();
 	}
 
 

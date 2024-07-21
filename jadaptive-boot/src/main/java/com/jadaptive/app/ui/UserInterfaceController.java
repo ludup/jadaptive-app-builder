@@ -92,9 +92,18 @@ public class UserInterfaceController extends AuthenticatedController {
 		request.getRequestDispatcher(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER))).forward(request, response);
 	}
 	
+	private final static ThreadLocal<Boolean> throwableReentranceProtection = new ThreadLocal<>();
+	
 	@ExceptionHandler(Throwable.class)
 	public void Throwable(Throwable e, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		/* The new startup progress stuff is causing very strange things when there are 
+		 * certain startup errors. CPU will go 100% with multiple overflowing stacks. Protecting
+		 * against reentrance here seems to do the trick.
+		 */
+		if(Boolean.TRUE.equals(throwableReentranceProtection.get()))
+			return;
 		log.error("Captured error", e);
+		throwableReentranceProtection.set(true);
 		request.getRequestDispatcher(ErrorPage.generateErrorURI(e, request.getHeader(HttpHeaders.REFERER))).forward(request, response);
 	}
 	
