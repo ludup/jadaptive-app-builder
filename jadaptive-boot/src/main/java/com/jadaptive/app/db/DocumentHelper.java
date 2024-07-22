@@ -398,7 +398,10 @@ public class DocumentHelper {
 						return null;
 					}
 					if(StringUtils.isNotBlank(part.getSubmittedFileName())) {
-						return String.format("%s;%s;%s", part.getSubmittedFileName(), part.getContentType(),  Base64.getEncoder().encodeToString(IOUtils.toByteArray(part.getInputStream())));
+						return String.format("%s;%s;%s;%s", part.getSubmittedFileName(), 
+								part.getContentType(),  
+								String.valueOf(part.getSize()),
+								Base64.getEncoder().encodeToString(IOUtils.toByteArray(part.getInputStream())));
 					}
 				}
 			} catch (IOException | ServletException e) {
