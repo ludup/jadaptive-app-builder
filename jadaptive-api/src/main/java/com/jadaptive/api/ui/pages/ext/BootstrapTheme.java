@@ -60,7 +60,12 @@ public enum BootstrapTheme {
 		
 		switch(current) {
 		case DEFAULT:
-			return DARKLY.name().toLowerCase();
+			/* BPS: I found Darkly embeds a font from Google. If server is
+			 * running disconnected from the internet, pages will take 30+
+			 * seconds to load. 
+			 */
+			return JADAPTIVE.name().toLowerCase();
+			//return DARKLY.name().toLowerCase();
 		default:
 			return current.name().toLowerCase();
 		}
