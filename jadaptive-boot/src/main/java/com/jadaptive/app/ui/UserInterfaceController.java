@@ -65,12 +65,20 @@ public class UserInterfaceController extends AuthenticatedController {
 	public void handleException(HttpServletRequest request,
 			HttpServletResponse response,
 			Throwable e) throws IOException {
-		
-		Feedback.error("userInterface", "unauthorized.text");
-		if(request.getRequestURI().startsWith("/app/ui/")) {
-			response.sendRedirect("/app/ui/login");
-		} else {
-			response.sendError(HttpStatus.UNAUTHORIZED.value());
+
+		if(checkReentrance(e))
+			return;
+
+		try {
+			Feedback.error("userInterface", "unauthorized.text");
+			if(request.getRequestURI().startsWith("/app/ui/")) {
+				response.sendRedirect("/app/ui/login");
+			} else {
+				response.sendError(HttpStatus.UNAUTHORIZED.value());
+			}
+		}
+		finally {
+			throwableReentranceProtection.remove();
 		}
 	}
 
@@ -78,41 +86,76 @@ public class UserInterfaceController extends AuthenticatedController {
 	public void handleException(HttpServletRequest request, 
 			HttpServletResponse response,
 			AccessDeniedException e) throws IOException {
-	
-		Feedback.error("userInterface", "unauthorized.text");
-		if(request.getRequestURI().startsWith("/app/ui/")) {
-			response.sendRedirect("/app/ui/login");
-		} else {
-			response.sendError(HttpStatus.FORBIDDEN.value());
+
+		if(checkReentrance(e))
+			return;
+
+		try {
+			Feedback.error("userInterface", "unauthorized.text");
+			if(request.getRequestURI().startsWith("/app/ui/")) {
+				response.sendRedirect("/app/ui/login");
+			} else {
+				response.sendError(HttpStatus.FORBIDDEN.value());
+			}
+		}
+		finally {
+			throwableReentranceProtection.remove();
 		}
 	}
 	
 	@ExceptionHandler(FileNotFoundException.class)
 	public void FileNotFoundException(FileNotFoundException e, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-		request.getRequestDispatcher(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER))).forward(request, response);
+		if(checkReentrance(e))
+			return;
+		try {
+			request.getRequestDispatcher(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER))).forward(request, response);
+		}
+		finally {
+			throwableReentranceProtection.remove();
+		}
 	}
 	
 	private final static ThreadLocal<Boolean> throwableReentranceProtection = new ThreadLocal<>();
 	
 	@ExceptionHandler(Throwable.class)
 	public void Throwable(Throwable e, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+		if(checkReentrance(e))
+			return;
+		try {
+			request.getRequestDispatcher(ErrorPage.generateErrorURI(e, request.getHeader(HttpHeaders.REFERER))).forward(request, response);
+		}
+		finally {
+			throwableReentranceProtection.remove();
+		}
+	}
+
+	boolean checkReentrance(Throwable e) {
 		/* The new startup progress stuff is causing very strange things when there are 
 		 * certain startup errors. CPU will go 100% with multiple overflowing stacks. Protecting
 		 * against reentrance here seems to do the trick.
 		 */
 		if(Boolean.TRUE.equals(throwableReentranceProtection.get()))
-			return;
+			return true;
 		log.error("Captured error", e);
 		throwableReentranceProtection.set(true);
-		request.getRequestDispatcher(ErrorPage.generateErrorURI(e, request.getHeader(HttpHeaders.REFERER))).forward(request, response);
+		return false;
 	}
 	
 	@ExceptionHandler(Redirect.class)
 	public void Redirect(Redirect e, HttpServletResponse response) throws IOException {
+		if(checkReentrance(e))
+			return;
+		
 		if(log.isDebugEnabled()) {
 			log.debug("Redirecting to {}", e.getUri());
 		}
-		response.sendRedirect(e.getUri());	
+		
+		try {
+			response.sendRedirect(e.getUri());
+		}
+		finally {
+			throwableReentranceProtection.remove();
+		}	
 	}
 
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.GET)
