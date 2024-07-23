@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -603,26 +604,27 @@ public abstract class HtmlPage implements Page {
 
 	}
 	
-	private void showFeedback(Document document, String icon, String bundle, String i18n, String... classes) {
-		document.selectFirst("#feedback").appendChild(Html.div(classes)
+	private void showFeedback(Document document, String icon, String bundle, String i18n, Set<String> classes, Object... args) {
+		var feedback = document.selectFirst("#feedback");
+		feedback.appendChild(Html.div(classes.toArray(new String[0]))
 				.appendChild(Html.i("fa-solid", icon))
-				.appendChild(Html.i18n(bundle, i18n)));
+				.appendChild(Html.i18n(bundle, i18n, args)));
 	}
 	
-	protected void showError(Document document, String bundle, String i18n) {
-		showFeedback(document, "fa-square-exclamation", bundle, i18n, "alert", "alert-danger");
+	protected void showError(Document document, String bundle, String i18n, Object... args) {
+		showFeedback(document, "fa-square-exclamation", bundle, i18n, Set.of("alert", "alert-danger"), args);
 	}
 	
-	protected void showSuccess(Document document, String bundle, String i18n) {
-		showFeedback(document, "fa-thumbs-up", bundle, i18n, "alert", "alert-success");
+	protected void showSuccess(Document document, String bundle, String i18n, Object... args) {
+		showFeedback(document, "fa-thumbs-up", bundle, i18n, Set.of("alert", "alert-success"), args);
+	} 
+	
+	protected void showInfo(Document document, String bundle, String i18n, Object... args) {
+		showFeedback(document, "fa-square-info", bundle, i18n, Set.of("alert", "alert-info"), args);
 	}
 	
-	protected void showInfo(Document document, String bundle, String i18n) {
-		showFeedback(document, "fa-square-info", bundle, i18n, "alert", "alert-info");
-	}
-	
-	protected void showWarning(Document document, String bundle, String i18n) {
-		showFeedback(document, "fa-triangle-exclamation", bundle, i18n, "alert", "alert-warning");
+	protected void showWarning(Document document, String bundle, String i18n, Object... args) {
+		showFeedback(document, "fa-triangle-exclamation", bundle, i18n, Set.of("alert", "alert-warning"), args);
 	}
 	
 	public void addProcessor(PageExtension ext) {
