@@ -66,19 +66,11 @@ public class UserInterfaceController extends AuthenticatedController {
 			HttpServletResponse response,
 			Throwable e) throws IOException {
 
-		if(checkReentrance(e))
-			return;
-
-		try {
-			Feedback.error("userInterface", "unauthorized.text");
-			if(request.getRequestURI().startsWith("/app/ui/")) {
-				response.sendRedirect("/app/ui/login");
-			} else {
-				response.sendError(HttpStatus.UNAUTHORIZED.value());
-			}
-		}
-		finally {
-			throwableReentranceProtection.remove();
+		Feedback.error("userInterface", "unauthorized.text");
+		if(request.getRequestURI().startsWith("/app/ui/")) {
+			response.sendRedirect("/app/ui/login");
+		} else {
+			response.sendError(HttpStatus.UNAUTHORIZED.value());
 		}
 	}
 
@@ -87,19 +79,11 @@ public class UserInterfaceController extends AuthenticatedController {
 			HttpServletResponse response,
 			AccessDeniedException e) throws IOException {
 
-		if(checkReentrance(e))
-			return;
-
-		try {
-			Feedback.error("userInterface", "unauthorized.text");
-			if(request.getRequestURI().startsWith("/app/ui/")) {
-				response.sendRedirect("/app/ui/login");
-			} else {
-				response.sendError(HttpStatus.FORBIDDEN.value());
-			}
-		}
-		finally {
-			throwableReentranceProtection.remove();
+		Feedback.error("userInterface", "unauthorized.text");
+		if(request.getRequestURI().startsWith("/app/ui/")) {
+			response.sendRedirect("/app/ui/login");
+		} else {
+			response.sendError(HttpStatus.FORBIDDEN.value());
 		}
 	}
 	
@@ -122,6 +106,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		if(checkReentrance(e))
 			return;
 		try {
+			log.error("Captured error", e);
 			request.getRequestDispatcher(ErrorPage.generateErrorURI(e, request.getHeader(HttpHeaders.REFERER))).forward(request, response);
 		}
 		finally {
@@ -136,26 +121,18 @@ public class UserInterfaceController extends AuthenticatedController {
 		 */
 		if(Boolean.TRUE.equals(throwableReentranceProtection.get()))
 			return true;
-		log.error("Captured error", e);
 		throwableReentranceProtection.set(true);
 		return false;
 	}
 	
 	@ExceptionHandler(Redirect.class)
 	public void Redirect(Redirect e, HttpServletResponse response) throws IOException {
-		if(checkReentrance(e))
-			return;
 		
 		if(log.isDebugEnabled()) {
 			log.debug("Redirecting to {}", e.getUri());
 		}
 		
-		try {
-			response.sendRedirect(e.getUri());
-		}
-		finally {
-			throwableReentranceProtection.remove();
-		}	
+		response.sendRedirect(e.getUri());
 	}
 
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.GET)
