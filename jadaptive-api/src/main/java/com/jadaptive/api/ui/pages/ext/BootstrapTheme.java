@@ -32,7 +32,6 @@ public enum BootstrapTheme {
 	
 	public boolean isDark() {
 		switch(this) {
-		case DEFAULT:
 		case CYBORG:
 		case DARKLY:
 		case QUARTZ:
