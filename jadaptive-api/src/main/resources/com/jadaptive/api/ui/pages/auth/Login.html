@@ -6,45 +6,55 @@
 <main class="container my-auto">
       <div class="row justify-content-center">
           <div id="login-container" class="col-8 align-self-center">
-              <div class="card">
-                  <div class="card-header" id="authenticationHeader"></div>
-                  <div class="card-body">
+<!--               <div class="card"> -->
+<!--                   <div class="card-header" id="authenticationHeader"></div> -->
+<!--                   <div class="card-body"> -->
                   	<div id="feedback"></div>
+                  	  <div class="text-center">
+						 <h1><i id="icon" class="fa-2x fa-solid fa-user-lock"></i></h1>
+						 <h3><span id="authenticationHeader"></span></h3>
+					  </div>
                       <form id="loginForm" action="/app/ui/login" method="POST" autocomplete="off">
                           <div id="policyDiv" class="row mb-3 d-none">
                               <label class="col-md-4 form-label">&nbsp;</label>
-                              <div class="col-md-6">
+                              <div class="col-md-6 offset-md-3">
                                   <div id="policyMessage"></div>
                                </div>
                           </div> 
-                          <div class="row my-3">
-                              <label for="username" class="col-md-4 form-label text-md-end">Username</label>
-                              <div class="col-md-6">
+                          <div class="row my-3 text-center">
+                          		<div class="col-md-6 offset-md-3">
+                          		 <label for="username" class="form-label text-md-end">Username</label>
+                          		</div>
+                             
+                              <div class="col-md-6 offset-md-3">
                                   <input type="text" id="username" class="form-control" name="username" autocomplete="off" required autofocus>
                               </div>
                           </div>
-						  <div id="passwordDiv" class="row mb-3">
-                              <label for="username" class="col-md-4 form-label text-md-end">Password</label>
-                              <div class="col-md-6">
+						  <div id="passwordDiv" class="row mb-3 text-center">
+						  	<div class="col-md-6 offset-md-3">
+                              <label for="password" class="form-label text-md-end">Password</label>
+                             </div>
+                             
+                              <div class="col-md-6 offset-md-3">
                                   <input type="password" id="password" class="form-control" name="password" autocomplete="off" required autofocus>
                               </div>
                           </div>
-						  <div class="row mb-3">
-	                          <div class="col-md-6 offset-md-4">
+						  <div class="row mb-3 text-center">
+	                          <div class="col-md-6 offset-md-3">
 	                              <button type="submit" class="bg-dark btn btn-primary spinForm">
 	                                  <i class="fa-solid fa-right-to-bracket"></i> <span id="buttonName">Login</span>
 	                              </button>
 	                          </div>
                           </div>
-                           <div class="col-md-6 offset-md-4 mt-3">
+                           <div class="col-md-6 offset-md-3 mt-3 text-center">
                            	 <div id="actions"></div>
                           </div>
                         </form>
                   </div>
                  
               </div>
-          </div>
-      </div>
+<!--           </div> -->
+<!--       </div> -->
 </main>
 </div>
 <footer jad:id="footer"></footer>
