@@ -28,7 +28,7 @@ body {
 
 .dropdown-size {
 	max-height: 300px; 
-	overflow-y: scroll;
+	overflow-y: auto;
 }
 
 .jad-radio-input {
