@@ -6,15 +6,15 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.TableView;
 
-@ObjectDefinition(resourceKey = FileAttachment.RESOURCE_KEY)
-@TableView(defaultColumns = {"name", "contentType", "size", "hash", "provider.name" })
+@ObjectDefinition(resourceKey = FileAttachment.RESOURCE_KEY, defaultColumn = "filename")
+@TableView(defaultColumns = {"filename", "contentType", "size", "hash" })
 public class FileAttachment extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -2041494617246214405L;
 
 	public static final String RESOURCE_KEY = "fileAttachments";
 
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT, nameField = true)
 	String filename;
 
 	@ObjectField(type = FieldType.TEXT)
@@ -34,6 +34,9 @@ public class FileAttachment extends AbstractUUIDEntity {
 	
 	@ObjectField(type = FieldType.TEXT, hidden = true)
 	String formVariable;
+	
+	@ObjectField(type = FieldType.TEXT)
+	String attachedTo;
 	
 	@Override
 	public String getResourceKey() {
@@ -95,5 +98,12 @@ public class FileAttachment extends AbstractUUIDEntity {
 	public void setFormVariable(String formVariable) {
 		this.formVariable = formVariable;
 	}
-	
+
+	public String getAttachedTo() {
+		return attachedTo;
+	}
+
+	public void setAttachedTo(String attachedTo) {
+		this.attachedTo = attachedTo;
+	}
 }

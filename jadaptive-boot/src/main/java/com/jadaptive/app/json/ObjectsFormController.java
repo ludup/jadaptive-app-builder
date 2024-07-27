@@ -1,6 +1,7 @@
 package com.jadaptive.app.json;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.files.FileAttachment;
 import com.jadaptive.api.files.FileAttachmentService;
@@ -37,6 +40,9 @@ import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.AuthenticatedController;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.PermissionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.servlet.Request;
@@ -55,8 +61,8 @@ import com.jadaptive.utils.ParameterHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-//@Controller
-public class ObjectsFormController {
+@Controller
+public class ObjectsFormController extends AuthenticatedController {
 
 static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
@@ -74,6 +80,9 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	@Autowired
 	private FileAttachmentService fileService;
+	
+	@Autowired
+	private PermissionService permissionService; 
 	
 	@ExceptionHandler(AccessDeniedException.class)
 	public void handleException(HttpServletRequest request, 
@@ -524,6 +533,37 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		} catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/objects/{}/copy", resourceKey, e);
+			}
+			throw new ObjectException(e);
+		}
+	}
+	
+	
+	@RequestMapping(value="/app/api/objects/attachment/{resourceKey}/{uuid}/{filename}", method = RequestMethod.GET)
+	public void downloadAttachment(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey,
+			 @PathVariable String uuid, @PathVariable String filename) throws ObjectException, IOException {
+		
+		permissionService.assertRead(PermissionUtils.getReadPermission(resourceKey));
+		
+		try {
+			
+			FileAttachment att = fileService.getAttachment(uuid);
+			response.setStatus(HttpStatus.OK.value());
+			response.setContentLengthLong(att.getSize());
+			response.setContentType(att.getContentType());
+			response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", filename));
+			SessionUtils.runIoWithoutSessionTimeout(request, ()->{
+				try(InputStream in = fileService.getAttachmentContent(uuid)) {
+					IOUtils.copy(in, response.getOutputStream());
+				}
+			});
+		} 
+		catch(ObjectNotFoundException e) {
+			response.sendError(HttpStatus.NOT_FOUND.value());
+		}
+		catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/objects/attachment{}", resourceKey, e);
 			}
 			throw new ObjectException(e);
 		}

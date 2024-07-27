@@ -10,6 +10,7 @@ import org.apache.commons.fileupload2.core.FileItemInput;
 import org.apache.commons.fileupload2.core.FileItemInputIterator;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,11 +137,12 @@ public class ObjectUploadServlet extends HttpServlet {
 		        String value = IOUtils.toString(item.getInputStream(), "UTF-8");
 		        ParameterHelper.setValue(parameters, name, value);
 		    } else {
-		    	
-			    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName());
-		    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
-		    	ParameterHelper.setValue(parameters, item.getFieldName() + "_name", attachment.getFilename());
-		    	attachments.add(attachment);
+		    	if(StringUtils.isNotBlank(item.getName())) {
+				    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName());
+			    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
+			    	ParameterHelper.setValue(parameters, item.getFieldName() + "_name", attachment.getFilename());
+			    	attachments.add(attachment);
+		    	}
 		    }
 		    
 		}

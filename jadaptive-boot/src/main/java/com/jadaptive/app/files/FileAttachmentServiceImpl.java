@@ -87,4 +87,9 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 		return appService.getBean(LocalFileAttachmentStorage.class);
 	}
 
+	@Override
+	public FileAttachment getAttachment(String uuid) {
+		return attachmentDatabase.get(uuid, FileAttachment.class);
+	}
+
 }

@@ -1,5 +1,7 @@
 package com.jadaptive.plugins.dashboard;
 
+import java.io.IOException;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.ExtensionPoint;
@@ -19,7 +21,7 @@ public interface DashboardWidget extends ExtensionPoint {
 	
 	String getName();
 	
-	void renderWidget(Document document, Element element);
+	void renderWidget(Document document, Element element) throws IOException;
 
 	Integer weight();
 

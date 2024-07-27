@@ -76,6 +76,7 @@ import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.RadioFormInput;
 import com.jadaptive.api.ui.renderers.form.SetPasswordFormInput;
+import com.jadaptive.api.ui.renderers.form.SingleAttachmentInput;
 import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
@@ -774,14 +775,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case ATTACHMENT:
 		{
-			String uuid = getFieldValue(fieldView, obj);
-			FileFormInput render = new FileFormInput(currentTemplate.get(), fieldView);
-			render.renderInput(element, uuid);
-			if(StringUtils.isNotBlank(uuid)) {
-				AbstractObject file = obj.getChild(field);
-				element.appendChild(Html.span((String)file.getValue("name"))
-						.addClass("text-muted"));
-			}
+			SingleAttachmentInput render = new SingleAttachmentInput(currentTemplate.get(),fieldView);
+			AbstractObject att = obj.getChild(field);
+			render.renderInput(element, Objects.nonNull(att) ? att.getUuid() : "");
 			break;
 		}
 		case TEXT_AREA:

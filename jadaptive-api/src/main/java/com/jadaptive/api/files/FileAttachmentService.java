@@ -11,4 +11,6 @@ public interface FileAttachmentService {
 
 	InputStream getAttachmentContent(String uuid) throws IOException;
 
+	public FileAttachment getAttachment(String uuid);
+
 }

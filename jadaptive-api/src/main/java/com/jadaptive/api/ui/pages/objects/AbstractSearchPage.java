@@ -243,7 +243,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 	}
 	
-	private void generateSearchColumns(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField, Map<String,FieldTemplate> processedFields) {
+	private void generateSearchColumns(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField, Map<String,FieldTemplate> processedFields) throws IOException {
 		
 		for(FieldTemplate field : template.getFields()) {
 			if(processedFields.containsKey(field.getResourceKey())) {
@@ -278,7 +278,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 	}
 
-	private void addSearchValueField(ObjectTemplate template, String parentPrefix, FieldTemplate field, Document document, boolean initial) {
+	private void addSearchValueField(ObjectTemplate template, String parentPrefix, FieldTemplate field, Document document, boolean initial) throws IOException {
 		
 		if(Objects.isNull(field)) {
 			return;

@@ -540,4 +540,34 @@ $(function() {
 			// TODO other types
 		}
 	});
+	
+	$('.attachment-download').click(function(e) {
+		e.preventDefault();
+		window.location = $(this).data('url');
+	});
+	
+	$('.attachment-delete').click(function(e) {
+		e.preventDefault();
+		var target = $(this).data('target');
+		$('#' + target + '_previousUUID').attr('name', target + "_removedUUID");
+		$('#' + target + '_previousName').attr('name', target + "_removedName");
+		$('#' + target).removeClass("d-none");
+		$('#' + target + "Holder").addClass("d-none");
+		
+		$('#' + target + 'Holder')
+			.before('<div id="' + target + 'Restore" class="text-warning mt-2"><small class="me-2">' + $(this).data('filename') + ' ${userInterface:restoreAttachment.text}</small> <a href="#" class="attachment-restore" data-target="' + target + '"><i class="fa-solid fa-trash-undo"></i></a></div>');
+	
+		$('.attachment-restore').click(function(e) {
+			e.preventDefault();
+			var target = $(this).data('target');
+			$('#' + target).val("");
+			$('#' + target + "_previousUUID").attr('name', target + "_previousUUID");
+			$('#' + target + "_previousName").attr('name', target + "_previousName");
+			$('#' + target + "Restore").remove();
+			$('#' + target).addClass("d-none");
+			$('#' + target + "Holder").removeClass("d-none");
+		});
+	});
+	
+	
 });

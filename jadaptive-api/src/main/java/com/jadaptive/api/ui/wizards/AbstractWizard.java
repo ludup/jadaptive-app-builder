@@ -23,6 +23,7 @@ import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.UriRedirect;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	

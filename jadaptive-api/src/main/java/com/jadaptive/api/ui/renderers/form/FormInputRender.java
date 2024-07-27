@@ -1,5 +1,7 @@
 package com.jadaptive.api.ui.renderers.form;
 
+import java.io.IOException;
+
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
@@ -28,7 +30,7 @@ public abstract class FormInputRender extends FieldInputRender {
 		this.decorate = false;
 	}
 	
-	public final void renderInput(Element rootElement, String value, String... classes) {
+	public final void renderInput(Element rootElement, String value, String... classes) throws IOException {
 		
 		Element myElement;
 		
@@ -36,6 +38,9 @@ public abstract class FormInputRender extends FieldInputRender {
 				new Element("div").addClass(Utils.csv(" ", classes) + " row mb-3"));
 		
 		Element parent = myElement;
+		
+		beforeInput(myElement, value);
+		
 		if(decorate) {
 			
 			myElement.appendChild(parent = new Element("div")
@@ -48,8 +53,11 @@ public abstract class FormInputRender extends FieldInputRender {
 		}
 		
 		parent.appendChild(Html.div("input-group").appendChild(input = createInputElement(value)));
+		
+		afterInput(myElement, value);
+		
 		if(decorate) {
-			createHelpElement(parent, value);
+			createHelpElement(myElement, value);
 		}
 		
 		if(!disableIDAttribute) {
@@ -60,6 +68,14 @@ public abstract class FormInputRender extends FieldInputRender {
 
 	}
 	
+	protected void beforeInput(Element myElement, String value) {
+		
+	}
+
+	protected void afterInput(Element myElement, String value) throws IOException {
+		
+	}
+
 	protected void createHelpElement(Element parent, String value) {
 		
 		parent.appendChild(new Element("small")
