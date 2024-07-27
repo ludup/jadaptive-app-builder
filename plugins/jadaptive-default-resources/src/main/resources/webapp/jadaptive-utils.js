@@ -85,6 +85,7 @@ serializeForm: function(form) {
 	form.find('.jadaptive-select option').prop('selected', false);
     return results;
 },
+
 setCookie: function(name,value,days) {
     var expires = "";
     if (days) {
@@ -109,5 +110,52 @@ hasCookie: function(name) {
 },
 eraseCookie: function(name) {   
     document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+},
+processedFormData: function(form) {
+	var fdata = new FormData(form[0]);
+	
+	form.find('.processDepends').each(function() {
+		var dependsOn = $(this).data('depends-on');
+		var dependsValue = $(this).attr('data-depends-value');
+
+		var allInput = $('#' + dependsOn);
+		if (!allInput.length) {
+			allInput = $('input[name=' + dependsOn + ']');
+		}
+		var matchValues = dependsValue.split(',');
+		var matches = false;
+		allInput.each(function(i, input) {
+			input = $(input);
+			$.each(matchValues, function(i, obj) {
+
+				var expectedResult = !obj.startsWith("!");
+				if (!expectedResult) {
+					obj = obj.substring(1);
+				}
+				var value;
+				if (input.attr('type') === 'radio') {
+					value = input.is(':checked') ? input.val() : '';
+				}
+				else if (input.attr('type') === 'checkbox') {
+					value = input.is(':checked').toString();
+				} else {
+					value = input.val();
+				}
+				if (obj == value) {
+					matches = expectedResult;
+					return true;
+				}
+				return false;
+			});
+			if (matches) {
+				return true;
+			}
+		});
+		if (!matches) {
+			fdata.delete($(this).find('input').attr('name'));
+		}
+	});
+	
+	return fdata;
 }
 };

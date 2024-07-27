@@ -5,7 +5,10 @@
 		<div class="col-12 dropzone text-muted text-center p-3 my-3 dashed-border">
 			  <div class="dropzoneClick">
 			  	<i id="uploadIcon" class="fa-solid fa-cloud-upload-alt fa-5x p-1"></i>
-			    <p><small id="helpText">To upload multiple files drag and drop them here or click in the area to select a file from your computer.</small></p>
+			    <p>
+			    	<small jad:bundle="userInterface" jad:i18n="upload.multiple.text" id="helpText">Upload multiple ...</small>
+			    	<small class="d-none" jad:bundle="userInterface" jad:i18n="upload.single.text" id="singleHelpText">Upload single ...</small>
+			    </p>
 			  </div>
 			  
 			  <div id="uploadProgress">
@@ -37,7 +40,7 @@
 	    		<input class="file-input file-index d-none" type="file" name="file" multiple/>
 	    	</div>
 	    </div> 
-		<div class="row">
+		<div id="uploadRow" class="row">
 			<div class="col-12 text-end">
 				<button id="uploadButton" class="btn btn-primary"><i class="fa-solid fa-upload"></i>&nbsp;<span jad:bundle="default" jad:i18n="upload.name">Upload</span></button>
 			</div>

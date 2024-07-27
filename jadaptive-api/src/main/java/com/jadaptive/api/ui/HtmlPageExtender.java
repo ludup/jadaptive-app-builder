@@ -7,7 +7,7 @@ import org.pf4j.ExtensionPoint;
 
 public interface HtmlPageExtender extends ExtensionPoint {
 
-	boolean isExtending(Page page);
+	boolean isExtending(Page page, String uri);
 
 	default void processEnd(Document doc, String uri, Page page) throws FileNotFoundException { };
 

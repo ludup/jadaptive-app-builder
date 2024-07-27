@@ -210,7 +210,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				
 				IconWithDropdownInput dropdown = new IconWithDropdownInput("extendObject", "default").up().icon("fa-code");
 				row.appendChild(Html.div("col-12 text-end")
-						.appendChild(dropdown.renderInput()));
+						.appendChild(dropdown.renderInput().addClass("mb-3")));
 				List<I18nOption> options = new ArrayList<>();
 				for(ExtensionRegistration extension : extensions) {
 					options.add(new I18nOption(extension.bundle(), 

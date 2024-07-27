@@ -106,5 +106,7 @@ public interface AuthenticationService {
 	void changePolicy(AuthenticationState state, AuthenticationPolicy assigned, boolean verifiedPassword);
 
 	void assertLoginThesholds();
+
+	Class<? extends Page> getCurrentPage();
 	
 }

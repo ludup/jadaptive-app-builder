@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.servlet.Request;
@@ -27,6 +28,9 @@ public class Footer extends AbstractPageExtension {
 	
 	private static final Logger log = LoggerFactory.getLogger(Footer.class);
 	
+	@Autowired
+	private BootstrapThemeResolver themeResolver;
+	
 	@Override
 	public void process(Document document, Element element, Page page) throws IOException {
 
@@ -35,7 +39,7 @@ public class Footer extends AbstractPageExtension {
 			log.debug("Bootstrap css is {}", bootstrap);
 		}
 		if(Objects.nonNull(bootstrap)) {
-			BootstrapTheme current = getThemeFromCookie(BootstrapTheme.DEFAULT);
+			BootstrapTheme current = themeResolver.getTheme();
 			if(log.isDebugEnabled()) {
 				log.debug("Bootstrap theme is {}", current);
 			}
@@ -53,8 +57,9 @@ public class Footer extends AbstractPageExtension {
 				IconWithDropdownInput input = new IconWithDropdownInput("theme", current.name().toLowerCase());
 				input.up().dark();
 				footer.appendChild(new Element("div")
-						.addClass("float-end me-3")
-						.appendChild(new Element("div").addClass("col-3 ms-3").appendChild(input.renderInput())));
+						.appendChild(new Element("div")
+							.addClass("ms-3")
+							.appendChild(input.renderInput())));
 				input.renderValues(BootstrapTheme.values(), current.name(), false, true);
 			}
 		}

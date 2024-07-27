@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<body>
+<div class="wrapper">
+<header jad:id="header"></header>
+<main class="container my-auto">
+      <div class="row justify-content-center">
+          <div id="login-container" class="col-8 align-self-center">
+              <div class="card">
+                  <div class="card-header" id="authenticationHeader">
+                  	<span jad:bundle="userInterface" jad:i18n="serverStatus.text"></span>
+                  </div>
+                  <div class="card-body">
+                  		<div class="row text-center">
+                  			<div class="col-12 my-3">
+                  				<i id="spinner" class="fa-solid fa-compass fa-spin-reverse fa-spin fa-4x"></i>
+                  			</div>
+	                  		<div class="col-12 my-3">
+	                  			<p jad:bundle="userInterface" jad:i18n="startup.text"></p>
+	                  		</div>
+                  		</div>
+                 </div>
+              </div>
+          </div>
+      </div>
+</main>
+</div>
+<footer jad:id="footer"></footer>
+</body>
+</html>

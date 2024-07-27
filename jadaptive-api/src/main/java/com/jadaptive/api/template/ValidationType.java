@@ -21,6 +21,7 @@ public enum ValidationType {
 	PORT,
 	TIME_24,
 	EMAIL, 
-	BYTESIZE;
+	BYTESIZE,
+	DOMAIN;
 
 }

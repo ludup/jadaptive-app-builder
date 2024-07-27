@@ -48,7 +48,7 @@ var Wizard = (function () {
 		           cache: false,
 		           contentType: false,
 		    	   processData: false,
-		           data: new FormData($("form")[0]),
+		           data: JadaptiveUtils.processedFormData($("form")),
 		           dataType: 'json',
 		           success: function(data)
 		           {

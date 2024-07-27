@@ -66,7 +66,7 @@ public class UserInterfaceController extends AuthenticatedController {
 	public void handleException(HttpServletRequest request,
 			HttpServletResponse response,
 			Throwable e) throws IOException {
-		
+
 		Feedback.error("userInterface", "unauthorized.text");
 		if(request.getRequestURI().startsWith("/app/ui/")) {
 			response.sendRedirect("/app/ui/login");
@@ -79,7 +79,7 @@ public class UserInterfaceController extends AuthenticatedController {
 	public void handleException(HttpServletRequest request, 
 			HttpServletResponse response,
 			AccessDeniedException e) throws IOException {
-	
+
 		Feedback.error("userInterface", "unauthorized.text");
 		if(request.getRequestURI().startsWith("/app/ui/")) {
 			response.sendRedirect("/app/ui/login");
@@ -90,21 +90,50 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@ExceptionHandler(FileNotFoundException.class)
 	public void FileNotFoundException(FileNotFoundException e, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-		request.getRequestDispatcher(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER))).forward(request, response);
+		if(checkReentrance(e))
+			return;
+		try {
+			request.getRequestDispatcher(MessagePage.generatePageNotFoundURI(Request.get().getHeader(HttpHeaders.REFERER))).forward(request, response);
+		}
+		finally {
+			throwableReentranceProtection.remove();
+		}
 	}
+	
+	private final static ThreadLocal<Boolean> throwableReentranceProtection = new ThreadLocal<>();
 	
 	@ExceptionHandler(Throwable.class)
 	public void Throwable(Throwable e, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-		log.error("Captured error", e);
-		request.getRequestDispatcher(ErrorPage.generateErrorURI(e, request.getHeader(HttpHeaders.REFERER))).forward(request, response);
+		if(checkReentrance(e))
+			return;
+		try {
+			log.error("Captured error", e);
+			request.getRequestDispatcher(ErrorPage.generateErrorURI(e, request.getHeader(HttpHeaders.REFERER))).forward(request, response);
+		}
+		finally {
+			throwableReentranceProtection.remove();
+		}
+	}
+
+	boolean checkReentrance(Throwable e) {
+		/* The new startup progress stuff is causing very strange things when there are 
+		 * certain startup errors. CPU will go 100% with multiple overflowing stacks. Protecting
+		 * against reentrance here seems to do the trick.
+		 */
+		if(Boolean.TRUE.equals(throwableReentranceProtection.get()))
+			return true;
+		throwableReentranceProtection.set(true);
+		return false;
 	}
 	
 	@ExceptionHandler(Redirect.class)
 	public void Redirect(Redirect e, HttpServletResponse response) throws IOException {
+		
 		if(log.isDebugEnabled()) {
 			log.debug("Redirecting to {}", e.getUri());
 		}
-		response.sendRedirect(e.getUri());	
+		
+		response.sendRedirect(e.getUri());
 	}
 
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.GET)
@@ -135,7 +164,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 		try {
 			Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".css", "")));
-			URL url = page.getClass().getResource(page.getCssResource());
+			URL url = page.getResourceClass().getResource(page.getCssResource());
 			response.setContentType("text/css");
 			response.setStatus(HttpStatus.OK.value());
 			try(InputStream in = url.openStream()) {
@@ -166,8 +195,8 @@ public class UserInterfaceController extends AuthenticatedController {
 		try {
 			try {
 				Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".js", "")));
-				URL url = page.getClass().getResource(page.getJsResource());
-				response.setContentType("text/javascript");
+				URL url = page.getResourceClass().getResource(page.getJsResource());
+				response.setContentType("application/javascript");
 				response.setStatus(HttpStatus.OK.value());
 				
 				try(InputStream in = ReaderInputStream.builder().setCharset("UTF-8")
@@ -177,8 +206,8 @@ public class UserInterfaceController extends AuthenticatedController {
 			} catch(FileNotFoundException e) {
 				try {
 					PageExtension page = pageCache.resolveExtension(name.replace(".js", ""));
-					URL url = page.getClass().getResource(page.getJsResource());
-					response.setContentType("text/javascript");
+					URL url = page.getResourceClass().getResource(page.getJsResource());
+					response.setContentType("application/javascript");
 					response.setStatus(HttpStatus.OK.value());
 					try(InputStream in = ReaderInputStream.builder().setCharset("UTF-8")
 							.setReader(new I18NConvertingReader(new InputStreamReader(url.openStream()), i18n, name)).get()) {

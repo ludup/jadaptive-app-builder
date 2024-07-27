@@ -17,4 +17,6 @@ public interface AuthenticationStep extends ExtensionPoint {
 	String getIcon();
 	
 	boolean isReady();
+
+	default String getIconGroup() { return "fa-solid"; };
 }

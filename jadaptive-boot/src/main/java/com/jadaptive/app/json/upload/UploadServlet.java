@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
@@ -39,16 +40,19 @@ public class UploadServlet extends HttpServlet {
 	static Logger log = LoggerFactory.getLogger(UploadServlet.class);
 	
 	@Autowired
-	SessionUtils sessionUtils;
+	private SessionUtils sessionUtils;
 	
 	@Autowired
-	PermissionService permissionService; 
+	private PermissionService permissionService; 
 	
 	@Autowired
-	UserService userService; 
+	private UserService userService; 
 	
 	@Autowired
-	PluginManager pluginManager;
+	private PluginManager pluginManager; 
+	
+	@Autowired
+	private ApplicationService applicationService;
 	
 	Map<String,UploadHandler> uploadHandlers = new HashMap<>();
 	
@@ -156,6 +160,16 @@ public class UploadServlet extends HttpServlet {
 					handler = h;
 					uploadHandlers.put(handlerName, h);
 					break;
+				}
+			}
+			
+			if(handler == null) {
+				for(var h : applicationService.getBeans(UploadHandler.class)) { 
+					if(h.getURIName().equalsIgnoreCase(handlerName)) {
+						handler = h;
+						uploadHandlers.put(handlerName, h);
+						break;
+					}
 				}
 			}
 		}

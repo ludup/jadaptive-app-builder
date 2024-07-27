@@ -56,7 +56,7 @@ public class IconWithDropdownInput extends InputRender {
 	@Override
 	public Element renderInput() {
 
-		return new Element("div").attr("class", "row mb-3")
+		return new Element("div").attr("class", "row")
 				.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", resourceKey))
 						.addClass("position-relative dropdown" + (up ? " dropup" : ""))

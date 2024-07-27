@@ -43,6 +43,10 @@ public class Feedback {
 	public boolean isRawText() {
 		return rawText;
 	}
+
+	public static boolean isSet() {
+		return Request.get().getSession().getAttribute("feedback") != null;
+	}
 	
 	public static void success(String bundle, String i18n, Object...args) {
 		Request.get().getSession().setAttribute("feedback", new SuccessFeedback(bundle, i18n, args));

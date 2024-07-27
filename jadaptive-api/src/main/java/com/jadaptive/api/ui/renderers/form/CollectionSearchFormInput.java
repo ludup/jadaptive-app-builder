@@ -82,12 +82,14 @@ public class CollectionSearchFormInput {
 								.addClass("dropdown-menu dropdown-size")
 								.attr("aria-labelledby", String.format("%sDropdown", resourceKey))));
 			
+			Element table;
+			
 			div.appendChild(new Element("div")
 						.addClass("row mt-3")
 						.appendChild(new Element("div")
 								.attr("id", formVariable)
 								.addClass("col-md-12")
-								.appendChild(new Element("table")
+								.appendChild(table = new Element("table")
 										.addClass("w-100 collectionSearchTarget table table-sm table-striped")
 									.appendChild(new Element("thead")
 											.appendChild(new Element("tr")
@@ -139,6 +141,9 @@ public class CollectionSearchFormInput {
 								.attr("jad:i18n", value.getName());
 				}
 			}
+		}
+		else {
+			table.addClass("d-none");
 		}
 	}
 

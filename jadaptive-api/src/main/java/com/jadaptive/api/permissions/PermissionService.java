@@ -2,6 +2,7 @@ package com.jadaptive.api.permissions;
 
 import java.io.Closeable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
@@ -16,6 +17,7 @@ public interface PermissionService {
 
 	public static final String READ = "read";
 	public static final String READ_WRITE = "readWrite";
+	public static final Set<String> NO_PERMISSIONS = Collections.emptySet();
 	
 	void assertAnyPermission(String... permissions) throws AccessDeniedException;
 
@@ -90,5 +92,8 @@ public interface PermissionService {
 		@Override
 		void close();
 	}
+
+	void assertAnyResolvedPermission(Set<String> resolvedPermissions, String... permissions)
+			throws AccessDeniedException;
 
 }

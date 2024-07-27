@@ -6,15 +6,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.avatar.Avatar;
+import com.jadaptive.api.avatar.AvatarRequest;
+import com.jadaptive.api.avatar.AvatarService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
@@ -25,6 +31,7 @@ import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.ChangePasswordEvent;
 import com.jadaptive.api.user.FakeUser;
@@ -49,6 +56,9 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	
 	@Autowired
 	private EventService eventService; 
+	
+	@Autowired
+	private AvatarService avatarService; 
 	
 	private Map<Class<? extends User>,UserDatabase> userDatabases = new HashMap<>();
 	
@@ -308,4 +318,40 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		return userRepository.list(User.class, SearchField.eq("resourceKey", userTemplate));
 	}
 
+	@Override
+	public Optional<Avatar> find(AvatarRequest request) {
+		try {
+			var user = request.user().orElseGet(() -> 
+				request.id().map(id -> getUserByUUID(id)).orElseGet(() ->
+					request.id().map(id -> getUser(id)).orElseThrow(() -> new IllegalArgumentException("Not enough detail to lookup user."))
+				)
+			);
+			if(StringUtils.isNotBlank(user.getAvatar())) {
+				return Optional.of(() -> Html.img(user.getAvatar()).addClass("user-avatar-image"));
+			}
+		}
+		catch(ObjectNotFoundException | IllegalArgumentException iae) {
+		}
+		return Optional.empty();
+	}
+
+
+	@Override
+	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
+		switch(column) {
+		case "avatar":
+		{
+			var user = getObjectByUUID(obj.getUuid());
+
+			var el = new Element("div");
+			el.addClass("users-user-avatar");
+			el.appendChild(avatarService.avatar(new AvatarRequest.Builder().
+					forUser(user).
+					build()).render());
+			return el;
+		}
+		default:
+			throw new UnsupportedOperationException(column + " is not a known dynamic column!");
+		}			
+	}
 }

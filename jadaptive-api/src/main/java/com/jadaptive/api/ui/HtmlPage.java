@@ -1,5 +1,7 @@
 package com.jadaptive.api.ui;
 
+import static com.jadaptive.utils.Instrumentation.timed;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
@@ -49,7 +52,6 @@ public abstract class HtmlPage implements Page {
 	
 	private ThreadLocal<List<PageExtension>> extensions = new ThreadLocal<>();
 	
-	private Collection<HtmlPageExtender> extenders = null;
 	protected String resourcePath;
 	
 	static ThreadLocal<Document> currentDocument = new ThreadLocal<>();
@@ -83,9 +85,11 @@ public abstract class HtmlPage implements Page {
 	}
 	
 	public final void created() throws FileNotFoundException {
-	
-		extenders = applicationService.getBean(UserInterfaceService.class).getExtenders(this);
 		onCreated();
+	}
+	
+	protected Collection<HtmlPageExtender> extenders() {
+		return applicationService.getBean(UserInterfaceService.class).getExtenders(this);
 	}
 	
 	protected boolean isCacheable() { return false; }
@@ -115,37 +119,64 @@ public abstract class HtmlPage implements Page {
 		
 		try {
 			
-			beforeProcess(uri, Request.get(), Request.response());
-			
-			processPageDependencies(document);
-			
+			try(var timed = timed("HtmlPage.generateHTMLDocument#beforeProcess(" + uri + ")")) {
+				beforeProcess(uri, Request.get(), Request.response());
+			}
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#processPageDependencies(" + uri + ")")) {
+				processPageDependencies(document);
+			}
+
+			var extenders = extenders();
 			if(Objects.nonNull(extenders)) {
-				for(HtmlPageExtender extender : extenders) {
-					extender.processStart(document, uri, this);
+				try(var timed = timed("HtmlPage.generateHTMLDocument#extender.processStart(" + uri + ")")) {
+					for(HtmlPageExtender extender : extenders) {
+						try(var timed2 = timed(extender.getClass().getName())) {
+							extender.processStart(document, uri, this);
+						}
+					}
 				}
 			}
-			
-			generateContent(document);
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#generateContent(" + uri + ")")) {
+				generateContent(document);
+			}
 			
 			if(Objects.nonNull(extenders)) {
-				for(HtmlPageExtender extender : extenders) {
-					extender.generateContent(document, this);
+				try(var timed = timed("HtmlPage.generateHTMLDocument#extender.generateContent(" + uri + ")")) {
+					for(HtmlPageExtender extender : extenders) {
+						try(var timed2 = timed(extender.getClass().getName())) {
+							extender.generateContent(document, this);
+						}
+					}
 				}
 			}
 			
 			if(Request.isAvailable()) {
 				injectFeedback(document, Request.get());
 			}
-			processPageExtensions(uri, document);
-			documentComplete(document);
-			
-			if(Objects.nonNull(extenders)) {
-				for(HtmlPageExtender extender : extenders) {
-					extender.processEnd(document, uri, this);
-				}
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#processPageExtensions(" + uri + ")")) {
+				processPageExtensions(uri, document);
+			}
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#documentComplete(" + uri + ")")) {
+				documentComplete(document);
 			}
 			
-			afterProcess(uri, Request.get(), Request.response());
+			if(Objects.nonNull(extenders)) {
+				try(var timed = timed("HtmlPage.generateHTMLDocument#extender.processEnd(" + uri + ")")) {
+					for(HtmlPageExtender extender : extenders) {
+						try(var timed2 = timed(extender.getClass().getName())) {
+							extender.processEnd(document, uri, this);
+						}
+					}
+				}
+			}
+
+			try(var timed = timed("HtmlPage.generateHTMLDocument#afterProcess(" + uri + ")")) {
+				afterProcess(uri, Request.get(), Request.response());
+			}
 		
 		} finally {
 			currentDocument.remove();
@@ -157,12 +188,22 @@ public abstract class HtmlPage implements Page {
 	
 	private void processPageExtensions(String uri, Document document) throws IOException {
 		
-		processDocumentExtensions(document);
-		
-		resolveScript(getUri(), document, this);
-		resolveStylesheet(getUri(), document, this);
 
-		processPageProcessors(document);
+		try(var timed = timed("HtmlPage.processPageExtensions#processDocumentExtensions(" + uri + ")")) {
+			processDocumentExtensions(document);
+		}
+
+		try(var timed = timed("HtmlPage.processPageExtensions#resolveScript(" + uri + ")")) {
+			resolveScript(getUri(), document, this);
+		}
+
+		try(var timed = timed("HtmlPage.processPageExtensions#resolveStylesheet(" + uri + ")")) {
+			resolveStylesheet(getUri(), document, this);
+		}
+
+		try(var timed = timed("HtmlPage.processPageExtensions#processPageProcessors(" + uri + ")")) {
+			processPageProcessors(document);
+		}
 	}
 
 	private void processPageDependencies(Document document) throws IOException {
@@ -200,6 +241,7 @@ public abstract class HtmlPage implements Page {
 			
 			processPageDependencies(doc);
 			
+			var extenders = extenders();
 			if(Objects.nonNull(extenders)) {
 				for(HtmlPageExtender extender : extenders) {
 					extender.processStart(doc, uri, this);
@@ -347,7 +389,9 @@ public abstract class HtmlPage implements Page {
 	private void processDocumentExtensions(Document document) throws IOException {
 		Elements embeddedElement = document.getElementsByAttribute("jad:id");
 		for(Element embedded : embeddedElement) {
-			processEmbeddedExtensions(document, embedded);
+			try(var timed = timed("HtmlPage.processDocumentExtensions#embedded(" + embedded.attr("jad:id") + ")")) {
+				processEmbeddedExtensions(document, embedded);
+			}
 		}
 		
 		afterDocumentExtensions(document);
@@ -458,7 +502,7 @@ public abstract class HtmlPage implements Page {
 	}
 
 	protected void resolveStylesheet(String uri, Document document, PageResources ext) {
-		URL url = ext.getClass().getResource(ext.getCssResource());
+		URL url = ext.getResourceClass().getResource(ext.getCssResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendStylesheet(document, "/app/css/" + uri + ".css");
 		} else {
@@ -474,7 +518,7 @@ public abstract class HtmlPage implements Page {
 	}
 
 	protected void resolveScript(String uri, Document document, PageResources ext) {
-		URL url = ext.getClass().getResource(ext.getJsResource());
+		URL url = ext.getResourceClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
 			PageHelper.appendBodyScript(document, "/app/js/" + uri + ".js");
 		} else {
@@ -560,26 +604,27 @@ public abstract class HtmlPage implements Page {
 
 	}
 	
-	private void showFeedback(Document document, String icon, String bundle, String i18n, String... classes) {
-		document.selectFirst("#feedback").appendChild(Html.div(classes)
+	private void showFeedback(Document document, String icon, String bundle, String i18n, Set<String> classes, Object... args) {
+		var feedback = document.selectFirst("#feedback");
+		feedback.appendChild(Html.div(classes.toArray(new String[0]))
 				.appendChild(Html.i("fa-solid", icon))
-				.appendChild(Html.i18n(bundle, i18n)));
+				.appendChild(Html.i18n(bundle, i18n, args)));
 	}
 	
-	protected void showError(Document document, String bundle, String i18n) {
-		showFeedback(document, "fa-square-exclamation", bundle, i18n, "alert", "alert-danger");
+	protected void showError(Document document, String bundle, String i18n, Object... args) {
+		showFeedback(document, "fa-square-exclamation", bundle, i18n, Set.of("alert", "alert-danger"), args);
 	}
 	
-	protected void showSuccess(Document document, String bundle, String i18n) {
-		showFeedback(document, "fa-thumbs-up", bundle, i18n, "alert", "alert-success");
+	protected void showSuccess(Document document, String bundle, String i18n, Object... args) {
+		showFeedback(document, "fa-thumbs-up", bundle, i18n, Set.of("alert", "alert-success"), args);
+	} 
+	
+	protected void showInfo(Document document, String bundle, String i18n, Object... args) {
+		showFeedback(document, "fa-square-info", bundle, i18n, Set.of("alert", "alert-info"), args);
 	}
 	
-	protected void showInfo(Document document, String bundle, String i18n) {
-		showFeedback(document, "fa-square-info", bundle, i18n, "alert", "alert-info");
-	}
-	
-	protected void showWarning(Document document, String bundle, String i18n) {
-		showFeedback(document, "fa-triangle-exclamation", bundle, i18n, "alert", "alert-warning");
+	protected void showWarning(Document document, String bundle, String i18n, Object... args) {
+		showFeedback(document, "fa-triangle-exclamation", bundle, i18n, Set.of("alert", "alert-warning"), args);
 	}
 	
 	public void addProcessor(PageExtension ext) {

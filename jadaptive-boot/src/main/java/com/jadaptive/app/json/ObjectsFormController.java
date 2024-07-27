@@ -185,6 +185,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			ObjectTemplate template = templateService.get(resourceKey);
 			request.getSession().removeAttribute(resourceKey);
 			
+
 			DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
 			return new RequestStatusImpl(true);
 		}  catch(ValidationException ex) { 

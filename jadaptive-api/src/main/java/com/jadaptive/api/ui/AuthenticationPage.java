@@ -20,6 +20,7 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
 import com.jadaptive.api.user.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -87,17 +88,42 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		if(isUndecorated(req.getSession())) {
 			try {
 				var cardBody = doc.getElementsByClass("card-body").first();
-				var loginContainer = doc.getElementById("login-container");
-				var par = loginContainer.parent();
-				loginContainer.remove();
-				cardBody.children().forEach(par::appendChild);
-				doc.getElementsByTag("footer").forEach(e -> e.remove());
-				doc.getElementsByTag("header").forEach(e -> e.remove());
+				if(cardBody != null) {
+					var loginContainer = Objects.requireNonNull(doc.getElementById("login-container"));
+					var par =  Objects.requireNonNull(loginContainer.parent());
+					loginContainer.remove();
+					cardBody.children().forEach(par::appendChild);
+					doc.getElementsByTag("footer").forEach(e -> e.remove());
+					doc.getElementsByTag("header").forEach(e -> e.remove());
+				}
 			}
 			catch(Exception e) {
-				log.warn(MessageFormat.format("The session requested an undecorated login, but {0} does not support it.", getClass().getName()));
+				log.warn(MessageFormat.format("The session requested an undecorated login, but {0} does not support it.", getClass().getName()), e);
 			}
 			
+		}
+		
+		Element actions = doc.selectFirst("#actions");
+		if(Objects.nonNull(actions)) {
+			AuthenticationState state = authenticationService.getCurrentState();
+			if(state.canReset()) {
+				actions.appendChild(Html.a("/app/api/reset-login")
+						.addClass("text-decoration-none d-block")
+						.appendChild(new Element("sup")
+								.appendChild(Html.i18n("userInterface", "reset.text"))));
+				
+//				<a id="cancel" class="" href="/app/ui/login"><sup><span jad:bundle="userInterface" jad:i18n="cancel.text">Cancel</span></sup></a>	      
+			}
+			
+			if(state.isRequiredAuthenticationComplete()
+					&& !state.isOptionalComplete()
+					&& state.getOptionalAvailable() > 1
+					&& !OptionalAuthentication.class.equals(authenticationService.getCurrentPage())) {
+				actions.appendChild(Html.a("/app/api/change-auth")
+						.addClass("text-decoration-none d-block")
+						.appendChild(new Element("sup")
+								.appendChild(Html.i18n("userInterface", "changeAuthentication.text"))));
+			}
 		}
 		
 		Element form = doc.selectFirst("form");
@@ -154,7 +180,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 		authenticationService.reportAuthenticationFailure(state, this);
 		
-		throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentState().getCurrentPage()));
+		throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentPage()));
 	}
 
 	@Override

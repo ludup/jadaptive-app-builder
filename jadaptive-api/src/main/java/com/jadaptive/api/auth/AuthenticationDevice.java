@@ -8,7 +8,7 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.TableView;
 
-@ObjectDefinition(resourceKey = AuthenticationDevice.RESOURCE_KEY, scope = ObjectScope.PERSONAL, creatable = true, updatable = false, deletable = true)
+@ObjectDefinition(resourceKey = AuthenticationDevice.RESOURCE_KEY, scope = ObjectScope.PERSONAL, creatable = true, updatable = false, deletable = true, defaultColumn = "name")
 @TableView( defaultColumns = {"name", "device.type", "lastModified"}, otherColumns = { @DynamicColumn(resourceKey = "device.type", service = AuthenticationDeviceService.class)})
 public abstract class AuthenticationDevice extends PersonalUUIDEntity {
 
@@ -16,7 +16,7 @@ public abstract class AuthenticationDevice extends PersonalUUIDEntity {
 	
 	private static final long serialVersionUID = -5802081948452215574L;
 	
-	@ObjectField(type = FieldType.TEXT, nameField = true)
+	@ObjectField(type = FieldType.TEXT, nameField = true, searchable = true)
 	protected String name;
 
 	public String getName() {

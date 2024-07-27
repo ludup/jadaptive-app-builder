@@ -138,6 +138,7 @@ $(function() {
 		
 		if(source.val()!=='') {
 			var select = source.closest(".collectionTextInput").find('table');
+			$(select).removeClass('d-none');
 			var name = source.closest('.collectionTextInput').data('resourcekey');
 			
 			select.append('<tr><input type="hidden" name="' + name + '" value="' + source.val() + '"><td>' + source.val() + '</td><td>' +
@@ -158,6 +159,7 @@ $(function() {
 			
 			if($(this).val()!=='') {
 				var select = $(this).closest(".collectionTextInput").find('table');
+				$(select).removeClass('d-none');
 				var name = $(this).closest('.collectionTextInput').data('resourcekey');
 				
 				select.append('<tr><input type="hidden" name="' + name + '" value="' + $(this).val() + '"><td>' + $(this).val() + '</td><td>' +
@@ -219,6 +221,7 @@ $(function() {
 		var uuid = $(this).data('resourcekey');
 		var name = $(this).text();
 		var select = $(this).closest(".collectionSearchInput").find('table');
+		$(select).removeClass('d-none');
 		var exists = false;
 		select.find('tr').each(function(idx, obj) { 
 			var thisUUID = $(obj).find('input').first().attr('value');
@@ -568,6 +571,12 @@ $(function() {
 			$('#' + target + "Holder").removeClass("d-none");
 		});
 	});
-	
-	
+
+	/* All because we don't allow unsafe-inline styles */
+	$('div.auto-progress-bar').each(function(idx) {
+		var val = $(this).attr('aria-valuenow');
+		var max = $(this).attr('aria-valuemax');
+		var pc = parseInt((val / max) * 100);
+		$(this).width(pc + '%');
+	});
 });

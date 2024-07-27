@@ -422,6 +422,25 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
+	public void assertAnyResolvedPermission(Set<String> resolvedPermissions, String... permissions) throws AccessDeniedException {
+		
+		
+		Set<String> testPermissions = new HashSet<>(Arrays.asList(permissions));
+
+		testPermissions.retainAll(resolvedPermissions);
+		
+		if(!testPermissions.isEmpty()) {
+			return;
+		}
+		
+		if(log.isWarnEnabled()) {
+			log.debug("User denied permission from permission set {}", 
+					StringUtils.defaultIfBlank(Utils.csv(resolvedPermissions), "<empty>"));
+		}
+		throw new AccessDeniedException();
+	}
+	
+	@Override
 	public void assertAllPermission(String... permissions) throws AccessDeniedException {
 		
 		User user = getCurrentUser();

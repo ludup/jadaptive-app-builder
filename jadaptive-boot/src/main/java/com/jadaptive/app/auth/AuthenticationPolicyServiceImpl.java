@@ -103,10 +103,26 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 			results = resolver.resolveUserPolicy(user, results);
 		}
 		
-		if(results.isEmpty()) {
-			if(permissionService.isAdministrator(user)) {
+		if(permissionService.isAdministrator(user)) {
+			
+			if(log.isInfoEnabled()) {
+				log.info("Administrator has multiple policies. Looking for a specific Administration policy first");
+			}
+			for(AuthenticationPolicy policy : results) {
+				if(policy.getRoles().contains(roleService.getAdministrationRole())) {
+					return policy;
+				}
+			}
+			
+			if(results.isEmpty()) {
+
+				if(log.isInfoEnabled()) {
+					log.info("Administrator not in any policy so returning default");
+				}
 				return getDefaultPolicy(policyClz);
 			}
+		}
+		if(results.isEmpty()) {
 			return null;
 		}
 		
@@ -157,9 +173,12 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 			 */
 			authenticationService.validateModules(policy);
 			if(Request.isAvailable() && policy instanceof UserLoginAuthenticationPolicy) {
-				if(Objects.isNull(getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getClass(), policy))) {
+				AuthenticationPolicy assigned = getAssignedPolicy(getCurrentUser(), Request.getRemoteAddress(), policy.getClass(), policy);
+				if(Objects.isNull(assigned)) {
 					throw new IllegalStateException("The policy is invalid because it would lock the current user out from this location");
 				}
+				
+				
 			}
 		}
 	}
@@ -175,7 +194,8 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		if(!clz.equals(UserLoginAuthenticationPolicy.class)) {
 			return getWeightedPolicy(clz);
 		} else {
-			return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true));
+			return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true),
+					SearchField.eq("resourceKey", UserLoginAuthenticationPolicy.RESOURCE_KEY));
 		}
 		
 	}

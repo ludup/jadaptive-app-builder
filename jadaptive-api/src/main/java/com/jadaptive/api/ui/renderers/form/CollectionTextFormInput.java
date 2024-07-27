@@ -25,7 +25,8 @@ public class CollectionTextFormInput {
 			Collection<String> selectedValues, boolean readOnly) {
 
 		Element div;
-		rootElement.appendChild(div = new Element("div").addClass("row collectionTextInput")
+		rootElement.removeClass("mb-3");
+		rootElement.appendChild(div = new Element("div").addClass("row collectionTextInput mb-3")
 				.attr("data-resourcekey", field.getResourceKey())
 				.appendChild(input = new Element("div")
 						.addClass("col-12")
@@ -38,7 +39,7 @@ public class CollectionTextFormInput {
 		if(!readOnly) {
 				input.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", field.getResourceKey()))
-						.addClass("input-group position-relative dropdown mb-3")
+						.addClass("input-group position-relative dropdown")
 					.appendChild(input = new Element("input")
 							.attr("id", String.format("%sText", field.getResourceKey()))
 							.addClass("form-control collectionTextInputText")
@@ -54,15 +55,16 @@ public class CollectionTextFormInput {
 		}
 		
 		Element tr;
+		Element table;
 		
 		div.appendChild(new Element("div")
 						.addClass("row")
 					.appendChild(new Element("div")
 							.attr("id", field.getFormVariable())
 							.addClass("col-md-12")
-							.appendChild(new Element("table")
+							.appendChild(table = new Element("table")
 									.addClass("w-100 collectionSearchTarget table table-sm table-striped")
-								.appendChild(new Element("thead")
+									.appendChild(new Element("thead")
 										.appendChild(tr = new Element("tr")
 												.appendChild(new Element("td")
 														.attr("jad:bundle","default")
@@ -82,6 +84,9 @@ public class CollectionTextFormInput {
 					.attr("jad:bundle","default")
 					.attr("jad:i18n", "actions.name"));
 		}
+		
+		if(selectedValues.isEmpty())
+			table.addClass("d-none");
 		
 		for(String value : selectedValues) {
 			

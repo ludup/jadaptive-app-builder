@@ -2,6 +2,10 @@ package com.jadaptive.api.ui.pages.auth;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import javax.servlet.http.Cookie;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -13,6 +17,7 @@ import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
@@ -26,6 +31,10 @@ import com.jadaptive.api.ui.pages.auth.OptionalAuthentication.OptionalAuthentica
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "i18n"} )
 public class OptionalAuthentication extends AuthenticationPage<OptionalAuthenticationForm> {
+
+	private static final String DEFAULT_COOKIE_NAME = "selectedAuthenticator";
+
+	private static final String TRIED_DEFAULT = null;
 
 	@Autowired
 	private PageCache pageCache;
@@ -42,6 +51,7 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 
 	public interface OptionalAuthenticationForm {
 		String getAuthenticator();
+		boolean getMakeDefault();
 	}
 
 	@Override
@@ -55,8 +65,16 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 		
 		var state = authenticationService.getCurrentState();
 		
-		if(!state.isAuthenticationComplete()) {
+		if(!state.isRequiredAuthenticationComplete()) {
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
+		}
+		
+		String defaultAuthenticator = null;
+		Page defaultPage = null;
+		for(Cookie c : Request.get().getCookies()) {
+			if(c.getName().equals(DEFAULT_COOKIE_NAME)) {
+				defaultAuthenticator = c.getValue();
+			}
 		}
 		
 		var pages = new ArrayList<AuthenticationPage<?>>();
@@ -64,8 +82,19 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			Class<? extends Page> pageClass = authenticationService.getAuthenticationPage(m.getAuthenticatorKey());
 			AuthenticationPage<?> page = (AuthenticationPage<?>)pageCache.resolvePage(pageClass);
 			if(!state.hasCompleted(pageClass) && page.canAuthenticate(state)) {
+				if(Objects.nonNull(defaultAuthenticator) && page.getAuthenticatorUUID().equals(defaultAuthenticator) && state.getAttribute(TRIED_DEFAULT) != Boolean.TRUE) {
+					state.setSelectedPage(page.getClass());
+					state.setAttribute(TRIED_DEFAULT, Boolean.TRUE);
+					defaultPage = page;
+				}
 				pages.add(page);
 			}
+		}
+		
+		state.setOptionalAvailable(pages.size());
+		
+		if(Objects.nonNull(defaultPage)) {
+			throw new PageRedirect(defaultPage);
 		}
 		
 		if(pages.size()==1) {
@@ -120,13 +149,25 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 	protected boolean doForm(Document document, AuthenticationState state, OptionalAuthenticationForm form)
 			throws AccessDeniedException, FileNotFoundException {
 
-		if(!state.isAuthenticationComplete()) {
+		if(!state.isRequiredAuthenticationComplete()) {
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
 		
 		AuthenticationModule module = moduleDatabase.get(form.getAuthenticator(), AuthenticationModule.class);
 		state.setSelectedPage(authenticationService.getAuthenticationPage(module.getAuthenticatorKey()));
-		throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage()));
+		
+		
+		if(form.getMakeDefault()) {
+			Cookie c = new Cookie(DEFAULT_COOKIE_NAME, module.getUuid());
+			c.setHttpOnly(true);
+			c.setDomain(Request.get().getServerName());
+			c.setSecure(true);
+			c.setMaxAge((int) TimeUnit.DAYS.toSeconds(7));
+			
+			Request.response().addCookie(c);
+		}
+		
+		throw new PageRedirect(pageCache.resolvePage(state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass())));
 		
 	}
 

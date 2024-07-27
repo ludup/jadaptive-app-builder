@@ -346,7 +346,7 @@ public class DocumentHelper {
 			String encoded = getParameter(parameters, field, formVariablePrefix);
 			if(StringUtils.isBlank(encoded)) {
 				return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
-			}
+            }
 			
 			String contentType = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_contentType");
 			String filename = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
