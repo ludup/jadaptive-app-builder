@@ -1,7 +1,6 @@
 package com.jadaptive.api.ui;
 
 import java.io.FileNotFoundException;
-import java.text.MessageFormat;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -35,7 +34,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		session.setAttribute(UNDECORATED, true);
 	}
 	
-	private static boolean isUndecorated(HttpSession session) {
+	public static boolean isUndecorated(HttpSession session) {
 		return Boolean.TRUE.equals(session.getAttribute(UNDECORATED));
 	}
 
@@ -84,24 +83,6 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		}
 		
 		doGenerateContent(doc); 
-		
-		if(isUndecorated(req.getSession())) {
-			try {
-				var cardBody = doc.getElementsByClass("card-body").first();
-				if(cardBody != null) {
-					var loginContainer = Objects.requireNonNull(doc.getElementById("login-container"));
-					var par =  Objects.requireNonNull(loginContainer.parent());
-					loginContainer.remove();
-					cardBody.children().forEach(par::appendChild);
-					doc.getElementsByTag("footer").forEach(e -> e.remove());
-					doc.getElementsByTag("header").forEach(e -> e.remove());
-				}
-			}
-			catch(Exception e) {
-				log.warn(MessageFormat.format("The session requested an undecorated login, but {0} does not support it.", getClass().getName()), e);
-			}
-			
-		}
 		
 		Element actions = doc.selectFirst("#actions");
 		if(Objects.nonNull(actions)) {
