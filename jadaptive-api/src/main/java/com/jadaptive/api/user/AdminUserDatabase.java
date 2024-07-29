@@ -6,4 +6,6 @@ public interface AdminUserDatabase extends PasswordEnabledUserDatabase {
 
 	User getPrimaryAdministrator();
 
+	Iterable<User> allObjects();
+
 }

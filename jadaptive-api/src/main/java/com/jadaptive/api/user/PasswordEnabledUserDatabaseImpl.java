@@ -16,7 +16,7 @@ import com.jadaptive.utils.PasswordEncryptionType;
 import com.jadaptive.utils.PasswordUtils;
 
 public abstract class PasswordEnabledUserDatabaseImpl 
-	extends AuthenticatedService implements PasswordEnabledUserDatabase, UUIDObjectService<User> {
+	extends AuthenticatedService implements PasswordEnabledUserDatabase {
 
 	private static final String ENCRYPTION_PREFIX = "!ENC!";
 	
@@ -95,14 +95,5 @@ public abstract class PasswordEnabledUserDatabaseImpl
 		objectDatabase.saveOrUpdate(u);
 		return u.getUuid();
 	}
-	
-	@Override
-	public void deleteObjectByUUID(String uuid) {
-		deleteObject(getObjectByUUID(uuid));
-	}
-	
-	@Override
-	public void deleteAll() {
-		throw new UnsupportedOperationException();
-	}
+
 }

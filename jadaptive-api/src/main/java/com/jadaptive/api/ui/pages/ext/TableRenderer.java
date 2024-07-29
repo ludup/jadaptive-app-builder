@@ -117,20 +117,50 @@ public class TableRenderer {
 			Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
 			Collection<TableAction> tableActions = generateActions(template.getCollectionKey());
-			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions);
+			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || view.multipleDelete();
+			
 			
 			if(hasMultipleSelection) {
 				Element ae;
 				tableholder.add(Html.div("row")
 						.appendChild(ae = Html.div("col-12")));
+			
+				if(view.multipleDelete()) {
+					
+					try {
+						permissionService.assertWrite(template.getResourceKey());
+						
+						ae.appendChild(Html.a("#")
+								.attr("data-url", "/app/api/objects/" + template.getResourceKey() + "/delete")
+								.addClass("btn btn-primary selectionAction")
+								.appendChild(Html.i("fa-solid", "fa-trash", "me-2"))
+								.appendChild(Html.i18n("userInterface","multipleDelete.text")));
+					
+					} catch(AccessDeniedException e) { }
+				}
 				
 				for(TableAction action : tableActions) {
 					if(action.target() == Target.SELECTION) {
-						ae.appendChild(Html.a("#")
-								.attr("data-url", action.url())
-								.addClass("btn btn-primary selectionAction")
-								.appendChild(Html.i(action.iconGroup(), action.icon(), "me-2"))
-								.appendChild(Html.i18n(action.bundle(), action.resourceKey() + ".name")));
+
+						if(action.permissions().length > 0) {
+							try {
+								if(action.matchAllPermissions()) {
+									permissionService.assertAllPermission(action.permissions());
+								} else {
+									permissionService.assertAnyPermission(action.permissions());
+								}
+								
+								ae.appendChild(Html.a("#")
+										.attr("data-url", action.url())
+										.addClass("btn btn-primary selectionAction")
+										.appendChild(Html.i(action.iconGroup(), action.icon(), "me-2"))
+										.appendChild(Html.i18n(action.bundle(), action.resourceKey() + ".name")));
+								
+							} catch(AccessDeniedException e) {
+							}
+						}
+						
+				
 					}
 				}
 			}

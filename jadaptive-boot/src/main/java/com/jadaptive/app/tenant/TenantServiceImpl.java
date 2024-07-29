@@ -675,5 +675,9 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public void onSetupComplete(Runnable run) {
 		onSetupComplete.add(run);
 	}
-	
+
+	@Override
+	public Collection<Tenant> collection(SearchField... fields) {
+		return filter(fields);
+	}
 }

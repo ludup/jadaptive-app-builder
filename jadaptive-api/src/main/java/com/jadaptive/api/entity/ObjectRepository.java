@@ -33,5 +33,7 @@ public interface ObjectRepository {
 
 	void delete(AbstractObject entity) throws RepositoryException, ObjectException;
 
+	Collection<AbstractObject> collection(ObjectTemplate def, SearchField... fields);
+
 	
 }

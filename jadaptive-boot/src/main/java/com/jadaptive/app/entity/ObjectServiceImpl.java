@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.entity.ObjectException;
@@ -87,6 +88,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 	@Autowired
 	private TenantService tenantService; 
+	
+	@Autowired
+	private TransactionService transactionService; 
 	
 	Map<String,FormHandler> formHandlers = new HashMap<>();
 	
@@ -332,14 +336,18 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
 				ObjectTemplate parentTemplate = templateService.getParentTemplate(reference);
 				if(resourceKey.equals(foreignType)) {
-					long count = count(reference.getResourceKey(), generateFieldName(parentField, field), foreignKey);
-					if(count > 0) {
-						if(parentTemplate.getType() == ObjectType.SINGLETON) {
-							throw new ObjectException("default", "foriegnReference.singleton.error",	count, 
-									I18N.getResource(parentTemplate.getBundle(), parentTemplate.getResourceKey() + ".names"));
+					Collection<AbstractObject> references = collection(reference.getResourceKey(), generateFieldName(parentField, field), foreignKey);
+					if(references.size() > 0) {
+						if(field.isCascadeDelete()) {
+							deleteAll(parentTemplate.getResourceKey(), convertToUUIDS(references));
 						} else {
-							throw new ObjectException("default", "foriegnReference.collection.error",	count, 
-								I18N.getResource(parentTemplate.getBundle(), parentTemplate.getResourceKey() + ".names"));
+							if(parentTemplate.getType() == ObjectType.SINGLETON) {
+								throw new ObjectException("default", "foriegnReference.singleton.error",	references.size(), 
+										I18N.getResource(parentTemplate.getBundle(), parentTemplate.getResourceKey() + ".names"));
+							} else {
+								throw new ObjectException("default", "foriegnReference.collection.error",	references.size(), 
+									I18N.getResource(parentTemplate.getBundle(), parentTemplate.getResourceKey() + ".names"));
+							}
 						}
 					}
 				}
@@ -357,6 +365,14 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			}
 			}
 		}
+	}
+
+	private String[] convertToUUIDS(Collection<AbstractObject> objects) {
+		var tmp = new ArrayList<String>();
+		for(var o : objects) {
+			tmp.add(o.getUuid());
+		}
+		return tmp.toArray(new String[0]);
 	}
 
 	private void assertReferencesExist(ObjectTemplate template, AbstractObject entity) {
@@ -572,6 +588,27 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 	}
 	
+	private Collection<AbstractObject> collectionViaObjectBean(ObjectTemplate template, SearchField... fields) {
+		
+		assertRead(template);
+		
+		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
+		
+		
+		if(Objects.nonNull(clz)) {
+		
+			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
+			
+			if(Objects.nonNull(annotation)) {
+				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
+				return convertObjects(bean.collection(fields));
+			}
+		}
+		
+		return objectRepository.collection(template, fields);
+		
+	}
+	
 	private Iterable<AbstractObject> listViaObjectBean(ObjectTemplate template) {
 		
 		assertRead(template);
@@ -721,25 +758,28 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			throw new ObjectException("You cannot delete a system object");
 		}
 		
-		cascadeDelete(template, e);
+		//cascadeDelete(template, e);
 		
 		deleteViaObjectBean(e, template);
 		
 	}
 
-//	@Override
-//	public void deleteAll(String resourceKey) throws ObjectException {
-//		
-//		assertWrite(resourceKey);
-//		
-//		ObjectTemplate template = templateService.get(resourceKey);
-//		if(template.getType()==ObjectType.SINGLETON) {	
-//			throw new ObjectException("You cannot delete a Singleton Entity");
-//		}
-//		
-//		deleteAllViaObjectBean(template);
-//		
-//	}
+	@Override
+	public void deleteAll(String resourceKey, String[] uuids) throws ObjectException {
+		
+		assertWrite(resourceKey);
+		
+		ObjectTemplate template = templateService.get(resourceKey);
+		if(template.getType()==ObjectType.SINGLETON) {	
+			throw new ObjectException("You cannot delete a Singleton Entity");
+		}
+		
+		transactionService.executeTransaction(()->{
+			for(String uuid : uuids) {
+				delete(resourceKey, uuid);
+			}
+		});
+	}
 
 	@Override
 	public Integer getTemplateOrder() {
@@ -856,6 +896,32 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		case GLOBAL:
 		default:
 			return countViaObjectBean(template, SearchUtils.generateSearch(searchField, searchValue, template));
+		}
+		
+	}
+	
+	@Override
+	public Collection<AbstractObject> collection(String resourceKey, String searchField, String searchValue) {
+		ObjectTemplate template = templateService.get(resourceKey);
+
+		switch(template.getScope()) {
+		case PERSONAL:
+			return objectRepository.collection(template,
+					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+		case ASSIGNED:
+			if(isAdministrator(getCurrentUser())) {
+				return objectRepository.collection(template, 
+						SearchUtils.generateSearch(searchField, searchValue, template));
+			}
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return objectRepository.collection(template,
+					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.or(
+							SearchField.all("users.uuid", getCurrentUser().getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
+		case GLOBAL:
+		default:
+			return collectionViaObjectBean(template, 
+					SearchUtils.generateSearch(searchField, searchValue, template));
 		}
 		
 	}

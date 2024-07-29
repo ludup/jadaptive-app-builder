@@ -2,7 +2,6 @@ package com.jadaptive.app.user;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
-import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
@@ -107,37 +104,9 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	}
 
 	@Override
-	public void deleteObject(User object) {
-		objectDatabase.delete((AdminUser)object);
-	}
-
-	@Override
-	public void deleteObjectByUUID(String uuid) {
-		deleteObject(getObjectByUUID(uuid));
-	}
-
-
-	@Override
 	public User getPrimaryAdministrator() {
 		return allObjects().iterator().next();
 	}
-
-
-	@Override
-	public void deleteAll() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public Collection<? extends UUIDDocument> searchTable(int start, int length, SortOrder sort, String sortField, SearchField... fields) {
-		return objectDatabase.searchTable(AdminUser.class, start, length, sort, sortField, fields);
-	}
-	
-	@Override
-	public long countTable(SearchField... fields) {
-		return objectDatabase.count(AdminUser.class, fields);
-	}
-
 
 	@Override
 	public void registerLogin(User user) {

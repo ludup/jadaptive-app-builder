@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -32,6 +33,7 @@ import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.servlet.Request;
@@ -47,7 +49,7 @@ import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.MongoEntity;
 
 @Controller
-public class ObjectsFormController {
+public class ObjectsFormController extends AuthenticatedController {
 
 static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
@@ -457,6 +459,28 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			}
 			throw new ObjectException(e);
 		}
+	}
+	
+	@RequestMapping(value = "/app/api/objects/{resourceKey}/delete", method = { RequestMethod.POST })
+	@ResponseStatus(code = HttpStatus.OK)
+	@ResponseBody
+	public RequestStatus deleteObjects(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable String resourceKey, @RequestParam String[] uuid)
+			throws IOException {
+
+		setupUserContext(request);
+		
+		try {
+			objectService.deleteAll(resourceKey, uuid);
+			Feedback.success("userInterface", "objectsDeleted.text", String.valueOf(uuid.length));
+			return new RequestStatusImpl(true);
+		} catch(Throwable e) { 
+		    Feedback.error(e.getMessage());
+		    return new RequestStatusImpl(false, e.getMessage());
+		} finally {
+			clearUserContext();
+		}
+		
 	}
 	
 	

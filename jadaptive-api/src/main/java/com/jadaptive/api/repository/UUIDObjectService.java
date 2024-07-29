@@ -27,6 +27,8 @@ public interface UUIDObjectService<T extends UUIDDocument> {
 
 	default UUIDDocument createNew(ObjectTemplate template) { return null; }
 
-	default boolean onObjectStashed(T obj) { return false; };
+	default boolean onObjectStashed(T obj) { return false; }
+
+	Collection<T> collection(SearchField... fields);;
 
 }
