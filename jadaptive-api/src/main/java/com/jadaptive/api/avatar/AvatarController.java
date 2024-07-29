@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
 import com.jadaptive.api.permissions.AuthenticatedContext;
+import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.user.UserService;
 
 @Controller
-public class AvatarController {
+public class AvatarController extends AuthenticatedController {
 
 	@Autowired
 	private AvatarService avatarService;
@@ -47,7 +48,7 @@ public class AvatarController {
 		var el = av.render();
 		var img = el.selectFirst("img");
 		if(img != null) {
-			var href = img.attr("href");
+			var href = img.attr("src");
 			if(href != null && href.startsWith("/")) {
 				request.getRequestDispatcher(href).forward(request, response);
 				return;
