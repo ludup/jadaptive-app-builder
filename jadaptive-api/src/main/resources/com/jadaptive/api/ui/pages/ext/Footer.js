@@ -499,16 +499,19 @@ $(function() {
 		e.preventDefault();
 		var name = $(this).data('name');
 		var url = $(this).data('url');
+		var confirmText = $(this).data('confirmText');
+		var confirmApprove = $(this).data('confirmApprove');
+		var confirmReject = $(this).data('confirmReject');
 
 		bootbox.confirm({
-    		message: '${userInterface:confirm.text} ' + name + '?',
+    		message: confirmText ? confirmText : ( '${userInterface:confirm.text} ' + name + '?' ),
 		    buttons: {
 		        confirm: {
-		            label: 'Yes',
+		            label: confirmApprove ? confirmApprove : 'Yes',
 		            className: 'btn-success'
 		        },
 		        cancel: {
-		            label: 'No',
+		            label: confirmReject ? confirmReject : 'No',
 		            className: 'btn-danger'
 		        }
 		    },

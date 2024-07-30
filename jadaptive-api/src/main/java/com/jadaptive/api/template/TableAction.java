@@ -37,6 +37,12 @@ public @interface TableAction  {
 	
 	boolean confirmationRequired() default false;
 	
+	String confirmationBundle() default "";
+	
+	String confirmationKey() default "";
+	
+	String[] confirmationArgs() default {};
+	
 	String targetKey() default "";
 	
 	String[] permissions() default {};
