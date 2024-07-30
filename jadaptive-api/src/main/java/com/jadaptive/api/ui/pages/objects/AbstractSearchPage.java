@@ -30,6 +30,7 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.ui.FormProcessor;
 import com.jadaptive.api.ui.Html;
@@ -67,7 +68,16 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	protected String searchModifier;
 	protected String sortColumn;
 	protected SortOrder sortOrder;
+	protected TableView tableView;
 	
+	@Override
+	protected void beforeGenerateContent(Document document) {
+		
+		super.beforeGenerateContent(document);
+		
+		tableView = templateClazz.getAnnotation(TableView.class);
+	}
+
 	public final void processForm(Document document, SearchForm form) throws IOException {
 		
 		searchField = form.getSearchColumn();
@@ -90,10 +100,10 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		setCachedValue("length", String.valueOf(length));
 		
-		sortColumn = StringUtils.defaultString(form.getSortColumn(), form.getSearchColumn());
+		sortColumn = StringUtils.defaultString(form.getSortColumn(), tableView.sortField());
 		setCachedValue("sortColumn", sortColumn);
 		
-		sortOrder = SortOrder.valueOf(StringUtils.defaultString(form.getSortOrder(), "ASC"));
+		sortOrder = SortOrder.valueOf(StringUtils.defaultString(form.getSortOrder(), tableView.sortOrder().name()));
 		setCachedValue("sortOrder", sortOrder.name());
 		
 		generateTable(document);
@@ -158,7 +168,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		sortColumn = Request.get().getParameter("sortColumn");
 		if(Objects.isNull(sortColumn)) {
-			sortColumn = getCachedValue("sortColumn", StringUtils.defaultString(Request.get().getParameter("sortColumn"), template.getDefaultColumn()));
+			sortColumn = getCachedValue("sortColumn", StringUtils.defaultString(Request.get().getParameter("sortColumn"),tableView.sortField()));
 			if(StringUtils.isBlank(sortColumn)) {
 				sortColumn = null;
 			}
@@ -166,7 +176,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		String order = Request.get().getParameter("sortOrder");
 		if(Objects.isNull(order)) {
-			order = getCachedValue("sortOrder", StringUtils.defaultString(Request.get().getParameter("sortOrder"), "ASC"));
+			order = getCachedValue("sortOrder", StringUtils.defaultString(Request.get().getParameter("sortOrder"), tableView.sortOrder().name()));
 			if(StringUtils.isBlank(order)) {
 				order = null;
 			}

@@ -85,6 +85,8 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		} catch (UnauthorizedException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
+		
+		beforeGenerateContent(document);
 
 	}
 		
