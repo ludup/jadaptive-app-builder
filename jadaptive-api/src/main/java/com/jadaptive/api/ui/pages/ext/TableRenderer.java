@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -27,6 +28,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.CreateURL;
@@ -69,27 +71,30 @@ public class TableRenderer {
 	private InternationalService internationalService; 
 	
 	@Autowired
+	private I18nService i18nService;
+	
+	@Autowired
 	private ApplicationService appService;
 	
-	int start;
-	int length;
+	private int start;
+	private int length;
 	
-	long totalObjects;
-	Collection<AbstractObject> objects;
-	String sortColumn;
-	SortOrder sortOrder;
+	private long totalObjects;
+	private Collection<AbstractObject> objects;
+	private String sortColumn;
+	private SortOrder sortOrder;
 	
-	ObjectTemplate template;
-	Class<?> templateClazz;
+	private ObjectTemplate template;
+	private Class<?> templateClazz;
 	
-	TableView view;
-	AbstractObject parentObject = null;
-	FieldTemplate field;
+	private TableView view;
+	private AbstractObject parentObject = null;
+	private FieldTemplate field;
 	private boolean readOnly;
 
-	RenderScope formRenderer;
-	String formHandler;
-	String stashURL = null;
+	private RenderScope formRenderer;
+	private String formHandler;
+	private String stashURL = null;
 	
 	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field,
 			RenderScope formRenderer, String formHandler) {
@@ -118,20 +123,50 @@ public class TableRenderer {
 			Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
 			Collection<TableAction> tableActions = generateActions(template.getCollectionKey());
-			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions);
+			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || view.multipleDelete();
+			
 			
 			if(hasMultipleSelection) {
 				Element ae;
 				tableholder.add(Html.div("row")
 						.appendChild(ae = Html.div("col-12")));
+			
+				if(view.multipleDelete()) {
+					
+					try {
+						permissionService.assertWrite(template.getResourceKey());
+						
+						ae.appendChild(Html.a("#")
+								.attr("data-url", "/app/api/objects/" + template.getResourceKey() + "/delete")
+								.addClass("btn btn-primary selectionAction")
+								.appendChild(Html.i("fa-solid", "fa-trash", "me-2"))
+								.appendChild(Html.i18n("userInterface","multipleDelete.text")));
+					
+					} catch(AccessDeniedException e) { }
+				}
 				
 				for(TableAction action : tableActions) {
 					if(action.target() == Target.SELECTION) {
-						ae.appendChild(Html.a("#")
-								.attr("data-url", action.url())
-								.addClass("btn btn-primary selectionAction")
-								.appendChild(Html.i(action.iconGroup(), action.icon(), "me-2"))
-								.appendChild(Html.i18n(action.bundle(), action.resourceKey() + ".name")));
+
+						if(action.permissions().length > 0) {
+							try {
+								if(action.matchAllPermissions()) {
+									permissionService.assertAllPermission(action.permissions());
+								} else {
+									permissionService.assertAnyPermission(action.permissions());
+								}
+								
+								ae.appendChild(Html.a("#")
+										.attr("data-url", action.url())
+										.addClass("btn btn-primary selectionAction")
+										.appendChild(Html.i(action.iconGroup(), action.icon(), "me-2"))
+										.appendChild(Html.i18n(action.bundle(), action.resourceKey() + ".name")));
+								
+							} catch(AccessDeniedException e) {
+							}
+						}
+						
+				
 					}
 				}
 			}
@@ -400,16 +435,24 @@ public class TableRenderer {
 				
 				Object val = obj.getValue(template.getDefaultColumn());
 				if(action.confirmationRequired()) {
+					Element iel;
 					if(StringUtils.isNotBlank(template.getDefaultColumn())) {
-						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
+						iel = dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
 							.attr("data-name", val == null ? "" : val.toString())
 							.attr("data-url", replaceVariables(action.url(), obj))
 							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
 					} else {
-						dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
+						iel = dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
 							.attr("data-name", obj.getUuid())
 							.attr("data-url", replaceVariables(action.url(), obj))
 							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
+					}
+					if(StringUtils.isNotBlank(action.confirmationBundle())) {
+						var vargs = Arrays.asList(action.confirmationArgs()).stream().map(a -> replaceVariables(a, obj)).toArray();
+						if(StringUtils.isNotBlank(action.confirmationKey()))
+							iel.dataset().put("confirm-text", i18nService.format(action.confirmationBundle(), Locale.getDefault(), action.confirmationKey(), vargs));
+						else
+							iel.dataset().put("confirm-text", i18nService.format(action.confirmationBundle(), Locale.getDefault(), action.resourceKey() + ".confirm", vargs));
 					}
 				} else {
 					dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", replaceVariables(action.url(), obj), action.iconGroup(), action.icon())

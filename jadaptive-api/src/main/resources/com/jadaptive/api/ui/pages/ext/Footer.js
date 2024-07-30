@@ -426,6 +426,38 @@ $(function() {
 		}
     });
     
+    $('.selectionAction').click(function(e) {
+		e.preventDefault();
+		
+		if($('input[name="selectedUUID"]').length > 0) {
+			
+			var form = new FormData();
+
+			$('input[name="selectedUUID').each(function() {
+				if ($(this).is(":checked")) {
+					form.append("uuid", $(this).val());
+				}
+			});
+			
+		    var actionUrl = $(this).data('url');
+		    
+		    $.ajax({
+		        type: "POST",
+		        url: actionUrl,
+		        data: form,
+		        contentType: false,
+   				processData: false, 
+		        complete: function()
+		        {
+		          window.location.reload();
+		        }
+		    });
+			
+		} else {
+			alert("No rows selected!");
+		}
+	});
+    
 	$('.deleteAction').on('click', function(e) {
 		e.preventDefault();
 		var name = $(this).data('name');
@@ -466,16 +498,19 @@ $(function() {
 		e.preventDefault();
 		var name = $(this).data('name');
 		var url = $(this).data('url');
+		var confirmText = $(this).data('confirmText');
+		var confirmApprove = $(this).data('confirmApprove');
+		var confirmReject = $(this).data('confirmReject');
 
 		bootbox.confirm({
-    		message: '${userInterface:confirm.text} ' + name + '?',
+    		message: confirmText ? confirmText : ( '${userInterface:confirm.text} ' + name + '?' ),
 		    buttons: {
 		        confirm: {
-		            label: 'Yes',
+		            label: confirmApprove ? confirmApprove : 'Yes',
 		            className: 'btn-success'
 		        },
 		        cancel: {
-		            label: 'No',
+		            label: confirmReject ? confirmReject : 'No',
 		            className: 'btn-danger'
 		        }
 		    },

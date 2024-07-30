@@ -24,8 +24,6 @@ public interface ObjectService {
 
 	void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException;
 
-//	void deleteAll(String resourceKey) throws ObjectException;
-
 	long count(String resourceKey, String searchField, String searchValue);
 
 	FormHandler getFormHandler(String handler);
@@ -64,6 +62,10 @@ public interface ObjectService {
 	void cascadeDelete(ObjectTemplate template, AbstractObject e);
 
 	AbstractObject createNew(String resourceKey);
+
+	void deleteAll(String resourceKey, String[] uuid);
+
+	Collection<AbstractObject> collection(String resourceKey, String searchField, String searchValue);
 
 	
 }

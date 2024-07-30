@@ -152,6 +152,17 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	}
 	
 	@Override
+	public Collection<AbstractObject> collection(ObjectTemplate def, SearchField... fields) {
+		List<AbstractObject> results = new ArrayList<>();
+		
+		for(Document document : db.search(def.getCollectionKey(), getDatabase(def), fields)) {
+			results.add(buildEntity(def, document));
+		}
+		
+		return results;
+	}
+	
+	@Override
 	public long count(ObjectTemplate def, SearchField... fields) {
 		return db.count(def.getCollectionKey(), getDatabase(def), fields);
 	}

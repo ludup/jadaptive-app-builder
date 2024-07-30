@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -537,6 +538,28 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			}
 			throw new ObjectException(e);
 		}
+	}
+	
+	@RequestMapping(value = "/app/api/objects/{resourceKey}/delete", method = { RequestMethod.POST })
+	@ResponseStatus(code = HttpStatus.OK)
+	@ResponseBody
+	public RequestStatus deleteObjects(HttpServletRequest request, HttpServletResponse response,
+			@PathVariable String resourceKey, @RequestParam String[] uuid)
+			throws IOException {
+
+		setupUserContext(request);
+		
+		try {
+			objectService.deleteAll(resourceKey, uuid);
+			Feedback.success("userInterface", "objectsDeleted.text", String.valueOf(uuid.length));
+			return new RequestStatusImpl(true);
+		} catch(Throwable e) { 
+		    Feedback.error(e.getMessage());
+		    return new RequestStatusImpl(false, e.getMessage());
+		} finally {
+			clearUserContext();
+		}
+		
 	}
 	
 	

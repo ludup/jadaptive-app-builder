@@ -232,4 +232,9 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		
 	}
 
+	@Override
+	public Collection<Session> collection(SearchField... fields) {
+		return filter(fields);
+	}
+
 }

@@ -146,35 +146,6 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 	}
 	
 	@Override
-	public void deleteObject(User user) {
-		
-		assertWrite(UserService.USER_RESOURCE_KEY);
-		
-		if(user.isSystem()) {
-			throw new ObjectException(String.format("%s cannot be deleted", user.getUsername()));
-		}
-		
-		objectDatabase.delete((BuiltinUser)user);
-		
-	}
-	
-	@Override
-	public void deleteObjectByUUID(String uuid) {
-		deleteObject(getObjectByUUID(uuid));
-	}
-	
-	
-	@Override
-	public Collection<? extends UUIDDocument> searchTable(int start, int length, SortOrder sort, String sortField, SearchField... fields) {
-		return objectDatabase.searchTable(BuiltinUser.class, start, length, sort, sortField, fields);
-	}
-	
-	@Override
-	public long countTable(SearchField... fields) {
-		return objectDatabase.count(BuiltinUser.class, fields);
-	}
-
-	@Override
 	public void registerLogin(User user) {
 		objectDatabase.saveOrUpdate((BuiltinUser)user);
 	}

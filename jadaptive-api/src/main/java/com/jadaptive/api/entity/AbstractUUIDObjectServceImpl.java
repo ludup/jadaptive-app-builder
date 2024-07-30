@@ -45,7 +45,12 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 		Request.get().getSession().setAttribute(obj.getResourceKey(), obj);
 		return true;
 	}
-
+	
+	@Override
+	public Collection<T> collection(SearchField...fields) {
+		return objectDatabase.searchObjects(getResourceClass(), fields);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public UUIDDocument createNew(ObjectTemplate template) {

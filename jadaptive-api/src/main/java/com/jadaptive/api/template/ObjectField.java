@@ -41,5 +41,5 @@ public @interface ObjectField {
 
 		String meta() default "";
 		
-		boolean cascadeDeldte() default false;
+		boolean cascadeDelete() default false;
 }

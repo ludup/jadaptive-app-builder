@@ -217,8 +217,8 @@ public class AuthenticationState {
 		attrs.remove(key.getName());
 	}
 	
-	public void removeAttribute(String name) {
-		attrs.remove(name);
+	public Object removeAttribute(String name) {
+		return attrs.remove(name);
 	}
 
 	public boolean isDecorateWindow() {

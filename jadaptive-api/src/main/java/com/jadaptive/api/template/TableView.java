@@ -22,4 +22,6 @@ public @interface TableView {
 		SortOrder sortOrder() default SortOrder.ASC;
 
 		String sortField() default "_id";
+		
+		boolean multipleDelete() default false;
 }
