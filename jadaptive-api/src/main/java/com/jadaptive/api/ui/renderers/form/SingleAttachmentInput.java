@@ -1,15 +1,12 @@
 package com.jadaptive.api.ui.renderers.form;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
-import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.files.FileAttachment;
 import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.template.ObjectTemplate;

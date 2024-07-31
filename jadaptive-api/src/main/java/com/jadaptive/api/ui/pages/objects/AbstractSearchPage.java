@@ -239,10 +239,8 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 		
 		TableRenderer renderer = applicationService.autowire(new TableRenderer(readOnly));
-		renderer.setLength(length);
-		renderer.setStart(start);
+
 		renderer.setObjects(objects);
-		renderer.setTotalObjects(totalObjects);
 		renderer.setTemplate(template);
 		renderer.setTemplateClazz(templateClazz);
 		renderer.setSortColumn(sortColumn);

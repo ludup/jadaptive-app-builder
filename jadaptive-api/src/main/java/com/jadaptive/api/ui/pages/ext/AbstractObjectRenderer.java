@@ -525,9 +525,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				return;
 			}
 			
-			table.setLength(objects.size());
-			table.setStart(0);
-			table.setTotalObjects(objects.size());
 			table.setObjects(objects);
 			table.setTemplate(objectTemplate);
 			table.setTemplateClazz(templateService.getTemplateClass(objectTemplate.getResourceKey()));

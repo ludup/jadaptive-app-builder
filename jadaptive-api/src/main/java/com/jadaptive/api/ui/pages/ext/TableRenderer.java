@@ -75,11 +75,8 @@ public class TableRenderer {
 	
 	@Autowired
 	private ApplicationService appService;
-	
-	private int start;
-	private int length;
-	
-	private long totalObjects;
+
+
 	private Collection<AbstractObject> objects;
 	private String sortColumn;
 	private SortOrder sortOrder;
@@ -91,18 +88,12 @@ public class TableRenderer {
 	private AbstractObject parentObject = null;
 	private FieldTemplate field;
 	private boolean readOnly;
-
-	private RenderScope formRenderer;
-	private String formHandler;
-	private String stashURL = null;
 	
 	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field,
 			RenderScope formRenderer, String formHandler) {
 		this.parentObject = parentObject;
 		this.field = field;
 		this.readOnly = readOnly;
-		this.formRenderer = formRenderer;
-		this.formHandler = formHandler;
 	}
 	
 	public TableRenderer(boolean readOnly) {
@@ -804,18 +795,6 @@ public class TableRenderer {
 		}
 		}
 	}
-	
-	public void setStart(int start) {
-		this.start = start;
-	}
-
-	public void setLength(int length) {
-		this.length = length;
-	}
-
-	public void setTotalObjects(long totalObjects) {
-		this.totalObjects = totalObjects;
-	}
 
 	public void setObjects(Collection<AbstractObject> objects) {
 		this.objects = objects;
@@ -831,10 +810,6 @@ public class TableRenderer {
 
 	public TableView getView() {
 		return view;
-	}
-
-	public void setStashURL(String stashURL) {
-		this.stashURL = stashURL;
 	}
 
 	public void setSortColumn(String sortColumn) {
