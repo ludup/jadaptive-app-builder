@@ -13,7 +13,7 @@ import com.jadaptive.api.ui.PageProcessors;
 
 @Component
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = { "i18n"} )
+@PageProcessors(extensions = { "i18n" } )
 public class SystemConfigurationPage extends ConfigurationPage {
 
 	@Autowired
