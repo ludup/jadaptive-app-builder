@@ -511,6 +511,10 @@ public class DocumentHelper {
 				clz = processClassNameChanges(clz, classLoader);
 				obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
 			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
+				
+				if(log.isErrorEnabled()) {
+					log.error("Failed to find a concrete class for {} and class {}", resourceKey, clz);
+				}
 				if(Objects.nonNull(resourceKey)) {
 					obj = (T) ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey).getConstructor().newInstance();
 				} else {		
