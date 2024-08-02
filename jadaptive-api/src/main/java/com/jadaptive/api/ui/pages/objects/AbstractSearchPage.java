@@ -259,8 +259,11 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			pagnation.dataset().put("jad-filtered", String.valueOf(filtered));
 			renderPagination(totalObjects, pagnation);
 		}
-			
+		
 		if(totalObjects == 0) {
+			/* No point in showing search form if there is nothing to search */
+			document.selectFirst("#searchForm").remove();
+			
 			var div = Html.div("mb-3");
 			 if(filtered) {
 				 div.appendChild(Html.i18nWithFallback("userInterface", "search.noMatch", template.getBundle(), template.getResourceKey() + ".noMatch"));
@@ -301,11 +304,12 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			generateSearchColumns(t, input, document, parentPrefix, searchField, processedFields);
 		}
 		
-		document.selectFirst("#searchForm").appendChild(
+		Element form = document.selectFirst("#searchForm");
+		form.appendChild(
 				Html.input("hidden", "sortColumn", sortColumn)
 						.attr("id", "sortColumn")
 						.attr("data-column", template.getDefaultColumn()));
-		document.selectFirst("#searchForm").appendChild(Html.input("hidden", "sortOrder", sortOrder.name())
+		form.appendChild(Html.input("hidden", "sortOrder", sortOrder.name())
 				.attr("id", "sortOrder"));
 		
 		
