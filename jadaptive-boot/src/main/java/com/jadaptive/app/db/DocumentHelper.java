@@ -512,7 +512,7 @@ public class DocumentHelper {
 			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
 				try {
 					obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
-				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
+				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e2) {
 					throw new IllegalStateException(String.format(
 							"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
 							resourceKey, clz, classLoader), e);
