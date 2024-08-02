@@ -272,6 +272,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			} else {
 				/* No point in showing search form if there is nothing to search */
 				document.selectFirst("#searchForm").remove();
+				document.selectFirst("#simpleSearch").remove();
 				
 				if (table.getElementById("create") == null) {
 					div.appendChild(Html.i18nWithFallback("userInterface", "search.noResults", template.getBundle(),
