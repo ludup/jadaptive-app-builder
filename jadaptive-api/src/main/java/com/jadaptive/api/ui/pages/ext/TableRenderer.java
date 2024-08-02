@@ -171,93 +171,95 @@ public class TableRenderer {
 			}
 			
 			Element el;
-			Element table;
-			tableholder.add(table = Html.table("table").attr("data-toggle", "table"));
-			
-			table.appendChild(Html.thead().appendChild(el = Html.tr()));
-			
-			if(hasMultipleSelection) {
-				el.appendChild(Html.td());
-			}
-			
-			ObjectTemplate tmp = template;
-			while(tmp.hasParent()) {
-				ObjectTemplate t = templateService.get(tmp.getParentTemplate());
-				TableView v = templateService.getTemplateClass(tmp.getParentTemplate()).getAnnotation(TableView.class);
-				if(Objects.nonNull(v)) {
-					renderTableColumns(v, el, t, columns, dynamicColumns);
+			if(totalObjects > 0) {
+				Element table = Html.table("table").attr("data-toggle", "table");
+				tableholder.add(table);
+				
+				table.appendChild(Html.thead().appendChild(el = Html.tr()));
+				
+				if(hasMultipleSelection) {
+					el.appendChild(Html.td());
 				}
-				tmp = t;
-			}
-			
-			renderTableColumns(view, el, template, columns, dynamicColumns);
-			
-			for(String childTemplate : template.getChildTemplates()) {
-				ObjectTemplate t = templateService.get(childTemplate);
-				Class<?> clz = templateService.getTemplateClass(childTemplate);
-				if(Objects.nonNull(clz)) {
-					TableView v = clz.getAnnotation(TableView.class);
+				
+				ObjectTemplate tmp = template;
+				while(tmp.hasParent()) {
+					ObjectTemplate t = templateService.get(tmp.getParentTemplate());
+					TableView v = templateService.getTemplateClass(tmp.getParentTemplate()).getAnnotation(TableView.class);
 					if(Objects.nonNull(v)) {
 						renderTableColumns(v, el, t, columns, dynamicColumns);
 					}
+					tmp = t;
 				}
-			}
-			// Actions
-			el.appendChild(Html.td());
-
-			
-			table.appendChild(el = Html.tbody());
-			
-			ObjectMapper json = new ObjectMapper();
-			
-			if(objects.size() > 0) {
-				for(AbstractObject obj : objects) {
-					
-					ObjectTemplate rowTemplate = template;
-					if(!obj.getResourceKey().equals(template.getResourceKey())) {
-						rowTemplate = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(obj.getResourceKey());
-					}
-					Element row = Html.tr();
-					
-					if(hasMultipleSelection) {
-						row.appendChild(Html.td().appendChild(Html.input("checkbox", "selectedUUID", obj.getUuid())));
-					}
-					
-					if(Objects.nonNull(parentObject)) {
-						String c = json.writeValueAsString(obj);
-						row.appendChild(new Element("input").attr("type", "hidden")
-							.attr("name", this.field.getResourceKey())
-							.val(Base64.getUrlEncoder().encodeToString(c.getBytes("UTF-8"))));
-					}
-					
-					
-					
-					for(String column : columns.keySet()) {
-						if(dynamicColumns.containsKey(column)) {
-							DynamicColumn dc = dynamicColumns.get(column);
-							DynamicColumnService service = ApplicationServiceImpl.getInstance().getBean(dc.service());
-							Element col = service.renderColumn(column, obj, rowTemplate);
-							row.appendChild(Html.td().appendChild(col == null ? Html.span("") : col));
-						} else {
-							FieldTemplate t = columns.get(column).getField(column);
-							if(t == null) {
-								row.appendChild(Html.td().appendChild(Html.span("<missing column: " + column + ">")));
-							}
-							else {
-								row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t)));
-							}
+				
+				renderTableColumns(view, el, template, columns, dynamicColumns);
+				
+				for(String childTemplate : template.getChildTemplates()) {
+					ObjectTemplate t = templateService.get(childTemplate);
+					Class<?> clz = templateService.getTemplateClass(childTemplate);
+					if(Objects.nonNull(clz)) {
+						TableView v = clz.getAnnotation(TableView.class);
+						if(Objects.nonNull(v)) {
+							renderTableColumns(v, el, t, columns, dynamicColumns);
 						}
 					}
-					
-				
-					renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getResourceKey()));
-					
-					el.appendChild(row);
 				}
-			} else {
-				el.appendChild(Html.tr().appendChild(Html.td().attr("colspan", String.valueOf(columns))
-						.addClass("text-center")
-						.appendChild(Html.i18n("default", "noResults.text"))));
+				// Actions
+				el.appendChild(Html.td());
+	
+				
+				table.appendChild(el = Html.tbody());
+				
+				ObjectMapper json = new ObjectMapper();
+				
+				if(objects.size() > 0) {
+					for(AbstractObject obj : objects) {
+						
+						ObjectTemplate rowTemplate = template;
+						if(!obj.getResourceKey().equals(template.getResourceKey())) {
+							rowTemplate = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(obj.getResourceKey());
+						}
+						Element row = Html.tr();
+						
+						if(hasMultipleSelection) {
+							row.appendChild(Html.td().appendChild(Html.input("checkbox", "selectedUUID", obj.getUuid())));
+						}
+						
+						if(Objects.nonNull(parentObject)) {
+							String c = json.writeValueAsString(obj);
+							row.appendChild(new Element("input").attr("type", "hidden")
+								.attr("name", this.field.getResourceKey())
+								.val(Base64.getUrlEncoder().encodeToString(c.getBytes("UTF-8"))));
+						}
+						
+						
+						
+						for(String column : columns.keySet()) {
+							if(dynamicColumns.containsKey(column)) {
+								DynamicColumn dc = dynamicColumns.get(column);
+								DynamicColumnService service = ApplicationServiceImpl.getInstance().getBean(dc.service());
+								Element col = service.renderColumn(column, obj, rowTemplate);
+								row.appendChild(Html.td().appendChild(col == null ? Html.span("") : col));
+							} else {
+								FieldTemplate t = columns.get(column).getField(column);
+								if(t == null) {
+									row.appendChild(Html.td().appendChild(Html.span("<missing column: " + column + ">")));
+								}
+								else {
+									row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t)));
+								}
+							}
+						}
+						
+					
+						renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getResourceKey()));
+						
+						el.appendChild(row);
+					}
+				} else {
+					el.appendChild(Html.tr().appendChild(Html.td().attr("colspan", String.valueOf(columns))
+							.addClass("text-center")
+							.appendChild(Html.i18n("default", "noResults.text"))));
+				}
 			}
 			
 			tableholder.add(Html.div("row", "mb-3").appendChild(

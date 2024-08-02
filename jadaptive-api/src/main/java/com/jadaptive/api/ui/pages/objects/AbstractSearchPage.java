@@ -237,7 +237,9 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 				readOnly = true;
 			}
 		}
-		
+
+		boolean filtered = search.length > 0;
+
 		TableRenderer renderer = applicationService.autowire(new TableRenderer(readOnly));
 		renderer.setLength(length);
 		renderer.setStart(start);
@@ -247,12 +249,30 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		renderer.setTemplateClazz(templateClazz);
 		renderer.setSortColumn(sortColumn);
 		renderer.setSortOrder(sortOrder);
-		
+	
 		table.insertChildren(0, renderer.render());
 
 		Element pagnation = table.selectFirst("#pagnation");
-		pagnation.dataset().put("jad-filtered", String.valueOf(search.length > 0));
-		renderPagination(totalObjects, pagnation);
+		if(getNumberOfPages(totalObjects) < 2)
+			pagnation.parent().remove();
+		else {
+			pagnation.dataset().put("jad-filtered", String.valueOf(filtered));
+			renderPagination(totalObjects, pagnation);
+		}
+			
+		if(totalObjects == 0) {
+			var div = Html.div("mb-3");
+			 if(filtered) {
+				 div.appendChild(Html.i18nWithFallback("userInterface", "search.noMatch", template.getBundle(), template.getResourceKey() + ".noMatch"));
+			 } 
+			 else if(table.getElementById("create") == null) {
+				 div.appendChild(Html.i18nWithFallback("userInterface", "search.noResults", template.getBundle(), template.getResourceKey() + ".noResults"));
+			 }
+			 else {
+				 div.appendChild(Html.i18nWithFallback("userInterface", "search.noResults.creatable", template.getBundle(), template.getResourceKey() + ".noResults.createable"));
+			 }
+			table.insertChildren(0, div);
+		}
 		
 	}
 	
@@ -493,10 +513,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 
 	private Element renderPagination(long totalObjects, Element pagnation) {
 		
-		long pages = totalObjects / length;
-		if(totalObjects % length > 0) {
-			pages++;
-		}
+		long pages = getNumberOfPages(totalObjects);
 		
 		long currentPage = 0;
 		if(start > 0) {
@@ -623,6 +640,14 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	@Override
 	public Class<SearchForm> getFormClass() {
 		return SearchForm.class;
+	}
+
+	private long getNumberOfPages(long totalObjects) {
+		long pages = totalObjects / length;
+		if(totalObjects % length > 0) {
+			pages++;
+		}
+		return pages;
 	}
 
 }
