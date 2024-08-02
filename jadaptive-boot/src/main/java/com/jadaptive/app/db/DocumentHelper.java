@@ -508,11 +508,15 @@ public class DocumentHelper {
 			String resourceKey = document.getString("resourceKey");
 			
 			try {
-				obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
+				obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
 			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
-				throw new IllegalStateException(String.format(
-						"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
-						resourceKey, clz, classLoader), e);
+				try {
+					obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
+				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
+					throw new IllegalStateException(String.format(
+							"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
+							resourceKey, clz, classLoader), e);
+				}
 			}
 			
 			String uuid = (String) document.get("_id");
