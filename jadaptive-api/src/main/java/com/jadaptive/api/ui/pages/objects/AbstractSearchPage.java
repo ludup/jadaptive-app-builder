@@ -207,7 +207,10 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		Map<String,FieldTemplate> searchFieldTemplates = new HashMap<>();
 		generateSearchColumns(template, searchColumns, document, "", searchField, searchFieldTemplates);
-		document.selectFirst(".searchColumn").val(searchField);
+		
+		Element srchCol = document.selectFirst(".searchColumn");
+		srchCol.val(searchField);
+		srchCol.dataset().put("default-search-column", template.getDefaultColumn());
 		
 		Element table = document.selectFirst("#tableholder");
 		
@@ -260,20 +263,24 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			renderPagination(totalObjects, pagnation);
 		}
 		
-		if(totalObjects == 0) {
-			/* No point in showing search form if there is nothing to search */
-			document.selectFirst("#searchForm").remove();
-			
+		if (totalObjects == 0) {
+
 			var div = Html.div("mb-3");
-			 if(filtered) {
-				 div.appendChild(Html.i18nWithFallback("userInterface", "search.noMatch", template.getBundle(), template.getResourceKey() + ".noMatch"));
-			 } 
-			 else if(table.getElementById("create") == null) {
-				 div.appendChild(Html.i18nWithFallback("userInterface", "search.noResults", template.getBundle(), template.getResourceKey() + ".noResults"));
-			 }
-			 else {
-				 div.appendChild(Html.i18nWithFallback("userInterface", "search.noResults.creatable", template.getBundle(), template.getResourceKey() + ".noResults.createable"));
-			 }
+			if (filtered) {
+				div.appendChild(Html.i18nWithFallback("userInterface", "search.noMatch", template.getBundle(),
+						template.getResourceKey() + ".noMatch"));
+			} else {
+				/* No point in showing search form if there is nothing to search */
+				document.selectFirst("#searchForm").remove();
+				
+				if (table.getElementById("create") == null) {
+					div.appendChild(Html.i18nWithFallback("userInterface", "search.noResults", template.getBundle(),
+							template.getResourceKey() + ".noResults"));
+				} else {
+					div.appendChild(Html.i18nWithFallback("userInterface", "search.noResults.creatable",
+							template.getBundle(), template.getResourceKey() + ".noResults.createable"));
+				}
+			}
 			table.insertChildren(0, div);
 		}
 		
