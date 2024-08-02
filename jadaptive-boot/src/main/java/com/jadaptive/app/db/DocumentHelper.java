@@ -40,6 +40,7 @@ import org.bouncycastle.util.encoders.Hex;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.db.ClassLoaderService;
@@ -513,9 +514,19 @@ public class DocumentHelper {
 				try {
 					obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
 				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e2) {
-					throw new IllegalStateException(String.format(
+					try {
+						Class<?> c = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey);
+						if(Objects.isNull(c)) {
+							throw new IllegalStateException(String.format(
+									"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
+									resourceKey, clz, classLoader));
+						}
+						obj = (T) c.getConstructor().newInstance();
+					} catch(NoSuchMethodException | InstantiationException e3) {
+						throw new IllegalStateException(String.format(
 							"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
 							resourceKey, clz, classLoader), e);
+					}
 				}
 			}
 			
