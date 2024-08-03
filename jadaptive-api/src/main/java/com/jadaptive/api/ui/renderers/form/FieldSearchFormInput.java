@@ -78,6 +78,7 @@ public class FieldSearchFormInput {
 						.attr("id", String.format("%sDropdown", resourceKey))
 						.addClass("input-group position-relative dropdown")
 					.appendChild(inputText = new Element("input")
+							.attr("autocomplete", "off")
 							.attr("name", String.format("%sText", variableName))
 							.attr("data-display", "static")
 							.addClass(String.format("%sText", resourceKey) + " form-control jsearchText")

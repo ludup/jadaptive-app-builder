@@ -1011,7 +1011,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		t.setSearchable(field.searchable());
 		t.setTextIndex(field.textIndex());
 		t.setResettable(field.resettable());
-		t.setCascadeDelete(field.cascadeDelete());
+		t.setOptions(Arrays.asList(field.options()));
 		t.setUnique(field.unique());
 		t.setMeta(field.meta());
 		t.setCollection(f.getType().isAssignableFrom(Collection.class));

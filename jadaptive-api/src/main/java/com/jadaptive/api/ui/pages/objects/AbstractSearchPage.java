@@ -25,6 +25,7 @@ import com.jadaptive.api.entity.SearchUtils;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
@@ -110,8 +111,18 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	}
 
 	@Override
-	public String getJsResource() {
+	public final String getJsResource() {
 		return String.format("%s.js", AbstractSearchPage.class.getSimpleName());
+	}
+	
+	@Override
+	public final String getHtmlResource() {
+		return String.format("%s.html", AbstractSearchPage.class.getSimpleName());
+	}
+	
+	@Override
+	public final Class<?> getResourceClass() {
+		return AbstractSearchPage.class;
 	}
 
 	private String getCachedValue(String key, String defaultValue) {
@@ -137,6 +148,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws IOException {
 		
+		document.selectFirst("#form").attr("action", generateSearchPostURI());
 		searchField = Request.get().getParameter("column");
 		if(Objects.isNull(searchField)) {
 			searchField = getCachedValue("searchField", StringUtils.defaultString(Request.get().getParameter("column"), template.getDefaultColumn()));
@@ -192,6 +204,10 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		generateTable(document);
 	
+	}
+
+	protected String generateSearchPostURI() {
+		return String.format("/app/ui/%s/%s", getUri(), getResourceKey());
 	}
 
 	protected void generateTable(Document document) throws IOException {
@@ -295,6 +311,14 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			}
 			processedFields.put(field.getResourceKey(), field);
 			if(field.isSearchable()) {
+				if(field.getFieldType()==FieldType.OBJECT_REFERENCE && field.getOptions().contains(FieldOptions.SEARCH_REQUIRE_REFERENCE_READ)) {
+					String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+					try {
+						permissionService.assertRead(resourceKey);
+					} catch(AccessDeniedException e) {
+						continue;
+					}
+				}
 				input.addInputValue(field.getResourceKey(), String.format("%s.name", field.getResourceKey()), true, template.getBundle()).attr("data-formvar", parentPrefix + field.getFormVariable());
 				if(searchField.equals(parentPrefix + field.getFormVariable())) {
 					input.setDefaultValue(String.format("%s.name", field.getResourceKey()), 
@@ -441,7 +465,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			ObjectTemplate referenceTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
 			FieldSearchFormInput input = new FieldSearchFormInput(
 					template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle(), 
-					String.format("/app/api/objects/%s/table", field.getValidationValue(ValidationType.RESOURCE_KEY)),
+					String.format("/app/api/references/%s/table", field.getValidationValue(ValidationType.RESOURCE_KEY)),
 						referenceTemplate.getNameField(), field.getResourceKey(), "uuid");
 			input.diableDecoration();
 			input.disableIDAttribute();
