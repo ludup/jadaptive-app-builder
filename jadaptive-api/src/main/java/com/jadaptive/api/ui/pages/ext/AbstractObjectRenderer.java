@@ -70,6 +70,7 @@ import com.jadaptive.api.ui.renderers.form.FileFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.ImageFormInput;
 import com.jadaptive.api.ui.renderers.form.JavascriptEditorFormInput;
+import com.jadaptive.api.ui.renderers.form.MultipleAttachmentInput;
 import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
@@ -292,8 +293,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				switch(field.getFieldType()) {
 				default:
 					Element e = Html.div("field");
-					renderField(e, obj, fieldView, scope, view);
 					viewElement.appendChild(e);
+					renderField(e, obj, fieldView, scope, view);
 					break;
 				}
 				
@@ -570,8 +571,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case ATTACHMENT:
 		{
-			UploadFormInput input = new UploadFormInput(fieldView);
+			MultipleAttachmentInput input = new MultipleAttachmentInput(fieldView);
 			input.renderInput(element, "");
+			input.renderAttachments(obj.getObjectCollection(fieldView.getResourceKey()));
 			break;
 			
 		}

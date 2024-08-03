@@ -12,6 +12,7 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.PageResources;
 
 public abstract class FieldInputRender implements PageResources {
@@ -84,6 +85,16 @@ public abstract class FieldInputRender implements PageResources {
 			for(Element child : body.children()) {
 				e.appendChild(child);
 			}
+		}
+		
+		url = getClass().getResource(getJsResource());
+		if(Objects.nonNull(url)) {
+			PageHelper.appendHeadScript(e.ownerDocument(), "/app/script/" + getResourceClass().getPackageName().replace('.', '/') + "/" + getJsResource());
+		}
+		
+		url = getClass().getResource(getCssResource());
+		if(Objects.nonNull(url)) {
+			PageHelper.appendStylesheet(e.ownerDocument(),  "/app/style/" + getResourceClass().getPackageName().replace('.', '/') + "/" + getCssResource());
 		}
 	}
 	

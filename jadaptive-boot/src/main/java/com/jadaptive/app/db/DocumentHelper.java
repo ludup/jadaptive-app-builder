@@ -380,7 +380,7 @@ public class DocumentHelper {
 			String uuid = getParameter(parameters, field, formVariablePrefix);
 			String name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
 			
-			if(StringUtils.isNotBlank(uuid)) {
+			if(StringUtils.isBlank(uuid)) {
 				uuid = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousUUID");
 				name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousName");
 			}
@@ -461,6 +461,27 @@ public class DocumentHelper {
 				convertObjectToDocument(generateReference(values[i], (String) obj.getValue(nameField)), doc);
 				result.add(doc);
 			}
+			break;
+		}
+		case ATTACHMENT:
+		{
+			
+//			String[] names = parameters.get(String.format("%sText", field.getFormVariable()));
+//			String uuid = getParameter(parameters, field, formVariablePrefix);
+//			String name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
+//			
+//			if(StringUtils.isBlank(uuid)) {
+//				uuid = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousUUID");
+//				name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousName");
+//			}
+//			
+//			if(StringUtils.isNotBlank(uuid)) {
+//				Document doc = new Document();
+//				convertObjectToDocument(generateReference(uuid, name), doc);
+//				return doc;
+//			}
+//
+//			return null;
 			break;
 		}
 		default:

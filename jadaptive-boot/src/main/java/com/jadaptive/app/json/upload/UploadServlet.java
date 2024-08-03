@@ -24,7 +24,6 @@ import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.ResponseHelper;
 import com.jadaptive.api.upload.UploadHandler;
 import com.jadaptive.api.upload.UploadIterator;
-import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.FileUtils;
 import com.jadaptive.utils.ParameterHelper;
 
@@ -40,13 +39,7 @@ public class UploadServlet extends HttpServlet {
 	static Logger log = LoggerFactory.getLogger(UploadServlet.class);
 	
 	@Autowired
-	private SessionUtils sessionUtils;
-	
-	@Autowired
 	private PermissionService permissionService; 
-	
-	@Autowired
-	private UserService userService; 
 	
 	@Autowired
 	private PluginManager pluginManager; 

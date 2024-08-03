@@ -3,10 +3,17 @@ package com.jadaptive.utils;
 import java.util.Map;
 import java.util.Objects;
 
+import org.bouncycastle.util.Arrays;
+
 public class ParameterHelper {
 
 	public static void setValue(Map<String,String[]> params, String key, String value) {
-		params.put(key,  new String[] { value });
+		String[] values = params.get(key);
+		if(Objects.isNull(values) || values.length==0) {
+			params.put(key,  new String[] { value });
+		} else {
+			params.put(key, Arrays.append(values, value));
+		}
 	}
 	
 	public static String getValue(Map<String,String[]> params ,String key) {

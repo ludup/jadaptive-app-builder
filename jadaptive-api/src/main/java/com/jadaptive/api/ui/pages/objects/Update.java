@@ -4,9 +4,12 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.ui.MessagePage;
 import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.RequestPage;
@@ -34,6 +37,8 @@ public class Update extends ObjectTemplatePage {
 	
 	protected void beforeGenerateContent(Document document) {
 
+		PageHelper.addContentSecurityPolicy("style-src", SessionUtils.UNSAFE_INLINE);
+		
 		if(!uiService.canUpdate(template)) {
 			throw new PageRedirect(new MessagePage("default",
 					"title.updateNotAllowed", 

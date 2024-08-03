@@ -133,14 +133,24 @@ public class ObjectUploadServlet extends HttpServlet {
 		    FileItemInput item = iter.next();
 
 		    if (item.isFormField()) {
+		    	
 		    	String name = item.getFieldName();
 		        String value = IOUtils.toString(item.getInputStream(), "UTF-8");
+		        
+		        if(log.isInfoEnabled()) {
+		        	log.info("Form input {} with value {}", name, value);
+		    	}
+
 		        ParameterHelper.setValue(parameters, name, value);
 		    } else {
 		    	if(StringUtils.isNotBlank(item.getName())) {
 				    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName());
 			    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
 			    	ParameterHelper.setValue(parameters, item.getFieldName() + "_name", attachment.getFilename());
+			    	
+			    	if(log.isInfoEnabled()) {
+			        	log.info("File input {} with value {}", item.getFieldName(), item.getName());
+			    	}
 			    	attachments.add(attachment);
 		    	}
 		    }

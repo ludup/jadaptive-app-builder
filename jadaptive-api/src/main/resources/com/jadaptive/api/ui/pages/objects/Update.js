@@ -13,15 +13,14 @@ $(document).ready(function() {
     	var url = form.attr('action');
     
         JadaptiveUtils.startAwesomeSpin($('#saveButton i'), 'fa-save');
-		var fdata = JadaptiveUtils.processedFormData(form);
-        
+
     	$.ajax({
            type: "POST",
            url: '/app/api/form/validate/' + form.data('resourcekey'),
            cache: false,
            contentType: false,
     	   processData: false,
-           data: fdata,
+           data: JadaptiveUtils.processedFormData(form, true),
            success: function(data)
            {
 	           if(data.success) {
@@ -31,7 +30,7 @@ $(document).ready(function() {
 			           cache: false,
 			           contentType: false,
 			    	   processData: false,
-			           data: new FormData(form[0]),
+			           data: JadaptiveUtils.processedFormData(form, false),
 			           success: function(data)
 			           {
 			               if(data.redirect) {
@@ -44,7 +43,45 @@ $(document).ready(function() {
 			           },
 			           complete: function() {
 			           		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
-			           }
+			           },
+			           xhr: function() {
+					        var xhr = new window.XMLHttpRequest();
+					
+							$('body').append('<!-- Modal --> \
+			                 <div class="modal fade" id="progressModal" data-bs-backdrop="static" \
+			                               data-bs-keyboard="false" tabindex="-1" \
+			                               aria-labelledby="staticBackdropLabel" aria-hidden="true"> \
+								  <div class="modal-dialog modal-dialog-centered"> \
+								    <div class="modal-content"> \
+								      <div class="modal-body"> \
+											<div id="uploadProgress"> \
+									   			<div class="progress mx-auto my-1 w-100"> \
+													<div id="progressBar" class="progress-bar" role="progressbar" \
+															 aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div> \
+												</div> \
+										      </div> \
+										     <div class="mt-1"> \
+										        <span class="form-text text-muted">${userInterface:uploadingFiles.text}</span> \
+										     </div> \
+								      </div> \
+								    </div> \
+								  </div> \
+								</div>');
+			
+			                $('#progressBar').css("width", 50).attr('aria-valuenow', "50");
+			                $('#progressModal').modal('show');
+			                
+					        // Upload progress
+					        xhr.upload.addEventListener("progress", function(evt){
+					            if (evt.lengthComputable) {
+					                var percentComplete = Math.round((evt.loaded / evt.total) * 100);
+								  $('#progressBar').width(percentComplete + "%")
+								  		.attr('aria-valuenow', percentComplete);
+					            }
+					       }, false);
+					       
+					       return xhr;
+					   }
 			         });
 			     } else {
 				     JadaptiveUtils.error(data.message);
