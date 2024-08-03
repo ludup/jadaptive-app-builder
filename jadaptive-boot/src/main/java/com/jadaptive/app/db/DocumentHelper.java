@@ -517,19 +517,30 @@ public class DocumentHelper {
 				clz = baseClass.getName();
 			}
 			
-			clz = clz.replace("FieldDefinition", "FieldTemplate");
+			clz = processClassNameChanges(clz, classLoader);
 			T obj;
 			
 			String resourceKey = document.getString("resourceKey");
 			
 			try {
-				clz = processClassNameChanges(clz, classLoader);
 				obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
 			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
-				if(Objects.nonNull(resourceKey)) {
-					obj = (T) ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey).getConstructor().newInstance();
-				} else {		
+				try {
 					obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
+				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e2) {
+					try {
+						Class<?> c = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey);
+						if(Objects.isNull(c)) {
+							throw new IllegalStateException(String.format(
+									"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
+									resourceKey, clz, classLoader));
+						}
+						obj = (T) c.getConstructor().newInstance();
+					} catch(NoSuchMethodException | InstantiationException e3) {
+						throw new IllegalStateException(String.format(
+							"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
+							resourceKey, clz, classLoader), e);
+					}
 				}
 			}
 			
@@ -702,7 +713,7 @@ public class DocumentHelper {
 			}
 			
 			return obj;
-		} catch (SecurityException | IllegalAccessException | NoSuchMethodException | IllegalArgumentException | InvocationTargetException | RepositoryException | InstantiationException | ParseException | ClassNotFoundException e) {
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | RepositoryException | ParseException e) {
 			log.error("Error converting document", e);
 			throw new RepositoryException(String.format("Unexpected error loading UUID entity %s", baseClass.getName()), e);			
 		}

@@ -29,6 +29,7 @@ import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -213,6 +214,58 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 							throws UnauthorizedException,
 							AccessDeniedException {
 						return objectService.count(resourceKey, searchColumn, searchPattern);
+					}
+				});
+
+		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/objects/{}/table", resourceKey, e);
+			}
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+	
+	@RequestMapping(value="/app/api/references/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public BootstrapTableResult<UUIDReference> referenceObjects(HttpServletRequest request, 
+			@PathVariable String resourceKey,
+			@RequestParam(required=false, defaultValue = "") String sort,
+			@RequestParam(required=false, defaultValue = "asc") String order,
+			@RequestParam(required=false, defaultValue = "0") int offset,
+			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, ObjectException {
+		
+		try {
+			
+			ObjectTemplate template = templateService.get(resourceKey);
+			
+			return processDataReferencesRequest(request, 
+					template,
+				new BootstrapTablePageProcessor() {
+
+					@Override
+					public Collection<?> getPage(String searchColumn, String searchPattern, int start,
+							int length, String sortBy)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						setupSystemContext();
+						try {
+							return objectService.table(resourceKey, searchColumn, searchPattern, offset, limit, sort, SortOrder.valueOf(order.toUpperCase()));
+						} finally {
+							clearUserContext();
+						}
+					}
+
+					@Override
+					public Long getTotalCount(String searchColumn, String searchPattern)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						setupSystemContext();
+						try {
+							return objectService.count(resourceKey, searchColumn, searchPattern);
+						} finally {
+							clearUserContext();
+						}
 					}
 				});
 

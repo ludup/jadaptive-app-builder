@@ -281,15 +281,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 						assertPermission(USER_LOGIN_PERMISSION);
 						Session session = sessionService.createSession(getCurrentTenant(), state.getUser(),
 								state.getRemoteAddress(), state.getUserAgent(), SessionType.HTTPS, state);
-						Redirect redir;
-						try {
-							redir = new PageRedirect(pageCache.getPage(state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass())));
-						}
-						catch(Redirect r) {
-							redir = r;
-						}
 						return new AuthenticationCompletedResult(
-								redir, 
+								state.nextRedirectOrFinish(pageCache), 
 								Optional.of(session)
 						) {
 							@Override

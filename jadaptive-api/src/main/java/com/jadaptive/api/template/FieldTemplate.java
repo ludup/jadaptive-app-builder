@@ -94,6 +94,9 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	@ObjectField(type = FieldType.TEXT_AREA)
 	String meta;
 	
+	@ObjectField(type = FieldType.ENUM)
+	Collection<FieldOptions> options;
+	
 	public FieldTemplate() {
 	}
 
@@ -353,5 +356,13 @@ public class FieldTemplate extends TemplateUUIDEntity {
 
 	public void setCascadeDelete(boolean cascadeDelete) {
 		this.cascadeDelete = cascadeDelete;
+	}
+
+	public Collection<FieldOptions> getOptions() {
+		return options;
+	}
+
+	public void setOptions(Collection<FieldOptions> options) {
+		this.options = options;
 	}
 }
