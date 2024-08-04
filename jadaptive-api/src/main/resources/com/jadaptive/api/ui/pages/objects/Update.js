@@ -46,37 +46,16 @@ $(document).ready(function() {
 			           },
 			           xhr: function() {
 					        var xhr = new window.XMLHttpRequest();
-					
-							$('body').append('<!-- Modal --> \
-			                 <div class="modal fade" id="progressModal" data-bs-backdrop="static" \
-			                               data-bs-keyboard="false" tabindex="-1" \
-			                               aria-labelledby="staticBackdropLabel" aria-hidden="true"> \
-								  <div class="modal-dialog modal-dialog-centered"> \
-								    <div class="modal-content"> \
-								      <div class="modal-body"> \
-											<div id="uploadProgress"> \
-									   			<div class="progress mx-auto my-1 w-100"> \
-													<div id="progressBar" class="progress-bar" role="progressbar" \
-															 aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div> \
-												</div> \
-										      </div> \
-										     <div class="mt-1"> \
-										        <span class="form-text text-muted">${userInterface:uploadingFiles.text}</span> \
-										     </div> \
-								      </div> \
-								    </div> \
-								  </div> \
-								</div>');
-			
-			                $('#progressBar').css("width", 50).attr('aria-valuenow', "50");
-			                $('#progressModal').modal('show');
+
+							 $('#progressModal').modal('show');
 			                
 					        // Upload progress
 					        xhr.upload.addEventListener("progress", function(evt){
 					            if (evt.lengthComputable) {
 					                var percentComplete = Math.round((evt.loaded / evt.total) * 100);
-								  $('#progressBar').width(percentComplete + "%")
-								  		.attr('aria-valuenow', percentComplete);
+								  	//$('#progressBar').parent().attr('aria-valuenow', percentComplete);
+								  	$('#progressBar.auto-progress-bar').width(percentComplete + "%")
+								  		;
 					            }
 					       }, false);
 					       
