@@ -11,6 +11,8 @@ public @interface ObjectField {
 		
 		FieldType type();	
 		
+		FieldOptions[] options() default {};
+		
 		String defaultValue() default "";
 
 		boolean readOnly() default false;
@@ -40,6 +42,4 @@ public @interface ObjectField {
 		String references() default "";
 
 		String meta() default "";
-		
-		boolean cascadeDelete() default false;
 }

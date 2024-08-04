@@ -63,6 +63,7 @@ public class CollectionSearchFormInput {
 							.attr("id", String.format("%sDropdown", resourceKey))
 							.addClass("input-group position-relative dropdown" + (readOnly ? " d-none" : ""))
 						.appendChild(new Element("input")
+								.attr("autocomplete", "off")
 								.attr("id", String.format("%sText", resourceKey))
 								.attr("data-display", "static")
 								.addClass("form-control collectionSearchInputText")

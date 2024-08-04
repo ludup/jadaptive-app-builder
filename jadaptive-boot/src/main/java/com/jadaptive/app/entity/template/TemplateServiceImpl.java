@@ -93,6 +93,10 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 	@Override
 	public void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template) {
+		
+		if(log.isInfoEnabled()) {
+			log.info("Registering template class for {} -> {}", resourceKey, templateClazz.getName());
+		}
 		for(String alias : template.getAliases()) {
 			templateClazzes.put(alias, templateClazz);
 		}

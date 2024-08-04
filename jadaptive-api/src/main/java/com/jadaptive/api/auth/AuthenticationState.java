@@ -8,13 +8,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.PageCache;
+import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.User;
 
 public class AuthenticationState {
+	private final static Logger LOG = LoggerFactory.getLogger(AuthenticationState.class);
 
 	private User user;
 	private Map<Class<? extends Page>,AuthenticationModule> requiredAuthenticationModulez = new HashMap<>();
@@ -62,6 +68,32 @@ public class AuthenticationState {
 	public void setOptionalAvailable(int optionalAvailable) {
 		this.optionalAvailable = optionalAvailable;
 	}
+	
+	public Redirect nextRedirectOrFinish(PageCache pageCache) throws Redirect {
+		if(!isRequiredAuthenticationComplete()) {
+			return new PageRedirect(pageCache.getPage(requiredAuthenticationPages.get(currentPageIndex)));
+		} if(!isOptionalComplete()) { 
+			if(Objects.nonNull(selectedPage)) {
+				return new PageRedirect(pageCache.getPage(selectedPage));
+			} else {
+				return new PageRedirect(pageCache.getPage(optionalSelectionPage));
+			}
+			
+		} else {
+			if(!hasPostAuthentication()) {
+				LOG.info("Clearing authentication state from session.");
+				Request.get().getSession().removeAttribute(AuthenticationService.AUTHENTICATION_STATE_ATTR);
+				
+				if(Objects.nonNull(homePage)) {
+					return homePage;
+				}
+				else
+					return new PageRedirect(pageCache.getPage(pageCache.getHomeClass()));
+			}
+			
+			return new PageRedirect(pageCache.getPage(postAuthenticationPages.get(currentPostAuthenticationIndex).getClass()));
+		}
+	}
 
 	public Optional<Class<? extends Page>> getCurrentPage() {
 		if(!isRequiredAuthenticationComplete()) {
@@ -74,9 +106,7 @@ public class AuthenticationState {
 			}
 			
 		} else {
-			
 			if(!hasPostAuthentication()) {
-				Request.get().getSession().setAttribute(AuthenticationService.AUTHENTICATION_STATE_ATTR, null);
 				if(Objects.nonNull(homePage)) {
 					throw homePage;
 				}

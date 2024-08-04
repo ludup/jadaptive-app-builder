@@ -403,6 +403,20 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	@Override
 	public void registerAnnotatedTemplates(boolean newSchema) {
 			
+		try (ScanResult scanResult =
+                new ClassGraph()                 
+                    .enableAllInfo()  
+                    .addClassLoader(getClass().getClassLoader())
+                    .whitelistPackages("com.jadaptive")   
+                    .scan()) {                  
+            for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectDefinition.class.getName())) {
+                if(log.isDebugEnabled()) {
+					log.debug("Found template {}", classInfo.getName());
+				}
+                registerAnnotatedTemplate((Class<? extends UUIDDocument>) classInfo.loadClass(), newSchema);
+            }
+        }
+		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
 			if(log.isDebugEnabled()) {
@@ -433,19 +447,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
             }
 		}
 		
-		try (ScanResult scanResult =
-                new ClassGraph()                 
-                    .enableAllInfo()  
-                    .addClassLoader(getClass().getClassLoader())
-                    .whitelistPackages("com.jadaptive")   
-                    .scan()) {                  
-            for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectDefinition.class.getName())) {
-                if(log.isDebugEnabled()) {
-					log.debug("Found template {}", classInfo.getName());
-				}
-                registerAnnotatedTemplate((Class<? extends UUIDDocument>) classInfo.loadClass(), newSchema);
-            }
-        }
+		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1009,7 +1011,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		t.setSearchable(field.searchable());
 		t.setTextIndex(field.textIndex());
 		t.setResettable(field.resettable());
-		t.setCascadeDelete(field.cascadeDelete());
+		t.setOptions(Arrays.asList(field.options()));
 		t.setUnique(field.unique());
 		t.setMeta(field.meta());
 		t.setCollection(f.getType().isAssignableFrom(Collection.class));
