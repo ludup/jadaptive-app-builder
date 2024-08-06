@@ -588,25 +588,32 @@ public class DocumentHelper {
 						m.invoke(obj, convertDocumentToObject(UUIDEntity.class, (Document) doc, classLoader));
 					} else {
 						Object objectUUID =  document.get(name);
+						String objectName = null;
 						if(objectUUID instanceof Document) {
 							objectUUID = document.get(name, Document.class).get("uuid");
+							objectName = (String) document.get(name, Document.class).get("name");
 						} 
 						
 						if(StringUtils.isNotBlank((String)objectUUID)) {
-							ObjectServiceBean service = parameter.getType().getAnnotation(ObjectServiceBean.class);
-							if(Objects.nonNull(service)) {
-								
-								UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
-								Object ref = bean.getObjectByUUID((String)objectUUID);
-								m.invoke(obj, ref);
-								
+							if(!parameter.getType().equals(UUIDReference.class)) {
+								ObjectServiceBean service = parameter.getType().getAnnotation(ObjectServiceBean.class);
+								if(Objects.nonNull(service)) {
+									
+									UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
+									Object ref = bean.getObjectByUUID((String)objectUUID);
+									m.invoke(obj, ref);
+									
+								} else {
+									resourceKey = getTemplateResourceKey(parameter.getType());
+	
+									AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, (String)objectUUID);
+									Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+									m.invoke(obj, ref);
+									
+								}
 							} else {
-								resourceKey = getTemplateResourceKey(parameter.getType());
-
-								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, (String)objectUUID);
-								Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+								UUIDReference ref = new UUIDReference((String)objectUUID, objectName);
 								m.invoke(obj, ref);
-								
 							}
 						}
 						
@@ -646,14 +653,19 @@ public class DocumentHelper {
 								elements.add(convertDocumentToObject(type, embeddedDocument, classLoader));
 							} else if(embedded instanceof Document) {
 								UUIDReference ref = DocumentHelper.convertDocumentToObject(UUIDReference.class, (Document) embedded);
-								AbstractObject e = (AbstractObject) 
-										ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
-												columnDefinition.references(), ref.getUuid());
-								UUIDEntity ue = convertDocumentToObject(
-										ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(columnDefinition.references()),
-										new Document(e.getDocument()), 
-										classLoader); 
-								elements.add(ue);
+								if(!UUIDReference.class.equals(type)) {
+									AbstractObject e = (AbstractObject) 
+											ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
+													columnDefinition.references(), ref.getUuid());
+									UUIDEntity ue = convertDocumentToObject(
+											ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(columnDefinition.references()),
+											new Document(e.getDocument()), 
+											classLoader); 
+									elements.add(ue);
+								} else {
+									elements.add(ref);
+								}
+								
 							}
 						}
 

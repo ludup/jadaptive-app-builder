@@ -125,7 +125,7 @@ public class TableRenderer {
 			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || view.multipleDelete();
 			
 			
-			if(hasMultipleSelection) {
+			if(hasMultipleSelection && totalObjects > 0) {
 				Element ae;
 				tableholder.add(Html.div("row")
 						.appendChild(ae = Html.div("col-12")));
