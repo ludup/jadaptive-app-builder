@@ -205,7 +205,7 @@ public class Application {
 			
 			KeyPair kp = X509CertificateUtils.generatePrivateKey("RSA", 2048);
 			cert = X509CertificateUtils.generateSelfSignedCertificate("localhost", 
-					 "JADAPTIVE Appplication", 
+					 "JADAPTIVE Application", 
 					 "JADAPTIVE Limited", 
 					 "Penzance", "Cornwall", "GB", kp, "SHA256WithRSAEncryption");
 			KeyStore ks = X509CertificateUtils.createPKCS12Keystore(kp, 
