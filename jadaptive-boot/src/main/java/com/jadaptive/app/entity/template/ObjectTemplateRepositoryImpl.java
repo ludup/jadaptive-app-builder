@@ -107,13 +107,21 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 						if(log.isInfoEnabled()) {
 							log.info("Creating unique index on {} for field {}", template.getName(), field.getResourceKey());
 						}
-						createUniqueIndex(template, field.getResourceKey());
+						if(field.getFieldType()==FieldType.OBJECT_REFERENCE) {
+							createUniqueIndex(template, field.getResourceKey() + ".uuid");
+						} else {
+							createUniqueIndex(template, field.getResourceKey());
+						}
 					} else {
 						if(field.isSearchable() && !field.isTextIndex()) {
 							if(log.isInfoEnabled()) {
 								log.info("Creating index on {} for field {}", template.getName(), field.getResourceKey());
 							}
-							createIndex(template, field.getResourceKey());
+							if(field.getFieldType()==FieldType.OBJECT_REFERENCE) {
+								createIndex(template, field.getResourceKey() + ".uuid");
+							} else {
+								createIndex(template, field.getResourceKey());
+							}
 						} else if(field.isTextIndex()) {
 							if(Objects.nonNull(textIndexField)) {
 								throw new IllegalStateException(
