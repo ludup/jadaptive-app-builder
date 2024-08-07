@@ -65,6 +65,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.templates.TemplateUtils;
 //import com.jadaptive.app.ClassLoaderServiceImpl;
 //import com.jadaptive.app.encrypt.EncryptionServiceImpl;
 //import com.jadaptive.app.entity.MongoEntity;
@@ -509,10 +510,11 @@ public class DocumentHelper {
 			String resourceKey = document.getString("resourceKey");
 			
 			try {
-				obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
+				obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
 			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
+				log.warn("Could not find class {} in uber class loader", clz);
 				try {
-					obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
+					obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
 				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e2) {
 					try {
 						Class<?> c = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey);

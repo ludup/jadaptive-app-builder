@@ -7,9 +7,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -40,6 +42,8 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	
 	@Autowired
 	private PluginManager pluginManager; 
+	
+	Map<String,Class<?>> cache = new HashMap<>();
 	
 	@PostConstruct
 	private void postConstruct() {
@@ -103,21 +107,34 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
 		
-		Class<?> clz = findLoadedClass(name);
+		
+		Class<?> clz = cache.get(name);
+		if(Objects.nonNull(clz)) {
+			return clz;
+		}
+				
+		clz = findLoadedClass(name);
 
 		if(clz!=null) {
+			cache.put(name, clz);
 			return clz;
 		}
 		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 			try {
-				return w.getPluginClassLoader().loadClass(name);
+				clz  = w.getPluginClassLoader().loadClass(name);
+				if(clz!=null) {
+					cache.put(name, clz);
+					return clz;
+				}
 			} catch(ClassNotFoundException e) {
 			}
 		}
 
-		return getClass().getClassLoader().loadClass(name);
-
+		clz = getClass().getClassLoader().loadClass(name);
+		cache.put(name, clz);
+		return clz;
+		
 	}
 
 	@Override
