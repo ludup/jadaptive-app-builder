@@ -59,10 +59,6 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 	@ObjectView(value = "optional", weight = 0)
 	Integer optionalRequired = 0;
 	
-	@ObjectField(type = FieldType.INTEGER)	
-	@ObjectView(value = "optional", weight = 0)
-	Integer backupRequired = 0;
-	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY)
 	@ObjectView(value = "optional", weight = 10)
 	Collection<AuthenticationModule> optionalAuthenticators = new ArrayList<>();
@@ -118,14 +114,6 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 
 	public void setOptionalRequired(Integer optionalRequired) {
 		this.optionalRequired = optionalRequired;
-	}
-
-	public Integer getBackupRequired() {
-		return backupRequired;
-	}
-
-	public void setBackupRequired(Integer backupRequired) {
-		this.backupRequired = backupRequired;
 	}
 
 	public Collection<AuthenticationModule> getOptionalAuthenticators() {
