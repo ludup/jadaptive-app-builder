@@ -43,7 +43,9 @@ public class ApplicationServiceImpl implements ApplicationService {
 	static ApplicationServiceImpl instance = new ApplicationServiceImpl();
 	
 	Map<Class<?>,Object> testingBeans = new HashMap<>();
-	
+	Map<Class<?>,Object> cachedBeans = new HashMap<>();
+	Map<Class<?>,Collection<?>> cachedCollections = new HashMap<>();
+  	
 	@PostConstruct
 	private void postConstruct() {
 		instance = this;
@@ -53,29 +55,15 @@ public class ApplicationServiceImpl implements ApplicationService {
 		return instance;
 	}
 
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E> E getBean(Class<E> clz) {
-		if(Objects.nonNull(context)) {
-			Collection<E> beans = getBeans(clz);
-			if(beans.isEmpty()) {
-				throw new NoSuchBeanDefinitionException("Missing bean of type " + clz.getName());
-			}
-			if(beans.size() > 1) {
-				throw new IllegalStateException("Multiple beans of type " + clz.getName());
-			}
-			return beans.iterator().next();
-		} else {
-			Object obj = testingBeans.get(clz);
-			if(Objects.isNull(obj)) {
-				throw new IllegalStateException("Uninitialized testing bean " + clz.getName());
-			}
-			return (E)obj;
-		}
-	}
-	
-	@Override
 	public <E> Collection<E> getBeans(Class<E> clz) {
+		
+		Collection<?> cached = cachedCollections.get(clz);
+		if(Objects.nonNull(cached)) {
+			return (Collection<E>) cached;
+		}
 		
 		List<E> results = new ArrayList<>();
 		
@@ -110,8 +98,60 @@ public class ApplicationServiceImpl implements ApplicationService {
 		}
 		
 		results.addAll(tmp.values());
-		
+		cachedCollections.put(clz, results);
 		return results;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <E> E getBean(Class<E> clz) {
+		
+		Object cached = cachedBeans.get(clz);
+		if(Objects.nonNull(cached)) {
+			return (E)cached;
+		}
+		
+		List<E> results = new ArrayList<>();
+		
+		for(PluginWrapper w : pluginManager.getPlugins()) {
+			
+			if(w.getPlugin()==null) {
+				continue;
+			}
+			
+			if(w.getPlugin() instanceof SpringPlugin) {
+				if(log.isDebugEnabled()) {
+					log.debug("Scanning plugin {} for beans {}", 
+							w.getPluginId(),
+							clz.getName());
+				}
+			
+				Map<String,E> tmp = ((SpringPlugin)w.getPlugin())
+						.getApplicationContext().getBeansOfType(clz);
+				
+				if(log.isDebugEnabled()) {
+					log.debug("Found {} plugin beans of type {}", tmp.size(), clz.getName());
+				}
+				
+				if(!tmp.isEmpty()) {
+					cachedBeans.put(clz, tmp.values().iterator().next());
+					return (E) cachedBeans.get(clz);
+				}
+			}
+		}
+		
+		Map<String,E> tmp = context.getBeansOfType(clz);
+		
+		if(tmp.isEmpty()) {
+			throw new NoSuchBeanDefinitionException(clz.getName());
+		}
+		
+		if(log.isDebugEnabled()) {
+			log.debug("Found {} system beans of type {}", tmp.size(), clz.getName());
+		}
+		
+		cachedBeans.put(clz, tmp.values().iterator().next());
+		return (E) cachedBeans.get(clz);
 	}
 	
 	@Override
