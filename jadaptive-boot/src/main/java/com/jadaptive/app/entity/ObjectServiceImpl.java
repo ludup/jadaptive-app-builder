@@ -34,6 +34,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
@@ -48,6 +49,7 @@ import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
+import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.DocumentDatabase;
@@ -984,6 +986,21 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(entity.getResourceKey());
 		return DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument()));
+	}
+	
+	@Override
+	public <T extends UUIDDocument> T objectFromReference(UUIDReference ref, Class<T> clz) {
+		return DocumentHelper.convertDocumentToObject(clz, new Document(get(TemplateUtils.lookupClassResourceKey(clz), ref.getUuid()).getDocument()));
+	}
+	
+	@Override
+	public <T extends UUIDDocument> Collection<T> collectionFromReferences(Collection<UUIDReference> refs, Class<T> clz) {
+		var results = new ArrayList<T>();
+		String resourceKey = TemplateUtils.lookupClassResourceKey(clz);
+		for(UUIDReference ref : refs) {
+			results.add(DocumentHelper.convertDocumentToObject(clz, new Document(get(resourceKey, ref.getUuid()).getDocument())));
+		}
+		return results;
 	}
 	
 	
