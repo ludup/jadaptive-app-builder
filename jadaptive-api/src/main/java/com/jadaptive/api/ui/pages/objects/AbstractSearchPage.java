@@ -462,11 +462,10 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 		case OBJECT_REFERENCE:
 		{
-			ObjectTemplate referenceTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
 			FieldSearchFormInput input = new FieldSearchFormInput(
 					template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle(), 
 					String.format("/app/api/references/%s/table", field.getValidationValue(ValidationType.RESOURCE_KEY)),
-						referenceTemplate.getNameField(), field.getResourceKey(), "uuid");
+						"name", field.getResourceKey(), "uuid");
 			input.diableDecoration();
 			input.disableIDAttribute();
 			if(!initial) {

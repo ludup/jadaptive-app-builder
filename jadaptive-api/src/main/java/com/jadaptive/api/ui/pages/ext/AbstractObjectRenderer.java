@@ -389,7 +389,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 				FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
 						String.format("/app/api/references/%s/table", objectType),
-						objectTemplate.getNameField(), "uuid");
+						"name", "uuid");
 				input.renderInput(element, uuid, name, false, scope == FieldView.READ);
 				break;
 			case OBJECT_EMBEDDED:
@@ -561,7 +561,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), fieldView, String.format("/app/api/references/%s/table", objectType),
-					objectTemplate.getNameField(), "uuid");
+					"name", "uuid");
 			render.renderInput(element, values, false, 
 					(view == FieldView.READ || fieldView.getField().isReadOnly()));
 			break;
