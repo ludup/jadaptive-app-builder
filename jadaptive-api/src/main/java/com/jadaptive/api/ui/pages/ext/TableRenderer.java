@@ -129,6 +129,7 @@ public class TableRenderer {
 			if(hasMultipleSelection && totalObjects > 0) {
 				Element ae;
 				tableholder.add(Html.div("row")
+						.attr("id", "selectionActions")
 						.appendChild(ae = Html.div("col-12")));
 			
 				if(view.multipleDelete()) {
@@ -136,9 +137,9 @@ public class TableRenderer {
 					try {
 						permissionService.assertWrite(template.getResourceKey());
 						
-						ae.appendChild(Html.a("#")
+						ae.appendChild(Html.button("btn", "btn-primary", "selectionAction")
+								.attr("disabled", "")
 								.attr("data-url", "/app/api/objects/" + template.getResourceKey() + "/delete")
-								.addClass("btn btn-primary selectionAction")
 								.appendChild(Html.i("fa-solid", "fa-trash", "me-2"))
 								.appendChild(Html.i18n("userInterface","multipleDelete.text")));
 					
@@ -156,9 +157,9 @@ public class TableRenderer {
 									permissionService.assertAnyPermission(action.permissions());
 								}
 								
-								ae.appendChild(Html.a("#")
+								ae.appendChild(Html.button("btn", "btn-primary", "selectionAction")
 										.attr("data-url", action.url())
-										.addClass("btn btn-primary selectionAction")
+										.attr("disabled", "")
 										.appendChild(Html.i(action.iconGroup(), action.icon(), "me-2"))
 										.appendChild(Html.i18n(action.bundle(), action.resourceKey() + ".name")));
 								
@@ -239,7 +240,9 @@ public class TableRenderer {
 								Element row = Html.tr();
 								
 								if(hasMultipleSelection) {
-									row.appendChild(Html.td().appendChild(Html.input("checkbox", "selectedUUID", obj.getUuid())));
+									Element cb = Html.input("checkbox", "selectedUUID", obj.getUuid());
+									cb.addClass("form-check-input");
+									row.appendChild(Html.td().appendChild(cb));
 								}
 								
 								if(Objects.nonNull(parentObject)) {

@@ -427,6 +427,16 @@ $(function() {
 		}
     });
     
+	$('input[name="selectedUUID"]').on('change', function(e, row, el) {
+		var selected = $('input[name="selectedUUID"]:checked').length > 0;
+		$('.selectionAction').prop('disabled', !selected);
+		/*var collapse = bootstrap.Collapse.getOrCreateInstance('#selectionActions');
+		if (selected)
+			collapse.show();
+		else
+			collapse.hide();*/
+	});
+	
     $('.selectionAction').click(function(e) {
 		e.preventDefault();
 		
@@ -434,7 +444,7 @@ $(function() {
 			
 			var form = new FormData();
 
-			$('input[name="selectedUUID').each(function() {
+			$('input[name="selectedUUID"]').each(function() {
 				if ($(this).is(":checked")) {
 					form.append("uuid", $(this).val());
 				}
