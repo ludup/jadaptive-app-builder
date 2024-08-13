@@ -71,18 +71,14 @@ public class AdminSection extends SetupSection {
 	@Override
 	public void finish(WizardState state) {
 		
-		CreateAccount account = ObjectUtils.assertObject(
-				state.getObject(this), 
-				CreateAccount.class);
+		CreateAccount account = state.getObject(CreateAccount.class);
 		
 		adminDatabase.createAdmin(account.getUsername(), 
 				account.getFirstPassword().toCharArray(), 
 				account.getEmail(), false);
 		
 		if(setOwner) {
-			
-			CreateTenant obj = ObjectUtils.assertObject(state.getObject(CreateTenant.class), CreateTenant.class);
-			
+			CreateTenant obj = state.getObject(CreateTenant.class);
 			tenantService.setSystemOwner(obj.getCompany(), obj.getName(), account.getEmail());
 		}
 
@@ -92,7 +88,7 @@ public class AdminSection extends SetupSection {
 	public void processReview(Document document, WizardState state) {
 
 		Element content = document.selectFirst("#wizardContent");
-		CreateAccount account = ObjectUtils.assertObject(state.getObject(this), CreateAccount.class);
+		CreateAccount account = state.getObject(CreateAccount.class);
 		
 		content.appendChild(new Element("div")
 				.addClass("col-12 w-100 my-3")

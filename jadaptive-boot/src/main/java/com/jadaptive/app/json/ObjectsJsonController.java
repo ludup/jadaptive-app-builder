@@ -124,7 +124,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 		setupUserContext(request);
 		
 		try {
-			sessionUtils.verifySameSiteRequest(request);
+			sessionUtils.verifySameSiteRequest(request, resourceKey);
 		
 			objectService.delete(resourceKey, uuid);
 			return new RequestStatusImpl();

@@ -76,6 +76,7 @@ import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.RadioFormInput;
+import com.jadaptive.api.ui.renderers.form.RichTextEditorInput;
 import com.jadaptive.api.ui.renderers.form.SetPasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.SingleAttachmentInput;
 import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
@@ -83,7 +84,6 @@ import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimeFormInput;
 import com.jadaptive.api.ui.renderers.form.TimestampFormInput;
-import com.jadaptive.api.ui.renderers.form.UploadFormInput;
 import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectRenderer extends AbstractPageExtension {
@@ -163,7 +163,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			Element form = getForm(contents);
 			
 			form.addClass("jadaptiveForm")
-				.attr("id", "objectForm")
 				.attr("method", "POST")
 				.attr("autocomplete", "off")
 				.attr("data-resourcekey", template.getResourceKey())
@@ -190,7 +189,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			Session.getOr().ifPresent(session -> {
 				form.appendChild(Html.input("hidden", 
 						SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
-							sessionUtils.setupCSRFToken(Request.get()))
+							sessionUtils.setupCSRFToken(Request.get(), template.getResourceKey()))
 							.attr("id", "csrftoken"));
 			});
 			
@@ -390,11 +389,23 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						name = (String) ref.getValue("name");
 					}
 				}
-
-				FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
-						String.format("/app/api/references/%s/table", objectType),
-						objectTemplate.getNameField(), "uuid");
-				input.renderInput(element, uuid, name, false, scope == FieldView.READ);
+				
+				AbstractObject ref = obj.getChild(field);
+				if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
+					DropdownFormInput dropdown = new DropdownFormInput(fieldView);
+					dropdown.renderInput(element, "");
+					for(AbstractObject o : objectService.list(objectType)) {
+						dropdown.addInputValue(o.getUuid(), (String) o.getValue(objectTemplate.getNameField()));
+					}
+					if(Objects.nonNull(ref)) {
+						dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
+					}
+				} else {
+					FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
+							String.format("/app/api/references/%s/table", objectType),
+							objectTemplate.getNameField(), "uuid");
+					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
+				}
 				break;
 			case OBJECT_EMBEDDED:
 //				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
@@ -800,6 +811,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
+			case RICH_EDITOR:
+			{
+				RichTextEditorInput render = new RichTextEditorInput(fieldView, currentDocument.get(), view == FieldView.READ);
+				render.renderInput(element, getFieldValue(fieldView, obj));
+				break;
+			}
 			case HTML_VIEW:
 			{
 				/**
@@ -966,7 +983,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		Elements thisElement = element.select("#" + field.getResourceKey());
 		if(field.isRequired()) {
-			thisElement.attr("required", "required");
+			thisElement.attr("required", "true");
 		}
 		if(field.isReadOnly() || view == FieldView.READ) {
 			thisElement.attr("readonly", "readonly");

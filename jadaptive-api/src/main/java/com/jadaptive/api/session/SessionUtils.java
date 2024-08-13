@@ -111,20 +111,24 @@ public class SessionUtils {
 		return sessionConfig.getObject(SessionConfiguration.class).getTimeout();
 	}
 	
-	public void verifySameSiteRequest(HttpServletRequest request) throws UnauthorizedException {
-		verifySameSiteRequest(request, request.getParameterMap());
+	public void verifySameSiteRequest(HttpServletRequest request, String formIdentifier) throws UnauthorizedException {
+		verifySameSiteRequest(request, request.getParameterMap(), formIdentifier);
 	}
 	
-	public void verifySameSiteRequest(HttpServletRequest request, Map<String,String[]> parameters) throws UnauthorizedException {
+	public void verifySameSiteRequest(HttpServletRequest request, Map<String,String[]> parameters, String formIdentifier) throws UnauthorizedException {
+		
+		if(Boolean.getBoolean("jadaptive.disableCSRF")) {
+			return;
+		}
 		
 		SessionConfiguration config = sessionConfig.getObject(SessionConfiguration.class);
 		
 		if(config.getEnableCsrf()) {
-			String requestToken = ParameterHelper.getValue(parameters, CSRF_TOKEN_ATTRIBUTE);
+			String requestToken = ParameterHelper.getValue(parameters, CSRF_TOKEN_ATTRIBUTE + formIdentifier);
 			if(Objects.isNull(requestToken)) {
 				requestToken = request.getHeader("CsrfToken");
 			}
-			String csrf = (String)request.getSession().getAttribute(CSRF_TOKEN_ATTRIBUTE);
+			String csrf = (String)request.getSession().getAttribute(CSRF_TOKEN_ATTRIBUTE + formIdentifier);
 			if(Objects.isNull(csrf)) {
 				log.warn("No CSRF token in session!");
 				return;
@@ -133,8 +137,8 @@ public class SessionUtils {
 				throw new UnauthorizedException("No CSRF token in form!");
 			}
 			if(!requestToken.equals(csrf)) {
-				log.warn("CSRF token mistmatch from {}", request.getRequestURI());
-				log.debug("REMOVEME: Current token {}", csrf);
+				log.warn("CSRF token mistmatch for {} from {}", formIdentifier, request.getRequestURI());
+				log.debug("REMOVEME: Current token for {} is {}", formIdentifier, csrf);
 				log.debug("REMOVEME: Request token {}", requestToken);
 				debugRequest(request);
 				throw new UnauthorizedException(String.format("CSRF token mistmatch from %s", 
@@ -316,11 +320,11 @@ public class SessionUtils {
 		return Session.get(request).getUser();
 	}
 
-	public String setupCSRFToken(HttpServletRequest request) {
+	public String setupCSRFToken(HttpServletRequest request, String formIdentifier) {
 		String token = (String) Utils.generateRandomAlphaNumericString(64);
-		request.getSession().setAttribute(CSRF_TOKEN_ATTRIBUTE, token);
+		request.getSession().setAttribute(CSRF_TOKEN_ATTRIBUTE + formIdentifier, token);
 		if(log.isDebugEnabled()) {
-			log.debug("REMOVEME: Changed CSRF token to {}", token);
+			log.debug("REMOVEME: Set CSRF token for {} to {}", token);
 		}
 		return token;
 	}

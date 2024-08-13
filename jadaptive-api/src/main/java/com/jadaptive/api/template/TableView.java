@@ -24,4 +24,6 @@ public @interface TableView {
 		String sortField() default "_id";
 		
 		boolean multipleDelete() default false;
+		
+		
 }

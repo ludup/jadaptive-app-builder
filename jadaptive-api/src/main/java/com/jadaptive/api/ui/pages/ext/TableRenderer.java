@@ -163,7 +163,7 @@ public class TableRenderer {
 			}
 			
 			Element el;
-			if(totalObjects > 0) {
+			if(Objects.nonNull(objects) && !objects.isEmpty()) {
 				Element table = Html.table("table").attr("data-toggle", "table");
 				tableholder.add(table);
 				
@@ -303,8 +303,6 @@ public class TableRenderer {
 		
 		for(String column : view.defaultColumns()) {
 			
-			boolean isSortedBy = column.equals(sortColumn);
-			
 			DynamicColumn dyn = dynamicColumns.get(column);
 			if(Objects.nonNull(dyn)) {
 				//if(StringUtils.isBlank(dyn.sortColumn())) {
@@ -317,35 +315,42 @@ public class TableRenderer {
 				// sortColumn = dyn.sortColumn();
 			}
 			
-			FieldTemplate t = template.getField(column);
-			
-			Element e;
-			if(Objects.nonNull(t)) {
-				el.appendChild(Html.td().appendChild(
-						e = Html.a("#")
-							.addClass("sortColumn text-decoration-none")
-							.attr("data-column", column)
-							.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey())))));
-			} else {
-				el.appendChild(Html.td().appendChild(
-						e = Html.a("#")
-							.addClass("sortColumn text-decoration-none")
-							.attr("data-column", column)
-							.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column)))));
-			}
-			
-			if(isSortedBy) {
-				switch(sortOrder) {
-				case ASC:
-					e.appendChild(Html.i("fa-solid", "fa-caret-down", "ms-1"));
-					break;
-				default:
-					e.appendChild(Html.i("fa-solid", "fa-caret-up", "ms-1"));
-					break;
-				}
-			}
+			renderColumn(column, el);
 			
 			columns.put(column, template);
+		}
+	}
+	
+	private void renderColumn(String column, Element el) {
+		
+		boolean isSortedBy = column.equals(sortColumn);
+		
+		FieldTemplate t = template.getField(column);
+		
+		Element e;
+		if(Objects.nonNull(t)) {
+			el.appendChild(Html.td().appendChild(
+					e = Html.a("#")
+						.addClass("sortColumn text-decoration-none")
+						.attr("data-column", column)
+						.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey())))));
+		} else {
+			el.appendChild(Html.td().appendChild(
+					e = Html.a("#")
+						.addClass("sortColumn text-decoration-none")
+						.attr("data-column", column)
+						.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column)))));
+		}
+		
+		if(isSortedBy) {
+			switch(sortOrder) {
+			case ASC:
+				e.appendChild(Html.i("fa-solid", "fa-caret-down", "ms-1"));
+				break;
+			default:
+				e.appendChild(Html.i("fa-solid", "fa-caret-up", "ms-1"));
+				break;
+			}
 		}
 	}
 

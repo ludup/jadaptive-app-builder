@@ -4,7 +4,6 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.ui.MessagePage;
@@ -18,7 +17,7 @@ import com.jadaptive.api.ui.pages.ObjectTemplatePage;
 
 @Component
 @RequestPage(path = "update/{resourceKey}/{uuid}")
-@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "jadaptive-forms"} )
 @PageProcessors(extensions = { "i18n"} )
 public class Update extends ObjectTemplatePage {
 	

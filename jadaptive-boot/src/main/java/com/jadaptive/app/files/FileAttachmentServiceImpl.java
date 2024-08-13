@@ -52,10 +52,10 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 	
 	
 	@Override
-	public FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable) throws IOException {
+	public FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable, String template) throws IOException {
 		
 		FileAttachmentStorage provider = getProvider();
-		return provider.createAttachment(in, filename, contentType, formVariable);
+		return provider.createAttachment(in, filename, contentType, formVariable, template);
 	}
 	
 	@Override

@@ -7,7 +7,7 @@ public interface FileAttachmentService {
 
 	public void registerProvider(String uuid, String name);
 
-	FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable) throws IOException;
+	FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable, String template) throws IOException;
 
 	InputStream getAttachmentContent(String uuid) throws IOException;
 

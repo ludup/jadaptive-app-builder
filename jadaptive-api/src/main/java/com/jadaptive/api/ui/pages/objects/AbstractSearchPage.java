@@ -101,10 +101,10 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		setCachedValue("length", String.valueOf(length));
 
-		sortColumn = StringUtils.defaultString(form.getSortColumn(), tableView.sortField());
+		sortColumn = Objects.toString(form.getSortColumn(), tableView.sortField());
 		setCachedValue("sortColumn", sortColumn);
 		
-		sortOrder = SortOrder.valueOf(StringUtils.defaultString(form.getSortOrder(), tableView.sortOrder().name()));
+		sortOrder = SortOrder.valueOf(Objects.toString(form.getSortOrder(), tableView.sortOrder().name()));
 		setCachedValue("sortOrder", sortOrder.name());
 		
 		generateTable(document);
@@ -180,7 +180,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		sortColumn = Request.get().getParameter("sortColumn");
 		if(Objects.isNull(sortColumn)) {
-			sortColumn = getCachedValue("sortColumn", StringUtils.defaultString(Request.get().getParameter("sortColumn"),tableView.sortField()));
+			sortColumn = getCachedValue("sortColumn", Objects.toString(Request.get().getParameter("sortColumn"),tableView.sortField()));
 			if(StringUtils.isBlank(sortColumn)) {
 				sortColumn = null;
 			}
@@ -188,7 +188,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		String order = Request.get().getParameter("sortOrder");
 		if(Objects.isNull(order)) {
-			order = getCachedValue("sortOrder", StringUtils.defaultString(Request.get().getParameter("sortOrder"), tableView.sortOrder().name()));
+			order = getCachedValue("sortOrder", Objects.toString(Request.get().getParameter("sortOrder"), tableView.sortOrder().name()));
 			if(StringUtils.isBlank(order)) {
 				order = null;
 			}

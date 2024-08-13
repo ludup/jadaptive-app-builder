@@ -28,7 +28,7 @@ $(document).ready(function() {
                }
            },
            complete: function() {
-           		
+           		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
            }
          });
     });

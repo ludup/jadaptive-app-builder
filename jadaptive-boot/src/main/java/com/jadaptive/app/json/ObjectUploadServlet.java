@@ -70,14 +70,10 @@ public class ObjectUploadServlet extends HttpServlet {
 		
 		try(var scope = SessionUtils.scopedIoWithoutSessionTimeout(request)) {
 
-			/**
-			 * Return the attachments uploaded. TODO stash these in case of validation
-			 * failure so they can be attached in subsequent operation
-			 */
 			@SuppressWarnings("unused")
-			var attachments = generateFormParameters(request, parameters);
+			var attachments = generateFormParameters(request, parameters, resourceKey);
 			
-			sessionUtils.verifySameSiteRequest(request, parameters);
+			sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
 			
 			resp.setStatus(200);
 			resp.setContentType("application/json");
@@ -120,7 +116,7 @@ public class ObjectUploadServlet extends HttpServlet {
 		}
 	}
 	
-	private Collection<FileAttachment> generateFormParameters(HttpServletRequest req, Map<String,String[]> parameters) throws IOException {
+	private Collection<FileAttachment> generateFormParameters(HttpServletRequest req, Map<String,String[]> parameters, String template) throws IOException {
 		
 		// Create a new file upload handler
 		JakartaServletFileUpload<?,?> upload = new JakartaServletFileUpload<>();
@@ -144,7 +140,7 @@ public class ObjectUploadServlet extends HttpServlet {
 		        ParameterHelper.setValue(parameters, name, value);
 		    } else {
 		    	if(StringUtils.isNotBlank(item.getName())) {
-				    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName());
+				    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName(), template);
 			    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
 			    	ParameterHelper.setValue(parameters, item.getFieldName() + "_name", attachment.getFilename());
 			    	

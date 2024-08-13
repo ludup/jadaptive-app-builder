@@ -54,7 +54,7 @@ public class LocalFileAttachmentStorage implements FileAttachmentStorage {
 	}
 
 	@Override
-	public FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable) throws IOException {
+	public FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable, String template) throws IOException {
 		
 		String uuid = java.util.UUID.randomUUID().toString();
 		FileAttachment attachment = new FileAttachment();
@@ -63,6 +63,7 @@ public class LocalFileAttachmentStorage implements FileAttachmentStorage {
 		attachment.setProvider(providerDatabase.get(UUID, FileStorageProvider.class));
 		attachment.setContentType(contentType);
 		attachment.setFormVariable(formVariable);
+		attachment.setAttachedTo(template);
 		
 		File file = new File(LOCATION, uuid);
 		try(FileOutputStream fout = new FileOutputStream(file)) {

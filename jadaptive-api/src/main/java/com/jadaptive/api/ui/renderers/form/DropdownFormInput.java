@@ -55,6 +55,7 @@ public class DropdownFormInput extends FieldInputRender {
 					.attr("type", "hidden"))
 			.appendChild(nameElement = new Element("input")
 					.attr("data-display", "static")
+					.attr("name",String.format("%sText", getFormVariableWithParents()))
 					.addClass(String.format("%sText", getResourceKey()) + " form-control dropdown-toggle filter-dropdown")
 					.attr("type", "text")
 					.attr("data-bs-toggle", "dropdown")

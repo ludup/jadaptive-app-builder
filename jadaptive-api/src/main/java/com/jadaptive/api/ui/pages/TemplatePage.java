@@ -83,7 +83,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	protected void beforeForm(Document document, HttpServletRequest request, HttpServletResponse response) {
 		
 		try {
-			sessionUtils.verifySameSiteRequest(request);
+			sessionUtils.verifySameSiteRequest(request, getResourceKey());
 		} catch (UnauthorizedException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
@@ -121,7 +121,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 			if(Objects.isNull(e)) {
 				form.appendChild(Html.input("hidden", 
 						SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
-							sessionUtils.setupCSRFToken(Request.get()))
+							sessionUtils.setupCSRFToken(Request.get(), getResourceKey()))
 							.attr("id", "csrftoken"));
 			}
 		}

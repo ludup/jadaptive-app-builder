@@ -85,9 +85,12 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			
 			AbstractObject displayObject = object.get();
 			ObjectTemplate displayTemplate = template;
-			if(Objects.nonNull(displayObject)) {
-				if(!displayObject.getResourceKey().equals(displayTemplate.getResourceKey())) {
-					displayTemplate = templateService.get(displayObject.getResourceKey());
+			var disableOverride = element.attr("jad:disableOverride");
+			if(!Boolean.parseBoolean(disableOverride)) {
+				if(Objects.nonNull(displayObject)) {
+					if(!displayObject.getResourceKey().equals(displayTemplate.getResourceKey())) {
+						displayTemplate = templateService.get(displayObject.getResourceKey());
+					}
 				}
 			}
 			

@@ -30,6 +30,8 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	
 	private static final String UNDECORATED = "authentication.undecorated";
 
+	private static final String LOGIN_IDENTIFIER = "LoginPage";
+	
 	public static void setUndecorated(HttpSession session) {
 		session.setAttribute(UNDECORATED, true);
 	}
@@ -115,7 +117,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			}
 			form.appendChild(Html.input("hidden", 
 					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
-						sessionUtils.setupCSRFToken(Request.get()))
+						sessionUtils.setupCSRFToken(Request.get(), LOGIN_IDENTIFIER))
 						.attr("id", "csrftoken"));
 		}
 		
@@ -141,7 +143,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 			var request = Request.get();
 			
-			sessionUtils.verifySameSiteRequest(request);
+			sessionUtils.verifySameSiteRequest(request, LOGIN_IDENTIFIER);
 			
 			if(doForm(document, state, form)) {
 				throw authenticationService.completeAuthentication(state, Optional.of(this)).

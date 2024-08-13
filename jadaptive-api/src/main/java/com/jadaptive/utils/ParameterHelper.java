@@ -30,7 +30,7 @@ public class ParameterHelper {
 		return params.get(key);
 	}
 	
-	public static void addValue(Map<String,String[]> params, String key, String value) {
+	/*public static void addValue(Map<String,String[]> params, String key, String value) {
 		String[] values = getValues(params, key);
 		if(Objects.isNull(values)) {
 			setValue(params, key, value);
@@ -40,5 +40,5 @@ public class ParameterHelper {
 			tmp[values.length] = value;
 			params.put(key, tmp);
 		}
-	}
+	}*/
 }

@@ -38,6 +38,7 @@ import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -224,7 +225,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				}
 				break;
 			case OBJECT_REFERENCE:
-				if(t.isCascadeDelete()) {
+				if(t.getOptions().contains(FieldOptions.CASCADE_DELETE)) {
 					if(t.getCollection()) {
 						for(AbstractObject c : e.getObjectCollection(t.getResourceKey())) {
 							cascadeReference(c, template, t);
@@ -338,7 +339,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				if(resourceKey.equals(foreignType)) {
 					Collection<AbstractObject> references = collection(reference.getResourceKey(), generateFieldName(parentField, field), foreignKey);
 					if(references.size() > 0) {
-						if(field.isCascadeDelete()) {
+						if(field.getOptions().contains(FieldOptions.CASCADE_ON_DELETED_REFERENCE)) {
 							deleteAll(parentTemplate.getResourceKey(), convertToUUIDS(references));
 						} else {
 							if(parentTemplate.getType() == ObjectType.SINGLETON) {

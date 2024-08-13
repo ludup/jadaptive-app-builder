@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -38,9 +37,6 @@ public class PageCache {
 	
 	@Autowired
 	private PermissionService permissionsService;
-	
-	@Autowired
-	private ClassLoaderService classService; 
 	
 	Map<Class<? extends PageExtension>,PageExtension> extensionCache = new HashMap<>();
 	Map<String,PageExtension> extensionsByName = new HashMap<>();

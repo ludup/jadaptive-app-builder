@@ -41,6 +41,7 @@ import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
 import com.jadaptive.api.template.ObjectExtension;
+import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.ObjectView;
@@ -503,10 +504,13 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 			processed.add(tmp);
 			
 			for(Field field : tmp.getDeclaredFields()) {
-				if(UUIDEntity.class.isAssignableFrom(field.getType())) {
-					iterateClassHeirarchy(field.getType(),
-							get(getTemplateResourceKey(field.getType())),
-							views, processed);
+				ObjectField def = field.getAnnotation(ObjectField.class);
+				if(Objects.nonNull(def) && def.type() == FieldType.OBJECT_EMBEDDED) {
+					if(UUIDEntity.class.isAssignableFrom(field.getType())) {
+						iterateClassHeirarchy(field.getType(),
+								get(getTemplateResourceKey(field.getType())),
+								views, processed);
+					}
 				}
 			}
 

@@ -112,14 +112,15 @@ eraseCookie: function(name) {
     document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 UTC;';
 },
 processedFormData: function(form, removeFiles) {
+	
 	var fdata = new FormData(form[0]);
 	
 	if(removeFiles) {
 		form.find('input[type="file"]').each(function() {
 			fdata.delete($(this).attr('name'));
 		});
-	}
-	
+	} 
+
 	form.find('.processDepends').each(function() {
 		var dependsOn = $(this).data('depends-on');
 		var dependsValue = $(this).attr('data-depends-value');

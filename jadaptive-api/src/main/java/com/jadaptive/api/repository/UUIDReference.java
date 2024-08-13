@@ -22,6 +22,10 @@ public class UUIDReference extends UUIDEntity implements NamedDocument {
 		this.name = name;
 	}
 	
+	public UUIDReference(NamedDocument e) {
+		this(e.getUuid(), e.getName());
+	}
+	
 	public String getName() {
 		return name;
 	}

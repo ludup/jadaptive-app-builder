@@ -14,5 +14,5 @@ public interface FileAttachmentStorage extends ExtensionPoint {
 	
 	long getMaximumSize();
 
-	FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable) throws IOException;
+	FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable, String template) throws IOException;
 }

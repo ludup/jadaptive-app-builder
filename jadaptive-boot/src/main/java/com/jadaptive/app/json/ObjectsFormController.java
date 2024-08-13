@@ -40,6 +40,7 @@ import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
+import com.jadaptive.api.json.ValidationRequestImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.permissions.PermissionService;
@@ -92,9 +93,9 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	   response.sendError(HttpStatus.FORBIDDEN.value(), e.getMessage());
 	}
 	
-	private Map<String,String[]> generateFormParameters(HttpServletRequest req) {
+	private Map<String,String[]> generateFormParameters(HttpServletRequest req, String template) {
 		
-		Map<String,String[]> parameters = new HashMap<>();
+		Map<String,String[]> parameters = req.getParameterMap();
 		
 			try {
 				// Create a new file upload handler
@@ -111,7 +112,9 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 				        String value = IOUtils.toString(item.getInputStream(), "UTF-8");
 				        ParameterHelper.setValue(parameters, name, value);
 				    } else {
-					    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName());
+					    FileAttachment attachment = fileService.createAttachment(
+					    			item.getInputStream(), item.getName(), 
+					    			item.getContentType(), item.getFieldName(), template);
 				    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
 				    }
 				    
@@ -143,12 +146,12 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			
-			sessionUtils.verifySameSiteRequest(request);
+			sessionUtils.verifySameSiteRequest(request, resourceKey);
 			
 			ObjectTemplate template = templateService.get(resourceKey);
 			request.getSession().removeAttribute(resourceKey);
 			
-			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
 			String uuid = objectService.saveOrUpdate(obj);
 			
 			if(template.isSingleton()) {
@@ -181,14 +184,16 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			
-			sessionUtils.verifySameSiteRequest(request);
+			sessionUtils.verifySameSiteRequest(request, resourceKey);
 			
 			ObjectTemplate template = templateService.get(resourceKey);
 			request.getSession().removeAttribute(resourceKey);
 			
-
-			DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
-			return new RequestStatusImpl(true);
+			DocumentHelper.enableMultipleValidation();
+			DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
+			return new ValidationRequestImpl(!DocumentHelper.hasErrors(), 
+					DocumentHelper.hasErrors() ? I18N.getResource("userInterface", "multipleErrors.text", DocumentHelper.getErrors().size()) : "",
+					DocumentHelper.getErrors());
 		}  catch(ValidationException ex) { 
 			return new RequestStatusImpl(false, ex.getMessage());
 		} catch (UriRedirect e) {
@@ -198,6 +203,8 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 				log.error("POST api/form/validate/{}", resourceKey, e);
 			}
 			return handleException(e, "POST", resourceKey);
+		} finally {
+			DocumentHelper.disableMultipleValidation();
 		}
 	}
 	
@@ -261,7 +268,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			ObjectTemplate template = templateService.get(resourceKey);
-			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
 			objectService.stashObject(obj);
 			return new UUIDStatus(obj.getUuid());
 		}  catch(ValidationException ex) { 
@@ -285,7 +292,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			ObjectTemplate template = templateService.get(resourceKey);
-			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
 			Request.get().getSession().setAttribute(obj.getResourceKey(), obj);
 			return new UUIDStatus(resourceKey);
 		}  catch(ValidationException ex) { 
@@ -312,7 +319,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		try {
 
 			ObjectTemplate template = templateService.get(resourceKey);
-			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
 			
 			ObjectTemplate extensionTemplate = templateService.get(extension);
 			
@@ -353,7 +360,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		try {
 
 			ObjectTemplate template = templateService.get(resourceKey);
-			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
 			
 			ObjectTemplate extensionTemplate = templateService.get(extension);
 			
@@ -444,7 +451,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		try {
 			ObjectTemplate parentTemplate = templateService.get(resourceKey);
 			ObjectTemplate childTemplate = templateService.get(childResource);
-			AbstractObject childObject = DocumentHelper.buildRootObject(generateFormParameters(request), childTemplate.getResourceKey(), childTemplate);
+			AbstractObject childObject = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), childTemplate.getResourceKey(), childTemplate);
 			FieldTemplate fieldTemplate = parentTemplate.getField(fieldName);
 			Object stashedObject = Request.get().getSession().getAttribute(resourceKey);
 			if(Objects.isNull(stashedObject)) {
@@ -502,7 +509,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			ObjectTemplate template = templateService.get(resourceKey);
-			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request), template.getResourceKey(), template);
+			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
 			objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
 					templateService.getTemplateClass(resourceKey), 
 					new Document(obj.getDocument())));
