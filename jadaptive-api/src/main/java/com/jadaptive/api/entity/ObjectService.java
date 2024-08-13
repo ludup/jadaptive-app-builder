@@ -6,6 +6,7 @@ import java.util.Collection;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.ValidationException;
@@ -66,6 +67,10 @@ public interface ObjectService {
 	void deleteAll(String resourceKey, String[] uuid);
 
 	Collection<AbstractObject> collection(String resourceKey, String searchField, String searchValue);
+
+	<T extends UUIDDocument> T objectFromReference(UUIDReference ref, Class<T> clz);
+
+	<T extends UUIDDocument> Collection<T> collectionFromReferences(Collection<UUIDReference> refs, Class<T> clz);
 
 	
 }

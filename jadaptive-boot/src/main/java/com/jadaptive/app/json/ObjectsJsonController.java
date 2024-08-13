@@ -250,7 +250,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 							AccessDeniedException {
 						setupSystemContext();
 						try {
-							return objectService.table(resourceKey, searchColumn, searchPattern, offset, limit, sort, SortOrder.valueOf(order.toUpperCase()));
+							return objectService.table(resourceKey, template.getNameField(), searchPattern, offset, limit, sort, SortOrder.valueOf(order.toUpperCase()));
 						} finally {
 							clearUserContext();
 						}
@@ -262,7 +262,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 							AccessDeniedException {
 						setupSystemContext();
 						try {
-							return objectService.count(resourceKey, searchColumn, searchPattern);
+							return objectService.count(resourceKey, template.getNameField(), searchPattern);
 						} finally {
 							clearUserContext();
 						}
