@@ -26,11 +26,13 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.PermissionUtils;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.ChangePasswordEvent;
@@ -64,6 +66,11 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	
 	@Autowired
 	private TenantAwareObjectDatabase<User> userRepository;
+	
+	@Autowired
+	private TenantService tenantService; 
+	
+	long cachedAllTenantsCount = -1;
 
 	@Override
 	public Integer getOrder() {
@@ -184,6 +191,25 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		}
 		
 	}
+	
+	@Override
+	public long allTenantsCount() {
+		
+		if(cachedAllTenantsCount < 0) {
+			long count = 0;
+			for(Tenant tenant : tenantService.allObjects()) {
+				tenantService.setCurrentTenant(tenant);
+				try {
+					count += countUsers();
+				} finally {
+					tenantService.clearCurrentTenant();
+				}
+			}
+			cachedAllTenantsCount = count;
+		}
+		
+		return cachedAllTenantsCount;
+	}
 
 	@Override
 	public void initializeSystem(boolean newSchema) {
@@ -193,6 +219,13 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 		
+		eventService.created(User.class, (e)->{
+			cachedAllTenantsCount++;
+		});
+		
+		eventService.deleted(User.class, (e)->{
+			cachedAllTenantsCount--;
+		});
 	}
 	
 	@Override
