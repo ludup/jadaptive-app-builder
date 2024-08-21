@@ -28,9 +28,6 @@ public class TextAreaFormInput extends FieldInputRender {
 
 
 		rootElement.appendChild(new Element("div")
-				.addClass("row mb-3")
-				.appendChild(new Element("div")
-						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", getFormVariable())
 						.addClass("form-label")
@@ -45,7 +42,7 @@ public class TextAreaFormInput extends FieldInputRender {
 						.addClass("form-text")
 						.addClass("text-muted")
 						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
+						.attr("jad:i18n", String.format("%s.desc", getResourceKey()))));
 
 		if(!disableIDAttribute) {
 			input.attr("id", getResourceKey());

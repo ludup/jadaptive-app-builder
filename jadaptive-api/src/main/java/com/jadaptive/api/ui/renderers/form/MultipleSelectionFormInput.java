@@ -25,9 +25,6 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 		
 		Element inputs;
 		rootElement.appendChild(new Element("div")
-				.addClass("row mb-3")
-				.appendChild(new Element("div")
-						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", field.getFormVariable())
 						.addClass("form-label")
@@ -74,7 +71,7 @@ public class MultipleSelectionFormInput extends FieldInputMultipleValuesRender {
 										.appendChild(new Element("small")
 												.addClass("text-muted")
 												.attr("jad:bundle", field.getBundle())
-												.attr("jad:i18n", String.format("%s.desc", field.getResourceKey()))))))));
+												.attr("jad:i18n", String.format("%s.desc", field.getResourceKey())))))));
 
 		
 		for(String value : availableValues) {

@@ -30,33 +30,26 @@ public abstract class FormInputRender extends FieldInputRender {
 	
 	public final void renderInput(Element rootElement, String value, String... classes) {
 		
-		Element myElement;
-		
-		rootElement.appendChild(myElement = 
-				new Element("div").addClass(Utils.csv(" ", classes) + " row mb-3"));
-		
-		Element parent = myElement;
 		if(decorate) {
 			
-			myElement.appendChild(parent = new Element("div")
-						.addClass("col-12")
+			rootElement
 				.appendChild(new Element("label")
 						.attr("for", getFormVariable())
 						.addClass("form-label")
 						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.name", getResourceKey()))));
+						.attr("jad:i18n", String.format("%s.name", getResourceKey())));
 		}
 		
-		parent.appendChild(Html.div("input-group").appendChild(input = createInputElement(value)));
+		rootElement.appendChild(Html.div("input-group").appendChild(input = createInputElement(value)));
 		if(decorate) {
-			createHelpElement(parent, value);
+			createHelpElement(rootElement, value);
 		}
 		
 		if(!disableIDAttribute) {
 			input.attr("id", resourceKey);
 		}
 		
-		onRender(myElement, value);
+		onRender(rootElement, value);
 
 	}
 	

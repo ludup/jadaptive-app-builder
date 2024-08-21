@@ -30,17 +30,12 @@ public class DropdownFormInput extends FieldInputRender {
 
 		
 		Element e;
-		rootElement.appendChild( e =new Element("div").addClass("row mb-3"));
-		
-		Element div;
-		
-		e.appendChild(div = new Element("div")
-				.addClass("col-12")
-				.addClass("dropdownInput"));
+		rootElement.appendChild( e =new Element("div"));
+		e.addClass("dropdownInput");
 		
 		if(decorate) {
 				
-				div.appendChild(new Element("label")
+				e.appendChild(new Element("label")
 						.attr("for", getFormVariable())
 						.addClass("form-label")
 						.attr("jad:bundle", getBundle())
