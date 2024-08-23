@@ -26,6 +26,7 @@ import de.flapdoodle.embed.mongo.transitions.ImmutableMongod;
 import de.flapdoodle.embed.mongo.transitions.Mongod;
 import de.flapdoodle.embed.mongo.transitions.RunningMongodProcess;
 import de.flapdoodle.embed.mongo.types.DatabaseDir;
+import de.flapdoodle.embed.process.io.ProcessOutput;
 import de.flapdoodle.embed.process.types.ImmutableProcessConfig;
 import de.flapdoodle.embed.process.types.ProcessConfig;
 import de.flapdoodle.reverse.TransitionWalker.ReachedState;
@@ -69,6 +70,7 @@ public class EmbeddedMongoWithTransactionsConfig {
     	
     	MongodArguments mongodArguments = MongodArguments.builder()
     			.replication(storage)
+    			.putArgs("--quiet", "")
     			.useNoJournal(false)
     			.build();
     	
@@ -78,6 +80,9 @@ public class EmbeddedMongoWithTransactionsConfig {
                .processConfig(Start.to(ProcessConfig.class)
             		   .initializedWith(ImmutableProcessConfig.builder()
             				   .daemonProcess(true).build()))
+               .processOutput(Start.to(ProcessOutput.class)
+   					.initializedWith(ProcessOutput.silent())
+   					.withTransitionLabel("no output"))
     		   .mongodArguments(Start.to(MongodArguments.class)
                     .initializedWith(mongodArguments))
 	                .net(Start.to(Net.class)
