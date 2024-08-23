@@ -21,7 +21,8 @@ public enum FieldType {
 	COUNTRY, 
 	OPTIONS,
 	TIME,
-	ATTACHMENT;
+	ATTACHMENT, 
+	TEMPLATE_REFERENCE;
 	
 	ValidationType[] options;
 	boolean canDefault = false;

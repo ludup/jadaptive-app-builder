@@ -253,11 +253,11 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	}
 	
 	public void setChildTemplates(Collection<String> childTemplates) {
-		this.childTemplates = childTemplates;
+		this.childTemplates = new TreeSet<>(childTemplates);
 	}
 	
 	public Collection<String> getChildTemplates() {
-		return new HashSet<>(childTemplates);
+		return childTemplates;
 	}
 
 	public boolean hasParent() {

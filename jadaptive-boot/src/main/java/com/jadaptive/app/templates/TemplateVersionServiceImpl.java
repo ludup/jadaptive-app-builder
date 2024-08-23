@@ -455,26 +455,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	public ObjectTemplate registerAnnotatedTemplate(Class<? extends UUIDDocument> clz, boolean newSchema) {
 		
 		try {
-			
-			List<Class<?>> parents = new ArrayList<>();
-			Class<?> c = clz.getSuperclass();
-			while(Objects.nonNull(c)) {
-				
-				ObjectDefinition e = c.getAnnotation(ObjectDefinition.class);
-				
-				if(Objects.nonNull(e)) {
-					parents.add(c);
-				}
-				c = c.getSuperclass();
-			}
-			
-			if(!parents.isEmpty()) {
-				Collections.reverse(parents);
-				for(Class<?> parent : parents) {
-					registerAnnotatedTemplate((Class<? extends UUIDDocument>) parent, newSchema);
-				}
-			}
-			
 			ObjectDefinition e = clz.getAnnotation(ObjectDefinition.class);
 			
 			String resourceKey = e.resourceKey();
@@ -485,6 +465,25 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			ObjectTemplate template = loadedTemplates.get(resourceKey);
 			if(Objects.nonNull(template)) {
 				return template;
+			}
+			
+			List<Class<?>> parents = new ArrayList<>();
+			Class<?> c = clz.getSuperclass();
+			while(Objects.nonNull(c)) {
+				
+				ObjectDefinition o = c.getAnnotation(ObjectDefinition.class);
+				
+				if(Objects.nonNull(o)) {
+					parents.add(c);
+				}
+				c = c.getSuperclass();
+			}
+			
+			if(!parents.isEmpty()) {
+				Collections.reverse(parents);
+				for(Class<?> parent : parents) {
+					registerAnnotatedTemplate((Class<? extends UUIDDocument>) parent, newSchema);
+				}
 			}
 			
 			try {
@@ -502,33 +501,33 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template.setUuid(resourceKey);
 			}
 			
-			Class<?> parentClass = getParentClass(clz);
-			ObjectDefinition parent = null;
-			if(Objects.nonNull(parentClass)) {
-				parent = parentClass.getAnnotation(ObjectDefinition.class);
-			}
-			
-			if(Objects.nonNull(parent)) {
-				String parentResourceKey = parent.resourceKey();
-				if(StringUtils.isBlank(parentResourceKey)) {
-					parentResourceKey = TemplateUtils.lookupClassResourceKey(parentClass);
-				}
-				if(log.isDebugEnabled()) {
-					log.debug("{} template has {} as parent", resourceKey, parentResourceKey);
-				}
-				template.setParentTemplate(parentResourceKey);
-				ObjectTemplate parentTemplate = templateRepository.get(parentResourceKey);
-				if(e.templateType()!=ObjectTemplateType.EXTENDED) {
-					if(!parentTemplate.getChildTemplates().contains(resourceKey)) {
-						parentTemplate.addChildTemplate(resourceKey);
-					}
-				}
-				
-				templateRepository.saveOrUpdate(parentTemplate);
-			}
+//			Class<?> parentClass = getParentClass(clz);
+//			ObjectDefinition parent = null;
+//			if(Objects.nonNull(parentClass)) {
+//				parent = parentClass.getAnnotation(ObjectDefinition.class);
+//			}
+//			
+//			if(Objects.nonNull(parent)) {
+//				String parentResourceKey = parent.resourceKey();
+//				if(StringUtils.isBlank(parentResourceKey)) {
+//					parentResourceKey = TemplateUtils.lookupClassResourceKey(parentClass);
+//				}
+//				if(log.isDebugEnabled()) {
+//					log.debug("{} template has {} as parent", resourceKey, parentResourceKey);
+//				}
+//				template.setParentTemplate(parentResourceKey);
+//				ObjectTemplate parentTemplate = templateRepository.get(parentResourceKey);
+//				if(e.templateType()!=ObjectTemplateType.EXTENDED) {
+//					if(!parentTemplate.getChildTemplates().contains(resourceKey)) {
+//						parentTemplate.addChildTemplate(resourceKey);
+//					}
+//				}
+//				
+//				templateRepository.saveOrUpdate(parentTemplate);
+//			}
 			
 			Class<?> baseClass = TemplateUtils.getBaseClass(clz);
-			ObjectDefinition collection = null; 
+			ObjectDefinition collection = e; 
 			if(Objects.nonNull(baseClass)) {
 				collection = baseClass.getAnnotation(ObjectDefinition.class);
 			}
@@ -536,15 +535,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			boolean auditObject = ReflectionUtils.hasAnnotation(clz, AuditedObject.class);
 			boolean generateEventTemplates = hasGenerateTemplatesAnnotation(clz);
 			
-			if(Objects.nonNull(collection)) {
-				String collectionResourceKey = collection.resourceKey();
-				if(StringUtils.isBlank(collectionResourceKey)) {
-					collectionResourceKey = TemplateUtils.lookupClassResourceKey(baseClass);
-				}
-				template.setCollectionKey(collectionResourceKey);
-			} else {
-				template.setCollectionKey(resourceKey);
+			String collectionResourceKey = collection.resourceKey();
+			if(StringUtils.isBlank(collectionResourceKey)) {
+				collectionResourceKey = TemplateUtils.lookupClassResourceKey(baseClass);
 			}
+			template.setCollectionKey(collectionResourceKey);
+			
+			
+			ObjectTemplate parentTemplate = loadedTemplates.get(collection.resourceKey());
+			if(Objects.nonNull(parentTemplate)) {
+				if(!parentTemplate.getChildTemplates().contains(resourceKey)) {
+					parentTemplate.getChildTemplates().add(resourceKey);
+				}
+				templateRepository.saveOrUpdate(parentTemplate);
+			}
+
 			template.setDisplayKey(getDisplayKey(clz, resourceKey));
 			template.setResourceKey(resourceKey);
 			template.setTemplateType(e.templateType());
@@ -1095,6 +1100,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			break;
 		}
 		case OBJECT_REFERENCE:
+		case TEMPLATE_REFERENCE:
 		{
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {

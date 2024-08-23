@@ -28,11 +28,13 @@ public class WizardState {
 	UUIDEntity completedObject;
 	
 	private boolean finished;;
+	private String uuid;
 	
 	CompletionCallback onFinish = null;
 	
-	public WizardState(WizardFlow flow) {
+	public WizardState(WizardFlow flow, String uuid) {
 		this.flow = flow;
+		this.uuid = uuid;
 	} 
 	
 	public void init(WizardSection startPage, WizardSection finishPage, WizardSection...pages) {
@@ -281,5 +283,13 @@ public class WizardState {
 	
 	public void decrementStep() {
 		displayStep--;
+	}
+
+	public String getRedirectURI() {
+		if(Objects.nonNull(uuid)) {
+			return String.format("/app/ui/wizards/%s/%s", getResourceKey(), uuid);
+		} else {
+			return String.format("/app/ui/wizards/%s", getResourceKey());
+		}
 	}
 }

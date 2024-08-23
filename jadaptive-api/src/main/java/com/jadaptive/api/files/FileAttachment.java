@@ -1,6 +1,7 @@
 package com.jadaptive.api.files;
 
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -8,7 +9,7 @@ import com.jadaptive.api.template.TableView;
 
 @ObjectDefinition(resourceKey = FileAttachment.RESOURCE_KEY, defaultColumn = "filename")
 @TableView(defaultColumns = {"filename", "contentType", "size", "hash" })
-public class FileAttachment extends AbstractUUIDEntity {
+public class FileAttachment extends AbstractUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = -2041494617246214405L;
 
@@ -38,6 +39,10 @@ public class FileAttachment extends AbstractUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String attachedTo;
 	
+	public String getName() {
+		return getFilename();
+		
+	}
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;

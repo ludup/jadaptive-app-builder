@@ -24,7 +24,6 @@ public interface WizardFlow extends ExtensionPoint {
 
 	boolean requiresUserSession();
 
-	
-	
-	
+	WizardState generateState(HttpServletRequest request, String uuid);
+
 }

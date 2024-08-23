@@ -23,7 +23,6 @@ import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.UriRedirect;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	
@@ -78,17 +77,14 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 
 	protected void startTransaction(WizardState state) { };
 
-	@Override
-	public WizardState getState(HttpServletRequest request) {
+	public WizardState generateState(HttpServletRequest request, String uuid) {
 		
-		
-		String stateAttribute = getStateAttribute();
-		HttpSession session = request.getSession();
-		WizardState state = (WizardState) session.getAttribute(stateAttribute);
-		boolean isSystem = tenantService.getCurrentTenant().isSystem();
+		WizardState state = (WizardState) request.getSession().getAttribute(getStateAttribute());
 		
 		if(Objects.isNull(state)) {
-			state = new WizardState(this);
+			boolean isSystem = tenantService.getCurrentTenant().isSystem();
+			
+			state = new WizardState(this, uuid);
 			
 			List<WizardSection> sections = new ArrayList<>();
 			
@@ -111,7 +107,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 			}
 			
 			Collections.sort(sections, new Comparator<WizardSection>() {
-
+	
 				@Override
 				public int compare(WizardSection o1, WizardSection o2) {
 					return o1.getWeight().compareTo(o2.getWeight());
@@ -125,7 +121,20 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 					sections.toArray((new WizardSection[0]))); 
 			
 			init(state);
-			session.setAttribute(stateAttribute, state);
+			request.getSession().setAttribute(getStateAttribute(), state);
+		
+		}
+		return state;
+	}
+	
+	@Override
+	public WizardState getState(HttpServletRequest request) {
+		
+		
+		WizardState state = (WizardState) request.getSession().getAttribute(getStateAttribute());
+		
+		if(Objects.isNull(state)) {
+			state =  generateState(request, null);
 		}
 		
 		assertPermissions(state);

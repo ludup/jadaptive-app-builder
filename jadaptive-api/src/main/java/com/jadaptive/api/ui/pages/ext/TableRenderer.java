@@ -22,7 +22,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +32,7 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ActionFilter;
 import com.jadaptive.api.template.CreateURL;
 import com.jadaptive.api.template.DynamicColumn;
@@ -49,6 +49,7 @@ import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.UpdateURL;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.ViewURL;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.UserInterfaceService;
 import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
@@ -102,10 +103,11 @@ public class TableRenderer {
 		this.readOnly = readOnly;
 	}
 
-	public Elements render() throws IOException {
+	public Element render() throws IOException {
 		
 			
-			Elements tableholder = new Elements();
+			Element tableholder = Html.div();
+			
 			view = templateClazz.getAnnotation(TableView.class);
 	
 			if(Objects.isNull(view)) {
@@ -118,9 +120,9 @@ public class TableRenderer {
 			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || view.multipleDelete();
 			
 			
-			if(hasMultipleSelection && totalObjects > 0) {
+			if(hasMultipleSelection && Objects.nonNull(objects) && !objects.isEmpty()) {
 				Element ae;
-				tableholder.add(Html.div("row")
+				tableholder.appendChild(Html.div("row")
 						.attr("id", "selectionActions")
 						.appendChild(ae = Html.div("col-12")));
 			
@@ -167,11 +169,11 @@ public class TableRenderer {
 			Element el;
 			if(Objects.nonNull(objects) && !objects.isEmpty()) {
 				Element table = Html.table("table").attr("data-toggle", "table");
-				tableholder.add(table);
+				tableholder.appendChild(table);
 
 				try(var timed = timed("TableRender.dataRendering")) {
-					Element table = Html.table("table").attr("data-toggle", "table");
-					tableholder.add(table);
+					
+					tableholder.appendChild(table);
 					
 					table.appendChild(Html.thead().appendChild(el = Html.tr()));
 					
@@ -284,13 +286,13 @@ public class TableRenderer {
 
 			}
 			
-			tableholder.add(Html.div("row", "mb-3").appendChild(
+			tableholder.appendChild(Html.div("row", "mb-3").appendChild(
 						Html.div("col-md-9 float-start text-start")
 							.attr("id", "pagnation"))
 					.appendChild(Html.div("col-md-3 float-start text-end")
 							.attr("id", "pagesize")));
 			
-			tableholder.add(Html.div("row", "mb-3").appendChild(
+			tableholder.appendChild(Html.div("row", "mb-3").appendChild(
 					Html.div("col-md-12 float-start text-start")
 						.attr("id", "objectActions")));
 			
@@ -407,20 +409,29 @@ public class TableRenderer {
 			IconWithDropdownInput dropdown = new IconWithDropdownInput("options", "default");
 			dropdown.icon("fa-ellipsis");
 			el.appendChild(dropdown.renderInput().addClass("mb-3"));
-			
+			Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
 			if(canUpdate && !readOnly) {
+				
+				
+				String url = replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj);
+				UpdateURL u = clz.getAnnotation(UpdateURL.class);
+				if(Objects.nonNull(u)) {
+					url = replaceVariables(u.value(), obj);
+				}
 				if(Objects.isNull(parentObject)) {
-					dropdown.addI18nAnchorWithIconValue("default", "edit.name", replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "fa-solid", "fa-edit");
+					dropdown.addI18nAnchorWithIconValue("default", "edit.name", url, "fa-solid", "fa-edit");
 				} else {
-					dropdown.addI18nAnchorWithIconValue("default", "edit.name", replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "fa-solid", "fa-edit", "stash")
+					dropdown.addI18nAnchorWithIconValue("default", "edit.name", url, "fa-solid", "fa-edit", "stash")
 						.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
 						.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid());	
 				}
 			}
 			
 			if(view.requiresView()) {
+				String url = replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj);
+				ViewURL u = clz.getAnnotation(ViewURL.class);
 				if(Objects.isNull(parentObject)) {
-					dropdown.addI18nAnchorWithIconValue("default", "view.name", replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "fa-solid", "fa-eye");
+					dropdown.addI18nAnchorWithIconValue("default", "view.name", url, "fa-solid", "fa-eye");
 				} else {
 					dropdown.addI18nAnchorWithIconValue("default", "view.name", replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)
 							+ "/" + field.getResourceKey() + "/" + obj.getUuid(), "fa-solid", "fa-eye");
@@ -490,7 +501,7 @@ public class TableRenderer {
 										iel.dataset().put("confirm-text", i18nService.format(action.confirmationBundle(), Locale.getDefault(), action.resourceKey() + ".confirm", vargs));
 								}
 							} else {
-								dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", replaceVariables(action.url(), obj), action.iconGroup(), action.icon())
+								dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", replaceVariables(action.url(), obj), action.iconGroup(), action.icon(), action.classes())
 									.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
 							}
 						}
@@ -538,7 +549,7 @@ public class TableRenderer {
 			if(Objects.nonNull(allActions)) {
 				for(TableAction action : allActions) {
 					if(action.target()==Target.TABLE) {
-						createTableAction(element, action.url(), action.bundle(), action.icon(), action.iconGroup(), action.buttonClass(), action.resourceKey());
+						createTableAction(element, action.url(), action.bundle(), action.icon(), action.iconGroup(), action.classes(), action.resourceKey());
 					}
 				}
 			}
@@ -710,6 +721,7 @@ public class TableRenderer {
 		for(String var : Utils.extractVariables(url)) {
 			url = url.replace(String.format("{%s}", var), StringUtils.defaultString((String)obj.getValue(var)));
 		}
+		url = url.replace("{baseURL}", Utils.getBaseURL(Request.get().getRequestURL().toString()));
 		return url;
 	}
 
@@ -720,8 +732,16 @@ public class TableRenderer {
 		
 		if(isDefault) {
 			if(canUpdate && !readOnly) {
+				
+				Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
+				String url = replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj);
+				UpdateURL u = clz.getAnnotation(UpdateURL.class);
+				if(Objects.nonNull(u)) {
+					url = replaceVariables(u.value(), obj);
+				}
+				
 				if(Objects.isNull(parentObject)) {
-					return Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "underline").appendChild(processFieldValue(obj, template, field));
+					return Html.a(url, "underline").appendChild(processFieldValue(obj, template, field));
 				} else {
 					return Html.a("#", "underline", "stash")
 							.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))

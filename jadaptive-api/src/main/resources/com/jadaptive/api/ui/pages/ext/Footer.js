@@ -349,7 +349,7 @@ $(function() {
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
 		$('.processDepends').each(function() {
-			var field = $(this);
+			var field = $(this).parents('.field').first();
 			var dependsOn = $(this).data('depends-on');
 			var dependsValue = $(this).attr('data-depends-value');
 			
@@ -382,7 +382,11 @@ $(function() {
 						}
 						return true;
 					} else {
-						field.removeClass('d-none');
+						if(expectedResult) {
+							field.addClass('d-none');
+						} else {
+							field.removeClass('d-none');
+						}
 					}
 					return false;
 				});

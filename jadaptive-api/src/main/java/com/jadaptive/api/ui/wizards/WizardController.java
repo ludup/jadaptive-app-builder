@@ -50,7 +50,7 @@ public class WizardController extends AuthenticatedController {
 			}
 			WizardState state = wizard.getState(request);
 			state.start();
-			throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
+			throw new UriRedirect(state.getRedirectURI());
 	}
 	
 	@RequestMapping(value = "/app/api/wizard/next/{resourceKey}", method = { RequestMethod.POST, RequestMethod.GET }, produces = { "application/json" })
@@ -68,7 +68,7 @@ public class WizardController extends AuthenticatedController {
 					WizardSection section = state.moveNext();
 					if(!section.isHidden()) {
 						state.incrementStep();
-						throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
+						throw new UriRedirect(state.getRedirectURI());
 					}
 				}
 				
@@ -98,7 +98,7 @@ public class WizardController extends AuthenticatedController {
 			}
 			
 			state.decrementStep();
-			throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
+			throw new UriRedirect(state.getRedirectURI());
 			} finally {
 				Wizard.clearCurrentState();
 			}

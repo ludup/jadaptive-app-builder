@@ -33,7 +33,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-@RequestPage(path="wizards/{resourceKey}")
+@RequestPage(path = {"wizards/{resourceKey}", "wizards/{resourceKey}/{uuid}"})
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "i18n"} )
 @ModalPage
@@ -52,6 +52,8 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	private PermissionService permissionService; 
 	
 	private String resourceKey;
+	private String uuid;
+	
 	private WizardState state;
 	
 	private static ThreadLocal<WizardState> currentState = new ThreadLocal<>();
@@ -62,13 +64,14 @@ public class Wizard extends HtmlPage implements ObjectPage {
 	
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
 		super.beforeProcess(uri, request, response);
-		state = wizardService.getWizard(resourceKey).getState(request);
+		state = wizardService.getWizard(resourceKey).generateState(request, uuid);
 		if(state.getFlow().requiresUserSession() && Session.getOr(request).isEmpty()) {
 			throw new AccessDeniedException();
 		}
 
 		currentState.set(state);
 	}
+	
 	
 	protected void afterProcess(String uri, HttpServletRequest request, HttpServletResponse response) throws FileNotFoundException {
 		super.afterProcess(uri, request, response);
@@ -114,10 +117,10 @@ public class Wizard extends HtmlPage implements ObjectPage {
 
 			injectHtmlSection(document, el, ext);
 			
-			Element n = document.selectFirst("form");
-			if(Objects.isNull(n)) {
-				
-			}
+//			Element n = document.selectFirst("form");
+//			if(Objects.isNull(n)) {
+//				
+//			}
 			/**
 			 * This is here to remove the previous style of wizard where an info alert
 			 * panel is used. We now render this automatically below so this code removes

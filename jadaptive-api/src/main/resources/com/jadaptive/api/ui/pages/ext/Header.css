@@ -2,7 +2,7 @@
 	width: 1.2em;
 }
 
-input[type=checkbox]
+cinput[type=checkbox]
 {
   /* Double-sized Checkboxes */
   -ms-transform: scale(1.5); /* IE */

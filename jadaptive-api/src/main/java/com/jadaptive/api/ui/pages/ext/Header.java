@@ -243,7 +243,7 @@ public class Header extends AbstractPageExtension {
 					
 					userMenuItem.getElementById("userMenuItemIcon").
 						addClass("fa").
-						addClass("me-1").
+						addClass("me-2").
 						addClass(item.getIcon());
 					
 					userMenuItem.getElementById("userMenuItemText")

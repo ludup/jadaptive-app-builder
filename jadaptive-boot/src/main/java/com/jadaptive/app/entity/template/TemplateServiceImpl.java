@@ -453,7 +453,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				iterateClassHeirarchy(clz, template, views, new HashSet<>());
 			}
 			
-			processFields(null,template, clz, views, new LinkedList<>(), disableViews); 
+			processFields(null,template, clz, views, new LinkedList<>(), disableViews, false); 
 
 			for(String child : childViews.keySet()) {
 				TemplateView view = views.remove(child);
@@ -570,7 +570,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		return FieldRenderer.DEFAULT;
 	}
 	
-	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, TemplateView> views, LinkedList<FieldTemplate> objectPath, boolean disableViews) throws NoSuchFieldException, ClassNotFoundException {
+	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, TemplateView> views, LinkedList<FieldTemplate> objectPath, boolean disableViews, boolean parentIsHidden) throws NoSuchFieldException, ClassNotFoundException {
 		
 		for(FieldTemplate field : template.getFields()) {
 			
@@ -589,7 +589,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 					currentPath.addAll(objectPath);
 				}
 				currentPath.add(field);
-				processFields(v, ct, c, views, currentPath, disableViews);
+				processFields(v, ct, c, views, currentPath, disableViews, field.isHidden());
 				continue;
 			}
 			
@@ -599,21 +599,21 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 					o = new TemplateView(template.getBundle(), currentView.value());
 					views.put(currentView.value(), o);
 				}
-				o.addField(new TemplateViewField(null, o, field, objectPath));				
+				o.addField(new TemplateViewField(null, o, field, objectPath, parentIsHidden));				
 			} else if(StringUtils.isBlank(v.value())) {
 				TemplateView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
 				if(Objects.isNull(o)) {
 					o = new TemplateView(template.getBundle());
 					views.put(null, o);
 				}
-				o.addField(new TemplateViewField(v, o, field, objectPath));
+				o.addField(new TemplateViewField(v, o, field, objectPath, parentIsHidden));
 			} else {
 				TemplateView o = views.get(disableViews ? null : v.value());
 				if(Objects.isNull(o)) {
 					o = new TemplateView(template.getBundle(), v.value());
 					views.put(v.value(), o);
 				}
-				o.addField(new TemplateViewField(v, o, field, objectPath));
+				o.addField(new TemplateViewField(v, o, field, objectPath, parentIsHidden));
 			}
 		}
 	}

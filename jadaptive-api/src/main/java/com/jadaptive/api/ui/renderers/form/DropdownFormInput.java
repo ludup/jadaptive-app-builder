@@ -6,8 +6,10 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Element;
 
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.PageHelper;
 
 public class DropdownFormInput extends FieldInputRender {
@@ -179,6 +181,24 @@ public class DropdownFormInput extends FieldInputRender {
 	
 	public void setSelectedValue(String value, String name) {
 		nameElement.val(name);
+		valueElement.val(value);
+	}
+
+	public void addI18nValue(String value, String i18n) {
+		
+		if(Objects.isNull(dropdownMenu)) {
+			dropdownInput.appendChild(dropdownMenu = new Element("div")
+					.addClass("dropdown-menu dropdown-size")
+					.attr("aria-labelledby", String.format("%sDropdown", getResourceKey())));
+		}
+		dropdownMenu.appendChild(Html.a("#").attr("jad:bundle", bundle)
+				.attr("jad:i18n", i18n)
+				.attr("data-resourcekey", value)
+				.addClass("jdropdown-item dropdown-item"));
+	}
+
+	public void setSelectedI18nValue(String uuid, String value) {
+		nameElement.val(I18N.getResource(bundle, value));
 		valueElement.val(value);
 	}
 

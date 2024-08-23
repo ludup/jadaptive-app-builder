@@ -317,6 +317,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 						continue;
 					}
 				}
+				
 				input.addInputValue(field.getResourceKey(), String.format("%s.name", field.getResourceKey()), true, template.getBundle()).attr("data-formvar", parentPrefix + field.getFormVariable());
 				if(searchField.equals(parentPrefix + field.getFormVariable())) {
 					input.setDefaultValue(String.format("%s.name", field.getResourceKey()), 

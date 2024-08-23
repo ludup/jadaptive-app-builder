@@ -33,6 +33,7 @@ import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.Feedback;
@@ -49,7 +50,10 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	private TemplateService templateService; 
 	
 	@Autowired
-	private ObjectService objectService; 
+	private ObjectService objectService;
+	
+	@Autowired
+	private ObjectTemplateRepository templateRepository;
 	
 	@Autowired
 	private SessionUtils sessionUtils;
@@ -263,6 +267,58 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 						setupSystemContext();
 						try {
 							return objectService.count(resourceKey, template.getNameField(), searchPattern);
+						} finally {
+							clearUserContext();
+						}
+					}
+				});
+
+		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/objects/{}/table", resourceKey, e);
+			}
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+	
+	@RequestMapping(value="/app/api/templates/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public BootstrapTableResult<UUIDReference> templateObjects(HttpServletRequest request, 
+			@PathVariable String resourceKey,
+			@RequestParam(required=false, defaultValue = "") String sort,
+			@RequestParam(required=false, defaultValue = "asc") String order,
+			@RequestParam(required=false, defaultValue = "0") int offset,
+			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, ObjectException {
+		
+		try {
+			
+			ObjectTemplate template = templateService.get(resourceKey);
+			
+			return processDataReferencesRequest(request, 
+					template,
+				new BootstrapTablePageProcessor() {
+
+					@Override
+					public Collection<?> getPage(String searchColumn, String searchPattern, int start,
+							int length, String sortBy)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						setupSystemContext();
+						try {
+							return objectService.table(ObjectTemplate.RESOURCE_KEY, "parentKey", resourceKey, offset, limit, sort, SortOrder.valueOf(order.toUpperCase()));
+						} finally {
+							clearUserContext();
+						}
+					}
+
+					@Override
+					public Long getTotalCount(String searchColumn, String searchPattern)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						setupSystemContext();
+						try {
+							return objectService.count(ObjectTemplate.RESOURCE_KEY, "parentKey", resourceKey);
 						} finally {
 							clearUserContext();
 						}

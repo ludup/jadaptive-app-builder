@@ -6,6 +6,11 @@ submit : function(form, callback) {
     
         JadaptiveUtils.startAwesomeSpin($('#saveButton i'), 'fa-save');
 
+        $('.mceEditor').each(function() {
+			var editor = tinymce.get($(this).attr('id'));
+			editor.save();
+		});
+		
     	$.ajax({
            type: "POST",
            url: '/app/api/form/validate/' + form.data('resourcekey'),

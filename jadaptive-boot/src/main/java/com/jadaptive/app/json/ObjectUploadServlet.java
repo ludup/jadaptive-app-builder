@@ -11,6 +11,7 @@ import org.apache.commons.fileupload2.core.FileItemInputIterator;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +42,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name="objectServlet", description="Servlet for handing objects", urlPatterns = { "/app/api/form/multipart/*" })
+@WebServlet(name="objectServlet", description="Servlet for handing objects", 
+	urlPatterns = { "/app/api/form/multipart/*", "/app/api/form/handler/*"})
 public class ObjectUploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8476101184614381108L;
 
 	private static Logger log = LoggerFactory.getLogger(ObjectUploadServlet.class);
+	
+	private static final String MULTIPART = "multipart";
 	
 	@Autowired
 	private TemplateService templateService; 
@@ -65,6 +69,7 @@ public class ObjectUploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
 		
+		String handler = FileUtils.lastPathElement(FileUtils.stripLastPathElement(request.getRequestURI()));
 		String resourceKey = FileUtils.lastPathElement(request.getRequestURI());
 		Map<String,String[]> parameters = new HashMap<>();
 		
@@ -84,7 +89,15 @@ public class ObjectUploadServlet extends HttpServlet {
 				request.getSession().removeAttribute(resourceKey);
 				
 				AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
-				String uuid = objectService.saveOrUpdate(obj);
+				
+				String uuid;
+				if(MULTIPART.equals(handler)) {
+					uuid = objectService.saveOrUpdate(obj);
+				} else {
+					uuid = objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
+							templateService.getTemplateClass(resourceKey), 
+							new Document(obj.getDocument())));
+				}
 				
 				if(template.isSingleton()) {
 					Feedback.success("default", "object.saved", I18N.getResource(
@@ -94,7 +107,7 @@ public class ObjectUploadServlet extends HttpServlet {
 				} else {
 					Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
 				}
-				
+
 				json.writer().writeValue(resp.getOutputStream(), new UUIDStatus(uuid));
 				
 				

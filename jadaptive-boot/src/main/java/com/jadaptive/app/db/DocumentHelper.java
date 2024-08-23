@@ -61,7 +61,6 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
-import com.jadaptive.api.templates.TemplateUtils;
 //import com.jadaptive.app.ClassLoaderServiceImpl;
 //import com.jadaptive.app.encrypt.EncryptionServiceImpl;
 //import com.jadaptive.app.entity.MongoEntity;
@@ -349,6 +348,7 @@ public class DocumentHelper {
 						template).getDocument();
 			}
 			case OBJECT_REFERENCE:
+			case TEMPLATE_REFERENCE:
 			{	
 				if(log.isDebugEnabled()) {
 					log.debug("Returning {} as reference {}", field.getResourceKey(), value);

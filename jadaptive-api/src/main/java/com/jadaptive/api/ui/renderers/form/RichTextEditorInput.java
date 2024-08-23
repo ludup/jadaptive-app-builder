@@ -7,18 +7,17 @@ import java.io.IOException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageHelper;
 
 public class RichTextEditorInput extends FieldInputRender {
 
 	private Document document;
-	private boolean readOnly;
 
-	public RichTextEditorInput(TemplateViewField field, Document document, boolean readOnly) {
+	public RichTextEditorInput(TemplateViewField field, Document document) {
 		super(field);
 		this.document = document;
-		this.readOnly = readOnly;
 	}
 	
 	public RichTextEditorInput(Document document, String resourceKey, String formVariable, String bundle) {
@@ -31,6 +30,7 @@ public class RichTextEditorInput extends FieldInputRender {
 				
 		rootElement.appendChild(
 				new Element("textarea")
+					.val(value)
 					.attr("name", resourceKey)
 					.attr("id", resourceKey)
 					.addClass("row mb-3 mceEditor"));
@@ -45,7 +45,7 @@ public class RichTextEditorInput extends FieldInputRender {
 		+ " tinymce.init({\n"
 		+ "   mode : '" + resourceKey + "',"
 		+ "	  selector: '#" + resourceKey + "', \n"
-		+ "	  plugins: '',\n"
+		+ "	  plugins: 'autosave',\n"
 		+ "	  license_key: 'gpl',\n"
 		+ "	  promotion: false,\n"
 		+ "	  branding: false,\n"
@@ -53,7 +53,7 @@ public class RichTextEditorInput extends FieldInputRender {
 		+ "	}); \n"
 		+ "});";
 		
-		
+		PageHelper.addContentSecurityPolicy("style-src", SessionUtils.UNSAFE_INLINE);
 		PageHelper.appendBodyScriptSnippet(document, tinyMCEScript);
 	}
 

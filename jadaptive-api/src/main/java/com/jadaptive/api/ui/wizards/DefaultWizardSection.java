@@ -32,7 +32,7 @@ public class DefaultWizardSection extends WizardSection {
 		super(bundle, name, resource, weight);
 	}
 	
-	protected Element renderObjectSection(Document document, String resourceKey) {
+	protected Element renderObjectSection(Document document, String resourceKey, String...ignores) {
 		
 		Element object;
 		document.selectFirst("body").appendChild(object = Html.div("row")
@@ -41,6 +41,7 @@ public class DefaultWizardSection extends WizardSection {
 			.appendChild(Html.div("col-12")
 					.attr("jad:id", "objectRenderer")
 					.attr("jad:renderer", "WIZARD")
+					.attr("jad:ignores", Utils.csv(ignores))
 					.attr("jad:handler", Wizard.getCurrentState().getResourceKey())
 					.attr("jad:resourceKey", resourceKey)));
 		
@@ -75,13 +76,14 @@ public class DefaultWizardSection extends WizardSection {
 	
 	private void renderObject(AbstractObject object, ObjectTemplate template, Element row) {
 		for(FieldTemplate field : template.getFields()) { 
-			if(field.isHidden() && !field.isSummarise()) {
+			if(field.isHidden() || !field.isSummarise()) {
 				continue;
 			}
 			
 			switch(field.getFieldType()) {
 			case OBJECT_EMBEDDED:
 			case OBJECT_REFERENCE:
+			case ATTACHMENT:
 				if(!field.getCollection()) {
 					AbstractObject o = object.getChild(field);
 					if(Objects.isNull(o)) {
@@ -124,6 +126,7 @@ public class DefaultWizardSection extends WizardSection {
 				break;
 			case OBJECT_REFERENCE:
 			case OBJECT_EMBEDDED:
+			case ATTACHMENT:
 			case OPTIONS:
 				
 				if(field.getCollection()) {

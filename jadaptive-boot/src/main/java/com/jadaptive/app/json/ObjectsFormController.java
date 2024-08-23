@@ -3,7 +3,6 @@ package com.jadaptive.app.json;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -266,6 +265,8 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	public RequestStatus stashObject(HttpServletRequest request, 
 			@PathVariable String resourceKey)  {
 
+		DocumentHelper.enableMultipleValidation();
+		
 		try {
 			ObjectTemplate template = templateService.get(resourceKey);
 			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
@@ -280,6 +281,8 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 				log.error("POST api/objects/{}", resourceKey, e);
 			}
 			return handleException(e, "POST", resourceKey);
+		} finally {
+			DocumentHelper.disableMultipleValidation();
 		}
 	}
 	
@@ -448,6 +451,8 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	public RequestStatus stashEmbeddedObject(HttpServletRequest request, 
 			@PathVariable String resourceKey, @PathVariable String childResource, @PathVariable String fieldName)  {
 
+		DocumentHelper.enableMultipleValidation();
+		
 		try {
 			ObjectTemplate parentTemplate = templateService.get(resourceKey);
 			ObjectTemplate childTemplate = templateService.get(childResource);
@@ -495,6 +500,8 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 				log.error("POST api/objects/{}", resourceKey, e);
 			}
 			return handleException(e, "POST", resourceKey);
+		} finally {
+			DocumentHelper.disableMultipleValidation();
 		}
 	}
 	

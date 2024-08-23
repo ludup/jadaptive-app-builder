@@ -226,7 +226,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				views = new ArrayList<>();
 				TemplateView v = new TemplateView("dynamic");
 				for(FieldTemplate t : template.getFields()) {
-					v.getFields().add(new TemplateViewField(null, v, t, null));
+					v.getFields().add(new TemplateViewField(null, v, t, null, false));
 				}
 				views.add(v);
 			}
@@ -377,7 +377,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			renderCollection(element, obj, fieldView, scope, panel); 
 		} else {
 			switch(field.getFieldType()) {
-			case OBJECT_REFERENCE:
+			case TEMPLATE_REFERENCE:
+			{
 				String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
 				ObjectTemplate objectTemplate = templateService.get(objectType);
 				String uuid = null;
@@ -394,8 +395,43 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
 					DropdownFormInput dropdown = new DropdownFormInput(fieldView);
 					dropdown.renderInput(element, "");
-					for(AbstractObject o : objectService.list(objectType)) {
-						dropdown.addInputValue(o.getUuid(), (String) o.getValue(objectTemplate.getNameField()));
+					for(String resourceKey : objectTemplate.getChildTemplates()) {
+						dropdown.addI18nValue(resourceKey, resourceKey + ".name");
+					}
+					if(Objects.nonNull(ref)) {
+						dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
+					}
+				} else {
+					FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
+							String.format("/app/api/templates/%s/table", objectType),
+							"name", "uuid");
+					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
+				}
+
+				break;
+			}
+			case OBJECT_REFERENCE:
+			{
+				String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
+				ObjectTemplate objectTemplate = templateService.get(objectType);
+				String uuid = null;
+				String name = null;
+				if(Objects.nonNull(obj)) {
+					AbstractObject ref = obj.getChild(fieldView.getField());
+					if(Objects.nonNull(ref)) {
+						uuid = ref.getUuid();
+						name = (String) ref.getValue("name");
+					}
+				}
+				
+				AbstractObject ref = obj.getChild(field);
+				if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
+					DropdownFormInput dropdown = new DropdownFormInput(fieldView);
+					dropdown.renderInput(element, "");
+					if(scope!=FieldView.READ) {
+						for(AbstractObject o : objectService.list(objectType)) {
+							dropdown.addInputValue(o.getUuid(), (String) o.getValue(objectTemplate.getNameField()));
+						}
 					}
 					if(Objects.nonNull(ref)) {
 						dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
@@ -408,6 +444,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				}
 
 				break;
+			}
 			case OBJECT_EMBEDDED:
 //				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
 				throw new IllegalStateException("Embedded object field should not be processed here");
@@ -436,7 +473,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		
 		
-		if(field.isHidden()) {
+		if(fieldView.isHidden()) {
 			element.addClass("d-none");
 		} if(!field.getViews().contains(scope)) {
 			switch(scope) {
@@ -544,7 +581,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			table.setSortColumn(objectTemplate.getDefaultColumn());
 			table.setSortOrder(SortOrder.ASC);
 			
-			element.insertChildren(0, table.render());
+			element.appendChild(table.render());
 			break;
 		}
 //		case FILE:
@@ -814,7 +851,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			case RICH_EDITOR:
 			{
-				RichTextEditorInput render = new RichTextEditorInput(fieldView, currentDocument.get(), view == FieldView.READ);
+				RichTextEditorInput render = new RichTextEditorInput(fieldView, currentDocument.get());
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
@@ -1008,7 +1045,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	private void processDynamicElements(Elements thisElement, TemplateViewField fieldView, AbstractObject obj) {
 
 		Map<String,ObjectDynamicField> optionalFields = generateDynamicFields(currentTemplate.get());
-		Element row = thisElement.parents().select(".field").first();
+		Element row = thisElement.parents().select(".row").first();
 		if(Objects.nonNull(row)) {
 			
 			if(optionalFields.containsKey(fieldView.getVariable())) {
@@ -1060,11 +1097,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		Map<String,ObjectDynamicField> tmp = new HashMap<>();
 		
 		Class<?> clz = templateService.getTemplateClass(objectTemplate.getResourceKey());
-		ObjectDynamicField[] fields = clz.getAnnotationsByType(ObjectDynamicField.class);
-		if(Objects.nonNull(fields)) {
-			for(ObjectDynamicField field : fields) {
-				tmp.put(field.field(), field);
+		while(Objects.nonNull(clz)) {
+			ObjectDynamicField[] fields = clz.getAnnotationsByType(ObjectDynamicField.class);
+			if(Objects.nonNull(fields)) {
+				for(ObjectDynamicField field : fields) {
+					tmp.put(field.field(), field);
+				}
 			}
+			clz = clz.getSuperclass();
 		}
 		return tmp;
 	}

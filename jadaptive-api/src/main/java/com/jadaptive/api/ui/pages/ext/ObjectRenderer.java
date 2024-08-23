@@ -70,8 +70,9 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			}
 		
 			formHandler.set(handler);
+			var forceNew = element.attr("jad:forceNewObject");
 			
-			if(page instanceof ObjectPage) {
+			if(page instanceof ObjectPage && !Boolean.parseBoolean(forceNew)) {
 				object.set(((ObjectPage)page).getObject());
 			} 
 			
@@ -93,8 +94,8 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 					}
 				}
 			}
-			
-			actionURL.set(String.format("/app/api/form/%s/%s", handler, displayTemplate.getResourceKey()));
+
+			actionURL.set(String.format("/app/api/form/handler/%s/%s", handler, displayTemplate.getResourceKey()));
 			
 			super.process(contents, page, displayTemplate, displayObject, scope);
 		
