@@ -35,10 +35,7 @@ public class CssEditorFormInput extends FieldInputRender {
 				
 		Element input;
 		rootElement.appendChild(new Element("div")
-				.addClass("row mb-3")
-				.addClass("w-100")
-				.appendChild(new Element("div")
-						.addClass("col-12")
+
 				.appendChild(new Element("label")
 						.attr("for", getFormVariable())
 						.addClass("form-label")
@@ -52,7 +49,7 @@ public class CssEditorFormInput extends FieldInputRender {
 						.addClass("form-text")
 						.addClass("text-muted")
 						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
+						.attr("jad:i18n", String.format("%s.desc", getResourceKey()))));
 
 		if(!disableIDAttribute) {
 			input.attr("id", getResourceKey());

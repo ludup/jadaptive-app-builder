@@ -20,9 +20,6 @@ public class TimestampFormInput extends FieldInputRender {
 		
 		Element input;
 		rootElement.appendChild(new Element("div")
-				.addClass("row mb-3")
-				.appendChild(new Element("div")
-						.addClass("col-12")
 				.appendChild(new Element("label")
 						.attr("for", getFormVariable())
 						.addClass("form-label")
@@ -37,7 +34,7 @@ public class TimestampFormInput extends FieldInputRender {
 						.addClass("form-text")
 						.addClass("text-muted")
 						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
+						.attr("jad:i18n", String.format("%s.desc", getResourceKey()))));
 		
 		
 		rootElement.appendChild(input = new Element("input")

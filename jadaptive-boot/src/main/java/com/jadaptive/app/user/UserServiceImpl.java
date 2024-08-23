@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,8 @@ import com.jadaptive.utils.Utils;
 @Service
 public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
 
+	private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+	
 	@Autowired
 	private PermissionService permissionService; 
 	
@@ -69,7 +73,11 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Autowired
 	private TenantService tenantService; 
 	
+<<<<<<< HEAD
 	long cachedAllTenantsCount = -1;
+=======
+	private long cachedAllTenantsCount = -1;
+>>>>>>> origin/develop
 
 	@Override
 	public Integer getOrder() {
@@ -192,7 +200,8 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	}
 	
 	@Override
-	public long allTenantsCount() {
+	public synchronized long allTenantsCount() {
+
 		
 		if(cachedAllTenantsCount < 0) {
 			long count = 0;
@@ -219,11 +228,22 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 		
 		eventService.created(User.class, (e)->{
-			cachedAllTenantsCount++;
+			synchronized(UserServiceImpl.this) {
+				cachedAllTenantsCount++;
+				if(log.isInfoEnabled()) {
+					log.info("REMOVEME: Increasing licensed user count to {}", cachedAllTenantsCount);
+				}
+			}
 		});
+
 		
 		eventService.deleted(User.class, (e)->{
-			cachedAllTenantsCount--;
+			synchronized(UserServiceImpl.this) {
+				cachedAllTenantsCount--;
+				if(log.isInfoEnabled()) {
+					log.info("REMOVEME: Reducing licensed user count to {}", cachedAllTenantsCount);
+				}
+			}
 		});
 	}
 	

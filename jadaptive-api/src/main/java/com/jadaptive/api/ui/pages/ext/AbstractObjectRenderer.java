@@ -286,15 +286,43 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			Element viewElement = createViewElement(view, element, first && !view.isRoot());
 			
 			boolean firstField = true;
+			Element lastRow = Html.div("row mb-3");
+			int usedCols = 0;
 			for(TemplateViewField fieldView : view.getFields()) {
 				FieldTemplate field = fieldView.getField();
 
 				switch(field.getFieldType()) {
 				default:
-					Element e = Html.div("field");
-					viewElement.appendChild(e);
-					renderField(e, obj, fieldView, scope, view);
+					
+					Element f = Html.div("field");
+					
+					int cols = Math.min(field.getMetaValueInt("cols", 12), 12);
+					int size = Math.min(field.getMetaValueInt("size", 12), 12);
+					boolean eor = true;
+					
+					if(size < 12) {
+						f.addClass("col-md-" + size + " col-sm-12");
+					} else if(cols < 12) {
+						usedCols += cols;
+						eor = usedCols >= 12;
+						f.addClass("col-md-" + cols + " col-sm-12");
+					}
+
+					renderField(f, obj, fieldView, scope, view);
+					lastRow.appendChild(f);
+					
+					if(!field.isHidden()) {
+						if(eor) {
+							viewElement.appendChild(lastRow);
+							lastRow = Html.div("row mb-3");
+							usedCols = 0;
+						}
+					}
 					break;
+				}
+				
+				if(lastRow.childNodeSize() > 0) {
+					viewElement.appendChild(lastRow);
 				}
 				
 				if(firstField) {
@@ -1045,7 +1073,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	private void processDynamicElements(Elements thisElement, TemplateViewField fieldView, AbstractObject obj) {
 
 		Map<String,ObjectDynamicField> optionalFields = generateDynamicFields(currentTemplate.get());
-		Element row = thisElement.parents().select(".row").first();
+		Element row = thisElement.parents().select(".field").first();
+
 		if(Objects.nonNull(row)) {
 			
 			if(optionalFields.containsKey(fieldView.getVariable())) {

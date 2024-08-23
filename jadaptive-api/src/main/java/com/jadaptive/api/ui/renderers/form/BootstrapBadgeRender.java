@@ -14,15 +14,12 @@ public class BootstrapBadgeRender extends FieldInputRender {
 		
 		Element input;
 		rootElement.appendChild(new Element("div")
-				.addClass("row mb-3")
-				.appendChild(new Element("div")
-						.addClass("col-12")
 				.appendChild(generateBadge(value))
 				.appendChild(input = new Element("input")
 						.attr("name", getFormVariableWithParents())
 						.addClass(getResourceKey() + " form-control")
 						.attr("value", value)
-						.attr("type", "hidden"))));
+						.attr("type", "hidden")));
 
 		if(!disableIDAttribute) {
 			input.attr("id", getResourceKey());
