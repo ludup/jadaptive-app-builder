@@ -999,7 +999,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 	private void processDynamicElements(Elements thisElement, TemplateViewField fieldView, AbstractObject obj) {
 
-		Element row = thisElement.parents().select(".row").first();
+		Element row = thisElement.parents().select(".field").first();
 		if(Objects.nonNull(row)) {
 			
 			if(fieldView.isOptional()) {
