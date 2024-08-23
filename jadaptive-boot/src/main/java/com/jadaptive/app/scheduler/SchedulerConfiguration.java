@@ -4,11 +4,13 @@ import java.util.Objects;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
-import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.ui.pages.config.ConfigurationItem;
 
 @ObjectDefinition(resourceKey = SchedulerConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
+@ConfigurationItem(icon = "fa-calendar-clock", path = "/app/ui/config/schedulerConfig", resourceKey = SchedulerConfiguration.RESOURCE_KEY, system = true)
 public class SchedulerConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = 3875690639044948654L;

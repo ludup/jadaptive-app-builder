@@ -782,16 +782,16 @@ public class TableRenderer {
 	}
 	
 	String getStringValue(FieldTemplate field, AbstractObject rootObject) {
-//
-//		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
-//			AbstractObject obj = rootObject.getChild(field.getParentField());
-//			if(Objects.nonNull(obj)) {
-//				return safeCast(obj.getValue(field.getResourceKey()));
-//			} 
-//			return "";
-//		} else {
+
+		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
+			AbstractObject obj = rootObject.getChild(field.getParentField());
+			if(Objects.nonNull(obj)) {
+				return safeCast(obj.getValue(field.getResourceKey()));
+			} 
+			return "";
+		} else {
 			return safeCast(rootObject.getValue(field.getResourceKey()));
-//		}
+		}
 		
 	}
 	

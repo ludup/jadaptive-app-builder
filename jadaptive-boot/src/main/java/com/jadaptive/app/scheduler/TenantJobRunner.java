@@ -1,5 +1,6 @@
 package com.jadaptive.app.scheduler;
 
+import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
@@ -51,9 +52,14 @@ public class TenantJobRunner implements Runnable {
 		future = taskScheduler.schedule(this, new CronTrigger(expression));
 	}
 	
+	public void schedule(TenantTask task, Date startTime, long repeat) {
+		this.task = task;
+		future = taskScheduler.scheduleAtFixedRate(task, startTime, repeat);
+	}
+	
 	public void runNow(TenantTask task) {
 		this.task = task;
-		taskScheduler.schedule(this, Utils.now());
+		future = taskScheduler.schedule(this, Utils.now());
 	}
 	
 	@Override
