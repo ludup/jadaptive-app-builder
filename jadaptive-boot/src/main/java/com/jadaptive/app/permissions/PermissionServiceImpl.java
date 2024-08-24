@@ -220,8 +220,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public User getCurrentUser() {
 		Stack<User> userStack = currentUser.get();
 		if(Objects.isNull(userStack) || userStack.isEmpty()) {
-			if(log.isWarnEnabled()) {
-				log.warn("Access denied because there is no user in the current context");
+			if(log.isDebugEnabled()) {
+				log.debug("Access denied because there is no user in the current context");
 			}
 			throw new AccessDeniedException();
 		}
