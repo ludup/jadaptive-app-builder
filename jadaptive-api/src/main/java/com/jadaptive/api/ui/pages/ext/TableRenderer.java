@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.i18n.I18nService;
@@ -298,13 +299,20 @@ public class TableRenderer {
 							.attr("id", "pagesize")));
 			
 			tableholder.add(Html.div("row", "mb-3").appendChild(
-					Html.div("col-md-12 float-start text-start")
+					Html.div("col-md-6 float-start text-start")
 						.attr("id", "objectActions")));
 			
 			generateTableActions(tableholder.select("#objectActions").first(), tableActions);
 			
 			if(readOnly) {
 				tableholder.select(".readWrite").remove();
+			}
+			
+			if(totalObjects > 0) {
+				tableholder.select("#objectActions").first().after(
+						Html.div("float-end", "text-muted", "col-md-6", "text-end").appendChild(
+								Html.i18n("userInterface","tableStats.text", objects.size(), totalObjects, 
+										I18N.getResource(template.getBundle(), template.getResourceKey() + ".names"))));
 			}
 			
 			return tableholder;
@@ -414,7 +422,7 @@ public class TableRenderer {
 				if(Objects.isNull(parentObject)) {
 					dropdown.addI18nAnchorWithIconValue("default", "edit.name", replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "fa-solid", "fa-edit");
 				} else {
-					dropdown.addI18nAnchorWithIconValue("default", "edit.name", replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "fa-solid", "fa-edit", "stash")
+					dropdown.addI18nAnchorWithIconValue("default", "edit.name", "#", "fa-solid", "fa-edit", "stash")
 						.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
 						.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid());	
 				}
@@ -783,16 +791,17 @@ public class TableRenderer {
 	
 	String getStringValue(FieldTemplate field, AbstractObject rootObject) {
 
-		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
-			AbstractObject obj = rootObject.getChild(field.getParentField());
-			if(Objects.nonNull(obj)) {
-				return safeCast(obj.getValue(field.getResourceKey()));
-			} 
-			return "";
-		} else {
-			return safeCast(rootObject.getValue(field.getResourceKey()));
+		Object val = rootObject.getValue(field.getResourceKey());
+		if(Objects.isNull(val)) {
+			if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
+				AbstractObject obj = rootObject.getChild(field.getParentField());
+				if(Objects.nonNull(obj)) {
+					return safeCast(obj.getValue(field.getResourceKey()));
+				} 
+				return "";
+			}
 		}
-		
+		return safeCast(val);
 	}
 	
 	AbstractObject getReferenceValue(FieldTemplate field, AbstractObject rootObject) {
