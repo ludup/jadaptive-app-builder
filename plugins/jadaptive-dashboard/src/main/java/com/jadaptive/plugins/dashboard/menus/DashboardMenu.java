@@ -32,7 +32,7 @@ public class DashboardMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/";
+		return "/app/ui/dashboard";
 	}
 
 	@Override
