@@ -11,8 +11,10 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 
@@ -50,9 +52,10 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 
 	@Override
-	public T get(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException {
+	public <X extends UUIDDocument> X get(String uuid, Class<X> resourceClass) throws RepositoryException, ObjectException {
 		try {
-			T result = getObject(uuid, getCurrentTenant().getUuid(), resourceClass);
+			X result = getObject(uuid, getCurrentTenant().getUuid(), resourceClass, 
+					SearchField.eq("resourceKey", TemplateUtils.lookupClassResourceKey(resourceClass)));
 			return result;
 		} catch(RepositoryException | ObjectException e) {
 			/**

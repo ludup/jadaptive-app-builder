@@ -81,6 +81,7 @@ import com.jadaptive.api.ui.renderers.form.SetPasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.SingleAttachmentInput;
 import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
+import com.jadaptive.api.ui.renderers.form.TextEditorInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimeFormInput;
 import com.jadaptive.api.ui.renderers.form.TimestampFormInput;
@@ -286,7 +287,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			Element viewElement = createViewElement(view, element, first && !view.isRoot());
 			
 			boolean firstField = true;
-			Element lastRow = Html.div("row mb-3");
+			Element lastRow = Html.div("row mb-3 fields");
+			viewElement.appendChild(lastRow);
+			
 			int usedCols = 0;
 			for(TemplateViewField fieldView : view.getFields()) {
 				FieldTemplate field = fieldView.getField();
@@ -295,7 +298,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				default:
 					
 					Element f = Html.div("field");
-					
+					lastRow.appendChild(f);
 					int cols = Math.min(field.getMetaValueInt("cols", 12), 12);
 					int size = Math.min(field.getMetaValueInt("size", 12), 12);
 					boolean eor = true;
@@ -309,22 +312,26 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					}
 
 					renderField(f, obj, fieldView, scope, view);
-					lastRow.appendChild(f);
 					
-					if(!field.isHidden()) {
-						if(eor) {
-							viewElement.appendChild(lastRow);
-							lastRow = Html.div("row mb-3");
-							usedCols = 0;
+					//if(!field.isHidden()) {
+					if(eor) {
+						boolean visible = false;
+						for(Element e : lastRow.select(".field")) {
+							if(!e.hasClass("d-none")) {
+								visible = true;
+								break;
+							}
 						}
+						if(!visible) {
+							lastRow.addClass("d-none");
+						}
+						viewElement.appendChild(lastRow = Html.div("row mb-3 fields"));
+						usedCols = 0;
 					}
+					//}
 					break;
 				}
-				
-				if(lastRow.childNodeSize() > 0) {
-					viewElement.appendChild(lastRow);
-				}
-				
+
 				if(firstField) {
 					var firstInput = viewElement.select("input").first();
 					if(firstInput != null) {
@@ -333,6 +340,10 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				}
 				
 				firstField = false;
+			}
+			
+			if(lastRow.childNodeSize() == 0) {
+				lastRow.remove();
 			}
 			
 			if(!view.getChildViews().isEmpty()) {
@@ -877,6 +888,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
+			case TEXT_EDITOR:
+			{
+				TextEditorInput render = new TextEditorInput(fieldView, currentDocument.get());
+				render.renderInput(element, getFieldValue(fieldView, obj));
+				break;
+			}
 			case RICH_EDITOR:
 			{
 				RichTextEditorInput render = new RichTextEditorInput(fieldView, currentDocument.get());
@@ -1083,6 +1100,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				String dependsValue = optionalFields.get(fieldView.getVariable()).dependsValue();
 				row.attr("data-depends-on", dependsOn);
 				row.attr("data-depends-value", dependsValue);
+				row.attr("data-resourcekey", fieldView.getResourceKey());
 				row.addClass("processDepends");
 				String[] matchValues = dependsValue.split(",");
 				boolean matches = false;

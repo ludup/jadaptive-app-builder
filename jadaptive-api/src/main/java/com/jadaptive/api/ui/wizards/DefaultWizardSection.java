@@ -76,7 +76,7 @@ public class DefaultWizardSection extends WizardSection {
 	
 	private void renderObject(AbstractObject object, ObjectTemplate template, Element row) {
 		for(FieldTemplate field : template.getFields()) { 
-			if(field.isHidden() || !field.isSummarise()) {
+			if(field.isHidden() && !field.isSummarise()) {
 				continue;
 			}
 			

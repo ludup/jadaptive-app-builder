@@ -292,6 +292,8 @@ public class DocumentHelper {
 			log.debug("Building object {} using template {}", resourceKey, template.getResourceKey());
 		}
 		
+		validationErrors.get().clear();
+		
 		AbstractObject obj = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).createNew(resourceKey);
 		String uuid = getParameter(parameters, formVariablePrefix + "uuid");
 		if(StringUtils.isNotBlank(uuid)) {

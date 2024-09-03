@@ -31,15 +31,12 @@ public abstract class FormInputRender extends FieldInputRender {
 	}
 	
 	public final void renderInput(Element rootElement, String value, String... classes) throws IOException {
-
-		Element myElement;
 		
-		rootElement.appendChild(myElement = 
-				new Element("div").addClass(Utils.csv(" ", classes)));
+		rootElement.addClass(Utils.csv(" ", classes));
 		
-		Element parent = myElement;
+		Element parent = rootElement;
 		
-		beforeInput(myElement, value);
+		beforeInput(rootElement, value);
 
 		if(decorate) {
 			
@@ -54,10 +51,10 @@ public abstract class FormInputRender extends FieldInputRender {
 
 		parent.appendChild(Html.div("input-group").appendChild(input = createInputElement(value)));
 		
-		afterInput(myElement, value);
+		afterInput(rootElement, value);
 		
 		if(decorate) {
-			createHelpElement(myElement, value);
+			createHelpElement(rootElement, value);
 		}
 		
 		if(!disableIDAttribute) {

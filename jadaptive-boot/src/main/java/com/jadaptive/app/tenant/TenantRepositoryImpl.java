@@ -11,7 +11,7 @@ import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
@@ -87,7 +87,7 @@ public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenan
 	}
 	
 	@Override
-	protected <T extends UUIDEntity> Map<String, T> getCache(Class<T> obj) {
+	protected <T extends UUIDDocument> Map<String, T> getCache(Class<T> obj) {
 		return cacheService.getCacheOrCreate("tenants.uuidCache", String.class, obj);
 	}
 

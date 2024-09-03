@@ -85,6 +85,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 			boolean isSystem = tenantService.getCurrentTenant().isSystem();
 			
 			state = new WizardState(this, uuid);
+			onGenerateState(state);
 			
 			List<WizardSection> sections = new ArrayList<>();
 			
@@ -122,11 +123,13 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 			
 			init(state);
 			request.getSession().setAttribute(getStateAttribute(), state);
-		
 		}
 		return state;
 	}
 	
+	protected void onGenerateState(WizardState state) {
+		
+	}
 	@Override
 	public WizardState getState(HttpServletRequest request) {
 		

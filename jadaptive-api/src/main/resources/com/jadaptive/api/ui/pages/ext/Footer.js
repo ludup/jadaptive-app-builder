@@ -346,12 +346,30 @@ $(function() {
 		JadaptiveUtils.startAwesomeSpin($(this).find('.spinForm').children('i'));
 	});
 	
+	function checkRowVisibility(row) {
+		
+		var hasVisible = false;
+		row.children('.field').each(function() {
+			if(!$(this).hasClass('d-none')) {
+				hasVisible = true;
+			}
+		});
+		
+		if(hasVisible){ 
+			row.removeClass('d-none');
+		} else {
+			row.addClass('d-none');
+		}
+	}
+	
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
 		$('.processDepends').each(function() {
-			var field = $(this).parents('.field').first();
+			var field = $(this); //.parents('.field').first();
+			var row = $(this).parents('.row').first();
 			var dependsOn = $(this).data('depends-on');
 			var dependsValue = $(this).attr('data-depends-value');
+			var resourceKey = $(this).data('resourcekey');
 			
 			var allInput = $('input[name="' + dependsOn + '"]');
 			
@@ -374,7 +392,9 @@ $(function() {
 					} else {
 						value = input.val();
 					}
+					var matches = !expectedResult;
 					if(obj == value) {
+						matches = expectedResult
 						if(expectedResult) {
 							field.removeClass('d-none');
 						} else {
@@ -387,12 +407,16 @@ $(function() {
 						} else {
 							field.removeClass('d-none');
 						}
+						return true;
 					}
 					return false;
 				});
 				
 			});
 			
+			$('.fields').each(function() {
+				checkRowVisibility($(this));
+			});
 		});
 	});
 	

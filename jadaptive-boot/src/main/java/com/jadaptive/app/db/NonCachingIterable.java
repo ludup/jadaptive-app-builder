@@ -12,11 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.db.ClassLoaderService;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 
-public class NonCachingIterable<T extends UUIDEntity> implements Iterable<T> {
+public class NonCachingIterable<T extends UUIDDocument> implements Iterable<T> {
 
 		static Logger log = LoggerFactory.getLogger(NonCachingIterable.class);
 		

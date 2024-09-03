@@ -9,4 +9,6 @@ public interface UUIDDocument extends Serializable {
 	public void setUuid(String string);
 	
 	String getResourceKey();
+	
+	String getEventGroup();
 }

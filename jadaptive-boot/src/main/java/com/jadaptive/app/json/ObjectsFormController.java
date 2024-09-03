@@ -607,5 +607,35 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		}
 	}
 	
+	@RequestMapping(value="/app/api/objects/image/{resourceKey}/{uuid}/{filename}", method = RequestMethod.GET)
+	public void downloadImage(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey,
+			 @PathVariable String uuid, @PathVariable String filename) throws ObjectException, IOException {
+		
+		permissionService.assertRead(PermissionUtils.getReadPermission(resourceKey));
+		
+		try {
+			
+			FileAttachment att = fileService.getAttachment(uuid);
+			response.setStatus(HttpStatus.OK.value());
+			response.setContentLengthLong(att.getSize());
+			response.setContentType(att.getContentType());
+			
+			SessionUtils.runIoWithoutSessionTimeout(request, ()->{
+				try(InputStream in = fileService.getAttachmentContent(uuid)) {
+					IOUtils.copy(in, response.getOutputStream());
+				}
+			});
+		} 
+		catch(ObjectNotFoundException e) {
+			response.sendError(HttpStatus.NOT_FOUND.value());
+		}
+		catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/objects/attachment{}", resourceKey, e);
+			}
+			throw new ObjectException(e);
+		}
+	}
+	
 	
 }

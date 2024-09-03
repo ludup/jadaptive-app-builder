@@ -129,6 +129,9 @@ processedFormData: function(form, removeFiles) {
 		if (!allInput.length) {
 			allInput = $('input[name=' + dependsOn + ']');
 		}
+		var resourceKey = $(this).data('resourcekey');
+		if(console)
+			console.log('Checking field ' + resourceKey + " against " + dependsOn + " and value " + dependsValue);
 		var matchValues = dependsValue.split(',');
 		var matches = false;
 		allInput.each(function(i, input) {
@@ -159,7 +162,9 @@ processedFormData: function(form, removeFiles) {
 			}
 		});
 		if (!matches) {
-			fdata.delete($(this).find('input').attr('name'));
+			if(console)
+			console.log('Removing field ' + resourceKey);
+			fdata.delete(resourceKey);
 		}
 	});
 	

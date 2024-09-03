@@ -72,5 +72,9 @@ public interface ObjectService {
 
 	<T extends UUIDDocument> Collection<T> collectionFromReferences(Collection<UUIDReference> refs, Class<T> clz);
 
+	<T extends UUIDDocument> T toUUIDDocument(AbstractObject entity, Class<T> clz);
+
+	<T extends UUIDDocument> T fromStashToUUIDDocument(String resourceKey, Class<T> clz);
+
 	
 }

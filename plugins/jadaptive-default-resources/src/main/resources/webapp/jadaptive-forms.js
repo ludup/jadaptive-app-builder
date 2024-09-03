@@ -1,11 +1,12 @@
 var JadaptiveForms = {
 
-submit : function(form, callback) {
+submit : function(form, callback, invalid) {
 	
 	var url = form.attr('action');
     
         JadaptiveUtils.startAwesomeSpin($('#saveButton i'), 'fa-save');
-
+		$('.validation').removeClass('validation border border-5 border-danger');
+		
         $('.mceEditor').each(function() {
 			var editor = tinymce.get($(this).attr('id'));
 			editor.save();
@@ -73,10 +74,20 @@ submit : function(form, callback) {
 				     //JadaptiveUtils.error($("#feedback"), data.message);
 				     
 				     $.each(data.errors, function(idx, obj) {
-					     $('input[name="' + obj.formVariable + '"]').parents(".field").first().find(".form-control").addClass("border border-5 border-danger");
+						var field = $('input[name="' + obj.formVariable + '"]').parents(".field").first().find(".form-control");
+						if(field.length > 0) {
+					     	field.addClass("validation border border-5 border-danger");
+					    } else {
+							field = $('textarea[name="' + obj.formVariable + '"]');
+							if(field.length > 0) {
+								field.siblings('.tox-tinymce').addClass("validation border border-5 border-danger");
+							}
+						}
 					  });
 				     
-				     
+				     if(invalid) {
+				     	invalid();
+				     }
 				 }
            },
            complete: function() {

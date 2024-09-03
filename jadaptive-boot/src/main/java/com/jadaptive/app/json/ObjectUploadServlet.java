@@ -43,7 +43,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(name="objectServlet", description="Servlet for handing objects", 
-	urlPatterns = { "/app/api/form/multipart/*", "/app/api/form/handler/*"})
+	urlPatterns = { "/app/api/form/multipart/*", "/app/api/form/stash/*", "/app/api/form/handler/*"})
 public class ObjectUploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8476101184614381108L;
@@ -51,6 +51,7 @@ public class ObjectUploadServlet extends HttpServlet {
 	private static Logger log = LoggerFactory.getLogger(ObjectUploadServlet.class);
 	
 	private static final String MULTIPART = "multipart";
+	private static final String STASH = "stash";
 	
 	@Autowired
 	private TemplateService templateService; 
@@ -90,9 +91,11 @@ public class ObjectUploadServlet extends HttpServlet {
 				
 				AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
 				
-				String uuid;
+				String uuid = "";
 				if(MULTIPART.equals(handler)) {
 					uuid = objectService.saveOrUpdate(obj);
+				} else if(STASH.equals(handler)) {
+					objectService.stashObject(obj);
 				} else {
 					uuid = objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
 							templateService.getTemplateClass(resourceKey), 

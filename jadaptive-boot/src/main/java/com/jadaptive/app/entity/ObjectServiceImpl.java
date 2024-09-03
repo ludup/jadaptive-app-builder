@@ -313,6 +313,15 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
+	public <T extends UUIDDocument> T fromStashToUUIDDocument(String resourceKey, Class<T> clz)  {
+		try {
+			return toUUIDDocument((AbstractObject) Request.get().getSession().getAttribute(resourceKey), clz);
+		} finally {
+			 Request.get().getSession().removeAttribute(resourceKey);
+		}
+	}
+	
+	@Override
 	public AbstractObject fromStashToAbstractObject(String resourceKey)  {
 		try {
 			UUIDDocument doc = (UUIDDocument) Request.get().getSession().getAttribute(resourceKey);
@@ -986,6 +995,11 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	public UUIDDocument toUUIDDocument(AbstractObject entity) {
 		
 		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(entity.getResourceKey());
+		return DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument()));
+	}
+	
+	@Override
+	public <T extends UUIDDocument> T toUUIDDocument(AbstractObject entity, Class<T> clz) {
 		return DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument()));
 	}
 	

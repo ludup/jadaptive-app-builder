@@ -27,13 +27,25 @@ public class RichTextEditorInput extends FieldInputRender {
 
 	@Override
 	public void renderInput(Element rootElement, String value, String... classes) throws IOException {
-				
+		
+		rootElement.appendChild(new Element("label")
+				.attr("for", getFormVariable())
+				.addClass("form-label")
+				.attr("jad:bundle", getBundle())
+				.attr("jad:i18n", String.format("%s.name", getResourceKey())));
+		
 		rootElement.appendChild(
 				new Element("textarea")
 					.val(value)
 					.attr("name", resourceKey)
 					.attr("id", resourceKey)
-					.addClass("row mb-3 mceEditor"));
+					.addClass("row mb-3 mceEditor form-control"));
+		
+		rootElement.appendChild(new Element("small")
+				.addClass("form-text")
+				.addClass("text-muted")
+				.attr("jad:bundle", getBundle())
+				.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
 		
 		rootElement.addClass("mb-3");
 		
@@ -49,7 +61,7 @@ public class RichTextEditorInput extends FieldInputRender {
 		+ "	  license_key: 'gpl',\n"
 		+ "	  promotion: false,\n"
 		+ "	  branding: false,\n"
-		+ "	  menubar: 'edit insert view format table tools'\n"
+		+ "	  menubar: 'edit insert view format table'\n"
 		+ "	}); \n"
 		+ "});";
 		

@@ -73,11 +73,7 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Autowired
 	private TenantService tenantService; 
 	
-<<<<<<< HEAD
-	long cachedAllTenantsCount = -1;
-=======
 	private long cachedAllTenantsCount = -1;
->>>>>>> origin/develop
 
 	@Override
 	public Integer getOrder() {

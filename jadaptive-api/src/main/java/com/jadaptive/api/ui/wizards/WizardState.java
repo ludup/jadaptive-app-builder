@@ -44,6 +44,10 @@ public class WizardState {
 		currentStep = Objects.nonNull(getStartPage()) ? 0 : 1;
 	}
 	
+	public String getUuid() {
+		return uuid;
+	}
+	
 	public Integer getDisplayStep() {
 		return displayStep;
 	}

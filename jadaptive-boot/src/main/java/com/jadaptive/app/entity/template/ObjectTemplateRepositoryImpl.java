@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.Index;
@@ -200,7 +200,7 @@ public class ObjectTemplateRepositoryImpl extends AbstractSystemObjectDatabaseIm
 	}
 
 	@Override
-	protected <T extends UUIDEntity> Map<String, T> getCache(Class<T> obj) {
+	protected <T extends UUIDDocument> Map<String, T> getCache(Class<T> obj) {
 		return cacheService.getCacheOrCreate("objectTemplates.uuidCache", String.class, obj);
 	}
 
