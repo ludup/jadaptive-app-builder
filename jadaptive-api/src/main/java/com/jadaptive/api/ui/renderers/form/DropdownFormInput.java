@@ -8,6 +8,7 @@ import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.ui.NamePairValue;
 import com.jadaptive.api.ui.PageHelper;
 
 public class DropdownFormInput extends FieldInputRender {
@@ -174,6 +175,22 @@ public class DropdownFormInput extends FieldInputRender {
 	public void setSelectedValue(String value, String name) {
 		nameElement.val(name);
 		valueElement.val(value);
+	}
+
+	public void renderNamePairValues(Collection<NamePairValue> values, String defaultValue) {
+		
+		NamePairValue selected = null;
+		for(NamePairValue value : values) {
+			addInputValue(value.getValue(), value.getName());
+			if(value.getValue().equals(defaultValue)) {
+				selected = value;
+			}
+		}
+		
+		if(Objects.nonNull(selected)) {
+			nameElement.val(selected.getName());
+			valueElement.val(selected.getValue());
+		}
 	}
 
 	

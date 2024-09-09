@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.pf4j.ExtensionPoint;
 
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.Redirect;
+import com.jadaptive.api.ui.UriRedirect;
 
 public interface WizardFlow extends ExtensionPoint {
 
@@ -24,7 +26,7 @@ public interface WizardFlow extends ExtensionPoint {
 
 	boolean requiresUserSession();
 
-	
+	default Redirect getCancelRedirect() { throw new UriRedirect("/app/ui"); }
 	
 	
 }

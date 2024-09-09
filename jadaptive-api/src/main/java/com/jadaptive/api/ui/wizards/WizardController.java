@@ -128,4 +128,30 @@ public class WizardController extends AuthenticatedController {
 			clearUserContext();
 		}
 	}
+	
+	@RequestMapping(value = "/app/api/wizard/cancel/{resourceKey}", method = { RequestMethod.POST, RequestMethod.GET }, produces = { "application/json" })
+	@ResponseBody
+	public void cancelWizrd(
+			HttpServletRequest request, HttpServletResponse response,
+			@PathVariable String resourceKey) throws AccessDeniedException,
+			UnauthorizedException, SessionTimeoutException, FileNotFoundException {
+
+		setupSystemContext();
+		
+		WizardFlow wizard = wizardService.getWizard(resourceKey);
+		
+		try {
+			
+			wizardService.clearState(resourceKey, request);
+		} catch(Throwable e) {
+			log.error("Failed to cancel wizard {}", resourceKey, e);
+		} finally {
+			clearUserContext();
+		}
+		
+		if(Objects.nonNull(wizard)) {
+			throw wizard.getCancelRedirect();
+		}
+		throw new UriRedirect("/app/ui");
+	}
 }

@@ -20,8 +20,13 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	
 	public static final String RESOURCE_KEY = "tenantConfiguration";
 	
+	public static final String CREATE_VIEW = "create";
 	public static final String DOMAIN_VIEW = "domain";
 	public static final String ANALYTICS_VIEW = "analytics";
+	
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
+	@ObjectView(CREATE_VIEW)
+	Boolean publicRegistration;
 	
 	@ObjectField(type = FieldType.TEXT, defaultValue = "")
 	@ObjectView(DOMAIN_VIEW)
@@ -40,6 +45,15 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	@ObjectView(DOMAIN_VIEW)
 	String invalidDomainRedirect;
 	
+	
+	public Boolean getPublicRegistration() {
+		return publicRegistration;
+	}
+
+	public void setPublicRegistration(Boolean publicRegistration) {
+		this.publicRegistration = publicRegistration;
+	}
+
 	public String getRootDomain() {
 		return rootDomain;
 	}

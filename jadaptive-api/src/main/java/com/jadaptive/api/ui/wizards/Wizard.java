@@ -135,6 +135,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			Element content = document.selectFirst("#content");
 			
 			if(!state.isStartPage()) {
+				
+				content.prependChild(new Element("div")
+						.addClass("col-12")
+						.appendChild(new Element("h1")
+								.attr("jad:bundle", state.getBundle())
+								.attr("jad:i18n", "wizard.name")));
+				
 				Element h2;
 				content.prependChild(new Element("div")
 						.addClass("col-12")
@@ -165,59 +172,41 @@ public class Wizard extends HtmlPage implements ObjectPage {
 							.attr("jad:bundle", state.getCurrentPage().getBundle())
 							.attr("jad:i18n", "finish.name"));
 				}
-			}
-			
-			if(!state.isStartPage()) {
-				content.prependChild(new Element("div")
-						.addClass("col-12")
-						.appendChild(new Element("h1")
-								.attr("jad:bundle", state.getBundle())
-								.attr("jad:i18n", "wizard.name")));
+				
+				document.selectFirst("#cancelButton").attr("href", "/app/api/wizard/cancel/" + resourceKey);
+			} else {
+				document.selectFirst("#cancelButton").remove();
 			} 
-	     
-			if(state.hasBackButton()) {
-				actions.appendChild(new Element("button")
-						.attr("id", "backButton")
-						.addClass("btn btn-danger float-start wizardBack")
-						.appendChild(new Element("i")
-							.addClass("fa-solid fa-arrow-circle-left me-1"))
-						.appendChild(new Element("span")
-							.attr("jad:bundle", "default")
-							.attr("jad:i18n", "back.name")));
+
+			Element form = body.selectFirst("form");
+			if(Objects.nonNull(form)) {
+				if(form.id().equals("")) {
+					form.attr("id", resourceKey + "_form");
+				}
 			}
 			
-			if(state.hasNextButton()) {
-				Element form = body.selectFirst("form");
+			if(!state.hasBackButton()) {
+				document.selectFirst("#backButton").remove();
+			} else {
 				if(Objects.nonNull(form)) {
-					if(form.id().equals("")) {
-						form.attr("id", resourceKey + "_form");
-					}
-					actions.appendChild(new Element("button")
-							.attr("type", "submit")
-							.attr("form",  form.id())
-							.attr("id", "nextButton")
-							.addClass("btn btn-success float-end wizardNext")
-							.appendChild(new Element("i")
-								.addClass("fa-solid fa-arrow-circle-right me-1"))
-							.appendChild(new Element("span")
-								.attr("jad:bundle", "default")
-								.attr("jad:i18n", "next.name")));
-				} else {
-					actions.appendChild(new Element("button")
-							.attr("id", "nextButton")
-							.addClass("btn btn-success float-end wizardNext")
-							.appendChild(new Element("i")
-								.addClass("fa-solid fa-arrow-circle-right me-1"))
-							.appendChild(new Element("span")
-								.attr("jad:bundle", "default")
-								.attr("jad:i18n", "next.name")));
+					document.selectFirst("#backButton")
+						.attr("form",  form.id());
 				}
-				
-				
-			} else if(state.isFinishPage()) {
-				actions.appendChild(new Element("button")
+			}
+			
+			if(!state.hasNextButton()) {
+				document.selectFirst("#nextButton").remove();
+			} else {
+				if(Objects.nonNull(form)) {
+					document.selectFirst("#nextButton")
+						.attr("form",  form.id());
+				}
+			}
+			
+			if(state.isFinishPage()) {
+				document.selectFirst("#backButton").appendChild(new Element("button")
 							.attr("id", "finishButton")
-							.addClass("btn btn-primary float-end wizardFinish")
+							.addClass("btn btn-primary wizardFinish me-3")
 						.appendChild(new Element("i")
 							.addClass("fa-solid fa-rocket me-1"))
 						.appendChild(new Element("span")
