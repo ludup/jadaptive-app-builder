@@ -147,10 +147,12 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 				throw authenticationService.completeAuthentication(state, Optional.of(this)).
 							maybeAttachToSession(request, sessionUtils.getTimeout());
 			}
-    	
+			
 			Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-	    	Feedback.error("default", "error.invalidCredentials");
-	    	
+			
+			if(!Feedback.isSet()) {
+		    	Feedback.error("default", "error.invalidCredentials");
+			}
     	} catch(AccessDeniedException e) {
     		Feedback.error(e.getMessage());
     	} catch(ObjectNotFoundException e) {	
