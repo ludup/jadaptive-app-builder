@@ -55,7 +55,7 @@ feedback: function(el, message, type, icon) {
 	}
 	var msg = '<div class="position-relative"> \
 				    <div class="toast-container p-3 top-0 start-50 translate-middle-x"> \
-				     <div class="toast align-items-center text-bg-alert-' + type + ' border-0 show" role="alert" aria-live="assertive" aria-atomic="true"> \
+				     <div class="toast align-items-center text-bg-' + type + ' border-0 show" role="alert" aria-live="assertive" aria-atomic="true"> \
 				      <div class="d-flex"> \
 				       <div class="toast-body"> \
 				        <i class="' + icon + ' me-2 ' + $('body').data('iconset') + '"></i> \
