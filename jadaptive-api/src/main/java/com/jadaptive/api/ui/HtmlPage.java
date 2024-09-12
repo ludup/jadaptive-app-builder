@@ -349,28 +349,40 @@ public abstract class HtmlPage implements Page {
 		Feedback feedback = (Feedback) request.getSession().getAttribute("feedback");
 		if(Objects.nonNull(feedback)) {
 			request.getSession().removeAttribute("feedback");
-			Element element = doc.selectFirst("#feedback");
+			Element element = doc.selectFirst("header");
 			if(Objects.isNull(element)) {
-				element = doc.selectFirst("#content");
-				if(Objects.nonNull(element)) {
-					element.prependChild(Html.div("col-12", "mt-3")
-								.appendChild(Html.div("alert", feedback.getAlert())
-								.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
-								.appendChild(getTextElement(feedback))));
-				} else {
-					element = doc.selectFirst("main");
-					if(Objects.nonNull(element)) {
-						element.appendChild(Html.div("col-12", "mt-3")
-								.appendChild(Html.div("alert", feedback.getAlert())
-								.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
-								.appendChild(getTextElement(feedback))));
-					}
-				}
-			} else {
-				element.appendChild(Html.div("alert", feedback.getAlert(), "mt-3")
-						.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
-						.appendChild(getTextElement(feedback)));
+					element = doc.selectFirst("body");
+			} 
+			
+			var bdy = Html.div("toast-body");
+
+			if(feedback.getIcon() != null) {
+				bdy.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"));
 			}
+			
+			bdy.appendChild(getTextElement(feedback));
+			
+			var btn = Html.button("btn-close", "btn-close-white", "me-2", "m-auto");
+			btn.dataset().put("bs-dismiss", "toast");
+			btn.attr("aria-label", "Close");
+			
+			var fbox = Html.div("d-flex");
+			fbox.appendChild(bdy);
+			fbox.appendChild(btn);
+			var toast = Html.div("toast", "align-items-center", "text-bg-" + feedback.getAlert(), "border-0", "show");
+			toast.attr("role", "alert");
+			toast.attr("aria-live", "assertive");
+			toast.attr("aria-atomic", "true");
+			toast.appendChild(fbox);
+			
+			var cnt = Html.div("toast-container", "p-3", "top-0", "start-50", "translate-middle-x");
+			cnt.appendChild(toast);
+			
+			var out = Html.div("position-relative");
+			out.appendChild(cnt);
+			
+			element.after(out);
+			
 		}
 		
 	}

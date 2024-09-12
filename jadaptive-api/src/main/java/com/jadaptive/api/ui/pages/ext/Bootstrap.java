@@ -44,7 +44,7 @@ public class Bootstrap extends AbstractPageExtension {
 			if(!classes.isEmpty()) {
 				Class<?> clz = classes.iterator().next();
 				EnableBootstrapTheme a = clz.getAnnotation(EnableBootstrapTheme.class);
-				if(StringUtils.isNotBlank(a.path())) {
+				if(StringUtils.isNotBlank(a.path()) && page.isThemePage()) {
 					
 					File themePath = new File(ApplicationProperties.getConfdFolder(),
 							"system" + File.separator + "shared" + File.separator + 

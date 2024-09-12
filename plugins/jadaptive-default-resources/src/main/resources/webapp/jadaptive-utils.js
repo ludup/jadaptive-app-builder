@@ -48,19 +48,28 @@ warning: function(el, message) {
 	this.feedback(el, message, 'warning', 'fa-warning');
 },
 feedback: function(el, message, type, icon) {
-	$('.feedback').remove();
-	if(el.length == 0) {
-		var e = $('main');
-		var msg = '<p class="feedback alert alert-' + type + '"><i class="' + $('body').data('iconset') + ' ' + icon + '"></i> ' + message + '</p>';
-		if(e.length == 0) {
-			e = $('#content');
-		}
-		if(e.length > 0) {
-			e.prepend(msg);
-		} 
-	} else {
-		el.append('<p class="feedback alert alert-' + type + '"><i class="' + $('body').data('iconset') + ' ' + icon + '"></i> ' + message + '</p>');
+	
+	var e = $('header');
+	if(e.length == 0) {
+		e = $('body');
 	}
+	var msg = '<div class="position-relative"> \
+				    <div class="toast-container p-3 top-0 start-50 translate-middle-x"> \
+				     <div class="toast align-items-center text-bg-' + type + ' border-0 show" role="alert" aria-live="assertive" aria-atomic="true"> \
+				      <div class="d-flex"> \
+				       <div class="toast-body"> \
+				        <i class="' + icon + ' me-2 ' + $('body').data('iconset') + '"></i> \
+				        <span>' + message + '</span> \
+				       </div> \
+				       <button class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button> \
+				      </div> \
+				     </div> \
+				    </div> \
+				   </div>';
+	
+	if(e.length > 0) {
+		e.after(msg);
+	} 
 },
 checkBlank: function(elements) {
 	var empty = false;

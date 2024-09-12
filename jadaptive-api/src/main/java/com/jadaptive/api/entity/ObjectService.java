@@ -76,5 +76,10 @@ public interface ObjectService {
 
 	<T extends UUIDDocument> T fromStashToUUIDDocument(String resourceKey, Class<T> clz);
 
+	long countObjectsNoScope(String resourceKey, SearchField... fields);
+
+	Collection<AbstractObject> tableObjectsNoScope(String resourceKey, int offset, int limit, String sortColumn,
+			SortOrder order, SearchField... fields);
+
 	
 }

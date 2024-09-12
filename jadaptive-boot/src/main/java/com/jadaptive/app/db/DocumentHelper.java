@@ -552,39 +552,46 @@ public class DocumentHelper {
 	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) throws ObjectException, ValidationException {
 		
 		try {
+			T obj = null;
 			
-			String clz = (String) document.get("_clz");
-			if(Objects.isNull(clz)) {
-				clz = (String) document.get("clz"); // Compatibility with older version.
-			}
-			if(Objects.isNull(clz)) {
-				clz = baseClass.getName();
-			}
-			
-			clz = processClassNameChanges(clz, classLoader);
-			T obj;
+			Class<?> c;
 			
 			String resourceKey = document.getString("resourceKey");
 			
-			try {
-				obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
-			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
-				log.warn("Could not find class {} in uber class loader", clz);
+			if(isTemplateClass(baseClass)) {
+				c = baseClass;
+			} else {
+				c =  ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey);
+			}
+			if(Objects.nonNull(c)) {
 				try {
-					obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
-				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e2) {
+					obj = (T) c.getConstructor().newInstance();
+				} catch(NoSuchMethodException | InstantiationException e) {
+				}
+			}
+			
+			if(Objects.isNull(obj)) {
+				String clz = (String) document.get("_clz");
+				if(Objects.isNull(clz)) {
+					clz = (String) document.get("clz"); // Compatibility with older version.
+				}
+				if(Objects.isNull(clz)) {
+					clz = baseClass.getName();
+				}
+				
+				clz = processClassNameChanges(clz, classLoader);
+				
+				try {
+					obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
+				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
+					log.warn("Could not find class {} in uber class loader", clz);
 					try {
-						Class<?> c = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey);
-						if(Objects.isNull(c)) {
-							throw new IllegalStateException(String.format(
-									"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
-									resourceKey, clz, classLoader));
-						}
-						obj = (T) c.getConstructor().newInstance();
-					} catch(NoSuchMethodException | InstantiationException e3) {
+						obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
+					} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e2) {
 						throw new IllegalStateException(String.format(
 							"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
-							resourceKey, clz, classLoader), e);
+							resourceKey, clz, classLoader), e2);
+						
 					}
 				}
 			}
@@ -776,6 +783,11 @@ public class DocumentHelper {
 		}
 		
 	}
+
+	private static boolean isTemplateClass(Class<?> baseClass) {
+		return baseClass.equals(ObjectTemplate.class) || baseClass.equals(FieldTemplate.class);
+	}
+
 
 	public static void registerClassNameChange(String from, String to) {
 		classNameChanges.put(from, to);

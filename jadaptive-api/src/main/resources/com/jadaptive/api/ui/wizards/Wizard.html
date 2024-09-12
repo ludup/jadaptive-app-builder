@@ -8,7 +8,11 @@
 <main class="container mt-5">
    <div id="content" class="row my-1">
         <div class="col-12" id="wizardContent"></div>
-        <div class="col-12 my-3"><div id="actions" class="col-12"></div></div>
+        <div class="col-12 my-3"><div id="actions" class="col-12">
+        	<button id="backButton" class="btn btn-danger me-3"> <i class="fa-solid fa-arrow-circle-left me-1"></i>&nbsp;<span jad:bundle="default" jad:i18n="back.name">[Back]</span></button> 
+        	<button id="nextButton" class="btn btn-success me-3"> <i class="fa-solid fa-arrow-circle-right me-1 wizardNext"></i>&nbsp;<span jad:bundle="default" jad:i18n="next.name">[Next]</span></button> 
+            <a id="cancelButton" class="checkExit text-muted" data-resourcekey="default"><span jad:bundle="default" jad:i18n="cancel.name">[Cancel]</span></a>
+        </div></div>
    </div>
 </main>
 </div>

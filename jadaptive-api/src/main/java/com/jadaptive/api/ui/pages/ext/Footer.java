@@ -38,7 +38,7 @@ public class Footer extends AbstractPageExtension {
 		if(log.isDebugEnabled()) {
 			log.debug("Bootstrap css is {}", bootstrap);
 		}
-		if(Objects.nonNull(bootstrap)) {
+		if(Objects.nonNull(bootstrap) && page.isThemePage()) {
 			BootstrapTheme current = themeResolver.getTheme();
 			if(log.isDebugEnabled()) {
 				log.debug("Bootstrap theme is {}", current);

@@ -53,39 +53,34 @@ public abstract class StashedObjectPage extends ObjectTemplatePage {
 
 		super.onCreate();
 
-		try {
-			FieldTemplate field = template.getField(fieldName);
-			if(StringUtils.isBlank(childResourceKey)) {
-				childResourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
-			}
-			childTemplate = templateService.get(childResourceKey);
-			childClazz = templateService.getTemplateClass(childResourceKey);
-		} catch (RepositoryException e) {
-			e.printStackTrace();
-			throw e;
-		} catch (ObjectException e) {
-			e.printStackTrace();
-			throw new FileNotFoundException(String.format("%s not found", resourceKey));
-		}
-		
 		FieldTemplate field = template.getField(fieldName);
+		if(StringUtils.isBlank(childResourceKey)) {
+			childResourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
+		}
 		if(field.getCollection()) {
 			if(Objects.nonNull(childUuid)) {
 				for(AbstractObject o : object.getObjectCollection(fieldName)) {
 					if(o.getUuid().equals(childUuid)) {
 						childObject = o;
+						childResourceKey = childObject.getResourceKey();
+						childTemplate = templateService.get(childResourceKey);
+						childClazz = templateService.getTemplateClass(childResourceKey);
 						break;
 					}
 	 			}
 			}
 		} else {
 			childObject = object.getChild(field);
+			childResourceKey = childObject.getResourceKey();
+			childTemplate = templateService.get(childResourceKey);
+			childClazz = templateService.getTemplateClass(childResourceKey);
 		}
 		
 		if(Objects.isNull(childObject)) {
 			childObject = objectService.createNew(childTemplate);
 			childObject.setUuid(UUID.randomUUID().toString()); // Embedded objects don't get assigned these automatically
-		}
+		} 
+		
 	}
 
 	@Override

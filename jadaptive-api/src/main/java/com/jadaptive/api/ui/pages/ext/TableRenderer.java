@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.i18n.I18nService;
@@ -92,15 +93,33 @@ public class TableRenderer {
 	private FieldTemplate field;
 	private boolean readOnly;
 	
-	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field,
-			RenderScope formRenderer, String formHandler) {
+	private final boolean showCreate;
+	private final boolean showUpdate;
+	private final boolean showCopy;
+	
+	public TableRenderer(boolean readOnly, 
+			AbstractObject parentObject, FieldTemplate field,
+			RenderScope formRenderer, String formHandler, ObjectTemplate template) {
+		this(false, template);
 		this.parentObject = parentObject;
 		this.field = field;
 		this.readOnly = readOnly;
 	}
 	
-	public TableRenderer(boolean readOnly) {
+	public TableRenderer(boolean readOnly, ObjectTemplate template) {
 		this.readOnly = readOnly;
+		this.template = template;
+		this.showCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		this.showUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+		this.showCopy = showUpdate && showCreate;
+	}
+	
+	public TableRenderer(boolean readOnly, ObjectTemplate template, boolean showCreate, boolean showUpdate) {
+		this.readOnly = readOnly;
+		this.template = template;
+		this.showCreate = showCreate;
+		this.showUpdate = showUpdate;
+		this.showCopy = showUpdate && showCreate;
 	}
 
 	public Element render() throws IOException {
@@ -116,7 +135,7 @@ public class TableRenderer {
 			
 			Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
-			Collection<TableAction> tableActions = generateActions(template.getCollectionKey());
+			Collection<TableAction> tableActions = generateActions(template.getParentTemplate(), template.getCollectionKey());
 			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || view.multipleDelete();
 			
 			
@@ -219,8 +238,7 @@ public class TableRenderer {
 					
 					if(objects.size() > 0) {
 						
-						boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
-						boolean canCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+						
 						Set<String> permissions = permissionService.resolveCurrentPermissions();
 						Map<Class<?>,ActionFilter> filters = new HashMap<>();
 						
@@ -270,7 +288,7 @@ public class TableRenderer {
 									}
 								}
 								
-								renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getResourceKey()), canUpdate, canCreate, permissions, filters);
+								renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getParentTemplate(), rowTemplate.getResourceKey()), showUpdate, showCreate, permissions, filters);
 								
 								el.appendChild(row);
 							}
@@ -291,15 +309,22 @@ public class TableRenderer {
 							.attr("id", "pagnation"))
 					.appendChild(Html.div("col-md-3 float-start text-end")
 							.attr("id", "pagesize")));
-			
-			tableholder.appendChild(Html.div("row", "mb-3").appendChild(
-					Html.div("col-md-12 float-start text-start")
+
+			tableholder.add(Html.div("row", "mb-3").appendChild(
+					Html.div("col-md-6 float-start text-start")
 						.attr("id", "objectActions")));
 			
 			generateTableActions(tableholder.select("#objectActions").first(), tableActions);
 			
 			if(readOnly) {
 				tableholder.select(".readWrite").remove();
+			}
+			
+			if(totalObjects > 0) {
+				tableholder.select("#objectActions").first().after(
+						Html.div("float-end", "text-muted", "col-md-6", "text-end").appendChild(
+								Html.i18n("userInterface","tableStats.text", objects.size(), totalObjects, 
+										I18N.getResource(template.getBundle(), template.getResourceKey() + ".names"))));
 			}
 			
 			return tableholder;
@@ -384,12 +409,13 @@ public class TableRenderer {
 		}
 	}
 
-	private Collection<TableAction> generateActions(String resourceKey) {
-		var t = templateService.getTableActions(resourceKey);
-		if(Objects.nonNull(t)) {
-			return t;
+	private Collection<TableAction> generateActions(String parent, String resourceKey) {
+		Set<TableAction> results = new HashSet<>();
+		if(StringUtils.isNotBlank(parent)) {
+			results.addAll(templateService.getTableActions(parent));
 		}
-		return Collections.emptySet();
+		results.addAll(templateService.getTableActions(resourceKey));
+		return results;
 	}
 
 	private Map<String, DynamicColumn> generateDynamicColumns() {
@@ -421,7 +447,7 @@ public class TableRenderer {
 				if(Objects.isNull(parentObject)) {
 					dropdown.addI18nAnchorWithIconValue("default", "edit.name", url, "fa-solid", "fa-edit");
 				} else {
-					dropdown.addI18nAnchorWithIconValue("default", "edit.name", url, "fa-solid", "fa-edit", "stash")
+					dropdown.addI18nAnchorWithIconValue("default", "edit.name", "#", "fa-solid", "fa-edit", "stash")
 						.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
 						.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid());	
 				}
@@ -536,7 +562,7 @@ public class TableRenderer {
 	
 	private void generateTableActions(Element element, Collection<TableAction> allActions) {
 		
-		if(uiService.canCreate(template)) {
+		if(showCreate) {
 			
 			if(!template.getChildTemplates().isEmpty()) {	
 				createMultipleCreate(element, template);
@@ -800,17 +826,18 @@ public class TableRenderer {
 	}
 	
 	String getStringValue(FieldTemplate field, AbstractObject rootObject) {
-//
-//		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
-//			AbstractObject obj = rootObject.getChild(field.getParentField());
-//			if(Objects.nonNull(obj)) {
-//				return safeCast(obj.getValue(field.getResourceKey()));
-//			} 
-//			return "";
-//		} else {
-			return safeCast(rootObject.getValue(field.getResourceKey()));
-//		}
-		
+
+		Object val = rootObject.getValue(field.getResourceKey());
+		if(Objects.isNull(val)) {
+			if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
+				AbstractObject obj = rootObject.getChild(field.getParentField());
+				if(Objects.nonNull(obj)) {
+					return safeCast(obj.getValue(field.getResourceKey()));
+				} 
+				return "";
+			}
+		}
+		return safeCast(val);
 	}
 	
 	AbstractObject getReferenceValue(FieldTemplate field, AbstractObject rootObject) {
@@ -870,10 +897,6 @@ public class TableRenderer {
 
 	public void setObjects(Collection<AbstractObject> objects) {
 		this.objects = objects;
-	}
-
-	public void setTemplate(ObjectTemplate template) {
-		this.template = template;
 	}
 
 	public void setTemplateClazz(Class<?> templateClazz) {

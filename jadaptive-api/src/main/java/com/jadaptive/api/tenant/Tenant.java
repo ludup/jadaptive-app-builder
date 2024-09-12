@@ -9,6 +9,7 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.template.CreateURL;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -25,12 +26,13 @@ import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = Tenant.RESOURCE_KEY, 
 	scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
-	system = true, creatable = false, defaultColumn = "name")
+	system = true, creatable = true, defaultColumn = "name")
 @ObjectServiceBean(bean = TenantService.class)
 @GenerateEventTemplates(value = Tenant.RESOURCE_KEY)
 @ObjectViews({ 
 	@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)})
 @TableView(defaultColumns = { "name", "hostname", "code" })
+@CreateURL(value = "/app/ui/wizards/setupTenant", i18n = "wizard.name")
 @TableAction(bundle = Tenant.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}")
 public class Tenant extends NamedUUIDEntity implements NamedDocument {
 

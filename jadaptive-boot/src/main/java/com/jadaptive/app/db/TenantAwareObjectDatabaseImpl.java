@@ -137,7 +137,7 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	
 	@Override
 	public Collection<T> searchObjects(Class<T> resourceClass, SortOrder order, String sortField, SearchField... fields) {
-		return searchObjects(getCurrentTenant().getUuid(), resourceClass, fields);
+		return searchObjects(getCurrentTenant().getUuid(), resourceClass, order, sortField, fields);
 	}
 
 	@Override
