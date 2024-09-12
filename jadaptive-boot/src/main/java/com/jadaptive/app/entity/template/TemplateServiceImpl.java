@@ -159,7 +159,11 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	
 	@Override
 	public Collection<TableAction> getTableActions(String template) {
-		return actionsByTarget.get(template);
+		var results = actionsByTarget.get(template);
+		if(Objects.isNull(results)) {
+			return Collections.emptySet();
+		}
+		return results;
 	}
 
 	@Override

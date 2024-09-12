@@ -6,6 +6,9 @@ import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.TableAction;
+import com.jadaptive.api.template.TableAction.Target;
+import com.jadaptive.api.user.User;
 import com.jadaptive.api.template.TableView;
 
 @ObjectDefinition(resourceKey = AuthenticationDevice.RESOURCE_KEY, scope = ObjectScope.PERSONAL, creatable = true, updatable = false, deletable = true, defaultColumn = "name")

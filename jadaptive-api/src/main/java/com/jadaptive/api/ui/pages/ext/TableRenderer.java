@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -98,8 +98,14 @@ public class TableRenderer {
 	private String formHandler;
 	private String stashURL = null;
 	
-	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field,
-			RenderScope formRenderer, String formHandler) {
+	private final boolean showCreate;
+	private final boolean showUpdate;
+	private final boolean showCopy;
+	
+	public TableRenderer(boolean readOnly, 
+			AbstractObject parentObject, FieldTemplate field,
+			RenderScope formRenderer, String formHandler, ObjectTemplate template) {
+		this(false, template);
 		this.parentObject = parentObject;
 		this.field = field;
 		this.readOnly = readOnly;
@@ -107,8 +113,20 @@ public class TableRenderer {
 		this.formHandler = formHandler;
 	}
 	
-	public TableRenderer(boolean readOnly) {
+	public TableRenderer(boolean readOnly, ObjectTemplate template) {
 		this.readOnly = readOnly;
+		this.template = template;
+		this.showCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		this.showUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+		this.showCopy = showUpdate && showCreate;
+	}
+	
+	public TableRenderer(boolean readOnly, ObjectTemplate template, boolean showCreate, boolean showUpdate) {
+		this.readOnly = readOnly;
+		this.template = template;
+		this.showCreate = showCreate;
+		this.showUpdate = showUpdate;
+		this.showCopy = showUpdate && showCreate;
 	}
 
 	public Elements render() throws IOException {
@@ -123,7 +141,7 @@ public class TableRenderer {
 			
 			Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
-			Collection<TableAction> tableActions = generateActions(template.getCollectionKey());
+			Collection<TableAction> tableActions = generateActions(template.getParentTemplate(), template.getCollectionKey());
 			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || view.multipleDelete();
 			
 			
@@ -225,8 +243,7 @@ public class TableRenderer {
 					
 					if(objects.size() > 0) {
 						
-						boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
-						boolean canCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+						
 						Set<String> permissions = permissionService.resolveCurrentPermissions();
 						Map<Class<?>,ActionFilter> filters = new HashMap<>();
 						
@@ -276,7 +293,7 @@ public class TableRenderer {
 									}
 								}
 								
-								renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getResourceKey()), canUpdate, canCreate, permissions, filters);
+								renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getParentTemplate(), rowTemplate.getResourceKey()), showUpdate, showCreate, permissions, filters);
 								
 								el.appendChild(row);
 							}
@@ -392,12 +409,13 @@ public class TableRenderer {
 		}
 	}
 
-	private Collection<TableAction> generateActions(String resourceKey) {
-		var t = templateService.getTableActions(resourceKey);
-		if(Objects.nonNull(t)) {
-			return t;
+	private Collection<TableAction> generateActions(String parent, String resourceKey) {
+		Set<TableAction> results = new HashSet<>();
+		if(StringUtils.isNotBlank(parent)) {
+			results.addAll(templateService.getTableActions(parent));
 		}
-		return Collections.emptySet();
+		results.addAll(templateService.getTableActions(resourceKey));
+		return results;
 	}
 
 	private Map<String, DynamicColumn> generateDynamicColumns() {
@@ -535,7 +553,7 @@ public class TableRenderer {
 	
 	private void generateTableActions(Element element, Collection<TableAction> allActions) {
 		
-		if(uiService.canCreate(template)) {
+		if(showCreate) {
 			
 			if(!template.getChildTemplates().isEmpty()) {	
 				createMultipleCreate(element, template);
@@ -873,10 +891,6 @@ public class TableRenderer {
 
 	public void setObjects(Collection<AbstractObject> objects) {
 		this.objects = objects;
-	}
-
-	public void setTemplate(ObjectTemplate template) {
-		this.template = template;
 	}
 
 	public void setTemplateClazz(Class<?> templateClazz) {

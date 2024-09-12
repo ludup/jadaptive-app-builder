@@ -878,6 +878,17 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
+	public Collection<AbstractObject> tableObjectsNoScope(String resourceKey, int offset, int limit, String sortColumn, SortOrder order, SearchField... fields) {
+		ObjectTemplate template = templateService.get(resourceKey);
+		
+		if(StringUtils.isBlank(sortColumn)) {
+			sortColumn = template.getDefaultColumn();
+		}
+
+		return tableViaObjectBean(template, offset, limit, order, sortColumn, fields);
+	}
+	
+	@Override
 	public long count(String resourceKey, String searchField, String searchValue) {
 		ObjectTemplate template = templateService.get(resourceKey);
 
@@ -949,6 +960,13 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		default:
 			return countViaObjectBean(template, fields);
 		}
+	}
+	
+	@Override
+	public long countObjectsNoScope(String resourceKey, SearchField... fields) {
+		ObjectTemplate template = templateService.get(resourceKey);
+		return countViaObjectBean(template, fields);
+		
 	}
 
 	private void buildFormHandlers() {

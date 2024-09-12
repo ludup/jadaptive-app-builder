@@ -259,16 +259,15 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 
 		boolean filtered = search.length > 0;
 
-		TableRenderer renderer = applicationService.autowire(new TableRenderer(readOnly));
+		TableRenderer renderer = applicationService.autowire(createTableRenderer(readOnly, template));
 		renderer.setLength(length);
 		renderer.setStart(start);
 		renderer.setObjects(objects);
 		renderer.setTotalObjects(totalObjects);
-		renderer.setTemplate(template);
 		renderer.setTemplateClazz(templateClazz);
 		renderer.setSortColumn(sortColumn);
 		renderer.setSortOrder(sortOrder);
-	
+		
 		table.insertChildren(0, renderer.render());
 
 		Element pagnation = table.selectFirst("#pagnation");
@@ -303,6 +302,10 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 	}
 	
+	protected TableRenderer createTableRenderer(boolean readOnly, ObjectTemplate template) {
+		return new TableRenderer(readOnly, template);
+	}
+
 	private void generateSearchColumns(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField, Map<String,FieldTemplate> processedFields) {
 		
 		for(FieldTemplate field : template.getFields()) {

@@ -531,13 +531,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			break;
 		case OBJECT_EMBEDDED:
 		{
-			TableRenderer table = applicationService.autowire(new TableRenderer(view == FieldView.READ, 
-					obj, field,
-					formRenderer.get(), formHandler.get()));
-
+			
 			String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
 			ObjectTemplate objectTemplate = templateService.get(objectType);
 			
+			TableRenderer table = applicationService.autowire(new TableRenderer(view == FieldView.READ, 
+					obj, field,
+					formRenderer.get(), formHandler.get(), objectTemplate));
+
 			Collection<AbstractObject> objects;
 			
 			if(Objects.nonNull(obj)) {
@@ -556,7 +557,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			table.setStart(0);
 			table.setTotalObjects(objects.size());
 			table.setObjects(objects);
-			table.setTemplate(objectTemplate);
 			table.setTemplateClazz(templateService.getTemplateClass(objectTemplate.getResourceKey()));
 			table.setSortColumn(objectTemplate.getDefaultColumn());
 			table.setSortOrder(SortOrder.ASC);
