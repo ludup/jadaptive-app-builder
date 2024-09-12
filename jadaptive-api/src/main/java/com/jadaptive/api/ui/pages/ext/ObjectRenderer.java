@@ -95,7 +95,7 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 				}
 			}
 
-			actionURL.set(String.format("/app/api/form/handler/%s/%s", handler, displayTemplate.getResourceKey()));
+			actionURL.set(String.format("/app/api/form/%s/%s", handler, displayTemplate.getResourceKey()));
 			
 			super.process(contents, page, displayTemplate, displayObject, scope);
 		

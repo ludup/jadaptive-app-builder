@@ -213,9 +213,7 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	@Override
 	public void injectClass(ObjectTemplate template) {
 		byte[] tmp = Base64.getDecoder().decode(template.getClassDefinition());
-		defineClass(String.format("com.jadaptive.extensions.%s",
-				   		WordUtils.capitalize(template.getResourceKey())), 
-						tmp, 0, tmp.length);
+		defineClass(template.getTemplateClass(), tmp, 0, tmp.length);
 		
 	}
 }

@@ -591,7 +591,7 @@ public class TableRenderer {
 		
 		for(String template : collectionTemplate.getChildTemplates()) {
 			ObjectTemplate childTemplate = templateRepository.get(template);
-			if(childTemplate.isCreatable()) {
+			if(childTemplate.isCreatable() && !childTemplate.isExtended()) {
 				creatableTemplates.add(childTemplate);
 			}
 		}

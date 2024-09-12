@@ -296,11 +296,6 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 		this.permissionProtected = permissionProtected;
 	}
 	
-	@JadaptiveIgnore
-	public String getCanonicalName() {
-		return "com.jadaptive.dynamic." + StringUtils.capitalize(resourceKey);
-	}
-
 	public Boolean isDeletable() {
 		return deletable;
 	}

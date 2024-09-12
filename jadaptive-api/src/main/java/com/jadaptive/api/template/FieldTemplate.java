@@ -1,7 +1,9 @@
 package com.jadaptive.api.template;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -353,5 +355,29 @@ public class FieldTemplate extends TemplateUUIDEntity {
 
 	public void setOptions(Collection<FieldOptions> options) {
 		this.options = options;
+	}
+	
+	public Type getJavaType() {
+		switch(fieldType) {
+		case TEXT:
+		case TEXT_AREA:
+		case COUNTRY:
+		case PASSWORD:
+		case TIME:
+			return String.class;
+		case BOOL:
+			return Boolean.class;
+		case DATE:
+		case TIMESTAMP:
+			return Date.class;
+		case DECIMAL:
+			return Double.class;
+		case INTEGER:
+			return Integer.class;
+		case LONG:
+			return Long.class;
+		default:
+			throw new IllegalStateException("Unsupported field type " + fieldType.name());
+		}
 	}
 }

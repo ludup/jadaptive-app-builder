@@ -43,7 +43,7 @@ public class Create extends StashedObjectPage {
 		Element element = document.selectFirst("#saveButton");
 		if(Objects.nonNull(element)) {
 			element.attr("data-url", referer /*String.format("/app/ui/create/%s", template.getResourceKey())*/)
-				.attr("data-action", String.format("/app/api/form/stash/%s/%s/%s", template.getResourceKey(), childResourceKey, fieldName));
+				.attr("data-action", String.format("/app/api/form/stash-child/%s/%s/%s", template.getResourceKey(), childResourceKey, fieldName));
 		}
 
 	}
