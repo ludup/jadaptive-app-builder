@@ -70,7 +70,7 @@ public class EmbeddedMongoWithTransactionsConfig {
     	
     	MongodArguments mongodArguments = MongodArguments.builder()
     			.replication(storage)
-    			.putArgs("--quiet", "")
+    			//.putArgs("--quiet", "")
     			.useNoJournal(false)
     			.build();
     	
