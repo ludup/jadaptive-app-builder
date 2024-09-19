@@ -57,6 +57,10 @@ public abstract class StashedObjectPage extends ObjectTemplatePage {
 		if(StringUtils.isBlank(childResourceKey)) {
 			childResourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
 		}
+		
+		childTemplate = templateService.get(childResourceKey);
+		childClazz = templateService.getTemplateClass(childResourceKey);
+		
 		if(field.getCollection()) {
 			if(Objects.nonNull(childUuid)) {
 				for(AbstractObject o : object.getObjectCollection(fieldName)) {
