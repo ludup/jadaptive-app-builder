@@ -107,7 +107,6 @@ import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.description.type.TypeDescription.Generic;
 import net.bytebuddy.dynamic.DynamicType.Builder;
-import net.bytebuddy.dynamic.DynamicType.Builder.FieldDefinition.Optional.Valuable;
 import net.bytebuddy.dynamic.scaffold.subclass.ConstructorStrategy;
 import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.FixedValue;

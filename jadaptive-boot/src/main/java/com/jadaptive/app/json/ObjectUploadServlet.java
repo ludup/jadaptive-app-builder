@@ -29,7 +29,6 @@ import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
 import com.jadaptive.api.repository.UUIDDocument;
-import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.FieldTemplate;

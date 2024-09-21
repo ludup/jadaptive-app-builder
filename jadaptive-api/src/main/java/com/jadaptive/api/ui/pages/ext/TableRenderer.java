@@ -82,6 +82,7 @@ public class TableRenderer {
 
 
 	private Collection<AbstractObject> objects;
+	private long totalObjects;
 	private String sortColumn;
 	private SortOrder sortOrder;
 	
@@ -120,6 +121,10 @@ public class TableRenderer {
 		this.showCreate = showCreate;
 		this.showUpdate = showUpdate;
 		this.showCopy = showUpdate && showCreate;
+	}
+	
+	public void setTotalObjects(long totalObjects) {
+		this.totalObjects = totalObjects;
 	}
 
 	public Element render() throws IOException {
@@ -310,7 +315,7 @@ public class TableRenderer {
 					.appendChild(Html.div("col-md-3 float-start text-end")
 							.attr("id", "pagesize")));
 
-			tableholder.add(Html.div("row", "mb-3").appendChild(
+			tableholder.appendChild(Html.div("row", "mb-3").appendChild(
 					Html.div("col-md-6 float-start text-start")
 						.attr("id", "objectActions")));
 			

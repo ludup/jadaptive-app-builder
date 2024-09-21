@@ -304,7 +304,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		return new TableRenderer(readOnly, template);
 	}
 
-	private void generateSearchColumns(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField, Map<String,FieldTemplate> processedFields) {
+	private void generateSearchColumns(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField, Map<String,FieldTemplate> processedFields) throws IOException {
 		
 		for(FieldTemplate field : template.getFields()) {
 			if(processedFields.containsKey(field.getResourceKey())) {

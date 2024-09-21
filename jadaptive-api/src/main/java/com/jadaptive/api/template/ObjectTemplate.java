@@ -3,7 +3,6 @@ package com.jadaptive.api.template;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeSet;
@@ -14,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.NamedDocument;
 
 @ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, system = true)

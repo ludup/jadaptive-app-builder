@@ -17,7 +17,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.WordUtils;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;

@@ -8,10 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.AbstractObject;
-import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationType;
