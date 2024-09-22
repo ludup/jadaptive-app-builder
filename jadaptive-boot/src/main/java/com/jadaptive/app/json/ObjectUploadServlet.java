@@ -28,6 +28,7 @@ import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
+import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
@@ -88,12 +89,13 @@ public class ObjectUploadServlet extends HttpServlet {
 		String resourceKey = paths.get(4);
 		
 		Map<String,String[]> parameters = new HashMap<>();
-		generateFormParameters(request, parameters, resourceKey);
 		
 		DocumentHelper.enableMultipleValidation();
 		
 		try(var scope = SessionUtils.scopedIoWithoutSessionTimeout(request)) {
 
+			generateFormParameters(request, parameters, resourceKey);
+			
 			sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
 			
 			resp.setStatus(200);
@@ -101,12 +103,17 @@ public class ObjectUploadServlet extends HttpServlet {
 			String uuid = "";
 			
 			try {
-				
-				if(MULTIPART.equals(handler) || STASH.equals(handler)) {
+				switch(handler) {
+				case MULTIPART:
 					uuid = processMultipartObject(request, resourceKey, parameters);
-				} else if(STASH_CHILD.equals(handler)) {
+					break;
+				case STASH:
+					uuid = processStashedObject(request, resourceKey, parameters);
+					break;
+				case STASH_CHILD:
 					uuid = processStashedChildObject(request, resourceKey, paths, parameters);
-				} else {
+					break;
+				default:
 					uuid = processUrlEncodedForm(request, handler, resourceKey, parameters);
 				}
 
@@ -132,7 +139,7 @@ public class ObjectUploadServlet extends HttpServlet {
 			}
 		}
 	}
-	
+
 	private List<String> getPathElements(String uri) {
 		return new ArrayList<String>(Arrays.asList(FileUtils.checkStartsWithNoSlash(uri).split("/")));
 	}
@@ -148,6 +155,14 @@ public class ObjectUploadServlet extends HttpServlet {
 
 	private String processMultipartObject(HttpServletRequest request, String resourceKey, Map<String,String[]> parameters) throws ValidationException, IOException {
 		
+		ObjectTemplate template = templateService.get(resourceKey);
+		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
+		objectService.saveOrUpdate(obj);
+		return obj.getUuid();
+	}
+	
+	private String processStashedObject(HttpServletRequest request, String resourceKey,
+			Map<String, String[]> parameters) throws ValidationException, RepositoryException, ObjectException, IOException {
 		ObjectTemplate template = templateService.get(resourceKey);
 		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
 		objectService.stashObject(obj);
