@@ -14,7 +14,7 @@ public class AuthenticatedService {
 	private PermissionService permissionService; 
 	
 	@Autowired
-	private TenantService tenantService; 
+	protected TenantService tenantService; 
 	
 	@Autowired
 	private TemplateService templateService;
