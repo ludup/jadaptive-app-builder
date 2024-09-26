@@ -39,11 +39,16 @@ $(function() {
 		var source = _this.closest('.multipleTagInput').find('.multipleTagSource');
 		var target = _this.closest('.multipleTagInput').find('.multipleTagTarget');
 		if(source.val() !== '' && !duplicate(source.val(), target)) {
-			target.append('<option class="badge bg-primary me-3" value="' + source.val()
-				 + '" class="me-1"><span class="pe-1">' + source.val() + '</span><a href="#" class="jadaptive-tag text-light"><i class="' + $('body').data('iconset') + ' fa-times"></i></a></option>');
+			target.append('<li class="badge bg-primary me-3" class="me-1">' + 
+			'<input type="hidden" name="' + _this.data('formvar') + '" value="' + source.val() + '"/>' +
+			'<span class="pe-1">' + source.val() + '</span><a href="#" class="jadaptive-tag text-light"><i class="' + $('body').data('iconset') + ' fa-times"></i></a></li>');
 			source.val('');
 		}
 	}
+	
+	$(document).on('click', '.jadaptive-tag', function() {
+		$(this).parents().find('li').remove();
+	});
 	
 	function addText(_this) {
 		var source = _this.closest('.multipleTextInput').find('.multipleTextSource');
@@ -311,10 +316,6 @@ $(function() {
 	$('input[name="theme"]').on('change', function(e) {
 		document.cookie = "userTheme=" + $(this).val() + '; path=/; expires=Tue, 01 Jan 2038 00:00:00 UTC;';
 		window.location.reload();
-	});
-	
-	$('.jadaptive-tag').on('click', function() {
-		$(this).parents().find('option').remove();
 	});
 	
 	$('.copyURL').on('click', function(e) {

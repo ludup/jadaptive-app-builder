@@ -70,6 +70,7 @@ import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.ImageFormInput;
 import com.jadaptive.api.ui.renderers.form.JavascriptEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
+import com.jadaptive.api.ui.renderers.form.MultipleTagsFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
@@ -623,14 +624,17 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case TEXT:
 		{
 			switch(fieldView.getRenderer()) {
-//			case TAGS:
-//			{
-//				MultipleTagsFormInput render = new MultipleTagsFormInput(currentTemplate.get(), orderedField);
-//				render.renderInput(panel, element, Objects.nonNull(obj) ? 
-//						obj.getCollection(field.getResourceKey()) 
-//						: Collections.emptyList());
-//				break;
-//			}
+			case TAGS:
+			{
+				MultipleTagsFormInput render = new MultipleTagsFormInput(
+						fieldView.getResourceKey(),
+						fieldView.getBundle(), 
+						fieldView.getFormVariable());
+				render.renderInput(panel, element, Objects.nonNull(obj) ? 
+						obj.getCollection(field.getResourceKey()) 
+						: Collections.emptyList());
+				break;
+			}
 			default:
 			{
 				Collection<String> values = Objects.nonNull(obj) ? obj.getCollection(field.getResourceKey())
@@ -1187,7 +1191,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 	private Element createTabElement(TemplateView view, Element rootElement, boolean first) {
 		
-		Element list = rootElement.selectFirst("ul");
+		Element list = rootElement.selectFirst("ul.nav");
 		
 		list.appendChild(new Element("li")
 				.addClass("nav-item")
