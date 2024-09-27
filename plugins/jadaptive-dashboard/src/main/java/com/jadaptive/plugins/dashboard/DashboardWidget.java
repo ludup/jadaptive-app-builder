@@ -32,4 +32,8 @@ public interface DashboardWidget extends ExtensionPoint {
 	default DashboardType getType() {
 		return BasicDashboardTypes.SERVER_INFORMATION;
 	}
+	
+	default WidgetPlacement getPlacement() {
+		return WidgetPlacement.STANDARD;
+	}
 }

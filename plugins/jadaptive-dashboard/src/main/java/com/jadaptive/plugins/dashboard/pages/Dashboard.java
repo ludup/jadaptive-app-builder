@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
@@ -36,6 +38,7 @@ import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.pages.ext.EnableBootstrapTheme;
 import com.jadaptive.plugins.dashboard.DashboardInitialiser;
 import com.jadaptive.plugins.dashboard.DashboardWidget;
+import com.jadaptive.plugins.dashboard.WidgetPlacement;
 
 @Component
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
@@ -115,74 +118,46 @@ public class Dashboard extends AuthenticatedPage {
 				
 				Element element = tabEl.appendElement("div").addClass("mt-5").attr("jad:type", type.name());
 				
+				List<DashboardWidget> topWidgets = widgets.stream().filter(e -> e.getPlacement() == WidgetPlacement.EXPANDED_TOP).collect(Collectors.toList());
+				List<DashboardWidget> bottomWidgets = widgets.stream().filter(e -> e.getPlacement() == WidgetPlacement.EXPANDED_BOTTOM).collect(Collectors.toList());
+				List<DashboardWidget> standardWidgets = widgets.stream().filter(e -> e.getPlacement() == WidgetPlacement.STANDARD).collect(Collectors.toList());
+				
+				if(!topWidgets.isEmpty()) {
+					
+					for(DashboardWidget widget : topWidgets) {
+						if(widget.getType()==type && widget.wantsDisplay()) {
+							
+							remainingTypes.remove(widget.getType());
+							renderWidget(element, widget, document);
+						}
+					}
+				}
+				
 				element.appendChild(root = new Element("div").addClass("row"));
 				root.appendChild(left = new Element("div").addClass("col-md-6"));
 				root.appendChild(right = new Element("div").addClass("col-md-6"));;
 				
 				int noWidgets = 0;
-				for(DashboardWidget widget : widgets) {
+				for(DashboardWidget widget : standardWidgets) {
 					
 					if(widget.getType()==type && widget.wantsDisplay()) {
 						
 						noWidgets++;
 						remainingTypes.remove(widget.getType());
 						Element row = count % 2 == 0 ? left : right;
-						Element w;
-						Element help;
-						Element e = new Element("div").addClass("row").appendChild(new Element("div")
-								.addClass("col-md-12 mb-3 h-100")
-								.appendChild(new Element("div")
-										.addClass("card")
-										.appendChild(new Element("div")
-												.addClass("card-header")
-												.appendChild(Html.div("w-75 float-start")
-													.appendChild(new Element("i")
-															.addClass(widget.getIconGroup() + " " + widget.getIcon()))
-													.appendChild(new Element("span")
-															.attr("jad:bundle", widget.getBundle())
-															.attr("jad:i18n",String.format("%s.name", widget.getName()) )))
-													.appendChild(help = Html.div("w-25 float-end text-end")))
-										.appendChild(w = new Element("div")
-												.addClass("card-body"))));
-						
-						if(widget.hasHelp()) {
-							help.appendChild(new Element("a")
-									.attr("jad:help", widget.getName() + "Help")
-									.attr("jad:html", widget.getClass().getName().replace(".", "/") + "Help.html")
-									.attr("jad:bundle", widget.getBundle())
-									.appendChild(Html.i("fa-solid", "fa-question-circle")));
-						}
-						
-						URL html = widget.getClass().getResource(widget.getClass().getSimpleName() + ".html");
-						if(Objects.nonNull(html)) {
-							try(InputStream in = html.openStream()) {
-								Document doc = Jsoup.parse(IOUtils.toString(in, "UTF-8"));
-								Elements children = doc.selectFirst("body").children();
-								if(Objects.nonNull(children)) {
-									for(Element elem : children) {
-										elem.appendTo(w);
-									}
-								}
-							}
-						}
-						
-						try {
-							widget.renderWidget(document, w);
-							row.appendChild(e);
-							
-							URL stylesheet = widget.getClass().getResource(widget.getClass().getSimpleName() + ".css");
-							if(Objects.nonNull(stylesheet)) {
-								PageHelper.appendStylesheet(document,"/app/style/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".css");
-							}
-							
-							URL script = widget.getClass().getResource(widget.getClass().getSimpleName() + ".js");
-							if(Objects.nonNull(script)) {
-								PageHelper.appendHeadScript(document, "/app/script/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".js");
-							}
-							
+						if(renderWidget(row, widget, document)) {
 							count++;
-						} catch(Throwable ex) {
-							log.error("Consumed exception whilst processing dashboard widget {}", widget.getName(), ex);
+						}
+					}
+				}
+				
+				if(!bottomWidgets.isEmpty()) {
+					
+					for(DashboardWidget widget : bottomWidgets) {
+						if(widget.getType()==type && widget.wantsDisplay()) {
+							
+							remainingTypes.remove(widget.getType());
+							renderWidget(element, widget, document);
 						}
 					}
 				}
@@ -202,6 +177,69 @@ public class Dashboard extends AuthenticatedPage {
 		if(tabCount < 2) {
 			document.getElementById("nav-tab").addClass("d-none");
 		}
+	}
+
+	private boolean renderWidget(Element row, DashboardWidget widget, Document document) throws IOException {
+		
+		Element w;
+		Element help;
+		Element e = new Element("div").addClass("row").appendChild(new Element("div")
+				.addClass("col-md-12 mb-3 h-100")
+				.appendChild(new Element("div")
+						.addClass("card")
+						.appendChild(new Element("div")
+								.addClass("card-header")
+								.appendChild(Html.div("w-75 float-start")
+									.appendChild(new Element("i")
+											.addClass(widget.getIconGroup() + " " + widget.getIcon()))
+									.appendChild(new Element("span")
+											.attr("jad:bundle", widget.getBundle())
+											.attr("jad:i18n",String.format("%s.name", widget.getName()) )))
+									.appendChild(help = Html.div("w-25 float-end text-end")))
+						.appendChild(w = new Element("div")
+								.addClass("card-body"))));
+		
+		if(widget.hasHelp()) {
+			help.appendChild(new Element("a")
+					.attr("jad:help", widget.getName() + "Help")
+					.attr("jad:html", widget.getClass().getName().replace(".", "/") + "Help.html")
+					.attr("jad:bundle", widget.getBundle())
+					.appendChild(Html.i("fa-solid", "fa-question-circle")));
+		}
+		
+		URL html = widget.getClass().getResource(widget.getClass().getSimpleName() + ".html");
+		if(Objects.nonNull(html)) {
+			try(InputStream in = html.openStream()) {
+				Document doc = Jsoup.parse(IOUtils.toString(in, "UTF-8"));
+				Elements children = doc.selectFirst("body").children();
+				if(Objects.nonNull(children)) {
+					for(Element elem : children) {
+						elem.appendTo(w);
+					}
+				}
+			}
+		}
+		
+		try {
+			widget.renderWidget(document, w);
+			row.appendChild(e);
+			
+			URL stylesheet = widget.getClass().getResource(widget.getClass().getSimpleName() + ".css");
+			if(Objects.nonNull(stylesheet)) {
+				PageHelper.appendStylesheet(document,"/app/style/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".css");
+			}
+			
+			URL script = widget.getClass().getResource(widget.getClass().getSimpleName() + ".js");
+			if(Objects.nonNull(script)) {
+				PageHelper.appendHeadScript(document, "/app/script/" + widget.getClass().getPackageName().replace('.', '/') + "/" + widget.getClass().getSimpleName() + ".js");
+			}
+
+			return true;
+		} catch(Throwable ex) {
+			log.error("Consumed exception whilst processing dashboard widget {}", widget.getName(), ex);
+		}
+		
+		return false;
 	}
 
 	static List<DashboardType> getTypes(List<DashboardWidget> widgets) {
