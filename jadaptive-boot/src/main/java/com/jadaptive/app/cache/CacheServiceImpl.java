@@ -23,8 +23,9 @@ public class CacheServiceImpl implements CacheService {
 		return cache(name, key, value, expiryTime);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public <K,V> Map<K, V> getCacheIfExists(String name, Class<K> key, Class<V> value){
-		return null;
+		return (Map<K, V>) caches.get(name);
 	}
 	
 	private <K,V> Map<K, V> cache(String name, Class<K> key, Class<V> value, long exiryTime){
