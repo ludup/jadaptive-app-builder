@@ -29,7 +29,7 @@ public class Footer extends AbstractPageExtension {
 	private static final Logger log = LoggerFactory.getLogger(Footer.class);
 	
 	@Autowired
-	private BootstrapThemeResolver themeResolver;
+	private BootstrapThemeService themeResolver;
 	
 	@Override
 	public void process(Document document, Element element, Page page) throws IOException {
