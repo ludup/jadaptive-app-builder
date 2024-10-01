@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.csv.CsvImportService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
@@ -62,22 +63,34 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	ThreadLocal<ClientSession> currentSession = new ThreadLocal<>();
 	
 	private MongoCollection<Document> getCollection(String table, String database) {
-		MongoDatabase db = mongo.getClient().getDatabase(database);
+		MongoDatabase db = mongo.getClient().getDatabase(getDatabaseName(database));
 		return db.getCollection(table);
+	}
+	
+	private String getDatabaseName(String database) {
+		String prefix = ApplicationProperties.getValue("mongodb.databasePrefix", null);
+		if(Objects.nonNull(prefix)) {
+			return String.format("%s-%s", prefix, database);
+		}
+		return database;
 	}
 
 	@Override
 	public void dropSchema() {
 
+		String prefix = ApplicationProperties.getValue("mongodb.databasePrefix", null);
+		
 		for(String database : mongo.getClient().listDatabaseNames()) {
-			MongoDatabase db = mongo.getClient().getDatabase(database);
+			MongoDatabase db = mongo.getClient().getDatabase(getDatabaseName(database));
 			switch(db.getName()) {
 			case "admin":
 			case "local":
 			case "config":
 				continue;
 			default:
-				db.drop();
+				if(db.getName().startsWith(prefix)) {
+					db.drop();
+				}
 			}
 		}
 	}
@@ -791,9 +804,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void dropDatabase(String database) {
 		ClientSession session = currentSession.get();
 		if(Objects.nonNull(session)) {
-			mongo.getClient().getDatabase(database).drop(session);
+			mongo.getClient().getDatabase(getDatabaseName(database)).drop(session);
 		} else {
-			mongo.getClient().getDatabase(database).drop();
+			mongo.getClient().getDatabase(getDatabaseName(database)).drop();
 		}
 		
 	}
