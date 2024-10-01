@@ -635,8 +635,29 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						: Collections.emptyList());
 				break;
 			}
+ 			case COLLECTION:
+			{
+				Collection<NamePairValue> values = 
+						( Objects.nonNull(obj) ? obj.getCollection(field.getResourceKey())
+						: Collections.emptyList() ).stream().map(o -> new NamePairValue(o.toString(), o.toString())).toList();
+				
+				if(values.isEmpty() && 
+						field.isReadOnly() &&
+						(fieldView.getRenderer() == FieldRenderer.OPTIONAL)) {
+					// TODO Hidden encrypted
+					return;
+				}
+				
+				CollectionSearchFormInput render = new CollectionSearchFormInput(
+						currentTemplate.get(), fieldView, field.getMeta(),
+						"name", "value");
+				render.renderInput(element, values, false, (view == FieldView.READ || fieldView.getField().isReadOnly()));
+
+				break;
+			}
 			default:
 			{
+				
 				Collection<String> values = Objects.nonNull(obj) ? obj.getCollection(field.getResourceKey())
 						: Collections.emptyList();
 				

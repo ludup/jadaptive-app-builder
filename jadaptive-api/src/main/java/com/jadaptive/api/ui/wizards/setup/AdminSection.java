@@ -1,12 +1,14 @@
 package com.jadaptive.api.ui.wizards.setup;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.tenant.TenantService;
@@ -25,6 +27,9 @@ public class AdminSection extends SetupSection {
 	@Autowired
 	private TenantService tenantService; 
 	
+	@Autowired
+	private RoleService roleService; 
+	
 	private boolean setOwner;
 	
 	public AdminSection(boolean setOwner) {
@@ -34,6 +39,11 @@ public class AdminSection extends SetupSection {
 	
 	public Integer getPosition() {
 		return 2;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return roleService.getUsersByRoles(Arrays.asList(roleService.getAdministrationRole())).isEmpty();
 	}
 
 	@Override
