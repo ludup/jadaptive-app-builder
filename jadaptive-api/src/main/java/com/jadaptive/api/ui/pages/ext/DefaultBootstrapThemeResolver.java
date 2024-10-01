@@ -1,8 +1,8 @@
 package com.jadaptive.api.ui.pages.ext;
 
-import org.pf4j.Extension;
+import org.springframework.stereotype.Component;
 
-@Extension(ordinal = 100)
+@Component
 public class DefaultBootstrapThemeResolver implements BootstrapThemeResolver {
 
 	@Override
