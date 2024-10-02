@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.avatar.Avatar;
 import com.jadaptive.api.avatar.AvatarRequest;
 import com.jadaptive.api.avatar.AvatarService;
@@ -28,6 +29,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -222,24 +224,28 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 		
-		eventService.created(User.class, (e)->{
-			synchronized(UserServiceImpl.this) {
-				cachedAllTenantsCount++;
-				if(log.isInfoEnabled()) {
-					log.info("REMOVEME: Increasing licensed user count to {}", cachedAllTenantsCount);
+		if(ApplicationServiceImpl.getInstance().getBean(ProductService.class).getProduct().isUserLicensing()) {
+			eventService.created(User.class, (e)->{
+				synchronized(UserServiceImpl.this) {
+					allTenantsCount();
+					cachedAllTenantsCount++;
+					if(log.isInfoEnabled()) {
+						log.info("REMOVEME: Increasing licensed user count to {}", cachedAllTenantsCount);
+					}
 				}
-			}
+				
+			});
 			
-		});
-		
-		eventService.deleted(User.class, (e)->{
-			synchronized(UserServiceImpl.this) {
-				cachedAllTenantsCount--;
-				if(log.isInfoEnabled()) {
-					log.info("REMOVEME: Reducing licensed user count to {}", cachedAllTenantsCount);
+			eventService.deleted(User.class, (e)->{
+				synchronized(UserServiceImpl.this) {
+					allTenantsCount();
+					cachedAllTenantsCount--;
+					if(log.isInfoEnabled()) {
+						log.info("REMOVEME: Reducing licensed user count to {}", cachedAllTenantsCount);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 	
 	@Override
