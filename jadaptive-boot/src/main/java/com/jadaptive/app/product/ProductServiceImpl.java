@@ -133,5 +133,15 @@ public class ProductServiceImpl implements ProductService {
 			return ProductId.FRAMEWORK;
 		}
 	}
+	
+	@Override
+	public Product getProduct() {
+		try {
+			Product product = appService.getBean(Product.class);
+			return product;
+		} catch (NoSuchBeanDefinitionException e1) {
+			return defaultProduct;
+		}
+	}
 
 }

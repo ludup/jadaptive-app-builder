@@ -135,17 +135,17 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			Element content = document.selectFirst("#content");
 			
 			if(!state.isStartPage()) {
+
+				Element h2;
+				content.prependChild(new Element("div")
+						.addClass("col-12")
+						.appendChild(h2 = new Element("h2")));
 				
 				content.prependChild(new Element("div")
 						.addClass("col-12")
 						.appendChild(new Element("h1")
 								.attr("jad:bundle", state.getBundle())
 								.attr("jad:i18n", "wizard.name")));
-				
-				Element h2;
-				content.prependChild(new Element("div")
-						.addClass("col-12")
-						.appendChild(h2 = new Element("h2")));
 				
 				if(!state.isFinishPage()) {
 						h2.appendChild(new Element("span")

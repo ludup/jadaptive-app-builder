@@ -1,7 +1,6 @@
 package com.jadaptive.plugins.builtin;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
-import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
 import com.jadaptive.api.user.User;

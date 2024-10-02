@@ -42,6 +42,10 @@ public interface Product extends ExtensionPoint {
 	default boolean isTenantLicensing() {
 		return false;
 	}
+	
+	default boolean isUserLicensing() {
+		return true;
+	}
 
 	default boolean isRevenueGenerating() {
 		return true;

@@ -48,4 +48,6 @@ public interface ProductService {
 
 	boolean isRevenueGenerating();
 
+	Product getProduct();
+
 }
