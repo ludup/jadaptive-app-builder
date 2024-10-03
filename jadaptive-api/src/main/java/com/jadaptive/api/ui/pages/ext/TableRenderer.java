@@ -61,9 +61,6 @@ public class TableRenderer {
 	private ObjectTemplateRepository templateRepository; 
 	
 	@Autowired
-	private UserInterfaceService uiService;
-	
-	@Autowired
 	private TemplateService templateService;
 	
 	@Autowired
@@ -116,8 +113,8 @@ public class TableRenderer {
 	public TableRenderer(boolean readOnly, ObjectTemplate template) {
 		this.readOnly = readOnly;
 		this.template = template;
-		this.showCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
-		this.showUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+		this.showCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+		this.showUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
 		this.showCopy = showUpdate && showCreate;
 	}
 	

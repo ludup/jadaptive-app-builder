@@ -9,9 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.cache.CacheService;
+import com.jadaptive.api.permissions.AuthenticatedService;
 
 @Service
-public class CacheServiceImpl implements CacheService {
+public class CacheServiceImpl extends AuthenticatedService implements CacheService {
 	
 	Map<String,Map<?,?>> caches = new HashMap<>();
 	
@@ -25,19 +26,23 @@ public class CacheServiceImpl implements CacheService {
 	
 	@SuppressWarnings("unchecked")
 	public <K,V> Map<K, V> getCacheIfExists(String name, Class<K> key, Class<V> value){
-		return (Map<K, V>) caches.get(name);
+		return (Map<K, V>) caches.get(generateName(name));
 	}
 	
 	private <K,V> Map<K, V> cache(String name, Class<K> key, Class<V> value, long exiryTime){
 		@SuppressWarnings("unchecked")
-		Map<K, V> cache = (Map<K, V>) caches.get(name);
+		Map<K, V> cache = (Map<K, V>) caches.get(generateName(name));
 		if(cache==null) {
 			cache = new ExpiringConcurrentHashMap<K, V>(exiryTime);
-			caches.put(name, cache);
+			caches.put(generateName(name), cache);
 		}
 		return cache;
 	}
 	
+	private String generateName(String name) {
+		return String.format("%s-%s", name, getCurrentTenant().getUuid());
+	}
+
 	class ExpiringConcurrentHashMap<K,V> extends ConcurrentHashMap<K,V> {
 
 		private static final long serialVersionUID = 4825825094828550762L;

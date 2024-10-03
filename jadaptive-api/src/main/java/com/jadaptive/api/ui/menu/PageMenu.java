@@ -21,6 +21,8 @@ public @interface PageMenu {
 	String path() default "";
 
 	String icon();
+	
+	String iconGroup() default "fa-solid";
 
 	String i18n() default "";
 

@@ -16,4 +16,18 @@ public interface PropertyService {
 
 	String getStringOrSaveDefault(String key, String defaultValue);
 
+	boolean getSystemBoolean(String key, boolean defaultValue);
+
+	void setSystemBoolean(String key, boolean value);
+
+	int getSystemInteger(String key, int defaultValue);
+
+	void setSystemInteger(String key, int value);
+
+	String getSystemString(String key, String defaultValue);
+
+	String getSystemStringOrSaveDefault(String key, String defaultValue);
+
+	void setSystemString(String key, String value);
+
 }
