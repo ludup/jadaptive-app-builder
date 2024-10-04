@@ -27,9 +27,6 @@ public class AdminSection extends SetupSection {
 	@Autowired
 	private TenantService tenantService; 
 	
-	@Autowired
-	private RoleService roleService; 
-	
 	private boolean setOwner;
 	
 	public AdminSection(boolean setOwner) {
@@ -40,12 +37,7 @@ public class AdminSection extends SetupSection {
 	public Integer getPosition() {
 		return 2;
 	}
-
-	@Override
-	public boolean isEnabled() {
-		return roleService.getUsersByRoles(Arrays.asList(roleService.getAdministrationRole())).isEmpty();
-	}
-
+	
 	@Override
 	protected void processSection(Document document, Element element, Page page) throws IOException {
 		
