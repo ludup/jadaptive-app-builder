@@ -78,7 +78,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Override
 	public void dropSchema() {
 
-		String prefix = ApplicationProperties.getValue("mongodb.databasePrefix", null);
+		String prefix = ApplicationProperties.getValue("mongodb.databasePrefix", "");
 		
 		for(String database : mongo.getClient().listDatabaseNames()) {
 			MongoDatabase db = mongo.getClient().getDatabase(getDatabaseName(database));
