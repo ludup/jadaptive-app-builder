@@ -204,7 +204,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			}
 			
 			if(state.isFinishPage()) {
-				document.selectFirst("#backButton").appendChild(new Element("button")
+				document.selectFirst("#backButton").parent().insertChildren(0, new Element("button")
 							.attr("id", "finishButton")
 							.addClass("btn btn-primary wizardFinish me-3")
 						.appendChild(new Element("i")
