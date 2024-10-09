@@ -32,7 +32,7 @@ import com.jadaptive.utils.Utils;
 @ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)
 @ObjectViewDefinition(bundle = "users", value = User.EMAIL_VIEW, weight=100)
 @ObjectViewDefinition(bundle = "users", value = User.PHONE_VIEW, weight=200)
-@TableView(defaultColumns = { "avatar", "username", "name", "lastLogin" }, otherColumns = {
+@TableView(defaultColumns = { "avatar", "username", "name", "email", "lastLogin" }, otherColumns = {
 		@DynamicColumn(resourceKey = "avatar", service = UserService.class) },
 requiresUpdate = true, sortField = "username")
 @Transactional

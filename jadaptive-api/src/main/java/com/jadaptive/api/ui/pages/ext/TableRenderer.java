@@ -30,6 +30,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.countries.InternationalService;
+import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -74,6 +75,9 @@ public class TableRenderer {
 	
 	@Autowired
 	private ApplicationService appService;
+	
+	@Autowired
+	private EncryptionService encryptionService;
 	
 	private int start;
 	private int length;
@@ -816,9 +820,18 @@ public class TableRenderer {
 				return "";
 			}
 		}
-		return safeCast(val);
+		return decryptOrMask(safeCast(val), field);
 	}
 	
+	private String decryptOrMask(String val, FieldTemplate field) {
+		if(field.isAutomaticallyEncrypted()) {
+			return encryptionService.decrypt(val);
+		} else if(field.isManuallyEncrypted()) {
+			return "**ENCRYPTED**";
+		}
+		return val;
+	}
+
 	AbstractObject getReferenceValue(FieldTemplate field, AbstractObject rootObject) {
 
 		AbstractObject obj = null;
