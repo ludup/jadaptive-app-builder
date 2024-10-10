@@ -27,7 +27,7 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	public static final String RESOURCE_KEY = "objectTemplates";
 	
 	@ObjectField(type = FieldType.ENUM)
-	Collection<ObjectTemplateCapability> capabilities;
+	Collection<ObjectTemplateCapability> capabilities = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.ENUM, defaultValue = "SYSTEM")
 	ObjectTemplateType templateType;
