@@ -565,6 +565,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			template.setUpdatable(e.updatable());
 			template.setDeletable(e.deletable());
 			template.setPermissionProtected(e.requiresPermission());
+			template.getCapabilities().clear();
+			template.getCapabilities().addAll(Arrays.asList(e.capabilities()));
 			
 			String nameField = "uuid";
 			

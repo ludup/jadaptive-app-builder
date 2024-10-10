@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.template.ObjectTemplateCapability;
 import com.jadaptive.api.ui.MessagePage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
@@ -35,6 +36,15 @@ public class Update extends ObjectTemplatePage {
 	protected void beforeGenerateContent(Document document) {
 
 		if(!uiService.canUpdate(template)) {
+			throw new PageRedirect(new MessagePage("default",
+					"title.updateNotAllowed", 
+					"message.updateNotAllowed",
+					"fa-exclamation-square",
+					String.format("/app/ui/search/%s", template.getResourceKey())));
+		}
+		
+		if(object.isSystem() 
+				&& template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS)) {
 			throw new PageRedirect(new MessagePage("default",
 					"title.updateNotAllowed", 
 					"message.updateNotAllowed",

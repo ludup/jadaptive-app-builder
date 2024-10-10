@@ -32,6 +32,8 @@ public @interface ObjectDefinition {
 		
 		boolean updatable() default true;
 		
+		ObjectTemplateCapability[] capabilities() default {};
+		
 		boolean deletable() default true;
 		
 		String[] aliases() default { };

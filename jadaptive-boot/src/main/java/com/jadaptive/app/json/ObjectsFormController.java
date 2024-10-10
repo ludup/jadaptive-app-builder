@@ -449,6 +449,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		    obj.setUuid(null);
 		    obj.getDocument().remove("_id");
 		    obj.getDocument().remove("uuid");
+		    obj.setSystem(false);
 		    request.getSession().setAttribute(resourceKey, obj);
 		  
 		    response.sendRedirect(String.format("/app/ui/create/%s", resourceKey));

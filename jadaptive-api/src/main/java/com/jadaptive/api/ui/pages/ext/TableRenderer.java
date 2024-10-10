@@ -42,6 +42,7 @@ import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateCapability;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableAction;
@@ -294,7 +295,11 @@ public class TableRenderer {
 									}
 								}
 								
-								renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getParentTemplate(), rowTemplate.getResourceKey()), showUpdate, showCreate, permissions, filters);
+								renderRowActions(row, obj, view, rowTemplate, 
+										generateActions(rowTemplate.getParentTemplate(), 
+												rowTemplate.getResourceKey()), 
+										showUpdate && !(obj.isSystem() && rowTemplate.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS)), 
+										showCreate, permissions, filters);
 								
 								el.appendChild(row);
 							}
@@ -456,7 +461,7 @@ public class TableRenderer {
 				}
 			}
 					
-			if(canCreate && !readOnly) {
+			if(canCreate && !readOnly && !template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_COPY)) {
 				dropdown.addI18nAnchorWithIconValue("default", "copy.name", replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "fa-solid", "fa-copy");
 			} 
 			
@@ -745,7 +750,12 @@ public class TableRenderer {
 	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field) throws UnsupportedEncodingException {
 		
 		boolean isDefault = StringUtils.defaultString(template.getDefaultColumn()).equals(field.getResourceKey());
-		boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		boolean canUpdate = 
+				ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		
+		if(obj.isSystem() && template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS) ) {
+			canUpdate = false;
+		}
 		
 		if(isDefault) {
 			if(canUpdate && !readOnly) {

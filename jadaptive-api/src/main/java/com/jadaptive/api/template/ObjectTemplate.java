@@ -26,6 +26,9 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 
 	public static final String RESOURCE_KEY = "objectTemplates";
 	
+	@ObjectField(type = FieldType.ENUM)
+	Collection<ObjectTemplateCapability> capabilities;
+	
 	@ObjectField(type = FieldType.ENUM, defaultValue = "SYSTEM")
 	ObjectTemplateType templateType;
 	
@@ -104,6 +107,14 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	}
 	public ObjectTemplate() {
 		
+	}
+
+	public Collection<ObjectTemplateCapability> getCapabilities() {
+		return capabilities;
+	}
+
+	public void setCapabilities(Collection<ObjectTemplateCapability> capabilities) {
+		this.capabilities = capabilities;
 	}
 
 	public String getBundle() {
