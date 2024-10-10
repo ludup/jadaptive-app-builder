@@ -42,6 +42,7 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateType;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.TemplateView;
@@ -1024,6 +1025,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 	private void processDynamicElements(Elements thisElement, TemplateViewField fieldView, AbstractObject obj) {
 
+		ObjectTemplate template = currentTemplate.get();
+		if(!obj.getResourceKey().equals(template.getResourceKey())) {
+			template = templateService.get(obj.getResourceKey());
+		}
+		
 		Element row = thisElement.parents().select(".field").first();
 		if(Objects.nonNull(row)) {
 			
@@ -1038,10 +1044,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					if(!expectedResult) {
 						matchValue = matchValue.substring(1);
 					}
-					FieldTemplate depends = currentTemplate.get().getField(fieldView.getDependsOn());
+					String field = fieldView.getDependsOn();
+					if(template.getTemplateType() == ObjectTemplateType.EVENT) {
+						field = "object." + field;
+					}
+					FieldTemplate depends = template.getField(field);
 					if(Objects.nonNull(obj)) {
 						if(depends == null)
-							throw new IllegalArgumentException("The field '" + fieldView.getDependsOn() + "' that '" + fieldView.getResourceKey() + "' depends on does not exist.");
+							throw new IllegalArgumentException("The field '" + field + "' that '" + fieldView.getResourceKey() + "' depends on does not exist.");
 						Object value = obj.getValue(depends);
 						if(Objects.isNull(value)) {
 							value = depends.getDefaultValue();
@@ -1063,7 +1073,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			if(fieldView.isAutoSave()) {
 				row.addClass("processAutosave");
-				row.attr("data-action", String.format("/app/api/form/stash/%s", currentTemplate.get().getResourceKey()));
+				row.attr("data-action", String.format("/app/api/form/stash/%s", template.getResourceKey()));
 			}
 		}
 	}
