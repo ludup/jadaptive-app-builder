@@ -4,9 +4,10 @@ import java.util.List;
 
 import com.jadaptive.api.user.User;
 
-@FunctionalInterface
 public interface AuthenticationPolicyResolver {
 
 	List<AuthenticationPolicy> resolveUserPolicy(User user, List<AuthenticationPolicy> policies);
+
+	void assertDefaultPolicy(AuthenticationPolicy policy);
 
 }

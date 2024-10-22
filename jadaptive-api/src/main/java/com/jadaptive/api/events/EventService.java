@@ -43,6 +43,8 @@ public interface EventService {
 
 	<T extends UUIDEntity> void saving(Class<T> clz, EventListener<ObjectEvent<T>> handler);
 
+	<T extends SystemEvent> void on(Class<T> clz, EventListener<T> handler);
+
 	
 
 }

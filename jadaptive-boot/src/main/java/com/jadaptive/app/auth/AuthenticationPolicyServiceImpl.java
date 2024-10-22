@@ -192,10 +192,17 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	public AuthenticationPolicy getDefaultPolicy(Class<? extends AuthenticationPolicy> clz) {
 		if(!clz.equals(UserLoginAuthenticationPolicy.class)) {
-			return getWeightedPolicy(clz);
+			AuthenticationPolicy policy = getWeightedPolicy(clz);
+			if(Objects.nonNull(resolver)) {
+				resolver.assertDefaultPolicy(policy);
+			}
+			return policy;
 		} else {
-			return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true),
+			AuthenticationPolicy policy = policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true),
 					SearchField.eq("resourceKey", UserLoginAuthenticationPolicy.RESOURCE_KEY));
+			
+			
+			return policy;
 		}
 		
 	}
