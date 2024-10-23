@@ -264,6 +264,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			if(log.isInfoEnabled()) {
 				log.info("User {} has completed authentication", state.getUser().getUsername());
 			}
+			
+			if(!state.hasSetupPostAuthentication()) {
+				setupPostAuthentication(state);
+			}
+			
 			if(!state.hasPostAuthentication()) {
 			
 				if(log.isInfoEnabled()) {
@@ -413,10 +418,9 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					return o1.getWeight().compareTo(o2.getWeight());
 				}
 			});
-			
-			state.getPostAuthenticationPages().clear();
-			state.getPostAuthenticationPages().addAll(additional);
 		}
+		
+		state.setPostAuthenticationPages(additional);
 
 	}
 

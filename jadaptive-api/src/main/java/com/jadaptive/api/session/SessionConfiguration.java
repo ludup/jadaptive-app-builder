@@ -5,6 +5,8 @@ import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = SessionConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
 public class SessionConfiguration extends SingletonUUIDEntity {
@@ -14,6 +16,7 @@ public class SessionConfiguration extends SingletonUUIDEntity {
 	public static final String RESOURCE_KEY = "sessionConfiguration";
 
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "60")
+	@Validator(type = ValidationType.RANGE, value = "1-1440")
 	private int timeout;
 
 	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
