@@ -226,6 +226,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		quotaService.assertQuota(quota, AuthenticationPolicy.RESOURCE_KEY, "failedLoginThreshold.error");
 	}
 	
+	@Override
+	public void clearLoginThesholds() {
+		QuotaThreshold quota = quotaService.getAssignedThreshold(quotaService.getKey(FAILED_LOGIN_ATTEMPTS_UUID));
+		quotaService.clearQuota(quota);
+	}
+	
 	private void flagFailedLogin() {
 		QuotaThreshold quota = quotaService.getAssignedThreshold(quotaService.getKey(FAILED_LOGIN_ATTEMPTS_UUID));
 		quotaService.incrementQuota(quota, AuthenticationPolicy.RESOURCE_KEY, "failedLoginThreshold.error");

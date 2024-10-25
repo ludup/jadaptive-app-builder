@@ -347,7 +347,7 @@ public abstract class HtmlPage implements Page {
 
 	protected void injectFeedback(Document doc, HttpServletRequest request) {
 		Feedback feedback = (Feedback) request.getSession().getAttribute("feedback");
-		if(Objects.nonNull(feedback)) {
+		if(Objects.nonNull(feedback) && Objects.nonNull(feedback.getI18n())) {
 			request.getSession().removeAttribute("feedback");
 			Element element = doc.selectFirst("header");
 			if(Objects.isNull(element)) {

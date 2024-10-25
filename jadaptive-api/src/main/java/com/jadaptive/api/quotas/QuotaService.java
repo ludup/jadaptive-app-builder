@@ -23,4 +23,6 @@ public interface QuotaService {
 	long getUsedQuota(QuotaThreshold transferQuota);
 
 	long getRemainingQuota(QuotaThreshold quota);
+
+	void clearQuota(QuotaThreshold quota);
 }

@@ -108,5 +108,7 @@ public interface AuthenticationService {
 	void assertLoginThesholds();
 
 	Class<? extends Page> getCurrentPage();
+
+	void clearLoginThesholds();
 	
 }
