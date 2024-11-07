@@ -48,6 +48,11 @@ public class I18N extends AbstractPageExtension {
 			if(optional) {
 				e.removeAttr("jad:optional");
 			}
+			
+			e.dataset().put("bundle", bundle);
+			e.dataset().put("key", key);
+			
+			e.addClass("editableText");
 		}
 	}
 

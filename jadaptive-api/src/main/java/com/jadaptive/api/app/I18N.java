@@ -77,12 +77,12 @@ public class I18N {
 		return keys;
 	}
 	
-	public static void overrideMessage(Locale locale, String key, String value) {
-		dynamic.put(key, value);
+	public static void addI18n(Locale locale, String bundle, String key, String value) {
+		dynamic.put(String.format("%s/%s", bundle, key), value);
 	}
 	
-	public static void removeOverrideMessage(Locale locale, String key) {		
-		dynamic.remove(key);
+	public static void removeI18n(Locale locale, String bundle, String key) {		
+		dynamic.remove(String.format("%s/%s", bundle, key));
 	}
 
 	public static String getResourceOrException(Locale locale, String resourceBundle,
@@ -95,38 +95,34 @@ public class I18N {
 					"You must specify a resource bundle for key " + key);
 		}
 
-		if(resourceBundle.equals("dynamic")) {
-			
-			String localizedString = dynamic.get(key);
-			if(Objects.nonNull(localizedString)) {
-				MessageFormat messageFormat = new MessageFormat(localizedString);
-				messageFormat.setLocale(locale);
-				return messageFormat.format(formatParameters(arguments));
-			}
-			
-			return "[i18n/" + resourceBundle + "/" + key + "]"; 
-			
-		} else {
+		String overrideKey = String.format("%s/%s", resourceBundle, key);
+		String localizedString = dynamic.get(overrideKey);
 		
-			String bundlePath = resourceBundle;
-			bundlePath = "i18n/" + resourceBundle;
-			
-			ResourceBundle resource = cachedBundles.get(bundlePath);
-			
-			if(Objects.isNull(resource)) {
-				resource = ResourceBundle.getBundle(bundlePath,
-						locale, ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).getClassLoader());
-			}
-			
-			String localizedString = resource.getString(key);
-			if (arguments == null || arguments.length == 0) {
-				return localizedString;
-			}
-	
+		if(Objects.nonNull(localizedString)) {
 			MessageFormat messageFormat = new MessageFormat(localizedString);
 			messageFormat.setLocale(locale);
 			return messageFormat.format(formatParameters(arguments));
 		}
+		
+		String bundlePath = resourceBundle;
+		bundlePath = "i18n/" + resourceBundle;
+		
+		ResourceBundle resource = cachedBundles.get(bundlePath);
+		
+		if(Objects.isNull(resource)) {
+			resource = ResourceBundle.getBundle(bundlePath,
+					locale, ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).getClassLoader());
+		}
+		
+		localizedString = resource.getString(key);
+		if (arguments == null || arguments.length == 0) {
+			return localizedString;
+		}
+
+		MessageFormat messageFormat = new MessageFormat(localizedString);
+		messageFormat.setLocale(locale);
+		return messageFormat.format(formatParameters(arguments));
+		
 	}
 
 	public static String getResource(Locale locale, String resourceBundle,

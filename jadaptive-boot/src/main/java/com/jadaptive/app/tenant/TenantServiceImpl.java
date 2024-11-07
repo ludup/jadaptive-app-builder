@@ -181,27 +181,29 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		setupCache(tenant);
 		
 		try {
+	
+			
 			applicationService.getBeans(TenantAware.class).
-				stream().
-				sorted((o1,o2) -> o1.getOrder().compareTo(o2.getOrder())).
-				forEach(aware -> {
-					if(tenant.isSystem()) {
-						aware.initializeSystem(newSchema);
-					} else {
-						aware.initializeTenant(tenant, newSchema);
-					}
+			stream().
+			sorted((o1,o2) -> o1.getOrder().compareTo(o2.getOrder())).
+			forEach(aware -> {
+				if(tenant.isSystem()) {
+					aware.initializeSystem(newSchema);
+				} else {
+					aware.initializeTenant(tenant, newSchema);
 				}
-			);
+			}
+		);
+			
 			
 			applicationService.getBeans(JsonTemplateEnabledService.class).
-				stream().
-				filter(repository -> tenant.isSystem() || !repository.isSystemOnly()).
-				sorted((o1, o2) -> o1.getTemplateOrder().compareTo(o2.getTemplateOrder())).
-				forEach(repository -> {
-					templateService.processTemplates(tenant, repository);		
-				}
-			);
-			
+			stream().
+			filter(repository -> tenant.isSystem() || !repository.isSystemOnly()).
+			sorted((o1, o2) -> o1.getTemplateOrder().compareTo(o2.getTemplateOrder())).
+			forEach(repository -> {
+				templateService.processTemplates(tenant, repository);		
+			}
+		);
 			
 			templateService.loadExtendedTemplates(tenant);
 		} finally {

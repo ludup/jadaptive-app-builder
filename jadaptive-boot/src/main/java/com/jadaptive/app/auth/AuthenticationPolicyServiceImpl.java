@@ -3,6 +3,7 @@ package com.jadaptive.app.auth;
 import java.lang.reflect.InvocationTargetException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -60,7 +61,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		
 		List<AuthenticationPolicy> results =  new ArrayList<>();
 		
-		for(AuthenticationPolicy policy : policyDatabase.getAssignedObjectsA(AuthenticationPolicy.class, user)) {
+		for(AuthenticationPolicy policy : getAssignedPolicies(user)) {
 			if(!policy.getClass().equals(policyClz)) {
 				continue;
 			}
@@ -215,7 +216,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
 		switch(column) {
 		case "scope":
-			return Html.i18n(AuthenticationPolicy.RESOURCE_KEY, rowTemplate.getResourceKey() + ".name");
+			return Html.i18n(rowTemplate.getBundle(), rowTemplate.getResourceKey() + ".name");
 		default:
 			throw new IllegalStateException("Unsupported dynamic column " + column);
 		}
@@ -251,5 +252,10 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	public boolean hasPolicy(String resourceKey) {
 		return policyDatabase.countObjects(AuthenticationPolicy.class, SearchField.eq("resourceKey", resourceKey)) > 0;
+	}
+
+	@Override
+	public Iterable<AuthenticationPolicy> getAssignedPolicies(User user) {
+		return policyDatabase.getAssignedObjectsA(AuthenticationPolicy.class, user);
 	}
 }

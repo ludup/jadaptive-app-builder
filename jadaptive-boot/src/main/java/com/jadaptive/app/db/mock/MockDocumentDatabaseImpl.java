@@ -1,7 +1,5 @@
 package com.jadaptive.app.db.mock;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -65,11 +63,11 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return getCollection(table, database).values();
 	}
 	
-	@Override
-	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField) {
-		Collection<Document> tmp = getCollection(table, database).values();
-		return new ArrayList<>(tmp).subList(start, Math.min(start + length, tmp.size()-1));
-	}
+//	@Override
+//	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField) {
+//		Collection<Document> tmp = getCollection(table, database).values();
+//		return new ArrayList<>(tmp).subList(start, Math.min(start + length, tmp.size()-1));
+//	}
 
 	@Override
 	public Long count(String table, String database, SearchField... fields) {

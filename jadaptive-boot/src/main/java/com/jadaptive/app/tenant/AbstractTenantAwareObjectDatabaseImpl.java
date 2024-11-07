@@ -71,7 +71,7 @@ public abstract class AbstractTenantAwareObjectDatabaseImpl<T extends AbstractUU
 
 	@Override
 	public Collection<T> table(String searchField, String searchValue, int start, int length, SortOrder order, String sortField) {
-		return tableObjects(tenantService.getCurrentTenant().getUuid(), getResourceClass(), searchField, searchValue, start, length, order, sortField);
+		return tableObjects(tenantService.getCurrentTenant().getUuid(), getResourceClass(), start, length, order, sortField, SearchField.eq(searchField, searchValue));
 	}
 
 	@Override

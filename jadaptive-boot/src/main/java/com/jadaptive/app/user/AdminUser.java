@@ -1,5 +1,7 @@
 package com.jadaptive.app.user;
 
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
@@ -105,6 +107,11 @@ public class AdminUser extends PasswordEnabledUser {
 	@Override
 	public String getEventGroup() {
 		return User.RESOURCE_KEY;
+	}
+
+	@Override
+	public Date getPasswordExpiry() {
+		return null;
 	}
 
 }

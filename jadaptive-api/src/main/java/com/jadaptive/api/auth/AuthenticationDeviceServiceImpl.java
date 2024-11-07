@@ -13,7 +13,6 @@ import com.jadaptive.api.ui.menu.ApplicationMenuService;
 import com.jadaptive.api.ui.menu.PageMenu;
 
 @Service
-@PageMenu(bundle = AuthenticationDevice.RESOURCE_KEY, parent = ApplicationMenuService.HOME_MENU_UUID, i18n = "2faDevices.names", icon = "fa-mobile-phone", path = "/app/ui/search/authenticationDevices")
 public class AuthenticationDeviceServiceImpl implements AuthenticationDeviceService {
 
 	@Override

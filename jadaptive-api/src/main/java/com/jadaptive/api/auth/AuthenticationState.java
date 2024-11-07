@@ -68,6 +68,10 @@ public class AuthenticationState {
 	public int getOptionalAvailable() {
 		return optionalAvailable;
 	}
+	
+	public Redirect getHomePage() {
+		return homePage;
+	}
 
 	public void setOptionalAvailable(int optionalAvailable) {
 		this.optionalAvailable = optionalAvailable;

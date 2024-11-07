@@ -54,4 +54,9 @@ public class UserLoginAuthenticationPolicy extends AuthenticationPolicy {
 		this.passwordRequired = passwordRequired;
 	}
 
+	@Override
+	public boolean isLoginPolicy() {
+		return true;
+	}
+
 }

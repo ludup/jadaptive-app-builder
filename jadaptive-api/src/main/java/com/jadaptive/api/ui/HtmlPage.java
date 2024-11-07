@@ -4,11 +4,9 @@ import static com.jadaptive.utils.Instrumentation.timed;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -32,7 +29,6 @@ import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.utils.FileUtils;
 
 public abstract class HtmlPage implements Page {
 	
@@ -48,7 +44,7 @@ public abstract class HtmlPage implements Page {
 	private ApplicationService applicationService; 
 	
 	@Autowired
-	private ClassLoaderService classService; 
+	private HtmlContentService contentService; 
 	
 	private ThreadLocal<List<PageExtension>> extensions = new ThreadLocal<>();
 	
@@ -194,11 +190,11 @@ public abstract class HtmlPage implements Page {
 		}
 
 		try(var timed = timed("HtmlPage.processPageExtensions#resolveScript(" + uri + ")")) {
-			resolveScript(getUri(), document, this);
+			contentService.resolveScript(getUri(), document, this);
 		}
 
 		try(var timed = timed("HtmlPage.processPageExtensions#resolveStylesheet(" + uri + ")")) {
-			resolveStylesheet(getUri(), document, this);
+			contentService.resolveStylesheet(getUri(), document, this);
 		}
 
 		try(var timed = timed("HtmlPage.processPageExtensions#processPageProcessors(" + uri + ")")) {
@@ -509,36 +505,14 @@ public abstract class HtmlPage implements Page {
 			
 			injectHtmlSection(document, element, ext);
 
-			resolveScript(ext.getName(), document, ext);
-			resolveStylesheet(ext.getName(), document, ext);
+			contentService.resolveScript(ext.getName(), document, ext);
+			contentService.resolveStylesheet(ext.getName(), document, ext);
 	}
 
-	protected void resolveStylesheet(String uri, Document document, PageResources ext) {
-		URL url = ext.getResourceClass().getResource(ext.getCssResource());
-		if(Objects.nonNull(url)) {
-			PageHelper.appendStylesheet(document, "/app/css/" + uri + ".css");
-		} else {
-			url = classService.getResource(ext.getCssResource());
-			if(Objects.nonNull(url)) {
-				PageHelper.appendStylesheet(document, "/app/style/" + uri + ".css");
-			} 
-		}
-	}
+	
 	
 	public String getCssResource() {
 		return String.format("%s.css", getClass().getSimpleName());
-	}
-
-	protected void resolveScript(String uri, Document document, PageResources ext) {
-		URL url = ext.getResourceClass().getResource(ext.getJsResource());
-		if(Objects.nonNull(url)) {
-			PageHelper.appendBodyScript(document, "/app/js/" + uri + ".js");
-		} else {
-			url = classService.getResource(ext.getJsResource());
-			if(Objects.nonNull(url)) {
-				PageHelper.appendBodyScript(document, "/app/script/" + ext.getJsResource());
-			}
-		}
 	}
 
 	public String getJsResource() {
@@ -556,56 +530,7 @@ public abstract class HtmlPage implements Page {
 	}
 	
 	protected Document resolveDocument(Class<?> clz, String resource, boolean canFail) throws IOException {
-		
-		if(isOverride(clz)) {
-			return getCustomizedContent(clz);
-		} else {
-			return getPageDocument(clz, resource, canFail);
-		}
-		
-	}
-	
-	protected Document getPageDocument(Class<?> clz, String resource, boolean canFail) throws IOException {
-		
-		URL url = clz.getResource(resource);
-		if(Objects.isNull(url)) {
-			url = getResourceClass().getResource(resource);
-		}
-		if(Objects.isNull(url)) {
-			url = classService.getResource(resource);
-		}
-		if(resource.startsWith("/")) {
-			resource = FileUtils.checkStartsWithNoSlash(resource);
-			return resolveDocument(clz, resource, canFail);
-		}
-		if(Objects.nonNull(url)) {
-			return loadDocument(url);
-		} else {
-			if(canFail) {
-				throw new IOException("Missing document for " + resource);
-			}
-			Document doc = new Document(Request.get().getRequestURI());
-			doc.appendChild(new Element("body"));
-			return doc;
-		}
-		
-	}
-
-	protected Document loadDocument(URL url) throws IOException {
-		try(InputStream in = url.openStream()) {
-			return Jsoup.parse(in, "UTF-8", url.toExternalForm());
-		}
-	}
-
-	private Document getCustomizedContent(Class<?> clz) {
-		
-//		HtmlContentService contentService = applicationService.getBean(HtmlContentService.class);
-		
-		return null;
-	}
-
-	private boolean isOverride(Class<?> clz) {
-		return false; //clz.getAnnotation(CustomizablePage.class) != null;
+		return contentService.resolveDocument(clz, this, resource, canFail);
 	}
 
 	private void processPageLevelExtensions(Document document, String[] extensionIds) throws IOException {
@@ -613,7 +538,6 @@ public abstract class HtmlPage implements Page {
 		for(String ext : extensionIds) {
 			pageCache.resolveExtension(ext).process(document, null, this);
 		}
-
 	}
 	
 	private void showFeedback(Document document, String icon, String bundle, String i18n, Set<String> classes, Object... args) {

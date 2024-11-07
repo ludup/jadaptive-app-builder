@@ -1,5 +1,7 @@
 package com.jadaptive.plugins.builtin;
 
+import java.util.Date;
+
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
@@ -86,5 +88,9 @@ public class BuiltinUser extends PasswordEnabledUser {
 		return User.RESOURCE_KEY;
 	}
 	
+	@Override
+	public Date getPasswordExpiry() {
+		return null;
+	}
 	
 }

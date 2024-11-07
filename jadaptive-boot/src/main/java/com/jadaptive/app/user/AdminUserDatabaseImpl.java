@@ -33,6 +33,7 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	
 	private final Set<UserDatabaseCapabilities> capabilities = new HashSet<>(
 			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD,
+					UserDatabaseCapabilities.UPDATE,
 					UserDatabaseCapabilities.LOGON));
 
 

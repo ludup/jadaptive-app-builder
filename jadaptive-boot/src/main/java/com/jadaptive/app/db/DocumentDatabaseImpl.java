@@ -685,29 +685,29 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		}
 	}
 	
-	@Override
-	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField) {
-		
-		MongoCollection<Document> collection = getCollection(table, database);
-		searchField = configureSearch(searchField);
-		
-		ClientSession session = currentSession.get();
-		
-		if(StringUtils.isBlank(searchValue)) {
-			if(Objects.nonNull(session)) {
-				return collection.find(session).sort(getOrder(order, sortField)).skip(start).limit(length);
-			} else {
-				return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
-			}
-			
-		} else {
-			if(Objects.nonNull(session)) {
-				return collection.find(session, Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);
-			} else {
-				return collection.find(Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);	
-			}
-		}
-	}
+//	@Override
+//	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField) {
+//		
+//		MongoCollection<Document> collection = getCollection(table, database);
+//		searchField = configureSearch(searchField);
+//		
+//		ClientSession session = currentSession.get();
+//		
+//		if(StringUtils.isBlank(searchValue)) {
+//			if(Objects.nonNull(session)) {
+//				return collection.find(session).sort(getOrder(order, sortField)).skip(start).limit(length);
+//			} else {
+//				return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
+//			}
+//			
+//		} else {
+//			if(Objects.nonNull(session)) {
+//				return collection.find(session, Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);
+//			} else {
+//				return collection.find(Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);	
+//			}
+//		}
+//	}
 
 	@Override
 	public Long count(String table, String database, SearchField... fields) {

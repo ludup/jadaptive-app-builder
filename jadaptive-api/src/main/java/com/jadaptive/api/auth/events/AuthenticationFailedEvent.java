@@ -1,6 +1,6 @@
 package com.jadaptive.api.auth.events;
 
-import com.jadaptive.api.auth.AuthenticationModule;
+import com.jadaptive.api.auth.AuthenticationProvider;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.AuditedObject;
@@ -26,29 +26,27 @@ public class AuthenticationFailedEvent extends UserGeneratedEvent {
 
 	public static final String RESOURCE_KEY = "authenticationFailed";
 
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY)
+	@ObjectField(type = FieldType.TEXT)
 	@ObjectView(value = ObjectEvent.OBJECT_VIEW)
-	AuthenticationModule authenticationModule;
+	String authenticator;
 	
 	public AuthenticationFailedEvent() { }
 	
-	public AuthenticationFailedEvent(AuthenticationModule authenticationModule, String username, String name, String remoteAddress) {
+	public AuthenticationFailedEvent(AuthenticationProvider authenticationModule, String username, String name, String remoteAddress) {
 		super(RESOURCE_KEY, "authentication");
 		setUsername(username);
 		setName(name);
 		setIpAddress(remoteAddress);
 		setEventDescription(authenticationModule.getName());
 		setState(EventState.FAILURE);
-		this.authenticationModule = authenticationModule;
+		this.authenticator = authenticationModule.getName();
 	}
 
-	public AuthenticationModule getAuthenticationModule() {
-		return authenticationModule;
+	public String getAuthenticator() {
+		return authenticator;
 	}
 
-	public void setAuthenticationModule(AuthenticationModule authenticationModule) {
-		this.authenticationModule = authenticationModule;
+	public void setAuthenticator(String authenticator) {
+		this.authenticator = authenticator;
 	}
-
-	
 }

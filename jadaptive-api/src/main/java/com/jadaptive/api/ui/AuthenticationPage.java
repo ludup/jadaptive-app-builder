@@ -173,7 +173,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	}
 
 	public abstract boolean canAuthenticate(AuthenticationState state);
-
+	
 	public abstract String getAuthenticatorUUID();
 	
 }

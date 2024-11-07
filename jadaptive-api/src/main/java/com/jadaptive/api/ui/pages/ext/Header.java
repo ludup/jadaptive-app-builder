@@ -49,6 +49,8 @@ public class Header extends AbstractPageExtension {
 	@Autowired
 	private AvatarService avatarService;
 	
+	private BootstrapThemeResolver themeResolver;
+	
 	@Override
 	public void process(Document document, Element element, Page page) {
 
@@ -185,6 +187,13 @@ public class Header extends AbstractPageExtension {
 				}
 			});
 		}
+		
+//		if(featureService.isEnabled(HtmlContentService.DEVELOPER_TOOLS)) {
+//			Element actions = document.getElementById("headerActions");
+//			actions.appendChild(Html.div("d-inline me-2")
+//					.appendChild(Html.a("#", "toggleEditable")
+//							.appendChild(Html.i("fa-solid", "fa-language", "text-light"))));
+//		}
 	}
 
 	private void userMenu(boolean isAdmin, Set<String> resolvedPermissions, Document document, ArrayList<ApplicationMenu> parents,
@@ -244,6 +253,7 @@ public class Header extends AbstractPageExtension {
 					userMenuItem.getElementById("userMenuItemIcon").
 						addClass("fa-solid").
 						addClass("me-2").
+						addClass("fa-fw").
 						addClass(item.getIcon());
 					
 					userMenuItem.getElementById("userMenuItemText")

@@ -598,4 +598,80 @@ $(function() {
 		var pc = parseInt((val / max) * 100);
 		$(this).width(pc + '%');
 	});
+	
+	
+	var editText = function(bundle, key, replacement, before, element) {
+		
+		var fd = new FormData();
+		fd.append('bundle', bundle);
+		fd.append('key', key);
+		fd.append('replacementValue', replacement);
+		debugger;
+		$.ajax({
+           type: "POST",
+           url: '/app/api/i18n/edit',
+           dataType: "json",
+           contentType: false,
+           processData: false,
+           data: fd,
+           success: function(data)
+           {
+				if(!data.success) {	
+					element.html(before);
+				} else {
+					element.data('before', element.html());
+	        		element.trigger('change');
+	        		element.blur();
+				}
+		   }
+		});
+		
+	}
+	$('body').on('focus', '.editableText', function() {
+	    const $this = $(this);
+	    $this.data('before', $this.html());
+	}).on('blur paste', '.editableText', function() {
+	    const $this = $(this);
+	    if ($this.data('before') !== $this.html()) {
+			editText($this.data('bundle'), 
+					$this.data('key'), 
+					$this.html(),
+					$this.data('before'),
+					$this);
+	    }
+	}).on('keyup keypress keydown', '.editableText', function(e) {
+
+	    var code = (e.keyCode ? e.keyCode : e.which);
+	    if (code==13) {
+	        e.preventDefault();
+	        const $this = $(this);
+		    if ($this.data('before') !== $this.html()) {
+				editText($this.data('bundle'), 
+						$this.data('key'), 
+						$this.html(),
+						$this.data('before'),
+						$this);
+		    }
+	    }
+	
+	});
+
+	$(document).on('click', '.toggleEditable', function(){ 
+		
+		if($(this).data('editing')) {
+			$('.editableText').attr('contenteditable', false);
+			$(this).children('i').removeClass('text-success');
+			$(this).children('i').addClass('text-light');
+			$('a').removeAttr('disabled');
+			$(this).data('editing', false);
+		} else {
+			$('.editableText').attr('contenteditable', true);
+			$(this).children('i').removeClass('text-light');
+			$(this).children('i').addClass('text-success');
+			$('.dropdown').show();
+			$('a').attr('disabled', true);
+			$(this).data('editing', true);
+		}
+
+	});
 });

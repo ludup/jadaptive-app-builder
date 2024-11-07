@@ -90,9 +90,6 @@ public interface AuthenticationService {
 	
 	AuthenticationModule getAuthenticationModuleByResourceKey(String uuid);
 
-	@SuppressWarnings("unchecked")
-	void registerAuthenticationPage(AuthenticationModule module, Class<? extends AuthenticationPage<?>>... pages);
-
 	AuthenticationState createAuthenticationState(AuthenticationPolicy policy) throws FileNotFoundException;
 
 	AuthenticationState createAuthenticationState(AuthenticationPolicy policy, Redirect homePage) throws FileNotFoundException;
@@ -110,5 +107,12 @@ public interface AuthenticationService {
 	Class<? extends Page> getCurrentPage();
 
 	void clearLoginThesholds();
+
+	void launchTemporaryAuthentication(String name, String redirectURI, AuthenticationModule... modules)
+			throws FileNotFoundException;
+
+	void registerAuthenticationPage(AuthenticationProvider provider, Class<? extends AuthenticationPage<?>>... pages);
+
+	AuthenticationProvider getAuthenticationProviderByUUID(String uuid);
 	
 }
