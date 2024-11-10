@@ -15,7 +15,6 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 	
 	Boolean system;
 	Boolean hidden;
-	boolean summarise;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, hidden = true, searchable = true)
 	@ExcludeView(values = FieldView.TABLE)
