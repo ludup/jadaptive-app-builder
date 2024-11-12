@@ -142,6 +142,7 @@ public class AuthenticationState {
 	public boolean hasFinished() {
 		return isRequiredAuthenticationComplete() 
 				&& isOptionalComplete()
+				&& hasSetupPostAuthentication() 
 				&& !hasPostAuthentication();
 	}
 	
@@ -158,11 +159,18 @@ public class AuthenticationState {
 	}
 	
 	public boolean hasPostAuthentication() {
-		return currentPostAuthenticationIndex < postAuthenticationPages.size();
+		
+		if(isRequiredAuthenticationComplete() && isOptionalComplete()) {
+			if(hasSetupPostAuthentication()) {
+				return currentPostAuthenticationIndex < postAuthenticationPages.size();
+			}
+		}
+		
+		return false;
 	}
 	
 	public boolean completePage() {
-		if(isRequiredAuthenticationComplete() && isOptionalComplete()) {
+		if(isRequiredAuthenticationComplete() && isOptionalComplete() && hasSetupPostAuthentication()) {
 			currentPostAuthenticationIndex++;
 			return !hasPostAuthentication();
 		} else {
