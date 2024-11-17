@@ -196,25 +196,6 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		}
 		
 	}
-	
-	@Override
-	public synchronized long allTenantsCount() {
-		
-		if(cachedAllTenantsCount < 0) {
-			long count = 0;
-			for(Tenant tenant : tenantService.allObjects()) {
-				tenantService.setCurrentTenant(tenant);
-				try {
-					count += countUsers();
-				} finally {
-					tenantService.clearCurrentTenant();
-				}
-			}
-			cachedAllTenantsCount = count;
-		}
-		
-		return cachedAllTenantsCount;
-	}
 
 	@Override
 	public void initializeSystem(boolean newSchema) {
@@ -227,10 +208,10 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		if(ApplicationServiceImpl.getInstance().getBean(ProductService.class).getProduct().isUserLicensing()) {
 			eventService.created(User.class, (e)->{
 				synchronized(UserServiceImpl.this) {
-					allTenantsCount();
+					allTenantsEnabledCount();
 					cachedAllTenantsCount++;
 					if(log.isInfoEnabled()) {
-						log.info("REMOVEME: Increasing licensed user count to {}", cachedAllTenantsCount);
+						log.info("Increasing licensed user count to {}", cachedAllTenantsCount);
 					}
 				}
 				
@@ -238,10 +219,10 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 			
 			eventService.deleted(User.class, (e)->{
 				synchronized(UserServiceImpl.this) {
-					allTenantsCount();
+					allTenantsEnabledCount();
 					cachedAllTenantsCount--;
 					if(log.isInfoEnabled()) {
-						log.info("REMOVEME: Reducing licensed user count to {}", cachedAllTenantsCount);
+						log.info("Reducing licensed user count to {}", cachedAllTenantsCount);
 					}
 				}
 			});
@@ -406,5 +387,29 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		default:
 			throw new UnsupportedOperationException(column + " is not a known dynamic column!");
 		}			
+	}
+
+	@Override
+	public int countEnabledUsers() {
+		return (int) userRepository.count(User.class, SearchField.eq("enabled", true));
+	}
+
+	@Override
+	public synchronized int allTenantsEnabledCount() {
+		
+		if(cachedAllTenantsCount < 0) {
+			long count = 0;
+			for(Tenant tenant : tenantService.allObjects()) {
+				tenantService.setCurrentTenant(tenant);
+				try {
+					count += countEnabledUsers();
+				} finally {
+					tenantService.clearCurrentTenant();
+				}
+			}
+			cachedAllTenantsCount = count;
+		}
+		
+		return (int) cachedAllTenantsCount;
 	}
 }

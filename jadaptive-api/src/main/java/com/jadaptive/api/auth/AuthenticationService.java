@@ -66,7 +66,7 @@ public interface AuthenticationService {
 	
 	LogonCompletedResult logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent);
 
-	AuthenticationState getCurrentState() throws FileNotFoundException;
+	AuthenticationState getCurrentState();
 
 	AuthenticationCompletedResult completeAuthentication(AuthenticationState state, Optional<Page> page);
 

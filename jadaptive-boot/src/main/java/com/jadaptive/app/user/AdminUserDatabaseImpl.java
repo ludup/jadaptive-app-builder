@@ -44,6 +44,8 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 		user.setUsername(username);
 		user.setEmail(email);
 		user.setSystem(true);
+		user.setEnabled(true);
+		
 		setPassword(user, password, forceChange);
 		objectDatabase.saveOrUpdate(user);
 		
