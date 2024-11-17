@@ -23,6 +23,10 @@ public class DocumentValidator {
 	public static Object validate(FieldTemplate field, String value)
 			throws ValidationException {
 
+		if(field.isHidden()) {
+			return value;
+		}
+		
 		switch (field.getFieldType()) {
 		case BOOL:
 			validateBoolean(value, field);
