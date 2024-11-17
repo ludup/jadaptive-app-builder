@@ -55,8 +55,6 @@ public interface DocumentDatabase {
 
 	void dropSchema();
 
-	Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField);
-
 	void doInTransaction(Runnable r);
 
 	Long sumLongValues(String table, String database, String groupBy, SearchField... fields);

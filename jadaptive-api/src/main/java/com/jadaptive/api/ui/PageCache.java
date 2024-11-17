@@ -217,10 +217,11 @@ public class PageCache {
 			return "/" + path;
 	}
 
-	public Page resolvePage(Class<? extends Page> clz) throws FileNotFoundException {
+	@SuppressWarnings("unchecked")
+	public <T extends Page> T resolvePage(Class<T> clz) throws FileNotFoundException {
 		Page cachedPage = pageCache.get(clz);
 		if(Objects.nonNull(cachedPage)) {
-			return cachedPage;
+			return (T) cachedPage;
 		}
 		try {
 			Collection<Page> pages = applicationService.getBeans(Page.class);
@@ -229,7 +230,7 @@ public class PageCache {
 					aliasCache.put(page.getUri(), page);
 					postCreation(page);
 					pageCache.put(page.getClass(), page);
-					return page;
+					return (T) page;
 				}
 			}
 		} catch(NoSuchBeanDefinitionException e) { }

@@ -100,10 +100,16 @@ public class Login extends AuthenticationPage<LoginForm> {
 			User user; 
 			try {
 				user = userService.getUser(form.getUsername());
-				
 			} catch(ObjectNotFoundException e) {
 				user = new FakeUser(form.getUsername());
 			}
+			
+			if(!user.isEnabled()) {
+				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+		    	Feedback.error("default", "error.invalidCredentials");
+				return false;
+			}
+			
 			state.setUser(user);
 			boolean passwordRequired = state.getPolicy().getPasswordOnFirstPage() && state.getPolicy().getPasswordRequired();
 			boolean passwordVerified = false;

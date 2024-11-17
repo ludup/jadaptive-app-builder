@@ -243,6 +243,11 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		}
 		
 		@Override
+		public String getIconGroup() {
+			return m.iconGroup();
+		}
+		
+		@Override
 		public String getI18n() {
 			return i18n;
 		}

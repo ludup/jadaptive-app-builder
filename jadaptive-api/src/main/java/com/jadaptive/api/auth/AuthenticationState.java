@@ -26,7 +26,7 @@ public class AuthenticationState {
 	private Map<Class<? extends Page>,AuthenticationModule> requiredAuthenticationModulez = new HashMap<>();
 	private List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
 	private Map<Class<? extends Page>,AuthenticationModule> optionalAuthentications = new HashMap<>();
-	private List<PostAuthenticatorPage> postAuthenticationPages = new ArrayList<>();
+	private List<PostAuthenticatorPage> postAuthenticationPages = null;
 	private int currentPageIndex = 0;
 	private String remoteAddress;
 	private String userAgent;
@@ -52,6 +52,10 @@ public class AuthenticationState {
 	public AuthenticationState(AuthenticationPolicy policy) {
 		this.policy = policy;
 	}
+	
+	public boolean hasSetupPostAuthentication() {
+		return postAuthenticationPages != null;
+	}
 
 	public AuthenticationPolicy getPolicy() {
 		return policy;
@@ -63,6 +67,10 @@ public class AuthenticationState {
 
 	public int getOptionalAvailable() {
 		return optionalAvailable;
+	}
+	
+	public Redirect getHomePage() {
+		return homePage;
 	}
 
 	public void setOptionalAvailable(int optionalAvailable) {
@@ -134,6 +142,7 @@ public class AuthenticationState {
 	public boolean hasFinished() {
 		return isRequiredAuthenticationComplete() 
 				&& isOptionalComplete()
+				&& hasSetupPostAuthentication() 
 				&& !hasPostAuthentication();
 	}
 	
@@ -150,11 +159,18 @@ public class AuthenticationState {
 	}
 	
 	public boolean hasPostAuthentication() {
-		return currentPostAuthenticationIndex < postAuthenticationPages.size();
+		
+		if(isRequiredAuthenticationComplete() && isOptionalComplete()) {
+			if(hasSetupPostAuthentication()) {
+				return currentPostAuthenticationIndex < postAuthenticationPages.size();
+			}
+		}
+		
+		return false;
 	}
 	
 	public boolean completePage() {
-		if(isRequiredAuthenticationComplete() && isOptionalComplete()) {
+		if(isRequiredAuthenticationComplete() && isOptionalComplete() && hasSetupPostAuthentication()) {
 			currentPostAuthenticationIndex++;
 			return !hasPostAuthentication();
 		} else {
@@ -372,5 +388,9 @@ public class AuthenticationState {
 	
 	public void addOptionalAuthentication(Class<? extends Page> clz, AuthenticationModule authenticationModule) {
 		optionalAuthentications.put(clz, authenticationModule);
+	}
+
+	public void setPostAuthenticationPages(List<PostAuthenticatorPage> postAuthenticationPages) {
+		this.postAuthenticationPages = postAuthenticationPages;
 	}
 }

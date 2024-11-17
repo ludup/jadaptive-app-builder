@@ -29,6 +29,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.countries.InternationalService;
+import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -41,6 +42,7 @@ import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateCapability;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableAction;
@@ -63,9 +65,6 @@ public class TableRenderer {
 	private ObjectTemplateRepository templateRepository; 
 	
 	@Autowired
-	private UserInterfaceService uiService;
-	
-	@Autowired
 	private TemplateService templateService;
 	
 	@Autowired
@@ -80,9 +79,15 @@ public class TableRenderer {
 	@Autowired
 	private ApplicationService appService;
 
+	@Autowired
+	private EncryptionService encryptionService;
+	
+	private int start;
+	private int length;
+	
+	private long totalObjects;
 
 	private Collection<AbstractObject> objects;
-	private long totalObjects;
 	private String sortColumn;
 	private SortOrder sortOrder;
 	
@@ -110,8 +115,8 @@ public class TableRenderer {
 	public TableRenderer(boolean readOnly, ObjectTemplate template) {
 		this.readOnly = readOnly;
 		this.template = template;
-		this.showCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
-		this.showUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+		this.showCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+		this.showUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
 		this.showCopy = showUpdate && showCreate;
 	}
 	
@@ -293,7 +298,11 @@ public class TableRenderer {
 									}
 								}
 								
-								renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getParentTemplate(), rowTemplate.getResourceKey()), showUpdate, showCreate, permissions, filters);
+								renderRowActions(row, obj, view, rowTemplate, 
+										generateActions(rowTemplate.getParentTemplate(), 
+												rowTemplate.getResourceKey()), 
+										showUpdate && !(obj.isSystem() && rowTemplate.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS)), 
+										showCreate, permissions, filters);
 								
 								el.appendChild(row);
 							}
@@ -469,7 +478,7 @@ public class TableRenderer {
 				}
 			}
 					
-			if(canCreate && !readOnly) {
+			if(canCreate && !readOnly && !template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_COPY)) {
 				dropdown.addI18nAnchorWithIconValue("default", "copy.name", replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "fa-solid", "fa-copy");
 			} 
 			
@@ -759,7 +768,12 @@ public class TableRenderer {
 	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field) throws UnsupportedEncodingException {
 		
 		boolean isDefault = StringUtils.defaultString(template.getDefaultColumn()).equals(field.getResourceKey());
-		boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		boolean canUpdate = 
+				ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		
+		if(obj.isSystem() && template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS) ) {
+			canUpdate = false;
+		}
 		
 		if(isDefault) {
 			if(canUpdate && !readOnly) {
@@ -842,9 +856,18 @@ public class TableRenderer {
 				return "";
 			}
 		}
-		return safeCast(val);
+		return decryptOrMask(safeCast(val), field);
 	}
 	
+	private String decryptOrMask(String val, FieldTemplate field) {
+		if(field.isAutomaticallyEncrypted()) {
+			return encryptionService.decrypt(val);
+		} else if(field.isManuallyEncrypted()) {
+			return "**ENCRYPTED**";
+		}
+		return val;
+	}
+
 	AbstractObject getReferenceValue(FieldTemplate field, AbstractObject rootObject) {
 
 		AbstractObject obj = null;

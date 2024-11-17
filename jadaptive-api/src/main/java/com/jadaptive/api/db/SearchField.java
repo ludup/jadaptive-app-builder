@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.util.ObjectUtils;
+
+import com.jadaptive.api.template.SearchTransformer;
 
 public class SearchField {
 
@@ -15,6 +18,7 @@ public class SearchField {
 	Object[] searchValue;
 	Type type;
 	SearchField[] fields;
+	private boolean marked;
 	
 	private SearchField(Type type, SearchField... fields) {
 		switch(type) {
@@ -121,5 +125,28 @@ public class SearchField {
 		tmp.addAll(Arrays.asList(field));
 		return tmp.toArray(new SearchField[0]);
 		
+	}
+
+	public void process(SearchTransformer transform) {
+		
+		if(Objects.nonNull(fields)) {
+			for(SearchField field : fields) {
+				field.process(transform);
+			}
+		}
+		
+		if(Objects.nonNull(searchValue)) {
+			for(int i = 0;i<searchValue.length;i++) {
+				searchValue[i] = transform.transform(searchField, searchValue[i]);
+			}
+		}
+	}
+
+	public void mark() {
+		this.marked = true;
+	}
+	
+	public boolean isMarked() {
+		return marked;
 	}
 }

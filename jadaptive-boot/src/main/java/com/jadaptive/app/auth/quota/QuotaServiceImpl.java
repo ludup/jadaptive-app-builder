@@ -261,6 +261,20 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 		
 	}
 	
+	@Override
+	public void clearQuota(QuotaThreshold quota) {
+		
+		if(Objects.isNull(quota)) {
+			return;
+		}
+		
+		Quota q = getQuota(quota);
+		if(Objects.nonNull(q.getUuid())) {
+			objectDatbase.delete(q);
+		}
+		
+	}
+	
 	private Quota internalAssert(QuotaThreshold quota, String bundle, String key) {
 		return internalAssert(getQuota(quota), quota, bundle, key);
 	}

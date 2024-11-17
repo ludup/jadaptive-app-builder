@@ -234,6 +234,11 @@ public class EventServiceImpl implements EventService {
 	public <T extends UUIDEntity> void unassigned(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler) {
 		on(Events.unassigned(templateService.getTemplateResourceKey(clz)), handler);
 	}
+	
+	@Override
+	public <T extends SystemEvent> void on(Class<T> clz, EventListener<T> handler) {
+		on(templateService.getTemplateResourceKey(clz), handler);
+	}
 
 	@Override
 	public void haltEvents() {

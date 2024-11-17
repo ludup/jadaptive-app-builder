@@ -14,37 +14,8 @@ public class AuthenticationModule extends NamedUUIDEntity {
 
 	public static final String RESOURCE_KEY = "authenticationModule";
 
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	Boolean enabled;
-	
 	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT)
 	String authenticatorKey;
-	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	boolean identityCapture;
-	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	boolean secretCapture;
-	
-	@ObjectField(type = FieldType.TEXT)
-	String icon;
-	
-	@ObjectField(type = FieldType.TEXT)
-	String iconGroup;
-	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	boolean requiresPhoneNumber;
-	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	boolean requiresEmailAddress;
-	
-	public Boolean getEnabled() {
-		return enabled;
-	}
-
-	public void setEnabled(Boolean enabled) {
-		this.enabled = enabled;
-	}
 
 	public String getAuthenticatorKey() {
 		return authenticatorKey;
@@ -52,38 +23,6 @@ public class AuthenticationModule extends NamedUUIDEntity {
 
 	public void setAuthenticatorKey(String authenticatorKey) {
 		this.authenticatorKey = authenticatorKey;
-	}
-
-	public boolean isIdentityCapture() {
-		return identityCapture;
-	}
-
-	public void setIdentityCapture(boolean identityCapture) {
-		this.identityCapture = identityCapture;
-	}
-
-	public boolean isSecretCapture() {
-		return secretCapture;
-	}
-
-	public void setSecretCapture(boolean secretCapture) {
-		this.secretCapture = secretCapture;
-	}
-
-	public boolean isRequiresPhoneNumber() {
-		return requiresPhoneNumber;
-	}
-
-	public void setRequiresPhoneNumber(boolean requiresPhoneNumber) {
-		this.requiresPhoneNumber = requiresPhoneNumber;
-	}
-
-	public boolean isRequiresEmailAddress() {
-		return requiresEmailAddress;
-	}
-
-	public void setRequiresEmailAddress(boolean requiresEmailAddress) {
-		this.requiresEmailAddress = requiresEmailAddress;
 	}
 
 	@Override

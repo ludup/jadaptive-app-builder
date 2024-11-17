@@ -52,6 +52,8 @@ public interface UserService extends UUIDObjectService<User>, AvatarProvider, Dy
 
 	Iterable<User> allObjects(String userTemplate);
 
-	long allTenantsCount();
+	int countEnabledUsers();
+
+	int allTenantsEnabledCount();
 
 }

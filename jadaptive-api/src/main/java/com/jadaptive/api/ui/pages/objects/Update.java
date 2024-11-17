@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.template.ObjectTemplateCapability;
 import com.jadaptive.api.ui.MessagePage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
@@ -39,6 +40,15 @@ public class Update extends ObjectTemplatePage {
 		PageHelper.addContentSecurityPolicy("style-src", SessionUtils.UNSAFE_INLINE);
 		
 		if(!uiService.canUpdate(template)) {
+			throw new PageRedirect(new MessagePage("default",
+					"title.updateNotAllowed", 
+					"message.updateNotAllowed",
+					"fa-exclamation-square",
+					String.format("/app/ui/search/%s", template.getResourceKey())));
+		}
+		
+		if(object.isSystem() 
+				&& template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS)) {
 			throw new PageRedirect(new MessagePage("default",
 					"title.updateNotAllowed", 
 					"message.updateNotAllowed",

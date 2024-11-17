@@ -50,7 +50,7 @@ public final class AvatarRequest {
 		}
 
 		public Builder withId(String id) {
-			this.id = Optional.of(id);
+			this.id = Optional.ofNullable(id);
 			return this;
 		}
 

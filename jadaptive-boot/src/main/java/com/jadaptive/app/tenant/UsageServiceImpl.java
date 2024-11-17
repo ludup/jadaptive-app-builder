@@ -85,6 +85,19 @@ public class UsageServiceImpl implements UsageService {
 	}
 	
 	@Override
+	public synchronized Long getDailyValue(String key, Date from) {
+		
+		try {
+			DailyCounter counter = dailyDatabase.get(DailyCounter.class,
+					SearchField.eq("date", from),
+					SearchField.eq("key", key));
+			return counter.getValue();
+		} catch(ObjectNotFoundException e) {
+			return 0L;
+		}
+	}
+	
+	@Override
 	public synchronized long getMonthlyValue(String key, Date date) {
 		
 		try {

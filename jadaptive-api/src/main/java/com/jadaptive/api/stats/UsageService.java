@@ -34,4 +34,6 @@ public interface UsageService {
 
 	Long sumOr(String... keys);
 
+	Long getDailyValue(String generateUsageKey, Date from);
+
 }

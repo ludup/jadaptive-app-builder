@@ -142,17 +142,17 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			Element content = document.selectFirst("#content");
 			
 			if(!state.isStartPage()) {
+
+				Element h2;
+				content.prependChild(new Element("div")
+						.addClass("col-12")
+						.appendChild(h2 = new Element("h2")));
 				
 				content.prependChild(new Element("div")
 						.addClass("col-12")
 						.appendChild(new Element("h1")
 								.attr("jad:bundle", state.getBundle())
 								.attr("jad:i18n", "wizard.name")));
-				
-				Element h2;
-				content.prependChild(new Element("div")
-						.addClass("col-12")
-						.appendChild(h2 = new Element("h2")));
 				
 				if(!state.isFinishPage()) {
 						h2.appendChild(new Element("span")
@@ -211,7 +211,7 @@ public class Wizard extends HtmlPage implements ObjectPage {
 			}
 			
 			if(state.isFinishPage()) {
-				document.selectFirst("#backButton").appendChild(new Element("button")
+				document.selectFirst("#backButton").parent().insertChildren(0, new Element("button")
 							.attr("id", "finishButton")
 							.addClass("btn btn-primary wizardFinish me-3")
 						.appendChild(new Element("i")

@@ -35,7 +35,7 @@ public class AdminSection extends SetupSection {
 	public Integer getPosition() {
 		return 2;
 	}
-
+	
 	@Override
 	protected void processSection(Document document, Element element, Page page) throws IOException {
 		

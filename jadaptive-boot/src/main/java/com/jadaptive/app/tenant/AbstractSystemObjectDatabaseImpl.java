@@ -104,7 +104,7 @@ public abstract class AbstractSystemObjectDatabaseImpl<T extends AbstractUUIDEnt
 
 	@Override
 	public Collection<T> table(String searchField, String searchValue, int start, int length, SortOrder order, String sortField) {
-		return tableObjects(TenantService.SYSTEM_UUID, getResourceClass(), searchField, searchValue, start, length, order, sortField);
+		return tableObjects(TenantService.SYSTEM_UUID, getResourceClass(), start, length, order, sortField, SearchField.eq(searchField, searchValue));
 	}
 
 	@Override

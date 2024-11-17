@@ -32,7 +32,7 @@ import com.jadaptive.utils.Utils;
 @ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)
 @ObjectViewDefinition(bundle = "users", value = User.EMAIL_VIEW, weight=100)
 @ObjectViewDefinition(bundle = "users", value = User.PHONE_VIEW, weight=200)
-@TableView(defaultColumns = { "avatar", "username", "name", "lastLogin" }, otherColumns = {
+@TableView(defaultColumns = { "avatar", "username", "name", "email", "lastLogin" }, otherColumns = {
 		@DynamicColumn(resourceKey = "avatar", service = UserService.class) },
 requiresUpdate = true, sortField = "username")
 @Transactional
@@ -58,6 +58,10 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@ObjectView(DETAILS_VIEW)
 	String name;
 
+	@ObjectField(type = FieldType.BOOL, readOnly = true, defaultValue = "true")
+	@ObjectView(DETAILS_VIEW)
+	Boolean enabled = Boolean.TRUE;
+	
 	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
 	@Validator(type = ValidationType.EMAIL)
 	@ObjectView(EMAIL_VIEW)
@@ -172,6 +176,14 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
+	}
+
+	public boolean isEnabled() {
+		return enabled==null || enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 	
 }

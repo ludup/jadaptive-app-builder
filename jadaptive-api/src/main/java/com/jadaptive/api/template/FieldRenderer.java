@@ -17,5 +17,6 @@ public enum FieldRenderer {
 	RADIO_BUTTON, 
 	RICH_EDITOR,
 	DROPDOWN, 
-	TEXT_EDITOR
+	TEXT_EDITOR,
+	COLLECTION
 }
