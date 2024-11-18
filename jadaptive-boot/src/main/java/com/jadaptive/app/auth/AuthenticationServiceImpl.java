@@ -280,10 +280,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				log.info("User {} has completed authentication", state.getUser().getUsername());
 			}
 			
-			if(!state.hasSetupPostAuthentication()) {
-				setupPostAuthentication(state);
-			}
-			
 			if(!state.hasPostAuthentication()) {
 			
 				if(log.isInfoEnabled()) {
@@ -412,11 +408,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return m;
 	}	
 
-	private void setupPostAuthentication(AuthenticationState state) {
+	@Override
+	public void setupPostAuthentication(AuthenticationState state) {
 		
 		List<PostAuthenticatorPage> additional = new ArrayList<>();
 		for(PostAuthenticatorPage a : applicationService.getBeans(PostAuthenticatorPage.class)) {
-			if(a.requiresProcessing(state)) {
+			if(a.requiresProcessing(state) && !(a instanceof SetupPostAuthenticationPage)) {
 				additional.add(a);
 			}
 		}
@@ -431,8 +428,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			});
 		}
 		
-		state.setPostAuthenticationPages(additional);
-
+		state.getPostAuthenticationPages().addAll(additional);
+		state.setAttribute(AuthenticationState.PROCESS_POST_AUTHENTICATION, Boolean.TRUE);
 	}
 
 	@Override
@@ -630,6 +627,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 		processRequiredAuthentication(state, policy);
 		
+		state.getPostAuthenticationPages().add(pageCache.resolvePage(SetupPostAuthenticationPage.class));
+		
 		Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
 		return state;
 		
@@ -744,4 +743,5 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //		public boolean isAuthenticated() { return true; }
 //		
 //	}
+	
 }

@@ -114,5 +114,7 @@ public interface AuthenticationService {
 	void registerAuthenticationPage(AuthenticationProvider provider, Class<? extends AuthenticationPage<?>>... pages);
 
 	AuthenticationProvider getAuthenticationProviderByUUID(String uuid);
+
+	void setupPostAuthentication(AuthenticationState state);
 	
 }
