@@ -22,11 +22,13 @@ import com.jadaptive.api.user.User;
 public class AuthenticationState {
 	private final static Logger LOG = LoggerFactory.getLogger(AuthenticationState.class);
 
+	public static final String PROCESS_POST_AUTHENTICATION = "processedPOSTAuthentication";
+
 	private User user;
 	private Map<Class<? extends Page>,AuthenticationModule> requiredAuthenticationModulez = new HashMap<>();
 	private List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
 	private Map<Class<? extends Page>,AuthenticationModule> optionalAuthentications = new HashMap<>();
-	private List<PostAuthenticatorPage> postAuthenticationPages = null;
+	private List<PostAuthenticatorPage> postAuthenticationPages = new ArrayList<>();
 	private int currentPageIndex = 0;
 	private String remoteAddress;
 	private String userAgent;
@@ -53,10 +55,6 @@ public class AuthenticationState {
 		this.policy = policy;
 	}
 	
-	public boolean hasSetupPostAuthentication() {
-		return postAuthenticationPages != null;
-	}
-
 	public AuthenticationPolicy getPolicy() {
 		return policy;
 	}
@@ -142,7 +140,6 @@ public class AuthenticationState {
 	public boolean hasFinished() {
 		return isRequiredAuthenticationComplete() 
 				&& isOptionalComplete()
-				&& hasSetupPostAuthentication() 
 				&& !hasPostAuthentication();
 	}
 	
@@ -161,16 +158,15 @@ public class AuthenticationState {
 	public boolean hasPostAuthentication() {
 		
 		if(isRequiredAuthenticationComplete() && isOptionalComplete()) {
-			if(hasSetupPostAuthentication()) {
-				return currentPostAuthenticationIndex < postAuthenticationPages.size();
-			}
+			return currentPostAuthenticationIndex < postAuthenticationPages.size();
+
 		}
 		
 		return false;
 	}
 	
 	public boolean completePage() {
-		if(isRequiredAuthenticationComplete() && isOptionalComplete() && hasSetupPostAuthentication()) {
+		if(isRequiredAuthenticationComplete() && isOptionalComplete()) {
 			currentPostAuthenticationIndex++;
 			return !hasPostAuthentication();
 		} else {
@@ -390,7 +386,7 @@ public class AuthenticationState {
 		optionalAuthentications.put(clz, authenticationModule);
 	}
 
-	public void setPostAuthenticationPages(List<PostAuthenticatorPage> postAuthenticationPages) {
-		this.postAuthenticationPages = postAuthenticationPages;
+	public boolean hasSetupPostAuthentication() {
+		return Objects.nonNull(getAttribute(PROCESS_POST_AUTHENTICATION));
 	}
 }
