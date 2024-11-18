@@ -1,11 +1,7 @@
 package com.jadaptive.app.auth;
 
 import java.io.FileNotFoundException;
-import java.util.Objects;
 import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +13,9 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Extension
 public class SetupPostAuthenticationPage extends HtmlPage implements PostAuthenticatorPage {
