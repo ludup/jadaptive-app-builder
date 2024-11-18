@@ -45,19 +45,13 @@ public class ApplicationProperties {
 				server.ssl.enabled=true
 				server.ssl.protocol=TLS
 
-				server.ssl.key-store-password=changeit
-				server.ssl.key-store-type=PKCS12
-				server.ssl.key-store=conf.d/cert.p12
-				server.ssl.key-alias=server
+				server.ssl.bundle=default
+				spring.ssl.bundle.jks.default.reload-on-update=true
+				spring.ssl.bundle.jks.default.key.alias=server
+				spring.ssl.bundle.jks.default.keystore.location=conf.d/default/cert.p12
+				spring.ssl.bundle.jks.default.keystore.password=changeit
+				spring.ssl.bundle.jks.default.keystore.type=PKCS12
 
-				# PEM files will be automatically converted to PKCS12 keystore as required. 
-				# If you configure PEM below the keystore above will be created with the PEM
-				# certificate and keys imported into it.
-
-				#server.ssl.private-key=conf.d/key.pem
-				#server.ssl.passprase=password
-				#server.ssl.ca-bundle=conf.d/chain.pem
-				#server.ssl.certificate=conf.d/cert.pem
 				""", Charset.forName("UTF-8"));
 				
 			} catch (IOException e) {

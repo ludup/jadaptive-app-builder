@@ -9,8 +9,6 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.ui.Html;
-import com.jadaptive.api.ui.menu.ApplicationMenuService;
-import com.jadaptive.api.ui.menu.PageMenu;
 
 @Service
 public class AuthenticationDeviceServiceImpl implements AuthenticationDeviceService {

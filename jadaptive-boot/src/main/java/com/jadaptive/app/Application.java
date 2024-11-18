@@ -1,10 +1,8 @@
 package com.jadaptive.app;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.security.KeyPair;
@@ -13,10 +11,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -32,8 +26,6 @@ import org.springframework.core.env.Environment;
 
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
-import com.jadaptive.api.x509.FileFormatException;
-import com.jadaptive.api.x509.InvalidPassphraseException;
 import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
 
@@ -133,69 +125,7 @@ public class Application {
 		KeyPair key = null;
 		X509Certificate[] chain = null;
 		X509Certificate cert = null;
-		File keystoreFile = new File(ApplicationProperties.getValue("server.ssl.key-store", "conf.d/cert.p12"));
-		File keyFile = new File(ApplicationProperties.getValue("server.ssl.private-key", "conf.d/key.pem"));
-		
-		if(keyFile.exists() && (!keystoreFile.exists() || keyFile.lastModified()!=keystoreFile.lastModified())) {
-			
-			if(log.isInfoEnabled()) {
-				log.info("Loading PEM private key {}", keyFile.getName());
-			}
-			
-			try(InputStream in = new FileInputStream(keyFile)) {
-				key = X509CertificateUtils.loadKeyPairFromPEM(in, 
-						ApplicationProperties.getValue("server.ssl.private-key-password", "").toCharArray());
-			} catch (InvalidPassphraseException | FileFormatException e) {
-				log.error("Failed to read PEM private key file", e);
-			}
-			
-			File chainFile = new File(ApplicationProperties.getValue("server.ssl.ca-bundle", "conf.d/chain.pem"));
-			if(chainFile.exists()) {
-				try(InputStream cin = new FileInputStream(chainFile)) {
-					chain = X509CertificateUtils.loadCertificateChainFromPEM(cin);
-				} catch (FileFormatException e) {
-					log.error("Failed to read PEM certificate chain file", e);
-				}
-			}
-			
-			File certFile = new File(ApplicationProperties.getValue("server.ssl.certificate", "conf.d/cert.pem"));
-			if(certFile.exists()) {
-				try(InputStream cin = new FileInputStream(certFile)) {
-					cert = X509CertificateUtils.loadCertificateFromPEM(cin);
-				} catch (FileFormatException e) {
-					log.error("Failed to read PEM certificate file", e);
-				}
-			}
-			
-			if(Objects.nonNull(key) && Objects.nonNull(cert)) {
-				
-				List<X509Certificate> tmp = new ArrayList<>();
-				tmp.add(cert);
-				if(Objects.nonNull(chain)) {
-					tmp.addAll(Arrays.asList(chain));
-				}
-				 
-				KeyStore ks = X509CertificateUtils.createPKCS12Keystore(key, tmp.toArray(new X509Certificate[0]), 
-						ApplicationProperties.getValue("server.ssl.key-alias", "server"), 
-						ApplicationProperties.getValue("server.ssl.key-store-password", "changeit").toCharArray());
-				
-				
-				 try (OutputStream fout = new FileOutputStream(keystoreFile)) {
-					ks.store(fout, ApplicationProperties.getValue(
-								"server.ssl.key-store-password", 
-									"changeit").toCharArray());
-				}
-				 
-
-			    keystoreFile.setLastModified(keyFile.lastModified());
-				
-			    if(log.isInfoEnabled()) {
-					log.info(String.format("Converted PEM files to keystore"));
-				}
-					
-				return;
-			}
-		}
+		File keystoreFile = new File( ApplicationProperties.getValue("spring.ssl.bundle.jks.default.keystore.location", "conf.d/default/cert.p12"));
 		
 		if(!keystoreFile.exists()) {
 			
@@ -210,14 +140,14 @@ public class Application {
 					 "Penzance", "Cornwall", "GB", kp, "SHA256WithRSAEncryption");
 			KeyStore ks = X509CertificateUtils.createPKCS12Keystore(kp, 
 					 new X509Certificate[] { cert },
-					 ApplicationProperties.getValue("server.ssl.key-alias", "server"),
-					 ApplicationProperties.getValue("server.ssl.key-store-password", "changeit").toCharArray());
+					 ApplicationProperties.getValue("spring.ssl.bundle.jks.default.key.alias", "server"),
+					 ApplicationProperties.getValue("spring.ssl.bundle.jks.default.keystore.password", "changeit").toCharArray());
 			 
-			keystoreFile.getParentFile().mkdir();
+			keystoreFile.getParentFile().mkdirs();
 			
 			 try (OutputStream fout = new FileOutputStream(keystoreFile)) {
 				ks.store(fout, ApplicationProperties.getValue(
-						"server.ssl.key-store-password", 
+						"spring.ssl.bundle.jks.default.keystore.password", 
 							"changeit").toCharArray());
 			}
 		}

@@ -42,7 +42,6 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.ObjectTemplateType;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.TemplateView;
@@ -1160,7 +1159,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			if(fieldView.isAutoSave()) {
 				row.addClass("processAutosave");
-				row.attr("data-action", String.format("/app/api/form/stash/%s", template.getResourceKey()));
+				row.attr("data-action", String.format("/app/api/form/stash/%s", obj.getResourceKey()));
 			}
 		}
 	}

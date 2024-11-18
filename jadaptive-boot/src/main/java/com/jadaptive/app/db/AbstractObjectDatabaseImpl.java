@@ -37,6 +37,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDEvent;
 import com.jadaptive.api.template.ObjectCache;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -121,7 +122,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			}
 			return templateRepository.get(resourceKey);
 		}
-		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
+		throw new ObjectNotFoundException(String.format("Missing template for class %s", clz.getSimpleName()));
 	}
 	
 	protected  <T extends UUIDDocument> Map<String, T> getCache(Class<T> clz) {
@@ -518,13 +519,16 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		
 		if(Objects.nonNull(clz)) {
 			addSearchTransformers(results, clz);
-			ObjectTemplate t = getObjectTemplate(clz);
-			if(!t.getChildTemplates().isEmpty()) {
-				for(String resourceKey : t.getChildTemplates()) {
-					addSearchTransformers(results, 
-							templateServic.getTemplateClass(resourceKey));
+			
+			try {
+				ObjectTemplate t = getObjectTemplate(clz);
+				if(!t.getChildTemplates().isEmpty()) {
+					for(String resourceKey : t.getChildTemplates()) {
+						addSearchTransformers(results, 
+								templateServic.getTemplateClass(resourceKey));
+					}
 				}
-			}
+			} catch(ObjectNotFoundException e) { }
 		}
 		
 		return results.toArray(new ObjectSearchField[0]);
