@@ -190,7 +190,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				
 			Session.getOr().ifPresent(session -> {
 				form.appendChild(Html.input("hidden", 
-						SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
+						SessionUtils.generateCSRFTokenName(template.getResourceKey()), 
 							sessionUtils.setupCSRFToken(Request.get(), template.getResourceKey()))
 							.attr("id", "csrftoken"));
 			});
