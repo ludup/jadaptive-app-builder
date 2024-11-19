@@ -105,6 +105,9 @@ public class Login extends AuthenticationPage<LoginForm> {
 			}
 			
 			if(!user.isEnabled()) {
+				if(log.isInfoEnabled()) {
+					log.info("{} cannot login as the account is disabled.");
+				}
 				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
 		    	Feedback.error("default", "error.invalidCredentials");
 				return false;
@@ -118,6 +121,9 @@ public class Login extends AuthenticationPage<LoginForm> {
 				if(userService.verifyPassword(state.getUser(), Request.get().getParameter("password").toCharArray())) {
 					state.setAttribute(AuthenticationService.PASSWORD, Request.get().getParameter("password"));
 					passwordVerified = true;
+					if(log.isInfoEnabled()) {
+						log.info("Verified password for {}");
+					}
 				} 
 			}
 			
