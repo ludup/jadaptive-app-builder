@@ -45,6 +45,8 @@ public interface EventService {
 
 	<T extends SystemEvent> void on(Class<T> clz, EventListener<T> handler);
 
+	<T extends UUIDEntity> void committed(Class<T> clz, EventListener<ObjectEvent<T>> handler);
+
 	
 
 }

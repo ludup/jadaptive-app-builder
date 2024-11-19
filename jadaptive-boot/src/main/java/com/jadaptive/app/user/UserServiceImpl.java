@@ -206,25 +206,18 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 		
 		if(ApplicationServiceImpl.getInstance().getBean(ProductService.class).getProduct().isUserLicensing()) {
-			eventService.created(User.class, (e)->{
+			eventService.committed(User.class, (e)->{
 				synchronized(UserServiceImpl.this) {
+					cachedAllTenantsCount = -1;
 					allTenantsEnabledCount();
-					cachedAllTenantsCount++;
 					if(log.isInfoEnabled()) {
-						log.info("Increasing licensed user count to {}", cachedAllTenantsCount);
+						log.info("User event {} for {}. Licensed user count is {}",
+								e.getResourceKey(),
+								e.getObject().getUsername(),
+								cachedAllTenantsCount);
 					}
 				}
 				
-			});
-			
-			eventService.deleted(User.class, (e)->{
-				synchronized(UserServiceImpl.this) {
-					allTenantsEnabledCount();
-					cachedAllTenantsCount--;
-					if(log.isInfoEnabled()) {
-						log.info("Reducing licensed user count to {}", cachedAllTenantsCount);
-					}
-				}
 			});
 		}
 	}
@@ -402,7 +395,11 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 			for(Tenant tenant : tenantService.allObjects()) {
 				tenantService.setCurrentTenant(tenant);
 				try {
-					count += countEnabledUsers();
+					int c = countEnabledUsers();
+					if(log.isInfoEnabled()) {
+						log.info("{} has  {} users", tenant.getName(), c);
+					}
+					count += c;
 				} finally {
 					tenantService.clearCurrentTenant();
 				}

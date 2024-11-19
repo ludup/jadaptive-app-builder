@@ -68,10 +68,10 @@ public class Login extends AuthenticationPage<LoginForm> {
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		if(state.hasFinished()) {
-			authenticationService.completeAuthentication(state, Optional.empty())
-				.maybeAttachToSession(Request.get(), sessionUtils.getTimeout());;
-			return;
+			throw authenticationService.completeAuthentication(state, Optional.empty())
+				.maybeAttachToSession(Request.get(), sessionUtils.getTimeout());
 		}
+		
 		state = authenticationService.getCurrentState();
 		var currentPage = authenticationService.getCurrentPage();
 		if(!currentPage.equals(Login.class)) {

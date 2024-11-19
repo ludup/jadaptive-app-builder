@@ -124,11 +124,11 @@ public class SessionUtils {
 		SessionConfiguration config = sessionConfig.getObject(SessionConfiguration.class);
 		
 		if(config.getEnableCsrf()) {
-			String requestToken = ParameterHelper.getValue(parameters, CSRF_TOKEN_ATTRIBUTE + formIdentifier);
+			String requestToken = ParameterHelper.getValue(parameters, generateCSRFTokenName(formIdentifier));
 			if(Objects.isNull(requestToken)) {
 				requestToken = request.getHeader("CsrfToken");
 			}
-			String csrf = (String)request.getSession().getAttribute(CSRF_TOKEN_ATTRIBUTE + formIdentifier);
+			String csrf = (String)request.getSession().getAttribute(generateCSRFTokenName(formIdentifier));
 			if(Objects.isNull(csrf)) {
 				log.warn("No CSRF token in session!");
 				return;
@@ -322,7 +322,7 @@ public class SessionUtils {
 
 	public String setupCSRFToken(HttpServletRequest request, String formIdentifier) {
 		String token = (String) Utils.generateRandomAlphaNumericString(64);
-		request.getSession().setAttribute(CSRF_TOKEN_ATTRIBUTE + formIdentifier, token);
+		request.getSession().setAttribute(generateCSRFTokenName(formIdentifier), token);
 		if(log.isDebugEnabled()) {
 			log.debug("REMOVEME: Set CSRF token for {} to {}", token);
 		}
@@ -381,6 +381,10 @@ public class SessionUtils {
 	public void disableContentSecurityPolicy() {
 		
 		Request.get().setAttribute(DISABLE_CONTENT_SECURITY, Boolean.TRUE);
+	}
+
+	public static String generateCSRFTokenName(String resourceKey) {
+		return String.format("%s-%s", resourceKey, CSRF_TOKEN_ATTRIBUTE);
 	}
 
 }

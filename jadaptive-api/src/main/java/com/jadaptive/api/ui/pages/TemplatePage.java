@@ -120,7 +120,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 			Element e = form.selectFirst("#csrftoken");
 			if(Objects.isNull(e)) {
 				form.appendChild(Html.input("hidden", 
-						SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
+						SessionUtils.generateCSRFTokenName(getResourceKey()), 
 							sessionUtils.setupCSRFToken(Request.get(), getResourceKey()))
 							.attr("id", "csrftoken"));
 			}
