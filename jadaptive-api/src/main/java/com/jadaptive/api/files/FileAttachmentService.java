@@ -13,4 +13,6 @@ public interface FileAttachmentService {
 
 	public FileAttachment getAttachment(String uuid);
 
+	public void markForRemoval(String encoded);
+
 }

@@ -92,4 +92,10 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 		return attachmentDatabase.get(uuid, FileAttachment.class);
 	}
 
+	@Override
+	public void markForRemoval(String encoded) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

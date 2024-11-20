@@ -29,6 +29,7 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -45,6 +46,8 @@ import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.files.FileAttachment;
+import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
@@ -383,28 +386,32 @@ public class DocumentHelper {
 				String contentType = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_contentType");
 				String filename = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
 				
-				
-				try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
-					BufferedImage bimg = ImageIO.read(in);
-					if(Objects.isNull(bimg)) {
-						throw new ValidationException(String.format("The file %s does not appear to contain an image!", filename));
+				try(InputStream in = ApplicationServiceImpl.getInstance().getBean(FileAttachmentService.class).getAttachmentContent(encoded)) {
+					String toBase64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(in));
+					ApplicationServiceImpl.getInstance().getBean(FileAttachmentService.class).markForRemoval(encoded);
+					
+					try(InputStream bin = new ByteArrayInputStream(Base64.getDecoder().decode(toBase64))) {
+						BufferedImage bimg = ImageIO.read(bin);
+						if(Objects.isNull(bimg)) {
+							throw new ValidationException(String.format("The file %s does not appear to contain an image!", filename));
+						}
+						
+						int width          = bimg.getWidth();
+						int height         = bimg.getHeight();
+						
+						int maxHeight = field.getValidationValueInt(ValidationType.IMAGE_HEIGHT, -1);
+						int maxWidth = field.getValidationValueInt(ValidationType.IMAGE_WIDTH, -1);
+						
+						if(maxWidth > -1 && maxWidth < width) {
+							throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+						}
+						
+						if(maxHeight > -1 && maxHeight < height) {
+							throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+						}
+						
+						return String.format("data:%s;base64, %s", contentType, toBase64);	
 					}
-					
-					int width          = bimg.getWidth();
-					int height         = bimg.getHeight();
-					
-					int maxHeight = field.getValidationValueInt(ValidationType.IMAGE_HEIGHT, -1);
-					int maxWidth = field.getValidationValueInt(ValidationType.IMAGE_WIDTH, -1);
-					
-					if(maxWidth > -1 && maxWidth < width) {
-						throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
-					}
-					
-					if(maxHeight > -1 && maxHeight < height) {
-						throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
-					}
-					
-					return String.format("data:%s;base64, %s", contentType, encoded);	
 				}
 			}
 			case ATTACHMENT:

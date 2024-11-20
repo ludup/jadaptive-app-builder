@@ -71,6 +71,7 @@ public class Header extends AbstractPageExtension {
 			document.select("#topMenu").remove();
 		} else {
 			
+			document.selectFirst("#logo").parent().addClass("d-none d-lg-inline");
 			try(var timed = Instrumentation.timed("Header#sort")) {
 				sortMenus(parents, sorted);
 			}

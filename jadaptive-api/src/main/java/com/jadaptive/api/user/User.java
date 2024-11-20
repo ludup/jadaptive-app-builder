@@ -58,7 +58,7 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@ObjectView(DETAILS_VIEW)
 	String name;
 
-	@ObjectField(type = FieldType.BOOL, readOnly = true, defaultValue = "true")
+	@ObjectField(type = FieldType.BOOL, hidden = true, defaultValue = "true")
 	@ObjectView(DETAILS_VIEW)
 	Boolean enabled = Boolean.TRUE;
 	
