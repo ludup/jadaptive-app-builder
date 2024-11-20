@@ -30,7 +30,7 @@ public class AuthorizedKeysMenu implements ApplicationMenu {
 
 	@Override
 	public String getParent() {
-		return ApplicationMenuService.HOME_MENU_UUID;
+		return ApplicationMenuService.USER_MENU;
 	}
 
 	@Override
