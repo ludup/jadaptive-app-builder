@@ -92,7 +92,7 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 
 	@Override
 	public boolean canAuthenticate(AuthenticationState state) {
-		return state.getUser() instanceof PasswordEnabledUser;
+		return state.getUser() instanceof PasswordChangeSupport;
 	}
 
 	@Override
