@@ -64,6 +64,8 @@ public interface AuthenticationService {
 	
 	public static final String PASSWORD_MODULE_UUID = "b76a4b67-ac70-45c2-95ca-9d7e14b3f695";
 	
+	LogonCompletedResult logonUser(User user, Tenant tenant, String remoteAddress, String userAgent);
+	
 	LogonCompletedResult logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent);
 
 	AuthenticationState getCurrentState();

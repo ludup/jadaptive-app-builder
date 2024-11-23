@@ -182,6 +182,41 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			permissionService.clearUserContext();
 		}
 	}
+	
+	@Override
+	public LogonCompletedResult logonUser(User user, Tenant tenant, String remoteAddress, String userAgent) {
+
+		permissionService.setupSystemContext();
+
+		try {
+
+			user = userService.getUser(user.getUsername());
+			if (Objects.isNull(user) || !userService.supportsLogin(user)) {
+				throw new AccessDeniedException("Bad username or password");
+			}
+
+			setupUserContext(user);
+
+			try {
+
+				assertPermission(USER_LOGIN_PERMISSION);
+
+				assertLoginThesholds();
+				return new LogonCompletedResult(Optional.of(sessionService.createSession(tenant, user, remoteAddress, userAgent, SessionType.HTTPS, null))) {
+					@Override
+					public void close() {
+						sessionService.closeSession(session().orElseThrow(() -> new IllegalStateException("Already closed.")));
+					}
+				};
+
+			} finally {
+				clearUserContext();
+			}
+
+		} finally {
+			permissionService.clearUserContext();
+		}
+	}
 
 	@Override
 	public LogonCompletedResult logonUser(String username, String password, Tenant tenant, String remoteAddress, String userAgent) {

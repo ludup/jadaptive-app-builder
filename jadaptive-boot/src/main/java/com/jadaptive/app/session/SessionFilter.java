@@ -24,6 +24,8 @@ import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationService.LogonCompletedResult;
+import com.jadaptive.api.auth.oauth2.OAuth2Token;
+import com.jadaptive.api.auth.oauth2.OAuth2TokenService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemSingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
@@ -74,6 +76,9 @@ public class SessionFilter implements Filter {
 	
 	@Autowired
 	private ApplicationService applicationService; 
+	
+	@Autowired
+	private OAuth2TokenService oauth2TokenService; 
 	
 	@Autowired
 	private TenantAwareObjectDatabase<Redirect> redirectDatabase;
@@ -204,6 +209,12 @@ public class SessionFilter implements Filter {
 				in.postHandle(request, response);
 			}
 			
+		
+		} catch(Throwable e) {
+			log.error("Caught exception in SessionFilter postHandle",e);
+			throw new ServletException(e);
+		} finally {
+			
 			tenantService.clearCurrentTenant();
 			if(permissionService.hasUserContext()) {
 				permissionService.clearUserContext();
@@ -211,11 +222,15 @@ public class SessionFilter implements Filter {
 			
 			sessionUtils.populateSecurityHeaders(response);
 			
+			Session.getOr().ifPresent(s -> {
+				var tkn = s.getAttribute(OAuth2Token.class);
+				/* OAuth2 requests close session after every call */
+				if(tkn != null) {
+					s.getAttribute(LogonCompletedResult.class).close();
+				}
+			});
+			
 			Request.tearDown();
-		
-		} catch(Throwable e) {
-			log.error("Caught exception in SessionFilter postHandle",e);
-			throw new ServletException(e);
 		}
 		
 	}
@@ -238,9 +253,9 @@ public class SessionFilter implements Filter {
 			 */
 			Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
 			
-			if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false"))
-					&& Objects.nonNull(request.getHeader(HttpHeaders.AUTHORIZATION))) {
-				sessionOr = performBasicAuthentication(request, response);
+			var authHdr = request.getHeader(HttpHeaders.AUTHORIZATION);
+			if(Objects.nonNull(authHdr)) {
+				sessionOr = performHttpAuthentication(request, response, properties);
 			}
 			
 			if(sessionOr.isEmpty() && Boolean.parseBoolean(properties.getProperty("authentication.allowAnonymous", "false"))) {
@@ -283,11 +298,35 @@ public class SessionFilter implements Filter {
 		return true;
 	}
 
-	private Optional<Session> performBasicAuthentication(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+	private Optional<Session> performHttpAuthentication(HttpServletRequest request, HttpServletResponse response, Properties properties) throws UnsupportedEncodingException {
 		
 		String[] authorization = request.getHeader(HttpHeaders.AUTHORIZATION).split(" ");
 		if(authorization.length > 1) {
-			if(authorization[0].equalsIgnoreCase("BASIC")) {
+			
+			if(authorization[0].equalsIgnoreCase("Bearer")) {
+				
+				/* An OAuth authenticated API call is intended for a single use. The
+				 * session will then be invalidated. Access to the API will further
+				 * be restricted by scope later on when it is known (by a handler interceptor).
+				 * 
+				 * TODO invalidate the session
+				 */
+				var tkn = oauth2TokenService.byToken(authorization[1]);
+				
+				LogonCompletedResult result = authenticationService.logonUser(
+						tkn.getOwner(), 
+						tenantService.getCurrentTenant(), 
+						Request.getRemoteAddress(), 
+						request.getHeader(HttpHeaders.USER_AGENT));
+				
+				Session.set(request, result);
+				result.session().get().setAttribute(OAuth2Token.class, tkn);
+				result.session().get().setAttribute(LogonCompletedResult.class, result);
+				
+				return result.session();
+			}
+			
+			if(Boolean.parseBoolean(properties.getProperty("authentication.allowBasic", "false")) && authorization[0].equalsIgnoreCase("BASIC")) {
 				String encoded = new String(Base64.getDecoder().decode(authorization[1]), "UTF-8");
 				int idx = encoded.indexOf(':');
 				if(idx==-1) {
