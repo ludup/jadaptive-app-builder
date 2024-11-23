@@ -32,6 +32,7 @@ public class ImageFormInput extends FormInputRender {
 				new Element("div").addClass(classes)
 								.appendChild(
 						new Element("img").
+							addClass("form-img-preview").
 							attr("id", getFormVariable() + "_preview").
 							attr("src", value)));
 		
