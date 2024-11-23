@@ -116,6 +116,7 @@ public class WizardController extends AuthenticatedController {
 		
 		try {
 			WizardState state = wizardService.getWizard(resourceKey).getState(request);
+			Wizard.setCurrentState(state);
 			state.finish();
 			return new RequestStatusImpl(true);
 			
@@ -126,6 +127,7 @@ public class WizardController extends AuthenticatedController {
 			return new RequestStatusImpl(false, e.getMessage());
 		} finally {
 			clearUserContext();
+			Wizard.clearCurrentState();
 		}
 	}
 	
