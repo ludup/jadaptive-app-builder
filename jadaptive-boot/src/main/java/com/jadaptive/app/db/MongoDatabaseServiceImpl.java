@@ -1,9 +1,6 @@
 package com.jadaptive.app.db;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,31 +18,28 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 
 	static Logger log = LoggerFactory.getLogger(MongoDatabaseServiceImpl.class);
 	
-	private Map<String,MongoClient> mongoClients = Collections.synchronizedMap(new HashMap<>());
-	
+	private MongoClient mongoClient;
+	 
 	@Override
-	public synchronized MongoClient getClient(String uuid) {
+	public synchronized MongoClient getClient() {
 		try {
-			if(!mongoClients.containsKey(uuid)) {
-				return connect(uuid);
+			if(mongoClient==null) {
+				connect();
 			}
-			return mongoClients.get(uuid);
+			return mongoClient;
 		} catch (IOException e) {
 			throw new RepositoryException(e.getMessage(), e);
 		}
 	}
 	
-	protected MongoClient connect(String uuid) throws IOException {
+	protected void connect() throws IOException {
 		
-		String connectionString = ApplicationProperties.getValue(String.format("mongodb.%s.connection", uuid), null);
-		if(StringUtils.isBlank(connectionString)) {
-			connectionString =  ApplicationProperties.getValue(String.format("mongodb.connection", uuid), null);
-		}
+		String connectionString = ApplicationProperties.getValue("mongodb.connection", null);
 		
 		if(StringUtils.isNotBlank(connectionString)) {
-			return new MongoClient(new MongoClientURI(connectionString));
+			mongoClient = new MongoClient(new MongoClientURI(connectionString));
 		} else {
-			return new MongoClient(
+			mongoClient = new MongoClient(
 				ApplicationProperties.getValue("mongodb.hostname", "localhost"),
 				ApplicationProperties.getValue("mongodb.port", 27017));
 		}
