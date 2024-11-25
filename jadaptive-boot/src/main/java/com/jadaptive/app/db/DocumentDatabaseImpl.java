@@ -30,6 +30,7 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.client.AggregateIterable;
@@ -63,7 +64,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	ThreadLocal<ClientSession> currentSession = new ThreadLocal<>();
 	
 	private MongoCollection<Document> getCollection(String table, String database) {
-		MongoDatabase db = mongo.getClient().getDatabase(getDatabaseName(database));
+		MongoDatabase db = mongo.getClient(database).getDatabase(getDatabaseName(database));
 		return db.getCollection(table);
 	}
 	
@@ -80,8 +81,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 		String prefix = ApplicationProperties.getValue("mongodb.databasePrefix", "");
 		
-		for(String database : mongo.getClient().listDatabaseNames()) {
-			MongoDatabase db = mongo.getClient().getDatabase(getDatabaseName(database));
+		for(String database : mongo.getClient(TenantService.SYSTEM_UUID).listDatabaseNames()) {
+			MongoDatabase db = mongo.getClient(TenantService.SYSTEM_UUID).getDatabase(getDatabaseName(database));
 			switch(db.getName()) {
 			case "admin":
 			case "local":
@@ -804,9 +805,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void dropDatabase(String database) {
 		ClientSession session = currentSession.get();
 		if(Objects.nonNull(session)) {
-			mongo.getClient().getDatabase(getDatabaseName(database)).drop(session);
+			mongo.getClient(database).getDatabase(getDatabaseName(database)).drop(session);
 		} else {
-			mongo.getClient().getDatabase(getDatabaseName(database)).drop();
+			mongo.getClient(database).getDatabase(getDatabaseName(database)).drop();
 		}
 		
 	}

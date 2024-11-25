@@ -4,6 +4,6 @@ import com.mongodb.MongoClient;
 
 public interface MongoDatabaseService {
 
-	public MongoClient getClient();
+	public MongoClient getClient(String uuid);
 
 }
