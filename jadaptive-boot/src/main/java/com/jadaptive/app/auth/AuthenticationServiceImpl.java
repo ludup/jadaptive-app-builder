@@ -743,7 +743,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		AuthenticationState state = createAuthenticationState(temporaryPolicy, 
 				new UriRedirect(redirectURI),
 				getCurrentUser());
-
+		state.setResetURL(redirectURI);
 		throw state.nextRedirectOrFinish(pageCache);
 
 	}
