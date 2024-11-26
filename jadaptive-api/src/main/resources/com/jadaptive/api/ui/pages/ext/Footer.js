@@ -128,12 +128,24 @@ $(function() {
 	});
 	
 	$(document).on('keyup', '.collectionSearchInputText', function(e) {
+		
 		createDropdown($(this).val(), $(this).data('url'), 
 							$(this).data('field'),
 							$(this).data('id'),
 							$(this).closest(".dropdown").find('.dropdown-menu'),
 							$(this),
 							'collectionSearchInputSelection');
+		
+	});
+	
+	$(document).on('click', '.collectionSearchInputText', function(e) {
+		    
+			createDropdown($(this).val(), $(this).data('url'), 
+								$(this).data('field'),
+								$(this).data('id'),
+								$(this).closest(".dropdown").find('.dropdown-menu'),
+								$(this),
+								'collectionSearchInputSelection');
 	});
 	
 	$(document).on('click', '.collectionTextAdd', function(e) {

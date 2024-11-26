@@ -32,7 +32,7 @@ public interface PersonalObjectDatabase<T extends PersonalUUIDEntity> {
 
 	long allObjectsCount(Class<T> resourceClass, SearchField... fields);
 
-	T max(Class<T> resourceClass, String field);
+	T max(Class<T> resourceClass, String field, SearchField... fields);
 
 	Long getPersonalObjectCount(Class<T> resourceClass, User user, SearchField... search);
 }
