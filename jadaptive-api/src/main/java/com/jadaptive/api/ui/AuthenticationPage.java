@@ -16,7 +16,6 @@ import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
@@ -78,12 +77,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	
 	@Override
 	protected final void generateContent(Document doc) throws FileNotFoundException {
-		var req = Request.get();
-		var session = Session.getOr(req);
-		if(session.isPresent() && isRedirectInSession()) {
-			throw new UriRedirect();
-		}
-		
+
 		doGenerateContent(doc); 
 		
 		Element actions = doc.selectFirst("#actions");

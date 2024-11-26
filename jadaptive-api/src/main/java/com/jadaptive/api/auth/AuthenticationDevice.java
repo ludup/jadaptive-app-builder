@@ -11,7 +11,7 @@ import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.user.User;
 
-@ObjectDefinition(resourceKey = AuthenticationDevice.RESOURCE_KEY, scope = ObjectScope.PERSONAL, creatable = true, updatable = false, deletable = true, defaultColumn = "name")
+@ObjectDefinition(resourceKey = AuthenticationDevice.RESOURCE_KEY, scope = ObjectScope.PERSONAL, creatable = false, updatable = false, deletable = true, defaultColumn = "name")
 @TableView( defaultColumns = {"name", "device.type", "lastModified"}, otherColumns = { @DynamicColumn(resourceKey = "device.type", service = AuthenticationDeviceService.class)})
 @TableAction(bundle = AuthenticationDevice.RESOURCE_KEY, icon = "fa-mobile-retro", permissions = "users.read", resourceKey = "2faDevices", target = Target.ROW, targetKey = User.RESOURCE_KEY, url = "/app/ui/admin-search/authenticationDevices/{uuid}")
 public abstract class AuthenticationDevice extends PersonalUUIDEntity {
