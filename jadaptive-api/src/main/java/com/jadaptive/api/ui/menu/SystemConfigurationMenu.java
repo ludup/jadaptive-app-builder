@@ -20,7 +20,7 @@ public class SystemConfigurationMenu implements ApplicationMenu {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/systemConfiguration";
+		return "/app/ui/options";
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class SystemConfigurationMenu implements ApplicationMenu {
 
 	@Override
 	public String getParent() {
-		return ApplicationMenuService.SYSTEM_MENU_UUID;
+		return ApplicationMenuService.CONFIGURATION_MENU_UUID;
 	}
 
 	@Override

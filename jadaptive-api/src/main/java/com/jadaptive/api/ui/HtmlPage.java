@@ -326,6 +326,7 @@ public abstract class HtmlPage implements Page {
 			
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 					| IllegalArgumentException e) {
+			clearFeedback();
 			if(e.getCause() instanceof Redirect) {
 				throw (Redirect) e.getCause();
 			}
@@ -336,6 +337,14 @@ public abstract class HtmlPage implements Page {
 		}
 	}
 	
+	protected void clearFeedback() {
+		Feedback feedback = (Feedback) Request.get().getSession().getAttribute("feedback");
+		if(Objects.nonNull(feedback)) {
+			log.info("REMOVEME: I'm clearing feedback because of some other error or redirect! [{}]", feedback.getI18n());
+			Request.get().getSession().removeAttribute("feedback");
+		}
+	}
+
 	protected void beforeForm(Document doc, HttpServletRequest request, HttpServletResponse response) {
 		
 	}

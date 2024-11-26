@@ -7,29 +7,39 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.config.ConfigurationPageItem;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.Html;
+import com.jadaptive.api.ui.PageDependencies;
+import com.jadaptive.api.ui.PageProcessors;
 
-public abstract class ConfigurationPage extends AuthenticatedPage {
+@Component
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
+@PageProcessors(extensions = { "i18n"} )
+public class ConfigurationPage extends AuthenticatedPage {
 
 	@Autowired
 	private ApplicationService applicationService; 
 	
 	@Autowired
+	private TenantService tenantService; 
+	
+	@Autowired
 	private ClassLoaderService classService;
 	
 	List<ConfigurationPageItem> annotatedItems = null;
-	
-	protected abstract boolean isSystem();
-	
+
 	@Override
 	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
 		
@@ -41,7 +51,7 @@ public abstract class ConfigurationPage extends AuthenticatedPage {
 		
 		for(ConfigurationPageItem optionPage : items) {
 			
-			if(optionPage.isSystem() == isSystem()) {
+			if(!optionPage.isSystem() || (tenantService.getCurrentTenant().isSystem() && optionPage.isSystem())) {
 				el.appendChild(Html.div("col-md-3", "mt-5")
 						.appendChild(Html.div().appendChild(Html.i(optionPage.getIconGroup(), "fa-2x", optionPage.getIcon())))
 						.appendChild(new Element("a")
@@ -89,6 +99,11 @@ public abstract class ConfigurationPage extends AuthenticatedPage {
 			}
 		}
 		return annotatedItems;
+	}
+
+	@Override
+	public String getUri() {
+		return "options";
 	}
 
 }

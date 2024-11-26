@@ -46,7 +46,6 @@ import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
-import com.jadaptive.api.files.FileAttachment;
 import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.ReflectionUtils;

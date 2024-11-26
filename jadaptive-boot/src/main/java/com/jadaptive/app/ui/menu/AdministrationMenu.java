@@ -11,14 +11,14 @@ import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
 @Extension
-public class SystemMenu implements ApplicationMenu {
+public class AdministrationMenu implements ApplicationMenu {
 
 	@Autowired
 	private TenantService tenantService;
 	
 	@Override
 	public String getUuid() {
-		return ApplicationMenuService.SYSTEM_MENU_UUID;
+		return ApplicationMenuService.CONFIGURATION_MENU_UUID;
 	}
 	
 	@Override
@@ -28,7 +28,7 @@ public class SystemMenu implements ApplicationMenu {
 	
 	@Override
 	public String getI18n() {
-		return "system.name";
+		return "administration.name";
 	}
 
 	@Override

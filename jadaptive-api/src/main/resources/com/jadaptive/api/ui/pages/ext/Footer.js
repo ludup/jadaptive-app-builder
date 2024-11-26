@@ -321,7 +321,12 @@ $(function() {
 	$('.copyURL').on('click', function(e) {
 		e.preventDefault();
 		navigator.clipboard.writeText($(this).attr('href'));
-		JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
+		var msg = $(this).data('message');
+		if(msg) {
+			JadaptiveUtils.success($('#feedback'), msg);
+		} else {
+			JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
+		}
 	});
 	
 	$('.copyToClipboard').on('click', function(e) {

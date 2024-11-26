@@ -22,7 +22,7 @@ public class SSHDConfigurationMenu implements ConfigurationPageItem {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/system/sshdConfiguration";
+		return "/app/ui/config/sshdConfiguration";
 	}
 
 	@Override

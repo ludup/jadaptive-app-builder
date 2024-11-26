@@ -29,7 +29,7 @@ public class IPConfigurationMenu implements ConfigurationPageItem {
 
 	@Override
 	public String getPath() {
-		return "/app/ui/system/" + IPStackConfiguration.RESOURCE_KEY;
+		return "/app/ui/config/" + IPStackConfiguration.RESOURCE_KEY;
 	}
 
 	@Override

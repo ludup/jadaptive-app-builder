@@ -16,7 +16,6 @@ import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.pages.user.ChangePassword.PasswordForm;
 import com.jadaptive.api.user.PasswordChangeSupport;
-import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
