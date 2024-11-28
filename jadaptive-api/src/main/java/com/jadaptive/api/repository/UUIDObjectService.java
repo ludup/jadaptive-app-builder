@@ -1,6 +1,9 @@
 package com.jadaptive.api.repository;
 
 import java.util.Collection;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.stream.Streams;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -17,6 +20,10 @@ public interface UUIDObjectService<T extends UUIDDocument> {
 	void deleteObjectByUUID(String uuid);
 	
 	Iterable<T> allObjects();
+	
+	default Stream<T> streamAll() {
+		return Streams.of(allObjects());
+	}
 
 	void deleteAll();
 
