@@ -56,4 +56,8 @@ public interface UserService extends UUIDObjectService<User>, AvatarProvider, Dy
 
 	int allTenantsEnabledCount();
 
+	void disableUser(User user);
+
+	void enableUser(User user);
+
 }

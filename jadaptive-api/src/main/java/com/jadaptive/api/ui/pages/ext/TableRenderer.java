@@ -299,7 +299,7 @@ public class TableRenderer {
 								}
 								
 								renderRowActions(row, obj, view, rowTemplate, 
-										generateActions(rowTemplate.getParentTemplate(), 
+										generateActions(rowTemplate.getCollectionKey(), 
 												rowTemplate.getResourceKey()), 
 										showUpdate && !(obj.isSystem() && rowTemplate.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS)), 
 										showCreate, permissions, filters);
@@ -470,6 +470,9 @@ public class TableRenderer {
 			if(view.requiresView()) {
 				String url = replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj);
 				ViewURL u = clz.getAnnotation(ViewURL.class);
+				if(Objects.nonNull(u)) {
+					url = replaceVariables(u.value(), obj);
+				}
 				if(Objects.isNull(parentObject)) {
 					dropdown.addI18nAnchorWithIconValue("default", "view.name", url, "fa-solid", "fa-eye");
 				} else {

@@ -120,6 +120,21 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		}
 	}
 
+	@Override 
+	public void enableUser(User user) {
+		
+		permissionService.assertWrite(User.RESOURCE_KEY);
+		getDatabase(user).enableUser(user);
+	}
+	
+	@Override 
+	public void disableUser(User user) {
+		
+		permissionService.assertWrite(User.RESOURCE_KEY);
+		getDatabase(user).disableUser(user);
+	}
+	
+	
 
 	@Override
 	public User getUser(String username) {
