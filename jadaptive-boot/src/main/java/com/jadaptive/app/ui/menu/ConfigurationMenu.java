@@ -1,21 +1,19 @@
 package com.jadaptive.app.ui.menu;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 
-@Extension
-public class AdministrationMenu implements ApplicationMenu {
+@Component
+public class ConfigurationMenu implements ApplicationMenu {
 
-	@Autowired
-	private TenantService tenantService;
-	
 	@Override
 	public String getUuid() {
 		return ApplicationMenuService.CONFIGURATION_MENU_UUID;
@@ -23,7 +21,7 @@ public class AdministrationMenu implements ApplicationMenu {
 	
 	@Override
 	public boolean isVisible() {
-		return tenantService.getCurrentTenant().isSystem();
+		return true;
 	}
 	
 	@Override
@@ -43,7 +41,7 @@ public class AdministrationMenu implements ApplicationMenu {
 
 	@Override
 	public Collection<String> getPermissions() {
-		return Collections.emptyList();
+		return Arrays.asList("tenant.read");
 	}
 
 	@Override

@@ -166,9 +166,7 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 				for(String perm : m.getPermissions()) {
 					if(StringUtils.isNotBlank(perm)) {
 						try {
-							if(!administrator) {
-								permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
-							}
+							permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
 						} catch(AccessDeniedException e) { 
 							return false;
 						}
@@ -180,9 +178,7 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 				for(String perm : m.getWithoutPermissions()) {
 					if(StringUtils.isNotBlank(perm)) {
 						try {
-							if(!administrator) {
-								permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
-							}
+							permissionService.assertAnyResolvedPermission(resolvedPermissions, perm);
 							return false;
 						} catch(AccessDeniedException e) { 
 						}

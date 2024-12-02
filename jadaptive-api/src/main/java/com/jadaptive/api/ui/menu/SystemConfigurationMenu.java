@@ -45,7 +45,7 @@ public class SystemConfigurationMenu implements ApplicationMenu {
 	
 	@Override
 	public Collection<String> getPermissions() {
-		return Arrays.asList("all.permissions");
+		return Arrays.asList("tenant.read");
 	}
 
 }

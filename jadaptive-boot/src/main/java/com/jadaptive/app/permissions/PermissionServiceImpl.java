@@ -364,13 +364,14 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		Set<String> allPermissions = new TreeSet<>();
 		Collection<Role> roles = roleService.getRoles(user);
-		if(isAdministrator()) {
-			allPermissions.add("all.permissions");
+		if(isAdministrator(user)) {
+			if(tenantService.isSystemTenant()) {
+				allPermissions.add("system.read");
+			}
 			allPermissions.addAll(getAllPermissions());
 		} else {
 			for(Role role : roles) {
 				if(role.isAllPermissions()) {
-					allPermissions.add("all.permissions");
 					allPermissions.addAll(getAllPermissions());
 				}
 				allPermissions.addAll(role.getPermissions());
