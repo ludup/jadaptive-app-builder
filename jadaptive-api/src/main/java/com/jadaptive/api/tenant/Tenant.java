@@ -61,6 +61,9 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 	@ObjectView(value = DOMAINS_VIEW)
 	Collection<String> alternativeDomains = new HashSet<>();
 	
+	@ObjectField(type = FieldType.OBJECT_REFERENCE)
+	DatabaseConnection database;
+	
 	public Tenant() {
 		
 	}
@@ -142,5 +145,13 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 			}
 		}
 		return false;
+	}
+
+	public DatabaseConnection getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(DatabaseConnection database) {
+		this.database = database;
 	}
 }

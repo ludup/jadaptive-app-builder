@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface TenantService extends UUIDObjectService<Tenant> {
 
 	public static final String SYSTEM_UUID = "4f1b781c-581d-474f-9505-4fea9c5e3909";
+	public static final String TENANTS_DATABASE = "tenants";
 	
 	Tenant getCurrentTenant() throws RepositoryException, ObjectException;
 
@@ -80,12 +81,10 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	Tenant initialiseTenant(Tenant tenant, boolean newSchema);
 
 	Tenant createTenant(String name, String ownerName, String ownerEmail, String primaryDomain,
-			boolean system, String... additionalDomains) throws RepositoryException, ObjectException;
+			boolean system, DatabaseConnection con, String... additionalDomains) throws RepositoryException, ObjectException;
 
 	Tenant createTenant(String uuid, String name, String ownerName, String ownerEmail, String primaryDomain,
-			boolean system, String... additionalDomains) throws RepositoryException, ObjectException;
-
-	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system);
+			boolean system, DatabaseConnection con, String... additionalDomains) throws RepositoryException, ObjectException;
 
 	boolean isSystemTenant();
 
@@ -102,4 +101,8 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	void setSystemOwner(String company, String name, String emailAddress);
 
 	void onSetupComplete(Runnable run);
+
+	String getTenantDatabaseConnection(String uuid, String defaultConnection);
+
+	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, DatabaseConnection con);
 }

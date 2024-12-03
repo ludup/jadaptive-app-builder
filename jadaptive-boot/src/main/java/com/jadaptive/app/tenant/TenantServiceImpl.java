@@ -23,6 +23,7 @@ import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SingletonObjectDatabase;
+import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
@@ -36,6 +37,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.TemplateVersionService;
+import com.jadaptive.api.tenant.DatabaseConnection;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantConfiguration;
@@ -77,6 +79,9 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Autowired
 	private SingletonObjectDatabase<TenantConfiguration> tenantConfig;
 
+	@Autowired
+	private EncryptionService encryptionService; 
+	
 	private Tenant systemTenant;
 	
 	private Map<String,Tenant> tenantsByDomain = new HashMap<>();
@@ -94,8 +99,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		try(var ctx = permissionService.systemContext()) {			
 			boolean newSchema = repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh");
 			if(newSchema) {
-				repository.newSchema();
-				systemTenant = createTenant(SYSTEM_UUID, "System", "localhost", true);
+				systemTenant = createTenant(SYSTEM_UUID, "System", "localhost", true, null);
 			} else {
 				systemTenant = repository.getSystemTenant();
 			}
@@ -107,13 +111,19 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			initialiseTenant(systemTenant, newSchema);
 			
 			for(Tenant tenant : allObjects()) {
+				setupCache(tenant);
 				if(!tenant.isSystem()) {
 					setCurrentTenant(tenant);
 					try {
 						templateService.registerTenantIndexes(newSchema);
 						initialiseTenant(tenant, false);
 							
-					} finally {
+					} catch(Throwable e) { 
+						if(tenant.isSystem()) {
+							throw e;
+						}
+						log.error("Failed to initialize tenant", e);
+					}finally {
 						clearCurrentTenant();
 					}
 				}
@@ -126,7 +136,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				sorted((o1,o2) -> o2.getStartupPosition().compareTo(o1.getStartupPosition())).
 				forEach(StartupAware::onApplicationStartup);
 			
-			eventService.updated(Tenant.class, tevt -> {
+			eventService.saved(Tenant.class, tevt -> {
 				if(tevt.getObject().getUuid().equals(systemTenant.getUuid())) {
 					systemTenant = tevt.getObject();
 				}
@@ -177,8 +187,6 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public Tenant initialiseTenant(Tenant tenant, boolean newSchema) {
 		
 		setCurrentTenant(tenant);
-		
-		setupCache(tenant);
 		
 		try {
 	
@@ -246,17 +254,17 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 
 	@Override
-	public Tenant createTenant(String name, String ownerName, String ownerEmail, String primaryDomain, boolean system, String... additionalDomains) throws RepositoryException, ObjectException {
-		return createTenant(UUID.randomUUID().toString(), name, ownerName, ownerEmail, primaryDomain, system, additionalDomains);
+	public Tenant createTenant(String name, String ownerName, String ownerEmail, String primaryDomain, boolean system, DatabaseConnection con, String... additionalDomains) throws RepositoryException, ObjectException {
+		return createTenant(UUID.randomUUID().toString(), name, ownerName, ownerEmail, primaryDomain, system, con, additionalDomains);
 	}
 	
 	@Override
-	public Tenant createTenant(String uuid, String name, String primaryDomain, boolean system) {
-		return createTenant(uuid, name, "", "", primaryDomain, system);
+	public Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, DatabaseConnection con) {
+		return createTenant(uuid, name, "", "", primaryDomain, system, con);
 	}
 
 	@Override
-	public Tenant createTenant(String uuid, String name, String ownerName, String ownerEmail, String primaryDomain, boolean system, String... additionalDomains) throws RepositoryException, ObjectException {
+	public Tenant createTenant(String uuid, String name, String ownerName, String ownerEmail, String primaryDomain, boolean system, DatabaseConnection con, String... additionalDomains) throws RepositoryException, ObjectException {
 		
 		if(tenantsByDomain.containsKey(primaryDomain)) {
 			throw new ObjectException(String.format("%s is already used by another tenant", primaryDomain));
@@ -277,11 +285,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		tenant.getAlternativeDomains().addAll(Arrays.asList(additionalDomains));
 		tenant.setOwnerEmail(ownerEmail);
 		tenant.setOwnerName(ownerName);
+		tenant.setDatabase(con);
 		
 		try {
 			repository.saveTenant(tenant);
-			setupCache(tenant);
-			return getObjectByUUID(tenant.getUuid());
+			return repository.getTenant(tenant.getUuid());
 		} catch (RepositoryException | ObjectException e) {
 			throw e;
 		}
@@ -681,5 +689,21 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Override
 	public Collection<Tenant> collection(SearchField... fields) {
 		return filter(fields);
+	}
+
+	@Override
+	public String getTenantDatabaseConnection(String uuid, String defaultConnection) {
+		switch(uuid) {
+		case TenantService.SYSTEM_UUID:
+		case TenantService.TENANTS_DATABASE:
+			break;
+		default:
+			Tenant tenant = tenantsByUUID.get(uuid);
+			if(Objects.nonNull(tenant.getDatabase())) {
+				return encryptionService.decrypt(tenant.getDatabase().getConnectionString());
+			}
+		}
+		
+		return defaultConnection;
 	}
 }

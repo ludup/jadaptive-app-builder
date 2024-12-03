@@ -13,9 +13,9 @@ public interface TenantRepository {
 	
 	Iterable<Tenant> listTenants() throws RepositoryException, ObjectException;
 
-	void newSchema() throws RepositoryException, ObjectException;
+//	void newSchema() throws RepositoryException, ObjectException;
 
-	void dropSchema() throws RepositoryException, ObjectException;
+//	void dropSchema() throws RepositoryException, ObjectException;
 
 	Tenant getTenant(String uuid) throws RepositoryException, ObjectException;
 

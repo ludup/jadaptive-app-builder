@@ -175,10 +175,10 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		
 	}
 
-	@Override
-	public void dropSchema() {
-
-	}
+//	@Override
+//	public void dropSchema() {
+//
+//	}
 
 	@Override
 	public Iterable<Document> search(String table, String database, SortOrder order, String sortField,
@@ -188,7 +188,7 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	}
 
 	@Override
-	public void doInTransaction(Runnable r) {
+	public void doInTransaction(String database, Runnable r) {
 		// TODO Auto-generated method stub
 		
 	}

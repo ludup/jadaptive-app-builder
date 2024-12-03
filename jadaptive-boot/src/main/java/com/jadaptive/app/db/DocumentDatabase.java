@@ -53,9 +53,7 @@ public interface DocumentDatabase {
 	
 	Document min(String table, String database, String field, SearchField... fields);
 
-	void dropSchema();
-
-	void doInTransaction(Runnable r);
+//	void dropSchema();
 
 	Long sumLongValues(String table, String database, String groupBy, SearchField... fields);
 
@@ -66,5 +64,7 @@ public interface DocumentDatabase {
 	boolean isTransactionActive();
 
 	Double sumDoubleValues(String table, String database, String groupBy, SearchField... fields);
+
+	void doInTransaction(String database, Runnable r);
 
 }

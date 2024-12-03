@@ -55,21 +55,21 @@ public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenan
 		return getTenant(TenantService.SYSTEM_UUID);
 	}
 	
-	@Override
-	public void dropSchema() throws RepositoryException, ObjectException {
-		db.dropSchema();
-	}
+//	@Override
+//	public void dropSchema() throws RepositoryException, ObjectException {
+//		db.dropSchema();
+//	}
 	
-	@Override
-	public void newSchema() throws RepositoryException, ObjectException {
-		
-		dropSchema();
-		
-		if(log.isInfoEnabled()) {
-			log.info("Creating new application schema");
-		}
-		
-	}
+//	@Override
+//	public void newSchema() throws RepositoryException, ObjectException {
+//		
+//		dropSchema();
+//		
+//		if(log.isInfoEnabled()) {
+//			log.info("Creating new application schema");
+//		}
+//		
+//	}
 
 	@Override
 	public boolean isEmpty() {
