@@ -25,7 +25,6 @@ import com.jadaptive.utils.Utils;
 	system = true, creatable = true, defaultColumn = "name")
 @GenerateEventTemplates(value = DatabaseConnection.RESOURCE_KEY)
 @TableView(defaultColumns = { "name"})
-@PageMenu(bundle = DatabaseConnection.RESOURCE_KEY, i18n = "databases.names", path = "/app/ui/search/databases", parent = ApplicationMenuService.CONFIGURATION_MENU_UUID, withPermission = "system.read", icon = "fa-database")
 public class DatabaseConnection extends NamedUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 1567817173441528990L;
