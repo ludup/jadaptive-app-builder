@@ -71,30 +71,30 @@ public class ConfigurationPage extends AuthenticatedPage {
 			for(Class<?> clz : classService.resolveAnnotatedClasses(ConfigurationItem.class)) {
 				ConfigurationItem m = clz.getAnnotation(ConfigurationItem.class);
 				if(Objects.nonNull(m)) {		
-					if(m.system() == isSystem()) {
-						String path = m.path();
-						String bundle = m.bundle();
-						String resourceKey = m.resourceKey();
-						
-						if(UUIDEntity.class.isAssignableFrom(clz)) {
-							try {
-								UUIDEntity e = (UUIDEntity) clz.getConstructor().newInstance();
-								if(StringUtils.isBlank(resourceKey)) {
-									resourceKey = e.getResourceKey();
-								}
-								if(StringUtils.isBlank(path)) {
-									path = String.format("/app/ui/%s/", isSystem() ? "system" : "config") + resourceKey;
-								}
-								if(StringUtils.isBlank(bundle)) {
-									bundle = e.getResourceKey();
-								}
-								
-							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-									| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+					
+					String path = m.path();
+					String bundle = m.bundle();
+					String resourceKey = m.resourceKey();
+					
+					if(UUIDEntity.class.isAssignableFrom(clz)) {
+						try {
+							UUIDEntity e = (UUIDEntity) clz.getConstructor().newInstance();
+							if(StringUtils.isBlank(resourceKey)) {
+								resourceKey = e.getResourceKey();
 							}
+							if(StringUtils.isBlank(path)) {
+								path = String.format("/app/ui/%s/", isSystem() ? "system" : "config") + resourceKey;
+							}
+							if(StringUtils.isBlank(bundle)) {
+								bundle = e.getResourceKey();
+							}
+							
+						} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+								| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						}
-						annotatedItems.add(new DynamicConfigurationItem(m, resourceKey, path, bundle, isSystem()));
 					}
+					annotatedItems.add(new DynamicConfigurationItem(m, resourceKey, path, bundle, isSystem()));
+					
 				}
 			}
 		}
