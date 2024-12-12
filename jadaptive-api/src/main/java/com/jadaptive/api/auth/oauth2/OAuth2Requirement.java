@@ -19,7 +19,7 @@ public @interface OAuth2Requirement  {
 	 *  
 	 * @return scopes
 	 */
-	String[] value();
+	String value() default "";
 
 	/**
 	 * Set whether OAuth authentication is required for this method. When <code>false</code>,
@@ -28,4 +28,13 @@ public @interface OAuth2Requirement  {
 	 * @return oauth required
 	 */
 	boolean required() default true;
+
+	/**
+	 * When <code>true</code>, a 401 response will be sent along with a <code>WWW-Authenticate</code>
+	 * Bearer header (with the scopes specified by this annotation). When <code>false</code>, if un-authenticated,
+	 * an exception will be thrown. In both cases, the annotated method will NOT be executed.
+	 * 
+	 * @return send HTTP response
+	 */
+	boolean response() default true;
 }

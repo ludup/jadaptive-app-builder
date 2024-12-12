@@ -69,7 +69,7 @@ public interface OAuth2TokenService  extends AbstractUUIDObjectService<OAuth2Tok
 			return authenticate(authentication, scope);
 		}
 		catch(TokenExpiredException tpe) {
-			response.addHeader("WWW-Authentication", "Bearer error=\"invalid_token\" error_description=\"The access token expired\"");
+			response.addHeader("WWW-Authenticate", "Bearer realm=\"JAD\" error=\"invalid_token\" error_description=\"The access token expired\"");
 			throw new ResponseEntityException(new ResponseEntity<>(new OAuth2ErrorResponse("invalid_token", "The access token expired"), HttpStatus.BAD_REQUEST));
 		}
 		

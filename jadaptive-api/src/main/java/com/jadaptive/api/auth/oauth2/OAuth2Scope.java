@@ -19,7 +19,8 @@ public interface OAuth2Scope extends ExtensionPoint {
 		return Strictness.STRICT;
 	}
 	
-	void verifyPermissions(Optional<OAuth2Request> oauthRequest, User principal) throws AccessDeniedException;
+	default void verifyPermissions(Optional<OAuth2Request> oauthRequest, User principal) throws AccessDeniedException {
+	}
 
 	default void onApproved(OAuth2Request oauthRequest) {
 	}

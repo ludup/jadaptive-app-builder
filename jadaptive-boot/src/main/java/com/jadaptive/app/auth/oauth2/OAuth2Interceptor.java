@@ -1,16 +1,17 @@
 package com.jadaptive.app.auth.oauth2;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.auth.oauth2.OAuth2Requirement;
 import com.jadaptive.api.auth.oauth2.OAuth2Scope;
-import com.jadaptive.api.auth.oauth2.OAuth2Token;
-import com.jadaptive.api.permissions.AccessDeniedException;
-import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
+import com.jadaptive.api.auth.oauth2.OAuth2TokenService;
+import com.jadaptive.api.auth.oauth2.ResponseEntityException;
+import com.jadaptive.api.auth.oauth2.TokenExpiredException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,56 +19,72 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class OAuth2Interceptor implements HandlerInterceptor {
 
-	
+	@Autowired
+	private OAuth2TokenService oauth2TokenService;
+
+	@Autowired
+	private ApplicationService applicationService;
+
+	@Autowired
+	private AllApiAccessScope allApiAccessScope;
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 		if (handler instanceof HandlerMethod) {
 
 			var method = (HandlerMethod) handler;
-			var token = Request.isAvailable() ? Session.getOr().map(s -> s.getAttribute(OAuth2Token.class)).orElse(null) : null;
-			
-			if(method.getBean() instanceof OAuth2Scope) {
-				/* Legacy method. The controller IS an OAuth2Scope,
-				 * i.e. it implements the interface. 
-				 * 
-				 * It will checking the token and scopes itself
-				 */
-				return true;
-			}
-
 			var acAnnotation = method.getMethodAnnotation(OAuth2Requirement.class);
-			
-			if(token == null) {
-				if(acAnnotation != null && acAnnotation.required()) {
-					throw new AccessDeniedException("Controller has @" + OAuth2Requirement.class + " with required = true, but this session is not authenticated.");
-				}
-			}
-			else {
-				if(token.getScopes().contains(AllApiAccessScope.ALL_API_ACCESS)) {
-					/* Special case, this special scope has access to everything */
+			if (acAnnotation != null) {
+				OAuth2Scope scope = null;
+
+				if (method.getBean() instanceof OAuth2Scope) {
+					/*
+					 * Legacy method. The controller IS an OAuth2Scope, i.e. it implements the
+					 * interface.
+					 * 
+					 * It will checking the token and scopes itself
+					 */
 					return true;
 				}
-	
-				if (acAnnotation != null) {
-					for(var scope : token.getScopes()) {
-						for(var mscope : acAnnotation.value()) {
-							if(mscope.equals(scope)) {
-								return true;
-							}
+
+				if (acAnnotation.value().length() != 0) {
+					for (var regScope : applicationService.getBeans(OAuth2Scope.class)) {
+						if (regScope.getId().equals(acAnnotation.value())) {
+							scope = regScope;
+							break;
 						}
 					}
-					
-					throw new AccessDeniedException("None of the required scopes are allowed for this authentication token.");
+				}
+				
+				if(scope == null) {
+					scope = allApiAccessScope;
+				}
+
+				var authHdr = request.getHeader("Authorization");
+				if(authHdr == null) {
+					response.addHeader("WWW-Authenticate", "Bearer realm=\"JAD\"");
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+					return false;
+				}
+				
+				try {
+					oauth2TokenService.authenticateRequest(request, response, authHdr, scope);
+				}
+				catch(ResponseEntityException e) {
+					/* We can't send an entity here, so just send the header and the response code */
+					response.sendError(e.getEntity().getStatusCode().value());
+					return false;
 				}
 			}
 		}
 
 		return true;
 	}
-	
+
 	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 			ModelAndView modelAndView) throws Exception {
 	}
+
 }
