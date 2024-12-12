@@ -37,7 +37,7 @@ public class SessionsMenu implements ApplicationMenu {
 
 	@Override
 	public String getParent() {
-		return ApplicationMenuService.SECURITY_MENU_UUID;
+		return ApplicationMenuService.REPORTING_MENU_UUID;
 	}
 
 	@Override

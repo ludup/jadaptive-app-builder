@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AuthenticatedContext;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.user.UserService;
@@ -34,26 +35,31 @@ public class AvatarController extends AuthenticatedController {
 	public void legacyGravatar(WebRequest webRequest, HttpServletRequest request, HttpServletResponse response, 
 			@PathVariable String uuid, @PathVariable Optional<Integer> size) throws Exception {
 		
-		var usr = userService.getObjectByUUID(uuid);
-		var bldr = new AvatarRequest.Builder();
-		bldr.withUsername(usr.getUsername());
-		if(StringUtils.isNotBlank(usr.getEmail()))
-			bldr.withEmail(usr.getEmail());
-		if(StringUtils.isNotBlank(usr.getName()))
-			bldr.withName(usr.getName());
-		
-		var av = avatarService.avatar(bldr.build());
-		
-		/* TODO: Bit of a hack. We should be able to 'render' to things other than an Element */
-		var el = av.render();
-		var img = el.selectFirst("img");
-		if(img != null) {
-			var href = img.attr("src");
-			if(href != null && href.startsWith("/")) {
-				request.getRequestDispatcher(href).forward(request, response);
-				return;
+		try {
+			var usr = userService.getObjectByUUID(uuid);
+			var bldr = new AvatarRequest.Builder();
+			bldr.withUsername(usr.getUsername());
+			if(StringUtils.isNotBlank(usr.getEmail()))
+				bldr.withEmail(usr.getEmail());
+			if(StringUtils.isNotBlank(usr.getName()))
+				bldr.withName(usr.getName());
+			
+			var av = avatarService.avatar(bldr.build());
+			
+			/* TODO: Bit of a hack. We should be able to 'render' to things other than an Element */
+			var el = av.render();
+			var img = el.selectFirst("img");
+			if(img != null) {
+				var href = img.attr("src");
+				if(href != null && href.startsWith("/")) {
+					request.getRequestDispatcher(href).forward(request, response);
+					return;
+				}
 			}
+		} catch(ObjectNotFoundException e) {
+		
 		}
+		
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		return;
 	}

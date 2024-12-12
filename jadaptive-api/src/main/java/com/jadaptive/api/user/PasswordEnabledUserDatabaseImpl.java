@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AuthenticatedService;
-import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.utils.PasswordEncryptionType;
 import com.jadaptive.utils.PasswordUtils;
 
@@ -95,5 +94,18 @@ public abstract class PasswordEnabledUserDatabaseImpl
 		objectDatabase.saveOrUpdate(u);
 		return u.getUuid();
 	}
+	
+	@Override
+	public void enableUser(User user) {
+		user.setEnabled(true);
+		saveOrUpdate(user);
+	}
+	
+	@Override
+	public void disableUser(User user) {
+		user.setEnabled(false);
+		saveOrUpdate(user);
+	}
+	
 
 }

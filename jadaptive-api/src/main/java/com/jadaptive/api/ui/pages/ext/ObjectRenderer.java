@@ -70,8 +70,9 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			}
 		
 			formHandler.set(handler);
+			var forceNew = element.attr("jad:forceNewObject");
 			
-			if(page instanceof ObjectPage) {
+			if(page instanceof ObjectPage && !Boolean.parseBoolean(forceNew)) {
 				object.set(((ObjectPage)page).getObject());
 			} 
 			
@@ -85,12 +86,15 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			
 			AbstractObject displayObject = object.get();
 			ObjectTemplate displayTemplate = template;
-			if(Objects.nonNull(displayObject)) {
-				if(!displayObject.getResourceKey().equals(displayTemplate.getResourceKey())) {
-					displayTemplate = templateService.get(displayObject.getResourceKey());
+			var disableOverride = element.attr("jad:disableOverride");
+			if(!Boolean.parseBoolean(disableOverride)) {
+				if(Objects.nonNull(displayObject)) {
+					if(!displayObject.getResourceKey().equals(displayTemplate.getResourceKey())) {
+						displayTemplate = templateService.get(displayObject.getResourceKey());
+					}
 				}
 			}
-			
+
 			actionURL.set(String.format("/app/api/form/%s/%s", handler, displayTemplate.getResourceKey()));
 			
 			super.process(contents, page, displayTemplate, displayObject, scope);

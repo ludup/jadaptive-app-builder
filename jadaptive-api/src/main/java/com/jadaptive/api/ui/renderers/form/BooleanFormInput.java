@@ -19,21 +19,17 @@ public class BooleanFormInput extends FieldInputRender {
 
 	@Override
 	public void renderInput(Element rootElement, String value, String... classes) {
-		
-		Element e;
-		
-		rootElement.appendChild(e = new Element("div")
-				.addClass(Utils.csv(" ", classes) + " row mb-3"));
-		
-		renderTop(e);
+
+		renderTop(rootElement);
 		
 		Element container = createContainer();
 		
-		e.appendChild(new Element("div")
-				.addClass("col-12").appendChild(container));
+		rootElement.appendChild(new Element("div")
+				.addClass("col-12 " + Utils.csv(" ", classes))
+					.appendChild(container));
 		
 		if(decorate) {
-				e.appendChild(new Element("div")
+			rootElement.appendChild(new Element("div")
 						.addClass("col-12"))
 				.appendChild(new Element("p")
 				.addClass("form-text text-muted text-small")

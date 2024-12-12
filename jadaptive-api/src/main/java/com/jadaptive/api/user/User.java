@@ -21,6 +21,8 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
+import com.jadaptive.api.template.TableAction;
+import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
@@ -32,9 +34,12 @@ import com.jadaptive.utils.Utils;
 @ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)
 @ObjectViewDefinition(bundle = "users", value = User.EMAIL_VIEW, weight=100)
 @ObjectViewDefinition(bundle = "users", value = User.PHONE_VIEW, weight=200)
-@TableView(defaultColumns = { "avatar", "username", "name", "lastLogin" }, otherColumns = {
+@TableView(defaultColumns = { "avatar", "username", "enabled", "name", "email", "lastLogin" }, otherColumns = {
 		@DynamicColumn(resourceKey = "avatar", service = UserService.class) },
 requiresUpdate = true, sortField = "username")
+@TableAction(resourceKey = "enableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-unlock", target = Target.ROW, url = "/app/api/accounts/enable/{uuid}", filter = DisabledAccountAction.class)
+@TableAction(resourceKey = "disableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-lock", target = Target.ROW, url = "/app/api/accounts/disable/{uuid}", filter = EnabledAccountAction.class)
+
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
 public abstract class User extends AbstractUUIDEntity implements NamedDocument {
@@ -58,6 +63,10 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@ObjectView(DETAILS_VIEW)
 	String name;
 
+	@ObjectField(type = FieldType.BOOL, hidden = true, defaultValue = "true")
+	@ObjectView(DETAILS_VIEW)
+	Boolean enabled = Boolean.TRUE;
+	
 	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
 	@Validator(type = ValidationType.EMAIL)
 	@ObjectView(EMAIL_VIEW)
@@ -172,6 +181,14 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	public void setAvatar(String avatar) {
 		this.avatar = avatar;
+	}
+
+	public boolean isEnabled() {
+		return enabled==null || enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 	
 }

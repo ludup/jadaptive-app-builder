@@ -4,11 +4,9 @@ import static com.jadaptive.utils.Instrumentation.timed;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +14,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -25,11 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.ApplicationService;
-import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
-import com.jadaptive.utils.FileUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,7 +43,7 @@ public abstract class HtmlPage implements Page {
 	private ApplicationService applicationService; 
 	
 	@Autowired
-	private ClassLoaderService classService; 
+	private HtmlContentService contentService; 
 	
 	private ThreadLocal<List<PageExtension>> extensions = new ThreadLocal<>();
 	
@@ -194,11 +189,11 @@ public abstract class HtmlPage implements Page {
 		}
 
 		try(var timed = timed("HtmlPage.processPageExtensions#resolveScript(" + uri + ")")) {
-			resolveScript(getUri(), document, this);
+			contentService.resolveScript(getUri(), document, this);
 		}
 
 		try(var timed = timed("HtmlPage.processPageExtensions#resolveStylesheet(" + uri + ")")) {
-			resolveStylesheet(getUri(), document, this);
+			contentService.resolveStylesheet(getUri(), document, this);
 		}
 
 		try(var timed = timed("HtmlPage.processPageExtensions#processPageProcessors(" + uri + ")")) {
@@ -331,6 +326,7 @@ public abstract class HtmlPage implements Page {
 			
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 					| IllegalArgumentException e) {
+			clearFeedback();
 			if(e.getCause() instanceof Redirect) {
 				throw (Redirect) e.getCause();
 			}
@@ -341,36 +337,56 @@ public abstract class HtmlPage implements Page {
 		}
 	}
 	
+	protected void clearFeedback() {
+		Feedback feedback = (Feedback) Request.get().getSession().getAttribute("feedback");
+		if(Objects.nonNull(feedback)) {
+			log.info("REMOVEME: I'm clearing feedback because of some other error or redirect! [{}]", feedback.getI18n());
+			Request.get().getSession().removeAttribute("feedback");
+		}
+	}
+
 	protected void beforeForm(Document doc, HttpServletRequest request, HttpServletResponse response) {
 		
 	}
 
 	protected void injectFeedback(Document doc, HttpServletRequest request) {
 		Feedback feedback = (Feedback) request.getSession().getAttribute("feedback");
-		if(Objects.nonNull(feedback)) {
+		if(Objects.nonNull(feedback) && Objects.nonNull(feedback.getI18n())) {
 			request.getSession().removeAttribute("feedback");
-			Element element = doc.selectFirst("#feedback");
+			Element element = doc.selectFirst("header");
 			if(Objects.isNull(element)) {
-				element = doc.selectFirst("#content");
-				if(Objects.nonNull(element)) {
-					element.prependChild(Html.div("col-12", "mt-3")
-								.appendChild(Html.div("alert", feedback.getAlert())
-								.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
-								.appendChild(getTextElement(feedback))));
-				} else {
-					element = doc.selectFirst("main");
-					if(Objects.nonNull(element)) {
-						element.appendChild(Html.div("col-12", "mt-3")
-								.appendChild(Html.div("alert", feedback.getAlert())
-								.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
-								.appendChild(getTextElement(feedback))));
-					}
-				}
-			} else {
-				element.appendChild(Html.div("alert", feedback.getAlert(), "mt-3")
-						.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"))
-						.appendChild(getTextElement(feedback)));
+					element = doc.selectFirst("body");
+			} 
+			
+			var bdy = Html.div("toast-body");
+
+			if(feedback.getIcon() != null) {
+				bdy.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"));
 			}
+			
+			bdy.appendChild(getTextElement(feedback));
+			
+			var btn = Html.button("btn-close", "btn-close-white", "me-2", "m-auto");
+			btn.dataset().put("bs-dismiss", "toast");
+			btn.attr("aria-label", "Close");
+			
+			var fbox = Html.div("d-flex");
+			fbox.appendChild(bdy);
+			fbox.appendChild(btn);
+			var toast = Html.div("toast", "align-items-center", "text-bg-" + feedback.getAlert(), "border-0", "show");
+			toast.attr("role", "alert");
+			toast.attr("aria-live", "assertive");
+			toast.attr("aria-atomic", "true");
+			toast.appendChild(fbox);
+			
+			var cnt = Html.div("toast-container", "p-3", "top-0", "start-50", "translate-middle-x");
+			cnt.appendChild(toast);
+			
+			var out = Html.div("position-relative");
+			out.appendChild(cnt);
+			
+			element.after(out);
+			
 		}
 		
 	}
@@ -497,36 +513,14 @@ public abstract class HtmlPage implements Page {
 			
 			injectHtmlSection(document, element, ext);
 
-			resolveScript(ext.getName(), document, ext);
-			resolveStylesheet(ext.getName(), document, ext);
+			contentService.resolveScript(ext.getName(), document, ext);
+			contentService.resolveStylesheet(ext.getName(), document, ext);
 	}
 
-	protected void resolveStylesheet(String uri, Document document, PageResources ext) {
-		URL url = ext.getResourceClass().getResource(ext.getCssResource());
-		if(Objects.nonNull(url)) {
-			PageHelper.appendStylesheet(document, "/app/css/" + uri + ".css");
-		} else {
-			url = classService.getResource(ext.getCssResource());
-			if(Objects.nonNull(url)) {
-				PageHelper.appendStylesheet(document, "/app/style/" + uri + ".css");
-			} 
-		}
-	}
+	
 	
 	public String getCssResource() {
 		return String.format("%s.css", getClass().getSimpleName());
-	}
-
-	protected void resolveScript(String uri, Document document, PageResources ext) {
-		URL url = ext.getResourceClass().getResource(ext.getJsResource());
-		if(Objects.nonNull(url)) {
-			PageHelper.appendBodyScript(document, "/app/js/" + uri + ".js");
-		} else {
-			url = classService.getResource(ext.getJsResource());
-			if(Objects.nonNull(url)) {
-				PageHelper.appendBodyScript(document, "/app/script/" + ext.getJsResource());
-			}
-		}
 	}
 
 	public String getJsResource() {
@@ -544,56 +538,7 @@ public abstract class HtmlPage implements Page {
 	}
 	
 	protected Document resolveDocument(Class<?> clz, String resource, boolean canFail) throws IOException {
-		
-		if(isOverride(clz)) {
-			return getCustomizedContent(clz);
-		} else {
-			return getPageDocument(clz, resource, canFail);
-		}
-		
-	}
-	
-	protected Document getPageDocument(Class<?> clz, String resource, boolean canFail) throws IOException {
-		
-		URL url = clz.getResource(resource);
-		if(Objects.isNull(url)) {
-			url = getResourceClass().getResource(resource);
-		}
-		if(Objects.isNull(url)) {
-			url = classService.getResource(resource);
-		}
-		if(resource.startsWith("/")) {
-			resource = FileUtils.checkStartsWithNoSlash(resource);
-			return resolveDocument(clz, resource, canFail);
-		}
-		if(Objects.nonNull(url)) {
-			return loadDocument(url);
-		} else {
-			if(canFail) {
-				throw new IOException("Missing document for " + resource);
-			}
-			Document doc = new Document(Request.get().getRequestURI());
-			doc.appendChild(new Element("body"));
-			return doc;
-		}
-		
-	}
-
-	protected Document loadDocument(URL url) throws IOException {
-		try(InputStream in = url.openStream()) {
-			return Jsoup.parse(in, "UTF-8", url.toExternalForm());
-		}
-	}
-
-	private Document getCustomizedContent(Class<?> clz) {
-		
-//		HtmlContentService contentService = applicationService.getBean(HtmlContentService.class);
-		
-		return null;
-	}
-
-	private boolean isOverride(Class<?> clz) {
-		return false; //clz.getAnnotation(CustomizablePage.class) != null;
+		return contentService.resolveDocument(clz, this, resource, canFail);
 	}
 
 	private void processPageLevelExtensions(Document document, String[] extensionIds) throws IOException {
@@ -601,7 +546,6 @@ public abstract class HtmlPage implements Page {
 		for(String ext : extensionIds) {
 			pageCache.resolveExtension(ext).process(document, null, this);
 		}
-
 	}
 	
 	private void showFeedback(Document document, String icon, String bundle, String i18n, Set<String> classes, Object... args) {

@@ -17,8 +17,9 @@ public class TemplateViewField {
 	boolean disableEncoding;
 	FieldRenderer renderer = null;
 	ObjectView view;
+	boolean parentIsHidden;
 	
-	public TemplateViewField(ObjectView view, TemplateView panel, FieldTemplate field, LinkedList<FieldTemplate> objectPath) {
+	public TemplateViewField(ObjectView view, TemplateView panel, FieldTemplate field, LinkedList<FieldTemplate> objectPath, boolean parentIsHidden) {
 		super();
 		this.view = view;
 		this.field = field;
@@ -28,6 +29,7 @@ public class TemplateViewField {
 		this.disableEncoding = Objects.nonNull(view) && view.disableEncoding();
 		this.bundle = Objects.nonNull(view) && StringUtils.isNotBlank(view.bundle()) ? view.bundle() : panel.getBundle();
 		this.renderer = view != null ? view.renderer() : FieldRenderer.DEFAULT;
+		this.parentIsHidden = parentIsHidden;
 	}
 	
 	public Integer getWeight() {
@@ -123,5 +125,9 @@ public class TemplateViewField {
 
 	public boolean isSystemOnly() {
 		return Objects.nonNull(view) && view.systemOnly();
+	}
+	
+	public boolean isHidden() {
+		return field.isHidden() || parentIsHidden;
 	}
 }

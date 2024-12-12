@@ -2,21 +2,24 @@ package com.jadaptive.app.json;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.commons.fileupload2.core.FileItemInput;
 import org.apache.commons.fileupload2.core.FileItemInputIterator;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
@@ -25,13 +28,18 @@ import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
+import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.app.db.DocumentHelper;
+import com.jadaptive.app.db.MongoEntity;
 import com.jadaptive.utils.FileUtils;
 import com.jadaptive.utils.ParameterHelper;
 
@@ -41,12 +49,18 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name="objectServlet", description="Servlet for handing objects", urlPatterns = { "/app/api/form/multipart/*" })
+@WebServlet(name="objectServlet", description="Servlet for handing objects", 
+	urlPatterns = { "/app/api/form/multipart/*", "/app/api/form/stash/*",
+			"/app/api/form/stash-child/*"})
 public class ObjectUploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8476101184614381108L;
 
 	private static Logger log = LoggerFactory.getLogger(ObjectUploadServlet.class);
+	
+	private static final String MULTIPART = "multipart";
+	private static final String STASH = "stash";
+	private static final String STASH_CHILD = "stash-child";
 	
 	@Autowired
 	private TemplateService templateService; 
@@ -65,40 +79,44 @@ public class ObjectUploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse resp) throws ServletException, IOException {
 		
-		String resourceKey = FileUtils.lastPathElement(request.getRequestURI());
+		String uri = request.getRequestURI();
+		List<String> paths = new ArrayList<>(getPathElements(uri));
+		if(paths.size() < 5) {
+			throw new IllegalStateException("Too few arguments for stash-child handler!");
+		}
+		
+		String handler = paths.get(3);
+		String resourceKey = paths.get(4);
+		
 		Map<String,String[]> parameters = new HashMap<>();
+		
+		DocumentHelper.enableMultipleValidation();
 		
 		try(var scope = SessionUtils.scopedIoWithoutSessionTimeout(request)) {
 
-			/**
-			 * Return the attachments uploaded. TODO stash these in case of validation
-			 * failure so they can be attached in subsequent operation
-			 */
-			@SuppressWarnings("unused")
-			var attachments = generateFormParameters(request, parameters);
+			generateFormParameters(request, parameters, resourceKey);
 			
-			sessionUtils.verifySameSiteRequest(request, parameters);
+			sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
 			
 			resp.setStatus(200);
 			resp.setContentType("application/json");
+			String uuid = "";
 			
 			try {
-				
-				ObjectTemplate template = templateService.get(resourceKey);
-				request.getSession().removeAttribute(resourceKey);
-				
-				AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
-				String uuid = objectService.saveOrUpdate(obj);
-				
-				if(template.isSingleton()) {
-					Feedback.success("default", "object.saved", I18N.getResource(
-							sessionUtils.getLocale(request), 
-							template.getBundle(),
-							template.getResourceKey() + ".name"));
-				} else {
-					Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+				switch(handler) {
+				case MULTIPART:
+					uuid = processMultipartObject(request, resourceKey, parameters);
+					break;
+				case STASH:
+					uuid = processStashedObject(request, resourceKey, parameters);
+					break;
+				case STASH_CHILD:
+					uuid = processStashedChildObject(request, resourceKey, paths, parameters);
+					break;
+				default:
+					uuid = processUrlEncodedForm(request, handler, resourceKey, parameters);
 				}
-				
+
 				json.writer().writeValue(resp.getOutputStream(), new UUIDStatus(uuid));
 				
 				
@@ -116,11 +134,95 @@ public class ObjectUploadServlet extends HttpServlet {
 					log.error("POST api/objects/{}", resourceKey, e);
 				}
 				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, e.getMessage()));
+			} finally {
+				DocumentHelper.disableMultipleValidation();
 			}
 		}
 	}
+
+	private List<String> getPathElements(String uri) {
+		return new ArrayList<String>(Arrays.asList(FileUtils.checkStartsWithNoSlash(uri).split("/")));
+	}
+
+	private String processUrlEncodedForm(HttpServletRequest request, String handler, String resourceKey, Map<String,String[]> parameters) throws ObjectException, ValidationException, IOException {
+		
+		ObjectTemplate template = templateService.get(resourceKey);
+		
+		return objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
+				templateService.getTemplateClass(resourceKey), 
+				new Document(DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template).getDocument())));
+	}
+
+	private String processMultipartObject(HttpServletRequest request, String resourceKey, Map<String,String[]> parameters) throws ValidationException, IOException {
+		
+		ObjectTemplate template = templateService.get(resourceKey);
+		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
+		objectService.saveOrUpdate(obj);
+		return obj.getUuid();
+	}
 	
-	private Collection<FileAttachment> generateFormParameters(HttpServletRequest req, Map<String,String[]> parameters) throws IOException {
+	private String processStashedObject(HttpServletRequest request, String resourceKey,
+			Map<String, String[]> parameters) throws ValidationException, RepositoryException, ObjectException, IOException {
+		ObjectTemplate template = templateService.get(resourceKey);
+		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
+		objectService.stashObject(obj);
+		return obj.getUuid();
+	}
+
+	private String processStashedChildObject(HttpServletRequest request,  String resourceKey, List<String> paths, Map<String, String[]> parameters) 
+			throws ValidationException, IOException {
+		
+		if(paths.size() < 7) {
+			throw new IllegalStateException("Too few arguments for stash-child handler!");
+		}
+		
+		String childResource = paths.get(5);
+		String fieldName = paths.get(6);
+		
+		try {
+			ObjectTemplate parentTemplate = templateService.get(resourceKey);
+			ObjectTemplate childTemplate = templateService.get(childResource);
+			AbstractObject childObject = DocumentHelper.buildRootObject(parameters, childTemplate.getResourceKey(), childTemplate);
+			FieldTemplate fieldTemplate = parentTemplate.getField(fieldName);
+			Object stashedObject = Request.get().getSession().getAttribute(resourceKey);
+			if(Objects.isNull(stashedObject)) {
+				throw new IllegalStateException("No parent object found for " + resourceKey);
+			}
+			if(!(stashedObject instanceof AbstractObject)) {
+				Document doc = new Document();
+				DocumentHelper.convertObjectToDocument((UUIDDocument) stashedObject, doc);
+				stashedObject = new MongoEntity(doc);
+			}
+			AbstractObject parentObject = (AbstractObject) stashedObject;
+			
+			if(fieldTemplate.getCollection()) {
+				AbstractObject existing = null;
+				for(AbstractObject child : parentObject.getObjectCollection(fieldName)) {
+					if(Objects.nonNull(child.getUuid()) && child.getUuid().equalsIgnoreCase(childObject.getUuid())) {
+						existing = child;
+					}
+				}
+				if(Objects.nonNull(existing)) {
+					parentObject.removeCollectionObject(fieldName, existing);
+				}
+				parentObject.addCollectionObject(fieldName, childObject);
+			} else {
+				/**
+				 * Can this happen?
+				 */
+				parentObject.setValue(fieldTemplate, childObject);
+			}
+			
+			Feedback.info(childTemplate.getBundle(), fieldName + ".stashed");
+			
+			objectService.stashObject(parentObject);
+			return childObject.getUuid();
+		}  finally {
+			DocumentHelper.disableMultipleValidation();
+		}
+	}
+	
+	private Collection<FileAttachment> generateFormParameters(HttpServletRequest req, Map<String,String[]> parameters, String template) throws IOException {
 		
 		// Create a new file upload handler
 		JakartaServletFileUpload<?,?> upload = new JakartaServletFileUpload<>();
@@ -144,7 +246,7 @@ public class ObjectUploadServlet extends HttpServlet {
 		        ParameterHelper.setValue(parameters, name, value);
 		    } else {
 		    	if(StringUtils.isNotBlank(item.getName())) {
-				    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName());
+				    FileAttachment attachment = fileService.createAttachment(item.getInputStream(), item.getName(), item.getContentType(), item.getFieldName(), template);
 			    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
 			    	ParameterHelper.setValue(parameters, item.getFieldName() + "_name", attachment.getFilename());
 			    	

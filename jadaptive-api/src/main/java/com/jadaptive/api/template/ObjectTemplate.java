@@ -3,7 +3,6 @@ package com.jadaptive.api.template;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeSet;
@@ -14,7 +13,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.JadaptiveIgnore;
 import com.jadaptive.api.repository.NamedDocument;
 
 @ObjectDefinition(resourceKey = ObjectTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, system = true)
@@ -25,6 +23,9 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	private static final long serialVersionUID = -8159475909799827150L;
 
 	public static final String RESOURCE_KEY = "objectTemplates";
+	
+	@ObjectField(type = FieldType.ENUM)
+	Collection<ObjectTemplateCapability> capabilities = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.ENUM, defaultValue = "SYSTEM")
 	ObjectTemplateType templateType;
@@ -104,6 +105,14 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	}
 	public ObjectTemplate() {
 		
+	}
+
+	public Collection<ObjectTemplateCapability> getCapabilities() {
+		return capabilities;
+	}
+
+	public void setCapabilities(Collection<ObjectTemplateCapability> capabilities) {
+		this.capabilities = capabilities;
 	}
 
 	public String getBundle() {
@@ -253,11 +262,11 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	}
 	
 	public void setChildTemplates(Collection<String> childTemplates) {
-		this.childTemplates = childTemplates;
+		this.childTemplates = new TreeSet<>(childTemplates);
 	}
 	
 	public Collection<String> getChildTemplates() {
-		return new HashSet<>(childTemplates);
+		return childTemplates;
 	}
 
 	public boolean hasParent() {
@@ -296,11 +305,6 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 		this.permissionProtected = permissionProtected;
 	}
 	
-	@JadaptiveIgnore
-	public String getCanonicalName() {
-		return "com.jadaptive.dynamic." + StringUtils.capitalize(resourceKey);
-	}
-
 	public Boolean isDeletable() {
 		return deletable;
 	}

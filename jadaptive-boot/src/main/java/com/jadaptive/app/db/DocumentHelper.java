@@ -29,6 +29,7 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -40,10 +41,12 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.db.DocumentValidationError;
 import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
+import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
@@ -75,6 +78,9 @@ public class DocumentHelper {
 	
 	static Map<String,String> classNameChanges = new HashMap<>();
 	
+	static ThreadLocal<List<DocumentValidationError>> validationErrors = ThreadLocal.withInitial(()->new ArrayList<>());
+	static ThreadLocal<Boolean> multipleValidation = ThreadLocal.withInitial(()->Boolean.FALSE);
+	
 	public static String getTemplateResourceKey(Class<?> clz) {
 		ObjectDefinition template = (ObjectDefinition) clz.getAnnotation(ObjectDefinition.class);
 		if(Objects.nonNull(template)) {
@@ -83,6 +89,13 @@ public class DocumentHelper {
 		return clz.getSimpleName();
 	}
 	
+	public static void enableMultipleValidation() {
+		multipleValidation.set(Boolean.TRUE);
+	}
+	
+	public static void disableMultipleValidation() {
+		multipleValidation.set(Boolean.FALSE);
+	}
 	
 	public static void convertObjectToDocument(UUIDDocument obj, Document document) throws RepositoryException, ObjectException {
 
@@ -250,6 +263,18 @@ public class DocumentHelper {
 		}
 		return val[0];
 	}
+	
+	private static String[] getParameters(Map<String,String[]> parameters, FieldTemplate field, String formVariablePrefix) {
+		return getParameters(parameters, formVariablePrefix + field.getFormVariable());
+	}
+	
+	private static String[] getParameters(Map<String,String[]> parameters, String formVariable) {
+		String[] val = parameters.get(formVariable);
+		if(Objects.isNull(val) || val.length == 0) {
+			return null;
+		}
+		return val;
+	}
 
 //	public static AbstractObject buildRootObject(HttpServletRequest request, String resourceKey, ObjectTemplate template) throws IOException, ValidationException {
 //		return buildObject(request, resourceKey, "", template);
@@ -263,11 +288,13 @@ public class DocumentHelper {
 //		return buildObject(request.getParameterMap(), resourceKey, formVariablePrefix, template);
 //	}
 	
-	public static AbstractObject buildObject(Map<String, String[]> parameters, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException, ValidationException {
+	public static AbstractObject buildObject(Map<String, String[]> parameters, String resourceKey, String formVariablePrefix, ObjectTemplate template) throws IOException {
 
 		if(log.isDebugEnabled()) {
 			log.debug("Building object {} using template {}", resourceKey, template.getResourceKey());
 		}
+		
+		validationErrors.get().clear();
 		
 		AbstractObject obj = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).createNew(resourceKey);
 		String uuid = getParameter(parameters, formVariablePrefix + "uuid");
@@ -293,7 +320,7 @@ public class DocumentHelper {
 			}
 			
 			if(field.getCollection()) {
-				obj.setValue(field, convertValues(field, parameters));
+				obj.setValue(field, convertValues(field, parameters, formVariablePrefix));
 			} else {
 				obj.setValue(field, convertValue(field, parameters, formVariablePrefix));
 			}
@@ -305,199 +332,222 @@ public class DocumentHelper {
 	
 	private static Object convertValue(FieldTemplate field, Map<String,String[]> parameters, String formVariablePrefix) throws IOException, ValidationException {
 		
-		String value = getParameter(parameters, field, formVariablePrefix);
+		String formVariable = formVariablePrefix + field.getFormVariable();
+		String value = getParameter(parameters, formVariable);
 
-		switch(field.getFieldType()) {
-		case OBJECT_EMBEDDED:
-		{
-			ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
-					.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
-			
-			StringBuffer tmp = new StringBuffer();
-			tmp.append(formVariablePrefix);
-			tmp.append(field.getFormVariable());
-			tmp.append(".");
-			return buildObject(parameters,  
-					template.getResourceKey(),
-					tmp.toString(),
-					template).getDocument();
-		}
-		case OBJECT_REFERENCE:
-		{	
-			if(log.isDebugEnabled()) {
-				log.debug("Returning {} as reference {}", field.getResourceKey(), value);
+		try {
+			switch(field.getFieldType()) {
+			case OBJECT_EMBEDDED:
+			{
+				ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class)
+						.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
+				
+				StringBuffer tmp = new StringBuffer();
+				tmp.append(formVariablePrefix);
+				tmp.append(field.getFormVariable());
+				tmp.append(".");
+				return buildObject(parameters,  
+						template.getResourceKey(),
+						tmp.toString(),
+						template).getDocument();
 			}
-
-			String name = getTextParameter(parameters, field, formVariablePrefix);
-			
-			Document doc = new Document();
-			convertObjectToDocument(generateReference(getParameter(parameters, field, formVariablePrefix), name), doc);
-			return doc;
-		}
-		case BOOL:
-			if(Objects.isNull(value)) {
-				return false;
-			} else {
-				return Boolean.valueOf(value);
-			}
-		case IMAGE:
-		{
-			
-			String encoded = getParameter(parameters, field, formVariablePrefix);
-			if(StringUtils.isBlank(encoded)) {
-				return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
-            }
-			
-			String contentType = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_contentType");
-			String filename = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
-			
-			
-			try(ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(encoded))) {
-				BufferedImage bimg = ImageIO.read(in);
-				if(Objects.isNull(bimg)) {
-					throw new ValidationException(String.format("The file %s does not appear to contain an image!", filename));
+			case OBJECT_REFERENCE:
+			case TEMPLATE_REFERENCE:
+			{	
+				if(log.isDebugEnabled()) {
+					log.debug("Returning {} as reference {}", field.getResourceKey(), value);
+				}
+	
+				String name = getTextParameter(parameters, field, formVariablePrefix);
+				
+				if(StringUtils.isBlank(value) && field.isRequired()) {
+					throw new ValidationException();
 				}
 				
-				int width          = bimg.getWidth();
-				int height         = bimg.getHeight();
-				
-				int maxHeight = field.getValidationValueInt(ValidationType.IMAGE_HEIGHT, -1);
-				int maxWidth = field.getValidationValueInt(ValidationType.IMAGE_WIDTH, -1);
-				
-				if(maxWidth > -1 && maxWidth < width) {
-					throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
-				}
-				
-				if(maxHeight > -1 && maxHeight < height) {
-					throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
-				}
-				
-				return String.format("data:%s;base64, %s", contentType, encoded);	
-			}
-		}
-		case ATTACHMENT:
-		{
-			String uuid = getParameter(parameters, field, formVariablePrefix);
-			String name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
-			
-			if(StringUtils.isBlank(uuid)) {
-				uuid = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousUUID");
-				name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousName");
-			}
-			
-			if(StringUtils.isNotBlank(uuid)) {
 				Document doc = new Document();
-				convertObjectToDocument(generateReference(uuid, name), doc);
+				convertObjectToDocument(generateReference(getParameter(parameters, field, formVariablePrefix), name), doc);
 				return doc;
 			}
-
-			return null;
-		}	
-		case FILE:
-		{
-			String encoded = getParameter(parameters, field, formVariablePrefix);
-			if(StringUtils.isBlank(encoded)) {
+			case BOOL:
+				if(Objects.isNull(value)) {
+					return false;
+				} else {
+					return Boolean.valueOf(value);
+				}
+			case IMAGE:
+			{
+				
+				String encoded = getParameter(parameters, field, formVariablePrefix);
+				if(StringUtils.isBlank(encoded)) {
+					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
+	            }
+				
+				String contentType = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_contentType");
+				String filename = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
+				
+				try(InputStream in = ApplicationServiceImpl.getInstance().getBean(FileAttachmentService.class).getAttachmentContent(encoded)) {
+					String toBase64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(in));
+					ApplicationServiceImpl.getInstance().getBean(FileAttachmentService.class).markForRemoval(encoded);
+					
+					try(InputStream bin = new ByteArrayInputStream(Base64.getDecoder().decode(toBase64))) {
+						BufferedImage bimg = ImageIO.read(bin);
+						if(Objects.isNull(bimg)) {
+							throw new ValidationException(String.format("The file %s does not appear to contain an image!", filename));
+						}
+						
+						int width          = bimg.getWidth();
+						int height         = bimg.getHeight();
+						
+						int maxHeight = field.getValidationValueInt(ValidationType.IMAGE_HEIGHT, -1);
+						int maxWidth = field.getValidationValueInt(ValidationType.IMAGE_WIDTH, -1);
+						
+						if(maxWidth > -1 && maxWidth < width) {
+							throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+						}
+						
+						if(maxHeight > -1 && maxHeight < height) {
+							throw new ValidationException(String.format("Image dimensions are %dx%d but must not exceed %dx%d", width, height, maxWidth, maxHeight));
+						}
+						
+						return String.format("data:%s;base64, %s", contentType, toBase64);	
+					}
+				}
+			}
+			case ATTACHMENT:
+			{
+				String uuid = getParameter(parameters, field, formVariablePrefix);
+				String name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
+				
+				if(StringUtils.isBlank(uuid)) {
+					uuid = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousUUID");
+					name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousName");
+				}
+				
+				if(StringUtils.isBlank(uuid) && field.isRequired()) {
+					throw new ValidationException();
+				}
+				
+				if(StringUtils.isNotBlank(uuid)) {
+					Document doc = new Document();
+					convertObjectToDocument(generateReference(uuid, name), doc);
+					return doc;
+				}
+	
+				return null;
+			}	
+			case FILE:
+			{
+				String encoded = getParameter(parameters, field, formVariablePrefix);
+				if(StringUtils.isBlank(encoded)) {
+					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
+				}
+				
 				return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
 			}
-			
-			return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
-		}
-		default:
-			if(Objects.isNull(value)) {
-				
-				if(log.isDebugEnabled()) {
-					log.debug("Returning {} value NULL", field.getResourceKey());
+			default:
+				if(Objects.isNull(value)) {
+					
+					if(log.isDebugEnabled()) {
+						log.debug("Returning {} value NULL", field.getResourceKey());
+					}
+					return null;
 				}
-				return null;
+				if(log.isDebugEnabled()) {
+					log.debug("Returning {} value {}", field.getResourceKey(), value);
+				}
+				return fromString(field, value);
 			}
-			if(log.isDebugEnabled()) {
-				log.debug("Returning {} value {}", field.getResourceKey(), value);
+		} catch(ValidationException e) {
+			if(!multipleValidation.get()) {
+				throw e;
 			}
-			return fromString(field, value);
+			validationErrors.get().add(new DocumentValidationError(formVariable, e.getMessage()));
+			return null;
 		}
 	}
 
-	private static List<Object> convertValues(FieldTemplate field, Map<String,String[]> parameters) throws IOException, ValidationException {
+	private static List<Object> convertValues(FieldTemplate field, Map<String,String[]> parameters, String formVariablePrefix) throws IOException {
 		
-		String fieldName = field.getFormVariable();
-		
+		String formVariable = formVariablePrefix + field.getFormVariable();
 		List<Object> result = new ArrayList<>();
-		String[] values = parameters.get(fieldName);
-		if(Objects.isNull(values) || values.length == 0) {
+		
+		try {
+			
+			String[] values = getParameters(parameters, formVariable);   
+			if(Objects.isNull(values) || values.length == 0) {
+				return result;
+			}
+			
+			switch(field.getFieldType()) {
+			case OBJECT_EMBEDDED:
+				
+				ObjectMapper mapper = new ObjectMapper();
+	
+				for(String value : values) {
+					if(StringUtils.isNotBlank(value)) {
+						String json = new String(Base64.getUrlDecoder().decode(value), "UTF-8");
+						result.add(mapper.readValue(json, MongoEntity.class).getDocument());
+					}
+				}
+	
+				break;
+			case OBJECT_REFERENCE:
+			{
+				String[] names = parameters.get(String.format("%sText", formVariable));
+				for(int i=0;i<values.length;i++) {
+					Document doc = new Document();
+					convertObjectToDocument(generateReference(values[i], names[i]), doc);
+					result.add(doc);
+				}
+				break;
+			}
+			case OPTIONS:
+			{
+				String nameField = field.getMetaValue("nameField", "name");
+				ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(field.getValidationValue(ValidationType.RESOURCE_KEY));
+				ObjectService service = ApplicationServiceImpl.getInstance().getBean(ObjectService.class);
+				for(int i=0;i<values.length;i++) {
+					AbstractObject obj = service.get(template, values[i]);
+					Document doc = new Document();
+					convertObjectToDocument(generateReference(values[i], (String) obj.getValue(nameField)), doc);
+					result.add(doc);
+				}
+				break;
+			}
+			case ATTACHMENT:
+			{
+				String[] uuids = getParameters(parameters, field, formVariablePrefix);
+				String[] names = getParameters(parameters, formVariablePrefix + field.getFormVariable() + "_name");
+				
+				for(int i=0;i<uuids.length;i++) { 
+					Document doc = new Document();
+					convertObjectToDocument(generateReference(uuids[i], names[i]), doc);
+					result.add(doc);
+				}
+	
+				return result;
+			}
+			default:
+			{
+				for(String value : values) {
+					result.add(fromString(field, value));
+				}
+				break;
+			}
+			}
+			
+			if(log.isDebugEnabled()) {
+				log.debug("Extracted {} values", field.getResourceKey(), Utils.csv(values));
+			}
+			
+			return result;
+		} catch(ValidationException e) {
+			if(!multipleValidation.get()) {
+				throw e;
+			}
+			validationErrors.get().add(new DocumentValidationError(formVariable, e.getMessage()));
 			return result;
 		}
-		
-		switch(field.getFieldType()) {
-		case OBJECT_EMBEDDED:
-			
-			ObjectMapper mapper = new ObjectMapper();
-
-			for(String value : values) {
-				if(StringUtils.isNotBlank(value)) {
-					String json = new String(Base64.getUrlDecoder().decode(value), "UTF-8");
-					result.add(mapper.readValue(json, MongoEntity.class).getDocument());
-				}
-			}
-
-			break;
-		case OBJECT_REFERENCE:
-		{
-			String[] names = parameters.get(String.format("%sText", field.getFormVariable()));
-			for(int i=0;i<values.length;i++) {
-				Document doc = new Document();
-				convertObjectToDocument(generateReference(values[i], names[i]), doc);
-				result.add(doc);
-			}
-			break;
-		}
-		case OPTIONS:
-		{
-			String nameField = field.getMetaValue("nameField", "name");
-			ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(field.getValidationValue(ValidationType.RESOURCE_KEY));
-			ObjectService service = ApplicationServiceImpl.getInstance().getBean(ObjectService.class);
-			for(int i=0;i<values.length;i++) {
-				AbstractObject obj = service.get(template, values[i]);
-				Document doc = new Document();
-				convertObjectToDocument(generateReference(values[i], (String) obj.getValue(nameField)), doc);
-				result.add(doc);
-			}
-			break;
-		}
-		case ATTACHMENT:
-		{
-			
-//			String[] names = parameters.get(String.format("%sText", field.getFormVariable()));
-//			String uuid = getParameter(parameters, field, formVariablePrefix);
-//			String name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_name");
-//			
-//			if(StringUtils.isBlank(uuid)) {
-//				uuid = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousUUID");
-//				name = getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previousName");
-//			}
-//			
-//			if(StringUtils.isNotBlank(uuid)) {
-//				Document doc = new Document();
-//				convertObjectToDocument(generateReference(uuid, name), doc);
-//				return doc;
-//			}
-//
-//			return null;
-			break;
-		}
-		default:
-		{
-			for(String value : values) {
-				result.add(fromString(field, value));
-			}
-			break;
-		}
-		}
-		
-		if(log.isDebugEnabled()) {
-			log.debug("Extracted {} values", field.getResourceKey(), Utils.csv(values));
-		}
-		
-		return result;
 	}
 
 	private static UUIDReference generateReference(String uuid, String name) {
@@ -508,38 +558,46 @@ public class DocumentHelper {
 	public static <T extends UUIDDocument> T convertDocumentToObject(Class<?> baseClass, Document document, ClassLoader classLoader) throws ObjectException, ValidationException {
 		
 		try {
+			T obj = null;
 			
-			String clz = (String) document.get("_clz");
-			if(Objects.isNull(clz)) {
-				clz = (String) document.get("clz"); // Compatibility with older version.
-			}
-			if(Objects.isNull(clz)) {
-				clz = baseClass.getName();
-			}
-			
-			clz = processClassNameChanges(clz, classLoader);
-			T obj;
+			Class<?> c;
 			
 			String resourceKey = document.getString("resourceKey");
 			
-			try {
-				obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
-			} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
+			if(isTemplateClass(baseClass)) {
+				c = baseClass;
+			} else {
+				c =  ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey);
+			}
+			if(Objects.nonNull(c)) {
+				try {
+					obj = (T) c.getConstructor().newInstance();
+				} catch(NoSuchMethodException | InstantiationException e) {
+				}
+			}
+			
+			if(Objects.isNull(obj)) {
+				String clz = (String) document.get("_clz");
+				if(Objects.isNull(clz)) {
+					clz = (String) document.get("clz"); // Compatibility with older version.
+				}
+				if(Objects.isNull(clz)) {
+					clz = baseClass.getName();
+				}
+				
+				clz = processClassNameChanges(clz, classLoader);
+				
 				try {
 					obj = (T) ApplicationServiceImpl.getInstance().getBean(ClassLoaderService.class).findClass(clz).getConstructor().newInstance();
-				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e2) {
+				} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e) {
+					log.warn("Could not find class {} in uber class loader", clz);
 					try {
-						Class<?> c = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey);
-						if(Objects.isNull(c)) {
-							throw new IllegalStateException(String.format(
-									"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
-									resourceKey, clz, classLoader));
-						}
-						obj = (T) c.getConstructor().newInstance();
-					} catch(NoSuchMethodException | InstantiationException e3) {
+						obj = (T) classLoader.loadClass(clz).getConstructor().newInstance();
+					} catch(ClassNotFoundException | NoSuchMethodException | InstantiationException e2) {
 						throw new IllegalStateException(String.format(
 							"Failed to find a concrete class for %s and class %s. Class loader is %s.", 
-							resourceKey, clz, classLoader), e);
+							resourceKey, clz, classLoader), e2);
+						
 					}
 				}
 			}
@@ -602,25 +660,32 @@ public class DocumentHelper {
 						m.invoke(obj, convertDocumentToObject(UUIDEntity.class, (Document) doc, classLoader));
 					} else {
 						Object objectUUID =  document.get(name);
+						String objectName = null;
 						if(objectUUID instanceof Document) {
 							objectUUID = document.get(name, Document.class).get("uuid");
+							objectName = (String) document.get(name, Document.class).get("name");
 						} 
 						
 						if(StringUtils.isNotBlank((String)objectUUID)) {
-							ObjectServiceBean service = parameter.getType().getAnnotation(ObjectServiceBean.class);
-							if(Objects.nonNull(service)) {
-								
-								UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
-								Object ref = bean.getObjectByUUID((String)objectUUID);
-								m.invoke(obj, ref);
-								
+							if(!parameter.getType().equals(UUIDReference.class)) {
+								ObjectServiceBean service = parameter.getType().getAnnotation(ObjectServiceBean.class);
+								if(Objects.nonNull(service)) {
+									
+									UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
+									Object ref = bean.getObjectByUUID((String)objectUUID);
+									m.invoke(obj, ref);
+									
+								} else {
+									resourceKey = getTemplateResourceKey(parameter.getType());
+	
+									AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, (String)objectUUID);
+									Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+									m.invoke(obj, ref);
+									
+								}
 							} else {
-								resourceKey = getTemplateResourceKey(parameter.getType());
-
-								AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, (String)objectUUID);
-								Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+								UUIDReference ref = new UUIDReference((String)objectUUID, objectName);
 								m.invoke(obj, ref);
-								
 							}
 						}
 						
@@ -660,14 +725,19 @@ public class DocumentHelper {
 								elements.add(convertDocumentToObject(type, embeddedDocument, classLoader));
 							} else if(embedded instanceof Document) {
 								UUIDReference ref = DocumentHelper.convertDocumentToObject(UUIDReference.class, (Document) embedded);
-								AbstractObject e = (AbstractObject) 
-										ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
-												columnDefinition.references(), ref.getUuid());
-								UUIDEntity ue = convertDocumentToObject(
-										ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(columnDefinition.references()),
-										new Document(e.getDocument()), 
-										classLoader); 
-								elements.add(ue);
+								if(!UUIDReference.class.equals(type)) {
+									AbstractObject e = (AbstractObject) 
+											ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
+													columnDefinition.references(), ref.getUuid());
+									UUIDEntity ue = convertDocumentToObject(
+											ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(columnDefinition.references()),
+											new Document(e.getDocument()), 
+											classLoader); 
+									elements.add(ue);
+								} else {
+									elements.add(ref);
+								}
+								
 							}
 						}
 
@@ -719,6 +789,11 @@ public class DocumentHelper {
 		}
 		
 	}
+
+	private static boolean isTemplateClass(Class<?> baseClass) {
+		return baseClass.equals(ObjectTemplate.class) || baseClass.equals(FieldTemplate.class);
+	}
+
 
 	public static void registerClassNameChange(String from, String to) {
 		classNameChanges.put(from, to);
@@ -976,6 +1051,14 @@ public class DocumentHelper {
 	public static void generateObjectHash(ObjectTemplate template, Document entity, SHA256Digest sha2) throws UnsupportedEncodingException {
 
 
+	}
+
+	public static boolean hasErrors() {
+		return !validationErrors.get().isEmpty();
+	}
+	
+	public static Collection<DocumentValidationError> getErrors() {
+		return validationErrors.get();
 	}
 
 }

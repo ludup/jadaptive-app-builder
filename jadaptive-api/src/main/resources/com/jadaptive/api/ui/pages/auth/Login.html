@@ -5,7 +5,7 @@
 <header jad:id="header"></header>
 <main class="container my-auto">
       <div class="row justify-content-center">
-          <div id="login-container" class="col-8 align-self-center">
+          <div id="login-container" class="col-lg-8 col-md-10 col-sm-12 align-self-center">
 <!--               <div class="card"> -->
 <!--                   <div class="card-header" id="authenticationHeader"></div> -->
 <!--                   <div class="card-body"> -->
@@ -15,38 +15,38 @@
 						 <h3><span id="authenticationHeader"></span></h3>
 					  </div>
                       <form id="loginForm" action="/app/ui/login" method="POST" autocomplete="off">
-                          <div id="policyDiv" class="row mb-3 d-none">
+                          <div id="policyDiv" class="row mb-3 d-none text-muted text-center">
                               <label class="col-md-4 form-label">&nbsp;</label>
-                              <div class="col-md-6 offset-md-3">
+                              <div class="col-md-8 offset-md-2">
                                   <div id="policyMessage"></div>
                                </div>
                           </div> 
                           <div class="row my-3 text-center">
-                          		<div class="col-md-6 offset-md-3">
+                          		<div class="col-md-8 offset-md-2">
                           		 <label for="username" class="form-label text-md-end">Username</label>
                           		</div>
                              
-                              <div class="col-md-6 offset-md-3">
+                              <div class="col-md-8 offset-md-2">
                                   <input type="text" id="username" class="form-control" name="username" autocomplete="off" required autofocus>
                               </div>
                           </div>
 						  <div id="passwordDiv" class="row mb-3 text-center">
-						  	<div class="col-md-6 offset-md-3">
+						  	<div class="col-md-8 offset-md-2">
                               <label for="password" class="form-label text-md-end">Password</label>
                              </div>
                              
-                              <div class="col-md-6 offset-md-3">
+                              <div class="col-md-8 offset-md-2">
                                   <input type="password" id="password" class="form-control" name="password" autocomplete="off" required autofocus>
                               </div>
                           </div>
 						  <div class="row mb-3 text-center">
-	                          <div class="col-md-6 offset-md-3">
+	                          <div class="col-md-8 offset-md-2">
 	                              <button type="submit" class="bg-dark btn btn-primary spinForm">
 	                                  <i class="fa-solid fa-right-to-bracket"></i> <span id="buttonName">Login</span>
 	                              </button>
 	                          </div>
                           </div>
-                           <div class="col-md-6 offset-md-3 mt-3 text-center">
+                           <div class="col-md-8 offset-md-2 mt-3 text-center">
                            	 <div id="actions"></div>
                           </div>
                         </form>

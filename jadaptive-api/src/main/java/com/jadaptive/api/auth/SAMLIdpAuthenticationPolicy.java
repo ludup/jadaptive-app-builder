@@ -49,4 +49,9 @@ public class SAMLIdpAuthenticationPolicy extends AuthenticationPolicy {
 		this.passwordRequired = passwordRequired;
 	}
 
+	@Override
+	public boolean isLoginPolicy() {
+		return true;
+	}
+
 }

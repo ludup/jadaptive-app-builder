@@ -16,7 +16,7 @@ import com.jadaptive.api.ui.menu.PageMenu;
 @Component
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils" })
 @PageProcessors(extensions = { "i18n" })
-@PageMenu(parent = ApplicationMenuService.SYSTEM_MENU_UUID, icon = "fa-address-card", weight = Integer.MAX_VALUE, withPermission = "tenant.read", path = "/app/ui/about", bundle = "userInterface", i18n = "about.name")
+@PageMenu(parent = ApplicationMenuService.CONFIGURATION_MENU_UUID, icon = "fa-address-card", weight = Integer.MAX_VALUE, withPermission = "system.read", path = "/app/ui/about", bundle = "userInterface", i18n = "about.name")
 public class About extends AuthenticatedPage {
 
 	@Autowired

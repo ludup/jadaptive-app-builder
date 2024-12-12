@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 public @interface RequestPage {
 
-	String path();
+	String[] path();
 }

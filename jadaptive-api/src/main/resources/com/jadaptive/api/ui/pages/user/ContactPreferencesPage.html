@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<head>
+<title></title>
+<meta charset="UTF-8">
+</head>
+<body>
+<div class="wrapper">
+<header jad:id="header"></header>
+<main class="container mt-5">
+    <div id="content" class="row my-1">
+         <div class="col-12">
+           <h1 jad:bundle="users" jad:i18n="contactPreferences.name"></h1></div>
+   		 <div class="col-12" jad:id="objectRenderer" jad:handler="multipart"></div>
+   </div>
+   <div class="row my-3">
+         <div class="col-12">
+           <button id="saveButton" class="btn btn-success me-3"> <i class="fa-save fa-solid"></i>&nbsp;<span jad:bundle="default" jad:i18n="save.name">[Save]</span></button> 
+           <a id="cancelButton" class="checkExit text-muted" href="#"><span jad:bundle="default" jad:i18n="cancel.name">[Cancel]</span></a>
+         </div>
+   </div>
+</main>
+</div>
+<footer jad:id="footer"></footer>
+</body>
+</html>

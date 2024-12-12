@@ -283,6 +283,8 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 			return node.asText();
 		case OBJECT_REFERENCE:
 			return createReference(node, field);
+		case COUNTRY:
+			return node.asText();
 		default:
 			throw new ValidationException(
 					String.format("Missing field type %s in validate method", 

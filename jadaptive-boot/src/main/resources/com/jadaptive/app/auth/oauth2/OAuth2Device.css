@@ -1,0 +1,13 @@
+input {
+  display: block;
+  margin: 0.5em auto;
+  border: none;
+  padding: 0;
+  background: repeating-linear-gradient(90deg, dimgrey 0, dimgrey 1ch, transparent 0, transparent 1.5ch) 0 100%/17ch 2px no-repeat;
+  font: 5ch droid sans mono, consolas, monospace;
+  letter-spacing: 0.5ch;
+  color: var(--bs-primary-color);
+}
+input:focus {
+  outline: none;
+}

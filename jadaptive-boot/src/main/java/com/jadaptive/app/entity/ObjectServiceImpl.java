@@ -34,10 +34,12 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -48,6 +50,7 @@ import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
+import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.DocumentDatabase;
@@ -224,7 +227,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				}
 				break;
 			case OBJECT_REFERENCE:
-				if(t.isCascadeDelete()) {
+				if(t.getOptions().contains(FieldOptions.CASCADE_DELETE)) {
 					if(t.getCollection()) {
 						for(AbstractObject c : e.getObjectCollection(t.getResourceKey())) {
 							cascadeReference(c, template, t);
@@ -310,6 +313,15 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
+	public <T extends UUIDDocument> T fromStashToUUIDDocument(String resourceKey, Class<T> clz)  {
+		try {
+			return toUUIDDocument((AbstractObject) Request.get().getSession().getAttribute(resourceKey), clz);
+		} finally {
+			 Request.get().getSession().removeAttribute(resourceKey);
+		}
+	}
+	
+	@Override
 	public AbstractObject fromStashToAbstractObject(String resourceKey)  {
 		try {
 			UUIDDocument doc = (UUIDDocument) Request.get().getSession().getAttribute(resourceKey);
@@ -338,7 +350,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				if(resourceKey.equals(foreignType)) {
 					Collection<AbstractObject> references = collection(reference.getResourceKey(), generateFieldName(parentField, field), foreignKey);
 					if(references.size() > 0) {
-						if(field.isCascadeDelete()) {
+						if(field.getOptions().contains(FieldOptions.CASCADE_ON_DELETED_REFERENCE)) {
 							deleteAll(parentTemplate.getResourceKey(), convertToUUIDS(references));
 						} else {
 							if(parentTemplate.getType() == ObjectType.SINGLETON) {
@@ -876,6 +888,17 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
+	public Collection<AbstractObject> tableObjectsNoScope(String resourceKey, int offset, int limit, String sortColumn, SortOrder order, SearchField... fields) {
+		ObjectTemplate template = templateService.get(resourceKey);
+		
+		if(StringUtils.isBlank(sortColumn)) {
+			sortColumn = template.getDefaultColumn();
+		}
+
+		return tableViaObjectBean(template, offset, limit, order, sortColumn, fields);
+	}
+	
+	@Override
 	public long count(String resourceKey, String searchField, String searchValue) {
 		ObjectTemplate template = templateService.get(resourceKey);
 
@@ -948,6 +971,13 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			return countViaObjectBean(template, fields);
 		}
 	}
+	
+	@Override
+	public long countObjectsNoScope(String resourceKey, SearchField... fields) {
+		ObjectTemplate template = templateService.get(resourceKey);
+		return countViaObjectBean(template, fields);
+		
+	}
 
 	private void buildFormHandlers() {
 		if(formHandlers.isEmpty()) {
@@ -984,6 +1014,26 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(entity.getResourceKey());
 		return DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument()));
+	}
+	
+	@Override
+	public <T extends UUIDDocument> T toUUIDDocument(AbstractObject entity, Class<T> clz) {
+		return DocumentHelper.convertDocumentToObject(clz, new Document(entity.getDocument()));
+	}
+	
+	@Override
+	public <T extends UUIDDocument> T objectFromReference(UUIDReference ref, Class<T> clz) {
+		return DocumentHelper.convertDocumentToObject(clz, new Document(get(TemplateUtils.lookupClassResourceKey(clz), ref.getUuid()).getDocument()));
+	}
+	
+	@Override
+	public <T extends UUIDDocument> Collection<T> collectionFromReferences(Collection<UUIDReference> refs, Class<T> clz) {
+		var results = new ArrayList<T>();
+		String resourceKey = TemplateUtils.lookupClassResourceKey(clz);
+		for(UUIDReference ref : refs) {
+			results.add(DocumentHelper.convertDocumentToObject(clz, new Document(get(resourceKey, ref.getUuid()).getDocument())));
+		}
+		return results;
 	}
 	
 	

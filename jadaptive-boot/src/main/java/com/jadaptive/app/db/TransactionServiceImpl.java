@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.TransactionService;
+import com.jadaptive.api.tenant.TenantService;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -15,7 +17,9 @@ public class TransactionServiceImpl implements TransactionService {
 	
 	private final ThreadLocal<TX> tx = new ThreadLocal<>();
 	
-
+	@Autowired
+	private TenantService tenantService; 
+	
 	protected final DocumentDatabase db;
 	
 	public TransactionServiceImpl(DocumentDatabase db) {
@@ -36,7 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
 		var tx = new TXImpl(rollbacks);
 		this.tx.set(tx);
 		try {
-			db.doInTransaction(r);
+			db.doInTransaction(tenantService.getCurrentTenant().getUuid(), r);
 		}
 		catch(RuntimeException e) {
 			try {

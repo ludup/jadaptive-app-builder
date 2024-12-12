@@ -74,6 +74,7 @@ public class FieldSearchFormInput {
 		
 		Element input;
 		Element inputText;
+		
 		_this.appendChild(new Element("div")
 						.attr("id", String.format("%sDropdown", resourceKey))
 						.addClass("input-group position-relative dropdown")

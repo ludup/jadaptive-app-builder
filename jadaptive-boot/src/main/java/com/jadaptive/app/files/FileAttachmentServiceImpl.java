@@ -52,10 +52,10 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 	
 	
 	@Override
-	public FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable) throws IOException {
+	public FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable, String template) throws IOException {
 		
 		FileAttachmentStorage provider = getProvider();
-		return provider.createAttachment(in, filename, contentType, formVariable);
+		return provider.createAttachment(in, filename, contentType, formVariable, template);
 	}
 	
 	@Override
@@ -90,6 +90,12 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 	@Override
 	public FileAttachment getAttachment(String uuid) {
 		return attachmentDatabase.get(uuid, FileAttachment.class);
+	}
+
+	@Override
+	public void markForRemoval(String encoded) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

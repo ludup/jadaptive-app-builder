@@ -220,8 +220,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	public User getCurrentUser() {
 		Stack<User> userStack = currentUser.get();
 		if(Objects.isNull(userStack) || userStack.isEmpty()) {
-			if(log.isWarnEnabled()) {
-				log.warn("Access denied because there is no user in the current context");
+			if(log.isDebugEnabled()) {
+				log.debug("Access denied because there is no user in the current context");
 			}
 			throw new AccessDeniedException();
 		}
@@ -364,7 +364,10 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		Set<String> allPermissions = new TreeSet<>();
 		Collection<Role> roles = roleService.getRoles(user);
-		if(isAdministrator()) {
+		if(isAdministrator(user)) {
+			if(tenantService.isSystemTenant()) {
+				allPermissions.add("system.read");
+			}
 			allPermissions.addAll(getAllPermissions());
 		} else {
 			for(Role role : roles) {

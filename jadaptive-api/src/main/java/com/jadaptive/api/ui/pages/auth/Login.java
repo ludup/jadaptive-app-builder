@@ -68,10 +68,10 @@ public class Login extends AuthenticationPage<LoginForm> {
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		if(state.hasFinished()) {
-			authenticationService.completeAuthentication(state, Optional.empty())
-				.maybeAttachToSession(Request.get(), sessionUtils.getTimeout());;
-			return;
+			throw authenticationService.completeAuthentication(state, Optional.empty())
+				.maybeAttachToSession(Request.get(), sessionUtils.getTimeout());
 		}
+		
 		state = authenticationService.getCurrentState();
 		var currentPage = authenticationService.getCurrentPage();
 		if(!currentPage.equals(Login.class)) {
@@ -100,10 +100,19 @@ public class Login extends AuthenticationPage<LoginForm> {
 			User user; 
 			try {
 				user = userService.getUser(form.getUsername());
-				
 			} catch(ObjectNotFoundException e) {
 				user = new FakeUser(form.getUsername());
 			}
+			
+			if(!user.isEnabled()) {
+				if(log.isInfoEnabled()) {
+					log.info("{} cannot login as the account is disabled.", user.getUsername());
+				}
+				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+		    	Feedback.error("default", "error.invalidCredentials");
+				return false;
+			}
+			
 			state.setUser(user);
 			boolean passwordRequired = state.getPolicy().getPasswordOnFirstPage() && state.getPolicy().getPasswordRequired();
 			boolean passwordVerified = false;
@@ -112,6 +121,9 @@ public class Login extends AuthenticationPage<LoginForm> {
 				if(userService.verifyPassword(state.getUser(), Request.get().getParameter("password").toCharArray())) {
 					state.setAttribute(AuthenticationService.PASSWORD, Request.get().getParameter("password"));
 					passwordVerified = true;
+					if(log.isInfoEnabled()) {
+						log.info("Verified password for {}", user.getUsername());
+					}
 				} 
 			}
 			

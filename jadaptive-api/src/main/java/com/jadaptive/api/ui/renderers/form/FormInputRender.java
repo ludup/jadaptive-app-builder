@@ -32,39 +32,36 @@ public abstract class FormInputRender extends FieldInputRender {
 	
 	public final void renderInput(Element rootElement, String value, String... classes) throws IOException {
 		
-		Element myElement;
+		rootElement.addClass(Utils.csv(" ", classes));
 		
-		rootElement.appendChild(myElement = 
-				new Element("div").addClass(Utils.csv(" ", classes) + " row mb-3"));
+		Element parent = rootElement;
 		
-		Element parent = myElement;
-		
-		beforeInput(myElement, value);
-		
+		beforeInput(rootElement, value);
+
 		if(decorate) {
 			
-			myElement.appendChild(parent = new Element("div")
-						.addClass("col-12")
+			rootElement
 				.appendChild(new Element("label")
 						.attr("for", getFormVariable())
 						.addClass("form-label")
 						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.name", getResourceKey()))));
+						.attr("jad:i18n", String.format("%s.name", getResourceKey())));
 		}
 		
+
 		parent.appendChild(Html.div("input-group").appendChild(input = createInputElement(value)));
 		
-		afterInput(myElement, value);
+		afterInput(rootElement, value);
 		
 		if(decorate) {
-			createHelpElement(myElement, value);
+			createHelpElement(rootElement, value);
 		}
 		
 		if(!disableIDAttribute) {
 			input.attr("id", resourceKey);
 		}
 		
-		onRender(myElement, value);
+		onRender(rootElement, value);
 
 	}
 	

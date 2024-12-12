@@ -6,9 +6,11 @@ import static com.mongodb.client.model.Sorts.descending;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.csv.CsvImportService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
@@ -59,49 +62,43 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Autowired
 	private CsvImportService importService; 
 	
-	ThreadLocal<ClientSession> currentSession = new ThreadLocal<>();
+	ThreadLocal<Transaction> currentSession = new ThreadLocal<>();
 	
 	private MongoCollection<Document> getCollection(String table, String database) {
-		MongoDatabase db = mongo.getClient().getDatabase(database);
+		MongoDatabase db = mongo.getClient(database).getDatabase(getDatabaseName(database));
 		return db.getCollection(table);
 	}
-
-	@Override
-	public void dropSchema() {
-
-		for(String database : mongo.getClient().listDatabaseNames()) {
-			MongoDatabase db = mongo.getClient().getDatabase(database);
-			switch(db.getName()) {
-			case "admin":
-			case "local":
-			case "config":
-				continue;
-			default:
-				db.drop();
-			}
-		}
-	}
 	
+	private String getDatabaseName(String database) {
+		String prefix = ApplicationProperties.getValue("mongodb.databasePrefix", null);
+		if(Objects.nonNull(prefix)) {
+			return String.format("%s-%s", prefix, database);
+		}
+		return database;
+	}
+
 	@Override
-	public void doInTransaction(Runnable r) {
+	public void doInTransaction(String database, Runnable r) {
 		
 		if(isTransactionActive()) {
 			r.run();
 		} else {
-			currentSession.set(mongo.getClient().startSession());
-			if(log.isDebugEnabled()) {
-				log.debug("Starting transaction");
+			
+			if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
+				log.info("TRANSACTION: Starting transaction");
 			}
-			currentSession.get().startTransaction();
+			
+			currentSession.set(new Transaction(database));
+			
 			try {
 				r.run();
-				if(log.isDebugEnabled()) {
-					log.debug("Committing transaction");
+				if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
+					log.info("TRANSACTION: Committing transaction");
 				}
 				currentSession.get().commitTransaction();
 			} catch(Throwable t) {
-				if(log.isDebugEnabled()) {
-					log.debug("Aborting transaction");
+				if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
+					log.info("TRANSACTION: Aborting transaction");
 				}
 				currentSession.get().abortTransaction();
 				if(t instanceof RuntimeException) {
@@ -109,15 +106,15 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				}
 				throw new IllegalStateException("Transaction failed with " + t.getMessage(), t);
 			} finally {
-				if(log.isDebugEnabled()) {
-					log.debug("Closing session");
+				if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
+					log.info("TRANSACTION: Closing session");
 				}
 				currentSession.get().close();
 				currentSession.remove();
 			}
 		}
 	}
-	
+
 	@Override
 	public void createTextIndex(String fieldName, String table, String database) {
 		String indexName = "text_" + fieldName;
@@ -125,9 +122,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		IndexOptions indexOptions = new IndexOptions()
 				.collation(getCollation())
 				.name(indexName);
-		ClientSession session = currentSession.get();
-		if(Objects.nonNull(session)) {
-			collection.createIndex(session, Indexes.text(fieldName), indexOptions);
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			collection.createIndex(transaction.session(database), Indexes.text(fieldName), indexOptions);
 		} else {
 			collection.createIndex(Indexes.text(fieldName), indexOptions);		
 		}
@@ -147,9 +144,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				.collation(getCollation())
 				.name(indexName);
 		
-		ClientSession session = currentSession.get();
-		if(Objects.nonNull(session)) {
-			collection.createIndex(session, Indexes.ascending(fieldNames), indexOptions);
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			collection.createIndex(transaction.session(database), Indexes.ascending(fieldNames), indexOptions);
 		} else {
 			collection.createIndex(Indexes.ascending(fieldNames), indexOptions);		
 		}
@@ -159,9 +156,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public void dropIndexes(String table, String database) {
 		MongoCollection<Document> collection = getCollection(table, database);
 
-		ClientSession session = currentSession.get();
-		if(Objects.nonNull(session)) {
-			collection.dropIndexes(session);
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			collection.dropIndexes(transaction.session(database));
 		} else {
 			collection.dropIndexes();	
 		}
@@ -178,9 +175,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				.unique(true)
 				.name(indexName);
 		
-		ClientSession session = currentSession.get();
-		if(Objects.nonNull(session)) {
-			collection.createIndex(session, Indexes.ascending(fieldNames), indexOptions);
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			collection.createIndex(transaction.session(database), Indexes.ascending(fieldNames), indexOptions);
 		} else {
 			collection.createIndex(Indexes.ascending(fieldNames), indexOptions);
 		}
@@ -208,9 +205,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			
 //			String contentHash = DocumentHelper.generateContentHash(document);
 //			document.put("contentHash", contentHash);
-			ClientSession session = currentSession.get();
-			if(Objects.nonNull(session)) {
-				collection.insertOne(session, document);	
+			Transaction transaction = currentSession.get();
+			if(Objects.nonNull(transaction)) {
+				collection.insertOne(transaction.session(database), document);	
 			} else {
 				collection.insertOne(document);		
 			}
@@ -238,9 +235,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 //			if(log.isDebugEnabled()) {
 //				log.debug("Saving {} object with content hash {}", table, contentHash);
 //			}
-			ClientSession session = currentSession.get();
-			if(Objects.nonNull(session)) {
-				collection.replaceOne(session, Filters.eq("_id", document.getString("_id")), 
+			Transaction transaction = currentSession.get();
+			if(Objects.nonNull(transaction)) {
+				collection.replaceOne(transaction.session(database), Filters.eq("_id", document.getString("_id")), 
 						document, new ReplaceOptions().upsert(true));
 			} else {
 				collection.replaceOne(Filters.eq("_id", document.getString("_id")), 
@@ -282,9 +279,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		ClientSession session= currentSession.get();
-		if(Objects.nonNull(session)) {
-			result = collection.find(session, Filters.eq("_id", uuid));
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			result = collection.find(transaction.session(database), Filters.eq("_id", uuid));
 		} else {
 			result = collection.find(Filters.eq("_id", uuid));
 		}
@@ -302,9 +299,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		ClientSession session= currentSession.get();
-		if(Objects.nonNull(session)) {
-			result = collection.find(session, buildFilter(fields))
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			result = collection.find(transaction.session(database), buildFilter(fields))
 					.collation(getCollation());
 		} else {
 			result = collection.find(buildFilter(fields))
@@ -330,16 +327,16 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		ClientSession session= currentSession.get();
+		Transaction transaction = currentSession.get();
 		if(fields.length > 0) {
-			if(Objects.nonNull(session)) {
-				result = collection.find(session, buildFilter(fields)).sort(new BasicDBObject(field, -1));
+			if(Objects.nonNull(transaction)) {
+				result = collection.find(transaction.session(database), buildFilter(fields)).sort(new BasicDBObject(field, -1));
 			} else {
 				result = collection.find(buildFilter(fields)).sort(new BasicDBObject(field, -1));
 			}
 		} else {
-			if(Objects.nonNull(session)) {
-				result = collection.find(session).sort(new BasicDBObject(field, -1));
+			if(Objects.nonNull(transaction)) {
+				result = collection.find(transaction.session(database)).sort(new BasicDBObject(field, -1));
 			} else {
 				result = collection.find().sort(new BasicDBObject(field, -1));
 			}
@@ -358,16 +355,16 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		ClientSession session= currentSession.get();
+		Transaction transaction = currentSession.get();
 		if(fields.length > 0) {
-			if(Objects.nonNull(session)) {
-				result = collection.find(session, buildFilter(fields)).sort(new BasicDBObject(field, 1));
+			if(Objects.nonNull(transaction)) {
+				result = collection.find(transaction.session(database), buildFilter(fields)).sort(new BasicDBObject(field, 1));
 			} else {
 				result = collection.find(buildFilter(fields)).sort(new BasicDBObject(field, 1));
 			}
 		} else {
-			if(Objects.nonNull(session)) {
-				result = collection.find(session).sort(new BasicDBObject(field, 1));
+			if(Objects.nonNull(transaction)) {
+				result = collection.find(transaction.session(database)).sort(new BasicDBObject(field, 1));
 			} else {
 				result = collection.find().sort(new BasicDBObject(field, 1));
 			}
@@ -385,12 +382,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		AggregateIterable<Document> results;
 		
-		ClientSession session= currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		if(fields.length > 0) {
 		
-			if(Objects.nonNull(session)) {
-				results = collection.aggregate(session,
+			if(Objects.nonNull(transaction)) {
+				results = collection.aggregate(transaction.session(database),
 					    Arrays.asList(
 					        Aggregates.match(buildFilter(fields)),
 					        Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
@@ -404,8 +401,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			}
 			
 		} else {
-			if(Objects.nonNull(session)) {
-				results = collection.aggregate(session,
+			if(Objects.nonNull(transaction)) {
+				results = collection.aggregate(transaction.session(database),
 					    Arrays.asList(
 					    	Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
 					    ));
@@ -432,12 +429,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		AggregateIterable<Document> results;
 		
-		ClientSession session= currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		if(fields.length > 0) {
 		
-			if(Objects.nonNull(session)) {
-				results = collection.aggregate(session,
+			if(Objects.nonNull(transaction)) {
+				results = collection.aggregate(transaction.session(database),
 					    Arrays.asList(
 					        Aggregates.match(buildFilter(fields)),
 					        Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
@@ -451,8 +448,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			}
 			
 		} else {
-			if(Objects.nonNull(session)) {
-				results = collection.aggregate(session,
+			if(Objects.nonNull(transaction)) {
+				results = collection.aggregate(transaction.session(database),
 					    Arrays.asList(
 					    	Aggregates.group(null, Accumulators.sum("total", "$" + groupBy))
 					    ));
@@ -480,9 +477,10 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		ClientSession session= currentSession.get();
-		if(Objects.nonNull(session)) {
-			result = collection.find(session, Filters.eq(field, value))
+		Transaction transaction = currentSession.get();
+		
+		if(Objects.nonNull(transaction)) {
+			result = collection.find(transaction.session(database), Filters.eq(field, value))
 					.collation(getCollation());
 		} else {
 			result = collection.find(Filters.eq(field, value))
@@ -501,9 +499,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		getByUUID(uuid, table, database);
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		ClientSession session = currentSession.get();
-		if(Objects.nonNull(session)) {
-			collection.deleteOne(session, Filters.eq("_id", uuid));
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			collection.deleteOne(transaction.session(database), Filters.eq("_id", uuid));
 		} else {
 			collection.deleteOne(Filters.eq("_id", uuid));
 		}
@@ -523,9 +521,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		DeleteResult result;
 		
-		ClientSession session = currentSession.get();
-		if(Objects.nonNull(session)) {
-			result = collection.deleteMany(session, buildFilter(fields));
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			result = collection.deleteMany(transaction.session(database), buildFilter(fields));
 		} else {
 			result = collection.deleteMany(buildFilter(fields));
 		}
@@ -538,17 +536,17 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		ClientSession session = currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		if(fields.length == 0) {
-			if(Objects.nonNull(session)) {
-				return collection.find(session);
+			if(Objects.nonNull(transaction)) {
+				return collection.find(transaction.session(database));
 			} else {
 				return collection.find();
 			}
 		} else {
-			if(Objects.nonNull(session)) {
-				return collection.find(session, buildFilter(fields))
+			if(Objects.nonNull(transaction)) {
+				return collection.find(transaction.session(database), buildFilter(fields))
 					.collation(getCollation());
 			} else {
 				return collection.find(buildFilter(fields))
@@ -562,17 +560,17 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 
-		ClientSession session = currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		if(fields.length == 0) {
-			if(Objects.nonNull(session)) {
-				return collection.find(session);
+			if(Objects.nonNull(transaction)) {
+				return collection.find(transaction.session(database));
 			} else {
 				return collection.find();
 			}
 		} else {
-			if(Objects.nonNull(session)) {
-				return collection.find(session, buildFilter(fields))
+			if(Objects.nonNull(transaction)) {
+				return collection.find(transaction.session(database), buildFilter(fields))
 					.collation(getCollation());
 			} else {
 				return collection.find(buildFilter(fields))
@@ -586,19 +584,19 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		ClientSession session = currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		if(fields.length == 0) {
-			if(Objects.nonNull(session)) {
-				return collection.find(session)
+			if(Objects.nonNull(transaction)) {
+				return collection.find(transaction.session(database))
 						.sort(getOrder(order, sortField));
 			} else {
 				return collection.find()
 						.sort(getOrder(order, sortField));
 			}
 		} else {
-			if(Objects.nonNull(session)) {
-				return collection.find(session, buildFilter(fields))
+			if(Objects.nonNull(transaction)) {
+				return collection.find(transaction.session(database), buildFilter(fields))
 					.collation(getCollation())
 					.sort(getOrder(order, sortField));
 			} else {
@@ -615,17 +613,17 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		ClientSession session = currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		if(fields.length == 0) {
-			if(Objects.nonNull(session)) {
-				return collection.find(session).sort(getOrder(order, sortField)).skip(start).limit(length);
+			if(Objects.nonNull(transaction)) {
+				return collection.find(transaction.session(database)).sort(getOrder(order, sortField)).skip(start).limit(length);
 			} else {
 				return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
 			}
 		} else {
-			if(Objects.nonNull(session)) {
-				return collection.find(session, buildFilter(fields))
+			if(Objects.nonNull(transaction)) {
+				return collection.find(transaction.session(database), buildFilter(fields))
 						.collation(getCollation())
 						.sort(getOrder(order, sortField)).skip(start).limit(length);
 			} else {
@@ -651,11 +649,11 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Long searchCount(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		ClientSession session = currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		if(fields.length == 0) {
-			if(Objects.nonNull(session)) {
-				return collection.countDocuments(session);
+			if(Objects.nonNull(transaction)) {
+				return collection.countDocuments(transaction.session(database));
 			} else {
 				return collection.countDocuments();	
 			}
@@ -663,8 +661,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			CountOptions options = new CountOptions();
 			options.collation(getCollation());
 			
-			if(Objects.nonNull(session)) {
-				return collection.countDocuments(session, buildFilter(fields), options);	
+			if(Objects.nonNull(transaction)) {
+				return collection.countDocuments(transaction.session(database), buildFilter(fields), options);	
 			} else {
 				return collection.countDocuments(buildFilter(fields), options);
 			}
@@ -672,42 +670,42 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		}
 	}
 	
-	@Override
-	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField) {
-		
-		MongoCollection<Document> collection = getCollection(table, database);
-		searchField = configureSearch(searchField);
-		
-		ClientSession session = currentSession.get();
-		
-		if(StringUtils.isBlank(searchValue)) {
-			if(Objects.nonNull(session)) {
-				return collection.find(session).sort(getOrder(order, sortField)).skip(start).limit(length);
-			} else {
-				return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
-			}
-			
-		} else {
-			if(Objects.nonNull(session)) {
-				return collection.find(session, Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);
-			} else {
-				return collection.find(Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);	
-			}
-		}
-	}
+//	@Override
+//	public Iterable<Document> table(String table, String searchField, String searchValue, String database, int start, int length, SortOrder order, String sortField) {
+//		
+//		MongoCollection<Document> collection = getCollection(table, database);
+//		searchField = configureSearch(searchField);
+//		
+//		ClientSession session = currentSession.get();
+//		
+//		if(StringUtils.isBlank(searchValue)) {
+//			if(Objects.nonNull(session)) {
+//				return collection.find(session).sort(getOrder(order, sortField)).skip(start).limit(length);
+//			} else {
+//				return collection.find().sort(getOrder(order, sortField)).skip(start).limit(length);
+//			}
+//			
+//		} else {
+//			if(Objects.nonNull(session)) {
+//				return collection.find(session, Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);
+//			} else {
+//				return collection.find(Filters.regex(searchField, searchValue)).sort(getOrder(order, sortField)).skip(start).limit(length);	
+//			}
+//		}
+//	}
 
 	@Override
 	public Long count(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		ClientSession session = currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		if(fields.length > 0) {
 		
-			if(Objects.nonNull(session)) {
+			if(Objects.nonNull(transaction)) {
 				CountOptions options = new CountOptions();
 				options.collation(getCollation());
-				return collection.countDocuments(session, buildFilter(fields), options);
+				return collection.countDocuments(transaction.session(database), buildFilter(fields), options);
 			} else {
 				CountOptions options = new CountOptions();
 				options.collation(getCollation());
@@ -715,8 +713,8 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			}
 			
 		} else {
-			if(Objects.nonNull(session)) {
-				return collection.countDocuments(session);
+			if(Objects.nonNull(transaction)) {
+				return collection.countDocuments(transaction.session(database));
 			} else {
 				return collection.countDocuments();
 			}
@@ -730,18 +728,18 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		searchField = configureSearch(searchField);
 		
-		ClientSession session = currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		if(StringUtils.isBlank(searchValue)) {
-			if(Objects.nonNull(session)) {
-				return collection.countDocuments(session);
+			if(Objects.nonNull(transaction)) {
+				return collection.countDocuments(transaction.session(database));
 			} else {
 				return collection.countDocuments();	
 			}
 			
 		} else {
-			if(Objects.nonNull(session)) {
-				return collection.countDocuments(session, Filters.regex(searchField, searchValue));
+			if(Objects.nonNull(transaction)) {
+				return collection.countDocuments(transaction.session(database), Filters.regex(searchField, searchValue));
 			} else {
 				return collection.countDocuments(Filters.regex(searchField, searchValue));	
 			}
@@ -759,9 +757,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void dropCollection(String table, String database) {
-		ClientSession session = currentSession.get();
-		if(Objects.nonNull(session)) {
-			getCollection(table, database).drop(session);
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			getCollection(table, database).drop(transaction.session(database));
 		} else {
 			getCollection(table, database).drop();
 		}
@@ -771,12 +769,12 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document getFirst(String uuid, String table, String database) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		ClientSession session = currentSession.get();
+		Transaction transaction = currentSession.get();
 		
 		FindIterable<Document> result;
 		
-		if(Objects.nonNull(session)) {
-			result = collection.find(session, Filters.eq("_id", uuid));
+		if(Objects.nonNull(transaction)) {
+			result = collection.find(transaction.session(database), Filters.eq("_id", uuid));
 		} else {
 			result = collection.find(Filters.eq("_id", uuid));
 		}
@@ -789,11 +787,11 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void dropDatabase(String database) {
-		ClientSession session = currentSession.get();
-		if(Objects.nonNull(session)) {
-			mongo.getClient().getDatabase(database).drop(session);
+		Transaction transaction = currentSession.get();
+		if(Objects.nonNull(transaction)) {
+			mongo.getClient(database).getDatabase(getDatabaseName(database)).drop(transaction.session(database));
 		} else {
-			mongo.getClient().getDatabase(database).drop();
+			mongo.getClient(database).getDatabase(getDatabaseName(database)).drop();
 		}
 		
 	}
@@ -966,12 +964,62 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public boolean isTransactionActive() {
-		ClientSession session = currentSession.get();
+		Transaction session = currentSession.get();
 		if(Objects.nonNull(session)) {
 			return session.hasActiveTransaction();
 		}
 		return false;
 	}
 
+	class Transaction {
+		
+		String id = Utils.generateRandomAlphaNumericString(8);
+		Map<String,ClientSession> databaseSessions = new HashMap<>();
+		
+		public Transaction(String database) {
+			startTransaction(database);
+		}
 
+		public boolean hasActiveTransaction() {
+			return !databaseSessions.isEmpty();
+		}
+		
+		public ClientSession session(String database) {
+			ClientSession session = databaseSessions.get(database);
+			if(session==null) {
+				return startTransaction(database);
+			}
+			return session;
+		}
+
+		public void close() {
+			for(ClientSession session : databaseSessions.values()) {
+				session.close();
+			}
+			databaseSessions.clear();
+		}
+
+		public void abortTransaction() {
+			for(ClientSession session : databaseSessions.values()) {
+				session.abortTransaction();
+			}
+		}
+
+		public void commitTransaction() {
+			for(ClientSession session : databaseSessions.values()) {
+				session.commitTransaction();
+			}
+		}
+
+		public ClientSession startTransaction(String database) {
+			if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
+				log.info("TRANSACTION: Creating session for transaction {} on database {}", id, database);
+			}
+			ClientSession session = mongo.getClient(database).startSession();
+			databaseSessions.put(database, session);
+			session.startTransaction();
+			return session;
+		}
+		
+	}
 }

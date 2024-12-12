@@ -11,10 +11,13 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.avatar.Avatar;
 import com.jadaptive.api.avatar.AvatarRequest;
 import com.jadaptive.api.avatar.AvatarService;
@@ -26,11 +29,13 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.ChangePasswordEvent;
@@ -48,6 +53,8 @@ import com.jadaptive.utils.Utils;
 @Service
 public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
 
+	private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+	
 	@Autowired
 	private PermissionService permissionService; 
 	
@@ -64,6 +71,11 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	
 	@Autowired
 	private TenantAwareObjectDatabase<User> userRepository;
+	
+	@Autowired
+	private TenantService tenantService; 
+	
+	private long cachedAllTenantsCount = -1;
 
 	@Override
 	public Integer getOrder() {
@@ -108,6 +120,21 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		}
 	}
 
+	@Override 
+	public void enableUser(User user) {
+		
+		permissionService.assertWrite(User.RESOURCE_KEY);
+		getDatabase(user).enableUser(user);
+	}
+	
+	@Override 
+	public void disableUser(User user) {
+		
+		permissionService.assertWrite(User.RESOURCE_KEY);
+		getDatabase(user).disableUser(user);
+	}
+	
+	
 
 	@Override
 	public User getUser(String username) {
@@ -193,6 +220,21 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 		
+		if(ApplicationServiceImpl.getInstance().getBean(ProductService.class).getProduct().isUserLicensing()) {
+			eventService.committed(User.class, (e)->{
+				synchronized(UserServiceImpl.this) {
+					cachedAllTenantsCount = -1;
+					allTenantsEnabledCount();
+					if(log.isInfoEnabled()) {
+						log.info("User event {} for {}. Licensed user count is {}",
+								e.getResourceKey(),
+								e.getObject().getUsername(),
+								cachedAllTenantsCount);
+					}
+				}
+				
+			});
+		}
 	}
 	
 	@Override
@@ -353,5 +395,33 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		default:
 			throw new UnsupportedOperationException(column + " is not a known dynamic column!");
 		}			
+	}
+
+	@Override
+	public int countEnabledUsers() {
+		return (int) userRepository.count(User.class, SearchField.eq("enabled", true));
+	}
+
+	@Override
+	public synchronized int allTenantsEnabledCount() {
+		
+		if(cachedAllTenantsCount < 0) {
+			long count = 0;
+			for(Tenant tenant : tenantService.allObjects()) {
+				tenantService.setCurrentTenant(tenant);
+				try {
+					int c = countEnabledUsers();
+					if(log.isInfoEnabled()) {
+						log.info("{} has  {} users", tenant.getName(), c);
+					}
+					count += c;
+				} finally {
+					tenantService.clearCurrentTenant();
+				}
+			}
+			cachedAllTenantsCount = count;
+		}
+		
+		return (int) cachedAllTenantsCount;
 	}
 }

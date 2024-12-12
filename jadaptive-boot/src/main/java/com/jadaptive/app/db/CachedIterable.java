@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
 
-public class CachedIterable<T extends UUIDEntity> implements Iterable<T> {
+public class CachedIterable<T extends UUIDDocument> implements Iterable<T> {
 
 	static Logger log = LoggerFactory.getLogger(CachedIterable.class);
 	

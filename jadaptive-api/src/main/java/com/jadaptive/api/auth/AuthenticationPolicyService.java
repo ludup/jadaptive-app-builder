@@ -14,4 +14,6 @@ public interface AuthenticationPolicyService extends AbstractUUIDObjectService<A
 
 	boolean hasPolicy(String resourceKey);
 
+	Iterable<AuthenticationPolicy> getAssignedPolicies(User currentUser);
+
 }

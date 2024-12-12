@@ -8,10 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.AbstractObject;
-import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationType;
@@ -53,39 +51,38 @@ public abstract class StashedObjectPage extends ObjectTemplatePage {
 
 		super.onCreate();
 
-		try {
-			FieldTemplate field = template.getField(fieldName);
-			if(StringUtils.isBlank(childResourceKey)) {
-				childResourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
-			}
-			childTemplate = templateService.get(childResourceKey);
-			childClazz = templateService.getTemplateClass(childResourceKey);
-		} catch (RepositoryException e) {
-			e.printStackTrace();
-			throw e;
-		} catch (ObjectException e) {
-			e.printStackTrace();
-			throw new FileNotFoundException(String.format("%s not found", resourceKey));
+		FieldTemplate field = template.getField(fieldName);
+		if(StringUtils.isBlank(childResourceKey)) {
+			childResourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
 		}
 		
-		FieldTemplate field = template.getField(fieldName);
+		childTemplate = templateService.get(childResourceKey);
+		childClazz = templateService.getTemplateClass(childResourceKey);
+		
 		if(field.getCollection()) {
 			if(Objects.nonNull(childUuid)) {
 				for(AbstractObject o : object.getObjectCollection(fieldName)) {
 					if(o.getUuid().equals(childUuid)) {
 						childObject = o;
+						childResourceKey = childObject.getResourceKey();
+						childTemplate = templateService.get(childResourceKey);
+						childClazz = templateService.getTemplateClass(childResourceKey);
 						break;
 					}
 	 			}
 			}
 		} else {
 			childObject = object.getChild(field);
+			childResourceKey = childObject.getResourceKey();
+			childTemplate = templateService.get(childResourceKey);
+			childClazz = templateService.getTemplateClass(childResourceKey);
 		}
 		
 		if(Objects.isNull(childObject)) {
 			childObject = objectService.createNew(childTemplate);
 			childObject.setUuid(UUID.randomUUID().toString()); // Embedded objects don't get assigned these automatically
-		}
+		} 
+		
 	}
 
 	@Override

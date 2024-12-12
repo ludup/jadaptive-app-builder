@@ -164,6 +164,14 @@ public class EventServiceImpl implements EventService {
 	public <T extends UUIDEntity> void changed(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
 		
 		String resourceKey = templateService.getTemplateResourceKey(clz);
+		on(handler, Events.created(resourceKey), Events.updated(resourceKey), Events.deleted(resourceKey));
+		
+	}
+	
+	@Override
+	public <T extends UUIDEntity> void committed(Class<T> clz, EventListener<ObjectEvent<T>> handler) {
+		
+		String resourceKey = templateService.getTemplateResourceKey(clz);
 		on(handler, Events.updated(resourceKey), Events.deleted(resourceKey));
 		
 	}
@@ -233,6 +241,11 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public <T extends UUIDEntity> void unassigned(Class<T> clz, EventListener<ObjectUpdateEvent<T>> handler) {
 		on(Events.unassigned(templateService.getTemplateResourceKey(clz)), handler);
+	}
+	
+	@Override
+	public <T extends SystemEvent> void on(Class<T> clz, EventListener<T> handler) {
+		on(templateService.getTemplateResourceKey(clz), handler);
 	}
 
 	@Override

@@ -22,6 +22,8 @@ import com.jadaptive.api.user.User;
 public class AuthenticationState {
 	private final static Logger LOG = LoggerFactory.getLogger(AuthenticationState.class);
 
+	public static final String PROCESS_POST_AUTHENTICATION = "processedPOSTAuthentication";
+
 	private User user;
 	private Map<Class<? extends Page>,AuthenticationModule> requiredAuthenticationModulez = new HashMap<>();
 	private List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
@@ -52,7 +54,7 @@ public class AuthenticationState {
 	public AuthenticationState(AuthenticationPolicy policy) {
 		this.policy = policy;
 	}
-
+	
 	public AuthenticationPolicy getPolicy() {
 		return policy;
 	}
@@ -63,6 +65,10 @@ public class AuthenticationState {
 
 	public int getOptionalAvailable() {
 		return optionalAvailable;
+	}
+	
+	public Redirect getHomePage() {
+		return homePage;
 	}
 
 	public void setOptionalAvailable(int optionalAvailable) {
@@ -150,7 +156,13 @@ public class AuthenticationState {
 	}
 	
 	public boolean hasPostAuthentication() {
-		return currentPostAuthenticationIndex < postAuthenticationPages.size();
+		
+		if(isRequiredAuthenticationComplete() && isOptionalComplete()) {
+			return currentPostAuthenticationIndex < postAuthenticationPages.size();
+
+		}
+		
+		return false;
 	}
 	
 	public boolean completePage() {
@@ -372,5 +384,9 @@ public class AuthenticationState {
 	
 	public void addOptionalAuthentication(Class<? extends Page> clz, AuthenticationModule authenticationModule) {
 		optionalAuthentications.put(clz, authenticationModule);
+	}
+
+	public boolean hasSetupPostAuthentication() {
+		return Objects.nonNull(getAttribute(PROCESS_POST_AUTHENTICATION));
 	}
 }

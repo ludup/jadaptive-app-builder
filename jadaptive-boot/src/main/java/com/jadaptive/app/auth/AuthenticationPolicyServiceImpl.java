@@ -60,7 +60,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		
 		List<AuthenticationPolicy> results =  new ArrayList<>();
 		
-		for(AuthenticationPolicy policy : policyDatabase.getAssignedObjectsA(AuthenticationPolicy.class, user)) {
+		for(AuthenticationPolicy policy : getAssignedPolicies(user)) {
 			if(!policy.getClass().equals(policyClz)) {
 				continue;
 			}
@@ -192,10 +192,17 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	public AuthenticationPolicy getDefaultPolicy(Class<? extends AuthenticationPolicy> clz) {
 		if(!clz.equals(UserLoginAuthenticationPolicy.class)) {
-			return getWeightedPolicy(clz);
+			AuthenticationPolicy policy = getWeightedPolicy(clz);
+			if(Objects.nonNull(resolver)) {
+				resolver.assertDefaultPolicy(policy);
+			}
+			return policy;
 		} else {
-			return policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true),
+			AuthenticationPolicy policy = policyDatabase.getObject(getResourceClass(), SearchField.eq("system", true),
 					SearchField.eq("resourceKey", UserLoginAuthenticationPolicy.RESOURCE_KEY));
+			
+			
+			return policy;
 		}
 		
 	}
@@ -208,7 +215,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
 		switch(column) {
 		case "scope":
-			return Html.i18n(AuthenticationPolicy.RESOURCE_KEY, rowTemplate.getResourceKey() + ".name");
+			return Html.i18n(rowTemplate.getBundle(), rowTemplate.getResourceKey() + ".name");
 		default:
 			throw new IllegalStateException("Unsupported dynamic column " + column);
 		}
@@ -244,5 +251,10 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	public boolean hasPolicy(String resourceKey) {
 		return policyDatabase.countObjects(AuthenticationPolicy.class, SearchField.eq("resourceKey", resourceKey)) > 0;
+	}
+
+	@Override
+	public Iterable<AuthenticationPolicy> getAssignedPolicies(User user) {
+		return policyDatabase.getAssignedObjectsA(AuthenticationPolicy.class, user);
 	}
 }

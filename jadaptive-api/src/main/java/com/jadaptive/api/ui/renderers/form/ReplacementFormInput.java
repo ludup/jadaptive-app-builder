@@ -23,9 +23,7 @@ public class ReplacementFormInput extends FieldInputRender {
 	public void renderInput(Element rootElement, String value, String... classes) {
 
 	
-		rootElement.appendChild(new Element("div").addClass("row mb-3")
-				.appendChild(new Element("div")
-						.addClass("col-12")
+		rootElement.appendChild(new Element("div")
 						.addClass("dropdownInput")
 				.appendChild(new Element("label")
 						.attr("for", getFormVariable())
@@ -51,7 +49,7 @@ public class ReplacementFormInput extends FieldInputRender {
 							.addClass("form-text")
 							.addClass("text-muted")
 							.attr("jad:bundle", getBundle())
-							.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
+							.attr("jad:i18n", String.format("%s.desc", getResourceKey()))));
 
 		if(!disableIDAttribute) {
 			dropdownInput.attr("id", String.format("%sDropdown", getResourceKey()));

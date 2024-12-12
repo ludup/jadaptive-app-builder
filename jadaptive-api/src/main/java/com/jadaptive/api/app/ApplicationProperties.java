@@ -2,8 +2,10 @@ package com.jadaptive.api.app;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.security.Provider;
 import java.security.Security;
@@ -35,33 +37,53 @@ public class ApplicationProperties {
 		confdFolder.mkdirs();
 		
 		File propertiesFile = new File(confdFolder, "ssl.properties");
-		if(!propertiesFile.exists()) {
+		File certificateProperties = new File(confdFolder, "certificate.properties");
+		File serverProperties = new File(confdFolder, "server.properties");
+		
+		if(!certificateProperties.exists()) {
 			try {
 				
-				FileUtils.writeStringToFile(propertiesFile,"""		
-				# Server Properties
-				server.port=443
+				FileUtils.writeStringToFile(certificateProperties,"""		
+				# Certificate Properties
+				server.ssl.bundle=default
+				spring.ssl.bundle.jks.default.reload-on-update=true
+				spring.ssl.bundle.jks.default.key.alias=server
+				spring.ssl.bundle.jks.default.keystore.location=conf.d/default/cert.p12
+				spring.ssl.bundle.jks.default.keystore.password=changeit
+				spring.ssl.bundle.jks.default.keystore.type=PKCS12
 
-				server.ssl.enabled=true
-				server.ssl.protocol=TLS
-
-				server.ssl.key-store-password=changeit
-				server.ssl.key-store-type=PKCS12
-				server.ssl.key-store=conf.d/cert.p12
-				server.ssl.key-alias=server
-
-				# PEM files will be automatically converted to PKCS12 keystore as required. 
-				# If you configure PEM below the keystore above will be created with the PEM
-				# certificate and keys imported into it.
-
-				#server.ssl.private-key=conf.d/key.pem
-				#server.ssl.passprase=password
-				#server.ssl.ca-bundle=conf.d/chain.pem
-				#server.ssl.certificate=conf.d/cert.pem
 				""", Charset.forName("UTF-8"));
 				
 			} catch (IOException e) {
 				throw new IllegalStateException(e.getMessage(), e);
+			}
+		}
+		
+		if(propertiesFile.exists()) {
+			
+			if(!serverProperties.exists()) {
+				try {
+					Properties props = new Properties();
+					try(InputStream in = new FileInputStream(propertiesFile)) {
+						props.load(in);
+					}
+					
+					Properties newProps = new Properties();
+					newProps.setProperty("server.port", props.getProperty("server.port"));
+					newProps.setProperty("server.ssl.enabled", "true");
+					newProps.setProperty("server.ssl.protocol", "TLS");
+					
+					try(OutputStream out = new FileOutputStream(serverProperties)) {
+						newProps.store(out, "Server Properties");
+					}
+	
+				} catch(IOException e ) {
+					throw new IllegalStateException(e.getMessage(), e);
+				}
+			}
+			
+			if(!propertiesFile.delete()) {
+				throw new IllegalStateException("Cannot delete conf.d/ssl.properties! Please delete this file manually");
 			}
 		}
 		
@@ -72,8 +94,7 @@ public class ApplicationProperties {
 				FileUtils.writeStringToFile(propertiesFile,"""		
 				# Database Properties
 				#mongodb.embedded=true
-				#mongodb.hostname=localhost
-				#mongodb.port=27017
+				#mongodb.connection=
 				""", Charset.forName("UTF-8"));
 				
 			} catch (IOException e) {

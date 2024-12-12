@@ -160,5 +160,7 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 			return StringUtils.defaultIfEmpty(def.bundle(), def.resourceKey());
 		}
 		return getResourceKey();
-	}	
+	}
+
+	public boolean isLoginPolicy() { return false; }
 }

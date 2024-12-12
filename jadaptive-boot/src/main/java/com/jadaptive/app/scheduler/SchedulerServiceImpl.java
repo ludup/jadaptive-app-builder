@@ -1,6 +1,7 @@
 package com.jadaptive.app.scheduler;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -103,9 +104,25 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		applicationService.autowire(task);
 		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), taskUUID);
 		applicationService.autowire(job);
-		
+
 		job.schedule(task, expression);
 		scheduledJobs.put(taskUUID, job);	
+	}
+	
+	@Override
+	public void schedule(TenantTask task, Date startTime, long repeat, String taskUUID) {
+		
+		applicationService.autowire(task);
+		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), taskUUID);
+		applicationService.autowire(job);
+
+		job.schedule(task, startTime, repeat);
+		scheduledJobs.put(taskUUID, job);	
+	}
+	
+	public void schedule(TenantTask task) {
+		
+		
 	}
 
 	@Override

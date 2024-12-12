@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.templates.TemplateVersion;
 import com.jadaptive.api.templates.TemplateVersionRepository;
 import com.jadaptive.api.tenant.TenantService;
@@ -68,7 +68,7 @@ public class TemplateVersionRepositoryImpl extends AbstractSystemObjectDatabaseI
 	}
 
 	@Override
-	protected <T extends UUIDEntity> Map<String, T> getCache(Class<T> obj) {
+	protected <T extends UUIDDocument> Map<String, T> getCache(Class<T> obj) {
 		return cacheService.getCacheOrCreate("templateVersions.uuidCache", String.class, obj);
 	}
 

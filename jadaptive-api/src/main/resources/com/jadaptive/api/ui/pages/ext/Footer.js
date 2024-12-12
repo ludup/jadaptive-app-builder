@@ -39,11 +39,16 @@ $(function() {
 		var source = _this.closest('.multipleTagInput').find('.multipleTagSource');
 		var target = _this.closest('.multipleTagInput').find('.multipleTagTarget');
 		if(source.val() !== '' && !duplicate(source.val(), target)) {
-			target.append('<option class="badge bg-primary me-3" value="' + source.val()
-				 + '" class="me-1"><span class="pe-1">' + source.val() + '</span><a href="#" class="jadaptive-tag text-light"><i class="' + $('body').data('iconset') + ' fa-times"></i></a></option>');
+			target.append('<li class="badge bg-primary me-3" class="me-1">' + 
+			'<input type="hidden" name="' + _this.data('formvar') + '" value="' + source.val() + '"/>' +
+			'<span class="pe-1">' + source.val() + '</span><a href="#" class="jadaptive-tag text-light"><i class="' + $('body').data('iconset') + ' fa-times"></i></a></li>');
 			source.val('');
 		}
 	}
+	
+	$(document).on('click', '.jadaptive-tag', function() {
+		$(this).parents().find('li').remove();
+	});
 	
 	function addText(_this) {
 		var source = _this.closest('.multipleTextInput').find('.multipleTextSource');
@@ -123,12 +128,24 @@ $(function() {
 	});
 	
 	$(document).on('keyup', '.collectionSearchInputText', function(e) {
+		
 		createDropdown($(this).val(), $(this).data('url'), 
 							$(this).data('field'),
 							$(this).data('id'),
 							$(this).closest(".dropdown").find('.dropdown-menu'),
 							$(this),
 							'collectionSearchInputSelection');
+		
+	});
+	
+	$(document).on('click', '.collectionSearchInputText', function(e) {
+		    
+			createDropdown($(this).val(), $(this).data('url'), 
+								$(this).data('field'),
+								$(this).data('id'),
+								$(this).closest(".dropdown").find('.dropdown-menu'),
+								$(this),
+								'collectionSearchInputSelection');
 	});
 	
 	$(document).on('click', '.collectionTextAdd', function(e) {
@@ -313,14 +330,15 @@ $(function() {
 		window.location.reload();
 	});
 	
-	$('.jadaptive-tag').on('click', function() {
-		$(this).parents().find('option').remove();
-	});
-	
 	$('.copyURL').on('click', function(e) {
 		e.preventDefault();
 		navigator.clipboard.writeText($(this).attr('href'));
-		JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
+		var msg = $(this).data('message');
+		if(msg) {
+			JadaptiveUtils.success($('#feedback'), msg);
+		} else {
+			JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
+		}
 	});
 	
 	$('.copyToClipboard').on('click', function(e) {
@@ -346,12 +364,30 @@ $(function() {
 		JadaptiveUtils.startAwesomeSpin($(this).find('.spinForm').children('i'));
 	});
 	
+	function checkRowVisibility(row) {
+		
+		var hasVisible = false;
+		row.children('.field').each(function() {
+			if(!$(this).hasClass('d-none')) {
+				hasVisible = true;
+			}
+		});
+		
+		if(hasVisible){ 
+			row.removeClass('d-none');
+		} else {
+			row.addClass('d-none');
+		}
+	}
+	
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
 		$('.processDepends').each(function() {
-			var field = $(this);
+			var field = $(this); //.parents('.field').first();
+			var row = $(this).parents('.row').first();
 			var dependsOn = $(this).data('depends-on');
 			var dependsValue = $(this).attr('data-depends-value');
+			var resourceKey = $(this).data('resourcekey');
 			
 			var allInput = $('input[name="' + dependsOn + '"]');
 			
@@ -374,7 +410,9 @@ $(function() {
 					} else {
 						value = input.val();
 					}
+					var matches = !expectedResult;
 					if(obj == value) {
+						matches = expectedResult
 						if(expectedResult) {
 							field.removeClass('d-none');
 						} else {
@@ -382,13 +420,21 @@ $(function() {
 						}
 						return true;
 					} else {
-						field.removeClass('d-none');
+						if(expectedResult) {
+							field.addClass('d-none');
+						} else {
+							field.removeClass('d-none');
+						}
+						return true;
 					}
 					return false;
 				});
 				
 			});
 			
+			$('.fields').each(function() {
+				checkRowVisibility($(this));
+			});
 		});
 	});
 	
@@ -426,6 +472,16 @@ $(function() {
 		}
     });
     
+	$('input[name="selectedUUID"]').on('change', function(e, row, el) {
+		var selected = $('input[name="selectedUUID"]:checked').length > 0;
+		$('.selectionAction').prop('disabled', !selected);
+		/*var collapse = bootstrap.Collapse.getOrCreateInstance('#selectionActions');
+		if (selected)
+			collapse.show();
+		else
+			collapse.hide();*/
+	});
+	
     $('.selectionAction').click(function(e) {
 		e.preventDefault();
 		
@@ -433,7 +489,7 @@ $(function() {
 			
 			var form = new FormData();
 
-			$('input[name="selectedUUID').each(function() {
+			$('input[name="selectedUUID"]').each(function() {
 				if ($(this).is(":checked")) {
 					form.append("uuid", $(this).val());
 				}
@@ -613,5 +669,81 @@ $(function() {
 		var max = $(this).attr('aria-valuemax');
 		var pc = parseInt((val / max) * 100);
 		$(this).width(pc + '%');
+	});
+	
+	
+	var editText = function(bundle, key, replacement, before, element) {
+		
+		var fd = new FormData();
+		fd.append('bundle', bundle);
+		fd.append('key', key);
+		fd.append('replacementValue', replacement);
+		debugger;
+		$.ajax({
+           type: "POST",
+           url: '/app/api/i18n/edit',
+           dataType: "json",
+           contentType: false,
+           processData: false,
+           data: fd,
+           success: function(data)
+           {
+				if(!data.success) {	
+					element.html(before);
+				} else {
+					element.data('before', element.html());
+	        		element.trigger('change');
+	        		element.blur();
+				}
+		   }
+		});
+		
+	}
+	$('body').on('focus', '.editableText', function() {
+	    const $this = $(this);
+	    $this.data('before', $this.html());
+	}).on('blur paste', '.editableText', function() {
+	    const $this = $(this);
+	    if ($this.data('before') !== $this.html()) {
+			editText($this.data('bundle'), 
+					$this.data('key'), 
+					$this.html(),
+					$this.data('before'),
+					$this);
+	    }
+	}).on('keyup keypress keydown', '.editableText', function(e) {
+
+	    var code = (e.keyCode ? e.keyCode : e.which);
+	    if (code==13) {
+	        e.preventDefault();
+	        const $this = $(this);
+		    if ($this.data('before') !== $this.html()) {
+				editText($this.data('bundle'), 
+						$this.data('key'), 
+						$this.html(),
+						$this.data('before'),
+						$this);
+		    }
+	    }
+	
+	});
+
+	$(document).on('click', '.toggleEditable', function(){ 
+		
+		if($(this).data('editing')) {
+			$('.editableText').attr('contenteditable', false);
+			$(this).children('i').removeClass('text-success');
+			$(this).children('i').addClass('text-light');
+			$('a').removeAttr('disabled');
+			$(this).data('editing', false);
+		} else {
+			$('.editableText').attr('contenteditable', true);
+			$(this).children('i').removeClass('text-light');
+			$(this).children('i').addClass('text-success');
+			$('.dropdown').show();
+			$('a').attr('disabled', true);
+			$(this).data('editing', true);
+		}
+
 	});
 });

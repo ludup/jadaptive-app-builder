@@ -65,3 +65,9 @@ body {
   max-width: 40px;
   max-height: 40px;
 }
+
+.form-img-preview {
+	max-height: 200px;
+	height: auto;
+	width: auto;
+}

@@ -1,12 +1,14 @@
 package com.jadaptive.api.repository;
 
 import java.util.Date;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.utils.Utils;
 
 @JsonIgnoreProperties(value = { "_clz" })
 public abstract class AbstractUUIDEntity extends UUIDEntity {
@@ -15,7 +17,6 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 	
 	Boolean system;
 	Boolean hidden;
-	boolean summarise;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, hidden = true, searchable = true)
 	@ExcludeView(values = FieldView.TABLE)
@@ -26,7 +27,7 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 	Date lastModified;
 
 	public Date getCreated() {
-		return created;
+		return Objects.nonNull(created) ? created : Utils.now();
 	}
 
 	public void setCreated(Date created) {
@@ -34,7 +35,7 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 	}
 
 	public Date getLastModified() {
-		return lastModified;
+		return Objects.nonNull(lastModified) ? lastModified : Utils.now();
 	}
 
 	public void setLastModified(Date lastModified) {

@@ -21,10 +21,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.SystemOnlyObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.i18n.I18nService;
+import com.jadaptive.api.json.RequestStatus;
+import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.repository.RepositoryException;
@@ -38,6 +45,7 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageExtension;
 import com.jadaptive.api.ui.Redirect;
+import com.jadaptive.api.ui.editor.ReplaceTextContentEdit;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -61,6 +69,9 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@Autowired
 	private I18nService i18n;
+	
+	@Autowired
+	private SystemOnlyObjectDatabase<ReplaceTextContentEdit> replacementDatabase;
 	
 	@ExceptionHandler(UnauthorizedException.class)
 	public void handleException(HttpServletRequest request,
@@ -265,5 +276,34 @@ public class UserInterfaceController extends AuthenticatedController {
 			IOUtils.copy(in, response.getOutputStream());
 		}
 
+	}
+	
+	@RequestMapping(value="/app/api/i18n/edit", method = RequestMethod.POST, produces = { "application/json"})
+	@ResponseBody
+	public RequestStatus changeText(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam String bundle, @RequestParam String key, @RequestParam String replacementValue) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
+
+		try {
+			ReplaceTextContentEdit edit;
+			
+			try {
+				edit = replacementDatabase.get(ReplaceTextContentEdit.class, 
+						SearchField.eq("bundle", bundle),
+						SearchField.eq("key", key));
+			} catch(ObjectNotFoundException e) {
+				edit = new ReplaceTextContentEdit();
+			}
+			
+			edit.setBundle(bundle);
+			edit.setKey(key);
+			edit.setReplacementText(replacementValue);
+			
+			replacementDatabase.saveOrUpdate(edit);
+			
+			return new RequestStatusImpl(true);
+		} catch(Throwable t) {
+			return new RequestStatusImpl(false);
+		}
+		
 	}
 }

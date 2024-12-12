@@ -1,5 +1,7 @@
 package com.jadaptive.api.ui.pages.ext;
 
+import static com.jadaptive.utils.Instrumentation.timed;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -7,36 +9,40 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.countries.InternationalService;
+import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.template.ActionFilter;
 import com.jadaptive.api.template.CreateURL;
 import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ObjectTemplateCapability;
 import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableAction;
@@ -46,20 +52,17 @@ import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.UpdateURL;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.template.ViewURL;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.UserInterfaceService;
 import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
 import com.jadaptive.api.ui.renderers.form.BootstrapBadgeRender;
 import com.jadaptive.utils.Utils;
-
 @TableView(defaultColumns = { "uuid" })
 public class TableRenderer {
 
 	@Autowired
 	private ObjectTemplateRepository templateRepository; 
-	
-	@Autowired
-	private UserInterfaceService uiService;
 	
 	@Autowired
 	private TemplateService templateService;
@@ -76,6 +79,13 @@ public class TableRenderer {
 	@Autowired
 	private ApplicationService appService;
 
+	@Autowired
+	private EncryptionService encryptionService;
+	
+	private int start;
+	private int length;
+	
+	private long totalObjects;
 
 	private Collection<AbstractObject> objects;
 	private String sortColumn;
@@ -89,22 +99,44 @@ public class TableRenderer {
 	private FieldTemplate field;
 	private boolean readOnly;
 	
-	public TableRenderer(boolean readOnly, AbstractObject parentObject, FieldTemplate field,
-			RenderScope formRenderer, String formHandler) {
+	private final boolean showCreate;
+	private final boolean showUpdate;
+	private final boolean showCopy;
+	
+	public TableRenderer(boolean readOnly, 
+			AbstractObject parentObject, FieldTemplate field,
+			RenderScope formRenderer, String formHandler, ObjectTemplate template) {
+		this(false, template);
 		this.parentObject = parentObject;
 		this.field = field;
 		this.readOnly = readOnly;
 	}
 	
-	public TableRenderer(boolean readOnly) {
+	public TableRenderer(boolean readOnly, ObjectTemplate template) {
 		this.readOnly = readOnly;
+		this.template = template;
+		this.showCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
+		this.showUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		this.showCopy = showUpdate && showCreate;
+	}
+	
+	public TableRenderer(boolean readOnly, ObjectTemplate template, boolean showCreate, boolean showUpdate) {
+		this.readOnly = readOnly;
+		this.template = template;
+		this.showCreate = showCreate;
+		this.showUpdate = showUpdate;
+		this.showCopy = showUpdate && showCreate;
+	}
+	
+	public void setTotalObjects(long totalObjects) {
+		this.totalObjects = totalObjects;
 	}
 
-	public Elements render() throws IOException {
+	public Element render() throws IOException {
 		
-		try {
 			
-			Elements tableholder = new Elements();
+			Element tableholder = Html.div();
+			
 			view = templateClazz.getAnnotation(TableView.class);
 	
 			if(Objects.isNull(view)) {
@@ -113,13 +145,14 @@ public class TableRenderer {
 			
 			Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
-			Collection<TableAction> tableActions = generateActions(template.getCollectionKey());
+			Collection<TableAction> tableActions = generateActions(template.getParentTemplate(), template.getCollectionKey());
 			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || view.multipleDelete();
 			
 			
-			if(hasMultipleSelection) {
+			if(hasMultipleSelection && Objects.nonNull(objects) && !objects.isEmpty()) {
 				Element ae;
-				tableholder.add(Html.div("row")
+				tableholder.appendChild(Html.div("row")
+						.attr("id", "selectionActions")
 						.appendChild(ae = Html.div("col-12")));
 			
 				if(view.multipleDelete()) {
@@ -127,9 +160,9 @@ public class TableRenderer {
 					try {
 						permissionService.assertWrite(template.getResourceKey());
 						
-						ae.appendChild(Html.a("#")
+						ae.appendChild(Html.button("btn", "btn-primary", "selectionAction")
+								.attr("disabled", "")
 								.attr("data-url", "/app/api/objects/" + template.getResourceKey() + "/delete")
-								.addClass("btn btn-primary selectionAction")
 								.appendChild(Html.i("fa-solid", "fa-trash", "me-2"))
 								.appendChild(Html.i18n("userInterface","multipleDelete.text")));
 					
@@ -147,9 +180,9 @@ public class TableRenderer {
 									permissionService.assertAnyPermission(action.permissions());
 								}
 								
-								ae.appendChild(Html.a("#")
+								ae.appendChild(Html.button("btn", "btn-primary", "selectionAction")
 										.attr("data-url", action.url())
-										.addClass("btn btn-primary selectionAction")
+										.attr("disabled", "")
 										.appendChild(Html.i(action.iconGroup(), action.icon(), "me-2"))
 										.appendChild(Html.i18n(action.bundle(), action.resourceKey() + ".name")));
 								
@@ -161,107 +194,138 @@ public class TableRenderer {
 					}
 				}
 			}
-			
+
 			Element el;
-			if(totalObjects > 0) {
+			if(Objects.nonNull(objects) && !objects.isEmpty()) {
 				Element table = Html.table("table").attr("data-toggle", "table");
-				tableholder.add(table);
-				
-				table.appendChild(Html.thead().appendChild(el = Html.tr()));
-				
-				if(hasMultipleSelection) {
-					el.appendChild(Html.td());
-				}
-				
-				ObjectTemplate tmp = template;
-				while(tmp.hasParent()) {
-					ObjectTemplate t = templateService.get(tmp.getParentTemplate());
-					TableView v = templateService.getTemplateClass(tmp.getParentTemplate()).getAnnotation(TableView.class);
-					if(Objects.nonNull(v)) {
-						renderTableColumns(v, el, t, columns, dynamicColumns);
+				tableholder.appendChild(table);
+
+				try(var timed = timed("TableRender.dataRendering")) {
+					
+					tableholder.appendChild(table);
+					
+					table.appendChild(Html.thead().appendChild(el = Html.tr()));
+					
+					if(hasMultipleSelection) {
+						el.appendChild(Html.td());
 					}
-					tmp = t;
-				}
-				
-				renderTableColumns(view, el, template, columns, dynamicColumns);
-				
-				for(String childTemplate : template.getChildTemplates()) {
-					ObjectTemplate t = templateService.get(childTemplate);
-					Class<?> clz = templateService.getTemplateClass(childTemplate);
-					if(Objects.nonNull(clz)) {
-						TableView v = clz.getAnnotation(TableView.class);
-						if(Objects.nonNull(v)) {
-							renderTableColumns(v, el, t, columns, dynamicColumns);
+					
+					ObjectTemplate tmp = template;
+					while(tmp.hasParent()) {
+						try(var timed2 = timed("TableRender.dataRendering.parentProcessing")) {
+							ObjectTemplate t = templateService.get(tmp.getParentTemplate());
+							TableView v = templateService.getTemplateClass(tmp.getParentTemplate()).getAnnotation(TableView.class);
+							if(Objects.nonNull(v)) {
+								renderTableColumns(v, el, t, columns, dynamicColumns);
+							}
+							tmp = t;
 						}
 					}
-				}
-				// Actions
-				el.appendChild(Html.td());
-	
-				
-				table.appendChild(el = Html.tbody());
-				
-				ObjectMapper json = new ObjectMapper();
-				
-				if(objects.size() > 0) {
-					for(AbstractObject obj : objects) {
-						
-						ObjectTemplate rowTemplate = template;
-						if(!obj.getResourceKey().equals(template.getResourceKey())) {
-							rowTemplate = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(obj.getResourceKey());
-						}
-						Element row = Html.tr();
-						
-						if(hasMultipleSelection) {
-							row.appendChild(Html.td().appendChild(Html.input("checkbox", "selectedUUID", obj.getUuid())));
-						}
-						
-						if(Objects.nonNull(parentObject)) {
-							String c = json.writeValueAsString(obj);
-							row.appendChild(new Element("input").attr("type", "hidden")
-								.attr("name", this.field.getResourceKey())
-								.val(Base64.getUrlEncoder().encodeToString(c.getBytes("UTF-8"))));
-						}
-						
-						
-						
-						for(String column : columns.keySet()) {
-							if(dynamicColumns.containsKey(column)) {
-								DynamicColumn dc = dynamicColumns.get(column);
-								DynamicColumnService service = ApplicationServiceImpl.getInstance().getBean(dc.service());
-								Element col = service.renderColumn(column, obj, rowTemplate);
-								row.appendChild(Html.td().appendChild(col == null ? Html.span("") : col));
-							} else {
-								FieldTemplate t = columns.get(column).getField(column);
-								if(t == null) {
-									row.appendChild(Html.td().appendChild(Html.span("<missing column: " + column + ">")));
-								}
-								else {
-									row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t)));
+					
+					try(var timed2 = timed("TableRender.dataRendering.renderColumns")) {
+						renderTableColumns(view, el, template, columns, dynamicColumns);
+					}
+					
+					try(var timed2 = timed("TableRender.dataRendering.renderChildTemplateColumns")) {
+						for(String childTemplate : template.getChildTemplates()) {
+							ObjectTemplate t = templateService.get(childTemplate);
+							Class<?> clz = templateService.getTemplateClass(childTemplate);
+							if(Objects.nonNull(clz)) {
+								TableView v = clz.getAnnotation(TableView.class);
+								if(Objects.nonNull(v)) {
+									renderTableColumns(v, el, t, columns, dynamicColumns);
 								}
 							}
 						}
-						
-					
-						renderRowActions(row, obj, view, rowTemplate, generateActions(rowTemplate.getResourceKey()));
-						
-						el.appendChild(row);
 					}
-				} else {
-					el.appendChild(Html.tr().appendChild(Html.td().attr("colspan", String.valueOf(columns))
-							.addClass("text-center")
-							.appendChild(Html.i18n("default", "noResults.text"))));
-				}
+					// Actions
+					el.appendChild(Html.td());
+		
+					
+					table.appendChild(el = Html.tbody());
+					
+					ObjectMapper json = new ObjectMapper();
+					
+					if(objects.size() > 0) {
+						
+						
+						Set<String> permissions = permissionService.resolveCurrentPermissions();
+						Map<Class<?>,ActionFilter> filters = new HashMap<>();
+						
+						for(AbstractObject obj : objects) {
+							
+							try(var timed2 = timed("TableRender.dataRendering.renderRow")) {
+								
+								ObjectTemplate rowTemplate = template;
+								if(!obj.getResourceKey().equals(template.getResourceKey())) {
+									rowTemplate = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(obj.getResourceKey());
+								}
+								Element row = Html.tr();
+								
+								if(hasMultipleSelection) {
+									Element cb = Html.input("checkbox", "selectedUUID", obj.getUuid());
+									cb.addClass("form-check-input");
+									row.appendChild(Html.td().appendChild(cb));
+								}
+								
+								if(Objects.nonNull(parentObject)) {
+									String c = json.writeValueAsString(obj);
+									row.appendChild(new Element("input").attr("type", "hidden")
+										.attr("name", this.field.getResourceKey())
+										.val(Base64.getUrlEncoder().encodeToString(c.getBytes("UTF-8"))));
+								}
+								
+								try(var timed3 = timed("TableRender.dataRendering.renderColumns")) {
+									for(String column : columns.keySet()) {
+										try(var timed4 = timed("TableRender.dataRendering.renderColumns." + column)) {
+											if(dynamicColumns.containsKey(column)) {
+											
+												DynamicColumn dc = dynamicColumns.get(column);
+												DynamicColumnService service = ApplicationServiceImpl.getInstance().getBean(dc.service());
+												Element col = service.renderColumn(column, obj, rowTemplate);
+												row.appendChild(Html.td().appendChild(col == null ? Html.span("") : col));
+												
+											} else {
+												FieldTemplate t = columns.get(column).getField(column);
+												if(t == null) {
+													row.appendChild(Html.td().appendChild(Html.span("<missing column: " + column + ">")));
+												}
+												else {
+													row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t)));
+												}
+											}
+										}
+									}
+								}
+								
+								renderRowActions(row, obj, view, rowTemplate, 
+										generateActions(rowTemplate.getCollectionKey(), 
+												rowTemplate.getResourceKey()), 
+										showUpdate && !(obj.isSystem() && rowTemplate.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS)), 
+										showCreate, permissions, filters);
+								
+								el.appendChild(row);
+							}
+						}
+					} else {
+						el.appendChild(Html.tr().appendChild(Html.td().attr("colspan", String.valueOf(columns))
+								.addClass("text-center")
+								.appendChild(Html.i18n("default", "noResults.text"))));
+					}
+						
+				} 
+
+
 			}
 			
-			tableholder.add(Html.div("row", "mb-3").appendChild(
+			tableholder.appendChild(Html.div("row", "mb-3").appendChild(
 						Html.div("col-md-9 float-start text-start")
 							.attr("id", "pagnation"))
 					.appendChild(Html.div("col-md-3 float-start text-end")
 							.attr("id", "pagesize")));
-			
-			tableholder.add(Html.div("row", "mb-3").appendChild(
-					Html.div("col-md-12 float-start text-start")
+
+			tableholder.appendChild(Html.div("row", "mb-3").appendChild(
+					Html.div("col-md-6 float-start text-start")
 						.attr("id", "objectActions")));
 			
 			generateTableActions(tableholder.select("#objectActions").first(), tableActions);
@@ -270,11 +334,16 @@ public class TableRenderer {
 				tableholder.select(".readWrite").remove();
 			}
 			
+			if(totalObjects > 0) {
+				tableholder.select("#objectActions").first().after(
+						Html.div("float-end", "text-muted", "col-md-6", "text-end").appendChild(
+								Html.i18n("userInterface","tableStats.text", objects.size(), totalObjects, 
+										I18N.getResource(template.getBundle(), template.getResourceKey() + ".names"))));
+			}
+			
 			return tableholder;
 		
-		} catch (JsonProcessingException e) {
-			throw new IllegalStateException(e.getMessage(), e);
-		}
+		
 		
 	}
 	
@@ -303,8 +372,6 @@ public class TableRenderer {
 		
 		for(String column : view.defaultColumns()) {
 			
-			boolean isSortedBy = column.equals(sortColumn);
-			
 			DynamicColumn dyn = dynamicColumns.get(column);
 			if(Objects.nonNull(dyn)) {
 				//if(StringUtils.isBlank(dyn.sortColumn())) {
@@ -317,44 +384,52 @@ public class TableRenderer {
 				// sortColumn = dyn.sortColumn();
 			}
 			
-			FieldTemplate t = template.getField(column);
-			
-			Element e;
-			if(Objects.nonNull(t)) {
-				el.appendChild(Html.td().appendChild(
-						e = Html.a("#")
-							.addClass("sortColumn text-decoration-none")
-							.attr("data-column", column)
-							.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey())))));
-			} else {
-				el.appendChild(Html.td().appendChild(
-						e = Html.a("#")
-							.addClass("sortColumn text-decoration-none")
-							.attr("data-column", column)
-							.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column)))));
-			}
-			
-			if(isSortedBy) {
-				switch(sortOrder) {
-				case ASC:
-					e.appendChild(Html.i("fa-solid", "fa-caret-down", "ms-1"));
-					break;
-				default:
-					e.appendChild(Html.i("fa-solid", "fa-caret-up", "ms-1"));
-					break;
-				}
-			}
+			renderColumn(column, el);
 			
 			columns.put(column, template);
 		}
 	}
-
-	private Collection<TableAction> generateActions(String resourceKey) {
-		var t = templateService.getTableActions(resourceKey);
+	
+	private void renderColumn(String column, Element el) {
+		
+		boolean isSortedBy = column.equals(sortColumn);
+		
+		FieldTemplate t = template.getField(column);
+		
+		Element e;
 		if(Objects.nonNull(t)) {
-			return t;
+			el.appendChild(Html.td().appendChild(
+					e = Html.a("#")
+						.addClass("sortColumn text-decoration-none")
+						.attr("data-column", column)
+						.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey())))));
+		} else {
+			el.appendChild(Html.td().appendChild(
+					e = Html.a("#")
+						.addClass("sortColumn text-decoration-none")
+						.attr("data-column", column)
+						.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", column)))));
 		}
-		return Collections.emptySet();
+		
+		if(isSortedBy) {
+			switch(sortOrder) {
+			case ASC:
+				e.appendChild(Html.i("fa-solid", "fa-caret-down", "ms-1"));
+				break;
+			default:
+				e.appendChild(Html.i("fa-solid", "fa-caret-up", "ms-1"));
+				break;
+			}
+		}
+	}
+
+	private Collection<TableAction> generateActions(String parent, String resourceKey) {
+		Set<TableAction> results = new HashSet<>();
+		if(StringUtils.isNotBlank(parent)) {
+			results.addAll(templateService.getTableActions(parent));
+		}
+		results.addAll(templateService.getTableActions(resourceKey));
+		return results;
 	}
 
 	private Map<String, DynamicColumn> generateDynamicColumns() {
@@ -365,117 +440,146 @@ public class TableRenderer {
 		return results;
 	}
 	
-	private void renderRowActions(Element row, AbstractObject obj, TableView view, ObjectTemplate template, Collection<TableAction> allActions) {
-		
-		Element el = Html.td("text-end");
-		
-		boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
-		boolean canCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
-		
-		IconWithDropdownInput dropdown = new IconWithDropdownInput("options", "default");
-		dropdown.icon("fa-ellipsis");
-		el.appendChild(dropdown.renderInput().addClass("mb-3"));
-		
-		if(canUpdate && !readOnly) {
+	private void renderRowActions(Element row, AbstractObject obj, TableView view, ObjectTemplate template, Collection<TableAction> allActions, boolean canUpdate, boolean canCreate, Set<String> permissions, Map<Class<?>,ActionFilter> filters) {
+
+		try(var timed3 = timed("TableRender.dataRendering.renderRowActions")) {
+			Element el = Html.td("text-end");
 			
+			
+			IconWithDropdownInput dropdown = new IconWithDropdownInput("options", "default");
+			dropdown.icon("fa-ellipsis");
+			el.appendChild(dropdown.renderInput().addClass("mb-3"));
 			Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
-			String url = replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj);
-			UpdateURL u = clz.getAnnotation(UpdateURL.class);
-			if(Objects.nonNull(u)) {
-				url = replaceVariables(u.value(), obj);
+			if(canUpdate && !readOnly) {
+				
+				
+				String url = replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj);
+				UpdateURL u = clz.getAnnotation(UpdateURL.class);
+				if(Objects.nonNull(u)) {
+					url = replaceVariables(u.value(), obj);
+				}
+				if(Objects.isNull(parentObject)) {
+					dropdown.addI18nAnchorWithIconValue("default", "edit.name", url, "fa-solid", "fa-edit");
+				} else {
+					dropdown.addI18nAnchorWithIconValue("default", "edit.name", "#", "fa-solid", "fa-edit", "stash")
+						.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+						.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid());	
+				}
 			}
 			
-			if(Objects.isNull(parentObject)) {
-				dropdown.addI18nAnchorWithIconValue("default", "edit.name", url, "fa-solid", "fa-edit");
-			} else {
-				dropdown.addI18nAnchorWithIconValue("default", "edit.name", url, "fa-solid", "fa-edit", "stash")
-					.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
-					.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid());	
-			}
-		}
-		
-		if(view.requiresView()) {
-			if(Objects.isNull(parentObject)) {
-				dropdown.addI18nAnchorWithIconValue("default", "view.name", replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj), "fa-solid", "fa-eye");
-			} else {
-				dropdown.addI18nAnchorWithIconValue("default", "view.name", replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)
-						+ "/" + field.getResourceKey() + "/" + obj.getUuid(), "fa-solid", "fa-eye");
-			}
-		}
-				
-		if(canCreate && !readOnly) {
-			dropdown.addI18nAnchorWithIconValue("default", "copy.name", replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "fa-solid", "fa-copy");
-		} 
-		
-		for(TableAction action : allActions) {
-			if(action.target()==Target.ROW) {
-				
-				if(action.permissions().length > 0) {
-					try {
-					permissionService.assertAnyPermission(action.permissions());
-					} catch(AccessDeniedException e) {
-						continue;
-					}
+			if(view.requiresView()) {
+				String url = replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj);
+				ViewURL u = clz.getAnnotation(ViewURL.class);
+				if(Objects.nonNull(u)) {
+					url = replaceVariables(u.value(), obj);
 				}
-				
-				try {
-					if(!appService.autowire(action.filter().getConstructor().newInstance()).showAction(obj)) {
-						continue;
-					}
-				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				}
-				
-				Object val = obj.getValue(template.getDefaultColumn());
-				if(action.confirmationRequired()) {
-					Element iel;
-					if(StringUtils.isNotBlank(template.getDefaultColumn())) {
-						iel = dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
-							.attr("data-name", val == null ? "" : val.toString())
-							.attr("data-url", replaceVariables(action.url(), obj))
-							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
-					} else {
-						iel = dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
-							.attr("data-name", obj.getUuid())
-							.attr("data-url", replaceVariables(action.url(), obj))
-							.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
-					}
-					if(StringUtils.isNotBlank(action.confirmationBundle())) {
-						var vargs = Arrays.asList(action.confirmationArgs()).stream().map(a -> replaceVariables(a, obj)).toArray();
-						if(StringUtils.isNotBlank(action.confirmationKey()))
-							iel.dataset().put("confirm-text", i18nService.format(action.confirmationBundle(), Locale.getDefault(), action.confirmationKey(), vargs));
-						else
-							iel.dataset().put("confirm-text", i18nService.format(action.confirmationBundle(), Locale.getDefault(), action.resourceKey() + ".confirm", vargs));
-					}
+				if(Objects.isNull(parentObject)) {
+					dropdown.addI18nAnchorWithIconValue("default", "view.name", url, "fa-solid", "fa-eye");
 				} else {
-					dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", replaceVariables(action.url(), obj), action.iconGroup(), action.icon())
-						.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
+					dropdown.addI18nAnchorWithIconValue("default", "view.name", replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)
+							+ "/" + field.getResourceKey() + "/" + obj.getUuid(), "fa-solid", "fa-eye");
 				}
+			}
+					
+			if(canCreate && !readOnly && !template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_COPY)) {
+				dropdown.addI18nAnchorWithIconValue("default", "copy.name", replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "fa-solid", "fa-copy");
 			} 
-		}
-		
-		if(template.isDeletable()) {
-			if(!obj.isSystem() && !readOnly) {
-				if(Objects.nonNull(parentObject)) {
-					dropdown.addI18nAnchorWithIconValue("default", "delete.name", "#", "fa-solid", "fa-trash", "removeAction", "readWrite")
-							.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())));
-				} else {
-					dropdown.addI18nAnchorWithIconValue("default", "delete.name", "#", "fa-solid", "fa-trash", "deleteAction", "readWrite")
-						.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())))
-						.attr("data-url", replaceVariables("/app/api/objects/{resourceKey}/{uuid}", obj));
+			
+			for(TableAction action : allActions) {
+				if(action.target()==Target.ROW) {
+				
+					try(var timedRow = timed("TableRender.dataRendering.renderRowActions.ROW")) {
+						
+						try(var perms = timed("TableRender.dataRendering.renderRowActions.ROW.permissions")) {
+							if(action.permissions().length > 0) {
+								try {
+									permissionService.assertAnyResolvedPermission(permissions, action.permissions());
+								} catch(AccessDeniedException e) {
+									continue;
+								}
+							}
+						}
+						
+						if(Objects.nonNull(action.filter())) {
+							try(var perms = timed("TableRender.dataRendering.renderRowActions.ROW.createFilter")) {
+								ActionFilter filter = filters.get(action.filter());
+								if(Objects.isNull(filter)) {
+									try {
+										filter = appService.autowire(action.filter().getConstructor().newInstance());
+										filters.put(action.filter(), filter);
+									} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+											| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+										throw new IllegalStateException(e.getMessage(), e);
+									}
+								}
+								
+								try(var sa = timed("TableRender.dataRendering.renderRowActions.ROW.showAction." + filter.getClass().getSimpleName())) {
+									if(!filter.showAction(obj)) {
+										continue;
+									}
+								}
+							}
+						}
+						
+						try(var perms = timed("TableRender.dataRendering.renderRowActions.ROW.addAction")) {
+							Object val = obj.getValue(template.getDefaultColumn());
+							if(action.confirmationRequired()) {
+								Element iel;
+								if(StringUtils.isNotBlank(template.getDefaultColumn())) {
+									iel = dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
+										.attr("data-name", val == null ? "" : val.toString())
+										.attr("data-url", replaceVariables(action.url(), obj))
+										.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
+								} else {
+									iel = dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", "#", action.iconGroup(), action.icon(), action.deleteAction() ? "deleteAction" : "confirmAction")
+										.attr("data-name", obj.getUuid())
+										.attr("data-url", replaceVariables(action.url(), obj))
+										.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
+								}
+								if(StringUtils.isNotBlank(action.confirmationBundle())) {
+									var vargs = Arrays.asList(action.confirmationArgs()).stream().map(a -> replaceVariables(a, obj)).toArray();
+									if(StringUtils.isNotBlank(action.confirmationKey()))
+										iel.dataset().put("confirm-text", i18nService.format(action.confirmationBundle(), Locale.getDefault(), action.confirmationKey(), vargs));
+									else
+										iel.dataset().put("confirm-text", i18nService.format(action.confirmationBundle(), Locale.getDefault(), action.resourceKey() + ".confirm", vargs));
+								}
+							} else {
+								dropdown.addI18nAnchorWithIconValue(action.bundle(), action.resourceKey() + ".name", replaceVariables(action.url(), obj), action.iconGroup(), action.icon(), action.classes())
+									.attr("target", action.window() == Window.BLANK ? "_blank" : "_self");
+							}
+						}
+					}
+					
+				} 
+			}
+			
+
+			if(template.isDeletable()) {
+				try(var perms = timed("TableRender.dataRendering.renderRowActions.ROW.deleteAction")) {
+					if(!obj.isSystem() && !readOnly) {
+						if(Objects.nonNull(parentObject)) {
+							dropdown.addI18nAnchorWithIconValue("default", "delete.name", "#", "fa-solid", "fa-trash", "removeAction", "readWrite")
+									.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())));
+						} else {
+							dropdown.addI18nAnchorWithIconValue("default", "delete.name", "#", "fa-solid", "fa-trash", "deleteAction", "readWrite")
+								.attr("data-name", checkNull(obj.getValue(template.getDefaultColumn())))
+								.attr("data-url", replaceVariables("/app/api/objects/{resourceKey}/{uuid}", obj));
+						}
+					} 
 				}
+				
 			} 
-		} 
-		
-		if(el.children().size() > 0) {
-			row.appendChild(el);
+			
+			if(el.children().size() > 0) {
+				row.appendChild(el);
+			}
 		}
 		
 	}
 	
 	private void generateTableActions(Element element, Collection<TableAction> allActions) {
 		
-		if(uiService.canCreate(template)) {
+		if(showCreate) {
 			
 			if(!template.getChildTemplates().isEmpty()) {	
 				createMultipleCreate(element, template);
@@ -488,7 +592,7 @@ public class TableRenderer {
 			if(Objects.nonNull(allActions)) {
 				for(TableAction action : allActions) {
 					if(action.target()==Target.TABLE) {
-						createTableAction(element, action.url(), action.bundle(), action.icon(), action.iconGroup(), action.buttonClass(), action.resourceKey());
+						createTableAction(element, action.url(), action.bundle(), action.icon(), action.iconGroup(), action.classes(), action.resourceKey());
 					}
 				}
 			}
@@ -530,7 +634,7 @@ public class TableRenderer {
 		
 		for(String template : collectionTemplate.getChildTemplates()) {
 			ObjectTemplate childTemplate = templateRepository.get(template);
-			if(childTemplate.isCreatable()) {
+			if(childTemplate.isCreatable() && !childTemplate.isExtended()) {
 				creatableTemplates.add(childTemplate);
 			}
 		}
@@ -660,18 +764,32 @@ public class TableRenderer {
 		for(String var : Utils.extractVariables(url)) {
 			url = url.replace(String.format("{%s}", var), StringUtils.defaultString((String)obj.getValue(var)));
 		}
+		url = url.replace("{baseURL}", Utils.getBaseURL(Request.get().getRequestURL().toString()));
 		return url;
 	}
 
 	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field) throws UnsupportedEncodingException {
 		
 		boolean isDefault = StringUtils.defaultString(template.getDefaultColumn()).equals(field.getResourceKey());
-		boolean canUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		boolean canUpdate = 
+				ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
+		
+		if(obj.isSystem() && template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS) ) {
+			canUpdate = false;
+		}
 		
 		if(isDefault) {
 			if(canUpdate && !readOnly) {
+				
+				Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
+				String url = replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj);
+				UpdateURL u = clz.getAnnotation(UpdateURL.class);
+				if(Objects.nonNull(u)) {
+					url = replaceVariables(u.value(), obj);
+				}
+				
 				if(Objects.isNull(parentObject)) {
-					return Html.a(replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj), "underline").appendChild(processFieldValue(obj, template, field));
+					return Html.a(url, "underline").appendChild(processFieldValue(obj, template, field));
 				} else {
 					return Html.a("#", "underline", "stash")
 							.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
@@ -730,19 +848,29 @@ public class TableRenderer {
 	}
 	
 	String getStringValue(FieldTemplate field, AbstractObject rootObject) {
-//
-//		if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
-//			AbstractObject obj = rootObject.getChild(field.getParentField());
-//			if(Objects.nonNull(obj)) {
-//				return safeCast(obj.getValue(field.getResourceKey()));
-//			} 
-//			return "";
-//		} else {
-			return safeCast(rootObject.getValue(field.getResourceKey()));
-//		}
-		
+
+		Object val = rootObject.getValue(field.getResourceKey());
+		if(Objects.isNull(val)) {
+			if(StringUtils.isNotBlank(field.getParentKey()) && !rootObject.getResourceKey().equals(field.getParentKey())) {
+				AbstractObject obj = rootObject.getChild(field.getParentField());
+				if(Objects.nonNull(obj)) {
+					return safeCast(obj.getValue(field.getResourceKey()));
+				} 
+				return "";
+			}
+		}
+		return decryptOrMask(safeCast(val), field);
 	}
 	
+	private String decryptOrMask(String val, FieldTemplate field) {
+		if(field.isAutomaticallyEncrypted()) {
+			return encryptionService.decrypt(val);
+		} else if(field.isManuallyEncrypted()) {
+			return "**ENCRYPTED**";
+		}
+		return val;
+	}
+
 	AbstractObject getReferenceValue(FieldTemplate field, AbstractObject rootObject) {
 
 		AbstractObject obj = null;
@@ -800,10 +928,6 @@ public class TableRenderer {
 
 	public void setObjects(Collection<AbstractObject> objects) {
 		this.objects = objects;
-	}
-
-	public void setTemplate(ObjectTemplate template) {
-		this.template = template;
 	}
 
 	public void setTemplateClazz(Class<?> templateClazz) {

@@ -43,6 +43,7 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 		user.setUsername(username);
 		user.setName(name);
 		user.setEmail(email);
+		user.setEnabled(true);
 		
 		createUser(user, password, passwordChangeRequired);
 		return user;

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<head>
+<title jad:bundle="oauth2" jad:i18n="device">Approve</title>
+</head>
+<body>
+	<div class="wrapper">
+		<header jad:id="header"></header>
+		<main class="container my-auto">
+			<div class="row justify-content-center">
+				<div class="col-6">
+					<div class="card">
+						<div class="card-header text-center">
+							<span jad:bundle="oauth2" jad:i18n="device">Device</span>
+						</div>
+						<div class="card-body text-left">
+                   			<form id="deviceForm" method="POST" autocomplete="off">
+                   				<input type="hidden" id="approved" name="approved" value="true"/>
+								<div class="row" id="feedback">
+								</div>
+								<div class="row mt-3">
+									<div class="col-md-2">
+										<i class="fa fa-handshake-simple text-success fa-3x align-middle"></i>&nbsp;
+									</div>
+									<div class="col-md-10">
+										<div class="text-muted" jad:bundle="oauth2" jad:i18n="device.text">A device wishes to request permission ....</div>
+									</div>
+								</div> 
+								<div class="row mt-3 text-center">
+									<div class="col-md-12">
+										<input type="text" name="userCode" id="userCode" value="" maxlength="9" autofocus="autofocus">
+									</div>
+								</div>
+								<div class="row mt-4 text-center">
+									<div class="col-md-12">
+										<button style="width: 10em;" id="approve" type="submit" class="btn btn-primary">
+											<span jad:bundle="oauth2" jad:i18n="device.add">Authenticate Device</span></button>
+										&nbsp; <a id="reject" href="#" id="reject" jad:bundle="oauth2" jad:i18n="device.reject">Cancel</a>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+	<footer jad:id="footer"></footer>
+</body>
+</html>

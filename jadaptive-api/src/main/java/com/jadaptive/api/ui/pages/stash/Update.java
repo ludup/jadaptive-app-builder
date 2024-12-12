@@ -9,6 +9,8 @@ import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.template.FieldView;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.ui.ModalPage;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
@@ -37,13 +39,17 @@ public class Update extends StashedObjectPage {
 		super.doGenerateTemplateContent(document);
 		
 		//AbstractObject parentObject = (AbstractObject) Request.get().getSession().getAttribute(template.getResourceKey());
+		ObjectTemplate childTemplate = templateService.get(
+				template.getField(fieldName)
+				.getValidationValue(ValidationType.RESOURCE_KEY));
+		
 		String returnURL = object.isNew() ? getCreateURL() : getUpdateURL();
 		
 		Element element = document.selectFirst("#saveButton");
 		if(Objects.nonNull(element)) {
 			element.attr("data-url", returnURL)
 				.attr("data-action", String.format("/app/api/form/stash/%s/%s/%s",
-						template.getResourceKey(),
+						childTemplate.getResourceKey(),
 						childResourceKey, 
 						fieldName));
 		}

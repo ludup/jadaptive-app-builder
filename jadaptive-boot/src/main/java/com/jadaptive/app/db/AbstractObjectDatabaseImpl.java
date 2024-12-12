@@ -3,8 +3,10 @@ package com.jadaptive.app.db;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.csv.CsvImportService;
 import com.jadaptive.api.db.AbstractObjectDatabase;
@@ -33,15 +36,20 @@ import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDEvent;
 import com.jadaptive.api.template.ObjectCache;
 import com.jadaptive.api.template.ObjectDefinition;
+import com.jadaptive.api.template.ObjectSearchField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
+import com.jadaptive.api.template.SearchTransformer;
 import com.jadaptive.api.template.SortOrder;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.templates.TemplateVersionService;
+import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.utils.Utils;
 import com.mongodb.MongoWriteException;
 
@@ -66,10 +74,15 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	private TemplateVersionService templateService;
 	
 	@Autowired
+	private TemplateService templateServic;
+	
+	@Autowired
 	private TransactionService transactionService; 
 	
 	@Autowired
 	private CsvImportService importService;
+	
+	Map<Class<?>,SearchTransformer> cachedTransformers = new HashMap<>();
 	
 	protected AbstractObjectDatabaseImpl(DocumentDatabase db) {
 		this.db = db;
@@ -109,33 +122,33 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			}
 			return templateRepository.get(resourceKey);
 		}
-		throw new ObjectException(String.format("Missing template for class %s", clz.getSimpleName()));
+		throw new ObjectNotFoundException(String.format("Missing template for class %s", clz.getSimpleName()));
 	}
 	
-	protected  <T extends UUIDEntity> Map<String, T> getCache(Class<T> clz) {
+	protected  <T extends UUIDDocument> Map<String, T> getCache(Class<T> clz) {
 		return cacheService.getCacheOrCreate(String.format("%s.uuidCache", clz.getName()), String.class, clz);
 	}
 	
-	protected  <T extends UUIDEntity> Map<String, UUIDList> getIteratorCache(Class<T> clz) {
+	protected  <T extends UUIDDocument> Map<String, UUIDList> getIteratorCache(Class<T> clz) {
 		return cacheService.getCacheOrCreate(String.format("%s.iterator", clz.getName()), String.class, UUIDList.class);
 	}
 	
-	protected  <T extends UUIDEntity> Map<String,UUIDList> getIteratorCache(Class<T> clz, String cacheName) {
+	protected  <T extends UUIDDocument> Map<String,UUIDList> getIteratorCache(Class<T> clz, String cacheName) {
 		return cacheService.getCacheOrCreate(String.format("%s.searchCache",
 				clz.getName()), String.class, UUIDList.class);
 	}
 
 //	@SuppressWarnings("rawtypes")
-//	protected <T extends UUIDEntity> Map<Class<T>, List> getIteratorCache(String name, Class<T> clz) {
+//	protected <T extends UUIDDocument> Map<Class<T>, List> getIteratorCache(String name, Class<T> clz) {
 //		return cacheService.getCacheOrCreate(String.format("iterator.%s.%s", clz.getSimpleName(), name), clz, List.class);
 //	}
 	
-	protected <T extends UUIDEntity> void stash(T object) {
+	protected <T extends UUIDDocument> void stash(T object) {
 		onObjectStashed(object);
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected <T extends UUIDEntity> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> void saveObject(T obj, String database) throws RepositoryException, ObjectException {
 		
 		T previous = null;
 		boolean isEvent = obj instanceof UUIDEvent;
@@ -180,7 +193,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends UUIDEntity> void doSave(T obj, String database, T previous, boolean isEvent) {
+	private <T extends UUIDDocument> void doSave(T obj, String database, T previous, boolean isEvent) {
 		
 		if(obj instanceof  AbstractUUIDEntity) {
 			
@@ -244,11 +257,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 
 	}
 	
-	private CachePolicy getCachePolicy(Class<? extends UUIDEntity> clz) {
+	private CachePolicy getCachePolicy(Class<? extends UUIDDocument> clz) {
 		return clz.getAnnotation(ObjectCache.class).cachePolicy();
 	}
 
-	protected <T extends UUIDEntity> T getObject(String uuid, String database, Class<T> clz) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> T getObject(String uuid, String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 			
 			if(Objects.nonNull(uuid) && isCaching(clz)) {
@@ -285,9 +298,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> T getObject(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> T getObject(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
+			fields = processFields(clz, fields);
 			if(isCaching(clz)) {
 				Map<String,T> cachedObjects = getCache(clz);
 				String searchKey = createSearchKey(fields);
@@ -392,10 +406,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		return builder.toString();
 	}
 
-	protected <T extends UUIDEntity> T max(String database, Class<T> clz, String field, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> T max(String database, Class<T> clz, String field, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 			
-			Document document = db.max(getCollectionName(clz), database, field, fields);
+			Document document = db.max(getCollectionName(clz), database, field, processFields(clz, fields));
 			if(Objects.isNull(document)) {
 				throw new ObjectNotFoundException(String.format("Maximum value from %s not found for fields %s", 
 						getCollectionName(clz),
@@ -431,9 +445,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	
 
 
-	protected <T extends UUIDEntity> T min(String database, Class<T> clz, String field, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> T min(String database, Class<T> clz, String field, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
-			Document document = db.min(getCollectionName(clz), database, field, fields);
+			
+			Document document = db.min(getCollectionName(clz), database, field, processFields(clz, fields));
 			if(Objects.isNull(document)) {
 				throw new ObjectNotFoundException(String.format("Minimum value from %s not found for fields %s", 
 						getCollectionName(clz),
@@ -467,6 +482,68 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	private SearchField[] processFields(Class<?> clz, SearchField[] fields) {
+		
+		if(Tenant.class.equals(clz)) {
+			return fields;
+		}
+		
+		ObjectSearchField[] searchFields = getSearchTransformers(clz);
+		if(Objects.nonNull(searchFields)) {
+			for(SearchField field : fields) {
+				if(!field.isMarked()) {
+					for(ObjectSearchField searchField : searchFields) {
+						SearchTransformer transform = cachedTransformers.get(searchField.value());
+						if(Objects.isNull(transform)) {
+							try {
+								transform = ApplicationServiceImpl.getInstance().autowire(searchField.value().getConstructor().newInstance());
+							} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+									| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+								log.error("Failed to create search transformer", e);
+							}
+							cachedTransformers.put(searchField.value(), transform);
+						}
+						field.process(transform);
+					}
+					field.mark();
+				}
+			}
+		}
+		return fields;
+	}
+
+	protected ObjectSearchField[] getSearchTransformers(Class<?> clz) {
+		
+		
+		List<ObjectSearchField> results = new ArrayList<>();
+		
+		if(Objects.nonNull(clz)) {
+			addSearchTransformers(results, clz);
+			
+			try {
+				ObjectTemplate t = getObjectTemplate(clz);
+				if(!t.getChildTemplates().isEmpty()) {
+					for(String resourceKey : t.getChildTemplates()) {
+						addSearchTransformers(results, 
+								templateServic.getTemplateClass(resourceKey));
+					}
+				}
+			} catch(ObjectNotFoundException e) { }
+		}
+		
+		return results.toArray(new ObjectSearchField[0]);
+	}
+
+	private void addSearchTransformers(List<ObjectSearchField> results, Class<?> clz) {
+		
+		if(Objects.nonNull(clz)) {
+			ObjectSearchField[] a = clz.getAnnotationsByType(ObjectSearchField.class);
+			if(Objects.nonNull(a)) {
+				results.addAll(Arrays.asList(a));
+			}
+		}
+	}
+
 	private String getSearchFieldsText(SearchField[] fields, String condition) {
 		
 		StringBuffer buf = new StringBuffer();
@@ -562,7 +639,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> void deleteObject(T obj, String database) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> void deleteObject(T obj, String database) throws RepositoryException, ObjectException {
 		
 		if(obj instanceof AbstractUUIDEntity && ((AbstractUUIDEntity)obj).isSystem()) {
 			throw new ObjectException(String.format("You cannot delete system objects from %s", getCollectionName(obj.getClass())));
@@ -595,11 +672,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> void delete(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> void delete(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 			
 		try {
 		
-			db.delete(database, getCollectionName(clz), fields);
+			db.delete(database, getCollectionName(clz), processFields(clz, fields));
 			
 			if(isCaching(clz)) {
 				Map<String,T> cachedObjects = getCache(clz);
@@ -615,11 +692,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> void deleteIfExists(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> void deleteIfExists(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 			
 		try {
 		
-			db.deleteIfExists(database, getCollectionName(clz), fields);
+			db.deleteIfExists(database, getCollectionName(clz), processFields(clz, fields));
 			
 			if(isCaching(clz)) {
 				Map<String,T> cachedObjects = getCache(clz);
@@ -635,12 +712,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> void onDeletingError(T obj, Throwable e) {
-		
+	protected <T extends UUIDDocument> void onDeletingError(T obj, Throwable e) {
+
 		fireEvent(Events.deleted(obj.getEventGroup()), obj, e);
 	}
 
-	protected <T extends UUIDEntity> void fireEvent(String eventKey, T obj, boolean ignoreErrors) {
+	protected <T extends UUIDDocument> void fireEvent(String eventKey, T obj, boolean ignoreErrors) {
 		
 		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
 		
@@ -656,7 +733,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> void fireUpdateEvent(String eventKey, T obj, T previous, boolean ignoreErrors) {
+	protected <T extends UUIDDocument> void fireUpdateEvent(String eventKey, T obj, T previous, boolean ignoreErrors) {
 		
 		Class<? extends ObjectUpdateEvent<?>> eventClz = templateService.getUpdateEventClass(eventKey);
 		
@@ -672,7 +749,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> void fireEvent(String eventKey, T obj, Throwable t) {
+	protected <T extends UUIDDocument> void fireEvent(String eventKey, T obj, Throwable t) {
 		
 		Class<? extends ObjectEvent<?>> eventClz = templateService.getEventClass(eventKey);
 		
@@ -685,7 +762,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> SystemEvent createUpdateEvent(Class<? extends ObjectUpdateEvent<?>> eventClz, T obj, T previous) {
+	protected <T extends UUIDDocument> SystemEvent createUpdateEvent(Class<? extends ObjectUpdateEvent<?>> eventClz, T obj, T previous) {
 		
 		try {
 			for(Constructor<?> c : eventClz.getConstructors()) {
@@ -704,7 +781,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		throw new IllegalStateException("No such constructor for event " + eventClz.getName() + " and object " + obj.getClass().getName());
 	}
 
-	protected <T extends UUIDEntity> SystemEvent createSuccessEvent(Class<? extends ObjectEvent<?>> eventClz, T obj) {
+	protected <T extends UUIDDocument> SystemEvent createSuccessEvent(Class<? extends ObjectEvent<?>> eventClz, T obj) {
 		
 		try {
 			for(Constructor<?> c : eventClz.getConstructors()) {
@@ -723,7 +800,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		throw new IllegalStateException("No such constructor for event " + eventClz.getName() + " and object " + obj.getClass().getName());
 	}
 	
-	protected <T extends UUIDEntity> SystemEvent createErrorEvent(Class<? extends ObjectEvent<?>> eventClz, T obj, Throwable t) {
+	protected <T extends UUIDDocument> SystemEvent createErrorEvent(Class<? extends ObjectEvent<?>> eventClz, T obj, Throwable t) {
 		
 		try {
 			for(Constructor<?> c : eventClz.getConstructors()) {
@@ -743,54 +820,54 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		throw new IllegalStateException("No such constructor for event " + eventClz.getName() + " and object " + obj.getClass().getName());
 	}
 
-	protected <T extends UUIDEntity> void onObjectDeleted(T obj) {
+	protected <T extends UUIDDocument> void onObjectDeleted(T obj) {
 		
 		fireEvent(Events.deleted(obj.getEventGroup()), obj, true);
 		
 	}
 	
-	protected <T extends UUIDEntity> void onObjectDeleting(T obj) {
+	protected <T extends UUIDDocument> void onObjectDeleting(T obj) {
 		
 		fireEvent(Events.deleting(obj.getEventGroup()), obj, false);
 		
 	}
 	
-	protected <T extends UUIDEntity> void onObjectCreating(T obj) { 
+	protected <T extends UUIDDocument> void onObjectCreating(T obj) { 
 		
 		fireEvent(Events.creating(obj.getEventGroup()), obj, false);
 	}
 
-	protected <T extends UUIDEntity> void onObjectCreated(T obj) { 
+	protected <T extends UUIDDocument> void onObjectCreated(T obj) { 
 		
 		fireEvent(Events.created(obj.getEventGroup()), obj, true);
 	}
 	
-	protected <T extends UUIDEntity> void onObjectStashed(T obj) { 
+	protected <T extends UUIDDocument> void onObjectStashed(T obj) { 
 		
 		fireEvent(Events.stashed(obj.getEventGroup()), obj, true);
 	}
 
-	protected <T extends UUIDEntity> void onCreatedError(T obj, Throwable t) { 
+	protected <T extends UUIDDocument> void onCreatedError(T obj, Throwable t) { 
 		
 		fireEvent(Events.created(obj.getEventGroup()), obj, t);
 	}
 	
-	protected <T extends UUIDEntity> void onUpdateError(T obj, T previous, Throwable t) { 
+	protected <T extends UUIDDocument> void onUpdateError(T obj, T previous, Throwable t) { 
 		
 		fireEvent(Events.updated(obj.getEventGroup()), obj, t);
 	}
 	
-	protected <T extends UUIDEntity> void onObjectUpdated(T obj, T previousObject) {
+	protected <T extends UUIDDocument> void onObjectUpdated(T obj, T previousObject) {
 		
 		fireUpdateEvent(Events.updated(obj.getEventGroup()), obj, previousObject, true);
 	}
 	
-	protected <T extends UUIDEntity> void onObjectUpdating(T obj, T previousObject) {
+	protected <T extends UUIDDocument> void onObjectUpdating(T obj, T previousObject) {
 		
 		fireUpdateEvent(Events.updating(obj.getEventGroup()), obj, previousObject, false);
 	}
 	
-	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> Iterable<T> listObjects(String database, Class<T> clz) throws RepositoryException, ObjectException {
 		
 		try {
 			
@@ -821,9 +898,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> Iterable<T> listObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> Iterable<T> listObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		
 		try {
+			fields = processFields(clz, fields);
 			if(isCaching(clz)) {
 				String cacheName = getSearchFieldsText(fields, "AND");
 				Map<String,UUIDList> cachedUUIDs = getIteratorCache(clz);
@@ -851,11 +929,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 
-	protected <T extends UUIDEntity> Collection<T> searchObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> Collection<T> searchObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.search(getCollectionName(clz), database, fields)) {
+			for(Document document : db.search(getCollectionName(clz), database, processFields(clz, fields))) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -867,11 +945,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> Collection<T> searchObjects(String database, Class<T> clz, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> Collection<T> searchObjects(String database, Class<T> clz, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.search(getCollectionName(clz), database, order, sortField, fields)) {
+			for(Document document : db.search(getCollectionName(clz), database, order, sortField, processFields(clz, fields))) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -883,11 +961,11 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> Collection<T> searchTable(String database, Class<T> clz, int start, int length, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, order, sortField, fields)) {
+			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, order, sortField, processFields(clz, fields))) {
 				try {
 					results.add(DocumentHelper.convertDocumentToObject(clz, document));
 				} catch (Throwable e) {
@@ -903,10 +981,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> Long searchCount(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> Long searchCount(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		
 		try {
-			return db.searchCount(getCollectionName(clz), database, fields);			
+			return db.searchCount(getCollectionName(clz), database, processFields(clz, fields));			
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
@@ -914,12 +992,12 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 
-	protected <T extends UUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, String searchField, String searchValue, int start, int length, SortOrder order, String sortField) throws RepositoryException, ObjectException {
+	protected <T extends UUIDEntity> Collection<T> tableObjects(String database, Class<T> clz, int start, int length, SortOrder order, String sortField, SearchField... fields) throws RepositoryException, ObjectException {
 		
 		try {
 
 			List<T> results = new ArrayList<>();
-			for(Document document : db.table(getCollectionName(clz), searchField, searchValue, database, start, length, order, sortField)) {
+ 			for(Document document : db.searchTable(getCollectionName(clz), database, start, length, order, sortField, processFields(clz, fields))) {
 				results.add(DocumentHelper.convertDocumentToObject(clz, document));
 			}
 			
@@ -931,10 +1009,10 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
-	protected <T extends UUIDEntity> Long countObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> Long countObjects(String database, Class<T> clz, SearchField... fields) throws RepositoryException, ObjectException {
 		
 		try {
-			return db.count(getCollectionName(clz), database, fields);			
+			return db.count(getCollectionName(clz), database, processFields(clz, fields));			
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
@@ -942,18 +1020,18 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 	}
 	
 	
-	protected <T extends UUIDEntity> Long sumLongValues(String database, Class<T> clz, String groupBy, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> Long sumLongValues(String database, Class<T> clz, String groupBy, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
-			return db.sumLongValues(getCollectionName(clz), database, groupBy, fields);
+			return db.sumLongValues(getCollectionName(clz), database, groupBy, processFields(clz, fields));
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
 		}		
 	}
 	
-	protected <T extends UUIDEntity> Double sumDoubleValues(String database, Class<T> clz, String groupBy, SearchField... fields) throws RepositoryException, ObjectException {
+	protected <T extends UUIDDocument> Double sumDoubleValues(String database, Class<T> clz, String groupBy, SearchField... fields) throws RepositoryException, ObjectException {
 		try {
-			return db.sumDoubleValues(getCollectionName(clz), database, groupBy, fields);
+			return db.sumDoubleValues(getCollectionName(clz), database, groupBy, processFields(clz, fields));
 		} catch (Throwable e) {
 			checkException(e);
 			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);

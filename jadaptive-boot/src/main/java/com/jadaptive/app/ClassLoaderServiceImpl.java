@@ -7,15 +7,16 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang.WordUtils;
 import org.pf4j.PluginManager;
 import org.pf4j.PluginWrapper;
 import org.slf4j.Logger;
@@ -40,6 +41,8 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	
 	@Autowired
 	private PluginManager pluginManager; 
+	
+	Map<String,Class<?>> cache = new HashMap<>();
 	
 	@PostConstruct
 	private void postConstruct() {
@@ -103,21 +106,34 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
 		
-		Class<?> clz = findLoadedClass(name);
+		
+		Class<?> clz = cache.get(name);
+		if(Objects.nonNull(clz)) {
+			return clz;
+		}
+				
+		clz = findLoadedClass(name);
 
 		if(clz!=null) {
+			cache.put(name, clz);
 			return clz;
 		}
 		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 			try {
-				return w.getPluginClassLoader().loadClass(name);
+				clz  = w.getPluginClassLoader().loadClass(name);
+				if(clz!=null) {
+					cache.put(name, clz);
+					return clz;
+				}
 			} catch(ClassNotFoundException e) {
 			}
 		}
 
-		return getClass().getClassLoader().loadClass(name);
-
+		clz = getClass().getClassLoader().loadClass(name);
+		cache.put(name, clz);
+		return clz;
+		
 	}
 
 	@Override
@@ -196,9 +212,7 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	@Override
 	public void injectClass(ObjectTemplate template) {
 		byte[] tmp = Base64.getDecoder().decode(template.getClassDefinition());
-		defineClass(String.format("com.jadaptive.extensions.%s",
-				   		WordUtils.capitalize(template.getResourceKey())), 
-						tmp, 0, tmp.length);
+		defineClass(template.getTemplateClass(), tmp, 0, tmp.length);
 		
 	}
 }

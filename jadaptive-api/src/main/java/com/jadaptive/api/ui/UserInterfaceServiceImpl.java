@@ -13,7 +13,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 
 @Service
 public class UserInterfaceServiceImpl implements UserInterfaceService {
-
+	
 	@Autowired
 	private ApplicationService applicationService; 
 	

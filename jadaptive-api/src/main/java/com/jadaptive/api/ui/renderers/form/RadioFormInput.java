@@ -24,22 +24,17 @@ public class RadioFormInput extends FieldInputRender {
 	public void renderInput(Element rootElement, String defaultValue, String... classes) {
 
 		rootElement.appendChild(
-				e =new Element("div").
-				addClass("row mb-3"));
+				e =new Element("div"));
 
-		Element div;
-		e.appendChild(div = new Element("div")
-				.addClass("col-12"));
 
 		if(decorate) {
-			div.appendChild(new Element("label").
+			e.appendChild(new Element("label").
 				attr("for", getFormVariable()).
 				addClass("form-label").
 				attr("jad:bundle", getBundle()).
 				attr("jad:i18n", String.format("%s.name", getResourceKey())));
 			
 			rootElement.appendElement("div").
-				addClass("col-12").
 				appendElement("p").
 					addClass("form-text text-muted text-small mt-3").
 					attr("jad:bundle", getBundle()).

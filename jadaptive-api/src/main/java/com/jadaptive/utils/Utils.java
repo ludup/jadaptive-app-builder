@@ -56,43 +56,42 @@ public class Utils {
 	public static final String EMAIL_PATTERN = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
 	public static final String HTTP_URL_PATTERN = "^(https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$";
 	public static final String TIME_24_PATTERN = "^(2[0-3]|[01]?[0-9]):([0-5]?[0-9])$";
-	
+
 	public static final String ALLOWED_CHARACTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	public static final String PHONE_PATTERN = "^[+]*[-\\s\\.\\d()]*$";
-	
+
 	static Logger log = LoggerFactory.getLogger(Utils.class);
 
 	static SecureRandom random = new SecureRandom();
-	
+
 	/**
-	 * Encapsulate a part of a string by a given character.useful in hiding part of a password
+	 * Encapsulate a part of a string by a given character.useful in hiding part of
+	 * a password
 	 * 
-	 * @param original
-	 *            Original string
-	 * @param start
-	 *            Start position of masking
-	 * @param maskcharacter
-	 *            masking character of the rest of the String
-	 * @return if the given string length is shorter than start position then
-	 *         return the original string, otherwise return original string with
-	 *         replace masking character from the start position onward
+	 * @param original      Original string
+	 * @param start         Start position of masking
+	 * @param maskcharacter masking character of the rest of the String
+	 * @return if the given string length is shorter than start position then return
+	 *         the original string, otherwise return original string with replace
+	 *         masking character from the start position onward
 	 */
-	public static String maskingString(String original, int start,String maskcharacter) {
+	public static String maskingString(String original, int start, String maskcharacter) {
 		String result = null;
 		if (start < 0) {
 			throw new IllegalArgumentException("Start position should be greater than 0");
 		}
 		if (original.length() > start) {
-			result = original.substring(0, start)+ original.substring(start).replaceAll(".", maskcharacter);
+			result = original.substring(0, start) + original.substring(start).replaceAll(".", maskcharacter);
 		} else {
 			result = original;
 		}
 		return result;
 	}
-	
+
 	/**
-	 * Format a date with a given format. Formats are cached to prevent excessive use of 
-	 * DateFormat.
+	 * Format a date with a given format. Formats are cached to prevent excessive
+	 * use of DateFormat.
+	 * 
 	 * @param date
 	 * @param format
 	 * @return
@@ -100,56 +99,57 @@ public class Utils {
 	public static String formatDate(Date date, String format) {
 		return new SimpleDateFormat(format).format(date);
 	}
-	
+
 	public static String formatDate(Date date) {
 		return formatDate(date, "MMM d, yyyy");
 	}
-	
- 	public static String formatDateTime(Long date) {
+
+	public static String formatDateTime(Long date) {
 		return formatDateTime(new Date(date));
 	}
-	
+
 	public static String formatDateTime(Date date) {
 		return formatDate(date, "EEE, d MMM yyyy HH:mm:ss.SSS Z");
 	}
-	
+
 	public static String formatTimestamp(Date date) {
 		return formatDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 	}
-	
+
 	public static Date parseTimestamp(String date) {
 		try {
 			return parseDate(date, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-		} catch(IllegalStateException e) {
+		} catch (IllegalStateException e) {
 			try {
 				return parseDate(date, "yyyy-MM-dd HH:mm:ss.SSS");
-			} catch(IllegalStateException e2) {
+			} catch (IllegalStateException e2) {
 				return parseDate(date, "yyyy-MM-dd HH:mm:ss");
 			}
 		}
 	}
-	
+
 	public static String formatISODate(Date date) {
 		return formatDate(date, "yyyy-MM-dd");
 	}
-	
+
 	public static String formatShortDate(Date date) {
 		return formatDate(date, "EEE, d MMM yyyy");
 	}
-	
+
 	public static String formatShortDate(long date) {
 		return formatShortDate(new Date(date));
 	}
-	
+
 	/**
-	 * Parse a date on a given format. 
+	 * Parse a date on a given format.
+	 * 
 	 * @param date
 	 * @param format
 	 * @return
 	 * @throws ParseException
 	 */
 	public static Date parseDate(String date, String format) {
-		if(Objects.isNull(date)) {
+		if (Objects.isNull(date)) {
 			return null;
 		}
 		try {
@@ -158,9 +158,9 @@ public class Utils {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
-	
+
 	public static Date parseDateTime(String date) {
-		if(Objects.isNull(date)) {
+		if (Objects.isNull(date)) {
 			return null;
 		}
 		try {
@@ -171,12 +171,12 @@ public class Utils {
 			} catch (ParseException e1) {
 				throw new IllegalStateException(e.getMessage(), e1);
 			}
-			
+
 		}
 	}
-	
+
 	public static Date parseShortDate(String date) {
-		if(Objects.isNull(date)) {
+		if (Objects.isNull(date)) {
 			return null;
 		}
 		try {
@@ -185,13 +185,13 @@ public class Utils {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
-	
+
 	public static Date today() {
 		return todayCalendar().getTime();
 	}
-	
+
 	public static Calendar todayCalendar() {
-		
+
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
@@ -199,46 +199,45 @@ public class Utils {
 		date.set(Calendar.MILLISECOND, 0);
 		return date;
 	}
-	
+
 	public static Calendar tomorrowCalendar() {
-		
+
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-		
+
 		date.add(Calendar.DAY_OF_MONTH, 1);
-		
+
 		return date;
 	}
-	
+
 	public static Date tomorrow() {
 		return tomorrowCalendar().getTime();
 	}
-	
+
 	public static Date yesterday() {
-		
+
 		return yesterdayCalendar().getTime();
 	}
-	
 
 	public static Calendar yesterdayCalendar() {
-		
+
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-		
+
 		date.add(Calendar.DAY_OF_MONTH, -1);
-		
+
 		return date;
 	}
 
-
 	/**
 	 * Strip the port from a host header.
+	 * 
 	 * @param hostHeader
 	 * @return
 	 */
@@ -248,41 +247,40 @@ public class Utils {
 
 	public static String after(String value, String string) {
 		int idx = value.indexOf(string);
-		if(idx > -1 && idx+string.length() < value.length()) {
-			return value.substring(idx+string.length());
+		if (idx > -1 && idx + string.length() < value.length()) {
+			return value.substring(idx + string.length());
 		}
 		return "";
 	}
-	
-	
+
 	public static String before(String value, String string) {
 		int idx = value.indexOf(string);
-		if(idx > -1) {
-			return value.substring(0,idx);
+		if (idx > -1) {
+			return value.substring(0, idx);
 		}
 		return value;
 	}
-	
+
 	public static String beforeLast(String value, String string) {
 		int idx = value.lastIndexOf(string);
-		if(idx > -1) {
-			return value.substring(0,idx);
+		if (idx > -1) {
+			return value.substring(0, idx);
 		}
 		return value;
 	}
-	
+
 	public static String afterLast(String value, String string) {
 		int idx = value.lastIndexOf(string);
-		if(idx > -1 && idx+string.length() < value.length()) {
-			return value.substring(idx+string.length());
+		if (idx > -1 && idx + string.length() < value.length()) {
+			return value.substring(idx + string.length());
 		}
 		return "";
 	}
-	
+
 	public static String base64Encode(byte[] bytes) {
 		return java.util.Base64.getEncoder().encodeToString(bytes);
 	}
-	
+
 	public static String base64Encode(String resourceKey) {
 		try {
 			return base64Encode(resourceKey.getBytes("UTF-8"));
@@ -294,7 +292,7 @@ public class Utils {
 	public static byte[] base64Decode(String property) throws IOException {
 		return java.util.Base64.getDecoder().decode(property.getBytes("UTF-8"));
 	}
-	
+
 	public static String base64DecodeToString(String str) {
 		try {
 			return new String(base64Decode(str), "UTF-8");
@@ -306,46 +304,45 @@ public class Utils {
 	public static String format(Double d) {
 		return new DecimalFormat("0.00").format(d);
 	}
-	
+
 	public static String format(Float f) {
 		return new DecimalFormat("0.00").format(f);
 	}
-	
-	public static String prettyPrintXml(SOAPMessage message) throws SOAPException, IOException, TransformerFactoryConfigurationError, TransformerException {
+
+	public static String prettyPrintXml(SOAPMessage message)
+			throws SOAPException, IOException, TransformerFactoryConfigurationError, TransformerException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		message.writeTo(out);
-		
+
 		return prettyPrintXml(out.toString("UTF-8"));
 	}
-	
-	public static String prettyPrintXml(String unformattedXml) throws TransformerFactoryConfigurationError, UnsupportedEncodingException, TransformerException {
 
-		Transformer transformer = TransformerFactory.newInstance()
-				.newTransformer();
+	public static String prettyPrintXml(String unformattedXml)
+			throws TransformerFactoryConfigurationError, UnsupportedEncodingException, TransformerException {
+
+		Transformer transformer = TransformerFactory.newInstance().newTransformer();
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		StreamResult result = new StreamResult(new StringWriter());
-		transformer.transform(
-				new StreamSource(new ByteArrayInputStream(unformattedXml.getBytes("UTF-8"))),
-				result);
+		transformer.transform(new StreamSource(new ByteArrayInputStream(unformattedXml.getBytes("UTF-8"))), result);
 		return result.getWriter().toString();
 	}
-	
+
 	public static String checkNull(String str) {
-		if(str==null) {
+		if (str == null) {
 			return "";
 		}
 		return str;
 	}
-	
+
 	public static String checkNullToString(Object obj) {
-		if(obj==null) {
+		if (obj == null) {
 			return "";
 		}
 		return obj.toString();
 	}
-	
+
 	public static String checkNull(String str, String def) {
-		if(str==null) {
+		if (str == null) {
 			return def;
 		}
 		return str;
@@ -358,14 +355,14 @@ public class Utils {
 			throw new IllegalStateException("System does not appear to support UTF-8!", e);
 		}
 	}
-	
+
 	public static String[] urlDecodeAll(String... message) {
 		String[] a = new String[message.length];
-		for(int i = 0 ; i < a.length ; i++)
+		for (int i = 0; i < a.length; i++)
 			a[i] = urlDecode(message[i]);
 		return a;
 	}
-	
+
 	public static String urlDecode(String message) {
 		try {
 			return URLDecoder.decode(message, "UTF-8");
@@ -375,7 +372,7 @@ public class Utils {
 	}
 
 	public static boolean isUUID(String attachment) {
-		 try {
+		try {
 			UUID.fromString(attachment);
 			return true;
 		} catch (Exception e) {
@@ -385,79 +382,79 @@ public class Utils {
 
 	public static String stripQuery(String url) {
 		int idx = url.indexOf('?');
-		if(idx > -1) {
-			url = url.substring(0,  idx);
+		if (idx > -1) {
+			url = url.substring(0, idx);
 		}
 		return url;
 	}
-	
+
 	public static String generateRandomAlphaNumericString(int length) {
-		return random.ints(0, ALLOWED_CHARACTERS.length())
-			    .limit(length).mapToObj(x -> ALLOWED_CHARACTERS.substring(x,x+1))
-			    .collect(Collectors.joining());
-	}
-	
-	public static String generateRandomNumericString(int length) {
-		return String.join("", random.ints(0, 10).limit(length).mapToObj(x -> String.valueOf(x)).collect(Collectors.toList()));
+		return random.ints(0, ALLOWED_CHARACTERS.length()).limit(length)
+				.mapToObj(x -> ALLOWED_CHARACTERS.substring(x, x + 1)).collect(Collectors.joining());
 	}
 
-	public static <T> List<T> nullSafe(List<T> list){
-		if(list == null){
+	public static String generateRandomNumericString(int length) {
+		return String.join("",
+				random.ints(0, 10).limit(length).mapToObj(x -> String.valueOf(x)).collect(Collectors.toList()));
+	}
+
+	public static <T> List<T> nullSafe(List<T> list) {
+		if (list == null) {
 			return Collections.<T>emptyList();
 		}
 		return list;
 	}
 
-	public static <T> Set<T> nullSafe(Set<T> set){
-		if(set == null){
+	public static <T> Set<T> nullSafe(Set<T> set) {
+		if (set == null) {
 			return Collections.<T>emptySet();
 		}
 		return set;
 	}
-	
+
 	public static String csv(String delim, String[] items) {
 		StringBuffer b = new StringBuffer();
-		for(String i : items) {
-			if(b.length() > 0) {
+		for (String i : items) {
+			if (b.length() > 0) {
 				b.append(delim);
 			}
 			b.append(i);
 		}
 		return b.toString();
 	}
-	
+
 	public static <T> String csv(Collection<T> items) {
 		StringBuffer b = new StringBuffer();
-		for(T i : items) {
-			if(b.length() > 0) {
+		for (T i : items) {
+			if (b.length() > 0) {
 				b.append(",");
 			}
 			b.append(i.toString());
 		}
 		return b.toString();
 	}
-	
+
 	public static String csv(String... items) {
 		return csv(Arrays.asList(items));
 	}
-	
+
 	public static String csv(Object[] items) {
 		StringBuffer b = new StringBuffer();
-		for(Object i : items) {
-			if(b.length() > 0) {
+		for (Object i : items) {
+			if (b.length() > 0) {
 				b.append(",");
 			}
-			if(Objects.nonNull(i)) {
+			if (Objects.nonNull(i)) {
 				b.append(i.toString());
-			} 
+			}
 		}
 		return b.toString();
 	}
-	
+
 	public static String getBaseURL(String url) {
 		String protocol = before(url, "//");
 		String tmp = after(url, "//");
-		
+
 		return protocol + "//" + before(tmp, "/");
 	}
 
@@ -466,37 +463,37 @@ public class Utils {
 	}
 
 	public static Calendar thirtyDaysCalendar() {
-		
+
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-		
+
 		date.add(Calendar.DAY_OF_MONTH, 30);
-		
+
 		return date;
-		
+
 	}
-	
+
 	public static Date thirtyDays() {
 		return thirtyDaysCalendar().getTime();
 	}
-	
+
 	public static Calendar thirtyDaysAgoCalendar() {
-		
+
 		Calendar date = Calendar.getInstance();
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-		
+
 		date.add(Calendar.DAY_OF_MONTH, -30);
-		
+
 		return date;
-		
+
 	}
-	
+
 	public static Date thirtyDaysAgo() {
 		return thirtyDaysAgoCalendar().getTime();
 	}
@@ -524,7 +521,7 @@ public class Utils {
 	public static int parseIntOrDefault(String value, int defaultValue) {
 		try {
 			return Integer.parseInt(value);
-		} catch(NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			return 0;
 		}
 	}
@@ -532,14 +529,14 @@ public class Utils {
 	public static Date now() {
 		return new Date();
 	}
-	
+
 	public static Set<String> extractVariables(String str) {
 		Set<String> vars = new HashSet<>();
 		int idx = 0;
-		while((idx = str.indexOf('{', idx)) != -1) {
-			int start = idx+1;
+		while ((idx = str.indexOf('{', idx)) != -1) {
+			int start = idx + 1;
 			idx = str.indexOf('}', start);
-			if(idx==-1) {
+			if (idx == -1) {
 				throw new IllegalArgumentException("Unterminated variable detected!");
 			}
 			vars.add(str.substring(start, idx));
@@ -547,22 +544,22 @@ public class Utils {
 		}
 		return vars;
 	}
-	
+
 	public static String getCommaSeparatedNames(Collection<? extends NamedDocument> values) {
-		
+
 		StringBuffer buf = new StringBuffer();
-		for(NamedDocument value : values) {
-			if(buf.length() > 0) {
+		for (NamedDocument value : values) {
+			if (buf.length() > 0) {
 				buf.append(",");
 			}
 			buf.append(value.getName());
 		}
-				
+
 		return buf.toString();
 	}
-	
+
 	public static Date getMonthEnd(Date timestamp) {
-		
+
 		Calendar date = Calendar.getInstance();
 		date.setTime(getMonthStart(timestamp));
 		date.add(Calendar.MONTH, 1);
@@ -572,11 +569,11 @@ public class Utils {
 		date.set(Calendar.SECOND, 59);
 		date.set(Calendar.MILLISECOND, 9999);
 		return date.getTime();
-		
+
 	}
 
 	public static Date getMonthStart(Date timestamp) {
-		
+
 		Calendar date = Calendar.getInstance();
 		date.setTime(timestamp);
 		date.set(Calendar.DAY_OF_MONTH, 1);
@@ -584,26 +581,27 @@ public class Utils {
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MILLISECOND, 0);
-		
+
 		return date.getTime();
 	}
 
 	public static Long getLongOrDefault(String value, Long defaultValue) {
 		try {
 			return Long.parseLong(value);
-		} catch(NumberFormatException e) { }
+		} catch (NumberFormatException e) {
+		}
 		return defaultValue;
 	}
-	
+
 	public static String stripNonAlphanumeric(String str) {
-	   return str = str.replaceAll("[^a-zA-Z0-9]", "");
+		return str = str.replaceAll("[^a-zA-Z0-9]", "");
 	}
 
 	public static boolean isNotCompanyType(String element) {
 
 		element = stripNonAlphanumeric(element);
-		
-		switch(element.trim().toLowerCase()) {
+
+		switch (element.trim().toLowerCase()) {
 		case "ltd":
 		case "inc":
 		case "limited":
@@ -617,18 +615,18 @@ public class Utils {
 			return true;
 		}
 	}
-	
+
 	public static String generate3LetterCode(String name, char fillingCharacter) {
 		return generateUsername(name, fillingCharacter, 3);
 	}
-	
+
 	public static String generateUsername(String name, char fillingCharacter, int length) {
 		name = WordUtils.capitalizeFully(stripNonAlphanumeric(name));
 		String[] elements = name.split(" ");
 		StringBuffer buf = new StringBuffer();
-		for(int i=0;i<length;i++) {
-			if(i < elements.length && StringUtils.isNotBlank(elements[i])) {
-				if(Utils.isNotCompanyType(elements[i])) {
+		for (int i = 0; i < length; i++) {
+			if (i < elements.length && StringUtils.isNotBlank(elements[i])) {
+				if (Utils.isNotCompanyType(elements[i])) {
 					buf.append(elements[i].charAt(0));
 				}
 			} else {
@@ -637,12 +635,12 @@ public class Utils {
 		}
 		return buf.toString();
 	}
-	
+
 	public static String intitals(String name) {
 		name = WordUtils.capitalizeFully(name);
 		String[] elements = name.split(" ");
 		StringBuffer buf = new StringBuffer();
-		for(int i=0;i<elements.length;i++) {
+		for (int i = 0; i < elements.length; i++) {
 			buf.append(elements[i].charAt(0));
 		}
 		return buf.toString();
@@ -651,6 +649,7 @@ public class Utils {
 	public static Double round(Double value) {
 		return round(value, 2);
 	}
+
 	public static Double round(Double value, int digits) {
 		return BigDecimal.valueOf(value).setScale(digits, RoundingMode.HALF_DOWN).doubleValue();
 	}
@@ -659,85 +658,163 @@ public class Utils {
 		StringBuffer buf = new StringBuffer();
 		String str = "abcdefghijklmnopqrstuvwxyz";
 		val = val.toLowerCase();
-		for(Character c : val.toCharArray()) {
-			
-			if(str.indexOf(c) > -1) {
+		for (Character c : val.toCharArray()) {
+
+			if (str.indexOf(c) > -1) {
 				buf.append(c);
 			}
-			if(buf.length() >= i) {
+			if (buf.length() >= i) {
 				break;
 			}
-			
+
 		}
 		return buf.toString();
 	}
-	
+
 	public static Long fromByteSize(String val) {
-		  if(val.matches("\\d+")) {
-			  return Long.parseLong(val);
-		  }
-		  
-		  Pattern p = Pattern.compile("(\\d+)(.*)");
-		  Matcher m = p.matcher(val);
-		  if(!m.matches()) {
-			  throw new IllegalArgumentException(String.format("Invalid input %s", val));
-		  }
-		  String n = m.group(1);
-		  String t = m.group(2);
-		  
-		  t = t.toUpperCase();
-		  
-		  Long v = Long.parseLong(n);
-		  
-		  switch(t) {
-		  case "P":
-		  case "PB":
-			  return v * 1000 * 1000 * 1000 * 1000 * 1000;
-		  case "PIB":
-			  	return v * 1024 * 1024 * 1024 * 1024 * 1024;
-		  case "T":
-		  case "TB":
-			  return v * 1000 * 1000 * 1000 * 1000;
-		  case "TIB":
-			  return v * 1024 * 1024 * 1024 * 1024;
-		  case "G":
-		  case "GB":
-			  return v * 1000 * 1000 * 1000;
-		  case "GIB":
-			  return v * 1024 * 1024 * 1024;
-		  case "M":
-		  case "MB":
-			  return v * 1000 * 1000;
-		  case "MIB":
-			  return v * 1024 * 1024;
-		  case "K":
-		  case "KB":
-			  return v * 1000;
-		  case "KIB":
-			  return v * 1024;
-		  default:
-			  throw new IllegalArgumentException(String.format("Invalid input %s", val));
-		  }
-	  }
+		if (val.matches("\\d+")) {
+			return Long.parseLong(val);
+		}
+
+		Pattern p = Pattern.compile("(\\d+)(.*)");
+		Matcher m = p.matcher(val);
+		if (!m.matches()) {
+			throw new IllegalArgumentException(String.format("Invalid input %s", val));
+		}
+		String n = m.group(1);
+		String t = m.group(2);
+
+		t = t.toUpperCase();
+
+		Long v = Long.parseLong(n);
+
+		switch (t) {
+		case "P":
+		case "PB":
+			return v * 1000 * 1000 * 1000 * 1000 * 1000;
+		case "PIB":
+			return v * 1024 * 1024 * 1024 * 1024 * 1024;
+		case "T":
+		case "TB":
+			return v * 1000 * 1000 * 1000 * 1000;
+		case "TIB":
+			return v * 1024 * 1024 * 1024 * 1024;
+		case "G":
+		case "GB":
+			return v * 1000 * 1000 * 1000;
+		case "GIB":
+			return v * 1024 * 1024 * 1024;
+		case "M":
+		case "MB":
+			return v * 1000 * 1000;
+		case "MIB":
+			return v * 1024 * 1024;
+		case "K":
+		case "KB":
+			return v * 1000;
+		case "KIB":
+			return v * 1024;
+		default:
+			throw new IllegalArgumentException(String.format("Invalid input %s", val));
+		}
+	}
 
 	public static String toByteSize(double t) {
 		return toByteSize(t, 2);
 	}
 
 	public static String toByteSize(double t, int decimalPlaces) {
-		
-		if(decimalPlaces < 0) {
+
+		if (decimalPlaces < 0) {
 			throw new IllegalArgumentException("Number of decimal places must be > 0");
 		}
 		String[] sizes = { "B", "KB", "MB", "GB", "TB", "PB" };
 		int idx = 0;
 		double x = t;
-		while(x / 1000 >= 1) {
+		while (x / 1000 >= 1) {
 			idx++;
 			x = (x / 1000);
 		}
-		
+
 		return String.format("%." + decimalPlaces + "f%s", x, sizes[idx]);
 	}
-	
+
+	/*
+	 * GNU LESSER GENERAL PUBLIC LICENSE Copyright (C) 2006 The XAMJ Project
+	 * 
+	 * This library is free software; you can redistribute it and/or modify it under
+	 * the terms of the GNU Lesser General Public License as published by the Free
+	 * Software Foundation; either version 2.1 of the License, or (at your option)
+	 * any later version.
+	 * 
+	 * This library is distributed in the hope that it will be useful, but WITHOUT
+	 * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+	 * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+	 * details.
+	 * 
+	 * You should have received a copy of the GNU Lesser General Public License
+	 * along with this library; if not, write to the Free Software Foundation, Inc.,
+	 * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+	 * 
+	 * Contact info: lobochief@users.sourceforge.net
+	 */
+	public static String textToHTML(String text) {
+		if (text == null) {
+			return null;
+		}
+		int length = text.length();
+		boolean prevSlashR = false;
+		StringBuffer out = new StringBuffer();
+		for (int i = 0; i < length; i++) {
+			char ch = text.charAt(i);
+			switch (ch) {
+			case '\r':
+				if (prevSlashR) {
+					out.append("<br>");
+				}
+				prevSlashR = true;
+				break;
+			case '\n':
+				prevSlashR = false;
+				out.append("<br>");
+				break;
+			case '"':
+				if (prevSlashR) {
+					out.append("<br>");
+					prevSlashR = false;
+				}
+				out.append("&quot;");
+				break;
+			case '<':
+				if (prevSlashR) {
+					out.append("<br>");
+					prevSlashR = false;
+				}
+				out.append("&lt;");
+				break;
+			case '>':
+				if (prevSlashR) {
+					out.append("<br>");
+					prevSlashR = false;
+				}
+				out.append("&gt;");
+				break;
+			case '&':
+				if (prevSlashR) {
+					out.append("<br>");
+					prevSlashR = false;
+				}
+				out.append("&amp;");
+				break;
+			default:
+				if (prevSlashR) {
+					out.append("<br>");
+					prevSlashR = false;
+				}
+				out.append(ch);
+				break;
+			}
+		}
+		return out.toString();
+	}
 }

@@ -1,14 +1,17 @@
 package com.jadaptive.app.db;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.repository.RepositoryException;
+import com.jadaptive.api.tenant.TenantService;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
@@ -18,31 +21,33 @@ public class MongoDatabaseServiceImpl implements MongoDatabaseService {
 
 	static Logger log = LoggerFactory.getLogger(MongoDatabaseServiceImpl.class);
 	
-	private MongoClient mongoClient;
-	 
+	private Map<String,MongoClient> databaseClients = new HashMap<>();
+	
+	@Autowired
+	private TenantService tenantService;
+	
 	@Override
-	public synchronized MongoClient getClient() {
+	public synchronized MongoClient getClient(String database) {
 		try {
-			if(mongoClient==null) {
-				connect();
+			MongoClient c = databaseClients.get(database);
+			if(c==null) {
+				c = connect(database);
+				databaseClients.put(database, c);
 			}
-			return mongoClient;
+			return c;
 		} catch (IOException e) {
 			throw new RepositoryException(e.getMessage(), e);
 		}
 	}
 	
-	protected void connect() throws IOException {
+	protected MongoClient connect(String database) throws IOException {
 		
-		String connectionString = ApplicationProperties.getValue("mongodb.connection", null);
+		String defaultConnection = ApplicationProperties.getValue("mongodb.connection", "mongodb://localhost:27017/");
 		
-		if(StringUtils.isNotBlank(connectionString)) {
-			mongoClient = new MongoClient(new MongoClientURI(connectionString));
-		} else {
-			mongoClient = new MongoClient(
-				ApplicationProperties.getValue("mongodb.hostname", "localhost"),
-				ApplicationProperties.getValue("mongodb.port", 27017));
+		if(!TenantService.SYSTEM_UUID.equals(database)) {
+			defaultConnection = tenantService.getTenantDatabaseConnection(database, defaultConnection); 
 		}
+		return new MongoClient(new MongoClientURI(defaultConnection));
 	}
 
 }

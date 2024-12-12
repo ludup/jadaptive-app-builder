@@ -13,7 +13,7 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
 	Iterable<T> list(Class<T> resourceClass, SearchField...fields);
 	
-	T get(String uuid, Class<T> resourceClass) throws RepositoryException, ObjectException;
+	<X extends UUIDDocument> X get(String uuid, Class<X> resourceClass) throws RepositoryException, ObjectException;
 	
 	T get(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException;
 	

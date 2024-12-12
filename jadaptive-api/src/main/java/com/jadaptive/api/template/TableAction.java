@@ -25,7 +25,7 @@ public @interface TableAction  {
 	
 	String url();
 
-	String buttonClass() default "primary";
+	String classes() default "primary";
 	
 	String icon();
 	

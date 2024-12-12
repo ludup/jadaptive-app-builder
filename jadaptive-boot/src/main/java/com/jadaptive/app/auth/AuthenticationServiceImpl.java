@@ -2,6 +2,7 @@ package com.jadaptive.app.auth;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -24,10 +25,12 @@ import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
+import com.jadaptive.api.auth.AuthenticationProvider;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.AuthenticatorPage;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
+import com.jadaptive.api.auth.TemporaryAuthenticationPolicy;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.auth.events.AuthenticationFailedEvent;
 import com.jadaptive.api.auth.events.AuthenticationSuccessEvent;
@@ -54,6 +57,7 @@ import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.Redirect;
+import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
 import com.jadaptive.api.ui.pages.auth.Password;
@@ -101,20 +105,25 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	private QuotaService quotaService;
 	
 	Map<String, Class<? extends Page>> registeredAuthenticationPages = new HashMap<>();
-
-	Map<Class<? extends Page>, AuthenticationModule> registeredModulesByPage = new HashMap<>();
-	Map<String,AuthenticationModule> registeredModulesByResourceKey = new HashMap<>();
+	Map<Class<? extends Page>, AuthenticationProvider> registeredModulesByPage = new HashMap<>();
+	Map<String,AuthenticationProvider> authenticationProvidersByUUID = new HashMap<>();
+	Map<String,AuthenticationProvider> authenticationProvidersByKey = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void registerAuthenticationPage(AuthenticationModule module, Class<? extends AuthenticationPage<?>>... pages) {
+	public void registerAuthenticationPage(
+			AuthenticationProvider provider,
+			Class<? extends AuthenticationPage<?>>... pages) {
 		if(Objects.isNull(pages) || pages.length == 0) {
 			throw new IllegalArgumentException();
 		}
-		registeredAuthenticationPages.put(module.getAuthenticatorKey(), pages[0]);
-		registeredModulesByResourceKey.put(module.getAuthenticatorKey(), module);
+		
+		authenticationProvidersByKey.put(provider.getAuthenticatorKey(), provider);
+		authenticationProvidersByUUID.put(provider.getAuthenticatorUUID(), provider);
+		registeredAuthenticationPages.put(provider.getAuthenticatorKey(), pages[0]);
+
 		for(var c : pages) {
-			registeredModulesByPage.put(c, module);
+			registeredModulesByPage.put(c, provider);
 		}
 	}
 
@@ -160,7 +169,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 			if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
 				Class<? extends Page> currentPage = state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass());
-				AuthenticationModule module = registeredModulesByPage.get(currentPage);
+				AuthenticationProvider module = registeredModulesByPage.get(currentPage);
 				if(Objects.isNull(module)) {
 					log.warn("User failed authentication on page {} but no module is present!!!", currentPage.getSimpleName());
 					return;
@@ -169,6 +178,41 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 						state.getAttemptedUsername(),
 						"", Request.getRemoteAddress()));
 			}
+		} finally {
+			permissionService.clearUserContext();
+		}
+	}
+	
+	@Override
+	public LogonCompletedResult logonUser(User user, Tenant tenant, String remoteAddress, String userAgent) {
+
+		permissionService.setupSystemContext();
+
+		try {
+
+			user = userService.getUser(user.getUsername());
+			if (Objects.isNull(user) || !userService.supportsLogin(user)) {
+				throw new AccessDeniedException("Bad username or password");
+			}
+
+			setupUserContext(user);
+
+			try {
+
+				assertPermission(USER_LOGIN_PERMISSION);
+
+				assertLoginThesholds();
+				return new LogonCompletedResult(Optional.of(sessionService.createSession(tenant, user, remoteAddress, userAgent, SessionType.HTTPS, null))) {
+					@Override
+					public void close() {
+						sessionService.closeSession(session().orElseThrow(() -> new IllegalStateException("Already closed.")));
+					}
+				};
+
+			} finally {
+				clearUserContext();
+			}
+
 		} finally {
 			permissionService.clearUserContext();
 		}
@@ -226,6 +270,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		quotaService.assertQuota(quota, AuthenticationPolicy.RESOURCE_KEY, "failedLoginThreshold.error");
 	}
 	
+	@Override
+	public void clearLoginThesholds() {
+		QuotaThreshold quota = quotaService.getAssignedThreshold(quotaService.getKey(FAILED_LOGIN_ATTEMPTS_UUID));
+		quotaService.clearQuota(quota);
+	}
+	
 	private void flagFailedLogin() {
 		QuotaThreshold quota = quotaService.getAssignedThreshold(quotaService.getKey(FAILED_LOGIN_ATTEMPTS_UUID));
 		quotaService.incrementQuota(quota, AuthenticationPolicy.RESOURCE_KEY, "failedLoginThreshold.error");
@@ -264,6 +314,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			if(log.isInfoEnabled()) {
 				log.info("User {} has completed authentication", state.getUser().getUsername());
 			}
+			
 			if(!state.hasPostAuthentication()) {
 			
 				if(log.isInfoEnabled()) {
@@ -386,21 +437,18 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		AuthenticationModule m = new AuthenticationModule();
 		m.setUuid(PASSWORD_MODULE_UUID);
 		m.setAuthenticatorKey(PASSWORD);
-		m.setIdentityCapture(false);
-		m.setSecretCapture(true);
 		m.setName("Password");
-		m.setRequiresEmailAddress(false);
-		m.setRequiresPhoneNumber(false);
 		m.setSystem(true);
 		
 		return m;
 	}	
 
-	private void setupPostAuthentication(AuthenticationState state) {
+	@Override
+	public void setupPostAuthentication(AuthenticationState state) {
 		
 		List<PostAuthenticatorPage> additional = new ArrayList<>();
 		for(PostAuthenticatorPage a : applicationService.getBeans(PostAuthenticatorPage.class)) {
-			if(a.requiresProcessing(state)) {
+			if(a.requiresProcessing(state) && !(a instanceof SetupPostAuthenticationPage)) {
 				additional.add(a);
 			}
 		}
@@ -413,11 +461,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					return o1.getWeight().compareTo(o2.getWeight());
 				}
 			});
-			
-			state.getPostAuthenticationPages().clear();
-			state.getPostAuthenticationPages().addAll(additional);
 		}
-
+		
+		state.getPostAuthenticationPages().addAll(additional);
+		state.setAttribute(AuthenticationState.PROCESS_POST_AUTHENTICATION, Boolean.TRUE);
 	}
 
 	@Override
@@ -492,8 +539,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 		state.setPolicy(policy);
 		
-		setupPostAuthentication(state);
-		
 		validateModules(policy);
 	}
 
@@ -528,7 +573,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		boolean hasSecret = false;
 
 		for (AuthenticationModule module : policy.getRequiredAuthenticators()) {
-			hasSecret |= module.isSecretCapture();
+			AuthenticationProvider provider = authenticationProvidersByKey.get(module.getAuthenticatorKey());
+			hasSecret |= provider.isSecretCapture();
 		}
 
 		if (policy.getOptionalAuthenticators().size() < policy.getOptionalRequired()) {
@@ -585,7 +631,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	
 	@Override
 	public AuthenticationModule getAuthenticationModuleByResourceKey(String resourceKey) {
-		return registeredModulesByResourceKey.get(resourceKey);
+		return moduleDatabase.get(AuthenticationModule.class, SearchField.eq("authenticatorKey", resourceKey));
 	}
 
 	@Override
@@ -615,6 +661,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		state.setUserAgent(Request.get().getHeader(HttpHeaders.USER_AGENT));
 
 		processRequiredAuthentication(state, policy);
+		
+		state.getPostAuthenticationPages().add(pageCache.resolvePage(SetupPostAuthenticationPage.class));
 		
 		Request.get().getSession().setAttribute(AUTHENTICATION_STATE_ATTR, state);
 		return state;
@@ -684,8 +732,26 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public Class<? extends Page> getCurrentPage() {
 		return getCurrentState().getCurrentPage().orElseGet(() -> pageCache.getHomeClass());
-	};
-	
+	}
+
+	@Override
+	public void launchTemporaryAuthentication(String name, String redirectURI, AuthenticationModule... modules) throws FileNotFoundException {
+		
+		AuthenticationPolicy temporaryPolicy = new TemporaryAuthenticationPolicy();
+		temporaryPolicy.setName(name);
+		temporaryPolicy.getRequiredAuthenticators().addAll(Arrays.asList(modules));
+		AuthenticationState state = createAuthenticationState(temporaryPolicy, 
+				new UriRedirect(redirectURI),
+				getCurrentUser());
+		state.setResetURL(redirectURI);
+		throw state.nextRedirectOrFinish(pageCache);
+
+	}
+
+	@Override
+	public AuthenticationProvider getAuthenticationProviderByUUID(String uuid) {
+		return authenticationProvidersByUUID.get(uuid);
+	}
 	
 	
 //	class NoAuthAuthenticationToken extends AbstractAuthenticationToken {
@@ -712,4 +778,5 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //		public boolean isAuthenticated() { return true; }
 //		
 //	}
+	
 }

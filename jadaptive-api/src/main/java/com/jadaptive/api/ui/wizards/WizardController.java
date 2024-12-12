@@ -50,7 +50,7 @@ public class WizardController extends AuthenticatedController {
 			}
 			WizardState state = wizard.getState(request);
 			state.start();
-			throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
+			throw new UriRedirect(state.getRedirectURI());
 	}
 	
 	@RequestMapping(value = "/app/api/wizard/next/{resourceKey}", method = { RequestMethod.POST, RequestMethod.GET }, produces = { "application/json" })
@@ -68,7 +68,7 @@ public class WizardController extends AuthenticatedController {
 					WizardSection section = state.moveNext();
 					if(!section.isHidden()) {
 						state.incrementStep();
-						throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
+						throw new UriRedirect(state.getRedirectURI());
 					}
 				}
 				
@@ -98,7 +98,7 @@ public class WizardController extends AuthenticatedController {
 			}
 			
 			state.decrementStep();
-			throw new UriRedirect(String.format("/app/ui/wizards/%s", state.getResourceKey()));
+			throw new UriRedirect(state.getRedirectURI());
 			} finally {
 				Wizard.clearCurrentState();
 			}
@@ -116,6 +116,7 @@ public class WizardController extends AuthenticatedController {
 		
 		try {
 			WizardState state = wizardService.getWizard(resourceKey).getState(request);
+			Wizard.setCurrentState(state);
 			state.finish();
 			return new RequestStatusImpl(true);
 			
@@ -126,6 +127,33 @@ public class WizardController extends AuthenticatedController {
 			return new RequestStatusImpl(false, e.getMessage());
 		} finally {
 			clearUserContext();
+			Wizard.clearCurrentState();
 		}
+	}
+	
+	@RequestMapping(value = "/app/api/wizard/cancel/{resourceKey}", method = { RequestMethod.POST, RequestMethod.GET }, produces = { "application/json" })
+	@ResponseBody
+	public void cancelWizrd(
+			HttpServletRequest request, HttpServletResponse response,
+			@PathVariable String resourceKey) throws AccessDeniedException,
+			UnauthorizedException, SessionTimeoutException, FileNotFoundException {
+
+		setupSystemContext();
+		
+		WizardFlow wizard = wizardService.getWizard(resourceKey);
+		
+		try {
+			
+			wizardService.clearState(resourceKey, request);
+		} catch(Throwable e) {
+			log.error("Failed to cancel wizard {}", resourceKey, e);
+		} finally {
+			clearUserContext();
+		}
+		
+		if(Objects.nonNull(wizard)) {
+			throw wizard.getCancelRedirect();
+		}
+		throw new UriRedirect("/app/ui");
 	}
 }

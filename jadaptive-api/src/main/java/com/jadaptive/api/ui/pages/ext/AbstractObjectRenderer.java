@@ -72,18 +72,20 @@ import com.jadaptive.api.ui.renderers.form.ImageFormInput;
 import com.jadaptive.api.ui.renderers.form.JavascriptEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleAttachmentInput;
 import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
+import com.jadaptive.api.ui.renderers.form.MultipleTagsFormInput;
 import com.jadaptive.api.ui.renderers.form.NumberFormInput;
 import com.jadaptive.api.ui.renderers.form.OptionsFormInput;
 import com.jadaptive.api.ui.renderers.form.PasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.RadioFormInput;
+import com.jadaptive.api.ui.renderers.form.RichTextEditorInput;
 import com.jadaptive.api.ui.renderers.form.SetPasswordFormInput;
 import com.jadaptive.api.ui.renderers.form.SingleAttachmentInput;
 import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 import com.jadaptive.api.ui.renderers.form.TextAreaFormInput;
+import com.jadaptive.api.ui.renderers.form.TextEditorInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimeFormInput;
 import com.jadaptive.api.ui.renderers.form.TimestampFormInput;
-import com.jadaptive.api.ui.renderers.form.UploadFormInput;
 import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectRenderer extends AbstractPageExtension {
@@ -163,7 +165,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			Element form = getForm(contents);
 			
 			form.addClass("jadaptiveForm")
-				.attr("id", "objectForm")
 				.attr("method", "POST")
 				.attr("autocomplete", "off")
 				.attr("data-resourcekey", template.getResourceKey())
@@ -189,8 +190,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				
 			Session.getOr().ifPresent(session -> {
 				form.appendChild(Html.input("hidden", 
-						SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
-							sessionUtils.setupCSRFToken(Request.get()))
+						SessionUtils.generateCSRFTokenName(template.getResourceKey()), 
+							sessionUtils.setupCSRFToken(Request.get(), template.getResourceKey()))
 							.attr("id", "csrftoken"));
 			});
 			
@@ -227,7 +228,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				views = new ArrayList<>();
 				TemplateView v = new TemplateView("dynamic");
 				for(FieldTemplate t : template.getFields()) {
-					v.getFields().add(new TemplateViewField(null, v, t, null));
+					v.getFields().add(new TemplateViewField(null, v, t, null, false));
 				}
 				views.add(v);
 			}
@@ -287,17 +288,51 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			Element viewElement = createViewElement(view, element, first && !view.isRoot());
 			
 			boolean firstField = true;
+			Element lastRow = Html.div("row mb-3 fields");
+			viewElement.appendChild(lastRow);
+			
+			int usedCols = 0;
 			for(TemplateViewField fieldView : view.getFields()) {
 				FieldTemplate field = fieldView.getField();
 
 				switch(field.getFieldType()) {
 				default:
-					Element e = Html.div("field");
-					viewElement.appendChild(e);
-					renderField(e, obj, fieldView, scope, view);
+					
+					Element f = Html.div("field");
+					lastRow.appendChild(f);
+					int cols = Math.min(field.getMetaValueInt("cols", 12), 12);
+					int size = Math.min(field.getMetaValueInt("size", 12), 12);
+					boolean eor = true;
+					
+					if(size < 12) {
+						f.addClass("col-md-" + size + " col-sm-12");
+					} else if(cols < 12) {
+						usedCols += cols;
+						eor = usedCols >= 12;
+						f.addClass("col-md-" + cols + " col-sm-12");
+					}
+
+					renderField(f, obj, fieldView, scope, view);
+					
+					//if(!field.isHidden()) {
+					if(eor) {
+						boolean visible = false;
+						for(Element e : lastRow.select(".field")) {
+							if(!e.hasClass("d-none")) {
+								visible = true;
+								break;
+							}
+						}
+						if(!visible) {
+							lastRow.addClass("d-none");
+						}
+						viewElement.appendChild(lastRow = Html.div("row mb-3 fields"));
+						usedCols = 0;
+					}
+					//}
 					break;
 				}
-				
+
 				if(firstField) {
 					var firstInput = viewElement.select("input").first();
 					if(firstInput != null) {
@@ -306,6 +341,10 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				}
 				
 				firstField = false;
+			}
+			
+			if(lastRow.childNodeSize() == 0) {
+				lastRow.remove();
 			}
 			
 			if(!view.getChildViews().isEmpty()) {
@@ -378,7 +417,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			renderCollection(element, obj, fieldView, scope, panel); 
 		} else {
 			switch(field.getFieldType()) {
-			case OBJECT_REFERENCE:
+			case TEMPLATE_REFERENCE:
+			{
 				String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
 				ObjectTemplate objectTemplate = templateService.get(objectType);
 				String uuid = null;
@@ -390,12 +430,61 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						name = (String) ref.getValue("name");
 					}
 				}
+				
+				AbstractObject ref = obj.getChild(field);
+				if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
+					DropdownFormInput dropdown = new DropdownFormInput(fieldView);
+					dropdown.renderInput(element, "");
+					for(String resourceKey : objectTemplate.getChildTemplates()) {
+						dropdown.addI18nValue(resourceKey, resourceKey + ".name");
+					}
+					if(Objects.nonNull(ref)) {
+						dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
+					}
+				} else {
+					FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
+							String.format("/app/api/templates/%s/table", objectType),
+							"name", "uuid");
+					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
+				}
 
-				FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
-						String.format("/app/api/references/%s/table", objectType),
-						objectTemplate.getNameField(), "uuid");
-				input.renderInput(element, uuid, name, false, scope == FieldView.READ);
 				break;
+			}
+			case OBJECT_REFERENCE:
+			{
+				String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
+				ObjectTemplate objectTemplate = templateService.get(objectType);
+				String uuid = null;
+				String name = null;
+				if(Objects.nonNull(obj)) {
+					AbstractObject ref = obj.getChild(fieldView.getField());
+					if(Objects.nonNull(ref)) {
+						uuid = ref.getUuid();
+						name = (String) ref.getValue("name");
+					}
+				}
+				
+				AbstractObject ref = obj.getChild(field);
+				if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
+					DropdownFormInput dropdown = new DropdownFormInput(fieldView);
+					dropdown.renderInput(element, "");
+					if(scope!=FieldView.READ) {
+						for(AbstractObject o : objectService.list(objectType)) {
+							dropdown.addInputValue(o.getUuid(), (String) o.getValue(objectTemplate.getNameField()));
+						}
+					}
+					if(Objects.nonNull(ref)) {
+						dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
+					}
+				} else {
+					FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
+							String.format("/app/api/references/%s/table", objectType),
+							"name", "uuid");
+					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
+				}
+
+				break;
+			}
 			case OBJECT_EMBEDDED:
 //				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
 				throw new IllegalStateException("Embedded object field should not be processed here");
@@ -424,7 +513,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		
 		
-		if(field.isHidden()) {
+		if(fieldView.isHidden()) {
 			element.addClass("d-none");
 		} if(!field.getViews().contains(scope)) {
 			switch(scope) {
@@ -505,13 +594,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			break;
 		case OBJECT_EMBEDDED:
 		{
-			TableRenderer table = applicationService.autowire(new TableRenderer(view == FieldView.READ, 
-					obj, field,
-					formRenderer.get(), formHandler.get()));
-
+			
 			String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
 			ObjectTemplate objectTemplate = templateService.get(objectType);
 			
+			TableRenderer table = applicationService.autowire(new TableRenderer(view == FieldView.READ, 
+					obj, field,
+					formRenderer.get(), formHandler.get(), objectTemplate));
+
 			Collection<AbstractObject> objects;
 			
 			if(Objects.nonNull(obj)) {
@@ -527,12 +617,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			
 			table.setObjects(objects);
-			table.setTemplate(objectTemplate);
 			table.setTemplateClazz(templateService.getTemplateClass(objectTemplate.getResourceKey()));
 			table.setSortColumn(objectTemplate.getDefaultColumn());
 			table.setSortOrder(SortOrder.ASC);
 			
-			element.insertChildren(0, table.render());
+			element.appendChild(table.render());
 			break;
 		}
 //		case FILE:
@@ -564,7 +653,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), fieldView, String.format("/app/api/references/%s/table", objectType),
-					objectTemplate.getNameField(), "uuid");
+					"name", "uuid");
 			render.renderInput(element, values, false, 
 					(view == FieldView.READ || fieldView.getField().isReadOnly()));
 			break;
@@ -606,16 +695,40 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case TEXT:
 		{
 			switch(fieldView.getRenderer()) {
-//			case TAGS:
-//			{
-//				MultipleTagsFormInput render = new MultipleTagsFormInput(currentTemplate.get(), orderedField);
-//				render.renderInput(panel, element, Objects.nonNull(obj) ? 
-//						obj.getCollection(field.getResourceKey()) 
-//						: Collections.emptyList());
-//				break;
-//			}
+			case TAGS:
+			{
+				MultipleTagsFormInput render = new MultipleTagsFormInput(
+						fieldView.getResourceKey(),
+						fieldView.getBundle(), 
+						fieldView.getFormVariable());
+				render.renderInput(panel, element, Objects.nonNull(obj) ? 
+						obj.getCollection(field.getResourceKey()) 
+						: Collections.emptyList());
+				break;
+			}
+ 			case COLLECTION:
+			{
+				Collection<NamePairValue> values = 
+						( Objects.nonNull(obj) ? obj.getCollection(field.getResourceKey())
+						: Collections.emptyList() ).stream().map(o -> new NamePairValue(o.toString(), o.toString())).toList();
+				
+				if(values.isEmpty() && 
+						field.isReadOnly() &&
+						(fieldView.getRenderer() == FieldRenderer.OPTIONAL)) {
+					// TODO Hidden encrypted
+					return;
+				}
+				
+				CollectionSearchFormInput render = new CollectionSearchFormInput(
+						currentTemplate.get(), fieldView, field.getMeta(),
+						"name", "value");
+				render.renderInput(element, values, false, (view == FieldView.READ || fieldView.getField().isReadOnly()));
+
+				break;
+			}
 			default:
 			{
+				
 				Collection<String> values = Objects.nonNull(obj) ? obj.getCollection(field.getResourceKey())
 						: Collections.emptyList();
 				
@@ -800,6 +913,18 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				render.renderInput(element, getFieldValue(fieldView, obj));
 				break;
 			}
+			case TEXT_EDITOR:
+			{
+				TextEditorInput render = new TextEditorInput(fieldView, currentDocument.get());
+				render.renderInput(element, getFieldValue(fieldView, obj));
+				break;
+			}
+			case RICH_EDITOR:
+			{
+				RichTextEditorInput render = new RichTextEditorInput(fieldView, currentDocument.get());
+				render.renderInput(element, getFieldValue(fieldView, obj));
+				break;
+			}
 			case HTML_VIEW:
 			{
 				/**
@@ -966,7 +1091,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		Elements thisElement = element.select("#" + field.getResourceKey());
 		if(field.isRequired()) {
-			thisElement.attr("required", "required");
+			thisElement.attr("required", "true");
 		}
 		if(field.isReadOnly() || view == FieldView.READ) {
 			thisElement.attr("readonly", "readonly");
@@ -991,6 +1116,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 		Map<String,ObjectDynamicField> optionalFields = generateDynamicFields(currentTemplate.get());
 		Element row = thisElement.parents().select(".field").first();
+
 		if(Objects.nonNull(row)) {
 			
 			if(optionalFields.containsKey(fieldView.getVariable())) {
@@ -999,6 +1125,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				String dependsValue = optionalFields.get(fieldView.getVariable()).dependsValue();
 				row.attr("data-depends-on", dependsOn);
 				row.attr("data-depends-value", dependsValue);
+				row.attr("data-resourcekey", fieldView.getResourceKey());
 				row.addClass("processDepends");
 				String[] matchValues = dependsValue.split(",");
 				boolean matches = false;
@@ -1032,7 +1159,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			if(fieldView.isAutoSave()) {
 				row.addClass("processAutosave");
-				row.attr("data-action", String.format("/app/api/form/stash/%s", currentTemplate.get().getResourceKey()));
+				row.attr("data-action", String.format("/app/api/form/stash/%s", obj.getResourceKey()));
 			}
 		}
 	}
@@ -1042,11 +1169,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		Map<String,ObjectDynamicField> tmp = new HashMap<>();
 		
 		Class<?> clz = templateService.getTemplateClass(objectTemplate.getResourceKey());
-		ObjectDynamicField[] fields = clz.getAnnotationsByType(ObjectDynamicField.class);
-		if(Objects.nonNull(fields)) {
-			for(ObjectDynamicField field : fields) {
-				tmp.put(field.field(), field);
+		while(Objects.nonNull(clz)) {
+			ObjectDynamicField[] fields = clz.getAnnotationsByType(ObjectDynamicField.class);
+			if(Objects.nonNull(fields)) {
+				for(ObjectDynamicField field : fields) {
+					tmp.put(field.field(), field);
+				}
 			}
+			clz = clz.getSuperclass();
 		}
 		return tmp;
 	}
@@ -1196,7 +1326,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 	private Element createTabElement(TemplateView view, Element rootElement, boolean first) {
 		
-		Element list = rootElement.selectFirst("ul");
+		Element list = rootElement.selectFirst("ul.nav");
 		
 		list.appendChild(new Element("li")
 				.addClass("nav-item")

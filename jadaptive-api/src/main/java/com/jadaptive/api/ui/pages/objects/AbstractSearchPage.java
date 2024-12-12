@@ -101,10 +101,10 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		setCachedValue("length", String.valueOf(length));
 
-		sortColumn = StringUtils.defaultString(form.getSortColumn(), tableView.sortField());
+		sortColumn = Objects.toString(form.getSortColumn(), tableView.sortField());
 		setCachedValue("sortColumn", sortColumn);
 		
-		sortOrder = SortOrder.valueOf(StringUtils.defaultString(form.getSortOrder(), tableView.sortOrder().name()));
+		sortOrder = SortOrder.valueOf(Objects.toString(form.getSortOrder(), tableView.sortOrder().name()));
 		setCachedValue("sortOrder", sortOrder.name());
 		
 		generateTable(document);
@@ -180,7 +180,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		sortColumn = Request.get().getParameter("sortColumn");
 		if(Objects.isNull(sortColumn)) {
-			sortColumn = getCachedValue("sortColumn", StringUtils.defaultString(Request.get().getParameter("sortColumn"),tableView.sortField()));
+			sortColumn = getCachedValue("sortColumn", Objects.toString(Request.get().getParameter("sortColumn"),tableView.sortField()));
 			if(StringUtils.isBlank(sortColumn)) {
 				sortColumn = null;
 			}
@@ -188,7 +188,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		String order = Request.get().getParameter("sortOrder");
 		if(Objects.isNull(order)) {
-			order = getCachedValue("sortOrder", StringUtils.defaultString(Request.get().getParameter("sortOrder"), tableView.sortOrder().name()));
+			order = getCachedValue("sortOrder", Objects.toString(Request.get().getParameter("sortOrder"), tableView.sortOrder().name()));
 			if(StringUtils.isBlank(order)) {
 				order = null;
 			}
@@ -259,14 +259,13 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 
 		boolean filtered = search.length > 0;
 
-		TableRenderer renderer = applicationService.autowire(new TableRenderer(readOnly));
-
+		TableRenderer renderer = applicationService.autowire(createTableRenderer(readOnly, template));
 		renderer.setObjects(objects);
-		renderer.setTemplate(template);
+		renderer.setTotalObjects(totalObjects);
 		renderer.setTemplateClazz(templateClazz);
 		renderer.setSortColumn(sortColumn);
 		renderer.setSortOrder(sortOrder);
-	
+		
 		table.insertChildren(0, renderer.render());
 
 		Element pagnation = table.selectFirst("#pagnation");
@@ -300,7 +299,11 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 		
 	}
-	
+
+	protected TableRenderer createTableRenderer(boolean readOnly, ObjectTemplate template) {
+		return new TableRenderer(readOnly, template);
+	}
+
 	private void generateSearchColumns(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField, Map<String,FieldTemplate> processedFields) throws IOException {
 		
 		for(FieldTemplate field : template.getFields()) {
@@ -317,6 +320,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 						continue;
 					}
 				}
+				
 				input.addInputValue(field.getResourceKey(), String.format("%s.name", field.getResourceKey()), true, template.getBundle()).attr("data-formvar", parentPrefix + field.getFormVariable());
 				if(searchField.equals(parentPrefix + field.getFormVariable())) {
 					input.setDefaultValue(String.format("%s.name", field.getResourceKey()), 
@@ -334,6 +338,8 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			generateSearchColumns(t, input, document, parentPrefix, searchField, processedFields);
 		}
 		
+		generateAdditionalColumns(document.selectFirst("#searchValueHolder"), input, searchField);
+		
 		Element form = document.selectFirst("#searchForm");
 		form.appendChild(
 				Html.input("hidden", "sortColumn", sortColumn)
@@ -342,6 +348,10 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		form.appendChild(Html.input("hidden", "sortOrder", sortOrder.name())
 				.attr("id", "sortOrder"));
 		
+		
+	}
+	
+	protected void generateAdditionalColumns(Element searchInputs, DropdownInput input, String searchField) {
 		
 	}
 
@@ -460,20 +470,22 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 		case OBJECT_REFERENCE:
 		{
-			ObjectTemplate referenceTemplate = templateService.get(field.getValidationValue(ValidationType.RESOURCE_KEY));
-			FieldSearchFormInput input = new FieldSearchFormInput(
-					template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle(), 
-					String.format("/app/api/references/%s/table", field.getValidationValue(ValidationType.RESOURCE_KEY)),
-						referenceTemplate.getNameField(), field.getResourceKey(), "uuid");
-			input.diableDecoration();
-			input.disableIDAttribute();
-			if(!initial) {
-				Element e = input.renderInput(holder,  "",  "", true, false);
-				e.addClass("d-none searchValueField");
-			} else {
-				Element e = input.renderInput(holder,  searchValue,  searchValueText, true, false);
-				e.addClass("searchValueField");
-			}
+			addReferenceSearchInput(holder, field.getResourceKey(), initial, template.getBundle(), 
+					String.format("/app/api/references/%s/table", field.getValidationValue(ValidationType.RESOURCE_KEY)));
+
+//			FieldSearchFormInput input = new FieldSearchFormInput(
+//					template, field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle(), 
+//						String.format("/app/api/references/%s/table", field.getValidationValue(ValidationType.RESOURCE_KEY)),
+//						"name", field.getResourceKey(), "uuid");
+//			input.diableDecoration();
+//			input.disableIDAttribute();
+//			if(!initial) {
+//				Element e = input.renderInput(holder,  "",  "", true, false);
+//				e.addClass("d-none searchValueField");
+//			} else {
+//				Element e = input.renderInput(holder,  searchValue,  searchValueText, true, false);
+//				e.addClass("searchValueField");
+//			}
 			
 			break;
 		}
@@ -538,6 +550,22 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 		}
 		
+	}
+	
+	protected void addReferenceSearchInput(Element searchInputs, String searchField, boolean initial, String bundle, String url) {
+		
+		FieldSearchFormInput input = new FieldSearchFormInput(
+				template, resourceKey, initial ? "searchValue" : "unused",bundle, 
+				url, "name", searchField, "uuid");
+		input.diableDecoration();
+		input.disableIDAttribute();
+		if(!initial) {
+			Element e = input.renderInput(searchInputs,  "",  "", true, false);
+			e.addClass("d-none searchValueField");
+		} else {
+			Element e = input.renderInput(searchInputs,  searchValue,  searchValueText, true, false);
+			e.addClass("searchValueField");
+		}
 	}
 
 	protected abstract Collection<AbstractObject> generateTable(ObjectTemplate template, 

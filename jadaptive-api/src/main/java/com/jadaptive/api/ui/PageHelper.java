@@ -167,4 +167,10 @@ public class PageHelper {
 		ApplicationServiceImpl.getInstance().getBean(SessionUtils.class).addContentSecurityPolicy(Request.response(), policy, value);
 	}
 
+	public static void appendInlineStyle(Document document, String css) {
+		
+		Element head = PageHelper.getOrCreateTag(document, "head");
+		head.appendChild(new Element("style").append(css));
+	}
+
 }

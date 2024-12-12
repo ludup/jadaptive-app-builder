@@ -120,16 +120,18 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 		Element authenticators = doc.selectFirst("#authenticators");
 		for(AuthenticationPage<?> page : pages) {
 			
+			AuthenticationModule module = authenticationService.getAuthenticationModuleByUUID(page.getAuthenticatorUUID());
 			if(!state.hasCompleted(page.getClass()) && page.canAuthenticate(state)) {
+				
 				authenticators.appendChild(Html.div("card my-3")
 					.appendChild(Html.div("card-body")
 						.appendChild(new Element("h6")
 								.addClass("card-title mb-1")
 								.appendChild(Html.i(page.getIconGroup(), page.getIcon(), "me-2"))
-								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.title")))
+								.appendChild(Html.i18n(page.getBundle(), module.getAuthenticatorKey() + ".verifyIdentity.title")))
 						.appendChild(new Element("span")
 								.addClass("card-text")
-								.appendChild(Html.i18n(page.getBundle(), "verifyIdentity.body")
+								.appendChild(Html.i18n(page.getBundle(), module.getAuthenticatorKey() + ".verifyIdentity.body")
 										.addClass("small")))
 						.appendChild(Html.a("#").addClass("select stretched-link float-end")
 								.attr("data-authenticator", page.getAuthenticatorUUID()))

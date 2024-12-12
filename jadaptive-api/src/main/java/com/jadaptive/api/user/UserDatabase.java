@@ -36,6 +36,10 @@ public interface UserDatabase extends ExtensionPoint {
 		throw new UnsupportedOperationException();
 	}
 	
+	void enableUser(User user);
+	
+	void disableUser(User user);
+	
 	Integer weight();
 
 	default User importUser(String username) {

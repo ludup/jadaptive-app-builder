@@ -8,9 +8,9 @@ import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
 
-public class CachingIterable<T extends UUIDEntity> implements Iterable<T> {
+public class CachingIterable<T extends UUIDDocument> implements Iterable<T> {
 
 		static Logger log = LoggerFactory.getLogger(CachingIterable.class);
 		

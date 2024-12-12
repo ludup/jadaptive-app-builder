@@ -16,7 +16,6 @@ import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
@@ -30,6 +29,8 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	
 	private static final String UNDECORATED = "authentication.undecorated";
 
+	private static final String LOGIN_IDENTIFIER = "LoginPage";
+	
 	public static void setUndecorated(HttpSession session) {
 		session.setAttribute(UNDECORATED, true);
 	}
@@ -76,12 +77,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	
 	@Override
 	protected final void generateContent(Document doc) throws FileNotFoundException {
-		var req = Request.get();
-		var session = Session.getOr(req);
-		if(session.isPresent() && isRedirectInSession()) {
-			throw new UriRedirect();
-		}
-		
+
 		doGenerateContent(doc); 
 		
 		Element actions = doc.selectFirst("#actions");
@@ -114,8 +110,8 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 				sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
 			}
 			form.appendChild(Html.input("hidden", 
-					SessionUtils.CSRF_TOKEN_ATTRIBUTE, 
-						sessionUtils.setupCSRFToken(Request.get()))
+					SessionUtils.generateCSRFTokenName(LOGIN_IDENTIFIER), 
+						sessionUtils.setupCSRFToken(Request.get(), LOGIN_IDENTIFIER))
 						.attr("id", "csrftoken"));
 		}
 		
@@ -141,16 +137,18 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		
 			var request = Request.get();
 			
-			sessionUtils.verifySameSiteRequest(request);
+			sessionUtils.verifySameSiteRequest(request, LOGIN_IDENTIFIER);
 			
 			if(doForm(document, state, form)) {
 				throw authenticationService.completeAuthentication(state, Optional.of(this)).
 							maybeAttachToSession(request, sessionUtils.getTimeout());
 			}
-    	
+			
 			Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-	    	Feedback.error("default", "error.invalidCredentials");
-	    	
+			
+			if(!Feedback.isSet()) {
+		    	Feedback.error("default", "error.invalidCredentials");
+			}
     	} catch(AccessDeniedException e) {
     		Feedback.error(e.getMessage());
     	} catch(ObjectNotFoundException e) {	
@@ -171,7 +169,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 	}
 
 	public abstract boolean canAuthenticate(AuthenticationState state);
-
+	
 	public abstract String getAuthenticatorUUID();
 	
 }

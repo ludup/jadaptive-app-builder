@@ -15,7 +15,7 @@ import com.jadaptive.api.ui.pages.ObjectTemplatePage;
 
 @Component
 @RequestPage(path = "create/{resourceKey}")
-@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "jadaptive-forms"} )
 @PageProcessors(extensions = { "i18n"} )
 public class Create extends ObjectTemplatePage {
 	

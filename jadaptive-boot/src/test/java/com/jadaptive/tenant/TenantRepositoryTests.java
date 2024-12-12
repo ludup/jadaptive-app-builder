@@ -24,8 +24,7 @@ public class TenantRepositoryTests {
 	
 	@BeforeEach
 	public void initTest() {
-		tenantRepository = new TenantRepositoryImpl(db);
-		tenantRepository.newSchema();		
+		tenantRepository = new TenantRepositoryImpl(db);	
 	}
 	
 	@Test

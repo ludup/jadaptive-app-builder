@@ -87,7 +87,7 @@ public class TablePage extends TemplatePage {
 		
 		for(TableAction action : templateService.getTableActions(template.getCollectionKey())) {
 			if(action.target()==Target.TABLE) {
-				createTableAction(document, action.url(), action.bundle(), action.icon(), action.buttonClass(), action.resourceKey());
+				createTableAction(document, action.url(), action.bundle(), action.icon(), action.classes(), action.resourceKey());
 			} else {
 				rowActions.appendChild( new Element("div")
 					.addClass("tableAction")
