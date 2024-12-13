@@ -3,7 +3,6 @@ package com.jadaptive.api.ui.pages.ext;
 public enum BootstrapTheme {
 
 	DEFAULT,
-	JADAPTIVE,
 	CERULEAN,
 	COSMO,
 	CYBORG,
@@ -48,29 +47,14 @@ public enum BootstrapTheme {
 	public static boolean hasCss(BootstrapTheme current) {
 		
 		switch(current) {
-		case JADAPTIVE:
+		case DEFAULT:
 			return false;
 		default:
 			return true;
 		}
 	}
 
-	public static String getThemeCssName(BootstrapTheme current) {
-		
-		switch(current) {
-		case DEFAULT:
-			/* BPS: I found Darkly embeds a font from Google. If server is
-			 * running disconnected from the internet, pages will take 30+
-			 * seconds to load. 
-			 */
-			return JADAPTIVE.name().toLowerCase();
-			//return DARKLY.name().toLowerCase();
-		default:
-			return current.name().toLowerCase();
-		}
-	}
-
 	public static String getThemeCssUrl(BootstrapTheme current) {
-		return String.format("/app/content/npm2mvn/npm/bootswatch/current/dist/%s/bootstrap.min.css", BootstrapTheme.getThemeCssName(current));
+		return String.format("/app/content/npm2mvn/npm/bootswatch/current/dist/%s/bootstrap.min.css", current.name().toString());
 	}
 }
