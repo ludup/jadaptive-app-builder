@@ -29,8 +29,7 @@ import com.jadaptive.utils.Utils;
 	system = true, creatable = true, defaultColumn = "name")
 @ObjectServiceBean(bean = TenantService.class)
 @GenerateEventTemplates(value = Tenant.RESOURCE_KEY)
-@ObjectViews({ 
-	@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)})
+@ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)
 @TableView(defaultColumns = { "name", "hostname", "code", "database" })
 @CreateURL(value = "/app/ui/wizards/setupTenant", i18n = "wizard.name")
 @TableAction(bundle = Tenant.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}")
