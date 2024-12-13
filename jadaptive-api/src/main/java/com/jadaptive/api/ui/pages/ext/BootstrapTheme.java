@@ -55,6 +55,6 @@ public enum BootstrapTheme {
 	}
 
 	public static String getThemeCssUrl(BootstrapTheme current) {
-		return String.format("/app/content/npm2mvn/npm/bootswatch/current/dist/%s/bootstrap.min.css", current.name().toString());
+		return String.format("/app/content/npm2mvn/npm/bootswatch/current/dist/%s/bootstrap.min.css", current.name().toLowerCase().toString());
 	}
 }
