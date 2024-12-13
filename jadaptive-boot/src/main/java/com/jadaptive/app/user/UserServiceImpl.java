@@ -164,6 +164,10 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 
 	@Override
 	public void setPassword(User user, char[] newPassword, boolean passwordChangeRequired) {
+		setPassword(user, newPassword, passwordChangeRequired, true);
+	}
+	@Override
+	public void setPassword(User user, char[] newPassword, boolean passwordChangeRequired, boolean log) {
 		
 		permissionService.assertPermission(SET_PASSWORD_PERMISSION);
 		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
@@ -171,9 +175,13 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		try {
 			eventService.publishEvent(new VerifyPasswordEvent(user, newPassword));
 			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
-			eventService.publishEvent(new SetPasswordEvent(user));
+			if(log) {
+				eventService.publishEvent(new SetPasswordEvent(user));
+			}
 		} catch(Throwable e) {
-			eventService.publishEvent(new SetPasswordEvent(user, e));
+			if(log) {
+				eventService.publishEvent(new SetPasswordEvent(user, e));
+			}
 			throw e;
 		}
 	}

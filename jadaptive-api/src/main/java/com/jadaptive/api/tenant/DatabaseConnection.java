@@ -2,7 +2,6 @@ package com.jadaptive.api.tenant;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Objects;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
@@ -12,13 +11,9 @@ import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectServiceBean;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
-import com.jadaptive.api.ui.menu.ApplicationMenuService;
-import com.jadaptive.api.ui.menu.PageMenu;
-import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = DatabaseConnection.RESOURCE_KEY, 
 	scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, 
@@ -34,12 +29,12 @@ public class DatabaseConnection extends NamedUUIDEntity implements NamedDocument
 	@ObjectField(type = FieldType.TEXT, manualEncryption = true)
 	String connectionString;
 	
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.HOSTNAME)
+	Collection<String> nodes;
+	
 	@ObjectField(type = FieldType.COUNTRY)
 	Collection<String> automaticMapping = new HashSet<>();
-	
-	public DatabaseConnection() {
-		
-	}
 
 	@Override
 	public String getResourceKey() {
@@ -60,5 +55,13 @@ public class DatabaseConnection extends NamedUUIDEntity implements NamedDocument
 
 	public void setAutomaticMapping(Collection<String> automaticMapping) {
 		this.automaticMapping = automaticMapping;
+	}
+
+	public Collection<String> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(Collection<String> nodes) {
+		this.nodes = nodes;
 	}
 }

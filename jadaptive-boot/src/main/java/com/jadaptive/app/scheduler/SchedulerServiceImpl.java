@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.events.EventService;
@@ -72,7 +73,7 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 			if(task.isSystemOnly() && !tenant.isSystem()) {
 				continue;
 			}
-			String scopes = System.getProperty("jadaptive.taskScopes", "NODE,GLOBAL");
+			String scopes = ApplicationProperties.getValue("ha.taskScopes", "NODE,GLOBAL");
 			
 			if(!scopes.contains(task.getScope().name())) {
 				if(log.isInfoEnabled()) {
