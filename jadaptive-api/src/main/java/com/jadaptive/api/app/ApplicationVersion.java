@@ -2,6 +2,8 @@ package com.jadaptive.api.app;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -12,6 +14,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class ApplicationVersion {
 
@@ -40,8 +43,20 @@ public class ApplicationVersion {
 	    if (version != null) {
 	        return version;
 	    }
+	    
+	    // look for <cwd>/.install4j/i4jparams.conf for the full application version (with build number)
+	    try(var in = Files.newInputStream(Paths.get(System.getProperty("install4j.installationDir", System.getProperty("user.dir"))).resolve(".install4j").resolve("i4jparams.conf"))) {
+    		var docBuilderFactory = DocumentBuilderFactory.newInstance();
+            var docBuilder = docBuilderFactory.newDocumentBuilder();
+            var doc = docBuilder.parse (in);
+            var general = (Element)doc.getDocumentElement().getElementsByTagName("general").item(0);
+			return general.getAttributes().getNamedItem("applicationVersion").getTextContent();
+	    }
+	    catch(Exception ioe) {
+	    	//
+	    }
 
-	    // try to load from maven properties first
+	    // now try to load from maven
 	    try {
 	        Properties p = new Properties();
 	        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("/META-INF/maven/com.jadaptive/" + artifactId + "/pom.properties");
