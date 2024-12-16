@@ -1,6 +1,7 @@
 package com.jadaptive.api.json;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -11,6 +12,11 @@ public class BootstrapTableResult<T> {
 	private Collection<?> rows;
 	private T resource;
 //	private ObjectTemplate template; 
+	
+
+	public BootstrapTableResult(List<?> rows) {
+		this(rows, rows.size());
+	}
 	
 	public BootstrapTableResult(Collection<?> rows, long total/*, ObjectTemplate template*/) {
 		this.rows = rows;
