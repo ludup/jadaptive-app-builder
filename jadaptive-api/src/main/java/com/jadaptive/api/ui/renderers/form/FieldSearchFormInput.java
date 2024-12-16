@@ -12,7 +12,7 @@ public class FieldSearchFormInput {
 	String searchField;
 	String idField;
 	String valueField;
-	protected ObjectTemplate template;
+	//protected ObjectTemplate template;
 	
 	String resourceKey;
 	String formVariable;
@@ -20,8 +20,7 @@ public class FieldSearchFormInput {
 	boolean decorate = true;
 	boolean disableIDAttribute; 
 	
-	public FieldSearchFormInput(ObjectTemplate template, TemplateViewField field, String url, String searchField, String idField) {
-		this.template = template;
+	public FieldSearchFormInput(TemplateViewField field, String url, String searchField, String idField) {
 		this.url = url;
 		this.searchField = searchField;
 		this.idField = idField;
@@ -31,8 +30,7 @@ public class FieldSearchFormInput {
 		this.bundle = field.getBundle();
 	}
 	
-	public FieldSearchFormInput(ObjectTemplate template, String resourceKey, String formVariable, String bundle, String url, String searchField, String idField, String valueField) {
-		this.template = template;
+	public FieldSearchFormInput(String resourceKey, String formVariable, String bundle, String url, String searchField, String idField, String valueField) {
 		this.url = url;
 		this.searchField = searchField;
 		this.idField = idField;

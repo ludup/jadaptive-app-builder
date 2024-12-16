@@ -442,7 +442,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
 					}
 				} else {
-					FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
+					FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
 							String.format("/app/api/templates/%s/table", objectType),
 							"name", "uuid");
 					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
@@ -477,7 +477,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
 					}
 				} else {
-					FieldSearchFormInput input = new FieldSearchFormInput(objectTemplate, fieldView, 
+					FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
 							String.format("/app/api/references/%s/table", objectType),
 							"name", "uuid");
 					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
@@ -836,6 +836,18 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					render.renderInput(element, value);
 				}
 				break;
+			}
+			case COLLECTION:
+			{
+				FieldSearchFormInput input = new FieldSearchFormInput(fieldView.getResourceKey(), 
+						fieldView.getFormVariable(),
+						fieldView.getBundle(),
+						fieldView.getField().getMetaValue("url", ""),
+						"name",
+						"name",
+						"value");
+				input.renderInput(element, getFieldValue(fieldView, obj), 
+						getFieldValue(fieldView, obj), false, view == FieldView.READ);
 			}
 			default:
 			{

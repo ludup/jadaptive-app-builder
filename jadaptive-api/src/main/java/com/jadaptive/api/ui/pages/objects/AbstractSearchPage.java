@@ -555,7 +555,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	protected void addReferenceSearchInput(Element searchInputs, String searchField, boolean initial, String bundle, String url) {
 		
 		FieldSearchFormInput input = new FieldSearchFormInput(
-				template, resourceKey, initial ? "searchValue" : "unused",bundle, 
+				resourceKey, initial ? "searchValue" : "unused",bundle, 
 				url, "name", searchField, "uuid");
 		input.diableDecoration();
 		input.disableIDAttribute();
