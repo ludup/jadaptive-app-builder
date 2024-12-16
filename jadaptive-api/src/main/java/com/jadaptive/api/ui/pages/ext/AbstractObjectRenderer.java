@@ -848,6 +848,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						"value");
 				input.renderInput(element, getFieldValue(fieldView, obj), 
 						getFieldValue(fieldView, obj), false, view == FieldView.READ);
+				break;
 			}
 			default:
 			{
