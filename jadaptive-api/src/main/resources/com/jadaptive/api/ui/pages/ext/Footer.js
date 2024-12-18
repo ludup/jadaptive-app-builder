@@ -382,17 +382,17 @@ $(function() {
 	
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
+		
 		$('.processDepends').each(function() {
-			var field = $(this); //.parents('.field').first();
-			var row = $(this).parents('.row').first();
 			var dependsOn = $(this).data('depends-on');
 			var dependsValue = $(this).attr('data-depends-value');
-			var resourceKey = $(this).data('resourcekey');
 			
-			var allInput = $('input[name="' + dependsOn + '"]');
-			
+			var allInput = $('#' + dependsOn);
+			if(!allInput.length) {
+				allInput = $('input[name=' + dependsOn + ']');
+			}
 			var matchValues = dependsValue.split(',');
-
+			var matches = false;
 			allInput.each(function(i, input) {
 				input = $(input);
 				$.each(matchValues, function(i, obj) {
@@ -410,28 +410,22 @@ $(function() {
 					} else {
 						value = input.val();
 					}
-					var matches = !expectedResult;
 					if(obj == value) {
-						matches = expectedResult
-						if(expectedResult) {
-							field.removeClass('d-none');
-						} else {
-							field.addClass('d-none');
-						}
-						return true;
-					} else {
-						if(expectedResult) {
-							field.addClass('d-none');
-						} else {
-							field.removeClass('d-none');
-						}
+						matches = expectedResult;
 						return true;
 					}
 					return false;
 				});
-				
+				if(matches) {
+					return true;
+				}
 			});
-			
+			if(matches) {
+				$(this).removeClass('d-none');
+			} else {
+				$(this).addClass('d-none');
+			}
+
 			$('.fields').each(function() {
 				checkRowVisibility($(this));
 			});
