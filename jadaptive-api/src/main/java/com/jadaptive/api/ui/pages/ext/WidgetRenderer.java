@@ -162,7 +162,7 @@ public class WidgetRenderer implements PageExtension {
 				case COUNTRY:
 					return (String) objectPage.getObject().getValue(formVar);
 				case OBJECT_REFERENCE:
-				case FILE:
+//				case FILE:
 				case ATTACHMENT:
 				case IMAGE:
 				case OBJECT_EMBEDDED:

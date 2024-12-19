@@ -888,16 +888,16 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			render.renderInput(element, val);
 			break;
 		}
-		case FILE:
-		{
-			String value = getFieldValue(fieldView, obj);
-			FileFormInput render = new FileFormInput(currentTemplate.get(), fieldView,
-					documentService.getFileTypeFilename(value),
-					documentService.getFileTypeContentLength(value),
-					documentService.getFileTypeContentType(value));
-			render.renderInput(element, value);
-			break;
-		}
+//		case FILE:
+//		{
+//			String value = getFieldValue(fieldView, obj);
+//			FileFormInput render = new FileFormInput(currentTemplate.get(), fieldView,
+//					documentService.getFileTypeFilename(value),
+//					documentService.getFileTypeContentLength(value),
+//					documentService.getFileTypeContentType(value));
+//			render.renderInput(element, value);
+//			break;
+//		}
 		case ATTACHMENT:
 		{
 			SingleAttachmentInput render = new SingleAttachmentInput(currentTemplate.get(),fieldView);

@@ -176,7 +176,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 			case OPTIONS:
 			case COUNTRY:
 			case IMAGE:
-			case FILE:
+//			case FILE:
 			case TIME:
 				gen.writeStringField(t.getResourceKey(), value.toString());
 				break;

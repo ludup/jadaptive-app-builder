@@ -17,7 +17,7 @@ public enum FieldType {
 	PERMISSION(true), 
 //	HIDDEN,
 	IMAGE,
-	FILE,
+//	FILE,
 	COUNTRY, 
 	OPTIONS,
 	TIME,

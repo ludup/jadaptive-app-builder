@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
@@ -59,8 +60,10 @@ import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.MongoEntity;
 import com.jadaptive.utils.ParameterHelper;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 
 @Controller
 public class ObjectsFormController extends AuthenticatedController {
@@ -118,7 +121,16 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 				    }
 				    
 				}
-			} catch (IOException e) {
+				
+				
+					for(Part part : req.getParts()) {
+						FileAttachment attachment = fileService.createAttachment(
+				    			part.getInputStream(), part.getSubmittedFileName(), 
+				    			part.getContentType(), part.getName(), template);
+			    	ParameterHelper.setValue(parameters, part.getName(), attachment.getUuid());
+					}
+				
+			} catch (IOException | ServletException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
 

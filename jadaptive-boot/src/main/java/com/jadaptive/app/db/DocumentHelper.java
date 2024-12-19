@@ -435,15 +435,15 @@ public class DocumentHelper {
 	
 				return null;
 			}	
-			case FILE:
-			{
-				String encoded = getParameter(parameters, field, formVariablePrefix);
-				if(StringUtils.isBlank(encoded)) {
-					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
-				}
-				
-				return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
-			}
+//			case FILE:
+//			{
+//				String encoded = getParameter(parameters, field, formVariablePrefix);
+//				if(StringUtils.isBlank(encoded)) {
+//					return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
+//				}
+//				
+//				return getParameter(parameters, formVariablePrefix + field.getFormVariable() + "_previous");
+//			}
 			default:
 				if(Objects.isNull(value)) {
 					
