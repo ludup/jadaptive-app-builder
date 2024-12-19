@@ -522,32 +522,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template = new ObjectTemplate();
 				template.setUuid(resourceKey);
 			}
-			
-//			Class<?> parentClass = getParentClass(clz);
-//			ObjectDefinition parent = null;
-//			if(Objects.nonNull(parentClass)) {
-//				parent = parentClass.getAnnotation(ObjectDefinition.class);
-//			}
-//			
-//			if(Objects.nonNull(parent)) {
-//				String parentResourceKey = parent.resourceKey();
-//				if(StringUtils.isBlank(parentResourceKey)) {
-//					parentResourceKey = TemplateUtils.lookupClassResourceKey(parentClass);
-//				}
-//				if(log.isDebugEnabled()) {
-//					log.debug("{} template has {} as parent", resourceKey, parentResourceKey);
-//				}
-//				template.setParentTemplate(parentResourceKey);
-//				ObjectTemplate parentTemplate = templateRepository.get(parentResourceKey);
-//				if(e.templateType()!=ObjectTemplateType.EXTENDED) {
-//					if(!parentTemplate.getChildTemplates().contains(resourceKey)) {
-//						parentTemplate.addChildTemplate(resourceKey);
-//					}
-//				}
-//				
-//				templateRepository.saveOrUpdate(parentTemplate);
-//			}
-			
+
 			Class<?> baseClass = TemplateUtils.getBaseClass(clz);
 			ObjectDefinition collection = e; 
 			if(Objects.nonNull(baseClass)) {
@@ -1252,6 +1227,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 		case OBJECT_REFERENCE:
 		case TEMPLATE_REFERENCE:
+		case ATTACHMENT:
 		{
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {

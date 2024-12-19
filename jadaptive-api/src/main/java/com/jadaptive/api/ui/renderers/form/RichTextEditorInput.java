@@ -55,7 +55,7 @@ public class RichTextEditorInput extends FieldInputRender {
 		
 		String tinyMCEScript = "$(function() { \n" 
 		+ " tinymce.init({\n"
-		+ "   mode : '" + resourceKey + "',"
+		//+ "   mode : '" + resourceKey + "',"
 		+ "	  selector: '#" + resourceKey + "', \n"
 		+ "	  plugins: 'autosave link',\n"
 		+ "	  license_key: 'gpl',\n"

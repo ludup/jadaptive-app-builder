@@ -437,7 +437,7 @@ $(function() {
         var _self = $(this);
         
         var cancelFunc = function() {
-			$.getJSON("/app/api/form/cancel/" + _self.data('resourcekey'), function(data) {
+			$.getJSON("/app/api/stash/cancel/" + _self.data('resourcekey'), function(data) {
 				window.location = _self.attr('href');
 			});
 		};
