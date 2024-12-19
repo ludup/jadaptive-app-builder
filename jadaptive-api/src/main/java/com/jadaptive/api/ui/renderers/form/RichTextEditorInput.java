@@ -57,7 +57,7 @@ public class RichTextEditorInput extends FieldInputRender {
 		+ " tinymce.init({\n"
 		+ "   mode : '" + resourceKey + "',"
 		+ "	  selector: '#" + resourceKey + "', \n"
-		+ "	  plugins: 'autosave',\n"
+		+ "	  plugins: 'autosave link',\n"
 		+ "	  license_key: 'gpl',\n"
 		+ "	  promotion: false,\n"
 		+ "	  branding: false,\n"
