@@ -1225,9 +1225,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					"resourceKey.invalid"));
 			break;
 		}
+		case ATTACHMENT:
 		case OBJECT_REFERENCE:
 		case TEMPLATE_REFERENCE:
-		case ATTACHMENT:
 		{
 			String resourceKey = field.references();
 			if(StringUtils.isBlank(resourceKey)) {

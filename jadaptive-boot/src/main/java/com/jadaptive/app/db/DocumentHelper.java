@@ -63,6 +63,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
+import com.jadaptive.api.templates.TemplateUtils;
 //import com.jadaptive.app.ClassLoaderServiceImpl;
 //import com.jadaptive.app.encrypt.EncryptionServiceImpl;
 //import com.jadaptive.app.entity.MongoEntity;
@@ -726,11 +727,12 @@ public class DocumentHelper {
 							} else if(embedded instanceof Document) {
 								UUIDReference ref = DocumentHelper.convertDocumentToObject(UUIDReference.class, (Document) embedded);
 								if(!UUIDReference.class.equals(type)) {
+									resourceKey = StringUtils.defaultIfEmpty(columnDefinition.references(), TemplateUtils.lookupClassResourceKey(type));
 									AbstractObject e = (AbstractObject) 
 											ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
-													columnDefinition.references(), ref.getUuid());
+													resourceKey, ref.getUuid());
 									UUIDEntity ue = convertDocumentToObject(
-											ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(columnDefinition.references()),
+											ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey),
 											new Document(e.getDocument()), 
 											classLoader); 
 									elements.add(ue);
