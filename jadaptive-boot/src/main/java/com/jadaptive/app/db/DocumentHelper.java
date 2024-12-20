@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
@@ -102,10 +103,12 @@ public class DocumentHelper {
 
 		try {
 
-			if(StringUtils.isNotBlank(obj.getUuid())) {
-				document.put("_id", obj.getUuid());
+			if(StringUtils.isBlank(obj.getUuid())) {
+				obj.setUuid(UUID.randomUUID().toString());
 			}
-
+			
+			document.put("_id", obj.getUuid());
+			
 			document.put("_clz", obj.getClass().getName());
 			document.put("resourceKey", obj.getResourceKey());
 			 
@@ -299,9 +302,10 @@ public class DocumentHelper {
 		
 		AbstractObject obj = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).createNew(resourceKey);
 		String uuid = getParameter(parameters, formVariablePrefix + "uuid");
-		if(StringUtils.isNotBlank(uuid)) {
-			obj.setUuid(uuid);
+		if(StringUtils.isBlank(uuid)) {
+			uuid = UUID.randomUUID().toString();
 		}
+		obj.setUuid(uuid);
 		String system = getParameter(parameters, formVariablePrefix + "system");
 		if(Objects.nonNull(system)) {
 			obj.setSystem(Boolean.valueOf(system));

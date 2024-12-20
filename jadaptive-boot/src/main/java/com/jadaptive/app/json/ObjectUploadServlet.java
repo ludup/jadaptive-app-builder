@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
@@ -29,7 +28,6 @@ import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
-import com.jadaptive.api.json.ValidationRequestImpl;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.servlet.Request;
@@ -52,7 +50,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(name="objectServlet", description="Servlet for handing objects", 
-	urlPatterns = { "/app/api/form/*" })
+	urlPatterns = { "/app/api/form/multipart/*", "/app/api/form/stash/*",
+			"/app/api/form/stash-child/*"})
 public class ObjectUploadServlet extends HttpServlet {
 
 	private static final long serialVersionUID = -8476101184614381108L;
@@ -60,7 +59,6 @@ public class ObjectUploadServlet extends HttpServlet {
 	private static Logger log = LoggerFactory.getLogger(ObjectUploadServlet.class);
 	
 	private static final String MULTIPART = "multipart";
-	private static final String VALIDATE = "validate";
 	private static final String STASH = "stash";
 	private static final String STASH_CHILD = "stash-child";
 	
@@ -115,14 +113,12 @@ public class ObjectUploadServlet extends HttpServlet {
 				case STASH_CHILD:
 					uuid = processStashedChildObject(request, resourceKey, paths, parameters);
 					break;
-				case VALIDATE:
-					processValidation(request, resourceKey, parameters);
-					return;
 				default:
 					uuid = processUrlEncodedForm(request, handler, resourceKey, parameters);
 				}
 
 				json.writer().writeValue(resp.getOutputStream(), new UUIDStatus(uuid));
+				
 				
 		    } catch(ValidationException ex) { 
 				Feedback.error(ex.getMessage());
@@ -130,7 +126,6 @@ public class ObjectUploadServlet extends HttpServlet {
 			} catch (UriRedirect e) {
 				json.writer().writeValue(resp.getOutputStream(), new RedirectStatus(e.getUri()));
 			} catch (ObjectException e) {
-				log.error("Form Failure", e);
 				Feedback.error(e.getMessage());
 				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, e.getMessage()));
 			} catch (Throwable e) {
@@ -143,21 +138,6 @@ public class ObjectUploadServlet extends HttpServlet {
 				DocumentHelper.disableMultipleValidation();
 			}
 		}
-	}
-
-	private void processValidation(HttpServletRequest request, String resourceKey, Map<String, String[]> parameters) throws ValidationException, IOException {
-		
-
-			ObjectTemplate template = templateService.get(resourceKey);
-			request.getSession().removeAttribute(resourceKey);
-			
-			DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
-			json.writer().writeValue(Request.response().getOutputStream(),
-					new ValidationRequestImpl(!DocumentHelper.hasErrors(), 
-							DocumentHelper.hasErrors() ? I18N.getResource("userInterface", "multipleErrors.text", DocumentHelper.getErrors().size()) : "",
-								DocumentHelper.getErrors()));
-	
-		
 	}
 
 	private List<String> getPathElements(String uri) {

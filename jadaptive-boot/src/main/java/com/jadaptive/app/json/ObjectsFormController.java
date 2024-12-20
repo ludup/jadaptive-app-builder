@@ -149,75 +149,75 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		return new EntityStatus<AbstractObject>(false, e.getMessage());
 	}
 	
-//	@RequestMapping(value="/app/api/form/default/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
-//			consumes = { "multipart/form-data" })
-//	@ResponseBody
-//	@ResponseStatus(value=HttpStatus.OK)
-//	public RequestStatus saveFormAsObject(HttpServletRequest request, @PathVariable String resourceKey)  {
-//
-//		try {
-//			
-//			sessionUtils.verifySameSiteRequest(request, resourceKey);
-//			
-//			ObjectTemplate template = templateService.get(resourceKey);
-//			request.getSession().removeAttribute(resourceKey);
-//			
-//			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
-//			String uuid = objectService.saveOrUpdate(obj);
-//			
-//			if(template.isSingleton()) {
-//				Feedback.success("default", "object.saved", I18N.getResource(
-//						sessionUtils.getLocale(request), 
-//						template.getBundle(),
-//						template.getResourceKey() + ".name"));
-//			} else {
-//				Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
-//			}
-//			
-//			return new UUIDStatus(uuid);
-//		}  catch(ValidationException ex) { 
-//			return new RequestStatusImpl(false, ex.getMessage());
-//		} catch (UriRedirect e) {
-//			return new RedirectStatus(e.getUri());
-//		} catch (Throwable e) {
-//			if(log.isErrorEnabled()) {
-//				log.error("POST api/objects/{}", resourceKey, e);
-//			}
-//			return handleException(e, "POST", resourceKey);
-//		}
-//	}
+	@RequestMapping(value="/app/api/form/default/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+			consumes = { "multipart/form-data" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus saveFormAsObject(HttpServletRequest request, @PathVariable String resourceKey)  {
+
+		try {
+			
+			sessionUtils.verifySameSiteRequest(request, resourceKey);
+			
+			ObjectTemplate template = templateService.get(resourceKey);
+			request.getSession().removeAttribute(resourceKey);
+			
+			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
+			String uuid = objectService.saveOrUpdate(obj);
+			
+			if(template.isSingleton()) {
+				Feedback.success("default", "object.saved", I18N.getResource(
+						sessionUtils.getLocale(request), 
+						template.getBundle(),
+						template.getResourceKey() + ".name"));
+			} else {
+				Feedback.success("default", "object.saved", obj.getValue(template.getNameField()));
+			}
+			
+			return new UUIDStatus(uuid);
+		}  catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/objects/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		}
+	}
 	
-//	@RequestMapping(value="/app/api/form/validate/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
-//			consumes = { "multipart/form-data" })
-//	@ResponseBody
-//	@ResponseStatus(value=HttpStatus.OK)
-//	public RequestStatus validateForm(HttpServletRequest request, @PathVariable String resourceKey)  {
-//
-//		try {
-//			
-//			sessionUtils.verifySameSiteRequest(request, resourceKey);
-//			
-//			ObjectTemplate template = templateService.get(resourceKey);
-//			request.getSession().removeAttribute(resourceKey);
-//			
-//			DocumentHelper.enableMultipleValidation();
-//			DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
-//			return new ValidationRequestImpl(!DocumentHelper.hasErrors(), 
-//					DocumentHelper.hasErrors() ? I18N.getResource("userInterface", "multipleErrors.text", DocumentHelper.getErrors().size()) : "",
-//					DocumentHelper.getErrors());
-//		}  catch(ValidationException ex) { 
-//			return new RequestStatusImpl(false, ex.getMessage());
-//		} catch (UriRedirect e) {
-//			return new RedirectStatus(e.getUri());
-//		} catch (Throwable e) {
-//			if(log.isErrorEnabled()) {
-//				log.error("POST api/form/validate/{}", resourceKey, e);
-//			}
-//			return handleException(e, "POST", resourceKey);
-//		} finally {
-//			DocumentHelper.disableMultipleValidation();
-//		}
-//	}
+	@RequestMapping(value="/app/api/form/validate/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+			consumes = { "multipart/form-data" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus validateForm(HttpServletRequest request, @PathVariable String resourceKey)  {
+
+		try {
+			
+			sessionUtils.verifySameSiteRequest(request, resourceKey);
+			
+			ObjectTemplate template = templateService.get(resourceKey);
+			request.getSession().removeAttribute(resourceKey);
+			
+			DocumentHelper.enableMultipleValidation();
+			DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
+			return new ValidationRequestImpl(!DocumentHelper.hasErrors(), 
+					DocumentHelper.hasErrors() ? I18N.getResource("userInterface", "multipleErrors.text", DocumentHelper.getErrors().size()) : "",
+					DocumentHelper.getErrors());
+		}  catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/form/validate/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		} finally {
+			DocumentHelper.disableMultipleValidation();
+		}
+	}
 	
 //	@RequestMapping(value="/app/api/form/multipart/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
 //			consumes = { "multipart/form-data" })
@@ -262,7 +262,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 //		}
 //	}
 
-	@RequestMapping(value="/app/api/stash/cancel/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
+	@RequestMapping(value="/app/api/form/cancel/{resourceKey}", method = RequestMethod.GET, produces = {"application/json"})
 	@ResponseBody
 	public RequestStatus cancelForm(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey)  {
 
@@ -298,31 +298,31 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 //		}
 //	}
 	
-//	@RequestMapping(value="/app/api/form/temp/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
-//			consumes = { "multipart/form-data" })
-//	@ResponseBody
-//	@ResponseStatus(value=HttpStatus.OK)
-//	public RequestStatus temporaryObject(HttpServletRequest request, 
-//			@PathVariable String resourceKey)  {
-//
-//		try {
-//			ObjectTemplate template = templateService.get(resourceKey);
-//			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
-//			Request.get().getSession().setAttribute(obj.getResourceKey(), obj);
-//			return new UUIDStatus(resourceKey);
-//		}  catch(ValidationException ex) { 
-//			return new RequestStatusImpl(false, ex.getMessage());
-//		} catch (UriRedirect e) {
-//			return new RedirectStatus(e.getUri());
-//		} catch (Throwable e) {
-//			if(log.isErrorEnabled()) {
-//				log.error("POST api/objects/{}", resourceKey, e);
-//			}
-//			return handleException(e, "POST", resourceKey);
-//		}
-//	}
+	@RequestMapping(value="/app/api/form/temp/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+			consumes = { "multipart/form-data" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus temporaryObject(HttpServletRequest request, 
+			@PathVariable String resourceKey)  {
+
+		try {
+			ObjectTemplate template = templateService.get(resourceKey);
+			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
+			Request.get().getSession().setAttribute(obj.getResourceKey(), obj);
+			return new UUIDStatus(resourceKey);
+		}  catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/objects/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		}
+	}
 	
-	@RequestMapping(value="/app/api/objects/extend/remove/{resourceKey}/{extension}", method = RequestMethod.POST, 
+	@RequestMapping(value="/app/api/form/extend/remove/{resourceKey}/{extension}", method = RequestMethod.POST, 
 			produces = {"application/json"},
 			consumes = { "multipart/form-data" })
 	@ResponseBody
@@ -363,7 +363,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		}
 	}
 	
-	@RequestMapping(value="/app/api/objects/extend/add/{resourceKey}/{extension}", method = RequestMethod.POST, 
+	@RequestMapping(value="/app/api/form/extend/add/{resourceKey}/{extension}", method = RequestMethod.POST, 
 			produces = {"application/json"},
 			consumes = { "multipart/form-data" })
 	@ResponseBody
@@ -407,57 +407,57 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		}
 	}
 	
-//	@RequestMapping(value="/app/api/form/delete/{resourceKey}/{fieldName}/{childUuid}", method = RequestMethod.DELETE, produces = {"application/json"})
-//	@ResponseBody
-//	@ResponseStatus(value=HttpStatus.OK)
-//	public RequestStatus deleteEmbeddedObject(HttpServletRequest request, 
-//			@PathVariable String resourceKey, @PathVariable String childUuid, @PathVariable String fieldName)  {
-//
-//		try {
-//			ObjectTemplate parentTemplate = templateService.get(resourceKey);
-//			//ObjectTemplate childTemplate = templateService.get(parentTemplate.getField(fieldName).getResourceKey());
-//			//AbstractObject childObject = DocumentHelper.buildRootObject(request, childTemplate.getResourceKey(), childTemplate);
-//			FieldTemplate fieldTemplate = parentTemplate.getField(fieldName);
-//			Object stashedObject = Request.get().getSession().getAttribute(resourceKey);
-//			if(Objects.isNull(stashedObject)) {
-//				throw new IllegalStateException("No parent object found for " + resourceKey);
-//			}
-//			if(!(stashedObject instanceof AbstractObject)) {
-//				Document doc = new Document();
-//				DocumentHelper.convertObjectToDocument((UUIDDocument) stashedObject, doc);
-//				stashedObject = new MongoEntity(doc);
-//			}
-//			AbstractObject parentObject = (AbstractObject) stashedObject;
-//			
-//			if(fieldTemplate.getCollection()) {
-//				AbstractObject existing = null;
-//				for(AbstractObject child : parentObject.getObjectCollection(fieldName)) {
-//					if(child.getUuid().equalsIgnoreCase(childUuid)) {
-//						existing = child;
-//					}
-//				}
-//				if(Objects.nonNull(existing)) {
-//					parentObject.removeCollectionObject(fieldName, existing);
-//				}
-//			} else {
-//				throw new IllegalStateException(fieldName + " is not a collection!");
-//			}
-//			
-//			Feedback.info(parentTemplate.getBundle(), fieldName + ".deleted");
-//			
-//			objectService.stashObject(parentObject);
-//			return new RequestStatusImpl(true);
-//		}  catch(ValidationException ex) { 
-//			return new RequestStatusImpl(false, ex.getMessage());
-//		} catch (UriRedirect e) {
-//			return new RedirectStatus(e.getUri());
-//		} catch (Throwable e) {
-//			if(log.isErrorEnabled()) {
-//				log.error("POST api/objects/{}", resourceKey, e);
-//			}
-//			return handleException(e, "POST", resourceKey);
-//		}
-//	}
+	@RequestMapping(value="/app/api/form/delete/{resourceKey}/{fieldName}/{childUuid}", method = RequestMethod.DELETE, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus deleteEmbeddedObject(HttpServletRequest request, 
+			@PathVariable String resourceKey, @PathVariable String childUuid, @PathVariable String fieldName)  {
+
+		try {
+			ObjectTemplate parentTemplate = templateService.get(resourceKey);
+			//ObjectTemplate childTemplate = templateService.get(parentTemplate.getField(fieldName).getResourceKey());
+			//AbstractObject childObject = DocumentHelper.buildRootObject(request, childTemplate.getResourceKey(), childTemplate);
+			FieldTemplate fieldTemplate = parentTemplate.getField(fieldName);
+			Object stashedObject = Request.get().getSession().getAttribute(resourceKey);
+			if(Objects.isNull(stashedObject)) {
+				throw new IllegalStateException("No parent object found for " + resourceKey);
+			}
+			if(!(stashedObject instanceof AbstractObject)) {
+				Document doc = new Document();
+				DocumentHelper.convertObjectToDocument((UUIDDocument) stashedObject, doc);
+				stashedObject = new MongoEntity(doc);
+			}
+			AbstractObject parentObject = (AbstractObject) stashedObject;
+			
+			if(fieldTemplate.getCollection()) {
+				AbstractObject existing = null;
+				for(AbstractObject child : parentObject.getObjectCollection(fieldName)) {
+					if(child.getUuid().equalsIgnoreCase(childUuid)) {
+						existing = child;
+					}
+				}
+				if(Objects.nonNull(existing)) {
+					parentObject.removeCollectionObject(fieldName, existing);
+				}
+			} else {
+				throw new IllegalStateException(fieldName + " is not a collection!");
+			}
+			
+			Feedback.info(parentTemplate.getBundle(), fieldName + ".deleted");
+			
+			objectService.stashObject(parentObject);
+			return new RequestStatusImpl(true);
+		}  catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/objects/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		}
+	}
 	
 //	@RequestMapping(value="/app/api/form/stash/{resourceKey}/{childResource}/{fieldName}", method = RequestMethod.POST, produces = {"application/json"},
 //			consumes = { "multipart/form-data" })
@@ -520,33 +520,33 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 //		}
 //	}
 	
-//	@RequestMapping(value="/app/api/form/{handler}/{resourceKey}", 
-//			method = RequestMethod.POST, produces = {"application/json"},
-//			consumes = { "multipart/form-data" })
-//	@ResponseBody
-//	@ResponseStatus(value=HttpStatus.OK)
-//	public RequestStatus saveObjectFromForm(HttpServletRequest request, 
-//			@PathVariable String handler, 
-//			@PathVariable String resourceKey)  {
-//
-//		try {
-//			ObjectTemplate template = templateService.get(resourceKey);
-//			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
-//			objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
-//					templateService.getTemplateClass(resourceKey), 
-//					new Document(obj.getDocument())));
-//			return new UUIDStatus(obj.getUuid());
-//		} catch(ValidationException ex) { 
-//			return new RequestStatusImpl(false, ex.getMessage());
-//		} catch (UriRedirect e) {
-//			return new RedirectStatus(e.getUri());
-//		} catch (Throwable e) {
-//			if(log.isErrorEnabled()) {
-//				log.error("POST api/form/{}", resourceKey, e);
-//			}
-//			return handleException(e, "POST", resourceKey);
-//		}
-//	}
+	@RequestMapping(value="/app/api/form/{handler}/{resourceKey}", 
+			method = RequestMethod.POST, produces = {"application/json"},
+			consumes = { "multipart/form-data" })
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public RequestStatus saveObjectFromForm(HttpServletRequest request, 
+			@PathVariable String handler, 
+			@PathVariable String resourceKey)  {
+
+		try {
+			ObjectTemplate template = templateService.get(resourceKey);
+			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
+			objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
+					templateService.getTemplateClass(resourceKey), 
+					new Document(obj.getDocument())));
+			return new UUIDStatus(obj.getUuid());
+		} catch(ValidationException ex) { 
+			return new RequestStatusImpl(false, ex.getMessage());
+		} catch (UriRedirect e) {
+			return new RedirectStatus(e.getUri());
+		} catch (Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("POST api/form/{}", resourceKey, e);
+			}
+			return handleException(e, "POST", resourceKey);
+		}
+	}
 	
 	@RequestMapping(value="/app/api/objects/{resourceKey}/copy/{uuid}", method = RequestMethod.GET, produces = {"application/json"})
 	public void copyObject(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey,

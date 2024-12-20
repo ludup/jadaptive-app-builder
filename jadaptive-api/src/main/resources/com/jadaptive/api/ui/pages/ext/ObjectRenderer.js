@@ -7,7 +7,7 @@ $(function() {
 		e.preventDefault();
 
 	    var form = $('#objectForm');
-	    var actionUrl = '/app/api/objects/extend/add/' + resourceKey + '/' + extension;
+	    var actionUrl = '/app/api/form/extend/add/' + resourceKey + '/' + extension;
 	    
 	    $.ajax({
 	        type: "POST",
@@ -36,7 +36,7 @@ $(function() {
 		e.preventDefault();
 
 	    var form = $('#objectForm');
-	    var actionUrl = '/app/api/objects/extend/remove/' + resourceKey + '/' + extension;
+	    var actionUrl = '/app/api/form/extend/remove/' + resourceKey + '/' + extension;
 	    
 	    $.ajax({
 	        type: "POST",

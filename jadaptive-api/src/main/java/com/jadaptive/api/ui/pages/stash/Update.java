@@ -18,7 +18,7 @@ import com.jadaptive.api.ui.RequestPage;
 
 @Component("stashUpdate")
 @RequestPage(path = "object-update/{resourceKey}/{uuid}/{fieldName}/{childUuid}")
-@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils", "jadaptive-forms"} )
+@PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = {"i18n"})
 @ModalPage
 public class Update extends StashedObjectPage {

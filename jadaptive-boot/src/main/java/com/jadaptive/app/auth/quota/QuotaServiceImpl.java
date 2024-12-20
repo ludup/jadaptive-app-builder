@@ -321,7 +321,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			q.setValue(0L);
 			
 			if(log.isInfoEnabled()) {
-				log.info("Reset quota for group {} on key {} to {} every {} {}", group, quota.getKey().getName(), quota.getPeriodValue(), quota.getPeriodUnit().toString());
+				log.info("Reset quota for group {} on key {} to {} every {}", group, quota.getKey().getName(), quota.getPeriodValue(), quota.getPeriodUnit().toString());
 			}
 			
 			objectDatbase.saveOrUpdate(q);

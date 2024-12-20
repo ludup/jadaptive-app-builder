@@ -1,5 +1,48 @@
 var JadaptiveUtils = {
-
+validate: function(form, callback, invalid) {
+		
+		$('.validation').removeClass('validation border border-5 border-danger');
+		
+		$('.mceEditor').each(function() {
+			var editor = tinymce.get($(this).attr('id'));
+			editor.save();
+		});
+		
+		$.ajax({
+		   type: "POST",
+		   url: '/app/api/form/validate/' + form.data('resourcekey'),
+		   cache: false,
+		   contentType: false,
+		   processData: false,
+		   data: JadaptiveUtils.processedFormData(form, true),
+		   success: function(data)
+		   {
+		       if(data.success) {
+					if(callback) {
+						callback();
+					}
+	           } else {
+				$('#progressModal').modal('hide');
+			     
+			     $.each(data.errors, function(idx, obj) {
+					var field = $('input[name="' + obj.formVariable + '"]').parents(".field").first().find(".form-control");
+					if(field.length > 0) {
+				     	field.addClass("validation border border-5 border-danger");
+				    } else {
+						field = $('textarea[name="' + obj.formVariable + '"]');
+						if(field.length > 0) {
+							field.siblings('.tox-tinymce').addClass("validation border border-5 border-danger");
+						}
+					}
+				  });
+			     
+			     if(invalid) {
+			     	invalid();
+			     }
+			  }
+		   }
+		 });
+	},
 startAwesomeSpin : function(el, icon, spinner) {
 	
 	

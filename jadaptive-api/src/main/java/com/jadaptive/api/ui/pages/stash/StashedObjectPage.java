@@ -62,7 +62,7 @@ public abstract class StashedObjectPage extends ObjectTemplatePage {
 		if(field.getCollection()) {
 			if(Objects.nonNull(childUuid)) {
 				for(AbstractObject o : object.getObjectCollection(fieldName)) {
-					if(o.getUuid().equals(childUuid)) {
+					if(childUuid.equals(o.getUuid())) {
 						childObject = o;
 						childResourceKey = childObject.getResourceKey();
 						childTemplate = templateService.get(childResourceKey);
