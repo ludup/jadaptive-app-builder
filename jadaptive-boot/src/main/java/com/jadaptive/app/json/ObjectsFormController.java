@@ -122,15 +122,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 				    
 				}
 				
-				
-					for(Part part : req.getParts()) {
-						FileAttachment attachment = fileService.createAttachment(
-				    			part.getInputStream(), part.getSubmittedFileName(), 
-				    			part.getContentType(), part.getName(), template);
-			    	ParameterHelper.setValue(parameters, part.getName(), attachment.getUuid());
-					}
-				
-			} catch (IOException | ServletException e) {
+			} catch (IOException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
 
@@ -187,37 +179,38 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		}
 	}
 	
-	@RequestMapping(value="/app/api/form/validate/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
-			consumes = { "multipart/form-data" })
-	@ResponseBody
-	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus validateForm(HttpServletRequest request, @PathVariable String resourceKey)  {
-
-		try {
-			
-			sessionUtils.verifySameSiteRequest(request, resourceKey);
-			
-			ObjectTemplate template = templateService.get(resourceKey);
-			request.getSession().removeAttribute(resourceKey);
-			
-			DocumentHelper.enableMultipleValidation();
-			DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
-			return new ValidationRequestImpl(!DocumentHelper.hasErrors(), 
-					DocumentHelper.hasErrors() ? I18N.getResource("userInterface", "multipleErrors.text", DocumentHelper.getErrors().size()) : "",
-					DocumentHelper.getErrors());
-		}  catch(ValidationException ex) { 
-			return new RequestStatusImpl(false, ex.getMessage());
-		} catch (UriRedirect e) {
-			return new RedirectStatus(e.getUri());
-		} catch (Throwable e) {
-			if(log.isErrorEnabled()) {
-				log.error("POST api/form/validate/{}", resourceKey, e);
-			}
-			return handleException(e, "POST", resourceKey);
-		} finally {
-			DocumentHelper.disableMultipleValidation();
-		}
-	}
+//	@RequestMapping(value="/app/api/form/validate/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
+//			consumes = { "multipart/form-data" })
+//	@ResponseBody
+//	@ResponseStatus(value=HttpStatus.OK)
+//	public RequestStatus validateForm(HttpServletRequest request, @PathVariable String resourceKey)  {
+//
+//		try {
+//			
+//			sessionUtils.verifySameSiteRequest(request, resourceKey);
+//			
+//			ObjectTemplate template = templateService.get(resourceKey);
+//			request.getSession().removeAttribute(resourceKey);
+//			
+//			DocumentHelper.enableMultipleValidation();
+//			DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
+//			return new ValidationRequestImpl(!DocumentHelper.hasErrors(), 
+//					DocumentHelper.hasErrors() ? I18N.getResource("userInterface", "multipleErrors.text", DocumentHelper.getErrors().size()) : "",
+//					DocumentHelper.getErrors());
+//		}  catch(ValidationException ex) { 
+//			return new RequestStatusImpl(false, ex.getMessage());
+//		} catch (UriRedirect e) {
+//			return new RedirectStatus(e.getUri());
+//		} catch (Throwable e) {
+//			if(log.isErrorEnabled()) {
+//				log.error("POST api/form/validate/{}", resourceKey, e);
+//			}
+//			Feedback.error(e.getMessage());
+//			return new RequestStatusImpl(false, e.getMessage());
+//		} finally {
+//			DocumentHelper.disableMultipleValidation();
+//		}
+//	}
 	
 //	@RequestMapping(value="/app/api/form/multipart/{resourceKey}", method = RequestMethod.POST, produces = {"application/json"},
 //			consumes = { "multipart/form-data" })

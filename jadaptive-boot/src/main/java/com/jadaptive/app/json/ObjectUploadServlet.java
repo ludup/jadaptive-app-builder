@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
@@ -28,6 +29,7 @@ import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
+import com.jadaptive.api.json.ValidationRequestImpl;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.servlet.Request;
@@ -50,7 +52,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(name="objectServlet", description="Servlet for handing objects", 
-	urlPatterns = { "/app/api/form/multipart/*", "/app/api/form/stash/*",
+	urlPatterns = { "/app/api/form/multipart/*", 
+			"/app/api/form/validate/*",
+			"/app/api/form/stash/*",
 			"/app/api/form/stash-child/*"})
 public class ObjectUploadServlet extends HttpServlet {
 
@@ -59,6 +63,7 @@ public class ObjectUploadServlet extends HttpServlet {
 	private static Logger log = LoggerFactory.getLogger(ObjectUploadServlet.class);
 	
 	private static final String MULTIPART = "multipart";
+	private static final String VALIDATE = "validate";
 	private static final String STASH = "stash";
 	private static final String STASH_CHILD = "stash-child";
 	
@@ -96,14 +101,15 @@ public class ObjectUploadServlet extends HttpServlet {
 
 			generateFormParameters(request, parameters, resourceKey);
 			
-			sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
-			
 			resp.setStatus(200);
 			resp.setContentType("application/json");
 			String uuid = "";
 			
 			try {
 				switch(handler) {
+				case VALIDATE:
+					processValidation(request, resourceKey, parameters);
+					return;
 				case MULTIPART:
 					uuid = processMultipartObject(request, resourceKey, parameters);
 					break;
@@ -146,14 +152,33 @@ public class ObjectUploadServlet extends HttpServlet {
 
 	private String processUrlEncodedForm(HttpServletRequest request, String handler, String resourceKey, Map<String,String[]> parameters) throws ObjectException, ValidationException, IOException {
 		
+		sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
+		
 		ObjectTemplate template = templateService.get(resourceKey);
 		
 		return objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
 				templateService.getTemplateClass(resourceKey), 
 				new Document(DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template).getDocument())));
 	}
+	
+	private void processValidation(HttpServletRequest request, String resourceKey, Map<String, String[]> parameters) throws ValidationException, IOException {
+		
+
+		ObjectTemplate template = templateService.get(resourceKey);
+		request.getSession().removeAttribute(resourceKey);
+		
+		DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
+		json.writer().writeValue(Request.response().getOutputStream(),
+				new ValidationRequestImpl(!DocumentHelper.hasErrors(), 
+						DocumentHelper.hasErrors() ? I18N.getResource("userInterface", "multipleErrors.text", DocumentHelper.getErrors().size()) : "",
+							DocumentHelper.getErrors()));
+
+	
+}
 
 	private String processMultipartObject(HttpServletRequest request, String resourceKey, Map<String,String[]> parameters) throws ValidationException, IOException {
+		
+		sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
 		
 		ObjectTemplate template = templateService.get(resourceKey);
 		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
@@ -163,6 +188,9 @@ public class ObjectUploadServlet extends HttpServlet {
 	
 	private String processStashedObject(HttpServletRequest request, String resourceKey,
 			Map<String, String[]> parameters) throws ValidationException, RepositoryException, ObjectException, IOException {
+		
+		sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
+		
 		ObjectTemplate template = templateService.get(resourceKey);
 		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
 		objectService.stashObject(obj);
@@ -179,47 +207,46 @@ public class ObjectUploadServlet extends HttpServlet {
 		String childResource = paths.get(5);
 		String fieldName = paths.get(6);
 		
-		try {
-			ObjectTemplate parentTemplate = templateService.get(resourceKey);
-			ObjectTemplate childTemplate = templateService.get(childResource);
-			AbstractObject childObject = DocumentHelper.buildRootObject(parameters, childTemplate.getResourceKey(), childTemplate);
-			FieldTemplate fieldTemplate = parentTemplate.getField(fieldName);
-			Object stashedObject = Request.get().getSession().getAttribute(resourceKey);
-			if(Objects.isNull(stashedObject)) {
-				throw new IllegalStateException("No parent object found for " + resourceKey);
-			}
-			if(!(stashedObject instanceof AbstractObject)) {
-				Document doc = new Document();
-				DocumentHelper.convertObjectToDocument((UUIDDocument) stashedObject, doc);
-				stashedObject = new MongoEntity(doc);
-			}
-			AbstractObject parentObject = (AbstractObject) stashedObject;
-			
-			if(fieldTemplate.getCollection()) {
-				AbstractObject existing = null;
-				for(AbstractObject child : parentObject.getObjectCollection(fieldName)) {
-					if(Objects.nonNull(child.getUuid()) && child.getUuid().equalsIgnoreCase(childObject.getUuid())) {
-						existing = child;
-					}
-				}
-				if(Objects.nonNull(existing)) {
-					parentObject.removeCollectionObject(fieldName, existing);
-				}
-				parentObject.addCollectionObject(fieldName, childObject);
-			} else {
-				/**
-				 * Can this happen?
-				 */
-				parentObject.setValue(fieldTemplate, childObject);
-			}
-			
-			Feedback.info(childTemplate.getBundle(), fieldName + ".stashed");
-			
-			objectService.stashObject(parentObject);
-			return childObject.getUuid();
-		}  finally {
-			DocumentHelper.disableMultipleValidation();
+		sessionUtils.verifySameSiteRequest(request, parameters, childResource);
+		
+		ObjectTemplate parentTemplate = templateService.get(resourceKey);
+		ObjectTemplate childTemplate = templateService.get(childResource);
+		AbstractObject childObject = DocumentHelper.buildRootObject(parameters, childTemplate.getResourceKey(), childTemplate);
+		FieldTemplate fieldTemplate = parentTemplate.getField(fieldName);
+		Object stashedObject = Request.get().getSession().getAttribute(resourceKey);
+		if(Objects.isNull(stashedObject)) {
+			throw new IllegalStateException("No parent object found for " + resourceKey);
 		}
+		if(!(stashedObject instanceof AbstractObject)) {
+			Document doc = new Document();
+			DocumentHelper.convertObjectToDocument((UUIDDocument) stashedObject, doc);
+			stashedObject = new MongoEntity(doc);
+		}
+		AbstractObject parentObject = (AbstractObject) stashedObject;
+		
+		if(fieldTemplate.getCollection()) {
+			AbstractObject existing = null;
+			for(AbstractObject child : parentObject.getObjectCollection(fieldName)) {
+				if(Objects.nonNull(child.getUuid()) && child.getUuid().equalsIgnoreCase(childObject.getUuid())) {
+					existing = child;
+				}
+			}
+			if(Objects.nonNull(existing)) {
+				parentObject.removeCollectionObject(fieldName, existing);
+			}
+			parentObject.addCollectionObject(fieldName, childObject);
+		} else {
+			/**
+			 * Can this happen?
+			 */
+			parentObject.setValue(fieldTemplate, childObject);
+		}
+		
+		Feedback.info(childTemplate.getBundle(), fieldName + ".stashed");
+		
+		objectService.stashObject(parentObject);
+		return childObject.getUuid();
+		  
 	}
 	
 	private Collection<FileAttachment> generateFormParameters(HttpServletRequest req, Map<String,String[]> parameters, String template) throws IOException {

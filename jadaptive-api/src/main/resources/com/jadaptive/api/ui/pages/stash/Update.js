@@ -11,26 +11,31 @@ $(document).ready(function() {
     	
         JadaptiveUtils.startAwesomeSpin($('#saveButton i'), 'fa-save');
         
-    	$.ajax({
-           type: "POST",
-           url: action,
-           cache: false,
-           contentType: false,
-    	   processData: false,
-           data: new FormData(form[0]),
-           success: function(data)
-           {
-               if(data.success) {
-                   window.location = url;
-               } else {
-               	   $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
-               	   $('#feedbackText').text(data.message);
-               }
-           },
-           complete: function() {
-           		
-           }
-         });
+        JadaptiveUtils.validate(form, function() {
+			$.ajax({
+	           type: "POST",
+	           url: action,
+	           cache: false,
+	           contentType: false,
+	    	   processData: false,
+	           data: JadaptiveUtils.processedFormData(form, false),
+	           success: function(data)
+	           {
+	               if(data.success) {
+	                   window.location = url;
+	               } else {
+	               	   $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
+	               	   $('#feedbackText').text(data.message);
+	               }
+	           },
+	           complete: function() {
+	           		
+	           }
+	         });
+		}, function() {
+			JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
+		});
+    	
     });
   
 });
