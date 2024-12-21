@@ -34,6 +34,11 @@ validate: function(form, callback, invalid) {
 							field.siblings('.tox-tinymce').addClass("validation border border-5 border-danger");
 						}
 					}
+					if(idx == 0) {
+				        var parentId = field.parents('.tab-pane').first().attr('id');
+						var triggerEl = document.querySelector('a[href="#' + parentId + '"]');
+						bootstrap.Tab.getInstance(triggerEl).show();
+					}
 				  });
 			     
 			     if(invalid) {

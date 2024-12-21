@@ -55,7 +55,13 @@ submit : function(form, callback, invalid) {
 		       return xhr;
 		   }
          });
-	}, invalid);
+	}, function() {
+		
+		if(invalid) {
+			invalid();
+		}
+		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
+	});
 	
     }
   }
