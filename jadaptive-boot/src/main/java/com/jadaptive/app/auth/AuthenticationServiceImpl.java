@@ -52,6 +52,7 @@ import com.jadaptive.api.session.SessionType;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.ui.AuthenticationPage;
+import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
@@ -165,8 +166,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 			state.incrementFailedAttempts();
 
-			flagFailedLogin();
-
 			if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
 				Class<? extends Page> currentPage = state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass());
 				AuthenticationProvider module = registeredModulesByPage.get(currentPage);
@@ -178,6 +177,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 						state.getAttemptedUsername(),
 						"", Request.getRemoteAddress()));
 			}
+			
+			flagFailedLogin();
+			
+		} catch(Throwable e) { 
+			Feedback.error(e.getMessage());
 		} finally {
 			permissionService.clearUserContext();
 		}

@@ -287,7 +287,8 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 				log.info("Rejecting access to group {} on key {} for exceeding quota of {} every {}", 
 						q.getGroup(), quota.getKey().getName(), quota.getPeriodUnit(), quota.getPeriodUnit().toString());
 			}
-			throw new ObjectException(bundle, key, quota.getValue().toUpperCase(), String.format("%d %s", quota.getPeriodValue(), quota.getPeriodUnit().name()));
+			throw new AccessDeniedException(bundle, key, quota.getValue().toUpperCase(), 
+					String.format("%d %s", quota.getPeriodValue(), quota.getPeriodUnit().name()));
 		}
 		
 		return q;
