@@ -83,7 +83,7 @@ public class ConfigurationPage extends AuthenticatedPage {
 								resourceKey = e.getResourceKey();
 							}
 							if(StringUtils.isBlank(path)) {
-								path = String.format("/app/ui/%s/", isSystem() ? "system" : "config") + resourceKey;
+								path = String.format("/app/ui/config/%s", resourceKey);
 							}
 							if(StringUtils.isBlank(bundle)) {
 								bundle = e.getResourceKey();
@@ -93,7 +93,7 @@ public class ConfigurationPage extends AuthenticatedPage {
 								| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						}
 					}
-					annotatedItems.add(new DynamicConfigurationItem(m, resourceKey, path, bundle, isSystem()));
+					annotatedItems.add(new DynamicConfigurationItem(m, resourceKey, path, bundle, m.system()));
 					
 				}
 			}
