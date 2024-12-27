@@ -103,11 +103,12 @@ public class DocumentHelper {
 
 		try {
 
-			if(StringUtils.isBlank(obj.getUuid())) {
-				obj.setUuid(UUID.randomUUID().toString());
+			if(StringUtils.isNotBlank(obj.getUuid())) {
+//				obj.setUuid(UUID.randomUUID().toString());
+				document.put("_id", obj.getUuid());
 			}
 			
-			document.put("_id", obj.getUuid());
+			
 			
 			document.put("_clz", obj.getClass().getName());
 			document.put("resourceKey", obj.getResourceKey());
@@ -130,8 +131,13 @@ public class DocumentHelper {
 					} else if(m.getReturnType().isEnum()) {
 						document.put(name, ((Enum<?>)value).name());
 					} else if(UUIDDocument.class.isAssignableFrom(m.getReturnType())) {
+						
 						if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
-							buildDocument(name, (UUIDDocument)value, document);
+							UUIDDocument uuidDocument =  (UUIDDocument)value;
+							if(StringUtils.isBlank(uuidDocument.getUuid())) {
+								uuidDocument.setUuid(UUID.randomUUID().toString());
+							}
+							buildDocument(name, uuidDocument, document);
 						} else if(Objects.nonNull(value)) {
 							if(value instanceof UUIDReference) {
 								buildDocument(name, (UUIDReference) value, document);
@@ -220,6 +226,9 @@ public class DocumentHelper {
 			} else if(UUIDEntity.class.isAssignableFrom(value.getClass())) {
 
 				UUIDEntity e = (UUIDEntity) value;
+				if(StringUtils.isBlank(e.getUuid())) {
+					e.setUuid(UUID.randomUUID().toString());
+				}
 				if(Objects.isNull(columnDefinition) || columnDefinition.type() == FieldType.OBJECT_EMBEDDED) {
 					Document embeddedDocument = new Document();
 					convertObjectToDocument(e, embeddedDocument);
@@ -302,9 +311,9 @@ public class DocumentHelper {
 		
 		AbstractObject obj = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).createNew(resourceKey);
 		String uuid = getParameter(parameters, formVariablePrefix + "uuid");
-		if(StringUtils.isBlank(uuid)) {
-			uuid = UUID.randomUUID().toString();
-		}
+//		if(StringUtils.isBlank(uuid)) {
+//			uuid = UUID.randomUUID().toString();
+//		}
 		obj.setUuid(uuid);
 		String system = getParameter(parameters, formVariablePrefix + "system");
 		if(Objects.nonNull(system)) {
