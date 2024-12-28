@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.I18N;
+import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -25,6 +26,12 @@ public class DocumentValidator {
 
 		if(field.isHidden()) {
 			return value;
+		}
+		
+		if(field.isManuallyEncrypted() || field.isAutomaticallyEncrypted()) {
+			if(ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).isEncrypted(value)) {
+				return value;
+			}
 		}
 		
 		switch (field.getFieldType()) {

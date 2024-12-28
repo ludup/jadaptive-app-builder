@@ -41,8 +41,16 @@ public class FileAttachment extends AbstractUUIDEntity implements NamedDocument 
 	
 	public String getName() {
 		return getFilename();
-		
 	}
+	
+	public String getFileName() {
+		return getName();
+	}
+	
+	public String getShortCode() {
+		return getUuid();
+	}
+	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;

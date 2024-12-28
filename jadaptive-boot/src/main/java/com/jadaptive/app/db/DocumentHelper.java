@@ -193,6 +193,15 @@ public class DocumentHelper {
 		return false;
 	}
 
+	private static Object checkForAndPerformEncryption(FieldTemplate field, Object value) {
+		if(Objects.nonNull(field) && (field.isManuallyEncrypted() || field.isAutomaticallyEncrypted())) {
+			if(Objects.nonNull(value) && !ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).isEncrypted(String.valueOf(value))) {
+				return ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).encrypt(String.valueOf(value));
+			}
+		}
+		return value;
+	}
+
 
 	private static String checkForAndPerformEncryption(ObjectField columnDefinition, String value) {
 		if(Objects.nonNull(columnDefinition) && (columnDefinition.manualEncryption() || columnDefinition.automaticEncryption())) {
@@ -938,7 +947,7 @@ public class DocumentHelper {
 		case TEXT_AREA:
 		case PERMISSION:
 		case ENUM:
-			return DocumentValidator.validate(def,value);
+			return checkForAndPerformEncryption(def, DocumentValidator.validate(def,value));
 		case TIMESTAMP:
 			if(StringUtils.isNotBlank(value)) {
 				return Utils.parseTimestamp(value);

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -444,10 +445,20 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 
 	private void setProperty(Object value, FieldTemplate t, AbstractObject e) {
 		if(!Objects.isNull(value)) {
-			e.setValue(t, value);
+			e.setValue(t, checkAndPerformEncryption(value, t));
 		} 
 	}
 	
+	private Object checkAndPerformEncryption(Object value, FieldTemplate t) {
+		if(Objects.nonNull(value)) {
+		EncryptionService es = ApplicationServiceImpl.getInstance().getBean(EncryptionService.class);
+			if(t.isAutomaticallyEncrypted() && !es.isEncrypted(String.valueOf(value))) {
+				value = es.encrypt(String.valueOf(value));
+			}
+		}
+		return value;
+	}
+
 	private void setPropertyDefault(FieldTemplate t, AbstractObject e) {
 		if(StringUtils.isNotBlank(t.getDefaultValue())) {
 			e.setValue(t, t.getDefaultValue()); 

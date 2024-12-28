@@ -191,4 +191,8 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 		this.enabled = enabled;
 	}
 	
+	public String getPrincipalDescription() {
+		return getDisplayName();
+	}
+	
 }
