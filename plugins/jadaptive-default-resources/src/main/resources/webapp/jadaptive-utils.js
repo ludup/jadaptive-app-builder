@@ -177,6 +177,11 @@ processedFormData: function(form, removeFiles) {
 			fdata.delete($(this).attr('name'));
 		});
 	} 
+	
+	form.find('.mceEditor').each(function() {
+		var editor = tinymce.get($(this).attr('id'));
+		editor.save();
+	});
 
 	form.find('.processDepends').each(function() {
 		var dependsOn = $(this).data('depends-on');
