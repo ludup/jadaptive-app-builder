@@ -384,13 +384,13 @@ public class TableRenderer {
 				// sortColumn = dyn.sortColumn();
 			}
 			
-			renderColumn(column, el);
+			renderColumn(column, el, template);
 			
 			columns.put(column, template);
 		}
 	}
 	
-	private void renderColumn(String column, Element el) {
+	private void renderColumn(String column, Element el, ObjectTemplate template) {
 		
 		boolean isSortedBy = column.equals(sortColumn);
 		
