@@ -1,6 +1,7 @@
 package com.jadaptive.api.repository;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
@@ -35,6 +36,6 @@ public abstract class TaggedAndNamedUUIDEntity extends AbstractUUIDEntity implem
 	}
 
 	public void setTags(Collection<String> tags) {
-		this.tags = tags;
+		this.tags = new HashSet<>(tags);
 	}
 }

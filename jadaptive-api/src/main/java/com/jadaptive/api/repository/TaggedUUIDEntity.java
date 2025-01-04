@@ -2,6 +2,7 @@ package com.jadaptive.api.repository;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.jadaptive.api.template.ExcludeView;
@@ -62,7 +63,7 @@ public abstract class TaggedUUIDEntity extends UUIDEntity {
 	}
 
 	public void setTags(Collection<String> tags) {
-		this.tags = tags;
+		this.tags = new HashSet<>(tags);
 	}
 
 //	public Boolean isHidden() {
