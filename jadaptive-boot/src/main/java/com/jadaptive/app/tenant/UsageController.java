@@ -88,11 +88,11 @@ public class UsageController extends AuthenticatedController {
 		}
 	}
 	
-	@RequestMapping(value="/app/api/usage/sum/days/{keys}/{days}", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
+	@RequestMapping(value="/app/api/usage/sum/days/{keys}/{days}/", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public ResourceStatus<BarChartDateLongValue[]> sumDailyValues(HttpServletRequest request,
-			HttpServletResponse response, @PathVariable String keys, @PathVariable(required = false, value = "7") Integer days)
+			HttpServletResponse response, @PathVariable String keys, @PathVariable Integer days)
 			throws IOException {
 
 		setupUserContext(request);
@@ -108,7 +108,7 @@ public class UsageController extends AuthenticatedController {
 				
 				revenue = new ArrayList<>();
 
-				Date from = DateUtils.addDays(Utils.today(), -90);
+				Date from = DateUtils.addDays(Utils.today(), -days);
 				Date to = DateUtils.addDays(from, 1);
 				
 				while(from.before(Utils.today())) {
