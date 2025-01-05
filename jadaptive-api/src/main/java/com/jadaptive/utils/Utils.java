@@ -11,6 +11,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -217,7 +218,7 @@ public class Utils {
 	}
 	
 	public static Date lastMonth() {
-		return DateUtils.addMonths(lastMonth(), -1);
+		return DateUtils.addMonths(thisMonth(), -1);
 	}
 	
 
@@ -857,8 +858,7 @@ public class Utils {
 		return out.toString();
 	}
 
-	public static String formatCurrency(Number allTime) {
-		// TODO Auto-generated method stub
-		return null;
+	public static String formatCurrency(Number value) {
+		return NumberFormat.getCurrencyInstance().format(value);
 	}
 }
