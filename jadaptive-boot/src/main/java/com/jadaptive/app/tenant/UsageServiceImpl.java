@@ -164,6 +164,20 @@ public class UsageServiceImpl implements UsageService {
 				SearchField.gte("created", from),
 				SearchField.lt("created", to));
 	}
+	
+	@Override
+	public Long sumOfDailyValues(String key, Date from, Date to) {
+		return dailyDatabase.sumLongValues(DailyCounter.class, "value", 
+				SearchField.in("key", key), 
+				SearchField.gte("date", from),
+				SearchField.lt("date", to));
+	}
+	
+	@Override
+	public Long sumOfDailyValues(String key) {
+		return dailyDatabase.sumLongValues(DailyCounter.class, "value", 
+				SearchField.in("key", key));
+	}
 
 	
 	@Override

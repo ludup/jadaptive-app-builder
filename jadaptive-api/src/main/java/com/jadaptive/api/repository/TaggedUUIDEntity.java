@@ -66,22 +66,6 @@ public abstract class TaggedUUIDEntity extends UUIDEntity {
 		this.tags = new HashSet<>(tags);
 	}
 
-//	public Boolean isHidden() {
-//		return hidden==null ? Boolean.FALSE : hidden;
-//	}
-//
-//	public void setHidden(Boolean hidden) {
-//		this.hidden = hidden;
-//	}
-
-//	public boolean isSummarise() {
-//		return summarise;
-//	}
-
-//	public void setSummarise(boolean summarise) {
-//		this.summarise = summarise;
-//	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;

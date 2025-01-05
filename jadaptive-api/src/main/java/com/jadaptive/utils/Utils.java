@@ -41,6 +41,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriUtils;
@@ -199,6 +200,26 @@ public class Utils {
 		date.set(Calendar.MILLISECOND, 0);
 		return date;
 	}
+	
+	public static Calendar thisMonthCalendar() {
+
+		Calendar date = Calendar.getInstance();
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+		date.set(Calendar.DAY_OF_MONTH, 1);
+		return date;
+	}
+	
+	public static Date thisMonth() {
+		return thisMonthCalendar().getTime();
+	}
+	
+	public static Date lastMonth() {
+		return DateUtils.addMonths(lastMonth(), -1);
+	}
+	
 
 	public static Calendar tomorrowCalendar() {
 
@@ -834,5 +855,10 @@ public class Utils {
 			}
 		}
 		return out.toString();
+	}
+
+	public static String formatCurrency(Number allTime) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
