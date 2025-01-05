@@ -183,7 +183,7 @@ public class Dashboard extends AuthenticatedPage {
 		Element w;
 		Element help;
 		Element e = new Element("div")
-				.addClass("col-md-12 mb-3 h-100")
+				.addClass("col-md-12 mb-3")
 				.appendChild(new Element("div")
 						.addClass("card h-100")
 						.appendChild(new Element("div")

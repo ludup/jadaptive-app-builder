@@ -85,6 +85,17 @@ public class ApplicationProperties {
 			if(!propertiesFile.delete()) {
 				throw new IllegalStateException("Cannot delete conf.d/ssl.properties! Please delete this file manually");
 			}
+		} else if(!serverProperties.exists()) {
+			
+			try {
+				FileUtils.writeStringToFile(serverProperties,"""		
+						# Server Properties
+						server.port=443
+						server.ssl=true
+						""", Charset.forName("UTF-8"));
+			} catch (IOException e) {
+				throw new IllegalStateException(e.getMessage(), e);
+			}
 		}
 		
 		propertiesFile = new File(confdFolder, "database.properties");
