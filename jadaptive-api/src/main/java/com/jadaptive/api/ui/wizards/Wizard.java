@@ -102,132 +102,134 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		permissionService.asSystem(()->{
 			WizardState state = wizardService.getWizard(resourceKey).getState(Request.get());
 			
-			if(state.isFinished()) {
-				throw new PageRedirect(state.getCompletePage());
-			}
+			Wizard.setCurrentState(state);
+			
+			try {
+				if(state.isFinished()) {
+					throw new PageRedirect(state.getCompletePage());
+				}
+	
+				Element body = document.selectFirst("body");
+				
+				body.attr("jad:wizard", resourceKey);
+				
+				WizardSection ext = state.getCurrentPage();
+				ext.beforeProcess(document, state);
+				
+				Element el = document.selectFirst("#wizardContent");
+	
+				injectHtmlSection(document, el, ext);
 
-			Element body = document.selectFirst("body");
-			
-			body.attr("jad:wizard", resourceKey);
-			
-			WizardSection ext = state.getCurrentPage();
-			ext.beforeProcess(document, state);
-			
-			Element el = document.selectFirst("#wizardContent");
-
-			injectHtmlSection(document, el, ext);
-			
-//			Element n = document.selectFirst("form");
-//			if(Objects.isNull(n)) {
-//				
-//			}
-			/**
-			 * This is here to remove the previous style of wizard where an info alert
-			 * panel is used. We now render this automatically below so this code removes
-			 * it from any HTML files. Once the HTML code-base has been cleaned this code
-			 * can be removed.
-			 */
-			Element wizardContent = document.selectFirst("#wizardContent");
-			if(Objects.nonNull(wizardContent) && wizardContent.childNodeSize() > 0) {
-				Element div = wizardContent.child(0);
-				if(div.tag().getName().equals("div") && div.childNodeSize() > 0) {
-					Element e = div.child(0);
-					if(e.tag().getName().equals("p") && e.hasClass("alert-info")) {
-						div.remove();
+				/**
+				 * This is here to remove the previous style of wizard where an info alert
+				 * panel is used. We now render this automatically below so this code removes
+				 * it from any HTML files. Once the HTML code-base has been cleaned this code
+				 * can be removed.
+				 */
+				Element wizardContent = document.selectFirst("#wizardContent");
+				if(Objects.nonNull(wizardContent) && wizardContent.childNodeSize() > 0) {
+					Element div = wizardContent.child(0);
+					if(div.tag().getName().equals("div") && div.childNodeSize() > 0) {
+						Element e = div.child(0);
+						if(e.tag().getName().equals("p") && e.hasClass("alert-info")) {
+							div.remove();
+						}
 					}
 				}
-			}
-			
-			Element actions = document.selectFirst("#actions");
-			Element content = document.selectFirst("#content");
-			
-			if(!state.isStartPage()) {
-
-				Element h2;
-				content.prependChild(new Element("div")
-						.addClass("col-12")
-						.appendChild(h2 = new Element("h2")));
 				
-				content.prependChild(new Element("div")
-						.addClass("col-12")
-						.appendChild(new Element("h1")
-								.attr("jad:bundle", state.getBundle())
-								.attr("jad:i18n", "wizard.name")));
+				Element content = document.selectFirst("#content");
 				
-				if(!state.isFinishPage()) {
+				if(!state.isStartPage()) {
+	
+					Element h2;
+					content.prependChild(new Element("div")
+							.addClass("col-12")
+							.appendChild(h2 = new Element("h2")));
+					
+					content.prependChild(new Element("div")
+							.addClass("col-12")
+							.appendChild(new Element("h1")
+									.attr("jad:bundle", state.getBundle())
+									.attr("jad:i18n", "wizard.name")));
+					
+					if(!state.isFinishPage()) {
+							h2.appendChild(new Element("span")
+								.attr("jad:bundle", "setup")
+								.attr("jad:i18n", "step.name"))
+							.appendChild(new Element("span")
+									.text(" " + String.valueOf(state.getDisplayStep())))
+							.appendChild(new Element("span")
+											.text(" - "))
+							.appendChild(new Element("span")
+									.addClass("ms-1")
+									.attr("jad:bundle", state.getCurrentPage().getBundle())
+									.attr("jad:i18n", state.getCurrentPage().getStepNamei18n()));
+							
+							
+							h2.after(new Element("h4")
+												.appendChild(Html.i("fa-solid fa-info-square text-primary me-2"))
+												.appendChild(Html.i18n(state.getCurrentPage().getBundle(),
+																state.getCurrentPage().getStepSummaryi18n()))
+																.addClass("my-3 text-primary"));
+							
+					} else {
 						h2.appendChild(new Element("span")
-							.attr("jad:bundle", "setup")
-							.attr("jad:i18n", "step.name"))
-						.appendChild(new Element("span")
-								.text(" " + String.valueOf(state.getDisplayStep())))
-						.appendChild(new Element("span")
-										.text(" - "))
-						.appendChild(new Element("span")
-								.addClass("ms-1")
 								.attr("jad:bundle", state.getCurrentPage().getBundle())
-								.attr("jad:i18n", state.getCurrentPage().getStepNamei18n()));
-						
-						
-						h2.after(new Element("h4")
-											.appendChild(Html.i("fa-solid fa-info-square text-primary me-2"))
-											.appendChild(Html.i18n(state.getCurrentPage().getBundle(),
-															state.getCurrentPage().getStepSummaryi18n()))
-															.addClass("my-3 text-primary"));
-						
+								.attr("jad:i18n", "finish.name"));
+					}
+					
+					document.selectFirst("#cancelButton").attr("href", "/app/api/wizard/cancel/" + resourceKey);
 				} else {
-					h2.appendChild(new Element("span")
-							.attr("jad:bundle", state.getCurrentPage().getBundle())
-							.attr("jad:i18n", "finish.name"));
-				}
-				
-				document.selectFirst("#cancelButton").attr("href", "/app/api/wizard/cancel/" + resourceKey);
-			} else {
-				document.selectFirst("#cancelButton").remove();
-			} 
-
-			Element form = body.selectFirst("form");
-			if(Objects.nonNull(form)) {
-				if(form.id().equals("")) {
-					form.attr("id", resourceKey + "_form");
-				}
-			}
-			
-			if(!state.hasBackButton()) {
-				document.selectFirst("#backButton").remove();
-			} else {
+					document.selectFirst("#cancelButton").remove();
+				} 
+	
+				Element form = body.selectFirst("form");
 				if(Objects.nonNull(form)) {
-					document.selectFirst("#backButton")
-						.attr("form",  form.id());
-				}
-			}
-			
-			if(!state.hasNextButton()) {
-				document.selectFirst("#nextButton").remove();
-			} else {
-				if(Objects.nonNull(form)) {
-					document.selectFirst("#nextButton")
-						.attr("form",  form.id());
-				}
-			}
-			
-			if(state.isFinishPage()) {
-				document.selectFirst("#backButton").parent().insertChildren(0, new Element("button")
-							.attr("id", "finishButton")
-							.addClass("btn btn-primary wizardFinish me-3")
-						.appendChild(new Element("i")
-							.addClass("fa-solid fa-rocket me-1"))
-						.appendChild(new Element("span")
-								.attr("jad:bundle", "default")
-								.attr("jad:i18n", "finish.name")));
-				
-				for(WizardSection section : state.getSections()) {
-					if(!section.isHidden()) {
-						section.processReview(document, state);
+					if(form.id().equals("")) {
+						form.attr("id", resourceKey + "_form");
 					}
 				}
+				
+				if(!state.hasBackButton()) {
+					document.selectFirst("#backButton").remove();
+				} else {
+					if(Objects.nonNull(form)) {
+						document.selectFirst("#backButton")
+							.attr("form",  form.id());
+					}
+				}
+				
+				if(!state.hasNextButton()) {
+					document.selectFirst("#nextButton").remove();
+				} else {
+					if(Objects.nonNull(form)) {
+						document.selectFirst("#nextButton")
+							.attr("form",  form.id());
+					}
+				}
+				
+				if(state.isFinishPage()) {
+					document.selectFirst("#backButton").parent().insertChildren(0, new Element("button")
+								.attr("id", "finishButton")
+								.addClass("btn btn-primary wizardFinish me-3")
+							.appendChild(new Element("i")
+								.addClass("fa-solid fa-rocket me-1"))
+							.appendChild(new Element("span")
+									.attr("jad:bundle", "default")
+									.attr("jad:i18n", "finish.name")));
+					
+					for(WizardSection section : state.getSections()) {
+						if(!section.isHidden()) {
+							section.processReview(document, state);
+						}
+					}
+				}
+	
+				ext.afterProcess(document, state);
+				
+			} finally {
+				Wizard.clearCurrentState();
 			}
-
-			ext.afterProcess(document, state);
 			
 			return null;
 		});

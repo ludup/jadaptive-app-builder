@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
@@ -859,6 +860,6 @@ public class Utils {
 	}
 
 	public static String formatCurrency(Number value) {
-		return NumberFormat.getCurrencyInstance().format(value);
+		return NumberFormat.getCurrencyInstance(Locale.getDefault()).format(value);
 	}
 }

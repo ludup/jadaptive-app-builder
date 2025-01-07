@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.charts.BarChartDateLongValue;
 import com.jadaptive.api.json.ResourceStatus;
 import com.jadaptive.api.permissions.AuthenticatedController;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.stats.UsageService;
 import com.jadaptive.utils.Utils;
 
@@ -40,11 +42,11 @@ public class UsageController extends AuthenticatedController {
 	@Autowired
 	private CacheService cacheService;
 	
-	@RequestMapping(value="/app/api/usage/daily/{key}/{days}", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
+	@RequestMapping(value="/app/api/usage/daily/{key}/{days}/", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public ResourceStatus<BarChartDateLongValue[]> getDailyInstances(HttpServletRequest request,
-			HttpServletResponse response, @PathVariable String key, @PathVariable(required = false, value = "7") Integer days)
+			HttpServletResponse response, @PathVariable String key, @PathVariable Integer days)
 			throws IOException {
 
 		setupUserContext(request);
@@ -53,22 +55,22 @@ public class UsageController extends AuthenticatedController {
 			
 			@SuppressWarnings("rawtypes")
 			Map<Date, List> cache = cacheService.getCacheOrCreate(String.format("daily.%d.%s", days, key), Date.class, List.class, Duration.ofDays(1).toMillis());
-			
+			int hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
 			@SuppressWarnings("unchecked")
 			List<BarChartDateLongValue> revenue = cache.get(Utils.today());
 			if(Objects.isNull(revenue)) {
 				
 				revenue = new ArrayList<>();
 
-				Date from = DateUtils.addDays(Utils.today(), -90);
+				Date from = DateUtils.addDays(Utils.today(), -days);
 				
 				while(from.before(Utils.today())) {
 						
 					if(Boolean.getBoolean("jadaptive.development")) {
 						if(from.getDay() == Calendar.SUNDAY || from.getDay() == Calendar.SATURDAY) {
-							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, 3)));
+							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, hint / 2)));
 						} else {
-							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, 10)));
+							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, hint)));
 						}
 					} else {
 						revenue.add(new BarChartDateLongValue(from, usageService.getDailyValue(key, from)));
@@ -102,6 +104,8 @@ public class UsageController extends AuthenticatedController {
 			@SuppressWarnings("rawtypes")
 			Map<Date, List> cache = cacheService.getCacheOrCreate(String.format("sumByDay.%d.%s", days, keys), Date.class, List.class, Duration.ofDays(1).toMillis());
 			
+			int hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
+			
 			@SuppressWarnings("unchecked")
 			List<BarChartDateLongValue> revenue = cache.get(Utils.today());
 			if(Objects.isNull(revenue)) {
@@ -115,9 +119,9 @@ public class UsageController extends AuthenticatedController {
 						
 					if(Boolean.getBoolean("jadaptive.development")) {
 						if(from.getDay() == Calendar.SUNDAY || from.getDay() == Calendar.SATURDAY) {
-							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, 3)));
+							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, hint / 2)));
 						} else {
-							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, 10)));
+							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, hint)));
 						}
 					} else {
 						revenue.add(new BarChartDateLongValue(from, usageService.sumAnd(from, to, keys.split(","))));
