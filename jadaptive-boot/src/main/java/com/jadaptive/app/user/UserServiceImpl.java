@@ -350,11 +350,6 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	}
 
 	@Override
-	public Map<String, String> getUserProperties(User user) {
-		return new HashMap<>();
-	}
-
-	@Override
 	public void registerLogin(User user) {
 		
 		eventService.haltEvents();

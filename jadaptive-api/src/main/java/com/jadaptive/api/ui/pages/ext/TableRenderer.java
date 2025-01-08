@@ -816,11 +816,24 @@ public class TableRenderer {
 		case BOOL:
 			return Html.i("fa-solid", Boolean.parseBoolean(getStringValue(field, obj)) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
 		case OBJECT_REFERENCE: 
-			AbstractObject value = getReferenceValue(field, obj);
-			if(Objects.nonNull(value)) {
-				if(value instanceof AbstractObject) {
-					return Html.span(StringUtils.defaultIfEmpty((String)((AbstractObject)value).getValue("name"), "-"));
-				} 
+			if(field.getCollection()) {
+				StringBuilder b = new StringBuilder();
+				for(AbstractObject value : obj.getObjectCollection(field.getResourceKey())) {
+					if(b.length() > 0) {
+						b.append(",");
+					}
+					b.append(value.getValue("name"));
+				}
+				if(b.length() > 0) {
+					return Html.span(b.toString());
+				}
+			} else {
+				AbstractObject value = getReferenceValue(field, obj);
+				if(Objects.nonNull(value)) {
+					if(value instanceof AbstractObject) {
+						return Html.span(StringUtils.defaultIfEmpty((String)((AbstractObject)value).getValue("name"), "-"));
+					} 
+				}
 			}
 			return Html.span("-");
 		case TEXT:

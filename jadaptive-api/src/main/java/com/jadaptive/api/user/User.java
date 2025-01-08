@@ -27,6 +27,8 @@ import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.template.Validators;
+import com.jadaptive.utils.ITokenResolver;
+import com.jadaptive.utils.StaticResolver;
 import com.jadaptive.utils.Utils;
 
 @ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
@@ -193,6 +195,10 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	
 	public String getPrincipalDescription() {
 		return getDisplayName();
+	}
+	
+	public ITokenResolver getAdditionalData() {
+		return new StaticResolver();
 	}
 	
 }

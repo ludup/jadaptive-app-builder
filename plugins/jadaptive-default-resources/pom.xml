@@ -51,7 +51,12 @@
         <dependency>
 		    <groupId>npm</groupId>
 		    <artifactId>jquery</artifactId>
-		    <version>3.6.3</version>
+		    <version>3.7.0</version>
+		</dependency>
+		 <dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>jquery-ui</artifactId>
+		    <version>1.14.1</version>
 		</dependency>
         <dependency>
 		    <groupId>npm</groupId>

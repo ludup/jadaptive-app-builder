@@ -37,7 +37,9 @@ validate: function(form, callback, invalid) {
 					if(idx == 0) {
 				        var parentId = field.parents('.tab-pane').first().attr('id');
 						var triggerEl = document.querySelector('a[href="#' + parentId + '"]');
-						bootstrap.Tab.getInstance(triggerEl).show();
+						if(bootstrap.Tab.getInstance(triggerEl)) {
+							bootstrap.Tab.getInstance(triggerEl).show();
+						}
 					}
 				  });
 			     

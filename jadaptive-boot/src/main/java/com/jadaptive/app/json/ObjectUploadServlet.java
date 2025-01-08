@@ -182,8 +182,7 @@ public class ObjectUploadServlet extends HttpServlet {
 		
 		ObjectTemplate template = templateService.get(resourceKey);
 		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
-		objectService.saveOrUpdate(obj);
-		return obj.getUuid();
+		return objectService.saveOrUpdate(obj);
 	}
 	
 	private String processStashedObject(HttpServletRequest request, String resourceKey,

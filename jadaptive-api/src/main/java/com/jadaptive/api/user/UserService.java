@@ -42,8 +42,6 @@ public interface UserService extends UUIDObjectService<User>, AvatarProvider, Dy
 
 	boolean supportsLogin(User user);
 
-	Map<String, String> getUserProperties(User user);
-
 	Collection<User> getUsersByUUID(Collection<String> users);
 
 	long countUsers();
