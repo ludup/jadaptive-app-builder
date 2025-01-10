@@ -50,6 +50,8 @@ import com.jadaptive.api.template.TableAction.Target;
 import com.jadaptive.api.template.TableAction.Window;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.template.TemplateView;
+import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.template.UpdateURL;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.ViewURL;
@@ -770,6 +772,8 @@ public class TableRenderer {
 
 	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field) throws UnsupportedEncodingException {
 		
+		List<TemplateView> views = templateService.getViews(template, true);
+		TemplateViewField fieldView = views.iterator().next().getField(field);
 		boolean isDefault = StringUtils.defaultString(template.getDefaultColumn()).equals(field.getResourceKey());
 		boolean canUpdate = 
 				ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
@@ -789,29 +793,29 @@ public class TableRenderer {
 				}
 				
 				if(Objects.isNull(parentObject)) {
-					return Html.a(url, "underline").appendChild(processFieldValue(obj, template, field));
+					return Html.a(url, "underline").appendChild(processFieldValue(obj, template, field, fieldView));
 				} else {
 					return Html.a("#", "underline", "stash")
 							.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
 							.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + this.field.getResourceKey() + "/" + obj.getUuid())
-							.appendChild(processFieldValue(obj, template, field));
+							.appendChild(processFieldValue(obj, template, field, fieldView));
 				}
 			} else {
 				if(Objects.isNull(parentObject)) {
-					return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").appendChild(processFieldValue(obj, template, field));
+					return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").appendChild(processFieldValue(obj, template, field, fieldView));
 				} else {
-					return Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)  + "/" + this.field.getResourceKey() + "/" + obj.getUuid(), "underline").appendChild(processFieldValue(obj, template, field));
+					return Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)  + "/" + this.field.getResourceKey() + "/" + obj.getUuid(), "underline").appendChild(processFieldValue(obj, template, field, fieldView));
 				}
 				
 			}
 			
 		}
 		
-		return processFieldValue(obj, template, field);
+		return processFieldValue(obj, template, field, fieldView);
 		
 	}
 	
-	private Element processFieldValue(AbstractObject obj, ObjectTemplate template, FieldTemplate field) {
+	private Element processFieldValue(AbstractObject obj, ObjectTemplate template, FieldTemplate field, TemplateViewField fieldView) {
 		switch(field.getFieldType()) {
 		case BOOL:
 			return Html.i("fa-solid", Boolean.parseBoolean(getStringValue(field, obj)) ? "text-success fa-check fa-fw" : "text-danger fa-times fa-fw");
@@ -839,7 +843,7 @@ public class TableRenderer {
 		case TEXT:
 		case ENUM:
 		{
-			return renderText(field, obj, template);
+			return renderText(field, obj, template, fieldView);
 		}
 		case DATE:
 			Date date = (Date) obj.getValue(field);
@@ -921,7 +925,7 @@ public class TableRenderer {
 		return value.toString();
 	}
 
-	private Element renderText(FieldTemplate field, AbstractObject obj, ObjectTemplate template) {
+	private Element renderText(FieldTemplate field, AbstractObject obj, ObjectTemplate template, TemplateViewField view) {
 		FieldRenderer renderer = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getRenderer(field, template);
 		switch(renderer) {
 		case BOOTSTRAP_BADGE:
@@ -930,7 +934,7 @@ public class TableRenderer {
 		}
 		case I18N:
 		{
-			return Html.i18n(template.getBundle(), Utils.checkNullToString(getStringValue(field, obj)));
+			return Html.i18n(view.getBundle(), Utils.checkNullToString(getStringValue(field, obj)));
 		}
 		default:
 		{

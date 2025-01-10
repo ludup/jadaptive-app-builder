@@ -3,7 +3,9 @@ package com.jadaptive.api.template;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TemplateView {
 		
@@ -15,7 +17,7 @@ public class TemplateView {
 	boolean isExtension;
 	String extension;
 	String bundle;
-	List<TemplateViewField> fields = new ArrayList<>();
+	Map<String,TemplateViewField> fields = new HashMap<>();
 	List<TemplateView> childViews = new ArrayList<>();
 
 	public TemplateView(String bundle) {
@@ -62,17 +64,18 @@ public class TemplateView {
 	}
 	
 	public void addField(TemplateViewField field) {
-		fields.add(field);
+		fields.put(field.getResourceKey(), field);
 	}
 	
 	public List<TemplateViewField> getFields() {
-		Collections.sort(fields, new Comparator<TemplateViewField>() {
+		List<TemplateViewField> tmp = new ArrayList<>(fields.values());
+		Collections.sort(tmp, new Comparator<TemplateViewField>() {
 			@Override
 			public int compare(TemplateViewField o1, TemplateViewField o2) {
 				return o1.getWeight().compareTo(o2.getWeight());
 			}
 		});
-		return fields;
+		return tmp;
 	}
 	
 	public void addChildView(TemplateView child) {
@@ -109,5 +112,9 @@ public class TemplateView {
 
 	public String getExtension() {
 		return extension;
+	}
+
+	public TemplateViewField getField(FieldTemplate field) {
+		return fields.get(field.getResourceKey());
 	}
 }
