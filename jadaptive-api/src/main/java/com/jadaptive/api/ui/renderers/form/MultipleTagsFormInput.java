@@ -53,7 +53,7 @@ public class MultipleTagsFormInput {
 							.addClass("col-md-12")
 							.appendChild(selected = new Element("ul")
 									.attr("name", formVariable)
-									.addClass("bg-body form-control w-100 multipleTagTarget jadaptive-select"))))
+									.addClass("bg-body form-control border-0 w-100 multipleTagTarget jadaptive-select"))))
 					.appendChild(new Element("div")
 							.addClass("row")
 						.appendChild(new Element("div")
@@ -67,7 +67,7 @@ public class MultipleTagsFormInput {
 			selected.appendChild(Html.input("hidden", formVariable, value))
 					.appendChild(Html.li("badge bg-primary me-1")
 							.appendChild(Html.span(value, "pe-1"))
-							.appendChild(Html.a("#", "jadaptive-tag")
+							.appendChild(Html.a("#", "jadaptive-tag text-reset")
 									.appendChild(Html.i("fa-solid fa-times"))));			
 		}
 	}
