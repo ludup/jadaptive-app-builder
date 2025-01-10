@@ -149,9 +149,9 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 
 		try {
 			
-			sessionUtils.verifySameSiteRequest(request, resourceKey);
-			
 			ObjectTemplate template = templateService.get(resourceKey);
+			sessionUtils.verifySameSiteRequest(request, template);
+			
 			request.getSession().removeAttribute(resourceKey);
 			
 			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);

@@ -83,7 +83,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	protected void beforeForm(Document document, HttpServletRequest request, HttpServletResponse response) {
 		
 		try {
-			sessionUtils.verifySameSiteRequest(request, getResourceKey());
+			sessionUtils.verifySameSiteRequest(request, template);
 		} catch (UnauthorizedException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
@@ -118,10 +118,11 @@ public abstract class TemplatePage extends AuthenticatedPage {
 			sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
 			
 			Element e = form.selectFirst("#csrftoken");
+			String formIdentifier = sessionUtils.generateCSRFTokenName(template);
 			if(Objects.isNull(e)) {
 				form.appendChild(Html.input("hidden", 
-						SessionUtils.generateCSRFTokenName(getResourceKey()), 
-							sessionUtils.setupCSRFToken(Request.get(), getResourceKey()))
+						formIdentifier, 
+							sessionUtils.setupCSRFToken(Request.get(), formIdentifier))
 							.attr("id", "csrftoken"));
 			}
 		}

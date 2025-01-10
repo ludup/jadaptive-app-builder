@@ -22,6 +22,8 @@ import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.ParameterHelper;
 import com.jadaptive.utils.Utils;
@@ -32,6 +34,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class SessionUtils {
+	
+	@Autowired
+	private TemplateService templateService; 
 	
 	@FunctionalInterface
 	public interface IoRunnable {
@@ -111,6 +116,10 @@ public class SessionUtils {
 		return sessionConfig.getObject(SessionConfiguration.class).getTimeout();
 	}
 	
+	public void verifySameSiteRequest(HttpServletRequest request, ObjectTemplate template) throws UnauthorizedException {
+		verifySameSiteRequest(request, generateCSRFTokenName(template));
+	}
+	
 	public void verifySameSiteRequest(HttpServletRequest request, String formIdentifier) throws UnauthorizedException {
 		verifySameSiteRequest(request, request.getParameterMap(), formIdentifier);
 	}
@@ -131,7 +140,7 @@ public class SessionUtils {
 			String csrf = (String)request.getSession().getAttribute(generateCSRFTokenName(formIdentifier));
 			if(Objects.isNull(csrf)) {
 				log.warn("No CSRF token in session!");
-				return;
+				throw new UnauthorizedException("No CSRF token in session!");
 			}
 			if(Objects.isNull(requestToken)) {
 				throw new UnauthorizedException("No CSRF token in form!");
@@ -385,6 +394,10 @@ public class SessionUtils {
 
 	public static String generateCSRFTokenName(String resourceKey) {
 		return String.format("%s-%s", resourceKey, CSRF_TOKEN_ATTRIBUTE);
+	}
+	
+	public String generateCSRFTokenName(ObjectTemplate template) {
+		return String.format("%s-%s", templateService.getBaseTemplate(template).getResourceKey(), CSRF_TOKEN_ATTRIBUTE);
 	}
 
 }
