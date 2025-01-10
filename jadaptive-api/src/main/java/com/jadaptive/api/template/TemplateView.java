@@ -68,7 +68,8 @@ public class TemplateView {
 	}
 	
 	public List<TemplateViewField> getFields() {
-		List<TemplateViewField> tmp = new ArrayList<>(fields.values());
+		List<TemplateViewField> tmp = new ArrayList<>();
+		tmp.addAll(fields.values());
 		Collections.sort(tmp, new Comparator<TemplateViewField>() {
 			@Override
 			public int compare(TemplateViewField o1, TemplateViewField o2) {
