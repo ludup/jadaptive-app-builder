@@ -15,12 +15,16 @@ import com.jadaptive.utils.Utils;
 
 public class SearchUtils {
 
+	public static SearchField[] generateSearch(String searchField, String searchValue, boolean regex,
+			ObjectTemplate template, SearchField... additional) {
+		return generateSearch(searchField, searchValue, regex, template.toMap(), additional);
+	}
+
 	public static SearchField[] generateSearch(String searchField, String searchValue, 
 			ObjectTemplate template, SearchField... additional) {
-		return generateSearch(searchField, searchValue, template.toMap(), additional);
+		return generateSearch(searchField, searchValue, true, template.toMap(), additional);
 	}
-	
-	public static SearchField[] generateSearch(String searchField, String searchValue,
+	public static SearchField[] generateSearch(String searchField, String searchValue, boolean regex,
 			Map<String,FieldTemplate> searchFieldTemplates, SearchField... additional) {
 		List<SearchField> fields = new ArrayList<>();
 		if(StringUtils.isNotBlank(searchValue)) {
@@ -105,6 +109,14 @@ public class SearchUtils {
 					break;
 				case BOOL:
 					fields.add(SearchField.eq(searchField, Boolean.parseBoolean(searchValue)));
+					break;
+				case TEXT:
+				case TEXT_AREA:
+					if(regex) {
+						fields.add(SearchField.like(searchField, searchValue));
+					} else {
+						fields.add(SearchField.eq(searchField, searchValue));
+					}
 					break;
 				default:
 					fields.add(SearchField.like(searchField, searchValue));

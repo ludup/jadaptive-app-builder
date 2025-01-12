@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.ParameterHelper;
 import com.jadaptive.utils.Utils;
@@ -117,14 +119,18 @@ public class SessionUtils {
 	}
 	
 	public void verifySameSiteRequest(HttpServletRequest request, ObjectTemplate template) throws UnauthorizedException {
-		verifySameSiteRequest(request, generateCSRFTokenName(template));
+		doVerifySameSiteRequest(request, request.getParameterMap(), generateCSRFTokenName(template));
+	}
+	
+	public void verifySameSiteRequest(HttpServletRequest request, Map<String,String[]> parameters, ObjectTemplate template) throws UnauthorizedException {
+		doVerifySameSiteRequest(request, parameters, generateCSRFTokenName(template));
 	}
 	
 	public void verifySameSiteRequest(HttpServletRequest request, String formIdentifier) throws UnauthorizedException {
-		verifySameSiteRequest(request, request.getParameterMap(), formIdentifier);
+		doVerifySameSiteRequest(request, request.getParameterMap(), generateCSRFTokenName(formIdentifier));
 	}
 	
-	public void verifySameSiteRequest(HttpServletRequest request, Map<String,String[]> parameters, String formIdentifier) throws UnauthorizedException {
+	private void doVerifySameSiteRequest(HttpServletRequest request, Map<String,String[]> parameters, String formIdentifier) throws UnauthorizedException {
 		
 		if(Boolean.getBoolean("jadaptive.disableCSRF")) {
 			return;
@@ -133,11 +139,11 @@ public class SessionUtils {
 		SessionConfiguration config = sessionConfig.getObject(SessionConfiguration.class);
 		
 		if(config.getEnableCsrf()) {
-			String requestToken = ParameterHelper.getValue(parameters, generateCSRFTokenName(formIdentifier));
+			String requestToken = ParameterHelper.getValue(parameters, formIdentifier);
 			if(Objects.isNull(requestToken)) {
 				requestToken = request.getHeader("CsrfToken");
 			}
-			String csrf = (String)request.getSession().getAttribute(generateCSRFTokenName(formIdentifier));
+			String csrf = (String)request.getSession().getAttribute(formIdentifier);
 			if(Objects.isNull(csrf)) {
 				log.warn("No CSRF token in session!");
 				throw new UnauthorizedException("No CSRF token in session!");
@@ -329,15 +335,39 @@ public class SessionUtils {
 		return Session.get(request).getUser();
 	}
 
-	public String setupCSRFToken(HttpServletRequest request, String formIdentifier) {
+	public String setupFormCSRFFToken(HttpServletRequest request, String formIdentifier, Element form) {
+		return doSetupCSRFToken(request, generateCSRFTokenName(formIdentifier), form);
+	}
+	
+	public String setupFormCSRFToken(HttpServletRequest request, ObjectTemplate template, Element form) {
+		return doSetupCSRFToken(request, generateCSRFTokenName(template), form);
+	}
+	
+	private String doSetupCSRFToken(HttpServletRequest request, String formIdentifier, Element form) {
+		
 		String token = (String) Utils.generateRandomAlphaNumericString(64);
-		request.getSession().setAttribute(generateCSRFTokenName(formIdentifier), token);
+		if(Objects.nonNull(form)) {
+			Element e = form.selectFirst("#csrftoken");
+			if(Objects.isNull(e)) {
+				form.appendChild(Html.input("hidden", formIdentifier, token).attr("id", "csrftoken"));
+			} else {
+				e.attr("name", formIdentifier);
+				e.val(token);
+			}
+		}
+		
+		request.getSession().setAttribute(formIdentifier, token);
+		
 		if(log.isDebugEnabled()) {
 			log.debug("REMOVEME: Set CSRF token for {} to {}", token);
 		}
 		return token;
 	}
 
+	public String setupCSRFToken(HttpServletRequest request, String formIdentifier) {
+		return doSetupCSRFToken(request, generateCSRFTokenName(formIdentifier), null);
+	}
+	
 	public void populateSecurityHeaders(HttpServletResponse response) {
 		
 		if(Objects.isNull(Request.get().getAttribute(DISABLE_CONTENT_SECURITY))) {

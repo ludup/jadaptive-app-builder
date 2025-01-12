@@ -377,7 +377,9 @@ public class TableRenderer {
 			DynamicColumn dyn = dynamicColumns.get(column);
 			if(Objects.nonNull(dyn)) {
 				//if(StringUtils.isBlank(dyn.sortColumn())) {
-					el.appendChild(Html.td().appendChild(
+					el.appendChild(Html.td()
+							.addClass(column)
+							.appendChild(
 							Html.i18n(template.getBundle(),String.format("%s.name", column))));
 					columns.put(column, template);
 					continue;
@@ -400,13 +402,17 @@ public class TableRenderer {
 		
 		Element e;
 		if(Objects.nonNull(t)) {
-			el.appendChild(Html.td().appendChild(
+			el.appendChild(Html.td()
+					.addClass(column)
+					.appendChild(
 					e = Html.a("#")
 						.addClass("sortColumn text-decoration-none")
 						.attr("data-column", column)
 						.appendChild(Html.i18n(template.getBundle(),String.format("%s.name", t.getResourceKey())))));
 		} else {
-			el.appendChild(Html.td().appendChild(
+			el.appendChild(Html.td()
+					.addClass(column)
+					.appendChild(
 					e = Html.a("#")
 						.addClass("sortColumn text-decoration-none")
 						.attr("data-column", column)

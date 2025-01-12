@@ -17,7 +17,8 @@ public class TemplateView {
 	boolean isExtension;
 	String extension;
 	String bundle;
-	Map<String,TemplateViewField> fields = new HashMap<>();
+	Map<String,TemplateViewField> fieldsByResourceKey = new HashMap<>();
+	List<TemplateViewField> fields = new ArrayList<>();
 	List<TemplateView> childViews = new ArrayList<>();
 
 	public TemplateView(String bundle) {
@@ -64,19 +65,18 @@ public class TemplateView {
 	}
 	
 	public void addField(TemplateViewField field) {
-		fields.put(field.getResourceKey(), field);
-	}
-	
-	public List<TemplateViewField> getFields() {
-		List<TemplateViewField> tmp = new ArrayList<>();
-		tmp.addAll(fields.values());
-		Collections.sort(tmp, new Comparator<TemplateViewField>() {
+		fields.add(field);
+		Collections.sort(fields, new Comparator<TemplateViewField>() {
 			@Override
 			public int compare(TemplateViewField o1, TemplateViewField o2) {
 				return o1.getWeight().compareTo(o2.getWeight());
 			}
 		});
-		return tmp;
+		fieldsByResourceKey.put(field.getResourceKey(), field);
+	}
+	
+	public List<TemplateViewField> getFields() {
+		return fields;
 	}
 	
 	public void addChildView(TemplateView child) {
@@ -116,6 +116,6 @@ public class TemplateView {
 	}
 
 	public TemplateViewField getField(FieldTemplate field) {
-		return fields.get(field.getResourceKey());
+		return fieldsByResourceKey.get(field.getResourceKey());
 	}
 }

@@ -22,6 +22,7 @@ public abstract class FieldInputRender implements PageResources {
 	String bundle;
 	String formVariableWithParents;
 	boolean decorate = true;
+	boolean labelOnly = false;
 	boolean disableIDAttribute = false;
 	
 	public FieldInputRender(TemplateViewField field) {
@@ -69,6 +70,14 @@ public abstract class FieldInputRender implements PageResources {
 	}
 	protected String getResourceKey() {
 		return resourceKey;
+	}
+	
+	public boolean isLabelOnly() {
+		return labelOnly;
+	}
+	
+	public void disableDescription() {
+		this.labelOnly = true;
 	}
 	
 	public abstract void renderInput(Element rootElement, String value, String... classes) throws IOException;

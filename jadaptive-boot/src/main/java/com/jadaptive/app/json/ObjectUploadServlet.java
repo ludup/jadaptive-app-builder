@@ -152,9 +152,9 @@ public class ObjectUploadServlet extends HttpServlet {
 
 	private String processUrlEncodedForm(HttpServletRequest request, String handler, String resourceKey, Map<String,String[]> parameters) throws ObjectException, ValidationException, IOException {
 		
-		sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
-		
 		ObjectTemplate template = templateService.get(resourceKey);
+		
+		sessionUtils.verifySameSiteRequest(request, parameters, template);
 		
 		return objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
 				templateService.getTemplateClass(resourceKey), 
@@ -178,9 +178,10 @@ public class ObjectUploadServlet extends HttpServlet {
 
 	private String processMultipartObject(HttpServletRequest request, String resourceKey, Map<String,String[]> parameters) throws ValidationException, IOException {
 		
-		sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
+		
 		
 		ObjectTemplate template = templateService.get(resourceKey);
+		sessionUtils.verifySameSiteRequest(request, parameters, template);
 		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
 		return objectService.saveOrUpdate(obj);
 	}
@@ -188,9 +189,10 @@ public class ObjectUploadServlet extends HttpServlet {
 	private String processStashedObject(HttpServletRequest request, String resourceKey,
 			Map<String, String[]> parameters) throws ValidationException, RepositoryException, ObjectException, IOException {
 		
-		sessionUtils.verifySameSiteRequest(request, parameters, resourceKey);
-		
 		ObjectTemplate template = templateService.get(resourceKey);
+		
+		sessionUtils.verifySameSiteRequest(request, parameters, template);
+		
 		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
 		objectService.stashObject(obj);
 		return obj.getUuid();
@@ -206,10 +208,12 @@ public class ObjectUploadServlet extends HttpServlet {
 		String childResource = paths.get(5);
 		String fieldName = paths.get(6);
 		
-		sessionUtils.verifySameSiteRequest(request, parameters, childResource);
-		
 		ObjectTemplate parentTemplate = templateService.get(resourceKey);
 		ObjectTemplate childTemplate = templateService.get(childResource);
+		
+		sessionUtils.verifySameSiteRequest(request, parameters, childTemplate);
+		
+		
 		AbstractObject childObject = DocumentHelper.buildRootObject(parameters, childTemplate.getResourceKey(), childTemplate);
 		FieldTemplate fieldTemplate = parentTemplate.getField(fieldName);
 		Object stashedObject = Request.get().getSession().getAttribute(resourceKey);

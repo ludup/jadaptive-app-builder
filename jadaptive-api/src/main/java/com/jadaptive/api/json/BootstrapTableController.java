@@ -104,6 +104,22 @@ public class BootstrapTableController<T> extends AuthenticatedController {
 		} else if(request.getParameter("searchValue") != null) {
 			searchPattern = request.getParameter("searchValue");
 		}  
+
+//		searchPattern = searchPattern.replace("[", "\\[")
+//							.replace("]", "\\]")
+//							.replace("*", "\\*")
+//							.replace("+", "\\+")
+//							.replace("?", "\\?")
+//							.replace("{", "\\{")
+//							.replace("}", "\\}")
+//							.replace(".", "\\.")
+//							.replace("(", "\\(")
+//							.replace(")", "\\)")
+//							//.replace("^", "\\^")
+//							.replace("|", "\\|")
+//							.replace("-", "\\-")
+//							.replace("]", "\\]");
+//							;
 		
 		if(request.getParameter("searchField") != null) {
 			searchColumn = request.getParameter("searchField");

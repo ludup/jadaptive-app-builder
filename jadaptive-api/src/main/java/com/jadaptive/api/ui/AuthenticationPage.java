@@ -109,10 +109,8 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			if(!isAllowFormExternalRedirect()) {
 				sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
 			}
-			form.appendChild(Html.input("hidden", 
-					SessionUtils.generateCSRFTokenName(LOGIN_IDENTIFIER), 
-						sessionUtils.setupCSRFToken(Request.get(), LOGIN_IDENTIFIER))
-						.attr("id", "csrftoken"));
+			
+			sessionUtils.setupFormCSRFFToken(Request.get(), LOGIN_IDENTIFIER, form);
 		}
 		
 

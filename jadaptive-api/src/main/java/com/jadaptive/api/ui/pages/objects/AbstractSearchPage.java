@@ -67,6 +67,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	protected String searchValue;
 	protected String searchValueText;
 	protected String searchModifier;
+	protected boolean useRegex;
 	protected String sortColumn;
 	protected SortOrder sortOrder;
 	protected TableView tableView;
@@ -93,6 +94,9 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		searchModifier = form.getSearchModifier();
 		setCachedValue("searchModifier", searchModifier);
 		
+		useRegex = form.getUseRegex();
+		setCachedValue("useRegex", String.valueOf(useRegex));
+
 		start = form.getStart();
 		setCachedValue("start", String.valueOf(start));
 		
@@ -178,6 +182,18 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			}
 		}
 		
+		String tmp = Request.get().getParameter("useRegex");
+		if(Objects.isNull(tmp)) {
+			tmp = getCachedValue("useRegex", "false");
+			if(StringUtils.isBlank(tmp)) {
+				useRegex = false;
+			} else {
+				useRegex = Boolean.valueOf(tmp);
+			}
+		} else {
+			useRegex = Boolean.valueOf(tmp);
+		}
+		
 		sortColumn = Request.get().getParameter("sortColumn");
 		if(Objects.isNull(sortColumn)) {
 			sortColumn = getCachedValue("sortColumn", Objects.toString(Request.get().getParameter("sortColumn"),tableView.sortField()));
@@ -239,7 +255,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 				log.info("Searching for {} {}", searchField, searchValue);
 		}
 		
-		SearchField[] search = SearchUtils.generateSearch(searchField, searchValue, searchFieldTemplates);
+		SearchField[] search = SearchUtils.generateSearch(searchField, searchValue, useRegex, searchFieldTemplates);
 		long totalObjects = generateCount(template, search);
 		
 		if(start > 0 && totalObjects <= start) {
@@ -545,7 +561,14 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			} else {
 				div.addClass("d-none searchValueField");
 			}
+			Element i = Html.input("checkbox", "useRegex", "true");
+			if(useRegex) {
+				i.attr("checked", "checked");
+			}
+			div.appendChild(i);
+			div.appendChild(Html.label("userInterface", "regex.name").addClass("ms-2 small text-muted"));
 			holder.appendChild(div);
+			
 			break;
 		}
 		}
@@ -694,6 +717,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		String getSearchValueText();
 		String getSearchValue();
 		String getSearchModifier();
+		boolean getUseRegex();
 		int getStart();
 		int getLength();
 		
