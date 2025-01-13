@@ -118,7 +118,7 @@ feedback: function(el, message, type, icon) {
 				   </div>';
 	
 	if(e.length > 0) {
-		e.after(msg);
+		e.first().after(msg);
 	} 
 },
 checkBlank: function(elements) {
