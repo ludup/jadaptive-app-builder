@@ -32,7 +32,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	private TenantService tenantService; 
 	
 	@Autowired
-	private SessionUtils sessionUtils;
+	protected SessionUtils sessionUtils;
 	
 	protected String resourceKey;
 	protected String displayKey;
@@ -112,6 +112,10 @@ public abstract class TemplatePage extends AuthenticatedPage {
 
 		super.documentComplete(document);
 		
+		setupCSRFToken(document);
+	}
+
+	protected void setupCSRFToken(Document document) {
 		Element form = document.selectFirst("form");
 		if(Objects.nonNull(form)) {
 			

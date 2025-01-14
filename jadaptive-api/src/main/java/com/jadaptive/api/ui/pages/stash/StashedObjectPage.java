@@ -5,11 +5,14 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationType;
@@ -47,6 +50,15 @@ public abstract class StashedObjectPage extends ObjectTemplatePage {
 		permissionService.assertWrite(template.getResourceKey());
 	}
 	
+	protected void setupCSRFToken(Document document) {
+		Element form = document.selectFirst("form");
+		if(Objects.nonNull(form)) {
+			
+			sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
+			sessionUtils.setupFormCSRFToken(Request.get(), childTemplate, form);
+
+		}
+	}
 	public void onCreate() throws FileNotFoundException {
 
 		super.onCreate();
