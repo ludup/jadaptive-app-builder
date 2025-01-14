@@ -328,10 +328,11 @@ public class PageCache {
 				return res.get();
 			}
 		}
-		if(permissionsService.hasUserContext())
+		if(permissionsService.hasUserContext()) {
 			return About.class;
-		else
+		} else {
 			return getDefaultPage();
+		}
 	}
 
 
