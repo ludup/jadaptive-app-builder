@@ -20,11 +20,11 @@ public class FieldSearchFormInput {
 	boolean decorate = true;
 	boolean disableIDAttribute; 
 	
-	public FieldSearchFormInput(TemplateViewField field, String url, String searchField, String idField) {
+	public FieldSearchFormInput(TemplateViewField field, String url, String searchField, String idField, String valueField) {
 		this.url = url;
 		this.searchField = searchField;
 		this.idField = idField;
-		this.valueField = idField;
+		this.valueField = valueField;
 		this.resourceKey = field.getResourceKey();
 		this.formVariable = field.getFormVariable();
 		this.bundle = field.getBundle();
@@ -111,7 +111,7 @@ public class FieldSearchFormInput {
 		}
 		
 		if(!disableIDAttribute) {
-			inputText.attr("id", String.format("%sText", resourceKey));
+			inputText.attr("id", String.format("%sText", idField));
 			input.attr("id", idField);
 			
 		}

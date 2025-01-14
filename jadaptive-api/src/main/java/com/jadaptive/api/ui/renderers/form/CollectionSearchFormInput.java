@@ -118,11 +118,13 @@ public class CollectionSearchFormInput {
 				table.appendChild(row = new Element("tr")
 						.appendChild(new Element("input")
 								.attr("type", "hidden")
+								.attr("id", formVariable)
 								.attr("name", formVariable)
 								.attr("value", value.getValue()))
 						.appendChild(new Element("input")
 								.attr("type", "hidden")
 								.attr("name", String.format("%sText", formVariable))
+								.attr("id", String.format("%sText", formVariable))
 								.attr("value", value.getName()))
 						.appendChild(new Element("td")
 								.appendChild(displayName = Html.span(value.getName(), "underline"))));

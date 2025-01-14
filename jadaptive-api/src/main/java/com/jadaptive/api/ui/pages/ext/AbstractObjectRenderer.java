@@ -441,7 +441,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				} else {
 					FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
 							String.format("/app/api/templates/%s/table", objectType),
-							"name", "uuid");
+							"name",fieldView.getFormVariable(), "uuid");
 					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
 				}
 
@@ -476,7 +476,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				} else {
 					FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
 							String.format("/app/api/references/%s/table", objectType),
-							"name", fieldView.getFormVariable());
+							"name", fieldView.getFormVariable(), "uuid");
 					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
 				}
 
