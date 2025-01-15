@@ -475,7 +475,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					}
 				} else {
 					FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
-							String.format("/app/api/references/%s/table", objectType),
+							fieldView.getField().getMetaValue("url", String.format("/app/api/references/%s/table", objectType)),
 							"name", fieldView.getFormVariable(), "uuid");
 					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
 				}

@@ -11,7 +11,7 @@ import com.jadaptive.api.template.SortOrder;
 
 public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
-	Iterable<T> list(Class<T> resourceClass, SearchField...fields);
+	<X extends UUIDDocument> Iterable<X> list(Class<X> resourceClass, SearchField...fields);
 	
 	<X extends UUIDDocument> X get(String uuid, Class<X> resourceClass) throws RepositoryException, ObjectException;
 	

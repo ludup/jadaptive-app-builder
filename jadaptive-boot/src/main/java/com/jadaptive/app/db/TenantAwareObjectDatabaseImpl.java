@@ -47,7 +47,7 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 	
 	@Override
-	public Iterable<T> list(Class<T> resourceClass, SearchField... fields) {
+	public<X extends UUIDDocument> Iterable<X> list(Class<X> resourceClass, SearchField... fields) {
 		return listObjects(getCurrentTenant().getUuid(), resourceClass, fields);
 	}
 

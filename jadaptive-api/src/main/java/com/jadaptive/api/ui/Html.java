@@ -1,7 +1,10 @@
 package com.jadaptive.api.ui;
 
+import java.util.Collection;
 import java.util.Objects;
 
+import org.apache.commons.lang.ArrayUtils;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.utils.Utils;
@@ -185,6 +188,37 @@ public class Html {
 			}
 		}
 		return el;
+	}
+	
+	public static void createButtonWithDropdown(Document document, Element target, String id, Collection<NamePairValue> actions, String bundle, String i18n, String... classes) {
+		
+		Element menu;
+		target.appendChild(
+				new Element("div")
+				    .addClass("dropdown " + Utils.csv(" ", classes))
+					.appendChild(new Element("button")
+							.addClass("btn btn-primary dropdown-toggle")
+							.attr("type", "button")
+							.attr("data-bs-toggle", "dropdown")
+							.attr("aria-haspopup", "true")
+							.attr("aria-expanded", "false")
+							.attr("id", id)
+							.appendChild(new Element("i")
+								.addClass("fa-solid fa-plus me-1"))
+							.appendChild(new Element("span")
+								.attr("jad:bundle", bundle)
+								.attr("jad:i18n",i18n)))
+					.appendChild(menu = new Element("div")
+							.addClass("dropdown-menu")
+							.attr("aria-labelledby", id)));
+		
+		for(NamePairValue action : actions) {
+			menu.appendChild(new Element("a")
+					.addClass("dropdown-item")
+					.attr("href", action.getValue())
+					.text(action.getName()));
+		}
+				 
 	}
 
 }

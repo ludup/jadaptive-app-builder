@@ -14,4 +14,8 @@ public @interface CreateURL {
 	String value();
 	
 	String i18n();
+	
+	String withPermission() default "";
+	
+	String withoutPermission() default "";
 }

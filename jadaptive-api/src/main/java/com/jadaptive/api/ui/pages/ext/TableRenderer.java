@@ -616,9 +616,12 @@ public class TableRenderer {
 			CreateURL[] urls = clz.getAnnotationsByType(CreateURL.class);
 			if(Objects.nonNull(urls) && urls.length > 0) {
 				for(CreateURL url : urls) {
+					if(!checkPermissions(url.withPermission(), url.withoutPermission())) {
+						continue;
+					}
 					createTableAction(element, url.value(), 
 							StringUtils.defaultIfEmpty(url.i18n(), template.getCollectionKey()), "fa-plus", "fa-solid",
-							"primary", "create", "readWrite");
+							"primary", "create");
 				}
 			} else {
 				createTableAction(element, String.format("/app/ui/create/%s", t.getResourceKey()), 
@@ -738,6 +741,9 @@ public class TableRenderer {
 					CreateURL[] urls = clz.getAnnotationsByType(CreateURL.class);
 					if(Objects.nonNull(urls) && urls.length > 0) {
 						for(CreateURL url : urls) {
+							if(!checkPermissions(url.withPermission(), url.withoutPermission())) {
+								continue;
+							}
 							menu.appendChild(new Element("a")
 									.addClass("dropdown-item")
 									.attr("href", url.value())
@@ -756,6 +762,28 @@ public class TableRenderer {
 		}
 	}
 	
+	private boolean checkPermissions(String withPermission, String withoutPermission) {
+		
+		if(StringUtils.isNotBlank(withPermission)) {
+			try {
+				permissionService.assertAnyPermission(withPermission.split(","));
+			} catch(AccessDeniedException ex) {
+				return false;
+			}
+		}
+		
+		if(StringUtils.isNotBlank(withoutPermission)) {
+			try {
+				permissionService.assertAnyPermission(withoutPermission.split(","));
+				return false;
+			} catch(AccessDeniedException ex) {
+				return true;
+			}
+		}
+		
+		return true;
+	}
+
 	private String replaceParameters(String str) {
 		return str.replace("${resourceKey}", template.getResourceKey());
 	}
