@@ -177,9 +177,7 @@ public class ObjectUploadServlet extends HttpServlet {
 }
 
 	private String processMultipartObject(HttpServletRequest request, String resourceKey, Map<String,String[]> parameters) throws ValidationException, IOException {
-		
-		
-		
+			
 		ObjectTemplate template = templateService.get(resourceKey);
 		sessionUtils.verifySameSiteRequest(request, parameters, template);
 		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
