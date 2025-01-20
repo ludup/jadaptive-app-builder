@@ -338,6 +338,16 @@ public class FieldTemplate extends TemplateUUIDEntity {
 		}
 	}
 	
+	public boolean getMetaValueBool(String name, boolean defaultValue) {
+		Map<String,String> data = generateMap();
+		String value = data.get(name);
+		if(Objects.isNull(value)) {
+			return defaultValue;
+		} else {
+			return Boolean.parseBoolean(value);
+		}
+	}
+	
 	private Map<String,String> generateMap() {
 		
 		String[] values = meta.split(",");
@@ -348,6 +358,8 @@ public class FieldTemplate extends TemplateUUIDEntity {
 		}
 		return data;
 	}
+	
+	
 
 	public Collection<FieldOptions> getOptions() {
 		return options;

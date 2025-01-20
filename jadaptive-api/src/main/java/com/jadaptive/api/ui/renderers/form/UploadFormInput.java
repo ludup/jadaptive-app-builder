@@ -24,33 +24,36 @@ public class UploadFormInput extends FieldInputRender {
 		
 		this.e = rootElement;
 		Element e;
+		Element form;
+		rootElement.appendChild(e = new Element("div")
+						.addClass("col-12"));
+		if(decorate) {
+			e.appendChild(new Element("label")
+					.attr("for", getFormVariable())
+					.addClass("form-label")
+					.attr("jad:bundle", getBundle())
+					.attr("jad:i18n", String.format("%s.name", getResourceKey())));
+		}
 		
-		rootElement.appendChild(new Element("div")
-				.addClass("row mb-3")
-				.appendChild(new Element("div")
-						.addClass("col-12")
-					.appendChild(new Element("label")
-							.attr("for", getFormVariable())
-							.addClass("form-label")
+		e.append("<div class=\"float-end text-end mt-1\">\n"
+				+ " 		<a data-bs-toggle=\"collapse\" href=\"#attachmentHolder\" role=\"button\" aria-expanded=\"false\" aria-controls=\"attachmentHolder\">\n"
+				+ " 			<i class=\"fa-solid fa-chevron-up\"></i>\n"
+				+ "  		</a>\n"
+				+ " 	</div>").appendChild(form = Html.div("uploadForm")
+					.attr("data-resourcekey", resourceKey)
+					.attr("data-variable", formVariable));
+		
+		if(decorate) {
+			e.appendChild(new Element("small")
+							.addClass("form-text")
+							.addClass("text-muted")
 							.attr("jad:bundle", getBundle())
-							.attr("jad:i18n", String.format("%s.name", getResourceKey())))
-					.append("<div class=\"float-end text-end mt-1\">\n"
-							+ " 		<a data-bs-toggle=\"collapse\" href=\"#attachmentHolder\" role=\"button\" aria-expanded=\"false\" aria-controls=\"attachmentHolder\">\n"
-							+ " 			<i class=\"fa-solid fa-chevron-up\"></i>\n"
-							+ "  		</a>\n"
-							+ " 	</div>")
-				.appendChild(e = Html.div("uploadForm")
-						.attr("data-resourcekey", resourceKey)
-						.attr("data-variable", formVariable))
-				.appendChild(new Element("small")
-						.addClass("form-text")
-						.addClass("text-muted")
-						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.desc", getResourceKey())))));
+							.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
+		}
 		
 		load(e);
 		
-		e.select("input[type='file']")
+		form.select("input[type='file']")
 			.addClass("mfiles")
 			.attr("name", formVariable);
 	}

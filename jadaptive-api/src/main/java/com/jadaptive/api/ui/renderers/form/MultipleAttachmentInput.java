@@ -28,6 +28,9 @@ public class MultipleAttachmentInput extends FieldInputRender {
 	public void renderInput(Element rootElement, String value, boolean readOnly, String... classes) throws IOException {
 		
 		input = new UploadFormInput(resourceKey, formVariable, bundle);
+		if(!decorate) {
+			input.disableDecoration();
+		}
 		input.renderInput(rootElement, value, readOnly);
 	}
 

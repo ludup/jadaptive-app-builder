@@ -14,7 +14,7 @@ import com.jadaptive.api.ui.PageHelper;
 public class RichTextEditorInput extends FieldInputRender {
 
 	private Document document;
-
+	private boolean disableLabel = false;
 	public RichTextEditorInput(TemplateViewField field, Document document) {
 		super(field);
 		this.document = document;
@@ -28,12 +28,13 @@ public class RichTextEditorInput extends FieldInputRender {
 	@Override
 	public void renderInput(Element rootElement, String value, boolean readOnly, String... classes) throws IOException {
 		
-		rootElement.appendChild(new Element("label")
-				.attr("for", getFormVariable())
-				.addClass("form-label")
-				.attr("jad:bundle", getBundle())
-				.attr("jad:i18n", String.format("%s.name", getResourceKey())));
-		
+		if(decorate) {
+			rootElement.appendChild(new Element("label")
+					.attr("for", getFormVariable())
+					.addClass("form-label")
+					.attr("jad:bundle", getBundle())
+					.attr("jad:i18n", String.format("%s.name", getResourceKey())));
+		}
 		rootElement.appendChild(
 				new Element("textarea")
 					.val(value)
@@ -41,11 +42,13 @@ public class RichTextEditorInput extends FieldInputRender {
 					.attr("id", resourceKey)
 					.addClass("row mb-3 mceEditor form-control"));
 		
-		rootElement.appendChild(new Element("small")
-				.addClass("form-text")
-				.addClass("text-muted")
-				.attr("jad:bundle", getBundle())
-				.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
+		if(decorate) {
+			rootElement.appendChild(new Element("small")
+					.addClass("form-text")
+					.addClass("text-muted")
+					.attr("jad:bundle", getBundle())
+					.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
+		}
 		
 		rootElement.addClass("mb-3");
 		

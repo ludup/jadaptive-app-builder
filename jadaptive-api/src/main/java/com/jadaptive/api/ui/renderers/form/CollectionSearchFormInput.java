@@ -146,7 +146,7 @@ public class CollectionSearchFormInput {
 			}
 		}
 		else {
-			table.before(new Element("em").appendChild(Html.i18n("userInterface", "noResults.text").addClass("small text-muted")));
+			table.before(new Element("em").appendChild(Html.i18n("userInterface", "emptyList.text").addClass("small text-muted")));
 			table.addClass("d-none");
 		}
 	}
