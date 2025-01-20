@@ -80,7 +80,7 @@ public abstract class FieldInputRender implements PageResources {
 		this.labelOnly = true;
 	}
 	
-	public abstract void renderInput(Element rootElement, String value, String... classes) throws IOException;
+	public abstract void renderInput(Element rootElement, String value, boolean readOnly, String... classes) throws IOException;
 	
 	protected void load(Element e) throws IOException {
 		

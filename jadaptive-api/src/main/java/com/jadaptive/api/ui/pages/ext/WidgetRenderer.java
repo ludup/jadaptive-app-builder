@@ -71,35 +71,35 @@ public class WidgetRenderer implements PageExtension {
 		
 			switch(widgetName) {
 			case "text":
-				new TextFormInput(name, formVar, bundle).renderInput(e, value);
+				new TextFormInput(name, formVar, bundle).renderInput(e, value, false);
 				break;
 			case "textarea":
-				new TextAreaFormInput(name, formVar, bundle, Integer.parseInt(e.attr("jad:rows"))).renderInput(e, value);
+				new TextAreaFormInput(name, formVar, bundle, Integer.parseInt(e.attr("jad:rows"))).renderInput(e, value, false);
 				break;
 			case "number":
-				new NumberFormInput(name, formVar, bundle).renderInput(e, value);
+				new NumberFormInput(name, formVar, bundle).renderInput(e, value, false);
 				break;
 			case "switch":
-				new SwitchFormInput(name, formVar, bundle).renderInput(e, value);
+				new SwitchFormInput(name, formVar, bundle).renderInput(e, value, false);
 				break;
 			case "checkbox":
-				new BooleanFormInput(name, formVar, bundle).renderInput(e, value);
+				new BooleanFormInput(name, formVar, bundle).renderInput(e, value, false);
 				break;
 			case "date":
-				new DateFormInput(name, formVar, bundle).renderInput(e, value);
+				new DateFormInput(name, formVar, bundle).renderInput(e, value, false);
 				break;
 			case "timestamp":
-				new TimestampFormInput(name, formVar, bundle).renderInput(e, value);
+				new TimestampFormInput(name, formVar, bundle).renderInput(e, value, false);
 				break;
 			case "password":
-				new PasswordFormInput(name, formVar, bundle).renderInput(e, value);
+				new PasswordFormInput(name, formVar, bundle).renderInput(e, value, false);
 				break;
 			case "enum":
 				Class<?> values;
 				try {
 					values = classService.findClass(e.attr("jad:class"));
 					DropdownFormInput render = new DropdownFormInput(name, formVar, bundle);
-					render.renderInput(e, value);
+					render.renderInput(e, value, false);
 					render.renderValues((Enum<?>[])values.getEnumConstants(), value, readOnly);
 				} catch (ClassNotFoundException e2) {
 					throw new IllegalStateException(e2.getMessage(), e2);
@@ -107,7 +107,7 @@ public class WidgetRenderer implements PageExtension {
 				break;
 			case "country":
 				DropdownFormInput dropdown = new DropdownFormInput(name, formVar, bundle);
-				dropdown.renderInput(e, "");
+				dropdown.renderInput(e, "", false);
 				for(Country country : internationalService.getCountries()) {
 					dropdown.addInputValue(country.getCode(), country.getName());
 				}

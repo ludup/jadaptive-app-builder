@@ -816,10 +816,12 @@ public class TableRenderer {
 			canUpdate = false;
 		}
 		
+		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
+		
 		if(isDefault) {
 			if(canUpdate && !readOnly) {
 				
-				Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
+				
 				String url = replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj);
 				UpdateURL u = clz.getAnnotation(UpdateURL.class);
 				if(Objects.nonNull(u)) {
@@ -836,7 +838,13 @@ public class TableRenderer {
 				}
 			} else {
 				if(Objects.isNull(parentObject)) {
-					return Html.a(String.format("/app/ui/view/%s/%s", template.getCollectionKey(), obj.getUuid()) , "underline").appendChild(processFieldValue(obj, template, field, fieldView));
+					
+					String url = replaceVariables("/app/ui/view/%s/%s", obj);
+					ViewURL u = clz.getAnnotation(ViewURL.class);
+					if(Objects.nonNull(u)) {
+						url = replaceVariables(u.value(), obj);
+					}
+					return Html.a(url , "underline").appendChild(processFieldValue(obj, template, field, fieldView));
 				} else {
 					return Html.a(replaceVariables("/app/ui/object-view/{resourceKey}/{uuid}", parentObject)  + "/" + this.field.getResourceKey() + "/" + obj.getUuid(), "underline").appendChild(processFieldValue(obj, template, field, fieldView));
 				}

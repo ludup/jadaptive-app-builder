@@ -25,10 +25,10 @@ public class MultipleAttachmentInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String value, String... classes) throws IOException {
+	public void renderInput(Element rootElement, String value, boolean readOnly, String... classes) throws IOException {
 		
 		input = new UploadFormInput(resourceKey, formVariable, bundle);
-		input.renderInput(rootElement, value);
+		input.renderInput(rootElement, value, readOnly);
 	}
 
 	public void renderAttachments(Collection<AbstractObject> objects) {

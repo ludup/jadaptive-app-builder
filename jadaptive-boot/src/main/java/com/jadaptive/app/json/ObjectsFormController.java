@@ -620,8 +620,6 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	public void downloadImage(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey,
 			 @PathVariable String uuid, @PathVariable String filename) throws ObjectException, IOException {
 		
-		permissionService.assertRead(PermissionUtils.getReadPermission(resourceKey));
-		
 		try {
 			
 			FileAttachment att = fileService.getAttachment(uuid);

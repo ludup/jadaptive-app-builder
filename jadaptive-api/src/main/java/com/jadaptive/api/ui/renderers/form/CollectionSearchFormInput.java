@@ -86,7 +86,7 @@ public class CollectionSearchFormInput {
 			Element table;
 			
 			div.appendChild(new Element("div")
-						.addClass("row mt-3")
+						.addClass("row")
 						.appendChild(new Element("div")
 								.attr("id", formVariable)
 								.addClass("col-md-12")
@@ -146,6 +146,7 @@ public class CollectionSearchFormInput {
 			}
 		}
 		else {
+			table.before(new Element("em").appendChild(Html.i18n("userInterface", "noResults.text").addClass("small text-muted")));
 			table.addClass("d-none");
 		}
 	}

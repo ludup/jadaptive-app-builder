@@ -30,7 +30,7 @@ public abstract class FormInputRender extends FieldInputRender {
 		this.decorate = false;
 	}
 	
-	public final void renderInput(Element rootElement, String value, String... classes) throws IOException {
+	public final void renderInput(Element rootElement, String value, boolean readOnly, String... classes) throws IOException {
 		
 		rootElement.addClass(Utils.csv(" ", classes));
 		

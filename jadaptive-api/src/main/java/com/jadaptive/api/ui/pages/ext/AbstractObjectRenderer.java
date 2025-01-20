@@ -344,6 +344,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				lastRow.remove();
 			}
 			
+			lastRow.removeClass("mb-3");
+			
 			if(!view.getChildViews().isEmpty()) {
 				createViews(view.getChildViews(), viewElement, obj, scope);
 			}
@@ -431,7 +433,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				AbstractObject ref = obj.getChild(field);
 				if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
 					DropdownFormInput dropdown = new DropdownFormInput(fieldView);
-					dropdown.renderInput(element, "");
+					dropdown.renderInput(element, "", scope == FieldView.READ);
 					for(String resourceKey : objectTemplate.getChildTemplates()) {
 						dropdown.addI18nValue(resourceKey, resourceKey + ".name");
 					}
@@ -464,7 +466,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				AbstractObject ref = obj.getChild(field);
 				if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
 					DropdownFormInput dropdown = new DropdownFormInput(fieldView);
-					dropdown.renderInput(element, "");
+					dropdown.renderInput(element, "", scope == FieldView.READ);
 					if(scope!=FieldView.READ) {
 						for(AbstractObject o : objectService.list(objectType)) {
 							dropdown.addInputValue(o.getUuid(), (String) o.getValue(objectTemplate.getNameField()));
@@ -658,7 +660,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case ATTACHMENT:
 		{
 			MultipleAttachmentInput input = new MultipleAttachmentInput(fieldView);
-			input.renderInput(element, "");
+			input.renderInput(element, "", view == FieldView.READ);
 			input.renderAttachments(obj.getObjectCollection(fieldView.getResourceKey()));
 			break;
 			
@@ -799,7 +801,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case COUNTRY:
 		{
 			DropdownFormInput dropdown = new DropdownFormInput(fieldView);
-			dropdown.renderInput(element, "");
+			dropdown.renderInput(element, "", view == FieldView.READ);
 			for(Country country : internationalService.getCountries()) {
 				dropdown.addInputValue(country.getCode(), country.getName());
 			}
@@ -815,14 +817,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			case BOOTSTRAP_BADGE:
 			{
 				BootstrapBadgeRender render = new BootstrapBadgeRender(fieldView);
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 				break;
 			}
 			case I18N:
 			{
 				String i18nValue = i18nService.format(currentTemplate.get().getBundle(), Locale.getDefault(), getFieldValue(fieldView, obj));
 				TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
-				render.renderInput(element, i18nValue);
+				render.renderInput(element, i18nValue, view == FieldView.READ);
 				break;
 			}
 			case OPTIONAL:
@@ -830,7 +832,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				String value = getFieldValue(fieldView, obj); 
 				if(StringUtils.isNotBlank(value) || (!fieldView.getField().isReadOnly() && view !=FieldView.READ)) {
 					TextFormInput render = new TextFormInput(currentTemplate.get(), fieldView);
-					render.renderInput(element, value);
+					render.renderInput(element, value, view == FieldView.READ);
 				}
 				break;
 			}
@@ -864,7 +866,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					}
 					
 				};
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 				
 				if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
 					ReplacementDropdown replacement = new ReplacementDropdown("replacements", "");
@@ -882,7 +884,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		{
 			String val = getFieldValue(fieldView, obj);
 			ImageFormInput render = new ImageFormInput(currentTemplate.get(), fieldView);
-			render.renderInput(element, val);
+			render.renderInput(element, val, view == FieldView.READ);
 			break;
 		}
 //		case FILE:
@@ -899,7 +901,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		{
 			SingleAttachmentInput render = new SingleAttachmentInput(currentTemplate.get(),fieldView);
 			AbstractObject att = obj.getChild(field);
-			render.renderInput(element, Objects.nonNull(att) ? att.getUuid() : "");
+			render.renderInput(element, Objects.nonNull(att) ? att.getUuid() : "", view == FieldView.READ);
 			break;
 		}
 		case TEXT_AREA:
@@ -908,31 +910,31 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			case CSS_EDITOR:
 			{
 				CssEditorFormInput render = new CssEditorFormInput(fieldView, currentDocument.get(), view == FieldView.READ);
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 				break;
 			}
 			case HTML_EDITOR:
 			{
 				HtmlEditorFormInput render = new HtmlEditorFormInput(fieldView, currentDocument.get(), view == FieldView.READ);
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 				break;
 			}
 			case JAVA_EDITOR:
 			{
 				JavascriptEditorFormInput render = new JavascriptEditorFormInput(fieldView, currentDocument.get(), view == FieldView.READ);
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 				break;
 			}
 			case TEXT_EDITOR:
 			{
 				TextEditorInput render = new TextEditorInput(fieldView, currentDocument.get());
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 				break;
 			}
 			case RICH_EDITOR:
 			{
 				RichTextEditorInput render = new RichTextEditorInput(fieldView, currentDocument.get());
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 				break;
 			}
 			case HTML_VIEW:
@@ -952,7 +954,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			{
 				String i18nValue = i18nService.format(panel.getBundle(), Locale.getDefault(), getFieldValue(fieldView, obj));
 				TextAreaFormInput render = new TextAreaFormInput(fieldView, field.getMetaValueInt("rows", 15));
-				render.renderInput(element, i18nValue);
+				render.renderInput(element, i18nValue, view == FieldView.READ);
 				break;
 			}
 			case OPTIONAL:
@@ -960,14 +962,14 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				String value = getFieldValue(fieldView, obj);
 				if(StringUtils.isNotBlank(value) || view!=FieldView.READ) {
 					TextAreaFormInput render = new TextAreaFormInput(fieldView, field.getMetaValueInt("rows", 15));
-					render.renderInput(element, value);
+					render.renderInput(element, value, view == FieldView.READ);
 				}
 				break;
 			}
 			default:
 			{
 				TextAreaFormInput render = new TextAreaFormInput(fieldView, field.getMetaValueInt("rows", 10));
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 				
 				List<String> replacementVars = replacementVariables.get();
 				if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
@@ -985,7 +987,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			PasswordFormInput render = fieldView.getRenderer() == FieldRenderer.SET_PASSWORD ? 
 					new SetPasswordFormInput(currentTemplate.get(), fieldView) :
 					new PasswordFormInput(currentTemplate.get(), fieldView);
-			render.renderInput(element, getFieldValue(fieldView, obj));
+			render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 			List<String> replacementVars = replacementVariables.get();
 			if(Objects.nonNull(replacementVars) && replacementVars.size() > 0) {
 				ReplacementDropdown replacement = new ReplacementDropdown("replacements", "");
@@ -997,13 +999,13 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case TIMESTAMP:
 		{
 			TimestampFormInput render = new TimestampFormInput(fieldView);
-			render.renderInput(element, getFieldValue(fieldView, obj));
+			render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 			break;
 		}
 		case TIME:
 		{
 			TimeFormInput render = new TimeFormInput(currentTemplate.get(), fieldView);
-			render.renderInput(element, getFieldValue(fieldView, obj));
+			render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 			break;
 		}
 		case DATE:
@@ -1016,7 +1018,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 
 			DateFormInput render = new DateFormInput(currentTemplate.get(), fieldView);
-			render.renderInput(element, dateValue);
+			render.renderInput(element, dateValue, view == FieldView.READ);
 			break;
 			
 		}
@@ -1031,7 +1033,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				render = new SwitchFormInput(fieldView);
 				break;
 			}
-			render.renderInput(element, getFieldValue(fieldView, obj));
+			render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 			if(field.isReadOnly() || view == FieldView.READ) {
 				render.disable();
 			}
@@ -1040,7 +1042,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case PERMISSION:
 		{
 			DropdownFormInput render = new DropdownFormInput(fieldView);
-			render.renderInput(element, getFieldValue(fieldView, obj));
+			render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 			render.renderValues(permissionService.getAllPermissions(), getFieldValue(fieldView, obj));
 		
 			break;
@@ -1051,7 +1053,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			case BOOTSTRAP_BADGE:
 			{
 				BootstrapBadgeRender render = new BootstrapBadgeRender(fieldView);
-				render.renderInput(element, getFieldValue(fieldView, obj));
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 				break;
 			}
 			case RADIO_BUTTON:
@@ -1061,7 +1063,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				try {
 					values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
 					RadioFormInput render = new RadioFormInput(fieldView);
-					render.renderInput(element, getFieldValue(fieldView, obj));
+					render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 					render.renderValues(filterEnums((Enum<?>[])values.getEnumConstants(), field), getFieldValue(fieldView, obj), view == FieldView.READ);
 				} catch (ClassNotFoundException e) {
 					throw new IllegalStateException(e.getMessage(), e);
@@ -1073,7 +1075,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				try {
 					values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
 					DropdownFormInput render = new DropdownFormInput(fieldView);
-					render.renderInput(element, getFieldValue(fieldView, obj));
+					render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 					render.renderValues(filterEnums((Enum<?>[])values.getEnumConstants(), field), getFieldValue(fieldView, obj), view == FieldView.READ);
 				} catch (ClassNotFoundException e) {
 					throw new IllegalStateException(e.getMessage(), e);
@@ -1086,7 +1088,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		case LONG:
 		{
 			NumberFormInput render = new NumberFormInput(currentTemplate.get(), fieldView);
-			render.renderInput(element, getFieldValue(fieldView, obj));
+			render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
 
 			break;
 		}

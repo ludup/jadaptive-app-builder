@@ -10,7 +10,7 @@ public class HiddenFormInput extends FieldInputRender {
 		super(field);
 	}
 	
-	public final void renderInput(Element rootElement, String value, String... classes) {
+	public final void renderInput(Element rootElement, String value, boolean readOnly, String... classes) {
 	
 		Element input;
 		rootElement.appendChild(input = new Element("input")

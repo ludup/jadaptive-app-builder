@@ -29,7 +29,7 @@ public class DropdownFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String defaultValue, String... classes) {
+	public void renderInput(Element rootElement, String defaultValue, boolean readOnly, String... classes) {
 
 		
 		Element e;
@@ -76,6 +76,10 @@ public class DropdownFormInput extends FieldInputRender {
 			dropdownInput.attr("id", String.format("%sDropdown", getResourceKey()));
 			valueElement.attr("id", resourceKey);
 			nameElement.attr("id", String.format("%sText", getResourceKey()));
+		}
+		
+		if(readOnly) {
+			nameElement.attr("disabled", "disabled");
 		}
 
 	}

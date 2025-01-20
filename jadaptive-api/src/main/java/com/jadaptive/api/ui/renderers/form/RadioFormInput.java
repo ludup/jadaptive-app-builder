@@ -21,7 +21,7 @@ public class RadioFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String defaultValue, String... classes) {
+	public void renderInput(Element rootElement, String defaultValue, boolean readOnly, String... classes) {
 
 		rootElement.appendChild(
 				e =new Element("div"));

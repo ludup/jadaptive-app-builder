@@ -386,9 +386,9 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			input.disableIDAttribute();
 			
 			if(initial) {
-				input.renderInput(holder, searchValue, "searchValueField");
+				input.renderInput(holder, searchValue, false, "searchValueField");
 			} else {
-				input.renderInput(holder, "", "d-none", "searchValueField");
+				input.renderInput(holder, "", false, "d-none", "searchValueField");
 			}
 			break;
 		}
@@ -405,7 +405,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			DropdownFormInput dropdown = new DropdownFormInput(field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			dropdown.disableDecoration();
 			dropdown.disableIDAttribute();
-			dropdown.renderInput(e, "");
+			dropdown.renderInput(e, "", false);
 			for(Country country : internationalService.getCountries()) {
 				dropdown.addInputValue(country.getCode(), country.getName());
 			}
@@ -446,9 +446,9 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			input.disableDecoration();
 			input.disableIDAttribute();
 			if(initial) {
-				input.renderInput(valueElement, searchValue);
+				input.renderInput(valueElement, searchValue,true);
 			} else {
-				input.renderInput(valueElement, "");
+				input.renderInput(valueElement, "", true);
 			}
 
 			break;
@@ -466,7 +466,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 			DropdownFormInput dropdown = new DropdownFormInput(field.getResourceKey(), initial ? "searchValue" : "unused", template.getBundle());
 			dropdown.disableDecoration();
 			dropdown.disableIDAttribute();
-			dropdown.renderInput(e, "");
+			dropdown.renderInput(e, "", false);
 
 			try {
 				Class<?> clz = classService.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
