@@ -47,7 +47,7 @@ $(function() {
 	}
 	
 	$(document).on('click', '.jadaptive-tag', function() {
-		$(this).parents().find('li').remove();
+		$(this).parent().remove();
 	});
 	
 	function addText(_this) {

@@ -64,8 +64,8 @@ public class MultipleTagsFormInput {
 										.attr("jad:i18n", String.format("%s.desc", resourceKey))))));
 		
 		for(String value : selectedValues) {
-			selected.appendChild(Html.input("hidden", formVariable, value))
-					.appendChild(Html.li("badge bg-primary me-1")
+			selected.appendChild(Html.li("badge bg-primary me-1")
+							.appendChild(Html.input("hidden", formVariable, value))
 							.appendChild(Html.span(value, "pe-1"))
 							.appendChild(Html.a("#", "jadaptive-tag text-reset")
 									.appendChild(Html.i("fa-solid fa-times"))));			
