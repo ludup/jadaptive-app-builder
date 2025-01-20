@@ -27,6 +27,10 @@ $(function() {
 	
 	$('.uploadProgress').addClass('d-none');
 	
+	$('.dropzone').click(function(e) {
+		$('.file-input').last().trigger('click');
+	});
+	
 	$(document).on('change', '.file-input', function(e) {
 		var fileInput = $('.file-input').last();
 		appendFile(fileInput);

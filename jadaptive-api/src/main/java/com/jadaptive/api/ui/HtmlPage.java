@@ -37,7 +37,7 @@ public abstract class HtmlPage implements Page {
 	private PageCache pageCache; 
 	
 	@Autowired
-	private SessionUtils sessionUtils;
+	protected SessionUtils sessionUtils;
 	
 	@Autowired
 	private ApplicationService applicationService; 
