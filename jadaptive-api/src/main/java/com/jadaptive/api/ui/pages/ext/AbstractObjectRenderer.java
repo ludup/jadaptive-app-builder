@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -812,6 +813,22 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		boolean decorate = fieldView.getField().getMetaValueBool("decorate", true);
 		
 		switch(field.getFieldType()) {
+		case ISO_CURRENCY:
+		{
+			DropdownFormInput dropdown = new DropdownFormInput(fieldView);
+			dropdown.renderInput(element, "", view == FieldView.READ);
+			if(!decorate) {
+				dropdown.disableDecoration();
+			}
+			for(Currency currency : Currency.getAvailableCurrencies()) {
+				dropdown.addInputValue(currency.getCurrencyCode(), currency.getCurrencyCode());
+			}
+			String code = getFieldValue(fieldView, obj);
+			if(StringUtils.isNotBlank(code)) {
+				dropdown.setSelectedValue(code, code);
+			}
+			break; 
+		}
 		case COUNTRY:
 		{
 			DropdownFormInput dropdown = new DropdownFormInput(fieldView);

@@ -963,6 +963,7 @@ public class DocumentHelper {
 		case OPTIONS:
 		case TIME:
 		case COUNTRY:
+		case ISO_CURRENCY:
 		{
 			return DocumentValidator.validate(def,value);
 		}

@@ -175,6 +175,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 			case ENUM:
 			case OPTIONS:
 			case COUNTRY:
+			case ISO_CURRENCY:
 			case IMAGE:
 //			case FILE:
 			case TIME:
@@ -218,6 +219,7 @@ public class AbstractObjectSerializer extends StdSerializer<AbstractObject> {
 		case ENUM:
 		case OPTIONS:
 		case COUNTRY:
+		case ISO_CURRENCY:
 			gen.writeString(value.toString());
 			break;
 		case OBJECT_REFERENCE:

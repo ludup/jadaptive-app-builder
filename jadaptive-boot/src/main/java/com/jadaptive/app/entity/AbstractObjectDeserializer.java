@@ -285,6 +285,7 @@ public class AbstractObjectDeserializer extends StdDeserializer<AbstractObject> 
 		case OBJECT_REFERENCE:
 			return createReference(node, field);
 		case COUNTRY:
+		case ISO_CURRENCY:
 			return node.asText();
 		default:
 			throw new ValidationException(

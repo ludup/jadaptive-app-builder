@@ -71,6 +71,8 @@ public class DocumentValidator {
 		case COUNTRY:
 			validateText(value, field);
 			return value;
+		case ISO_CURRENCY:
+			return value;
 		default:
 			return value;
 		}
