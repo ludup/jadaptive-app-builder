@@ -25,6 +25,19 @@ function appendFile(fileInput) {
 }
 $(function() {
 	
+	$('.uploadToggle').click(function(e) {
+		
+		var el = $(this).find('i');
+		
+		var prev = el.data('prev');
+		var next = el.data('next');
+		
+		el.removeClass(prev).addClass(next);
+		
+		el.data('prev', next);
+		el.data('next', prev);
+	});
+	
 	$('.uploadProgress').addClass('d-none');
 	
 	$('.dropzone').click(function(e) {

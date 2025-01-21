@@ -36,8 +36,8 @@ public class UploadFormInput extends FieldInputRender {
 		}
 		
 		e.append("<div class=\"float-end text-end mt-1\">\n"
-				+ " 		<a data-bs-toggle=\"collapse\" href=\"#attachmentHolder\" role=\"button\" aria-expanded=\"false\" aria-controls=\"attachmentHolder\">\n"
-				+ " 			<i class=\"fa-solid fa-chevron-up\"></i>\n"
+				+ " 		<a class=\"uploadToggle\" data-bs-toggle=\"collapse\" href=\"#attachmentHolder\" role=\"button\" aria-expanded=\"false\" aria-controls=\"attachmentHolder\">\n"
+				+ " 			<i class=\"fa-solid fa-chevron-up\" data-next=\"fa-chevron-down\" data-prev=\"fa-chevron-up\"></i>\n"
 				+ "  		</a>\n"
 				+ " 	</div>").appendChild(form = Html.div("uploadForm")
 					.attr("data-resourcekey", resourceKey)
@@ -51,7 +51,7 @@ public class UploadFormInput extends FieldInputRender {
 							.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
 		}
 		
-		load(e);
+		load(form);
 		
 		form.select("input[type='file']")
 			.addClass("mfiles")
