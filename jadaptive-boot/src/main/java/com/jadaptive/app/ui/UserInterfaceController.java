@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.db.SearchField;
@@ -155,6 +156,17 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 		Page page = pageCache.resolvePage(resourceUri, true);
 		page.doGet(resourceUri, request, response);
+	}
+	
+	@RequestMapping(value="/robots.txt", method = RequestMethod.GET, produces = "text/plain")
+	@ResponseBody
+	@ResponseStatus(code = HttpStatus.OK)
+	public String doRobots(HttpServletRequest request, HttpServletResponse response) {
+
+		StringBuilder b = new StringBuilder();
+		b.append("User-agent: *\n");
+		b.append("Disallow: /\n");
+		return b.toString();
 	}
 	
 	@RequestMapping(value="/app/ui/**", method = RequestMethod.POST)
