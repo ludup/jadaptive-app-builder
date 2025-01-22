@@ -62,6 +62,7 @@ public class RichTextEditorInput extends FieldInputRender {
 		+ "	  selector: '#" + resourceKey + "', \n"
 		+ "	  plugins: 'autosave link',\n"
 		+ "	  license_key: 'gpl',\n"
+		+ "   relative_urls: false,\n"
 		+ "	  promotion: false,\n"
 		+ "	  branding: false,\n"
 		+ "	  menubar: 'edit insert view format table'\n"
