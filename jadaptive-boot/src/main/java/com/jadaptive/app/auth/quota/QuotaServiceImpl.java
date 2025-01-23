@@ -284,8 +284,11 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 	private Quota internalAssert(Quota q, QuotaThreshold quota, String bundle, String key) {
 		if(q.getValue() > q.getQuota()) {
 			if(log.isInfoEnabled()) {
-				log.info("Rejecting access to group {} on key {} for exceeding quota of {} every {}", 
-						q.getGroup(), quota.getKey().getName(), quota.getPeriodUnit(), quota.getPeriodUnit().toString());
+				log.info("Rejecting access to group {} on key {} for exceeding quota of {} every {} {}", 
+						q.getGroup(), quota.getKey().getName(), 
+						quota.getValue(),
+						quota.getPeriodUnit(), 
+						quota.getPeriodUnit().toString());
 			}
 			throw new AccessDeniedException(bundle, key, quota.getValue().toUpperCase(), 
 					String.format("%d %s", quota.getPeriodValue(), quota.getPeriodUnit().name()));
@@ -313,7 +316,12 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			q.setQuotaStarted(new Date());
 			
 			if(log.isInfoEnabled()) {
-				log.info("Created quota for group {} on key {} to {} every {} {}", group, quota.getKey().getName(), quota.getPeriodValue(), quota.getPeriodUnit().toString());
+				log.info("Created quota for group {} on key {} to {} every {} {}", 
+						group, 
+						quota.getKey().getName(), 
+						quota.getValue(),
+						quota.getPeriodValue(), 
+						quota.getPeriodUnit().toString());
 			}
 		}
 		
@@ -322,7 +330,12 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			q.setValue(0L);
 			
 			if(log.isInfoEnabled()) {
-				log.info("Reset quota for group {} on key {} to {} every {}", group, quota.getKey().getName(), quota.getPeriodValue(), quota.getPeriodUnit().toString());
+				log.info("Reset quota for group {} on key {} to {} every {} {}", 
+						group, 
+						quota.getKey().getName(), 
+						quota.getValue(),
+						quota.getPeriodValue(), 
+						quota.getPeriodUnit().toString());
 			}
 			
 			objectDatbase.saveOrUpdate(q);
