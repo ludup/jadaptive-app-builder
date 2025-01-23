@@ -154,7 +154,7 @@ public class PageCache {
 				Field field = ReflectionUtils.getField(page.getClass(), e.getKey());
 				field.setAccessible(true);
 
-				if(field.getType().isAssignableFrom(Integer.class)) {
+				if(field.getType().equals(int.class) || field.getType().equals(Integer.class)) {
 					field.set(page, Integer.parseInt(e.getValue().toString()));
 				} else {
 					field.set(page, e.getValue());
