@@ -27,21 +27,28 @@ public class UploadFormInput extends FieldInputRender {
 		Element form;
 		rootElement.appendChild(e = new Element("div")
 						.addClass("col-12"));
+		
+		Element div = Html.div("w-100");
 		if(decorate) {
-			e.appendChild(new Element("label")
+			div.appendChild(new Element("label")
 					.attr("for", getFormVariable())
 					.addClass("form-label")
 					.attr("jad:bundle", getBundle())
 					.attr("jad:i18n", String.format("%s.name", getResourceKey())));
-		}
+			
+			div.append("<div class=\"float-end text-end mt-1\">\n"
+					+ " 		<a class=\"uploadToggle\" data-bs-toggle=\"collapse\" href=\"#attachmentHolder\" role=\"button\" aria-expanded=\"false\" aria-controls=\"attachmentHolder\">\n"
+					+ " 			<i class=\"fa-solid fa-chevron-up\" data-next=\"fa-chevron-down\" data-prev=\"fa-chevron-up\"></i>\n"
+					+ "  		</a>\n"
+					+ " 	</div>");
+			
+			e.appendChild(div);
+		} 
 		
-		e.append("<div class=\"float-end text-end mt-1\">\n"
-				+ " 		<a class=\"uploadToggle\" data-bs-toggle=\"collapse\" href=\"#attachmentHolder\" role=\"button\" aria-expanded=\"false\" aria-controls=\"attachmentHolder\">\n"
-				+ " 			<i class=\"fa-solid fa-chevron-up\" data-next=\"fa-chevron-down\" data-prev=\"fa-chevron-up\"></i>\n"
-				+ "  		</a>\n"
-				+ " 	</div>").appendChild(form = Html.div("uploadForm")
+		e.appendChild(form = Html.div("uploadForm")
 					.attr("data-resourcekey", resourceKey)
 					.attr("data-variable", formVariable));
+		
 		
 		if(decorate) {
 			e.appendChild(new Element("small")
