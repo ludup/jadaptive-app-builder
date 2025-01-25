@@ -18,6 +18,7 @@ public interface PermissionService {
 	public static final String READ = "read";
 	public static final String READ_WRITE = "readWrite";
 	public static final Set<String> NO_PERMISSIONS = Collections.emptySet();
+	public static final String SYSTEM_USER_UUID = "aa53c0f8-cbbe-44be-bb61-cc7bbe6d6f3d";
 	
 	void assertAnyPermission(String... permissions) throws AccessDeniedException;
 

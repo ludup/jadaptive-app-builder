@@ -43,6 +43,13 @@ public class AuthenticatedService {
 		return permissionService.hasUserContext();
 	}
 	
+	protected boolean hasSystemContext() {
+		if(hasUserContext()) {
+			return getCurrentUser().getUuid().equals(PermissionService.SYSTEM_USER_UUID);
+		}
+		return false;
+	}
+	
 	
 	protected boolean isAdministrator(User currentUser) {
 		return permissionService.isAdministrator(currentUser);

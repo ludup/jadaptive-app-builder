@@ -85,8 +85,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	ThreadLocal<Stack<User>> currentUser = new ThreadLocal<>();
 	
-	final static String SYSTEM_USER_UUID = "aa53c0f8-cbbe-44be-bb61-cc7bbe6d6f3d";
-	
 	final static User SYSTEM_USER = new User() {
 
 		private static final long serialVersionUID = 900617280859406080L;
