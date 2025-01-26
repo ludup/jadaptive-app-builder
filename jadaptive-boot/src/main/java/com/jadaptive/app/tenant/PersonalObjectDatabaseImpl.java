@@ -39,6 +39,13 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	}
 	
 	@Override
+	public T getPersonalObject(Class<T> resourceClass, User user, String uuid) {
+		return objectDatabase.get(resourceClass, 
+					SearchField.eq("uuid", uuid),
+					SearchField.eq("ownerUUID", user.getUuid()));
+	}
+	
+	@Override
 	public Long getPersonalObjectCount(Class<T> resourceClass, User user, SearchField... search) {
 		if(search.length > 0) {
 			return objectDatabase.searchCount(resourceClass, 
