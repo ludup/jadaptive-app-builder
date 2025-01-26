@@ -1,5 +1,7 @@
 package com.jadaptive.app.permissions;
 
+import java.io.FileNotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.jadaptive.api.permissions.AuthenticatedContext;
 import com.jadaptive.api.permissions.AuthenticatedController;
@@ -98,7 +101,11 @@ public class ControllerInterceptor implements HandlerInterceptor {
 			thrw = (Throwable)request.getAttribute(DispatcherServlet.EXCEPTION_ATTRIBUTE);
 		}
 		if(thrw != null && !(thrw instanceof Redirect)) {
-			log.error("API failure on {} URL {}", request.getMethod(), request.getRequestURL().toString(), thrw);
+			if(thrw instanceof FileNotFoundException || thrw instanceof NoResourceFoundException) {
+				log.warn("Resource not found {}", request.getRequestURI());
+				return;
+			}
+			log.error("Request failure on {} URL {}", request.getMethod(), request.getRequestURL().toString(), thrw);
 		}
 	}
 }
