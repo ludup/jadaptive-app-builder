@@ -57,6 +57,15 @@ public class LogonController {
 	@Autowired
 	private PageCache pageCache;
 	
+	@RequestMapping(value = "/app/api/server/ping", method = RequestMethod.GET, produces = { "application/json" })
+	@ResponseBody
+	@ResponseStatus(value = HttpStatus.OK)
+	@Deprecated
+	public RequestStatus ping(HttpServletRequest request,
+			HttpServletResponse response) {
+		return new RequestStatusImpl(true, "");
+	}
+	
 	@RequestMapping(value="/app/api/logon/basic", method = RequestMethod.POST, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
