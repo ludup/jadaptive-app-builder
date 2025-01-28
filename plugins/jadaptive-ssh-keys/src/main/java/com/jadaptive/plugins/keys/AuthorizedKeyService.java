@@ -11,7 +11,7 @@ import com.sshtools.common.ssh.SshException;
 import com.sshtools.common.ssh.components.SshKeyPair;
 import com.sshtools.common.ssh.components.SshPublicKey;
 
-public interface AuthorizedKeyService extends UUIDObjectService<AuthorizedKey> {
+public interface AuthorizedKeyService extends UUIDObjectService<AuthorizedKey>, AuthorizedKeyDatabase {
 
 	public static final String AUTHORIZED_KEY_ASSIGN = "authorizedKey.assign";
 	public static final String RESOURCE_BUNDLE = "authorizedKeys";

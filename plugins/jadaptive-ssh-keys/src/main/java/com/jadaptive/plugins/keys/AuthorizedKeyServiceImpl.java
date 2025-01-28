@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.zip.ZipEntry;
@@ -216,5 +217,19 @@ public class AuthorizedKeyServiceImpl extends AbstractUUIDObjectServceImpl<Autho
 		return objectDatabase.allObjectsCount(AuthorizedKey.class, 
 				SearchField.or(SearchField.eq("expires", null),
 						SearchField.gt("expires", Utils.today())));
+	}
+
+	@Override
+	public Collection<SshPublicKey> getPublicKeys(User user) throws IOException {
+		var results = new ArrayList<SshPublicKey>();
+		for(AuthorizedKey key : getAuthorizedKeys(user)) {
+			results.add(SshKeyUtils.getPublicKey(key.getPublicKey()));
+		}
+		return results;
+	}
+
+	@Override
+	public Integer getKeyPriority() {
+		return Integer.MAX_VALUE;
 	}
 }

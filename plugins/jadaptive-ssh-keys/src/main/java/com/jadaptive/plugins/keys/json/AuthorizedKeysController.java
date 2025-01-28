@@ -72,7 +72,12 @@ public class AuthorizedKeysController extends AuthenticatedController{
 				authorizedKeys.append(String.format("# No keys for user %s", username));
 			} else {
 					
-				Collection<AuthorizedKeyDatabase> databases = ApplicationServiceImpl.getInstance().getBeans(AuthorizedKeyDatabase.class);
+				authorizedKeys.append(String.format("# Authorized keys for user %s", username));
+				
+				Collection<AuthorizedKeyDatabase> databases = ApplicationServiceImpl.getInstance().getBeans(
+						AuthorizedKeyDatabase.class).stream()
+						.sorted((db1, db2)->{ return db1.getKeyPriority().compareTo(db2.getKeyPriority()); })
+						.toList();
 				
 				for(AuthorizedKeyDatabase database : databases) {
 					
@@ -92,7 +97,7 @@ public class AuthorizedKeysController extends AuthenticatedController{
 			usageService.log(1, AuthorizedKeyService.AUTHORIZED_KEYS_USER, principal.getUuid());
 			
 		} catch(Throwable t) { 
-			log.error("Failed to get keys for {}", username);
+			log.error("Failed to get keys for {}", username, t);
 			authorizedKeys.append(String.format("# Encountered error attempting to retrieve keys for %s", username));
 		} finally {
 			clearUserContext();

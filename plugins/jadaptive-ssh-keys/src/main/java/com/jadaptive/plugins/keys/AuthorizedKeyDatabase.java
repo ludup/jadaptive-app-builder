@@ -11,4 +11,6 @@ import com.sshtools.common.ssh.components.SshPublicKey;
 public interface AuthorizedKeyDatabase extends ExtensionPoint {
 
 	Collection<SshPublicKey> getPublicKeys(User user) throws IOException;
+
+	Integer getKeyPriority();
 }
