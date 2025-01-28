@@ -3,6 +3,8 @@ package com.jadaptive.plugins.keys.json;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Objects;
 
 import org.apache.commons.io.IOUtils;
 import org.pf4j.Extension;
@@ -11,19 +13,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.stats.UsageService;
+import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
+import com.jadaptive.plugins.keys.AuthorizedKey;
+import com.jadaptive.plugins.keys.AuthorizedKeyDatabase;
 import com.jadaptive.plugins.keys.AuthorizedKeyService;
 import com.jadaptive.plugins.keys.PublicKeyType;
+import com.sshtools.common.publickey.SshKeyUtils;
+import com.sshtools.common.ssh.components.SshPublicKey;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,6 +53,57 @@ public class AuthorizedKeysController extends AuthenticatedController{
 	@Autowired
 	private UserService userService; 
  
+	@Autowired
+	private UsageService usageService; 
+	
+	@RequestMapping(value = { "/authorizedKeys/{username}" }, method = { RequestMethod.GET, RequestMethod.POST }, produces = { "text/plain" })
+	@ResponseBody
+	public String listAuthorizedKeys(HttpServletRequest request, HttpServletResponse response, @PathVariable String username) throws IOException, AccessDeniedException, UnauthorizedException {
+		
+		setupSystemContext();
+		
+		StringBuffer authorizedKeys = new StringBuffer();
+		
+		try {
+
+			User principal = userService.getUser(username);
+			
+			if(Objects.isNull(principal)) {
+				authorizedKeys.append(String.format("# No keys for user %s", username));
+			} else {
+					
+				Collection<AuthorizedKeyDatabase> databases = ApplicationServiceImpl.getInstance().getBeans(AuthorizedKeyDatabase.class);
+				
+				for(AuthorizedKeyDatabase database : databases) {
+					
+					Collection<SshPublicKey> keys = database.getPublicKeys(principal);
+					
+					for(SshPublicKey key : keys) {
+						if(authorizedKeys.length() > 0) {
+							authorizedKeys.append("\r\n");
+						}
+						authorizedKeys.append(
+							SshKeyUtils.getOpenSSHFormattedKey(key));	
+					}
+				}
+				
+			}
+			
+			usageService.log(1, AuthorizedKeyService.AUTHORIZED_KEYS_USER, principal.getUuid());
+			
+		} catch(Throwable t) { 
+			log.error("Failed to get keys for {}", username);
+			authorizedKeys.append(String.format("# Encountered error attempting to retrieve keys for %s", username));
+		} finally {
+			clearUserContext();
+		}
+		
+		return authorizedKeys.toString();
+	}
+
+	interface KeyOperation {
+		void doOperation(AuthorizedKey key);
+	}
 	
 	@RequestMapping(value = { "/generate/personal/key" }, produces = { "application/json" })
 	@ResponseBody

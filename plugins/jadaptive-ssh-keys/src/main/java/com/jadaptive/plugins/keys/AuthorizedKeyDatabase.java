@@ -1,4 +1,4 @@
-package com.jadaptive.plugins.sshd;
+package com.jadaptive.plugins.keys;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -10,5 +10,5 @@ import com.sshtools.common.ssh.components.SshPublicKey;
 
 public interface AuthorizedKeyDatabase extends ExtensionPoint {
 
-	Collection<SshPublicKey> getAuthorizedKeys(User user) throws IOException;
+	Collection<SshPublicKey> getPublicKeys(User user) throws IOException;
 }

@@ -14,6 +14,7 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.plugins.keys.AuthorizedKey;
+import com.jadaptive.plugins.keys.AuthorizedKeyDatabase;
 import com.jadaptive.plugins.keys.AuthorizedKeyService;
 import com.sshtools.common.auth.AbstractPublicKeyAuthenticationProvider;
 import com.sshtools.common.logger.Log;
@@ -55,7 +56,7 @@ public class AuthorizedKeyProvider extends AbstractPublicKeyAuthenticationProvid
 			User user = userService.getUser(tenantUsername);
 			
 			for(AuthorizedKeyDatabase kdb : applicationService.getBeans(AuthorizedKeyDatabase.class)) {
-				for(SshPublicKey dbkey : kdb.getAuthorizedKeys(user)) {
+				for(SshPublicKey dbkey : kdb.getPublicKeys(user)) {
 					if(dbkey.equals(key)) {
 						con.setProperty(SSHDService.TENANT, tenantService.getCurrentTenant());
 						con.setProperty(SSHDService.USER, user);
