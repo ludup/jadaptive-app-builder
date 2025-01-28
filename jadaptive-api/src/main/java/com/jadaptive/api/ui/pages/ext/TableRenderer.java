@@ -22,6 +22,7 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -971,8 +972,18 @@ public class TableRenderer {
 		FieldRenderer renderer = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getRenderer(field, template);
 		switch(renderer) {
 		case BOOTSTRAP_BADGE:
+		case TAGS:
 		{
-			return BootstrapBadgeRender.generateBadge(Utils.checkNullToString(getStringValue(field, obj)));
+			if(field.getCollection()) {
+				Elements e = new Elements();
+				StringBuilder b = new StringBuilder();
+				for(String value : obj.getCollection(field.getResourceKey())) {
+					e.add( BootstrapBadgeRender.generateBadge(value));
+				}
+				return Html.div().appendChildren(e);
+			} else {
+				return BootstrapBadgeRender.generateBadge(Utils.checkNullToString(getStringValue(field, obj)));
+			}
 		}
 		case I18N:
 		{
