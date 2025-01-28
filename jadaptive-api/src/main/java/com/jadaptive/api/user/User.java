@@ -31,7 +31,7 @@ import com.jadaptive.utils.ITokenResolver;
 import com.jadaptive.utils.StaticResolver;
 import com.jadaptive.utils.Utils;
 
-@ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION, defaultColumn = "username")
+@ObjectDefinition(resourceKey = "users", type = ObjectType.COLLECTION)
 @ObjectServiceBean(bean = UserService.class)
 @ObjectViewDefinition(bundle = "users", value = User.DETAILS_VIEW, weight=0)
 @ObjectViewDefinition(bundle = "users", value = User.EMAIL_VIEW, weight=100)
@@ -41,7 +41,6 @@ import com.jadaptive.utils.Utils;
 requiresUpdate = true, sortField = "username")
 @TableAction(resourceKey = "enableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-unlock", target = Target.ROW, url = "/app/api/accounts/enable/{uuid}", filter = DisabledAccountAction.class)
 @TableAction(resourceKey = "disableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-lock", target = Target.ROW, url = "/app/api/accounts/disable/{uuid}", filter = EnabledAccountAction.class)
-
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
 public abstract class User extends AbstractUUIDEntity implements NamedDocument {
@@ -55,12 +54,12 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	
 	private static final long serialVersionUID = 2210375165051752363L;
 
-	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true, nameField = true)
+	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true)
 	@ObjectView(DETAILS_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
 	String username;
 
-	@ObjectField(searchable = true, type = FieldType.TEXT)
+	@ObjectField(searchable = true, type = FieldType.TEXT, nameField = true)
 	@Validator(type = ValidationType.REQUIRED)
 	@ObjectView(DETAILS_VIEW)
 	String name;
