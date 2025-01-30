@@ -1,10 +1,17 @@
 package com.jadaptive.api.entity;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.PersonalObjectDatabase;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.PersonalUUIDEntity;
+import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.SortOrder;
 
 public abstract class AbstractPersonalUUIDObjectServceImpl<T extends PersonalUUIDEntity> extends AuthenticatedService implements AbstractUUIDObjectService<T> {
 
@@ -20,7 +27,7 @@ public abstract class AbstractPersonalUUIDObjectServceImpl<T extends PersonalUUI
 	@Override
 	public String saveOrUpdate(T object) {
 		validateSave(object);
-		objectDatabase.saveOrUpdate(object);
+		objectDatabase.saveOrUpdate(object, getCurrentUser());
 		return object.getUuid();
 	}
 
@@ -49,5 +56,36 @@ public abstract class AbstractPersonalUUIDObjectServceImpl<T extends PersonalUUI
 	protected void validateSave(T object) {
 		
 	}
+
+	@Override
+	public void deleteAll() {
+		
+		for(T t : collection()) {
+			objectDatabase.deletePersonalObject(t);
+		}
+	}
+
+	@Override
+	public Collection<? extends UUIDDocument> searchTable(int start, int length, SortOrder order, String sortField,
+			SearchField... fields) {
+		return objectDatabase.searchPersonalObjects(getResourceClass(), sortField, sortField, start, length);
+	}
+
+	@Override
+	public long countTable(SearchField... fields) {
+		return objectDatabase.getPersonalObjectCount(getResourceClass(), getCurrentUser(), fields);
+	}
+
+	@Override
+	public Collection<T> collection(SearchField... fields) {
+		return objectDatabase.getPersonalObjects(getResourceClass(), getCurrentUser(), fields);
+	}
+	
+	 public T createNew(ObjectTemplate template) { try {
+		return getResourceClass().getConstructor().newInstance();
+	} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+			| NoSuchMethodException | SecurityException e) {
+		throw new IllegalStateException(e.getMessage(), e);
+	} }
 
 }
