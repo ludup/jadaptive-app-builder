@@ -12,7 +12,7 @@ import com.jadaptive.api.ui.menu.PageMenu;
 
 @ObjectDefinition(resourceKey = ContentEdit.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, defaultColumn = "name")
 @TableView(defaultColumns = { "name" })
-@PageMenu(bundle = UserInterfaceService.BUNDLE, feature = HtmlContentService.DEVELOPER_TOOLS, icon = "fa-wrench", i18n = "contentEditor.name", parent = ApplicationMenuService.CUSTOMIZE_MENU, withPermission  = "tenant.read")
+//@PageMenu(bundle = UserInterfaceService.BUNDLE, feature = HtmlContentService.DEVELOPER_TOOLS, icon = "fa-wrench", i18n = "contentEditor.name", parent = ApplicationMenuService.CUSTOMIZE_MENU, withPermission  = "tenant.read")
 public class ContentEdit extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -6325538173424390831L;
