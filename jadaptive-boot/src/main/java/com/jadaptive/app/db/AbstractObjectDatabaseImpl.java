@@ -188,7 +188,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 				}
 			}
 			checkException(e);
-			throw new RepositoryException(String.format("%s: %s", obj.getClass().getSimpleName(), e.getMessage()), e);
+			throw new RepositoryException(e.getMessage(), e);
 		}
 	}
 
