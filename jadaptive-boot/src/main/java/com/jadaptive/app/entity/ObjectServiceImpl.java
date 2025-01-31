@@ -279,7 +279,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
-	public <T extends UUIDDocument> void stashObject(T object) throws ValidationException, RepositoryException, ObjectException, IOException {
+	public <T extends UUIDDocument> void stashObject(T object) throws ValidationException, RepositoryException, ObjectException {
 		
 		tenantService.asSystem(()->{
 			Document doc = new Document();
@@ -293,7 +293,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
-	public <T extends UUIDDocument> void stashObject(AbstractObject object) throws ValidationException, RepositoryException, ObjectException, IOException {
+	public <T extends UUIDDocument> void stashObject(AbstractObject object) throws ValidationException, RepositoryException, ObjectException {
 		
 		tenantService.asSystem(()->{
 			if(!stashViaObjectBean(object, templateRepository.get(object.getResourceKey()))) {

@@ -38,9 +38,9 @@ public interface ObjectService {
 
 	AbstractObject toAbstractObject(UUIDDocument obj);
 
-	<T extends UUIDDocument> void stashObject(AbstractObject obj) throws ValidationException, RepositoryException, ObjectException, IOException;
+	<T extends UUIDDocument> void stashObject(AbstractObject obj) throws ValidationException, RepositoryException, ObjectException;
 
-	<T extends UUIDDocument> void stashObject(T obj) throws ValidationException, RepositoryException, ObjectException, IOException;
+	<T extends UUIDDocument> void stashObject(T obj) throws ValidationException, RepositoryException, ObjectException;
 
 	<T extends UUIDDocument> T fromStash(String resourceKey, Class<T> clz);
 	
