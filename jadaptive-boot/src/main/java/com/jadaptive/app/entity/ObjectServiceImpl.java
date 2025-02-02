@@ -841,21 +841,21 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		switch(template.getScope()) {
 		case PERSONAL:
 			return objectRepository.table(template, offset, limit, sortColumn, order,
-					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+					SearchUtils.generateSearch(searchField, searchValue, true, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.table(template, offset, limit, sortColumn, order,
-						SearchUtils.generateSearch(searchField, searchValue, template));
+						SearchUtils.generateSearch(searchField, searchValue, true, template));
 			}
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return objectRepository.table(template, offset, limit, sortColumn, order,
-					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.or(
+					SearchUtils.generateSearch(searchField, searchValue, true, template, SearchField.or(
 							SearchField.all("users.uuid", getCurrentUser().getUuid()),
 							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
 			return tableViaObjectBean(template, offset, limit, SortOrder.ASC, searchField, 
-					SearchUtils.generateSearch(searchField, searchValue, template));
+					SearchUtils.generateSearch(searchField, searchValue, true, template));
 		}
 		
 	}
@@ -905,20 +905,20 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		switch(template.getScope()) {
 		case PERSONAL:
 			return objectRepository.count(template, 
-					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+					SearchUtils.generateSearch(searchField, searchValue, true, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.count(template,  
-						SearchUtils.generateSearch(searchField, searchValue, template));
+						SearchUtils.generateSearch(searchField, searchValue, true, template));
 			}
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return objectRepository.count(template, 
-					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.or(
+					SearchUtils.generateSearch(searchField, searchValue, true, template, SearchField.or(
 							SearchField.all("users.uuid", getCurrentUser().getUuid()),
 							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
 		case GLOBAL:
 		default:
-			return countViaObjectBean(template, SearchUtils.generateSearch(searchField, searchValue, template));
+			return countViaObjectBean(template, SearchUtils.generateSearch(searchField, searchValue, true, template));
 		}
 		
 	}

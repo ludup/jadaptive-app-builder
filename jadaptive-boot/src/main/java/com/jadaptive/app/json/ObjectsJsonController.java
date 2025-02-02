@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.lang.model.UnknownEntityException;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -255,7 +256,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 							AccessDeniedException {
 						setupSystemContext();
 						try {
-							return objectService.table(resourceKey, template.getNameField(), searchPattern, offset, limit, sort, SortOrder.valueOf(order.toUpperCase()));
+							return objectService.table(resourceKey, template.getNameField(), searchPattern, offset, limit, StringUtils.defaultIfEmpty(sort, template.getDefaultColumn()), SortOrder.valueOf(order.toUpperCase()));
 						} finally {
 							clearUserContext();
 						}
@@ -266,6 +267,58 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 							throws UnauthorizedException,
 							AccessDeniedException {
 						setupSystemContext();
+						try {
+							return objectService.count(resourceKey, template.getNameField(), searchPattern);
+						} finally {
+							clearUserContext();
+						}
+					}
+				});
+
+		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/objects/{}/table", resourceKey, e);
+			}
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+	
+	@RequestMapping(value="/app/api/personal/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public BootstrapTableResult<UUIDReference> personalReferences(HttpServletRequest request, 
+			@PathVariable String resourceKey,
+			@RequestParam(required=false, defaultValue = "") String sort,
+			@RequestParam(required=false, defaultValue = "asc") String order,
+			@RequestParam(required=false, defaultValue = "0") int offset,
+			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, ObjectException {
+		
+		try {
+			
+			ObjectTemplate template = templateService.get(resourceKey);
+			
+			return processDataReferencesRequest(request, 
+					template,
+				new BootstrapTablePageProcessor() {
+
+					@Override
+					public Collection<?> getPage(String searchColumn, String searchPattern, int start,
+							int length, String sortBy)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						setupUserContext(getCurrentUser());
+						try {
+							return objectService.table(resourceKey, template.getNameField(), searchPattern, offset, limit, StringUtils.defaultIfEmpty(sort, template.getDefaultColumn()), SortOrder.valueOf(order.toUpperCase()));
+						} finally {
+							clearUserContext();
+						}
+					}
+
+					@Override
+					public Long getTotalCount(String searchColumn, String searchPattern)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						setupUserContext(getCurrentUser());
 						try {
 							return objectService.count(resourceKey, template.getNameField(), searchPattern);
 						} finally {

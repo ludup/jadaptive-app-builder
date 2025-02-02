@@ -488,7 +488,8 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		{
 			addReferenceSearchInput(holder, field.getResourceKey(), initial, template.getBundle(), 
 					field.getMetaValue("url", 
-							String.format("/app/api/references/%s/table", 
+							String.format("/app/api/%s/%s/table", 
+									template.getScope() == ObjectScope.PERSONAL ? "personal" : "references",
 									field.getValidationValue(ValidationType.RESOURCE_KEY))));
 
 //			FieldSearchFormInput input = new FieldSearchFormInput(

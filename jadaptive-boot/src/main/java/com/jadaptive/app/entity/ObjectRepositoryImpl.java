@@ -143,8 +143,8 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	@Override
 	public Collection<AbstractObject> table(ObjectTemplate def, int offset, int limit, String sortColumn, SortOrder order, SearchField... fields) {
 		List<AbstractObject> results = new ArrayList<>();
-		
-		for(Document document : db.searchTable(def.getCollectionKey(), getDatabase(def), offset, limit, order, sortColumn, fields)) {
+				for(Document document : db.searchTable(def.getCollectionKey(), 
+				getDatabase(def), offset, limit, order, sortColumn, fields)) {
 			results.add(buildEntity(def, document));
 		}
 		

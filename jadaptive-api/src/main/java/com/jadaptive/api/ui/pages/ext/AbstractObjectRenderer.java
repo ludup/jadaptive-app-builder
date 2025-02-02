@@ -32,6 +32,7 @@ import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.db.DocumentService;
 import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.PermissionService;
@@ -484,7 +485,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					}
 				} else {
 					FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
-							fieldView.getField().getMetaValue("url", String.format("/app/api/references/%s/table", objectType)),
+							fieldView.getField().getMetaValue("url", String.format("/app/api/%s/%s/table", 
+									currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
+									objectType)),
 							"name", fieldView.getFormVariable(), "uuid");
 					if(!decorate) {
 						input.diableDecoration();
@@ -662,7 +665,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
-					currentTemplate.get(), fieldView, String.format("/app/api/references/%s/table", objectType),
+					currentTemplate.get(), fieldView, String.format("/app/api/%s/%s/table", 
+							currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
+							objectType),
 					"name", "uuid");
 			render.renderInput(element, values, false, 
 					(view == FieldView.READ || fieldView.getField().isReadOnly()));
