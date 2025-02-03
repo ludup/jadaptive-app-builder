@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
@@ -58,6 +59,8 @@ public class SessionFilter implements Filter {
 	static Logger log = LoggerFactory.getLogger(SessionFilter.class);
 	
 	public static final String PRE_LOGON_ORIGINAL_URL = "originalURL";
+
+	private static final String ALLOW_HTTP = "enableHttp";
 	
 	@Autowired
 	private TenantService tenantService; 
@@ -252,6 +255,15 @@ public class SessionFilter implements Filter {
 			 * Get the security.properties hierarchy from the web application
 			 */
 			Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
+			
+			if(!request.isSecure()) {
+				if(!Boolean.parseBoolean(properties.getProperty(ALLOW_HTTP))) {
+					response.sendRedirect(request.getRequestURL().toString().replace("http:", "https:")
+							.replace(ApplicationProperties.getValue("server.http.port", "80"), 
+									ApplicationProperties.getValue("server.port", "443")));
+					return false;
+				}
+			}
 			
 			var authHdr = request.getHeader(HttpHeaders.AUTHORIZATION);
 			if(Objects.nonNull(authHdr)) {
