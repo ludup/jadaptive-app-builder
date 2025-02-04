@@ -63,30 +63,33 @@ public class ResourceController extends ExceptionHandlingController {
 		return "PONG\r\n";
 	}
 
-	@RequestMapping(value="/app/content/**", method = RequestMethod.GET)
+	@RequestMapping(value={"/app/content/**", "/**"}, method = RequestMethod.GET)
+	
 	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		tenantService.setCurrentTenant(request);
 		
-		String uri = request.getRequestURI();
-		String resourceUri = uri.length() >= 12 ? uri.substring(12) : "";
+		String resourceUri = request.getRequestURI();
+		if(resourceUri.startsWith("/app/content/")) {
+			resourceUri = resourceUri.substring(12);
+		}
 		
 		try {	
 			
 			if(resourceUri.endsWith("security.properties")) {
-				ResponseHelper.send404NotFound(uri, request, response);
+				ResponseHelper.send404NotFound(resourceUri, request, response);
 				return;
 			}
 			
 			if(resourceUri.startsWith("/npm2mvn/")) {
-				resolveNpm(uri, resourceUri.substring(8), request, response);
+				resolveNpm(resourceUri, resourceUri.substring(8), request, response);
 				return;
 			}
 			
 			Path resource = resolveResource(request, resourceUri);
 			
-			if(Files.exists(resource) && Files.isDirectory(resource) && !uri.endsWith("/")) {
-				ResponseHelper.sendRedirect(uri + "/", request, response);
+			if(Files.exists(resource) && Files.isDirectory(resource) && !resourceUri.endsWith("/")) {
+				ResponseHelper.sendRedirect(resourceUri + "/", request, response);
 				return;
 			}
 			
@@ -99,7 +102,7 @@ public class ResourceController extends ExceptionHandlingController {
 				
 				if(!Files.exists(resource)) {
 					if(log.isInfoEnabled()) {
-						log.info("Resource not found {}", uri);
+						log.info("Resource not found {}", resourceUri);
 					}
 
 					tryClasspathFailover(request, response, resourceUri);
@@ -108,7 +111,7 @@ public class ResourceController extends ExceptionHandlingController {
 			} 
 			
 			if(log.isDebugEnabled()) {
-				log.debug("Returning content for {}", uri);
+				log.debug("Returning content for {}", resourceUri);
 			}
 			
 			sessionUtils.setCachable(response, 600);
@@ -119,10 +122,10 @@ public class ResourceController extends ExceptionHandlingController {
 			try {
 				tryClasspathFailover(request, response, resourceUri);
 			} catch(FileNotFoundException e2) {
-				ResponseHelper.send404NotFound(uri, request, response);
+				ResponseHelper.send404NotFound(resourceUri, request, response);
 			}
 		} catch(Throwable e) { 
-			log.error("Error loading content resource " + uri, e);
+			log.error("Error loading content resource " + resourceUri, e);
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
