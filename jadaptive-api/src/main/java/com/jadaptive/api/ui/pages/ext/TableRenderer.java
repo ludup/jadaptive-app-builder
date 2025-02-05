@@ -840,7 +840,7 @@ public class TableRenderer {
 			} else {
 				if(Objects.isNull(parentObject)) {
 					
-					String url = replaceVariables("/app/ui/view/%s/%s", obj);
+					String url = replaceVariables("/app/ui/view/{resourceKey}/{uuid}", obj);
 					ViewURL u = clz.getAnnotation(ViewURL.class);
 					if(Objects.nonNull(u)) {
 						url = replaceVariables(u.value(), obj);
