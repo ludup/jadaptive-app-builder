@@ -37,7 +37,7 @@ import com.jadaptive.api.template.Validator;
 @ObjectServiceBean(bean = AuthorizedKeyService.class)
 @DisableStandardActions
 @GenerateEventTemplates(value = AuthorizedKey.RESOURCE_KEY)
-@ObjectViews(@ObjectViewDefinition(bundle = AuthorizedKey.RESOURCE_KEY, value = AuthorizedKey.KEY_VIEW))
+@ObjectViewDefinition(bundle = AuthorizedKey.RESOURCE_KEY, value = AuthorizedKey.KEY_VIEW)
 @TableView(defaultColumns = { "name", "fingerprint", "type", "expires" })
 @TableAction(resourceKey = "generateKey", bundle = AuthorizedKey.RESOURCE_KEY, url = "generate-key", icon = "fa-solid fa-wrench", writeAction = true)
 @TableAction(resourceKey = "uploadPublicKey",  bundle = AuthorizedKey.RESOURCE_KEY, url = "upload-key", icon = "fa-solid fa-upload", writeAction = true)
