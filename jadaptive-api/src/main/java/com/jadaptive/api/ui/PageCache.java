@@ -43,7 +43,6 @@ public class PageCache {
 	Map<String,PageExtension> extensionsByName = new HashMap<>();
 	Map<String,Page> aliasCache = new HashMap<>();
 	Map<Class<? extends Page>, Page> pageCache = new HashMap<>();
-//	Class<? extends Page> homePage;
 	private Class<? extends Page> defaultPage = Login.class;
 	
 	

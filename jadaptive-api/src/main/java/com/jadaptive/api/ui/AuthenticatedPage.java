@@ -12,6 +12,7 @@ import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,7 +49,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 				reqUrl.append(query);
 			}
 			authenticationService.createAuthenticationState(policy, new UriRedirect(reqUrl.toString()));
-			throw new PageRedirect(pageCache.resolveDefault());
+			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
 	}
 

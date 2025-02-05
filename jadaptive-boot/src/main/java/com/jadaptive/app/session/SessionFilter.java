@@ -61,6 +61,8 @@ public class SessionFilter implements Filter {
 	public static final String PRE_LOGON_ORIGINAL_URL = "originalURL";
 
 	private static final String ALLOW_HTTP = "enableHttp";
+
+	private static final String DISABLE_DEFAULT_REDIRECT = "disableDefaultRedirect";
 	
 	@Autowired
 	private TenantService tenantService; 
@@ -165,12 +167,13 @@ public class SessionFilter implements Filter {
 				}
 			}
 		
+			Properties properties = securityService.resolveSecurityProperties(req.getRequestURI());
 
-			if(checkRedirects(req, resp)) {
+			if(checkRedirects(req, resp, properties)) {
 				return;
 			}
 			
-			if(!preHandle(req, resp)) {
+			if(!preHandle(req, resp, properties)) {
 				return;
 			}
 			
@@ -241,7 +244,7 @@ public class SessionFilter implements Filter {
 
 
 
-	private boolean preHandle(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+	private boolean preHandle(HttpServletRequest request, HttpServletResponse response, Properties properties) throws ServletException {
 		
 		try {
 			if(request.getRequestURI().equals("/app/verify")) {
@@ -250,18 +253,13 @@ public class SessionFilter implements Filter {
 			}
 			
 			var sessionOr = Session.getOr(request);
-			
-			/**
-			 * Get the security.properties hierarchy from the web application
-			 */
-			Properties properties = securityService.resolveSecurityProperties(request.getRequestURI());
-			
+
 			if(!request.isSecure()) {
 				if(!Boolean.parseBoolean(properties.getProperty(ALLOW_HTTP))) {
 					response.sendRedirect(request.getRequestURL().toString().replace("http:", "https:")
 							.replace(ApplicationProperties.getValue("server.http.port", "80"), 
 									ApplicationProperties.getValue("server.port", "443")));
-					return false;
+					return true;
 				}
 			}
 			
@@ -362,7 +360,7 @@ public class SessionFilter implements Filter {
 		return Optional.empty();
 	}
 	
-	private boolean checkRedirects(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private boolean checkRedirects(HttpServletRequest request, HttpServletResponse response, Properties properties) throws IOException {
 		
 		try {
 				
@@ -419,11 +417,13 @@ public class SessionFilter implements Filter {
 		} catch(ObjectNotFoundException e) {
 		}
 		
-		if(request.getRequestURI().equals("/")
-				|| request.getRequestURI().equals("/app")
-				|| request.getRequestURI().equals("/app/")) {
-			response.sendRedirect("/app/ui/");
-			return true;
+		if(!Boolean.parseBoolean(properties.getProperty(DISABLE_DEFAULT_REDIRECT, "false"))) {
+			if(request.getRequestURI().equals("/")
+					|| request.getRequestURI().equals("/app")
+					|| request.getRequestURI().equals("/app/")) {
+				response.sendRedirect("/app/ui/");
+				return true;
+			}
 		}
 		
 		return false;

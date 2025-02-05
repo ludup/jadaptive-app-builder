@@ -31,6 +31,7 @@ import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
 import com.jadaptive.app.session.SessionFilter;
 
@@ -147,7 +148,7 @@ public class LogonController {
 		authenticationService.clearAuthenticationState();
 		authenticationService.createAuthenticationState();
 		
-		throw new PageRedirect(pageCache.resolveDefault());
+		throw new PageRedirect(pageCache.resolvePage(Login.class));
 	}
 	
 	@RequestMapping(value="/app/api/change-auth", method = { RequestMethod.GET }, produces = { "text/html"})
