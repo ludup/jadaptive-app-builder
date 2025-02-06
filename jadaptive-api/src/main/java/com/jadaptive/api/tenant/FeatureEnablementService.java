@@ -3,6 +3,7 @@ package com.jadaptive.api.tenant;
 import java.util.Set;
 
 import com.jadaptive.api.permissions.FeatureGroup;
+import com.jadaptive.api.permissions.LicensedFeature;
 
 public interface FeatureEnablementService {
 
@@ -10,12 +11,12 @@ public interface FeatureEnablementService {
 
 	boolean isFeature(String resourceKey);
 
-	Set<String> getEnabledFeatures();
+	Set<LicensedFeature> getEnabledFeatures();
 
-	Set<String> allFeatures();
+	Set<LicensedFeature> allFeatures();
 
 	void assertFeature(String feature);
 
-	Set<String> getFeaturesByGroup(FeatureGroup group);
+	Set<LicensedFeature> getFeaturesByGroup(FeatureGroup group);
 	
 }

@@ -15,4 +15,6 @@ public @interface LicensedFeature {
 	String value();
 	
 	FeatureGroup group();
+	
+	boolean requiresPAYGCredits() default true;
 }
