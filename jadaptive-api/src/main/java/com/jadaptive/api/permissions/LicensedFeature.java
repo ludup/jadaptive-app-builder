@@ -16,5 +16,5 @@ public @interface LicensedFeature {
 	
 	FeatureGroup group();
 	
-	boolean requiresPAYGCredits() default true;
+	boolean requiresPAYGCredits() default false;
 }
