@@ -430,4 +430,8 @@ public class SessionUtils {
 		return String.format("%s-%s", templateService.getBaseTemplate(template).getResourceKey(), CSRF_TOKEN_ATTRIBUTE);
 	}
 
+	public boolean isLoggedOn() {
+		return Session.getOr().isPresent();
+	}
+
 }
