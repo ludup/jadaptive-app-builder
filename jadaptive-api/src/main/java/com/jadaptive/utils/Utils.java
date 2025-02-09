@@ -3,10 +3,14 @@ package com.jadaptive.utils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
@@ -41,6 +45,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -862,4 +867,17 @@ public class Utils {
 	public static String formatCurrency(Number value) {
 		return NumberFormat.getCurrencyInstance(Locale.getDefault()).format(value);
 	}
+
+	public static String urlToBase64Image(String pictureUrl) throws IOException {
+		URL url = URI.create(pictureUrl).toURL();
+		URLConnection c = url.openConnection();
+		return urlToBase64Image(c.getContentType(), c.getInputStream());
+	}
+	
+	public static String urlToBase64Image(String contentType, InputStream source) throws IOException {
+		return String.format("data:%s;base64, %s", 
+				contentType,
+				Utils.base64Encode(IOUtils.toByteArray(source)));
+	}
+	
 }

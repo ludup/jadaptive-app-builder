@@ -398,16 +398,21 @@ public class SessionUtils {
 			}
 			String header = csp.iterator().next();
 			int idx = header.indexOf(policy);
+			if(value.equals("self")) {
+				value = "'self'";
+			} else if(value.startsWith("nonce")) {
+				value = String.format("'%s'", value);
+			}
 			if(idx > -1) {
 				int idx2 = header.indexOf(';', idx);
 				String tmp = header.substring(idx, idx2);
 				if(tmp.contains(String.format("'%s'", value))) {
 					return;
 				}
-				header = header.replace(policy, String.format("%s '%s'", policy, value));
+				header = header.replace(policy, String.format("%s %s", policy, value));
 				
 			} else {
-				header = header + String.format(" %s '%s';", policy, value);
+				header = header + String.format(" %s %s;", policy, value);
 			}
 			response.setHeader("Content-Security-Policy", header);
 		}

@@ -104,9 +104,9 @@ public class SecurityPropertyServiceImpl implements SecurityPropertyService {
 			}
 		}
 		
-		if(log.isInfoEnabled()) {
+		if(log.isDebugEnabled()) {
 			for(String name : properties.stringPropertyNames()) {
-				log.info("{} = {}", name, properties.get(name));
+				log.debug("{} = {}", name, properties.get(name));
 			}
 		}
 		

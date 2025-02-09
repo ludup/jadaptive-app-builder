@@ -459,7 +459,7 @@ public class TableRenderer {
 			dropdown.icon("fa-ellipsis");
 			el.appendChild(dropdown.renderInput().addClass("mb-3"));
 			Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
-			if(canUpdate && !readOnly) {
+			if(template.isUpdatable() && !readOnly) {
 				
 				
 				String url = replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj);
@@ -490,7 +490,7 @@ public class TableRenderer {
 				}
 			}
 					
-			if(canCreate && !readOnly && !template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_COPY)) {
+			if(template.isCreatable() && !readOnly && !template.getCapabilities().contains(ObjectTemplateCapability.DISABLE_COPY)) {
 				dropdown.addI18nAnchorWithIconValue("default", "copy.name", replaceVariables("/app/api/objects/{resourceKey}/copy/{uuid}", obj), "fa-solid", "fa-copy");
 			} 
 			
