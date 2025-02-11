@@ -1,7 +1,5 @@
 package com.jadaptive.api.user;
 
-import org.pf4j.Extension;
-
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.ActionFilter;
 

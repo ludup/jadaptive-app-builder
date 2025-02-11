@@ -122,8 +122,8 @@ public class Application {
 	
 	private static void checkDefaultCertificate() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, MismatchedCertificateException {
 		
-		KeyPair key = null;
-		X509Certificate[] chain = null;
+		//KeyPair key = null;
+		//X509Certificate[] chain = null;
 		X509Certificate cert = null;
 		File keystoreFile = new File( ApplicationProperties.getValue("spring.ssl.bundle.jks.default.keystore.location", "conf.d/default/cert.p12"));
 		

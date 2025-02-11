@@ -1,8 +1,6 @@
 package com.jadaptive.api.user;
 
 import java.util.Collection;
-import java.util.Map;
-
 import com.jadaptive.api.avatar.AvatarProvider;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.template.DynamicColumnService;

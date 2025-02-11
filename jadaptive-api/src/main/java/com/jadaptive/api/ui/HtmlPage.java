@@ -358,7 +358,7 @@ public abstract class HtmlPage implements Page {
 					element = doc.selectFirst("body");
 			} 
 			
-			var bdy = Html.div("toast-body").addClass("bg-" + feedback.getAlert());
+			var bdy = Html.div("toast-body");
 
 			if(feedback.getIcon() != null) {
 				bdy.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"));

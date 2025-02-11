@@ -1,6 +1,5 @@
 package com.jadaptive.api.entity;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import com.jadaptive.api.db.SearchField;

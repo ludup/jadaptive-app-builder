@@ -2,12 +2,8 @@ package com.jadaptive.app.ui.menu;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 

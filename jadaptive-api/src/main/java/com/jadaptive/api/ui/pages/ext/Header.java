@@ -49,8 +49,6 @@ public class Header extends AbstractPageExtension {
 	@Autowired
 	private AvatarService avatarService;
 	
-	private BootstrapThemeResolver themeResolver;
-	
 	@Override
 	public void process(Document document, Element element, Page page) {
 

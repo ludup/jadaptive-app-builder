@@ -14,7 +14,7 @@ import com.jadaptive.api.ui.PageHelper;
 public class RichTextEditorInput extends FieldInputRender {
 
 	private Document document;
-	private boolean disableLabel = false;
+//	private boolean disableLabel = false;
 	public RichTextEditorInput(TemplateViewField field, Document document) {
 		super(field);
 		this.document = document;

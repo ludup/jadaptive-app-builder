@@ -111,8 +111,6 @@ public class ApplicationServiceImpl implements ApplicationService {
 			return (E)cached;
 		}
 		
-		List<E> results = new ArrayList<>();
-		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 			
 			if(w.getPlugin()==null) {

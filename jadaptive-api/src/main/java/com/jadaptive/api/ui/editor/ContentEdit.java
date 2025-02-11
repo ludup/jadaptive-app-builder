@@ -5,10 +5,6 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.TableView;
-import com.jadaptive.api.ui.HtmlContentService;
-import com.jadaptive.api.ui.UserInterfaceService;
-import com.jadaptive.api.ui.menu.ApplicationMenuService;
-import com.jadaptive.api.ui.menu.PageMenu;
 
 @ObjectDefinition(resourceKey = ContentEdit.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, defaultColumn = "name")
 @TableView(defaultColumns = { "name" })

@@ -29,7 +29,6 @@ import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.countries.Country;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.db.ClassLoaderService;
-import com.jadaptive.api.db.DocumentService;
 import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectScope;
@@ -68,7 +67,6 @@ import com.jadaptive.api.ui.renderers.form.CssEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
-import com.jadaptive.api.ui.renderers.form.FileFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.ImageFormInput;
 import com.jadaptive.api.ui.renderers.form.JavascriptEditorFormInput;
@@ -126,10 +124,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	
 	@Autowired
 	private TenantService tenantService; 
-	
-	@Autowired
-	private DocumentService documentService; 
-	
+
 	protected ThreadLocal<Document> currentDocument = new ThreadLocal<>();
 	protected ThreadLocal<ObjectTemplate> currentTemplate = new ThreadLocal<>();
 	private ThreadLocal<Properties> securityProperties = new ThreadLocal<>();

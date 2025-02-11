@@ -11,8 +11,6 @@ import com.jadaptive.api.auth.oauth2.OAuth2Requirement;
 import com.jadaptive.api.auth.oauth2.OAuth2Scope;
 import com.jadaptive.api.auth.oauth2.OAuth2TokenService;
 import com.jadaptive.api.auth.oauth2.ResponseEntityException;
-import com.jadaptive.api.auth.oauth2.TokenExpiredException;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

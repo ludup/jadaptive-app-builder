@@ -34,7 +34,6 @@ import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.ObjectTemplateRepository;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.Feedback;
@@ -52,9 +51,6 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	
 	@Autowired
 	private ObjectService objectService;
-	
-	@Autowired
-	private ObjectTemplateRepository templateRepository;
 	
 	@Autowired
 	private SessionUtils sessionUtils;

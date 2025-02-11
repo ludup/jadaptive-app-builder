@@ -1,6 +1,5 @@
 package com.jadaptive.api.ui.forms;
 
-import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
 
 @Extension

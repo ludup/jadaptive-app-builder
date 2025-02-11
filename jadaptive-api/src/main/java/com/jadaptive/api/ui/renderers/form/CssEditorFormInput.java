@@ -16,12 +16,12 @@ import com.jadaptive.api.ui.PageHelper;
 public class CssEditorFormInput extends FieldInputRender {
 
 	private Document document;
-	private boolean readOnly;
+//	private boolean readOnly;
 
 	public CssEditorFormInput(TemplateViewField field, Document document, boolean readOnly) {
 		super(field);
 		this.document = document;
-		this.readOnly = readOnly;
+//		this.readOnly = readOnly;
 	}
 
 	@Override

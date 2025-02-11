@@ -17,12 +17,12 @@ import com.jadaptive.api.ui.PageHelper;
 public class JavascriptEditorFormInput extends FieldInputRender {
 
 	private Document document;
-	private boolean readOnly;
+//	private boolean readOnly;
 
 	public JavascriptEditorFormInput(TemplateViewField field, Document document, boolean readOnly) {
 		super(field);
 		this.document = document;
-		this.readOnly = readOnly;
+//		this.readOnly = readOnly;
 	}
 	
 	@Override

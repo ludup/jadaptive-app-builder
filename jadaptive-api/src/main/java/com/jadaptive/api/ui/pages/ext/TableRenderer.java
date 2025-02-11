@@ -85,9 +85,6 @@ public class TableRenderer {
 	@Autowired
 	private EncryptionService encryptionService;
 	
-	private int start;
-	private int length;
-	
 	private long totalObjects;
 
 	private Collection<AbstractObject> objects;
@@ -104,7 +101,6 @@ public class TableRenderer {
 	
 	private final boolean showCreate;
 	private final boolean showUpdate;
-	private final boolean showCopy;
 	
 	public TableRenderer(boolean readOnly, 
 			AbstractObject parentObject, FieldTemplate field,
@@ -120,7 +116,6 @@ public class TableRenderer {
 		this.template = template;
 		this.showCreate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canCreate(template);
 		this.showUpdate = ApplicationServiceImpl.getInstance().getBean(UserInterfaceService.class).canUpdate(template);
-		this.showCopy = showUpdate && showCreate;
 	}
 	
 	public TableRenderer(boolean readOnly, ObjectTemplate template, boolean showCreate, boolean showUpdate) {
@@ -128,7 +123,6 @@ public class TableRenderer {
 		this.template = template;
 		this.showCreate = showCreate;
 		this.showUpdate = showUpdate;
-		this.showCopy = showUpdate && showCreate;
 	}
 	
 	public void setTotalObjects(long totalObjects) {
@@ -976,7 +970,6 @@ public class TableRenderer {
 		{
 			if(field.getCollection()) {
 				Elements e = new Elements();
-				StringBuilder b = new StringBuilder();
 				for(String value : obj.getCollection(field.getResourceKey())) {
 					e.add( BootstrapBadgeRender.generateBadge(value));
 				}

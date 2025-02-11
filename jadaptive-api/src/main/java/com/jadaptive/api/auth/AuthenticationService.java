@@ -113,7 +113,7 @@ public interface AuthenticationService {
 	void launchTemporaryAuthentication(String name, String redirectURI, AuthenticationModule... modules)
 			throws FileNotFoundException;
 
-	void registerAuthenticationPage(AuthenticationProvider provider, Class<? extends AuthenticationPage<?>>... pages);
+	void registerAuthenticationPage(AuthenticationProvider provider, @SuppressWarnings("unchecked") Class<? extends AuthenticationPage<?>>... pages);
 
 	AuthenticationProvider getAuthenticationProviderByUUID(String uuid);
 

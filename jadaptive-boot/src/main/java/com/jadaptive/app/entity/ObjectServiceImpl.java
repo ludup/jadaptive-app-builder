@@ -1,6 +1,5 @@
 package com.jadaptive.app.entity;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

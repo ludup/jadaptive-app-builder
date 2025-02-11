@@ -2,8 +2,6 @@ package com.jadaptive.app.tenant;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -19,9 +17,7 @@ import com.jadaptive.app.db.DocumentDatabase;
 
 @Repository
 public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenant> implements TenantRepository {
-
-	private static Logger log = LoggerFactory.getLogger(TenantRepositoryImpl.class);
-		
+	
 	@Autowired
 	private CacheService cacheService;
 	

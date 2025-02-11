@@ -2,7 +2,6 @@ package com.jadaptive.api.ui.renderers.form;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateViewField;
 
 public class FieldSearchFormInput {
