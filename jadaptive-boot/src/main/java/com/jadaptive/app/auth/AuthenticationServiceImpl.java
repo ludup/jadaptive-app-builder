@@ -3,13 +3,16 @@ package com.jadaptive.app.auth;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.jsoup.nodes.Document;
@@ -29,6 +32,7 @@ import com.jadaptive.api.auth.AuthenticationProvider;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.AuthenticatorPage;
+import com.jadaptive.api.auth.LoginAuthenticationPolicy;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
 import com.jadaptive.api.auth.TemporaryAuthenticationPolicy;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
@@ -126,6 +130,71 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		for(var c : pages) {
 			registeredModulesByPage.put(c, provider);
 		}
+	}
+	
+	@Override
+	public Collection<AuthenticationModule> resolveUserModules(User user) {
+		
+		Set<AuthenticationModule> modules = new HashSet<>();
+		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
+			modules.addAll(policy.getRequiredAuthenticators());
+			modules.addAll(policy.getOptionalAuthenticators());
+		}
+		
+		return modules;
+	}
+	
+	@Override
+	public Collection<AuthenticationModule> resolveRequiredUserModules(User user) {
+		
+		Set<AuthenticationModule> modules = new HashSet<>();
+		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
+			modules.addAll(policy.getRequiredAuthenticators());
+		}
+		
+		return modules;
+	}
+	
+	@Override
+	public Collection<AuthenticationModule> resolveOptionalUserModules(User user) {
+		
+		Set<AuthenticationModule> modules = new HashSet<>();
+		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
+			modules.addAll(policy.getOptionalAuthenticators());
+		}
+		
+		return modules;
+	}
+		
+	private Collection<AuthenticationModule> resolveMissingModules(User user, Collection<AuthenticationModule> modules) {
+		
+		List<AuthenticationModule> missing = new ArrayList<>();
+		for(AuthenticationModule m : modules) {
+
+			AuthenticationProvider provider = getAuthenticationProviderByUUID(m.getUuid());
+			
+			boolean enrolled = provider.hasSufficientCredentials(user);
+			if(!enrolled) {
+				missing.add(m);
+			}
+		}
+		return missing;
+	}
+	
+	@Override
+	public int countUserCredentials(User user) {
+		
+		int count = 0;
+		for(AuthenticationModule m : resolveUserModules(user)) {
+
+			AuthenticationProvider provider = getAuthenticationProviderByUUID(m.getUuid());
+			
+			boolean enrolled = provider.hasSufficientCredentials(user);
+			if(!enrolled) {
+				count++;
+			}
+		}
+		return count;
 	}
 
 	@Override
@@ -534,16 +603,34 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		state.setPasswordEnabled(policy.getPasswordOnFirstPage() || policy.getPasswordRequired() || policy.getPasswordProvided());
 		state.clearOptionalAuthentications();
-		for(AuthenticationModule m : policy.getOptionalAuthenticators()) {
-			state.addOptionalAuthentication(getAuthenticationPage(m.getAuthenticatorKey()), m);
+		
+		if(policy instanceof LoginAuthenticationPolicy && Objects.nonNull(state.getUser())) {
+			LoginAuthenticationPolicy loginPolicy = (LoginAuthenticationPolicy) policy;
+			if(loginPolicy.getEnsureOptionalSetup()) {
+				Collection<AuthenticationModule> modules = resolveUserModules(state.getUser());
+				Collection<AuthenticationModule> missing = resolveMissingModules(state.getUser(), modules);
+				configueOptional(state, policy, missing, 1);
+			} else {
+				configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
+			}
+		} else {
+			configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
 		}
-		state.setOptionalCompleted(0);
-		state.setOptionalRequired(Math.min(policy.getOptionalRequired(), state.getOptionalAuthentications().size()));
-		state.setOptionalSelectionPage(OptionalAuthentication.class);
-
+		
 		state.setPolicy(policy);
 		
 		validateModules(policy);
+	}
+
+	private void configueOptional(AuthenticationState state, AuthenticationPolicy policy, Collection<AuthenticationModule> modules, int i) {
+		
+		for(AuthenticationModule m : modules) {
+			state.addOptionalAuthentication(getAuthenticationPage(m.getAuthenticatorKey()), m);
+		}
+		state.setOptionalCompleted(0);
+		state.setOptionalRequired(Math.min(i, state.getOptionalAuthentications().size()));
+		state.setOptionalSelectionPage(OptionalAuthentication.class);
+
 	}
 
 	private void processRequiredAuthentication(AuthenticationState state, 

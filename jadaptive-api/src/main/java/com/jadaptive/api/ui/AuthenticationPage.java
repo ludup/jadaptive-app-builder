@@ -88,9 +88,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 						.addClass("text-decoration-none d-block")
 						.appendChild(new Element("sup")
 								.appendChild(Html.i18n("userInterface", "reset.text"))));
-				
-//				<a id="cancel" class="" href="/app/ui/login"><sup><span jad:bundle="userInterface" jad:i18n="cancel.text">Cancel</span></sup></a>	      
-			}
+		}
 			
 			if(state.isRequiredAuthenticationComplete()
 					&& !state.isOptionalComplete()

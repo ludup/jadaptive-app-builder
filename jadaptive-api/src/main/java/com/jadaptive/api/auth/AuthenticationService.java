@@ -2,6 +2,7 @@ package com.jadaptive.api.auth;
 
 import java.io.Closeable;
 import java.io.FileNotFoundException;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.jsoup.nodes.Document;
@@ -118,5 +119,11 @@ public interface AuthenticationService {
 	AuthenticationProvider getAuthenticationProviderByUUID(String uuid);
 
 	void setupPostAuthentication(AuthenticationState state);
+
+	Collection<AuthenticationModule> resolveUserModules(User user);
+
+	int countUserCredentials(User user);
+
+	Collection<AuthenticationModule> resolveRequiredUserModules(User user);
 	
 }
