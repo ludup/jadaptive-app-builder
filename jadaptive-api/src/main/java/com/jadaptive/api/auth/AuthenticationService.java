@@ -125,5 +125,7 @@ public interface AuthenticationService {
 	int countUserCredentials(User user);
 
 	Collection<AuthenticationModule> resolveRequiredUserModules(User user);
+
+	Collection<AuthenticationModule> resolveOptionalUserModules(User user);
 	
 }
