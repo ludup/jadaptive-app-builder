@@ -32,7 +32,7 @@ public abstract class TaggedUUIDEntity extends UUIDEntity {
 
 	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@ObjectView(value = "", renderer = FieldRenderer.TAGS, weight = 9999)
-	Collection<String> tags;
+	Collection<String> tags = new HashSet<>();
 	
 	public Date getCreated() {
 		return created;
