@@ -32,7 +32,6 @@ import com.jadaptive.api.auth.AuthenticationProvider;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.AuthenticatorPage;
-import com.jadaptive.api.auth.LoginAuthenticationPolicy;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
 import com.jadaptive.api.auth.TemporaryAuthenticationPolicy;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
