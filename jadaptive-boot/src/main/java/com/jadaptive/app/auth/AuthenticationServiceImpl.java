@@ -604,18 +604,18 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		state.setPasswordEnabled(policy.getPasswordOnFirstPage() || policy.getPasswordRequired() || policy.getPasswordProvided());
 		state.clearOptionalAuthentications();
 		
-		if(policy instanceof LoginAuthenticationPolicy && Objects.nonNull(state.getUser())) {
-			LoginAuthenticationPolicy loginPolicy = (LoginAuthenticationPolicy) policy;
-			if(loginPolicy.getEnsureOptionalSetup()) {
-				Collection<AuthenticationModule> modules = resolveUserModules(state.getUser());
-				Collection<AuthenticationModule> missing = resolveMissingModules(state.getUser(), modules);
-				configueOptional(state, policy, missing, 1);
-			} else {
-				configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
-			}
-		} else {
+//		if(policy instanceof LoginAuthenticationPolicy && Objects.nonNull(state.getUser())) {
+//			LoginAuthenticationPolicy loginPolicy = (LoginAuthenticationPolicy) policy;
+//			if(loginPolicy.getEnsureOptionalSetup()) {
+//				Collection<AuthenticationModule> modules = resolveUserModules(state.getUser());
+//				Collection<AuthenticationModule> missing = resolveMissingModules(state.getUser(), modules);
+//				configueOptional(state, policy, missing, 1);
+//			} else {
+//				configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
+//			}
+//		} else {
 			configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
-		}
+//		}
 		
 		state.setPolicy(policy);
 		

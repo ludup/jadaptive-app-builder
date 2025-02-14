@@ -33,7 +33,7 @@ import com.jadaptive.api.template.Validator;
 			otherColumns = { @DynamicColumn(resourceKey = "scope", service = AuthenticationPolicyService.class)})
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
 @GenerateEventTemplates(AuthenticationPolicy.RESOURCE_KEY)
-@LicensedFeature(value = AuthenticationPolicy.FEATURE_NAME, group = FeatureGroup.PROFESSIONAL)
+@LicensedFeature(value = AuthenticationPolicy.FEATURE_NAME, group = FeatureGroup.PROFESSIONAL, includedWithPAYG = true)
 @UniqueIndex(columns = { "resourceKey", "weight"})
 public abstract class AuthenticationPolicy extends AssignableUUIDEntity implements NamedDocument {
 

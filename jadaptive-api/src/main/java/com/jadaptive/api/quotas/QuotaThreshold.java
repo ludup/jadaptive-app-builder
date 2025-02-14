@@ -21,7 +21,7 @@ import com.jadaptive.api.ui.pages.config.ConfigurationItem;
 @TableView(defaultColumns = {"key", "periodValue", "periodUnit", "value"})
 @ObjectViewDefinition(value = QuotaThreshold.QUOTA_VIEW, weight = 0)
 @ObjectViewDefinition(value = QuotaThreshold.OPTIONS_VIEW, weight = 1000)
-@LicensedFeature(group = FeatureGroup.PROFESSIONAL, value = "Quotas")
+@LicensedFeature(group = FeatureGroup.PROFESSIONAL, value = "Quotas", includedWithPAYG = true)
 public abstract class QuotaThreshold extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 1389709000295821056L;

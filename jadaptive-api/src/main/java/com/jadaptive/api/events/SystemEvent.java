@@ -36,7 +36,7 @@ import com.jadaptive.utils.Utils;
 @TableView(defaultColumns = { "state", "timestamp", "username", "eventKey", "eventDescription", "ipAddress"}, 
 				sortOrder = SortOrder.DESC, sortField = "timestamp", requiresView = false)
 @TableAction(bundle = SystemEvent.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/event/{resourceKey}/{uuid}" )
-@LicensedFeature(value = SystemEvent.FEATURE, group = FeatureGroup.PROFESSIONAL)
+@LicensedFeature(value = SystemEvent.FEATURE, group = FeatureGroup.PROFESSIONAL, includedWithPAYG = true)
 public class SystemEvent extends UUIDEvent {
 
 	public static final String FEATURE = "Event Log";

@@ -13,7 +13,7 @@ import com.jadaptive.api.template.ObjectViews;
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
 @ObjectViews({})
 @GenerateEventTemplates(UserLoginAuthenticationPolicy.RESOURCE_KEY)
-public class UserLoginAuthenticationPolicy extends AuthenticationPolicy {
+public class UserLoginAuthenticationPolicy extends LoginAuthenticationPolicy {
 
 	private static final long serialVersionUID = -4581883248747380399L;
 

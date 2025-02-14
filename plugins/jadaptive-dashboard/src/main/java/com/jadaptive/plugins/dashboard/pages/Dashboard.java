@@ -192,6 +192,7 @@ public class Dashboard extends AuthenticatedPage {
 									.appendChild(new Element("i")
 											.addClass(widget.getIconGroup() + " " + widget.getIcon()))
 									.appendChild(new Element("span")
+											.addClass("ms-2")
 											.attr("jad:bundle", widget.getBundle())
 											.attr("jad:i18n",String.format("%s.name", widget.getName()) )))
 									.appendChild(help = Html.div("w-25 float-end text-end")))
