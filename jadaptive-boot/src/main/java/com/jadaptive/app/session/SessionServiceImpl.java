@@ -32,6 +32,7 @@ import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.session.events.SessionClosedEvent;
 import com.jadaptive.api.session.events.SessionOpenedEvent;
 import com.jadaptive.api.stats.UsageService;
+import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
@@ -235,6 +236,11 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Override
 	public Collection<Session> collection(SearchField... fields) {
 		return filter(fields);
+	}
+
+	@Override
+	public UUIDDocument createNew(ObjectTemplate template) {
+		return new Session();
 	}
 
 }
