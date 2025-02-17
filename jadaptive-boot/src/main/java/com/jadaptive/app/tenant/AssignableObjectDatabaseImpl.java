@@ -143,5 +143,10 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 	public Collection<T> searchObjects(Class<T> clz, SearchField... fields) {
 		return objectDatabase.searchObjects(clz, fields);
 	}
+
+	@Override
+	public T max(Class<T> clz, String column) {
+		return objectDatabase.max(clz, column);
+	}
 	
 }

@@ -29,4 +29,6 @@ public interface AssignableObjectDatabase<T extends AssignableDocument> {
 	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields);
 
 	Collection<T> searchObjects(Class<T> clz, SearchField... fields);
+
+	T max(Class<T> clz, String column);
 }
