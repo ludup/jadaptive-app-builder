@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.util.Optional;
 
 import org.pf4j.Extension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.auth.AuthenticationService;
@@ -20,6 +22,8 @@ import jakarta.servlet.http.HttpServletResponse;
 @Extension
 public class SetupPostAuthenticationPage extends HtmlPage implements PostAuthenticatorPage {
 
+	private static final Logger log = LoggerFactory.getLogger(SetupPostAuthenticationPage.class);
+	
 	@Autowired
 	private AuthenticationService authenticationService; 
 	
@@ -38,14 +42,18 @@ public class SetupPostAuthenticationPage extends HtmlPage implements PostAuthent
 	protected void beforeProcess(String uri, HttpServletRequest request, HttpServletResponse response)
 			throws FileNotFoundException {
 		
+		
 		AuthenticationState state = authenticationService.getCurrentState();
 		if(!state.hasSetupPostAuthentication()) {
+			log.info("REMOVEME: Setting up post authentication");
 			authenticationService.setupPostAuthentication(authenticationService.getCurrentState());
 			throw authenticationService.completeAuthentication(
 					authenticationService.getCurrentState(), 
 					Optional.empty()).maybeAttachToSession(request, sessionUtils.getTimeout());
 		
 		} else {
+			log.info("REMOVEME: Redirecting to {}", authenticationService.getCurrentPage().getSimpleName());
+			
 			throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentPage()));
 		}
 	}

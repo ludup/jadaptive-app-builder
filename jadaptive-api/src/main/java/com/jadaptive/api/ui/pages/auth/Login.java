@@ -142,6 +142,7 @@ public class Login extends AuthenticationPage<LoginForm> {
 			}
 
     	} catch(AccessDeniedException e) {
+    		log.info("REMOVEME: {} denied access", form.getUsername());
     		throw e;
     	} catch(ObjectNotFoundException e) {
     		log.warn("{} not found", e);

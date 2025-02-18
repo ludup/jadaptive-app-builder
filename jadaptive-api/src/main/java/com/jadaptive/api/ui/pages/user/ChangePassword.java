@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
+import com.jadaptive.api.auth.LoginAuthenticationPolicy;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -69,7 +70,7 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 	@Override
 	public boolean requiresProcessing(AuthenticationState state) {
 		
-		if(state.getPolicy().getResourceKey().equals(UserLoginAuthenticationPolicy.RESOURCE_KEY)) {
+		if(state.getPolicy() instanceof LoginAuthenticationPolicy) {
 			if(state.getUser() instanceof PasswordChangeSupport) {
 				
 		    	if(((PasswordChangeSupport)state.getUser()).getPasswordChangeRequired()) {

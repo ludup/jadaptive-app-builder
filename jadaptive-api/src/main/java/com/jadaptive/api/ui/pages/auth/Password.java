@@ -76,6 +76,7 @@ public class Password extends AuthenticationPage<LoginForm> implements Authentic
     		Feedback.error(e.getMessage());
     		log.error("Access Denied", e);
     	} catch(ObjectNotFoundException e) {
+    		log.error("Not found exception for {} in Password form! How did we get here?", state.getUser().getUsername());
     	} catch(Throwable e) {
     		log.error("Error in login", e);
     	}
