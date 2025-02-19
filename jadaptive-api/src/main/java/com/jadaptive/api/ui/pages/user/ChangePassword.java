@@ -8,7 +8,6 @@ import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.LoginAuthenticationPolicy;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
-import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.ui.AuthenticationPage;
