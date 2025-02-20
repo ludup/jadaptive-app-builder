@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.security.Provider;
 import java.security.Security;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -152,28 +153,18 @@ public class ApplicationProperties {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
 		}
-			
-			
-		try{
-			log.info("Loading properties file jadaptive.properties");
-			properties = loadPropertiesFile(propertiesFile);
-		} catch(IOException e) {
-			log.warn("Could not load jadaptive.properties file [{}]", e.getMessage());
-		}
-
-		File confd = new File("conf.d");
-		if(confd.exists()) {
-			for(File file : confd.listFiles()) {
-				if(file.isFile() && file.getName().endsWith(".properties")) {
-					log.info("Loading extended properties file {}", file.getName());
-					try {
-						properties.putAll(loadPropertiesFile(file));
-					} catch (IOException e) {
-						log.error("Faild to load properties file {}", file.getName(), e);
-					}
-				}
+		
+		
+		properties = new Properties();
+		for(File file : Arrays.asList(confdFolder.listFiles(f -> f.isFile() && f.getName().endsWith(".properties"))).stream().sorted().toList()) {
+			log.info("Loading properties file {}", file.getName());
+			try {
+				properties.putAll(loadPropertiesFile(file));
+			} catch (IOException e) {
+				log.error("Faild to load properties file {}", file.getName(), e);
 			}
 		}
+		
 		checkLoaded();
 	}
 	
