@@ -22,7 +22,8 @@ public interface ProductService {
 		SECURE_NODE,
 		LICENSE_SERVER,
 		WINDOWS_CONNECT,
-		GABBLE_CLOUD
+		GABBLE_CLOUD,
+		PASSWORD_EXPRESS_CLOUD
 	}
 	
 	ProductId getProductId(); 
@@ -49,6 +50,6 @@ public interface ProductService {
 
 	boolean isRevenueGenerating();
 
-	Product getProduct();
+	boolean isUserLicensing();
 
 }

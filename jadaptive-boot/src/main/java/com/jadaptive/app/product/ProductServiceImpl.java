@@ -6,6 +6,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.product.Product;
@@ -35,107 +36,61 @@ public class ProductServiceImpl implements ProductService {
 			ProductLogoSource source = appService.getBean(ProductLogoSource.class);
 			return source.getProductLogo();
 		} catch(Throwable e) {
-			try {
-				Product product = appService.getBean(Product.class);
-				return product.getLogoResource();
-			} catch (NoSuchBeanDefinitionException e1) {
-				return defaultProduct.getLogoResource();
-			}
+			return ApplicationProperties.getValue("app.logo", getProduct().getLogoResource());
 		}
 	}
 	
 	@Override
 	public String getFaviconResource() {
-		try {
-			Product product = appService.getBean(Product.class);
-			return product.getFaviconResource();
-		} catch (NoSuchBeanDefinitionException e1) {
-			return defaultProduct.getFaviconResource();
-		}
+		return ApplicationProperties.getValue("app.favicon", getProduct().getFaviconResource());
 	}
 	
 	@Override
 	public String getProductName() {
-		try {
-			Product product = appService.getBean(Product.class);
-			return product.getName();
-		} catch (NoSuchBeanDefinitionException e1) {
-			return defaultProduct.getName();
-		}
+		return ApplicationProperties.getValue("app.name", getProduct().getName());
 	}
 
 	@Override
 	public String getPoweredBy() {
-		try {
-			Product product = appService.getBean(Product.class);
-			return product.getPoweredBy();
-		} catch (NoSuchBeanDefinitionException e1) {
-			return defaultProduct.getPoweredBy();
-		}
+		return ApplicationProperties.getValue("app.power", getProduct().getVendor());
 	}
 
 	@Override
 	public String getProductCode() {
-		try {
-			Product product = appService.getBean(Product.class);
-			return product.getProductCode();
-		} catch (NoSuchBeanDefinitionException e1) {
-			return defaultProduct.getProductCode();
-		}
+		return ApplicationProperties.getValue("app.code", getProduct().getProductCode());
 	}
 
 	@Override
 	public String getVendor() {
-		try {
-			Product product = appService.getBean(Product.class);
-			return product.getVendor();
-		} catch (NoSuchBeanDefinitionException e1) {
-			return defaultProduct.getVendor();
-		}
+		return ApplicationProperties.getValue("app.vendor", getProduct().getVendor());
 	}
 
 	@Override
 	public boolean requiresRegistration() {
-		try {
-			Product product = appService.getBean(Product.class);
-			return product.requiresRegistration();
-		} catch (NoSuchBeanDefinitionException e1) {
-			return defaultProduct.requiresRegistration();
-		}
+		return getProduct().requiresRegistration();
 	}
 
 	@Override
 	public boolean isTenantLicensing() {
-		try {
-			Product product = appService.getBean(Product.class);
-			return product.isTenantLicensing();
-		} catch (NoSuchBeanDefinitionException e1) {
-			return defaultProduct.isTenantLicensing();
-		}
+		return getProduct().isTenantLicensing();
 	}
 
 	@Override
 	public boolean isRevenueGenerating() {
-		try {
-			Product product = appService.getBean(Product.class);
-			return product.isRevenueGenerating();
-		} catch (NoSuchBeanDefinitionException e1) {
-			return defaultProduct.isRevenueGenerating();
-		}
+		return getProduct().isRevenueGenerating();
 	}
 
 	@Override
 	public ProductId getProductId() {
-		try {
-			Product product = appService.getBean(Product.class);
-			return product.getProductId();
-		} catch (NoSuchBeanDefinitionException e1) {
-			return ProductId.FRAMEWORK;
-		}
+		return getProduct().getProductId();
 	}
 	
 	@Override
-	public Product getProduct() {
+	public boolean isUserLicensing() {
+		return getProduct().isUserLicensing();
+	}
+	
+	private Product getProduct() {
 		try {
 			Product product = appService.getBean(Product.class);
 			return product;
@@ -143,5 +98,6 @@ public class ProductServiceImpl implements ProductService {
 			return defaultProduct;
 		}
 	}
+
 
 }
