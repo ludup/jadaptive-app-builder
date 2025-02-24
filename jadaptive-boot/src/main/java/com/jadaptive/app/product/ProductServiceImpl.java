@@ -1,6 +1,9 @@
 package com.jadaptive.app.product;
 
 import java.util.Calendar;
+import java.util.Locale;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationService;
 import com.jadaptive.api.app.ApplicationVersion;
+import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.product.Product;
 import com.jadaptive.api.product.ProductLogoSource;
 import com.jadaptive.api.product.ProductService;
@@ -20,6 +24,11 @@ public class ProductServiceImpl implements ProductService {
 	ApplicationService appService; 
 	
 	final private Product defaultProduct = new Product() { };
+	
+	@PostConstruct
+	private void postConstruct() {
+		I18N.addI18n(Locale.getDefault(), "vendor", "product.name", getProductName());
+	}
 	
 	public String getVersion() {
 		return ApplicationVersion.getVersion();
@@ -41,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 	
 	@Override
-	public String getFaviconResource() {
+	public String getFaviconResource() { 
 		return ApplicationProperties.getValue("app.favicon", getProduct().getFaviconResource());
 	}
 	

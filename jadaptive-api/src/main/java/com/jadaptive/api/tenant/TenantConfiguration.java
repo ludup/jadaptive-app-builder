@@ -1,5 +1,8 @@
 package com.jadaptive.api.tenant;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.FieldType;
@@ -31,6 +34,14 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	@ObjectField(type = FieldType.TEXT, defaultValue = "")
 	@ObjectView(DOMAIN_VIEW)
 	String rootDomain = "";
+	
+	@ObjectField(type = FieldType.TEXT, defaultValue = "")
+	@ObjectView(DOMAIN_VIEW)
+	Collection<String> additionalDomains = new ArrayList<>();
+	
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
+	@ObjectView(DOMAIN_VIEW)
+	Boolean forceRegistrationOnIncomingRootDomain;
 	
 	@ObjectField(type = FieldType.TEXT, defaultValue = "")
 	@ObjectView(DOMAIN_VIEW)
@@ -86,6 +97,22 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 		this.invalidDomainRedirect = invalidDomainRedirect;
 	}
 	
+	public Collection<String> getAdditionalDomains() {
+		return additionalDomains;
+	}
+
+	public void setAdditionalDomains(Collection<String> additionalDomains) {
+		this.additionalDomains = additionalDomains;
+	}
+
+	public Boolean getForceRegistrationOnIncomingRootDomain() {
+		return forceRegistrationOnIncomingRootDomain;
+	}
+
+	public void setForceRegistrationOnIncomingRootDomain(Boolean forceRegistrationOnIncomingRootDomain) {
+		this.forceRegistrationOnIncomingRootDomain = forceRegistrationOnIncomingRootDomain;
+	}
+
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
