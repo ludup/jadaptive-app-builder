@@ -293,5 +293,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 		return objectService.toAbstractObject(obj);
 		
 	}
+	
 
+	public static String getStateAttribute(String resourceKey) {
+		return String.format("%s-state", resourceKey);
+	}
+	
+	public static void clearState(String resourceKey, HttpServletRequest request) {
+		request.getSession().setAttribute(getStateAttribute(resourceKey), null);	
+	}
 }

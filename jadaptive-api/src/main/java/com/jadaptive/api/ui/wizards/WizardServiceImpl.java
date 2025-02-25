@@ -2,14 +2,11 @@ package com.jadaptive.api.ui.wizards;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationService;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class WizardServiceImpl implements WizardService {
@@ -32,14 +29,6 @@ public class WizardServiceImpl implements WizardService {
 			for(WizardFlow wizard : applicationService.getBeans(WizardFlow.class)) {
 				wizards.put(wizard.getResourceKey(), wizard);
 			}
-		}
-	}
-
-	@Override
-	public void clearState(String resourceKey, HttpServletRequest request) {
-		WizardFlow wiz = wizards.get(resourceKey);
-		if(Objects.nonNull(wiz)) {
-			wiz.clearState(request);
 		}
 	}
 }

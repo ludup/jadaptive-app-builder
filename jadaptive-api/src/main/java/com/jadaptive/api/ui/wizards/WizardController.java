@@ -144,7 +144,7 @@ public class WizardController extends AuthenticatedController {
 		
 		try {
 			
-			wizardService.clearState(resourceKey, request);
+			Wizard.clearState(resourceKey, request);
 		} catch(Throwable e) {
 			log.error("Failed to cancel wizard {}", resourceKey, e);
 		} finally {

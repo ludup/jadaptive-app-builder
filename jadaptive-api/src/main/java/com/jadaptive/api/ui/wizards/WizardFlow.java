@@ -18,8 +18,6 @@ public interface WizardFlow extends ExtensionPoint {
 	
 	WizardState getState(HttpServletRequest request);
 
-	void clearState(HttpServletRequest request);
-	
 	Page getCompletePage() throws FileNotFoundException;
 
 	void finish(WizardState wizardState);

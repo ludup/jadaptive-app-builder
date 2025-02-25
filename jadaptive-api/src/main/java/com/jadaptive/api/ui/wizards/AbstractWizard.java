@@ -37,10 +37,6 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	
 	protected abstract Class<? extends WizardSection> getSectionClass();
 	
-	protected String getStateAttribute() {
-		return String.format("%s-state", getResourceKey());
-	}
-	
 	@Override
 	public boolean requiresUserSession() {
 		return true;
@@ -79,7 +75,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 
 	public WizardState generateState(HttpServletRequest request, String uuid) {
 		
-		WizardState state = (WizardState) request.getSession().getAttribute(getStateAttribute());
+		WizardState state = (WizardState) request.getSession().getAttribute(Wizard.getStateAttribute(getResourceKey()));
 		
 		if(Objects.isNull(state)) {
 			boolean isSystem = tenantService.getCurrentTenant().isSystem();
@@ -122,7 +118,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 					sections.toArray((new WizardSection[0]))); 
 			
 			init(state);
-			request.getSession().setAttribute(getStateAttribute(), state);
+			request.getSession().setAttribute(Wizard.getStateAttribute(getResourceKey()), state);
 		}
 		return state;
 	}
@@ -134,7 +130,7 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	public WizardState getState(HttpServletRequest request) {
 		
 		
-		WizardState state = (WizardState) request.getSession().getAttribute(getStateAttribute());
+		WizardState state = (WizardState) request.getSession().getAttribute(Wizard.getStateAttribute(getResourceKey()));
 		
 		if(Objects.isNull(state)) {
 			state =  generateState(request, null);
@@ -154,11 +150,6 @@ public abstract class AbstractWizard implements WizardFlow, FormHandler {
 
 	
 	protected void assertPermissions(WizardState state) { };
-
-	@Override
-	public void clearState(HttpServletRequest request) {
-		request.getSession().setAttribute(getStateAttribute(), null);
-	}
 
 	@Override
 	public <U extends UUIDEntity> String saveObject(U object) {

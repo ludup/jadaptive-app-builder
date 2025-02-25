@@ -65,11 +65,6 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	}
 
 	@Override
-	protected String getStateAttribute() {
-		return STATE_ATTR;
-	}
-	
-	@Override
 	protected Collection<? extends WizardSection> getDefaultSections() {
 		List<SetupSection> sections = new ArrayList<>();
 
