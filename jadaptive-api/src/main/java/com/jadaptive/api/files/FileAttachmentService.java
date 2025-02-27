@@ -2,6 +2,7 @@ package com.jadaptive.api.files;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 
 public interface FileAttachmentService {
 
@@ -12,6 +13,8 @@ public interface FileAttachmentService {
 	InputStream getAttachmentContent(String uuid) throws IOException;
 
 	public FileAttachment getAttachment(String uuid);
+
+	public void markForRemoval(Collection<FileAttachment> attachments);
 
 	public void markForRemoval(String encoded);
 

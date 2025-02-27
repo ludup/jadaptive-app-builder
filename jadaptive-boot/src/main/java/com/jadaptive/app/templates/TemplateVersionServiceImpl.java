@@ -147,6 +147,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	private Map<String,Class<? extends ObjectEvent<?>>> eventClasses = new HashMap<>();
 	private Map<String,Class<? extends ObjectUpdateEvent<?>>> updateEventClasses = new HashMap<>();
 	
+	private List<Runnable> updatedOperations = new ArrayList<>();
+	
 	@Override
 	public Iterable<TemplateVersion> list() throws RepositoryException, ObjectException {
 		return versionRepository.list();
@@ -1407,6 +1409,19 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				objectService.rebuildReferences(template);
 			}
 			processed.add(template);
+		}
+	}
+
+	@Override
+	public void onUpdated(Runnable r) {
+		updatedOperations.add(r);
+	}
+
+	@Override
+	public void doUpdateOperations() {
+		
+		for(Runnable r : updatedOperations) {
+			r.run();
 		}
 	}
 }

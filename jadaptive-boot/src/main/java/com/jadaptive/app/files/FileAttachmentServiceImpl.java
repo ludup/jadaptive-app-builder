@@ -2,6 +2,7 @@ package com.jadaptive.app.files;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,9 +94,17 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 	}
 
 	@Override
-	public void markForRemoval(String encoded) {
-		// TODO Auto-generated method stub
+	public void markForRemoval(Collection<FileAttachment> attachments) {
 		
+		for(FileAttachment attach : attachments) {
+			attachmentDatabase.delete(attach);
+		}
+		
+	}
+
+	@Override
+	public void markForRemoval(String uuid) {
+		attachmentDatabase.delete(getAttachment(uuid));
 	}
 
 }

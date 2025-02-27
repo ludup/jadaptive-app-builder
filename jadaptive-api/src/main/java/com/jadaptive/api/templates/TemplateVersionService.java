@@ -36,4 +36,8 @@ public interface TemplateVersionService {
 			ObjectTemplate extensionTemplate,
 			Collection<String> extensions);
 
+	void onUpdated(Runnable r);
+
+	void doUpdateOperations();
+
 }

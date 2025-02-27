@@ -169,11 +169,9 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override
 	public void setPassword(User user, char[] newPassword, boolean passwordChangeRequired, boolean log) {
 		
-		permissionService.assertPermission(SET_PASSWORD_PERMISSION);
-		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
+		assertPasswordRules(user, newPassword, true);
 		
 		try {
-			eventService.publishEvent(new VerifyPasswordEvent(user, newPassword));
 			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 			if(log) {
 				eventService.publishEvent(new SetPasswordEvent(user));
@@ -189,11 +187,9 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override
 	public void changePassword(User user, char[] oldPassword, char[] newPassword) {
 		
-		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
-		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
+		assertPasswordRules(user, newPassword, false);
 		
 		try {
-			eventService.publishEvent(new VerifyPasswordEvent(user, newPassword));
 			verifyPassword(user, oldPassword);
 			getDatabase(user).setPassword(user, newPassword, false);
 			eventService.publishEvent(new ChangePasswordEvent());
@@ -206,11 +202,9 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override
 	public void changePassword(User user, char[] newPassword, boolean passwordChangeRequired) {
 		
-		permissionService.assertPermission(CHANGE_PASSWORD_PERMISSION);
-		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
+		assertPasswordRules(user, newPassword, false);
 		
 		try {
-			eventService.publishEvent(new VerifyPasswordEvent(user, newPassword));
 			getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 			eventService.publishEvent(new ChangePasswordEvent());
 		} catch(Throwable e) {
@@ -218,6 +212,15 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 			throw e;
 		}
 		
+	}
+	
+	@Override
+	public void assertPasswordRules(User user, char[] newPassword, boolean administrative) {
+		
+		permissionService.assertPermission(administrative ? SET_PASSWORD_PERMISSION : CHANGE_PASSWORD_PERMISSION);
+		assertCapability(user, UserDatabaseCapabilities.MODIFY_PASSWORD);
+		eventService.publishEvent(new VerifyPasswordEvent(user, newPassword));
+
 	}
 
 	@Override

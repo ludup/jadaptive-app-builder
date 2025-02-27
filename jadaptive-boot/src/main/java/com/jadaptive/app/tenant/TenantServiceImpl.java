@@ -214,6 +214,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		);
 			
 			templateService.loadExtendedTemplates(tenant);
+			templateService.doUpdateOperations();
 		} finally {
 			clearCurrentTenant();
 		}

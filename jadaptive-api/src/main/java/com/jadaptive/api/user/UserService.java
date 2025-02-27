@@ -58,4 +58,6 @@ public interface UserService extends UUIDObjectService<User>, AvatarProvider, Dy
 
 	void setPassword(User user, char[] newPassword, boolean passwordChangeRequired, boolean log);
 
+	void assertPasswordRules(User user, char[] newPassword, boolean administrative);
+
 }
