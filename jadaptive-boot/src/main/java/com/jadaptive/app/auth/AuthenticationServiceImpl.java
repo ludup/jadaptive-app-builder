@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.auth.AuthenticationPolicy;
@@ -94,7 +94,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	private PageCache pageCache;
 
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 	
 	@Autowired
 	private TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;

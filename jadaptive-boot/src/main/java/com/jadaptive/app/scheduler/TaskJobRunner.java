@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.jobs.TaskRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
@@ -42,7 +42,7 @@ public class TaskJobRunner implements Runnable {
 	private PermissionService permissionService;
 	
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 	
 	public TaskJobRunner() {
 	}

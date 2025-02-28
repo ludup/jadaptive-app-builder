@@ -6,13 +6,13 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 
 @Service
 public class WizardServiceImpl implements WizardService {
 
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	Map<String,WizardFlow> wizards = new HashMap<>();
 	

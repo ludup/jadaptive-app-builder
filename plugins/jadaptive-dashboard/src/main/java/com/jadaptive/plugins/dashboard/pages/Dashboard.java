@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.ui.AuthenticatedPage;
@@ -48,7 +48,7 @@ public class Dashboard extends AuthenticatedPage {
 	static Logger log = LoggerFactory.getLogger(Dashboard.class);
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 
 	@Autowired
 	private I18nService i18nService;

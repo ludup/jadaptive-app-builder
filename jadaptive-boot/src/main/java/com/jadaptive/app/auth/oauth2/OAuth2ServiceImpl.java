@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService;
 import com.jadaptive.api.auth.oauth2.OAuth2Request;
 import com.jadaptive.api.auth.oauth2.OAuth2Scope;
@@ -67,7 +67,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 	}
 	
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 
 	@Autowired
 	private SingletonObjectDatabase<OAuth2Configuration> config;

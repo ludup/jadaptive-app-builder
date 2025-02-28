@@ -17,7 +17,7 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.PluginWebSocketHandler;
 import com.jadaptive.api.app.WebSocketClient;
 import com.jadaptive.api.app.WebSocketOutput;
@@ -27,7 +27,7 @@ public class ExtensionWebSocketHandler implements WebSocketHandler {
 	static Logger log = LoggerFactory.getLogger(ExtensionWebSocketHandler.class);
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {

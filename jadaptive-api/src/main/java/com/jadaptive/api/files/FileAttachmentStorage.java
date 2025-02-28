@@ -10,9 +10,11 @@ public interface FileAttachmentStorage extends ExtensionPoint {
 
 	String getUuid();
 	
-	InputStream getAttachmentContent(String attachmentUUID) throws FileNotFoundException;
+	InputStream getAttachmentContent(String attachmentUUID) throws FileNotFoundException, IOException;
 	
 	long getMaximumSize();
 
 	FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable, String template) throws IOException;
+
+	String getName();
 }

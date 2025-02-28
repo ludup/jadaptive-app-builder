@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.ui.HomePageResolver;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.plugins.dashboard.DashboardInitialiser;
@@ -17,7 +17,7 @@ import com.jadaptive.plugins.dashboard.DashboardWidget;
 public class DashboardHomePage implements HomePageResolver {
 	
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 
 	@Override
 	public int getWeight() {

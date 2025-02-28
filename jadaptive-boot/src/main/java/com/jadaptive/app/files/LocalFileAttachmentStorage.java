@@ -34,6 +34,7 @@ public class LocalFileAttachmentStorage implements FileAttachmentStorage {
 	
 	@Autowired
 	private TenantAwareObjectDatabase<FileAttachment> attachmentDatabase;
+	
 	static {
 		LOCATION.mkdirs();
 	}
@@ -79,6 +80,11 @@ public class LocalFileAttachmentStorage implements FileAttachmentStorage {
 		IOUtils.closeQuietly(in);
 		
 		return attachment;
+	}
+
+	@Override
+	public String getName() {
+		return "Local File System";
 	}
 
 }

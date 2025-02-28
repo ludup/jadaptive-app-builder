@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
 
@@ -15,7 +15,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 public class UserInterfaceServiceImpl implements UserInterfaceService {
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Override
 	public boolean canCreate(ObjectTemplate template) {

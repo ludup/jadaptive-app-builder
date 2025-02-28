@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
@@ -45,7 +45,7 @@ public class UploadServlet extends HttpServlet {
 	private PluginManager pluginManager; 
 	
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 	
 	Map<String,UploadHandler> uploadHandlers = new HashMap<>();
 	

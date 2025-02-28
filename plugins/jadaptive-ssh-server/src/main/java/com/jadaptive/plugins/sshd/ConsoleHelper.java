@@ -17,7 +17,7 @@ import org.jline.reader.Candidate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.tasks.TriggerMapping;
@@ -38,7 +38,7 @@ public class ConsoleHelper {
 	private TemplateService templateService; 
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Autowired
 	private I18nService i18n; 

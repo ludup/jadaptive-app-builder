@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationProperties;
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -35,7 +35,7 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	private SingletonObjectDatabase<SchedulerConfiguration> schedulerConfig;
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Autowired
 	private EventService eventService;

@@ -12,7 +12,7 @@ import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public abstract class AbstractWizard implements WizardFlow, FormHandler {
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Autowired
 	private TenantService tenantService; 

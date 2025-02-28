@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 
 import com.jadaptive.api.app.ApplicationProperties;
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
@@ -80,7 +80,7 @@ public class SessionFilter implements Filter {
 	private AuthenticationService authenticationService; 
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Autowired
 	private OAuth2TokenService oauth2TokenService; 

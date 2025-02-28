@@ -25,7 +25,7 @@ import org.pf4j.PluginWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.PropertyService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
@@ -74,7 +74,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	private PropertyService propertyService;
 	
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 	
 	@Autowired
 	private ObjectService objectService;

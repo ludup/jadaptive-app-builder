@@ -14,7 +14,7 @@ import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.config.ConfigurationPageItem;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -30,7 +30,7 @@ import com.jadaptive.api.ui.PageProcessors;
 public class ConfigurationPage extends AuthenticatedPage {
 
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Autowired
 	private TenantService tenantService; 

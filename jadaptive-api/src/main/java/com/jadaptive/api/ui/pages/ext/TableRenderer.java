@@ -26,7 +26,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.countries.InternationalService;
@@ -80,7 +80,7 @@ public class TableRenderer {
 	private I18nService i18nService;
 	
 	@Autowired
-	private ApplicationService appService;
+	private App appService;
 
 	@Autowired
 	private EncryptionService encryptionService;

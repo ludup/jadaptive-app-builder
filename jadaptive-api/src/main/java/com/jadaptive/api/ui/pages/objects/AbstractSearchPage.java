@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.countries.Country;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.db.ClassLoaderService;
@@ -53,7 +53,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	private PermissionService permissionService; 
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Autowired
 	private InternationalService internationalService; 

@@ -27,7 +27,7 @@ import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.spring.ExtensionAutowireHelper;
 
 @Service
-public class ApplicationServiceImpl implements ApplicationService {
+public class ApplicationServiceImpl implements App {
 
 	static Logger log = LoggerFactory.getLogger(ApplicationServiceImpl.class);
 
@@ -51,7 +51,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 		instance = this;
 	}
 
-	public static ApplicationService getInstance() {
+	public static App getInstance() {
 		return instance;
 	}
 

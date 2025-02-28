@@ -8,7 +8,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemOnlyObjectDatabase;
@@ -29,7 +29,7 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 	private SystemSingletonObjectDatabase<FilesConfiguration> fileConfig;
 	
 	@Autowired
-	private ApplicationService appService; 
+	private App appService; 
 	
 	@Autowired
 	private TenantAwareObjectDatabase<FileAttachment> attachmentDatabase;
@@ -48,7 +48,10 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 
 	@Override
 	public void onApplicationStartup() {
-		registerProvider(LocalFileAttachmentStorage.UUID, "Local Storage");
+		
+		for(FileAttachmentStorage provider : App.beans(FileAttachmentStorage.class)) {
+			registerProvider(provider.getUuid(), provider.getName());
+		}
 	}
 	
 	

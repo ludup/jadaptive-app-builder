@@ -9,7 +9,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.tasks.Task;
 import com.jadaptive.api.tasks.TaskImpl;
@@ -22,7 +22,7 @@ public class TaskServiceImpl extends AuthenticatedService implements TaskService
 	Map<String,TaskImpl<?>> taskImplementations = new HashMap<>();
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Override
 	public <T extends Task> TaskImpl<T> getTaskImplementation(T task) {

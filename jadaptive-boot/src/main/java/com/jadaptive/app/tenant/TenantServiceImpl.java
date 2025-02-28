@@ -19,7 +19,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SingletonObjectDatabase;
@@ -68,7 +68,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	private PermissionService permissionService; 
 
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 
 	@Autowired
 	private EventService eventService; 

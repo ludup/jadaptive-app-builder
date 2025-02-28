@@ -8,7 +8,7 @@ import org.jsoup.nodes.Element;
 import org.pf4j.Extension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.ui.AbstractPageExtension;
@@ -26,7 +26,7 @@ public class ContextHelp extends AbstractPageExtension {
 	private ClassLoaderService classLoaderService;
 
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 	
 	@Override
 	public void process(Document document, Element element, Page page) throws IOException {

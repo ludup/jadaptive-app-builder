@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.app.SecurityScope;
 import com.jadaptive.api.countries.Country;
@@ -120,7 +120,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	private InternationalService internationalService; 
 	
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 	
 	@Autowired
 	private TenantService tenantService; 

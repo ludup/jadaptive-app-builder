@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.db.SingletonObjectDatabase;
@@ -70,7 +70,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	public static final String SSH_SERVER = "SSH Server";
 	
 	@Autowired
-	private ApplicationService appContext; 
+	private App appContext; 
 	
 	@Autowired
 	private UserCommandFactory userCommands; 

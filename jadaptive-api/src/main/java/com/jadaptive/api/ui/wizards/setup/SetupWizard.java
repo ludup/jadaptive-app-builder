@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.entity.FormHandler;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -36,7 +36,7 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 	private TenantService tenantService; 
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Autowired
 	private TransactionService transactionService;

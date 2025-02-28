@@ -6,7 +6,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.auth.oauth2.OAuth2Requirement;
 import com.jadaptive.api.auth.oauth2.OAuth2Scope;
 import com.jadaptive.api.auth.oauth2.OAuth2TokenService;
@@ -21,7 +21,7 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 	private OAuth2TokenService oauth2TokenService;
 
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 
 	@Autowired
 	private AllApiAccessScope allApiAccessScope;

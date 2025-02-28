@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.avatar.Avatar;
 import com.jadaptive.api.avatar.AvatarRequest;
@@ -59,7 +59,7 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	private PermissionService permissionService; 
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Autowired
 	private EventService eventService; 

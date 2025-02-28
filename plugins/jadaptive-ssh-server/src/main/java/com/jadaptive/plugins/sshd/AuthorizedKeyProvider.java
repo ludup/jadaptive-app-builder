@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
@@ -38,7 +38,7 @@ public class AuthorizedKeyProvider extends AbstractPublicKeyAuthenticationProvid
 	private TenantService tenantService; 
 	
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 	
 	@Override
 	public boolean isAuthorizedKey(SshPublicKey key, SshConnection con) throws IOException {

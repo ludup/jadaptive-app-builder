@@ -17,7 +17,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
@@ -34,7 +34,7 @@ public class PageCache {
 	static Logger log = LoggerFactory.getLogger(PageCache.class);
 	
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 	
 	@Autowired
 	private PermissionService permissionsService;

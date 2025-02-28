@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ApplicationProperties;
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.product.Product;
@@ -21,7 +21,7 @@ import com.jadaptive.api.product.ProductService;
 public class ProductServiceImpl implements ProductService {
 
 	@Autowired
-	ApplicationService appService; 
+	App appService; 
 	
 	final private Product defaultProduct = new Product() { };
 	

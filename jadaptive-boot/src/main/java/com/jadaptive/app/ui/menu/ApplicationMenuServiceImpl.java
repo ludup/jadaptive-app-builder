@@ -14,7 +14,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -35,7 +35,7 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 	
 	public static final String MENU_CACHE = "menuCache";
 	@Autowired
-	private ApplicationService applicationService; 
+	private App applicationService; 
 
 	@Autowired
 	private ClassLoaderService classService; 

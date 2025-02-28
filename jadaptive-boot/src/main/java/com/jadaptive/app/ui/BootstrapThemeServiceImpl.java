@@ -5,7 +5,7 @@ import java.util.Comparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationService;
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.ui.pages.ext.BootstrapTheme;
 import com.jadaptive.api.ui.pages.ext.BootstrapThemeResolver;
 import com.jadaptive.api.ui.pages.ext.BootstrapThemeService;
@@ -15,7 +15,7 @@ import com.jadaptive.api.ui.pages.ext.Footer;
 public class BootstrapThemeServiceImpl implements BootstrapThemeService {
 
 	@Autowired
-	private ApplicationService applicationService;
+	private App applicationService;
 	
 	@Override
 	public BootstrapTheme getTheme() {
