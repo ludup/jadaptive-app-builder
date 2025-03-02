@@ -16,6 +16,7 @@ import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
+import com.jadaptive.api.auth.LoginAuthenticationPolicy;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
@@ -83,6 +84,13 @@ public class Login extends AuthenticationPage<LoginForm> {
 		if(!state.getPolicy().getPasswordOnFirstPage()) {
 			doc.selectFirst("#passwordDiv").remove();
 		}
+		if(state.getPolicy() instanceof LoginAuthenticationPolicy) {
+			LoginAuthenticationPolicy loginPolicy = (LoginAuthenticationPolicy) state.getPolicy();
+			if(StringUtils.isNotBlank(loginPolicy.getBanner())){
+				doc.selectFirst("#loginForm").after(Html.div("mt-3").append(loginPolicy.getBanner()));
+			}
+		}
+		
 	}
 	
 	@Override
