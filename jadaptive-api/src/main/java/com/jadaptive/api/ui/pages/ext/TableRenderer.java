@@ -371,14 +371,11 @@ public class TableRenderer {
 			
 			DynamicColumn dyn = dynamicColumns.get(column);
 			if(Objects.nonNull(dyn)) {
-				//if(StringUtils.isBlank(dyn.sortColumn())) {
-					el.appendChild(Html.td()
-							.addClass(column)
-							.appendChild(
-							Html.i18n(template.getBundle(),String.format("%s.name", column))));
+				if(StringUtils.isBlank(dyn.sortColumn())) {
+					renderColumn(column, el, template);
 					columns.put(column, template);
 					continue;
-				//}
+				}
 				// Too late to change the search
 				// sortColumn = dyn.sortColumn();
 			}
