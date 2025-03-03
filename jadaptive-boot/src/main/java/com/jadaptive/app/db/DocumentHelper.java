@@ -46,6 +46,7 @@ import com.jadaptive.api.db.DocumentValidationError;
 import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.files.FileAttachmentService;
 import com.jadaptive.api.repository.NamedDocument;
@@ -695,15 +696,27 @@ public class DocumentHelper {
 								if(Objects.nonNull(service)) {
 									
 									UUIDObjectService<?> bean = (UUIDObjectService<?>) ApplicationServiceImpl.getInstance().getBean(service.bean());
-									Object ref = bean.getObjectByUUID((String)objectUUID);
-									m.invoke(obj, ref);
+									try {
+										m.invoke(obj, bean.getObjectByUUID((String)objectUUID));
+									} catch(ObjectNotFoundException e) {
+										log.warn("{} reference {} referenced by {} no longer exists", 
+												TemplateUtils.lookupClassResourceKey(parameter.getType()),
+												objectUUID, resourceKey);
+									}
+									
 									
 								} else {
 									resourceKey = getTemplateResourceKey(parameter.getType());
 	
-									AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, (String)objectUUID);
-									Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
-									m.invoke(obj, ref);
+									try {
+										AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, (String)objectUUID);
+										Object ref = convertDocumentToObject(parameter.getType(), new Document(e.getDocument())); 
+										m.invoke(obj, ref);
+									} catch(ObjectNotFoundException e) {
+										log.warn("{} reference {} referenced by {} no longer exists", 
+												TemplateUtils.lookupClassResourceKey(parameter.getType()),
+												objectUUID, resourceKey);
+									}
 									
 								}
 							} else {
