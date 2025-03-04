@@ -39,6 +39,7 @@ import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.AuthenticatedContext;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.permissions.PermissionUtils;
@@ -606,6 +607,38 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		catch(Throwable e) {
 			if(log.isErrorEnabled()) {
 				log.error("GET api/objects/attachment{}", resourceKey, e);
+			}
+			throw new ObjectException(e);
+		}
+	}
+	
+	/**
+	 * Backwards compatible with old platform
+	 */
+	@RequestMapping(value="/app/api/files/public/{uuid}/{filename}", method = RequestMethod.GET)
+	@AuthenticatedContext(system = true)
+	public void downloadPublic(HttpServletRequest request, HttpServletResponse response, 
+			 @PathVariable String uuid, @PathVariable String filename) throws ObjectException, IOException {
+		
+		try {
+			
+			FileAttachment att = fileService.getAttachment(uuid);
+			response.setStatus(HttpStatus.OK.value());
+			response.setContentLengthLong(att.getSize());
+			response.setContentType(att.getContentType());
+			response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", filename));
+			SessionUtils.runIoWithoutSessionTimeout(request, ()->{
+				try(InputStream in = fileService.getAttachmentContent(uuid)) {
+					IOUtils.copy(in, response.getOutputStream());
+				}
+			});
+		} 
+		catch(ObjectNotFoundException e) {
+			response.sendError(HttpStatus.NOT_FOUND.value());
+		}
+		catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/files/public", e);
 			}
 			throw new ObjectException(e);
 		}
