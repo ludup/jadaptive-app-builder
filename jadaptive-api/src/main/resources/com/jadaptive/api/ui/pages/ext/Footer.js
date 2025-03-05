@@ -1,5 +1,8 @@
 $(function() {
 	
+	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+	
 	$(document).on('click', '.jdropdown-item', function(e) {
 		e.preventDefault();
 		$(this).closest(".dropdown").find('input[type="text"]').val($(this).text());

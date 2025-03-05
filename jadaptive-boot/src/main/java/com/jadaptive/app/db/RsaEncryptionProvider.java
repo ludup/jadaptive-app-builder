@@ -27,13 +27,15 @@ import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jadaptive.api.app.ApplicationProperties;
+
 public class RsaEncryptionProvider {
 
 	static public RsaEncryptionProvider instance;
 	
 	static Logger log = LoggerFactory.getLogger(RsaEncryptionProvider.class);
 	
-	private File privateFolder = new File("conf", "private");
+	private File privateFolder = new File("conf", ApplicationProperties.getValue("private.conf", "private"));
 	private File prvFile = new File(privateFolder, "secrets");
 	private File pubFile = new File(privateFolder, "secrets.pub");
 	

@@ -58,6 +58,7 @@ public class Bootstrap extends AbstractPageExtension {
 			}
 		}
 		
+		scripts(document, "@popperjs/core", "dist/umd/popper.min.js");
 		PageHelper.appendHeadScript(document, runtimePathJs, false, "bootstrapEnabled");
 		PageHelper.appendStylesheet(document, runtimePathCss, "bootstrapCss");
 		PageHelper.appendStylesheet(document, runtimePathCss, "printBootstrap", "print");

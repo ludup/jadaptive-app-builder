@@ -400,6 +400,8 @@ public class SessionUtils {
 			int idx = header.indexOf(policy);
 			if(value.equals("self")) {
 				value = "'self'";
+			} if(value.equals(UNSAFE_INLINE)) {
+				value = "'unsafe-inline'";
 			} else if(value.startsWith("nonce")) {
 				value = String.format("'%s'", value);
 			}

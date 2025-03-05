@@ -57,7 +57,7 @@ public class FieldSearchFormInput {
 			boolean readOnly) {
 		Element _this;
 		rootElement.appendChild(_this = new Element("div")
-				.addClass("row mb-3 fieldSearchInput"));
+				.addClass("mb-3 fieldSearchInput"));
 		
 		if(decorate) {
 			_this.appendChild(new Element("div")
