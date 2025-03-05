@@ -26,7 +26,7 @@ public class MultipleTagsFormInput {
 			Collection<String> selectedValues) {
 		
 		Element selected;
-		rootElement.appendChild(new Element("div").addClass("mb-3 multipleTagInput jadaptive-tags")
+		rootElement.appendChild(new Element("div").addClass("multipleTagInput jadaptive-tags")
 				.appendChild(new Element("label")
 						.attr("for", formVariable)
 						.addClass("form-label")
@@ -47,21 +47,15 @@ public class MultipleTagsFormInput {
 							.attr("class", "input-group-text multipleTagAdd text-decoration-none")
 							.appendChild(new Element("i")
 									.attr("class", "fa-solid fa-plus"))))
-				.appendChild(new Element("div")
-						.addClass("row mt-3")
 					.appendChild(new Element("div")
 							.addClass("col-md-12")
 							.appendChild(selected = new Element("ul")
 									.attr("name", formVariable)
-									.addClass("bg-body form-control border-0 w-100 multipleTagTarget jadaptive-select"))))
-					.appendChild(new Element("div")
-							.addClass("row")
-						.appendChild(new Element("div")
-								.addClass("col-md-10")
-								.appendChild(new Element("small")
+									.addClass("mt-1 border-0 w-100 multipleTagTarget jadaptive-select ps-0 mb-0"))))
+							.appendChild(new Element("small")
 										.addClass("text-muted")
 										.attr("jad:bundle", bundle)
-										.attr("jad:i18n", String.format("%s.desc", resourceKey))))));
+										.attr("jad:i18n", String.format("%s.desc", resourceKey)));
 		
 		for(String value : selectedValues) {
 			selected.appendChild(Html.li("badge bg-primary me-1")
