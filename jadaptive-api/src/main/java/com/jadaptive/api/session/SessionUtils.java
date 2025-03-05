@@ -397,7 +397,7 @@ public class SessionUtils {
 				csp = response.getHeaders("Content-Security-Policy");
 			}
 			String header = csp.iterator().next();
-			int idx = header.indexOf(policy);
+			
 			if(value.equals("self")) {
 				value = "'self'";
 			} if(value.equals(UNSAFE_INLINE)) {
@@ -405,10 +405,11 @@ public class SessionUtils {
 			} else if(value.startsWith("nonce")) {
 				value = String.format("'%s'", value);
 			}
+			int idx = header.indexOf(policy);
 			if(idx > -1) {
 				int idx2 = header.indexOf(';', idx);
 				String tmp = header.substring(idx, idx2);
-				if(tmp.contains(String.format("'%s'", value))) {
+				if(tmp.contains(value)) {
 					return;
 				}
 				header = header.replace(policy, String.format("%s %s", policy, value));
