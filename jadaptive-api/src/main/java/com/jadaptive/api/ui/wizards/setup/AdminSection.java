@@ -11,13 +11,14 @@ import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;
+import com.jadaptive.api.ui.wizards.DefaultWizardSection;
 import com.jadaptive.api.ui.wizards.Wizard;
 import com.jadaptive.api.ui.wizards.WizardState;
 import com.jadaptive.api.user.AdminUserDatabase;
 import com.jadaptive.utils.ObjectUtils;
 import com.jadaptive.utils.Utils;
 
-public class AdminSection extends SetupSection {
+public class AdminSection extends DefaultWizardSection {
 
 	@Autowired
 	private AdminUserDatabase adminDatabase;
@@ -55,6 +56,8 @@ public class AdminSection extends SetupSection {
 			}
 		
 		}
+		
+		renderObjectSection(document, CreateAccount.RESOURCE_KEY);
 		
 		super.processSection(document, element, page);
 	}

@@ -27,8 +27,6 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 
 	public static final String RESOURCE_KEY = "setup";
 
-	private static final String STATE_ATTR = "setupState";
-
 	@Autowired
 	private PageCache pageCache;
 	
@@ -66,7 +64,7 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 
 	@Override
 	protected Collection<? extends WizardSection> getDefaultSections() {
-		List<SetupSection> sections = new ArrayList<>();
+		List<WizardSection> sections = new ArrayList<>();
 
 		if(productService.requiresRegistration()) {
 			sections.add(new SetupSection("setup", "createTenant", 
