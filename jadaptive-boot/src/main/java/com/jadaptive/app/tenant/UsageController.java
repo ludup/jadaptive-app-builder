@@ -54,10 +54,10 @@ public class UsageController extends AuthenticatedController {
 		try {
 			
 			@SuppressWarnings("rawtypes")
-			Map<Date, List> cache = cacheService.getCacheOrCreate(String.format("daily.%d.%s", days, key), Date.class, List.class, Duration.ofDays(1).toMillis());
+			Map<Date, List> cache = cacheService.getCacheOrCreate(String.format("daily.%d.%s", days, key), Date.class, List.class, Duration.ofHours(1).toMillis());
 			int hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
 			@SuppressWarnings("unchecked")
-			List<BarChartDateLongValue> revenue = cache.get(Utils.today());
+			List<BarChartDateLongValue> revenue = cache.get(Utils.tomorrow());
 			if(Objects.isNull(revenue)) {
 				
 				revenue = new ArrayList<>();
@@ -102,12 +102,12 @@ public class UsageController extends AuthenticatedController {
 		try {
 			
 			@SuppressWarnings("rawtypes")
-			Map<Date, List> cache = cacheService.getCacheOrCreate(String.format("sumByDay.%d.%s", days, keys), Date.class, List.class, Duration.ofDays(1).toMillis());
+			Map<Date, List> cache = cacheService.getCacheOrCreate(String.format("sumByDay.%d.%s", days, keys), Date.class, List.class, Duration.ofHours(1).toMillis());
 			
 			int hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
 			
 			@SuppressWarnings("unchecked")
-			List<BarChartDateLongValue> revenue = cache.get(Utils.today());
+			List<BarChartDateLongValue> revenue = cache.get(Utils.tomorrow());
 			if(Objects.isNull(revenue)) {
 				
 				revenue = new ArrayList<>();
