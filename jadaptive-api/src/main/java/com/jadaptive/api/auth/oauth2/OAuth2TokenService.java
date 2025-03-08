@@ -36,10 +36,10 @@ public interface OAuth2TokenService  extends AbstractUUIDObjectService<OAuth2Tok
 			throws AccessDeniedException, UnauthorizedException;
 
 	/**
-	 * Get a token given a bearer token (probably supplied from the Authentication
+	 * Get a token given a bearer token (probably supplied from the Authorization
 	 * HTTP header.).
 	 *  
-	 * @param authentication
+	 * @param authorization authorization
 	 * @param scope the scope executing. This will be checked against the scope the token requires.
 	 * @return token
 	 * @throws AccessDeniedException if access denied
@@ -50,13 +50,13 @@ public interface OAuth2TokenService  extends AbstractUUIDObjectService<OAuth2Tok
 			throws AccessDeniedException, UnauthorizedException, ResponseEntityException;
 	
 	/**
-	 * Get a token given a bearer token (probably supplied from the Authentication
+	 * Get a token given a bearer token (probably supplied from the Authorization
 	 * HTTP header). If the token is invalid, the exception will be caught and a 400 
 	 * error response, along with the WWW-Authenticate header will be returned. All
 	 * other error types will be caught an an error response constructed.  
 	 *  
-	 * @param request
-	 * @param authentication
+	 * @param requestr request
+	 * @param authorization authorization
 	 * @param scope the scope executing. This will be checked against the scope the token requires.
 	 * @return token
 	 * @throws AccessDeniedException if access denied
