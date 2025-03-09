@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.setup.SetupSection;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Page;

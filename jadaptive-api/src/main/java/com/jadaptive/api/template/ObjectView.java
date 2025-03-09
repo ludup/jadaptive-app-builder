@@ -16,14 +16,5 @@ public @interface ObjectView {
 	FieldRenderer renderer() default FieldRenderer.DEFAULT;
 
 	String bundle() default "";
-	
-//	boolean disableLabels() default false;
-	
-	/*String dependsOn() default "";
-	
-	String dependsValue() default "";*/
-	
-//	boolean autosave() default false;
-	
-//	boolean systemOnly() default false;
+
 }
