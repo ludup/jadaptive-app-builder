@@ -44,7 +44,7 @@ public class GetUserDetailsScope implements OAuth2Scope, PluginController {
 	@ResponseStatus(value = HttpStatus.OK)
 	@AuthenticatedContext(system = true)
 	public User getUserDetails(HttpServletRequest request, HttpServletResponse response,
-			@RequestHeader("Authentication") String authentication) throws Exception {
+			@RequestHeader("Authorization") String authentication) throws Exception {
 		return tokenService.authenticate(authentication, this).getOwner();
 	}
 

@@ -1,6 +1,7 @@
 package com.jadaptive.api.auth.oauth2;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.NamedUUIDEntity;
@@ -21,6 +22,24 @@ import com.jadaptive.api.user.User;
 @ObjectServiceBean(bean = OAuth2ApplicationService.class)
 @GenerateEventTemplates
 public class OAuth2Token extends NamedUUIDEntity {
+	
+	private final static ThreadLocal<OAuth2Token> token = new ThreadLocal<>();
+	
+	public final static OAuth2Token get() {
+		return getOr().orElseThrow(() -> new IllegalStateException("Not an OAuth request."));
+	}
+	
+	public final static Optional<OAuth2Token> getOr() {
+		return Optional.ofNullable(token.get());
+	}
+	
+	public final static void set(OAuth2Token token) {
+		OAuth2Token.token.set(token);
+	}
+
+	public final static void clear() {
+		OAuth2Token.token.remove();
+	}
 
 	private static final long serialVersionUID = -7288600405384404678L;
 

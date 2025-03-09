@@ -1,5 +1,9 @@
 package com.jadaptive.app.auth.oauth2;
 
+import java.text.MessageFormat;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -9,13 +13,17 @@ import org.springframework.web.servlet.ModelAndView;
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.auth.oauth2.OAuth2Requirement;
 import com.jadaptive.api.auth.oauth2.OAuth2Scope;
+import com.jadaptive.api.auth.oauth2.OAuth2Token;
 import com.jadaptive.api.auth.oauth2.OAuth2TokenService;
 import com.jadaptive.api.auth.oauth2.ResponseEntityException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class OAuth2Interceptor implements HandlerInterceptor {
+	
+	private final static Logger LOG = LoggerFactory.getLogger(OAuth2Interceptor.class);
 
 	@Autowired
 	private OAuth2TokenService oauth2TokenService;
@@ -37,13 +45,9 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 				OAuth2Scope scope = null;
 
 				if (method.getBean() instanceof OAuth2Scope) {
-					/*
-					 * Legacy method. The controller IS an OAuth2Scope, i.e. it implements the
-					 * interface.
-					 * 
-					 * It will checking the token and scopes itself
-					 */
-					return true;
+					throw new IllegalStateException(MessageFormat.format(
+							"The {0} annotation is no longer supported with {1} that are also controllers.",
+							OAuth2Requirement.class.getName(), OAuth2Scope.class.getName()));
 				}
 
 				if (acAnnotation.value().length() != 0) {
@@ -61,13 +65,19 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 
 				var authHdr = request.getHeader("Authorization");
 				if(authHdr == null) {
+					authHdr = request.getHeader("Authentication");
+					if(authHdr != null) {
+						LOG.warn("This client is using `Authentication` header as opposed to `Authorization`. This is deprecated.");
+					}
+				}
+				if(authHdr == null) {
 					response.addHeader("WWW-Authenticate", "Bearer realm=\"JAD\"");
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 					return false;
 				}
 				
 				try {
-					oauth2TokenService.authenticateRequest(request, response, authHdr, scope);
+					OAuth2Token.set(oauth2TokenService.authenticateRequest(request, response, authHdr, scope));
 				}
 				catch(ResponseEntityException e) {
 					/* We can't send an entity here, so just send the header and the response code */
@@ -83,6 +93,7 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 	@Override
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 			ModelAndView modelAndView) throws Exception {
+		OAuth2Token.clear();
 	}
 
 }
