@@ -10,11 +10,9 @@ import com.jadaptive.api.template.ValidationType;
 public class ImageFormInput extends FormInputRender {
 
 	private String classes = "col-12 my-3";
-	private boolean resettable;
 	
 	public ImageFormInput(ObjectTemplate template, TemplateViewField field) {
 		super(template, field);
-		resettable = field.getField().isResettable();
 		try {
 			classes += " " + field.getField().getValidationValue(ValidationType.CLASSES);
 		} catch(UnsupportedOperationException e) { }
@@ -38,7 +36,7 @@ public class ImageFormInput extends FormInputRender {
 		
 		Element inputEl = rootElement.selectFirst("input");
 		inputEl.val("");
-		if(resettable && StringUtils.isNotBlank(value)) {
+		if(StringUtils.isNotBlank(value)) {
 			inputEl.after(new Element("div").addClass("input-group-text").appendChild(
 				new Element("a").
 				  attr("href", "#").

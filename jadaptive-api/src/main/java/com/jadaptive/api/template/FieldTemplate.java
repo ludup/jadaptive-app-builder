@@ -52,9 +52,6 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	boolean hidden;
 	
 	@ObjectField(type = FieldType.BOOL)
-	boolean summarise;
-	
-	@ObjectField(type = FieldType.BOOL)
 	boolean manuallyEncrypted;
 	
 	@ObjectField(type = FieldType.BOOL)
@@ -72,9 +69,6 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	@ObjectField(type = FieldType.BOOL)
 	boolean readOnly;
 	
-	@ObjectField(type = FieldType.BOOL)
-	boolean alternativeId;
-	
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = FieldValidator.RESOURCE_KEY)
 	Collection<FieldValidator> validators = new ArrayList<>();
 	
@@ -87,9 +81,6 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	@ObjectField(type = FieldType.BOOL)
 	boolean requireAllPermissions = false;
 	
-	@ObjectField(type = FieldType.BOOL)
-	boolean resettable = false;
-	
 	@ObjectField(type = FieldType.TEXT_AREA)
 	String meta;
 	
@@ -97,14 +88,6 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	Collection<FieldOptions> options;
 	
 	public FieldTemplate() {
-	}
-
-	public boolean isResettable() {
-		return resettable;
-	}
-
-	public void setResettable(boolean resettable) {
-		this.resettable = resettable;
 	}
 
 	public String getResourceKey() {
@@ -238,14 +221,6 @@ public class FieldTemplate extends TemplateUUIDEntity {
 		this.readOnly = readOnly;
 	}
 
-	public boolean isAlternativeId() {
-		return alternativeId;
-	}
-
-	public void setAlternativeId(boolean alternativeId) {
-		this.alternativeId = alternativeId;
-	}
-
 	public Collection<FieldView> getViews() {
 		return views;
 	}
@@ -293,15 +268,7 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	public void setParentField(String parentField) {
 		this.parentField = parentField;
 	}
-
-	public boolean isSummarise() {
-		return summarise;
-	}
-
-	public void setSummarise(boolean summarise) {
-		this.summarise = summarise;
-	}
-
+	
 	public int getValidationValueInt(ValidationType val, int defaultValue) {
 		try {
 			return Integer.parseInt(getValidationValue(val));

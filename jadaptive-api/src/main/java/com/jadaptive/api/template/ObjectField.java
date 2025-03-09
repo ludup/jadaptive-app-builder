@@ -19,8 +19,6 @@ public @interface ObjectField {
 
 		boolean hidden() default false;
 
-		boolean summarise() default false;
-
 		boolean manualEncryption() default false;
 		
 		boolean automaticEncryption() default false;
@@ -31,11 +29,7 @@ public @interface ObjectField {
 		
 		boolean textIndex() default false;
 		
-		boolean alternativeId() default false;
-		
 		boolean nameField() default false;
-		
-		boolean resettable() default false;
 		
 		String formVariable() default "";
 		

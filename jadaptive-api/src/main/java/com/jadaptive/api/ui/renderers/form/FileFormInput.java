@@ -13,7 +13,7 @@ public class FileFormInput extends FormInputRender {
 	String filename;
 	long size;
 	String contentType;
-	boolean resettable;
+
 	public FileFormInput(ObjectTemplate template, TemplateViewField field,
 			String filename, 
 			long size,
@@ -22,7 +22,6 @@ public class FileFormInput extends FormInputRender {
 		this.filename = filename;
 		this.size = size;
 		this.contentType = contentType;
-		this.resettable = field.getField().isResettable();
 	}
 
 	@Override

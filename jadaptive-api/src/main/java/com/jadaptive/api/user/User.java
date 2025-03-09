@@ -79,7 +79,7 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	String mobilePhone;
 	
-	@ObjectField(type = FieldType.IMAGE, resettable = true)
+	@ObjectField(type = FieldType.IMAGE)
 	@ObjectView(value = AVATAR_VIEW, weight = 9999)
 	@Validators({
 		@Validator(type = ValidationType.CLASSES, value = "p-3 bg-light"),

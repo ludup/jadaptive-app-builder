@@ -16,16 +16,14 @@ public @interface ObjectView {
 	FieldRenderer renderer() default FieldRenderer.DEFAULT;
 
 	String bundle() default "";
-
-	boolean disableEncoding() default false;
 	
-	boolean disableLabels() default false;
+//	boolean disableLabels() default false;
 	
 	/*String dependsOn() default "";
 	
 	String dependsValue() default "";*/
 	
-	boolean autosave() default false;
+//	boolean autosave() default false;
 	
-	boolean systemOnly() default false;
+//	boolean systemOnly() default false;
 }

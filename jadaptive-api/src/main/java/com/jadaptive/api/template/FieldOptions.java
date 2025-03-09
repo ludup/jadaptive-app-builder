@@ -24,5 +24,28 @@ public enum FieldOptions {
 	 * that declared this in its field. i.e.  the declaring object will be
 	 * deleted.
 	 */
-	CASCADE_ON_DELETED_REFERENCE
+	CASCADE_ON_DELETED_REFERENCE, 
+	
+	
+	/**
+	 * Can be used on hidden fields that you want to display in a wizard summary.
+	 */
+	SHOW_IN_WIZARD_SUMMARISE, 
+	
+	/**
+	 * Unknown status. Was a attribute of ObjectView and it is assumed this is for disabling
+	 * the HTML encoding of data in a form
+	 */
+	DISABLE_FORM_ENCODING,
+	
+	
+	/**
+	 * Only displayed to users in the System tenant. 
+	 */
+	SYSTEM_ONLY_VIEW, 
+	
+	/**
+	 * Objects with a field with this option are autosaved when he field changes.
+	 */
+	AUTOSAVE_VIEW
 }

@@ -12,6 +12,7 @@ import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
@@ -76,7 +77,7 @@ public class DefaultWizardSection extends WizardSection {
 	
 	private void renderObject(AbstractObject object, ObjectTemplate template, Element row) {
 		for(FieldTemplate field : template.getFields()) { 
-			if(field.isHidden() && !field.isSummarise()) {
+			if(field.isHidden() && !field.getOptions().contains(FieldOptions.SHOW_IN_WIZARD_SUMMARISE)) {
 				continue;
 			}
 			

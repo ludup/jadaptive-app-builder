@@ -26,7 +26,7 @@ public class TemplateViewField {
 		this.panel = panel;
 		this.objectPath = objectPath;
 		this.weight = view != null ? view.weight() : 0;
-		this.disableEncoding = Objects.nonNull(view) && view.disableEncoding();
+		this.disableEncoding = Objects.nonNull(view) && field.getOptions().contains(FieldOptions.DISABLE_FORM_ENCODING);
 		this.bundle = Objects.nonNull(view) && StringUtils.isNotBlank(view.bundle()) ? view.bundle() : panel.getBundle();
 		this.renderer = view != null ? view.renderer() : FieldRenderer.DEFAULT;
 		this.parentIsHidden = parentIsHidden;
@@ -62,9 +62,6 @@ public class TemplateViewField {
 		return buf.toString();
 	}
 
-	public boolean isDisableEncoding() {
-		return disableEncoding;
-	}
 	public String getFormVariable() {
 		return field.getFormVariable();
 	}
@@ -120,11 +117,11 @@ public class TemplateViewField {
 //	}
 	
 	public boolean isAutoSave() {
-		return Objects.nonNull(view) && view.autosave();
+		return Objects.nonNull(view) && field.getOptions().contains(FieldOptions.AUTOSAVE_VIEW);
 	}
 
 	public boolean isSystemOnly() {
-		return Objects.nonNull(view) && view.systemOnly();
+		return Objects.nonNull(view) && field.getOptions().contains(FieldOptions.SYSTEM_ONLY_VIEW);
 	}
 	
 	public boolean isHidden() {

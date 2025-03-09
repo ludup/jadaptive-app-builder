@@ -80,11 +80,6 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		
 		List<SearchField> search = new ArrayList<>();
 		search.add(SearchField.eq("uuid", value));
-		for(FieldTemplate field : def.getFields()) {
-			if(field.isAlternativeId() && NumberUtils.isCreatable(value)) {
-				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
-			}
-		}
 		Document document = db.get(def.getCollectionKey(),
 				getDatabase(def), 
 				SearchField.or(search.toArray(new SearchField[0])));
@@ -109,11 +104,6 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 	public void deleteByUUIDOrAltId(ObjectTemplate def, String value) throws RepositoryException, ObjectException, ValidationException {
 		List<SearchField> search = new ArrayList<>();
 		search.add(SearchField.eq("uuid", value));
-		for(FieldTemplate field : def.getFields()) {
-			if(field.isAlternativeId()) {
-				search.add(SearchField.eq(field.getResourceKey(), DocumentHelper.fromString(field, value)));
-			}
-		}
 		db.delete(def.getCollectionKey(), getDatabase(def), 
 				SearchField.or(search.toArray(new SearchField[0])));
 	}
