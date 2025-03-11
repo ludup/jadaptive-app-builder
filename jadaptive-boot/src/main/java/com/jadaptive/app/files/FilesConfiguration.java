@@ -10,7 +10,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.ui.pages.config.ConfigurationItem;
 
-@ObjectDefinition(resourceKey = FilesConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON)
+@ObjectDefinition(resourceKey = FilesConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON, system = true)
 @ConfigurationItem(bundle = FilesConfiguration.RESOURCE_KEY, icon = "fa-files", resourceKey = FilesConfiguration.RESOURCE_KEY)
 public class FilesConfiguration extends SingletonUUIDEntity {
 
