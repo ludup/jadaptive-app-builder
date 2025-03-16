@@ -515,6 +515,7 @@ $(function() {
 		e.preventDefault();
 		var name = $(this).data('name');
 		var url = $(this).data('url');
+		var returnTo = $(this).data('returnto');
 
 		bootbox.confirm({
     		message: '${userInterface:delete.text} ' + name + '?',
@@ -539,7 +540,11 @@ $(function() {
 					    type: 'DELETE',
 					    dataType: 'JSON',
 					    complete: function() {
-					        window.location = window.location.href;
+							if(!returnTo) {
+					        	window.location = window.location.href;
+							} else {
+								window.location = returnTo;
+							}
 					    }
 					});
 		        }

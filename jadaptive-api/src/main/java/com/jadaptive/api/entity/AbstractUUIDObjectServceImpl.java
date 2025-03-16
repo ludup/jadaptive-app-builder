@@ -3,6 +3,7 @@ package com.jadaptive.api.entity;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.SearchField;
@@ -36,6 +37,18 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 		objectDatabase.saveOrUpdate(object);
 		afterSave(object);
 		return object.getUuid();
+	}
+	
+	@Override
+	public void createIfNotExisting(T obj) {
+		if(StringUtils.isBlank(obj.getUuid())) {
+			throw new IllegalArgumentException("Expected UUIDDocument with initialised UUID value!");
+		}
+		try {
+			objectDatabase.get(obj.getUuid(), getResourceClass());
+		} catch(ObjectNotFoundException e) { 
+			saveOrUpdate(obj);
+		}
 	}
 	
 	@Override

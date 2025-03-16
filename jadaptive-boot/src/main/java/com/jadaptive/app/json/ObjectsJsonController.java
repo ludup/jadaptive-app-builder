@@ -120,7 +120,9 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 	@RequestMapping(value="/app/api/objects/{resourceKey}/{uuid}", method = RequestMethod.DELETE, produces = {"application/json"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
-	public RequestStatus delete(HttpServletRequest request, @PathVariable String resourceKey, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
+	public RequestStatus delete(HttpServletRequest request, 
+			@PathVariable String resourceKey,
+			@PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
 
 		setupUserContext(request);
 		
@@ -148,6 +150,7 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 		
 		try {
 			objectService.delete(resourceKey, uuid);
+			Feedback.success("default", "object.deleted", name);
 			return new RequestStatusImpl();
 		} catch (Throwable e) {
 			if(log.isErrorEnabled()) {

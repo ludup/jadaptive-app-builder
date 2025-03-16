@@ -70,6 +70,7 @@ import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.ImageFormInput;
 import com.jadaptive.api.ui.renderers.form.JavascriptEditorFormInput;
+import com.jadaptive.api.ui.renderers.form.MarkdownEditorInput;
 import com.jadaptive.api.ui.renderers.form.MultipleAttachmentInput;
 import com.jadaptive.api.ui.renderers.form.MultipleSelectionFormInput;
 import com.jadaptive.api.ui.renderers.form.MultipleTagsFormInput;
@@ -136,6 +137,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	
 	protected ThreadLocal<RenderScope> formRenderer = new ThreadLocal<>();
 	protected ThreadLocal<String> formHandler = new ThreadLocal<>();
+	protected ThreadLocal<Element> currentElement = new ThreadLocal<>(); 
+	
+	public ObjectTemplate getCurrentTemplate() {
+		return currentTemplate.get();
+	}
 	
 	protected void process(Document contents, Page page, ObjectTemplate template, AbstractObject object, FieldView scope) throws IOException {
 
@@ -407,140 +413,146 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 
 	private void renderField(Element element, AbstractObject obj, TemplateViewField fieldView,  FieldView scope, TemplateView panel) throws IOException {
 		
-		FieldTemplate field = fieldView.getField();
-		boolean decorate = field.getMetaValueBool("decorate", true);
-		if(field.getCollection()) {
-			renderCollection(element, obj, fieldView, scope, panel); 
-		} else {
-			switch(field.getFieldType()) {
-			case TEMPLATE_REFERENCE:
-			{
-				String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
-				ObjectTemplate objectTemplate = templateService.get(objectType);
-				String uuid = null;
-				String name = null;
-				if(Objects.nonNull(obj)) {
-					AbstractObject ref = obj.getChild(fieldView.getField());
-					if(Objects.nonNull(ref)) {
-						uuid = ref.getUuid();
-						name = (String) ref.getValue("name");
-					}
-				}
-				
-				AbstractObject ref = obj.getChild(field);
-				if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
-					DropdownFormInput dropdown = new DropdownFormInput(fieldView);
-					dropdown.renderInput(element, "", scope == FieldView.READ);
-					for(String resourceKey : objectTemplate.getChildTemplates()) {
-						dropdown.addI18nValue(resourceKey, resourceKey + ".name");
-					}
-					if(Objects.nonNull(ref)) {
-						dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
-					}
-				} else {
-					FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
-							String.format("/app/api/templates/%s/table", objectType),
-							"name",fieldView.getFormVariable(), "uuid");
-					if(!decorate) {
-						input.diableDecoration();
-					}
-					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
-				}
-
-				break;
-			}
-			case OBJECT_REFERENCE:
-			{
-				String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
-				ObjectTemplate objectTemplate = templateService.get(objectType);
-				String uuid = null;
-				String name = null;
-				if(Objects.nonNull(obj)) {
-					AbstractObject ref = obj.getChild(fieldView.getField());
-					if(Objects.nonNull(ref)) {
-						uuid = ref.getUuid();
-						name = (String) ref.getValue("name");
-					}
-				}
-				
-				AbstractObject ref = obj.getChild(field);
-				if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
-					DropdownFormInput dropdown = new DropdownFormInput(fieldView);
-					if(!decorate) {
-						dropdown.disableDecoration();
-					}
-					dropdown.renderInput(element, "", scope == FieldView.READ);
-					if(scope!=FieldView.READ) {
-						for(AbstractObject o : objectService.list(objectType)) {
-							dropdown.addInputValue(o.getUuid(), (String) o.getValue(objectTemplate.getNameField()));
+		currentElement.set(element);
+		
+		try {
+			FieldTemplate field = fieldView.getField();
+			boolean decorate = field.getMetaValueBool("decorate", true);
+			if(field.getCollection()) {
+				renderCollection(element, obj, fieldView, scope, panel); 
+			} else {
+				switch(field.getFieldType()) {
+				case TEMPLATE_REFERENCE:
+				{
+					String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
+					ObjectTemplate objectTemplate = templateService.get(objectType);
+					String uuid = null;
+					String name = null;
+					if(Objects.nonNull(obj)) {
+						AbstractObject ref = obj.getChild(fieldView.getField());
+						if(Objects.nonNull(ref)) {
+							uuid = ref.getUuid();
+							name = (String) ref.getValue("name");
 						}
 					}
-					if(Objects.nonNull(ref)) {
-						dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
+					
+					AbstractObject ref = obj.getChild(field);
+					if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
+						DropdownFormInput dropdown = new DropdownFormInput(fieldView);
+						dropdown.renderInput(element, "", scope == FieldView.READ);
+						for(String resourceKey : objectTemplate.getChildTemplates()) {
+							dropdown.addI18nValue(resourceKey, resourceKey + ".name");
+						}
+						if(Objects.nonNull(ref)) {
+							dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
+						}
+					} else {
+						FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
+								String.format("/app/api/templates/%s/table", objectType),
+								"name",fieldView.getFormVariable(), "uuid");
+						if(!decorate) {
+							input.diableDecoration();
+						}
+						input.renderInput(element, uuid, name, false, scope == FieldView.READ);
 					}
-				} else {
-					FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
-							fieldView.getField().getMetaValue("url", String.format("/app/api/%s/%s/table", 
-									currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
-									objectType)),
-							"name", fieldView.getFormVariable(), "uuid");
-					if(!decorate) {
-						input.diableDecoration();
-					}
-					input.renderInput(element, uuid, name, false, scope == FieldView.READ);
+	
+					break;
 				}
-
-				break;
+				case OBJECT_REFERENCE:
+				{
+					String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
+					ObjectTemplate objectTemplate = templateService.get(objectType);
+					String uuid = null;
+					String name = null;
+					if(Objects.nonNull(obj)) {
+						AbstractObject ref = obj.getChild(fieldView.getField());
+						if(Objects.nonNull(ref)) {
+							uuid = ref.getUuid();
+							name = (String) ref.getValue("name");
+						}
+					}
+					
+					AbstractObject ref = obj.getChild(field);
+					if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
+						DropdownFormInput dropdown = new DropdownFormInput(fieldView);
+						if(!decorate) {
+							dropdown.disableDecoration();
+						}
+						dropdown.renderInput(element, "", scope == FieldView.READ);
+						if(scope!=FieldView.READ) {
+							for(AbstractObject o : objectService.list(objectType)) {
+								dropdown.addInputValue(o.getUuid(), (String) o.getValue(objectTemplate.getNameField()));
+							}
+						}
+						if(Objects.nonNull(ref)) {
+							dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
+						}
+					} else {
+						FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
+								fieldView.getField().getMetaValue("url", String.format("/app/api/%s/%s/table", 
+										currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
+										objectType)),
+								"name", fieldView.getFormVariable(), "uuid");
+						if(!decorate) {
+							input.diableDecoration();
+						}
+						input.renderInput(element, uuid, name, false, scope == FieldView.READ);
+					}
+	
+					break;
+				}
+				case OBJECT_EMBEDDED:
+	//				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
+					throw new IllegalStateException("Embedded object field should not be processed here");
+				default:	
+					renderFormField(element, obj, fieldView, scope, panel);
+				}
+				
+				
 			}
-			case OBJECT_EMBEDDED:
-//				renderFormField(template, element, Objects.nonNull(obj) ? obj.getChild(field) : null, field, properties, view);
-				throw new IllegalStateException("Embedded object field should not be processed here");
-			default:	
-				renderFormField(element, obj, fieldView, scope, panel);
+			Elements thisElement = element.select("#" + field.getResourceKey());
+			processDynamicElements(thisElement, fieldView, obj);
+			
+			if(!field.getViews().isEmpty()) {
+				if(!field.getViews().contains(scope)) {
+					if(scope != FieldView.READ) {
+						/**
+						 * Edit will need hidden fields 
+						 * 
+						 * TODO encrypt these
+						 */
+						element.addClass("d-none");
+						return;
+					}
+				}
 			}
 			
 			
-		}
-		Elements thisElement = element.select("#" + field.getResourceKey());
-		processDynamicElements(thisElement, fieldView, obj);
-		
-		if(!field.getViews().isEmpty()) {
-			if(!field.getViews().contains(scope)) {
-				if(scope != FieldView.READ) {
-					/**
-					 * Edit will need hidden fields 
-					 * 
-					 * TODO encrypt these
-					 */
-					element.addClass("d-none");
-					return;
-				}
-			}
-		}
-		
-		
-		
-		if(fieldView.isHidden()) {
-			element.addClass("d-none");
-		} if(!field.getViews().contains(scope)) {
-			switch(scope) {
-			case UPDATE:
+			
+			if(fieldView.isHidden()) {
 				element.addClass("d-none");
-				break;
-			default:
-				element.empty();
+			} if(!field.getViews().contains(scope)) {
+				switch(scope) {
+				case UPDATE:
+					element.addClass("d-none");
+					break;
+				default:
+					element.empty();
+				}
+			} else if(Objects.isNull(obj) && 
+					field.isReadOnly() &&
+					fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
+				element.addClass("d-none");
 			}
-		} else if(Objects.isNull(obj) && 
-				field.isReadOnly() &&
-				fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
-			element.addClass("d-none");
-		}
-		
-		Set<String> ignores = ignoreResources.get();
-		if(Objects.nonNull(ignores) && ignores.contains(field.getResourceKey())) {
-			element.addClass("d-none");
-		} else if(!tenantService.getCurrentTenant().isSystem() && fieldView.isSystemOnly()) {
-			element.addClass("d-none");
+			
+			Set<String> ignores = ignoreResources.get();
+			if(Objects.nonNull(ignores) && ignores.contains(field.getResourceKey())) {
+				element.addClass("d-none");
+			} else if(!tenantService.getCurrentTenant().isSystem() && fieldView.isSystemOnly()) {
+				element.addClass("d-none");
+			}
+		} finally {
+			currentElement.remove();
 		}
 	}
 	
@@ -1002,6 +1014,15 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			case RICH_EDITOR:
 			{
 				RichTextEditorInput render = new RichTextEditorInput(fieldView, currentDocument.get());
+				if(!decorate) {
+					render.disableDecoration();
+				}
+				render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
+				break;
+			}
+			case MARKDOWN_EDITOR:
+			{
+				MarkdownEditorInput render = new MarkdownEditorInput(fieldView, currentDocument.get());
 				if(!decorate) {
 					render.disableDecoration();
 				}

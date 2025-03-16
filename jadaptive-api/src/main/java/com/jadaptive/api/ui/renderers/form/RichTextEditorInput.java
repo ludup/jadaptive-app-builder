@@ -60,7 +60,7 @@ public class RichTextEditorInput extends FieldInputRender {
 		+ " tinymce.init({\n"
 		+ "   mode : '" + resourceKey + "',"
 		+ "	  selector: '#" + resourceKey + "', \n"
-		+ "	  plugins: 'autosave link',\n"
+		+ "	  plugins: 'autosave link image',\n"
 		+ "	  license_key: 'gpl',\n"
 		+ "	  convert_urls: false,\n"
 		+ "   link_assume_external_targets: true,\n"

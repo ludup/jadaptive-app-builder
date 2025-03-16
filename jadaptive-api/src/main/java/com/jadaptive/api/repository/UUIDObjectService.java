@@ -36,6 +36,6 @@ public interface UUIDObjectService<T extends UUIDDocument> {
 
 	default boolean onObjectStashed(T obj) { return false; }
 
-	Collection<T> collection(SearchField... fields);;
+	Collection<T> collection(SearchField... fields);
 
 }

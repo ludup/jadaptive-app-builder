@@ -2,6 +2,7 @@ package com.jadaptive.api.entity;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.AssignableObjectDatabase;
@@ -30,6 +31,18 @@ public abstract class AbstractAssignableUUIDObjectServiceImpl <T extends Assigna
 		return object.getUuid();
 	}
 
+	@Override
+	public void createIfNotExisting(T obj) {
+		if(StringUtils.isBlank(obj.getUuid())) {
+			throw new IllegalArgumentException("Expected UUIDDocument with initialised UUID value!");
+		}
+		try {
+			objectDatabase.getObjectByUUID(getResourceClass(),obj.getUuid());
+		} catch(ObjectNotFoundException e) { 
+			saveOrUpdate(obj);
+		}
+	}
+	
 	protected void beforeSave(T object) {
 		
 	}

@@ -3,6 +3,7 @@ package com.jadaptive.api.entity;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.PersonalObjectDatabase;
@@ -23,12 +24,29 @@ public abstract class AbstractPersonalUUIDObjectServceImpl<T extends PersonalUUI
 	public T getObjectByUUID(String uuid) {
 		return objectDatabase.getObjectByUUID(getResourceClass(), uuid);
 	}
+	
+	
 
 	@Override
 	public String saveOrUpdate(T object) {
 		validateSave(object);
 		objectDatabase.saveOrUpdate(object, getCurrentUser());
 		return object.getUuid();
+	}
+	
+	@Override
+	public void createIfNotExisting(T obj) {
+		if(StringUtils.isBlank(obj.getUuid())) {
+			throw new IllegalArgumentException("Expected UUIDDocument with initialised UUID value!");
+		}
+		if(StringUtils.isBlank(obj.getOwnerUUID())) {
+			obj.setOwnerUUID(getCurrentUser().getUuid());
+		}
+		try {
+			objectDatabase.getObjectByUUID(getResourceClass(),obj.getUuid());
+		} catch(ObjectNotFoundException e) { 
+			saveOrUpdate(obj);
+		}
 	}
 
 	@Override

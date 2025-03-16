@@ -22,6 +22,10 @@ submit : function(form, callback, invalid) {
            data: JadaptiveUtils.processedFormData(form, false),
            success: function(data)
            {
+				$('.mdeEditor').each(function() {
+					$(this).data('simplemde').clearAutosavedValue();
+				});
+				
 				if(callback) {
 					callback(data);
 				} else {

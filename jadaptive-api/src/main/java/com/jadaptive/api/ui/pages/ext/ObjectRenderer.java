@@ -28,10 +28,13 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 	ThreadLocal<String> actionURL = new ThreadLocal<>();
 	ThreadLocal<AbstractObject> object = new ThreadLocal<>();
 	
-	
 	@Override
 	public String getName() {
 		return "objectRenderer";
+	}
+	
+	public AbstractObject getCurrentObject() {
+		return object.get();
 	}
 
 	 @Override

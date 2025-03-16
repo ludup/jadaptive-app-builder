@@ -1,0 +1,34 @@
+.EasyMDEContainer .CodeMirror {
+    color: #ccc;
+    border-color: #333;
+    background-color: #000;
+}
+.EasyMDEContainer .cm-s-easymde .CodeMirror-cursor {
+    border-color: #ccc;
+}
+
+.EasyMDEContainer .editor-toolbar > * {
+    color: #ccc;
+}
+
+.EasyMDEContainer .editor-toolbar > .active, .editor-toolbar > button:hover, .editor-preview pre, .cm-s-easymde .cm-comment {
+    background-color: #444;
+}
+
+.EasyMDEContainer .CodeMirror-fullscreen {
+    background: #000;
+}
+
+.editor-toolbar {
+    border-top: 1px solid #333;
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+}
+
+.editor-toolbar.fullscreen {
+    background: #000;
+}
+
+.editor-preview {
+    background: #000;
+}
