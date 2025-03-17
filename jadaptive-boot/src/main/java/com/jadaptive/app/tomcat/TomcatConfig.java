@@ -1,7 +1,9 @@
-package com.jadaptive.app;
+package com.jadaptive.app.tomcat;
 
 import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.embedded.tomcat.TomcatProtocolHandlerCustomizer;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Configuration;
@@ -24,5 +26,15 @@ public class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWeb
 	        connector.setPort(httpPort);
 	        factory.addAdditionalTomcatConnectors(connector);
         }
+        
+        factory.addProtocolHandlerCustomizers(new TomcatProtocolHandlerCustomizer<Http11NioProtocol>() {
+
+			@Override
+			public void customize(Http11NioProtocol protocolHandler) {
+				protocolHandler.setSslImplementationName(CustomSSLImplementation.class.getCanonicalName());
+			}
+        	
+        });
+   
     }
 }

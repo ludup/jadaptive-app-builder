@@ -304,6 +304,10 @@ public class Utils {
 		}
 		return "";
 	}
+	
+	public static boolean isIPAddress(String ip) {
+		return IPAddressValidator.getInstance().validate(ip);
+	}
 
 	public static String base64Encode(byte[] bytes) {
 		return java.util.Base64.getEncoder().encodeToString(bytes);

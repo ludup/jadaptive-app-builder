@@ -27,4 +27,8 @@ public interface App {
 	static <T> T bean(Class<T> clz) {
 		return ApplicationServiceImpl.getInstance().getBean(clz);
 	}
+	
+	static<T> T wire(T obj) {
+		return ApplicationServiceImpl.getInstance().autowire(obj);
+	}
 }

@@ -5,10 +5,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.security.KeyManagementException;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
@@ -78,8 +80,7 @@ public class Application {
 		 
 		 try {
 			checkDefaultCertificate();
-		 } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException
-				| MismatchedCertificateException e) {
+		 } catch (Throwable e) {
 			log.error("Failed to setup default SSL certificate", e);
 			return;
 		 }
@@ -120,12 +121,11 @@ public class Application {
 		}
 	}
 	
-	private static void checkDefaultCertificate() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, MismatchedCertificateException {
+	private static void checkDefaultCertificate() throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException, MismatchedCertificateException, KeyManagementException, UnrecoverableKeyException {
 		
-		//KeyPair key = null;
-		//X509Certificate[] chain = null;
 		X509Certificate cert = null;
 		File keystoreFile = new File( ApplicationProperties.getValue("spring.ssl.bundle.jks.default.keystore.location", "conf.d/default/cert.p12"));
+		KeyStore ks;
 		
 		if(!keystoreFile.exists()) {
 			
@@ -138,7 +138,7 @@ public class Application {
 					 "JADAPTIVE Application", 
 					 "JADAPTIVE Limited", 
 					 "Penzance", "Cornwall", "GB", kp, "SHA256WithRSAEncryption");
-			KeyStore ks = X509CertificateUtils.createPKCS12Keystore(kp, 
+			ks = X509CertificateUtils.createPKCS12Keystore(kp, 
 					 new X509Certificate[] { cert },
 					 ApplicationProperties.getValue("spring.ssl.bundle.jks.default.key.alias", "server"),
 					 ApplicationProperties.getValue("spring.ssl.bundle.jks.default.keystore.password", "changeit").toCharArray());
@@ -150,6 +150,6 @@ public class Application {
 						"spring.ssl.bundle.jks.default.keystore.password", 
 							"changeit").toCharArray());
 			}
-		}
+		} 
 	}
 }
