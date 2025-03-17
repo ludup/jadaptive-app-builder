@@ -18,14 +18,13 @@ import com.jadaptive.api.app.certificates.Keyring;
 import com.jadaptive.utils.Utils;
 
 public final class SniKeyManager extends X509ExtendedKeyManager {
-	private final X509ExtendedKeyManager keyManager;
+
 	private final String defaultAlias = "server";
 
 	@Autowired
 	private Keyring keyring;
 	
-	public SniKeyManager(X509ExtendedKeyManager keyManager) {
-		this.keyManager = keyManager;
+	public SniKeyManager() {
 	}
 
 	@Override

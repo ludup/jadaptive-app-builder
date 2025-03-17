@@ -138,16 +138,21 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	protected ThreadLocal<RenderScope> formRenderer = new ThreadLocal<>();
 	protected ThreadLocal<String> formHandler = new ThreadLocal<>();
 	protected ThreadLocal<Element> currentElement = new ThreadLocal<>(); 
+	protected ThreadLocal<Page> currentPage = new ThreadLocal<>(); 
 	
 	public ObjectTemplate getCurrentTemplate() {
 		return currentTemplate.get();
+	}
+	
+	public Page getCurrentPage() {
+		return currentPage.get();
 	}
 	
 	protected void process(Document contents, Page page, ObjectTemplate template, AbstractObject object, FieldView scope) throws IOException {
 
 		currentDocument.set(contents);
 		currentTemplate.set(template);
-		
+		currentPage.set(page);
     	try {
     		securityProperties.set(propertyService.getOverrideProperties(
 					SecurityScope.TENANT, 
@@ -239,6 +244,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			throw new IOException(e.getMessage(), e);
 		} finally {
 			currentDocument.remove();
+			currentTemplate.remove();
+			currentPage.remove();
 			securityProperties.remove();
 			childObjects.remove();
 		}

@@ -165,6 +165,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return modules;
 	}
 		
+	@SuppressWarnings("unused")
 	private Collection<AuthenticationModule> resolveMissingModules(User user, Collection<AuthenticationModule> modules) {
 		
 		List<AuthenticationModule> missing = new ArrayList<>();

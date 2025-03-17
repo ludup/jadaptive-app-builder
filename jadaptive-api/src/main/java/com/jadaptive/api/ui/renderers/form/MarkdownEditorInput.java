@@ -8,9 +8,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.app.App;
-import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.TemplateViewField;
+import com.jadaptive.api.ui.ObjectPage;
+import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.pages.ext.BootstrapThemeService;
 import com.jadaptive.api.ui.pages.ext.ObjectRenderer;
@@ -62,14 +63,14 @@ public class MarkdownEditorInput extends FieldInputRender {
 		);
 
 		ObjectRenderer renderer = App.bean(ObjectRenderer.class);
-		AbstractObject obj = renderer.getCurrentObject();
-		String uniqueId = (obj == null ? "__NEW__" : obj.getUuid()) + "_" + renderer.getCurrentTemplate().getResourceKey() + "_" + resourceKey;
+		Page page = renderer.getCurrentPage();
+		String uniqueId = (page != null && page instanceof ObjectPage ? ((ObjectPage)page).getObject().getUuid() : "__") + "_" + renderer.getCurrentTemplate().getResourceKey() + "_" + resourceKey;
 		
 		String tinyMCEScript = "$(function() { \n" 
 		+ "  var simplemde = new EasyMDE({\n"
 		+ "      element: $(\"#" + resourceKey + "\")[0],\n"
 	    + "      forceSync: true,"
-//		+ "      autosave: { enabled: true, uniqueId: '" + uniqueId + "', delay: 1000 },"
+		+ "      autosave: { enabled: true, uniqueId: '" + uniqueId + "', delay: 1000 },"
 		+ "      spellChecker: true"
 		+ "  });\n"
 		+ "  $('#" + resourceKey + "').data('simplemde', simplemde);\n"

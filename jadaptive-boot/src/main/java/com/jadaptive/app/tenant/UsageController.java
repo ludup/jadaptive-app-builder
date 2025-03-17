@@ -62,21 +62,22 @@ public class UsageController extends AuthenticatedController {
 				
 				revenue = new ArrayList<>();
 
-				Date from = DateUtils.addDays(Utils.today(), -days);
+				Calendar from = Calendar.getInstance();
+				from.setTime(DateUtils.addDays(Utils.today(), -days));
 				
 				while(from.before(Utils.today())) {
 						
 					if(Boolean.getBoolean("jadaptive.development")) {
-						if(from.getDay() == Calendar.SUNDAY || from.getDay() == Calendar.SATURDAY) {
-							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, hint / 2)));
+						if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+							revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint / 2)));
 						} else {
-							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, hint)));
+							revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint)));
 						}
 					} else {
-						revenue.add(new BarChartDateLongValue(from, usageService.getDailyValue(key, from)));
+						revenue.add(new BarChartDateLongValue(from.getTime(), usageService.getDailyValue(key, from.getTime())));
 					}
 						
-					from = DateUtils.addDays(from, 1);
+					from.setTime(DateUtils.addDays(from.getTime(), 1));
 				}
 				
 				if(!Boolean.getBoolean("jadaptive.development")) {
@@ -112,23 +113,24 @@ public class UsageController extends AuthenticatedController {
 				
 				revenue = new ArrayList<>();
 
-				Date from = DateUtils.addDays(Utils.today(), -days);
-				Date to = DateUtils.addDays(from, 1);
+				Calendar from = Calendar.getInstance();
+				from.setTime(DateUtils.addDays(Utils.today(), -days));
+				Date to = DateUtils.addDays(from.getTime(), 1);
 				
 				while(from.before(Utils.today())) {
 						
 					if(Boolean.getBoolean("jadaptive.development")) {
-						if(from.getDay() == Calendar.SUNDAY || from.getDay() == Calendar.SATURDAY) {
-							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, hint / 2)));
+						if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+							revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint / 2)));
 						} else {
-							revenue.add(new BarChartDateLongValue(from, new Random().nextLong(0, hint)));
+							revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint)));
 						}
 					} else {
-						revenue.add(new BarChartDateLongValue(from, usageService.sumAnd(from, to, keys.split(","))));
+						revenue.add(new BarChartDateLongValue(from.getTime(), usageService.sumAnd(from.getTime(), to, keys.split(","))));
 					}
 					
-					to = from;
-					from = DateUtils.addDays(from, 1);
+					to = from.getTime();
+					from.setTime(DateUtils.addDays(from.getTime(), 1));
 				}
 				
 				if(!Boolean.getBoolean("jadaptive.development")) {
