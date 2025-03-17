@@ -19,7 +19,7 @@ import com.jadaptive.utils.Utils;
 
 public final class SniKeyManager extends X509ExtendedKeyManager {
 
-	private final String defaultAlias = "server";
+	private final String defaultAlias = "default";
 
 	@Autowired
 	private Keyring keyring;

@@ -147,56 +147,57 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 		}
 
 
-			try {
-				// Add the server key store entries
-				Enumeration<String> aliasEnum = serverKeyStore.aliases();
-				while (aliasEnum.hasMoreElements()) {
-					var alias = aliasEnum.nextElement();
-					var key = serverKeyStore.getKey(alias, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
-					var cert = decodeCertificate(serverKeyStore.getCertificate(alias).getEncoded());
-					var certChain = decodeCertificates(serverKeyStore.getCertificateChain(alias));
-					
-					KeyHolder entry = null;
-					if (key == null) {
-						if (cert == null) {
-							LOG.warn("Not a key or a cert.");
-						} else {
-							if(certChain == null)
-								entry = new KeyHolder(KeyType.CERTIFICATE, alias, key, cert);
-							else
-								entry = new KeyHolder(KeyType.CERTIFICATE, alias, key, certChain);
-						}
+		try {
+			// Add the server key store entries
+			Enumeration<String> aliasEnum = serverKeyStore.aliases();
+			while (aliasEnum.hasMoreElements()) {
+				var alias = aliasEnum.nextElement();
+				var key = serverKeyStore.getKey(alias, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+				var cert = decodeCertificate(serverKeyStore.getCertificate(alias).getEncoded());
+				var certChain = decodeCertificates(serverKeyStore.getCertificateChain(alias));
+				
+				KeyHolder entry = null;
+				if (key == null) {
+					if (cert == null) {
+						LOG.warn("Not a key or a cert.");
 					} else {
-						if (cert == null) {
-							entry = new KeyHolder(KeyType.CERTIFICATE, alias, key);
-						} else {
-							if(certChain == null)
-								entry = new KeyHolder(KeyType.PRIVATE_KEY_AND_CERTIFICATE, alias, key, cert);
-							else
-								entry = new KeyHolder(KeyType.PRIVATE_KEY_AND_CERTIFICATE, alias, key, certChain);
-						}
+						if(certChain == null)
+							entry = new KeyHolder(KeyType.CERTIFICATE, alias, key, cert);
+						else
+							entry = new KeyHolder(KeyType.CERTIFICATE, alias, key, certChain);
 					}
-					if (entry != null) {
-						entries.add(entry);
+				} else {
+					if (cert == null) {
+						entry = new KeyHolder(KeyType.CERTIFICATE, alias, key);
+					} else {
+						if(certChain == null)
+							entry = new KeyHolder(KeyType.PRIVATE_KEY_AND_CERTIFICATE, alias, key, cert);
+						else
+							entry = new KeyHolder(KeyType.PRIVATE_KEY_AND_CERTIFICATE, alias, key, certChain);
 					}
 				}
-
-				// Add the CA certs
-				aliasEnum = caKeyStore.aliases();
-				while (aliasEnum.hasMoreElements()) {
-					var alias = aliasEnum.nextElement();
-					var cert =decodeCertificate(caKeyStore.getCertificate(alias).getEncoded());
-					var entry = new KeyHolder(KeyType.CA, alias, null, cert);
+				if (entry != null) {
+					if(Objects.isNull(defaultKeyHolder)) {
+						defaultKeyHolder = entry;
+					}
 					entries.add(entry);
 				}
-				
-				keyEntries.put(name, entries);
-			} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
-				throw new IOException(e.getMessage(), e);
-			} catch (CertificateEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+
+			// Add the CA certs
+			aliasEnum = caKeyStore.aliases();
+			while (aliasEnum.hasMoreElements()) {
+				var alias = aliasEnum.nextElement();
+				var cert =decodeCertificate(caKeyStore.getCertificate(alias).getEncoded());
+				var entry = new KeyHolder(KeyType.CA, alias, null, cert);
+				entries.add(entry);
+			}
+			
+			keyEntries.put(name, entries);
+			
+		} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateEncodingException e) {
+			throw new IOException(e.getMessage(), e);
+		}
 
 	}
 
