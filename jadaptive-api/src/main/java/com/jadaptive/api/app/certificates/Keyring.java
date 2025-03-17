@@ -15,4 +15,6 @@ public interface Keyring {
 
 	PrivateKey getPrivateKey(String alias);
 
+	String[] getAliases();
+
 }

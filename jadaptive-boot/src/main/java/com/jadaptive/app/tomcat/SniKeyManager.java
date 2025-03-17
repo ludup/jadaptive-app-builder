@@ -45,7 +45,7 @@ public final class SniKeyManager extends X509ExtendedKeyManager {
 
 	@Override
 	public String[] getServerAliases(String keyType, Principal[] issuers) {
-		return keyManager.getServerAliases(keyType, issuers);
+		return keyring.getAliases();
 	}
 
 	@Override

@@ -241,4 +241,9 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 		}
 		return null;
 	}
+
+	@Override
+	public String[] getAliases() {
+		return keyEntries.keySet().toArray(new String[0]);
+	}
 }
