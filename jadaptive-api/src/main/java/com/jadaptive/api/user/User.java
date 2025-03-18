@@ -9,6 +9,8 @@ import java.util.Date;
 import com.jadaptive.api.db.Transactional;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
+import com.jadaptive.api.permissions.FeatureGroup;
+import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.DynamicColumn;
@@ -43,6 +45,7 @@ requiresUpdate = true, sortField = "username")
 @TableAction(resourceKey = "disableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-lock", target = Target.ROW, url = "/app/api/accounts/disable/{uuid}", filter = EnabledAccountAction.class)
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
+@LicensedFeature(group = FeatureGroup.FOUNDATION, includedWithPAYG = true, value = User.RESOURCE_KEY)
 public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	public static final String RESOURCE_KEY = "users";

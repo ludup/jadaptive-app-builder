@@ -5,7 +5,10 @@ import java.util.Collection;
 
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.app.App;
+import com.jadaptive.api.role.Role;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.tenant.FeatureEnablementService;
 
 @Component
 public class SessionsMenu implements ApplicationMenu {
@@ -23,6 +26,11 @@ public class SessionsMenu implements ApplicationMenu {
 	@Override
 	public String getPath() {
 		return "/app/ui/search/" + Session.RESOURCE_KEY;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return App.bean(FeatureEnablementService.class).isEnabled(Session.RESOURCE_KEY);
 	}
 
 	@Override

@@ -20,7 +20,7 @@ public class SearchField {
 	SearchField[] fields;
 	private boolean marked;
 	
-	private SearchField(Type type, SearchField... fields) {
+	public SearchField(Type type, SearchField... fields) {
 		switch(type) {
 		case OR:
 		case AND:
@@ -32,7 +32,7 @@ public class SearchField {
 		this.type = type;
 	}
 	
-	private SearchField(Type type, String searchField, Object... searchValue) {
+	public SearchField(Type type, String searchField, Object... searchValue) {
 		super();
 		if(ObjectUtils.isEmpty(searchField) || searchField.equalsIgnoreCase("UUID")) {
 			searchField = "_id";

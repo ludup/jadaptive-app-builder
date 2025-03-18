@@ -12,18 +12,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.jadaptive.api.app.App;
 import com.jadaptive.api.countries.Country;
-import com.jadaptive.api.countries.InternationalService;
-import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.SearchUtils;
 import com.jadaptive.api.permissions.AccessDeniedException;
-import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldTemplate;
@@ -31,13 +25,8 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
-import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
-import com.jadaptive.api.ui.FormProcessor;
 import com.jadaptive.api.ui.Html;
-import com.jadaptive.api.ui.pages.TemplatePage;
-import com.jadaptive.api.ui.pages.ext.TableRenderer;
-import com.jadaptive.api.ui.pages.objects.AbstractSearchPage.SearchForm;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
@@ -45,42 +34,18 @@ import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 
-public abstract class AbstractSearchPage extends TemplatePage implements FormProcessor<SearchForm> {
+public abstract class AbstractSearchPage extends BaseSearchPage {
 
 	static Logger log = LoggerFactory.getLogger(AbstractSearchPage.class);
 	
-	@Autowired
-	private PermissionService permissionService; 
-	
-	@Autowired
-	private App applicationService; 
-	
-	@Autowired
-	private InternationalService internationalService; 
-	
-	@Autowired
-	private ClassLoaderService classService; 
-	
-	protected Integer start = 0;
-	protected Integer length = 10;
 	protected String searchField;
 	protected String searchValue;
 	protected String searchValueText;
 	protected String searchModifier;
 	protected boolean useRegex;
-	protected String sortColumn;
-	protected SortOrder sortOrder;
-	protected TableView tableView;
-	
-	@Override
-	protected void beforeGenerateContent(Document document) {
-		
-		super.beforeGenerateContent(document);
-		
-		tableView = templateClazz.getAnnotation(TableView.class);
-	}
 
-	public final void processForm(Document document, SearchForm form) throws IOException {
+	@Override
+	public final void onProcessForm(Document document, SearchForm form) throws IOException {
 		
 		searchField = form.getSearchColumn();
 		setCachedValue("searchField", searchField);
@@ -96,22 +61,6 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 		useRegex = form.getUseRegex();
 		setCachedValue("useRegex", String.valueOf(useRegex));
-
-		start = form.getStart();
-		setCachedValue("start", String.valueOf(start));
-		
-		length = form.getLength();
-		length =  Math.max(length, 10);
-		
-		setCachedValue("length", String.valueOf(length));
-
-		sortColumn = Objects.toString(form.getSortColumn(), tableView.sortField());
-		setCachedValue("sortColumn", sortColumn);
-		
-		sortOrder = SortOrder.valueOf(Objects.toString(form.getSortOrder(), tableView.sortOrder().name()));
-		setCachedValue("sortOrder", sortOrder.name());
-		
-		generateTable(document);
 	}
 
 	@Override
@@ -127,26 +76,6 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	@Override
 	public final Class<?> getResourceClass() {
 		return AbstractSearchPage.class;
-	}
-
-	private String getCachedValue(String key, String defaultValue) {
-		String cachedValue = (String) Request.get().getSession().getAttribute(resourceKey + "." + key);
-		if(Objects.isNull(cachedValue)) {
-			return defaultValue;
-		}
-		return cachedValue;
-	}
-	
-	private int getCachedInt(String key, String sessionValue, int defaultValue) {
-		String value = getCachedValue(key, sessionValue);
-		if(Objects.nonNull(value)) {
-			return Integer.parseInt(value);
-		}
-		return defaultValue;
-	}
-	
-	private void setCachedValue(String key, String value) {
-		Request.get().getSession().setAttribute(resourceKey + "." + key, value);
 	}
 
 	@Override
@@ -222,104 +151,6 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	
 	}
 
-	protected String generateSearchPostURI() {
-		return String.format("/app/ui/%s/%s", getUri(), getResourceKey());
-	}
-
-	protected void generateTable(Document document) throws IOException {
-		
-		
-		DropdownInput searchColumns = new DropdownInput("searchColumn", "default");
-		searchColumns.disableIDAttribute();
-		document.selectFirst(".searchDropdownHolder").appendChild(searchColumns.renderInput());
-		
-		if(StringUtils.isBlank(searchField)) {
-			searchField = template.getDefaultColumn();
-		}
-		
-		Map<String,FieldTemplate> searchFieldTemplates = new HashMap<>();
-		generateSearchColumns(template, searchColumns, document, "", searchField, searchFieldTemplates);
-		
-		Element srchCol = document.selectFirst(".searchColumn");
-		srchCol.val(searchField);
-		srchCol.dataset().put("default-search-column", template.getDefaultColumn());
-		
-		Element table = document.selectFirst("#tableholder");
-		
-		if(StringUtils.isNotBlank(searchModifier)) {
-			searchValue = searchModifier + searchValue;
-		}
-		
-		if(log.isInfoEnabled()) {
-			if(StringUtils.isNotBlank(searchValue))
-				log.info("Searching for {} {}", searchField, searchValue);
-		}
-		
-		SearchField[] search = SearchUtils.generateSearch(searchField, searchValue, useRegex, searchFieldTemplates);
-		long totalObjects = generateCount(template, search);
-		
-		if(start > 0 && totalObjects <= start) {
-			start -= length;
-		}
-		
-		Collection<AbstractObject> objects = generateTable(template, start, length, searchFieldTemplates, search);
-		
-		boolean readOnly = false;
-		if(template.getScope()!=ObjectScope.PERSONAL && template.getPermissionProtected()) {
-			try {
-				permissionService.assertWrite(template.getResourceKey());
-			} catch(AccessDeniedException e) {
-				readOnly = true;
-			}
-		}
-
-		boolean filtered = search.length > 0;
-
-		TableRenderer renderer = applicationService.autowire(createTableRenderer(readOnly, template));
-		renderer.setObjects(objects);
-		renderer.setTotalObjects(totalObjects);
-		renderer.setTemplateClazz(templateClazz);
-		renderer.setSortColumn(sortColumn);
-		renderer.setSortOrder(sortOrder);
-		
-		table.insertChildren(0, renderer.render());
-
-		Element pagnation = table.selectFirst("#pagnation");
-		if(getNumberOfPages(totalObjects) < 2)
-			pagnation.parent().remove();
-		else {
-			pagnation.dataset().put("jad-filtered", String.valueOf(filtered));
-			renderPagination(totalObjects, pagnation);
-		}
-		
-		if (totalObjects == 0) {
-
-			var div = Html.div("mb-3");
-			if (filtered) {
-				div.appendChild(Html.i18nWithFallback("userInterface", "search.noMatch", template.getBundle(),
-						template.getResourceKey() + ".noMatch"));
-			} else {
-				/* No point in showing search form if there is nothing to search */
-				document.selectFirst("#searchForm").remove();
-				document.selectFirst("#simpleSearch").remove();
-				
-				if (table.getElementById("create") == null) {
-					div.appendChild(Html.i18nWithFallback("userInterface", "search.noResults", template.getBundle(),
-							template.getResourceKey() + ".noResults"));
-				} else {
-					div.appendChild(Html.i18nWithFallback("userInterface", "search.noResults.creatable",
-							template.getBundle(), template.getResourceKey() + ".noResults.createable"));
-				}
-			}
-			table.insertChildren(0, div);
-		}
-		
-	}
-
-	protected TableRenderer createTableRenderer(boolean readOnly, ObjectTemplate template) {
-		return new TableRenderer(readOnly, template);
-	}
-
 	private void generateSearchColumns(ObjectTemplate template, DropdownInput input, Document document, String parentPrefix, String searchField, Map<String,FieldTemplate> processedFields) throws IOException {
 		
 		for(FieldTemplate field : template.getFields()) {
@@ -367,10 +198,6 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		
 	}
 	
-	protected void generateAdditionalColumns(Element searchInputs, DropdownInput input, String searchField) {
-		
-	}
-
 	private void addSearchValueField(ObjectTemplate template, String parentPrefix, FieldTemplate field, Document document, boolean initial) throws IOException {
 		
 		if(Objects.isNull(field)) {
@@ -594,103 +421,7 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 		}
 	}
 
-	protected abstract Collection<AbstractObject> generateTable(ObjectTemplate template, 
-			Integer start, Integer length, Map<String, FieldTemplate> searchFieldTemplates, SearchField... fields);
 	
-	protected abstract long generateCount(ObjectTemplate template, SearchField... fields);
-
-	private Element renderPagination(long totalObjects, Element pagnation) {
-		
-		long pages = getNumberOfPages(totalObjects);
-		
-		long currentPage = 0;
-		if(start > 0) {
-			currentPage = start / length;
-		}
-
-		Element pageList;
-		pagnation.appendChild(Html.nav().appendChild(pageList = Html.ul("pagination")));
-		
-		pageList.dataset().put("jad-page-number", String.valueOf(currentPage));
-		pageList.dataset().put("jad-pages", String.valueOf(pages));
-		
-		Element pageSize = pagnation.nextElementSibling();
-		DropdownInput searchPage = new DropdownInput("length", "default");
-		pageSize.appendChild(searchPage.renderInput());
-		
-		var pageResults = new ArrayList<I18nOption>();
-		pageResults.add(new I18nOption("default", "10.items", "10"));
-		pageResults.add(new I18nOption("default", "25.items", "25"));
-		pageResults.add(new I18nOption("default", "50.items", "50"));
-		pageResults.add(new I18nOption("default", "100.items", "100"));
-		pageResults.add(new I18nOption("default", "250.items", "250"));
-		searchPage.renderValues(pageResults, String.valueOf(length));
-		
-		if(currentPage > 0) {
-			pageList.appendChild(Html.li("page-item")
-					.appendChild(Html.a("#", "page-link searchTable")
-							.attr("data-start", "0")
-							.appendChild(Html.i("fa-solid fa-chevron-double-left"))));
-			
-			pageList.appendChild(Html.li("page-item")
-						.appendChild(Html.a("#", "page-link searchTable")
-								.attr("data-start", String.valueOf((currentPage-1)*length))
-								.appendChild(Html.i("fa-solid fa-chevron-left"))));
-		} else {
-			pageList.appendChild(Html.li("page-item disabled")
-					.appendChild(Html.a("#", "page-link")
-							.appendChild(Html.i("fa-solid fa-chevron-double-left"))));
-			pageList.appendChild(Html.li("page-item disabled")
-					.appendChild(Html.a("#", "page-link")
-							.appendChild(Html.i("fa-solid fa-chevron-left"))));
-		}
-
-		int totalPages = 0;
-		long firstPage = Math.max(currentPage-5, 0);
-		
-		for(long i=firstPage;i<currentPage;i++) {
-			pageList.appendChild(Html.li("page-item")
-						.appendChild(Html.a("#", "page-link searchTable")
-								.attr("data-start", String.valueOf(i*length))
-								.text(String.valueOf(i+1))));
-			totalPages++;
-		}
-		
-		pageList.appendChild(Html.li("page-item", "active")
-				.appendChild(Html.a("#", "page-link searchTable")
-						.attr("data-start", String.valueOf(currentPage*length))
-						.text(String.valueOf(currentPage+1))));
-		long endPage = currentPage + 1;
-		
-		while(totalPages < 9 && endPage < pages) {
-			pageList.appendChild(Html.li("page-item")
-					.appendChild(Html.a("#", "page-link searchTable")
-							.attr("data-start", String.valueOf(endPage*length))
-							.text(String.valueOf(endPage+1))));
-			totalPages++;
-			endPage++;
-		}
-	
-		if(endPage < pages - 1) {
-			pageList.appendChild(Html.li("page-item")
-					.appendChild(Html.a("#", "page-link searchTable")
-							.attr("data-start", String.valueOf((currentPage+1)*length))
-							.appendChild(Html.i("fa-solid fa-chevron-right"))));
-			pageList.appendChild(Html.li("page-item")
-					.appendChild(Html.a("#", "page-link searchTable")
-							.attr("data-start", String.valueOf((pages-1)*length))
-							.appendChild(Html.i("fa-solid fa-chevron-double-right"))));
-		} else {
-			pageList.appendChild(Html.li("page-item disabled")
-					.appendChild(Html.a("#", "page-link")
-							.appendChild(Html.i("fa-solid fa-chevron-right"))));
-			pageList.appendChild(Html.li("page-item disabled")
-					.appendChild(Html.a("#", "page-link")
-							.appendChild(Html.i("fa-solid fa-chevron-double-right"))));
-		}
-		
-		return pagnation;
-	}
 
 	@Override
 	public FieldView getScope() {
@@ -712,31 +443,35 @@ public abstract class AbstractSearchPage extends TemplatePage implements FormPro
 	public void setLength(Integer length) {
 		this.length = length;
 	}
-	
-	public interface SearchForm {
-		String getSearchColumn();
-		String getSortOrder();
-		String getSortColumn();
-		String getSearchValueText();
-		String getSearchValue();
-		String getSearchModifier();
-		boolean getUseRegex();
-		int getStart();
-		int getLength();
-		
-	}
 
 	@Override
-	public Class<SearchForm> getFormClass() {
-		return SearchForm.class;
-	}
-
-	private long getNumberOfPages(long totalObjects) {
-		long pages = totalObjects / length;
-		if(totalObjects % length > 0) {
-			pages++;
+	protected SearchField[] getSearchFields(Document document) throws IOException {
+		
+		
+		DropdownInput searchColumns = new DropdownInput("searchColumn", "default");
+		searchColumns.disableIDAttribute();
+		document.selectFirst(".searchDropdownHolder").appendChild(searchColumns.renderInput());
+		
+		if(StringUtils.isBlank(searchField)) {
+			searchField = template.getDefaultColumn();
 		}
-		return pages;
+		
+		Map<String,FieldTemplate> searchFieldTemplates = new HashMap<>();
+		generateSearchColumns(template, searchColumns, document, "", searchField, searchFieldTemplates);
+		
+		Element srchCol = document.selectFirst(".searchColumn");
+		srchCol.val(searchField);
+		srchCol.dataset().put("default-search-column", template.getDefaultColumn());
+		
+		if(StringUtils.isNotBlank(searchModifier)) {
+			searchValue = searchModifier + searchValue;
+		}
+		
+		if(log.isInfoEnabled()) {
+			if(StringUtils.isNotBlank(searchValue))
+				log.info("Searching for {} {}", searchField, searchValue);
+		}
+		return SearchUtils.generateSearch(searchField, searchValue, template);
 	}
 
 }

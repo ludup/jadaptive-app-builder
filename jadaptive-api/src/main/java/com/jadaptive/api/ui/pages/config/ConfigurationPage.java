@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.config.ConfigurationPageItem;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.permissions.FeatureGroup;
+import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticatedPage;
@@ -27,8 +29,11 @@ import com.jadaptive.api.ui.PageProcessors;
 @Component
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "i18n"} )
+@LicensedFeature(group = FeatureGroup.FOUNDATION, includedWithPAYG = true, value = ConfigurationPage.CONFIGURATION_FEATURE)
 public class ConfigurationPage extends AuthenticatedPage {
 
+	public static final String CONFIGURATION_FEATURE = "configuration";
+	
 	@Autowired
 	private App applicationService; 
 	

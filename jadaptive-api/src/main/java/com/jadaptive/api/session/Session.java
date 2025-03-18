@@ -9,6 +9,8 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.auth.AuthenticationService.LogonCompletedResult;
 import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.permissions.FeatureGroup;
+import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldType;
@@ -27,6 +29,7 @@ import jakarta.servlet.http.HttpSession;
 @ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL, creatable = false, updatable = false, defaultColumn = "user")
 @ObjectServiceBean(bean = SessionService.class)
 @TableView(defaultColumns = { "user", "signedIn", "remoteAddress", "type", "state", "userAgent"})
+@LicensedFeature(group = FeatureGroup.FOUNDATION, includedWithPAYG = true, value = Session.RESOURCE_KEY)
 public class Session extends AbstractUUIDEntity {
 	
 	public final static void set(HttpServletRequest request, LogonCompletedResult result) {

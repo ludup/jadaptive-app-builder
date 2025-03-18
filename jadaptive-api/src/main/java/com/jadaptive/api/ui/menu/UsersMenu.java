@@ -2,6 +2,8 @@ package com.jadaptive.api.ui.menu;
 
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.app.App;
+import com.jadaptive.api.tenant.FeatureEnablementService;
 import com.jadaptive.api.user.User;
 
 @Component
@@ -12,4 +14,11 @@ public class UsersMenu extends AbstractSearchPageMenu {
 	public UsersMenu() {
 		super(User.RESOURCE_KEY, "userInterface", "fa-users", ApplicationMenuService.SECURITY_MENU_UUID, -10, MENU_UUID);
 	}
+
+	@Override
+	public boolean isEnabled() {
+		return App.bean(FeatureEnablementService.class).isEnabled(User.RESOURCE_KEY);
+	}
+	
+	
 }

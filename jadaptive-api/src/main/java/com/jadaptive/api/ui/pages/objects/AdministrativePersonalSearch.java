@@ -62,7 +62,7 @@ public class AdministrativePersonalSearch extends AbstractSearchPage  {
 	}
 	
 	protected Collection<AbstractObject> generateTable(ObjectTemplate template,
-			Integer start, Integer length, Map<String,FieldTemplate> searchFieldTemplates, SearchField... fields) {
+			Integer start, Integer length, SearchField... fields) {
 		return objectService.tableObjectsNoScope(template.getResourceKey(), start, length, sortColumn, sortOrder, 
 				SearchUtils.combine(fields, SearchField.eq("ownerUUID", uuid)));
 	}

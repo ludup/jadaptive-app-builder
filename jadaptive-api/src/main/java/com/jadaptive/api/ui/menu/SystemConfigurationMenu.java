@@ -5,6 +5,10 @@ import java.util.Collection;
 
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.app.App;
+import com.jadaptive.api.tenant.FeatureEnablementService;
+import com.jadaptive.api.ui.pages.config.ConfigurationPage;
+
 @Component
 public class SystemConfigurationMenu implements ApplicationMenu {
 
@@ -21,6 +25,11 @@ public class SystemConfigurationMenu implements ApplicationMenu {
 	@Override
 	public String getPath() {
 		return "/app/ui/options";
+	}
+	
+	@Override
+	public boolean isEnabled() {
+		return App.bean(FeatureEnablementService.class).isEnabled(ConfigurationPage.CONFIGURATION_FEATURE);
 	}
 
 	@Override

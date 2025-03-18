@@ -5,6 +5,10 @@ import java.util.Collection;
 
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.app.App;
+import com.jadaptive.api.role.Role;
+import com.jadaptive.api.tenant.FeatureEnablementService;
+
 @Component
 public class RolesMenu implements ApplicationMenu {
 
@@ -16,6 +20,11 @@ public class RolesMenu implements ApplicationMenu {
 	@Override
 	public String getBundle() {
 		return "userInterface";
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return App.bean(FeatureEnablementService.class).isEnabled(Role.RESOURCE_KEY);
 	}
 
 	@Override

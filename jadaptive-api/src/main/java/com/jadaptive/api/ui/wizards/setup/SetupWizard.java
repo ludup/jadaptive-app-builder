@@ -93,7 +93,7 @@ public class SetupWizard extends AbstractWizard implements FormHandler {
 		
 		transactionService.executeTransaction(()-> {
 			for(WizardSection section : state.getSections()) {
-				((SetupSection)section).finish(state);
+				section.finish(state);
 			}
 		});
 

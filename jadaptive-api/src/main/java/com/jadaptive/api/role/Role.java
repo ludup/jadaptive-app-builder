@@ -7,6 +7,8 @@ import java.util.HashSet;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
+import com.jadaptive.api.permissions.FeatureGroup;
+import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
@@ -29,6 +31,7 @@ import com.jadaptive.api.user.User;
 	@ObjectViewDefinition(value = Role.OPTIONS_VIEW, bundle = Role.RESOURCE_KEY, weight = 100)})
 @TableView(defaultColumns = { "name", "allPermissions", "allUsers" })
 @GenerateEventTemplates(Role.RESOURCE_KEY)
+@LicensedFeature(group = FeatureGroup.FOUNDATION, includedWithPAYG = true, value = Role.RESOURCE_KEY)
 public class Role extends NamedUUIDEntity {
 	
 	private static final long serialVersionUID = -5211370653998523985L;
