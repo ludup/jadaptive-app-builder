@@ -6,7 +6,6 @@ import java.util.Collection;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.App;
-import com.jadaptive.api.role.Role;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.FeatureEnablementService;
 

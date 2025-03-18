@@ -2,8 +2,6 @@ package com.jadaptive.api.ui.pages.objects;
 
 import java.io.FileNotFoundException;
 import java.util.Collection;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +13,6 @@ import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.entity.SearchUtils;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.PageDependencies;

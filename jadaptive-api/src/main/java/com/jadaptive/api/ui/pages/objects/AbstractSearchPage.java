@@ -22,11 +22,11 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
-import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.ui.Html;
+import com.jadaptive.api.ui.pages.objects.AbstractSearchPage.SearchForm;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
@@ -34,7 +34,7 @@ import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.SwitchFormInput;
 
-public abstract class AbstractSearchPage extends BaseSearchPage {
+public abstract class AbstractSearchPage extends BaseSearchPage<SearchForm> {
 
 	static Logger log = LoggerFactory.getLogger(AbstractSearchPage.class);
 	
@@ -45,7 +45,7 @@ public abstract class AbstractSearchPage extends BaseSearchPage {
 	protected boolean useRegex;
 
 	@Override
-	public final void onProcessForm(Document document, SearchForm form) throws IOException {
+	public final void processForm(Document document, SearchForm form) throws IOException {
 		
 		searchField = form.getSearchColumn();
 		setCachedValue("searchField", searchField);
@@ -61,6 +61,8 @@ public abstract class AbstractSearchPage extends BaseSearchPage {
 		
 		useRegex = form.getUseRegex();
 		setCachedValue("useRegex", String.valueOf(useRegex));
+		
+		super.processForm(document, form);
 	}
 
 	@Override
@@ -76,6 +78,18 @@ public abstract class AbstractSearchPage extends BaseSearchPage {
 	@Override
 	public final Class<?> getResourceClass() {
 		return AbstractSearchPage.class;
+	}
+	
+	public interface SearchForm  extends BaseSearchForm {
+		String getSearchColumn();
+		String getSearchValueText();
+		String getSearchModifier();
+		boolean getUseRegex();
+	}
+
+	@Override
+	public Class<SearchForm> getFormClass() {
+		return SearchForm.class;
 	}
 
 	@Override
@@ -123,31 +137,8 @@ public abstract class AbstractSearchPage extends BaseSearchPage {
 			useRegex = Boolean.valueOf(tmp);
 		}
 		
-		sortColumn = Request.get().getParameter("sortColumn");
-		if(Objects.isNull(sortColumn)) {
-			sortColumn = getCachedValue("sortColumn", Objects.toString(Request.get().getParameter("sortColumn"),tableView.sortField()));
-			if(StringUtils.isBlank(sortColumn)) {
-				sortColumn = null;
-			}
-		}
 		
-		String order = Request.get().getParameter("sortOrder");
-		if(Objects.isNull(order)) {
-			order = getCachedValue("sortOrder", Objects.toString(Request.get().getParameter("sortOrder"), tableView.sortOrder().name()));
-			if(StringUtils.isBlank(order)) {
-				order = null;
-			}
-		}
-		
-		sortOrder = SortOrder.ASC;
-		if(Objects.nonNull(order)) {
-			sortOrder = SortOrder.valueOf(order.toUpperCase());
-		}
-		
-		start = getCachedInt("start", (String) Request.get().getParameter("start"), 0);
-		length = getCachedInt("length", (String) Request.get().getParameter("length"), 10);
-		
-		generateTable(document);
+		super.doGenerateTemplateContent(document);
 	
 	}
 
@@ -421,32 +412,8 @@ public abstract class AbstractSearchPage extends BaseSearchPage {
 		}
 	}
 
-	
-
 	@Override
-	public FieldView getScope() {
-		return FieldView.TABLE;
-	}
-
-	public Integer getStart() {
-		return start;
-	}
-
-	public void setStart(Integer start) {
-		this.start = start;
-	}
-
-	public Integer getLength() {
-		return length;
-	}
-
-	public void setLength(Integer length) {
-		this.length = length;
-	}
-
-	@Override
-	protected SearchField[] getSearchFields(Document document) throws IOException {
-		
+	protected SearchField[] generateSearchFields(Document document) throws IOException {
 		
 		DropdownInput searchColumns = new DropdownInput("searchColumn", "default");
 		searchColumns.disableIDAttribute();

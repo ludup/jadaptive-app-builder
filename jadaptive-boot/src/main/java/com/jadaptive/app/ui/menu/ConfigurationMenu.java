@@ -5,11 +5,8 @@ import java.util.Collection;
 
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.app.App;
-import com.jadaptive.api.tenant.FeatureEnablementService;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
-import com.jadaptive.api.ui.pages.config.ConfigurationPage;
 
 @Component
 public class ConfigurationMenu implements ApplicationMenu {

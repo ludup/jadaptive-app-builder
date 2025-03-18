@@ -3,9 +3,9 @@ package com.jadaptive.api.ui.pages.objects;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -18,10 +18,11 @@ import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectScope;
+import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.template.FieldTemplate;
+import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableView;
@@ -29,11 +30,10 @@ import com.jadaptive.api.ui.FormProcessor;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.pages.TemplatePage;
 import com.jadaptive.api.ui.pages.ext.TableRenderer;
-import com.jadaptive.api.ui.pages.objects.BaseSearchPage.SearchForm;
 import com.jadaptive.api.ui.renderers.DropdownInput;
 import com.jadaptive.api.ui.renderers.I18nOption;
 
-public abstract class BaseSearchPage extends TemplatePage implements FormProcessor<SearchForm> {
+public abstract class BaseSearchPage<T extends BaseSearchForm> extends TemplatePage implements FormProcessor<T> {
 
 	static Logger log = LoggerFactory.getLogger(AbstractSearchPage.class);
 
@@ -49,6 +49,8 @@ public abstract class BaseSearchPage extends TemplatePage implements FormProcess
 	@Autowired
 	protected ClassLoaderService classService;
 	
+	@Autowired
+	protected ObjectService objectService;
 	
 	protected Integer start = 0;
 	protected Integer length = 10;
@@ -64,9 +66,7 @@ public abstract class BaseSearchPage extends TemplatePage implements FormProcess
 		tableView = templateClazz.getAnnotation(TableView.class);
 	}
 	
-	public final void processForm(Document document, SearchForm form) throws IOException {
-		
-		onProcessForm(document, form);
+	public void processForm(Document document, T form) throws IOException {
 		
 		start = form.getStart();
 		setCachedValue("start", String.valueOf(start));
@@ -82,20 +82,54 @@ public abstract class BaseSearchPage extends TemplatePage implements FormProcess
 		sortOrder = SortOrder.valueOf(Objects.toString(form.getSortOrder(), tableView.sortOrder().name()));
 		setCachedValue("sortOrder", sortOrder.name());
 		
-		generateTable(document);
+		generateTable(document, generateSearchFields(document));
+	}
+	
+	@Override
+	public FieldView getScope() {
+		return FieldView.TABLE;
 	}
 
-	protected abstract void onProcessForm(Document document, SearchForm form) throws IOException;
+	@Override
+	protected void doGenerateTemplateContent(Document document) throws IOException {
+		
+		sortColumn = Request.get().getParameter("sortColumn");
+		if(Objects.isNull(sortColumn)) {
+			sortColumn = getCachedValue("sortColumn", Objects.toString(Request.get().getParameter("sortColumn"),tableView.sortField()));
+			if(StringUtils.isBlank(sortColumn)) {
+				sortColumn = null;
+			}
+		}
+		
+		String order = Request.get().getParameter("sortOrder");
+		if(Objects.isNull(order)) {
+			order = getCachedValue("sortOrder", Objects.toString(Request.get().getParameter("sortOrder"), tableView.sortOrder().name()));
+			if(StringUtils.isBlank(order)) {
+				order = null;
+			}
+		}
+		
+		sortOrder = SortOrder.ASC;
+		if(Objects.nonNull(order)) {
+			sortOrder = SortOrder.valueOf(order.toUpperCase());
+		}
+		
+		start = getCachedInt("start", (String) Request.get().getParameter("start"), 0);
+		length = getCachedInt("length", (String) Request.get().getParameter("length"), 10);
+	
+		generateTable(document, generateSearchFields(document));
+	}
+	
+	
+	protected abstract SearchField[] generateSearchFields(Document document) throws IOException;
 	
 	protected String generateSearchPostURI() {
 		return String.format("/app/ui/%s/%s", getUri(), getResourceKey());
 	}
 	
-	protected void generateTable(Document document) throws IOException {
+	protected void generateTable(Document document, SearchField[] search) throws IOException {
 		
 		Element table = document.selectFirst("#tableholder");
-		
-		SearchField[] search = getSearchFields(document);
 		
 		long totalObjects = generateCount(template, search);
 		
@@ -157,8 +191,6 @@ public abstract class BaseSearchPage extends TemplatePage implements FormProcess
 		
 	}
 	
-	protected abstract SearchField[] getSearchFields(Document document) throws IOException;
-
 	protected TableRenderer createTableRenderer(boolean readOnly, ObjectTemplate template) {
 		return new TableRenderer(readOnly, template);
 	}
@@ -167,10 +199,14 @@ public abstract class BaseSearchPage extends TemplatePage implements FormProcess
 		
 	}
 	
-	protected abstract Collection<AbstractObject> generateTable(ObjectTemplate template, 
-			Integer start, Integer length, SearchField... fields);
-	
-	protected abstract long generateCount(ObjectTemplate template, SearchField... fields);
+	protected Collection<AbstractObject> generateTable(ObjectTemplate template,
+			Integer start, Integer length, SearchField... fields) {
+		return objectService.tableObjects(template.getResourceKey(), start, length, sortColumn, sortOrder, fields);
+	}
+
+	protected long generateCount(ObjectTemplate template, SearchField... fields) {
+		return  objectService.countObjects(template.getCollectionKey(), fields);
+	}
 
 	private Element renderPagination(long totalObjects, Element pagnation) {
 		
@@ -299,24 +335,20 @@ public abstract class BaseSearchPage extends TemplatePage implements FormProcess
 		Request.get().getSession().setAttribute(resourceKey + "." + key, value);
 	}
 	
+	public Integer getStart() {
+		return start;
+	}
+
+	public void setStart(Integer start) {
+		this.start = start;
+	}
+
+	public Integer getLength() {
+		return length;
+	}
+
+	public void setLength(Integer length) {
+		this.length = length;
+	}
 	
-	public interface SearchForm {
-		String getSearchColumn();
-		String getSortOrder();
-		String getSortColumn();
-		String getSearchValueText();
-		String getSearchValue();
-		String getSearchModifier();
-		boolean getUseRegex();
-		int getStart();
-		int getLength();
-		
-	}
-
-	@Override
-	public Class<SearchForm> getFormClass() {
-		return SearchForm.class;
-	}
-
-
 }

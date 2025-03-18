@@ -1,19 +1,12 @@
 package com.jadaptive.api.ui.pages.objects;
 
 import java.io.FileNotFoundException;
-import java.util.Collection;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.entity.AbstractObject;
-import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.template.FieldTemplate;
-import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
@@ -27,9 +20,6 @@ public class Search extends AbstractSearchPage  {
 
 	@Autowired
 	private PermissionService permissionService; 
-	
-	@Autowired
-	private ObjectService objectService;;
 	
 	@Override
 	public String getUri() {
@@ -54,14 +44,4 @@ public class Search extends AbstractSearchPage  {
 			throw new UriRedirect(String.format("/app/ui/config/%s", template.getCollectionKey()));
 		}
 	}
-	
-	protected Collection<AbstractObject> generateTable(ObjectTemplate template,
-			Integer start, Integer length, SearchField... fields) {
-		return objectService.tableObjects(template.getResourceKey(), start, length, sortColumn, sortOrder, fields);
-	}
-
-	protected long generateCount(ObjectTemplate template, SearchField... fields) {
-		return  objectService.countObjects(template.getCollectionKey(), fields);
-	}
-
 }
