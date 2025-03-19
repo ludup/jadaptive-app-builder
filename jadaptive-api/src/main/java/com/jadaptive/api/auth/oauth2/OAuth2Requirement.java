@@ -37,4 +37,10 @@ public @interface OAuth2Requirement  {
 	 * @return send HTTP response
 	 */
 	boolean response() default true;
+	
+	/*
+	 * Whether or not run the annotated method in the context of the user attached to the 
+	 * token.
+	 */
+	boolean asUser() default true;
 }
