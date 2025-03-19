@@ -104,6 +104,8 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 				
 		KeyStore serverKeyStore = null, caKeyStore = getCertificateAuthorities();
 
+		String alias = ApplicationProperties.getValue(String.format("spring.ssl.bundle.pem.%s.keystore.alias", name), "");
+		String password = ApplicationProperties.getValue(String.format("spring.ssl.bundle.pem.%s.keystore.password", DEFAULT_KEYSTORE_PASSWORD), "");
 		String pemPath = ApplicationProperties.getValue(String.format("spring.ssl.bundle.pem.%s.keystore.private-key", name), "");
 		String certPath = ApplicationProperties.getValue(String.format("spring.ssl.bundle.pem.%s.keystore.certificate", name), "");
 		if(StringUtils.isNotBlank(pemPath) && StringUtils.isNotBlank(certPath)) {
@@ -114,7 +116,8 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 					serverKeyStore = X509CertificateUtils.loadKeystoreFromPEM(Files.newInputStream(key),
 							Files.newInputStream(cert), 
 							null,
-							DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+							password.toCharArray(),
+							alias);
 					
 					LOG.info("Loaded PEM file for {} certificate", name);
 				} catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException
@@ -151,10 +154,10 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 			// Add the server key store entries
 			Enumeration<String> aliasEnum = serverKeyStore.aliases();
 			while (aliasEnum.hasMoreElements()) {
-				var alias = aliasEnum.nextElement();
-				var key = serverKeyStore.getKey(alias, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
-				var cert = decodeCertificate(serverKeyStore.getCertificate(alias).getEncoded());
-				var certChain = decodeCertificates(serverKeyStore.getCertificateChain(alias));
+				var aliasName = aliasEnum.nextElement();
+				var key = serverKeyStore.getKey(aliasName, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+				var cert = decodeCertificate(serverKeyStore.getCertificate(aliasName).getEncoded());
+				var certChain = decodeCertificates(serverKeyStore.getCertificateChain(aliasName));
 				
 				KeyHolder entry = null;
 				if (key == null) {
@@ -162,18 +165,18 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 						LOG.warn("Not a key or a cert.");
 					} else {
 						if(certChain == null)
-							entry = new KeyHolder(KeyType.CERTIFICATE, alias, key, cert);
+							entry = new KeyHolder(KeyType.CERTIFICATE, aliasName, key, cert);
 						else
-							entry = new KeyHolder(KeyType.CERTIFICATE, alias, key, certChain);
+							entry = new KeyHolder(KeyType.CERTIFICATE, aliasName, key, certChain);
 					}
 				} else {
 					if (cert == null) {
-						entry = new KeyHolder(KeyType.CERTIFICATE, alias, key);
+						entry = new KeyHolder(KeyType.CERTIFICATE, aliasName, key);
 					} else {
 						if(certChain == null)
-							entry = new KeyHolder(KeyType.PRIVATE_KEY_AND_CERTIFICATE, alias, key, cert);
+							entry = new KeyHolder(KeyType.PRIVATE_KEY_AND_CERTIFICATE, aliasName, key, cert);
 						else
-							entry = new KeyHolder(KeyType.PRIVATE_KEY_AND_CERTIFICATE, alias, key, certChain);
+							entry = new KeyHolder(KeyType.PRIVATE_KEY_AND_CERTIFICATE, aliasName, key, certChain);
 					}
 				}
 				if (entry != null) {
@@ -187,9 +190,9 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 			// Add the CA certs
 			aliasEnum = caKeyStore.aliases();
 			while (aliasEnum.hasMoreElements()) {
-				var alias = aliasEnum.nextElement();
-				var cert =decodeCertificate(caKeyStore.getCertificate(alias).getEncoded());
-				var entry = new KeyHolder(KeyType.CA, alias, null, cert);
+				var aliasName = aliasEnum.nextElement();
+				var cert =decodeCertificate(caKeyStore.getCertificate(aliasName).getEncoded());
+				var entry = new KeyHolder(KeyType.CA, aliasName, null, cert);
 				entries.add(entry);
 			}
 			

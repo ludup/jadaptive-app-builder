@@ -178,14 +178,6 @@ public abstract class AbstractSearchPage extends BaseSearchPage<SearchForm> {
 		
 		generateAdditionalColumns(document.selectFirst("#searchValueHolder"), input, searchField);
 		
-		Element form = document.selectFirst("#searchForm");
-		form.appendChild(
-				Html.input("hidden", "sortColumn", sortColumn)
-						.attr("id", "sortColumn")
-						.attr("data-column", template.getDefaultColumn()));
-		form.appendChild(Html.input("hidden", "sortOrder", sortOrder.name())
-				.attr("id", "sortOrder"));
-		
 		
 	}
 	

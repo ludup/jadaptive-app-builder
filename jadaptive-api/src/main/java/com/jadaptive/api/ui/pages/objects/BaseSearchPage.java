@@ -116,7 +116,7 @@ public abstract class BaseSearchPage<T extends BaseSearchForm> extends TemplateP
 		
 		start = getCachedInt("start", (String) Request.get().getParameter("start"), 0);
 		length = getCachedInt("length", (String) Request.get().getParameter("length"), 10);
-	
+		
 		generateTable(document, generateSearchFields(document));
 	}
 	
@@ -189,6 +189,13 @@ public abstract class BaseSearchPage<T extends BaseSearchForm> extends TemplateP
 			table.insertChildren(0, div);
 		}
 		
+		Element form = document.selectFirst("form");
+		form.appendChild(
+				Html.input("hidden", "sortColumn", sortColumn)
+						.attr("id", "sortColumn")
+						.attr("data-column", template.getDefaultColumn()));
+		form.appendChild(Html.input("hidden", "sortOrder", sortOrder.name())
+				.attr("id", "sortOrder"));
 	}
 	
 	protected TableRenderer createTableRenderer(boolean readOnly, ObjectTemplate template) {
