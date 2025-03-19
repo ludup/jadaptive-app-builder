@@ -3,6 +3,7 @@ package com.jadaptive.app.db;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,18 +19,16 @@ import com.jadaptive.api.template.ObjectTemplateRepository;
 
 public class NonCachingIterable<T extends UUIDDocument> implements Iterable<T> {
 
-		static Logger log = LoggerFactory.getLogger(NonCachingIterable.class);
+		private static Logger log = LoggerFactory.getLogger(NonCachingIterable.class);
 		
-		Iterable<Document> iterator;
-		Class<T> clz;
-		Map<String,Class<?>> cachedTemplates = new HashMap<>();
+		private final Iterable<Document> iterator;
+		private final Map<String,Class<?>> cachedTemplates = new HashMap<>();
 		
 		public NonCachingIterable(Class<T> clz, 
 				Iterable<Document> iterator) {
 			if(log.isDebugEnabled()) {
 				log.debug("Started uncached iteration for {} ", clz.getSimpleName());
 			}
-			this.clz = clz;
 			this.iterator = iterator;
 		}
 
@@ -38,7 +37,7 @@ public class NonCachingIterable<T extends UUIDDocument> implements Iterable<T> {
 			return new ConvertingIterator(iterator.iterator());
 		}
 		
-		private Class<?> resolveClassFromTemplate(String resourceKey) {
+		private Class<?> resolveClassFromTemplate(String resourceKey) throws ClassNotFoundException {
 			
 			Class<?> clz = cachedTemplates.get(resourceKey);
 			if(Objects.nonNull(clz)) {
@@ -65,12 +64,13 @@ public class NonCachingIterable<T extends UUIDDocument> implements Iterable<T> {
 				}
 				
 			} 
-			throw new IllegalStateException("No template class found for " + resourceKey);
+			throw new ClassNotFoundException("No template class found for " + resourceKey);
 		}
 	
 		class ConvertingIterator implements Iterator<T> {
 
-			Iterator<Document> iterator;
+			final Iterator<Document> iterator;
+			T next;
 			
 			public ConvertingIterator(Iterator<Document> iterator) {
 				this.iterator = iterator;
@@ -78,14 +78,43 @@ public class NonCachingIterable<T extends UUIDDocument> implements Iterable<T> {
 
 			@Override
 			public boolean hasNext() {
-				return iterator.hasNext();
+				checkNext();
+				return next != null;
 			}
 
 			@Override
 			public T next() {
-				Document doc = iterator.next();
-				return  DocumentHelper.convertDocumentToObject(
-						resolveClassFromTemplate(doc.getString("resourceKey")), doc);
+				checkNext();
+				if(next == null)
+					throw new NoSuchElementException();
+				else {
+					try {
+						return next;
+					}
+					finally {
+						next = null;
+					}
+				}
+			}
+			
+			private void checkNext() {
+				if(next == null) {
+					while(iterator.hasNext()) {
+						var document = iterator.next();
+						try {
+							var clazz = resolveClassFromTemplate(document.getString("resourceKey"));
+							next = DocumentHelper.convertDocumentToObject(
+									clazz, document);
+							return;
+						}
+						catch(ClassNotFoundException cnfe) {
+							if(log.isDebugEnabled())
+								log.warn("{}. This may be because it uses a Java class that no longer exists (e.g. an extension has been removed), or is not accessible in this scope. You may need to clean up your data. ", cnfe.getMessage(), cnfe);
+							else
+								log.warn("{}. This may be because it uses a Java class that no longer exists (e.g. an extension has been removed), or is not accessible in this scope. You may need to clean up your data.", cnfe.getMessage());
+						}
+					}
+				}
 			}
 		}
 	}
