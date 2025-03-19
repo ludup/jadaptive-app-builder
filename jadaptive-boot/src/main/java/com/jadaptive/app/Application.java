@@ -18,12 +18,9 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner;
-import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
 import com.jadaptive.api.app.ApplicationProperties;
@@ -34,28 +31,7 @@ import com.jadaptive.api.x509.X509CertificateUtils;
 @SpringBootApplication(exclude = { JmxAutoConfiguration.class })
 public class Application {
 
-	static Logger log = LoggerFactory.getLogger(Application.class);
-	
-	static int exitCode = 0;
-	static SpringApplication app;
-	static boolean running = true;
-	
-	public static void shutdown() {
-		running = false;
-		synchronized (app) {
-			app.notify();
-		}
-	}
-
-	public static void restart() {
-		exitCode = 99;
-		shutdown();
-	}
-	
-	@Bean
-    public ExitCodeGenerator exitCodeGenerator() {
-        return () -> exitCode;
-    }
+	private static Logger log = LoggerFactory.getLogger(Application.class);
 	
 	public static void main(String[] args) {
 		 
@@ -85,7 +61,7 @@ public class Application {
 			return;
 		 }
 		 
-		 app = new SpringApplication(Application.class);
+		 var app = new SpringApplication(Application.class);
 		 app.setBanner(new Banner() {
 
 			@Override
@@ -105,19 +81,13 @@ public class Application {
 		 app.setBannerMode(Banner.Mode.LOG);
 		 
 		 synchronized(app) {
-			 ApplicationContext context = app.run(args);
-			 while(running) {
+			 app.run(args);
+			 while(true) {
 				 try {
 					app.wait(5000);
 				} catch (InterruptedException e) {
 				}
 			 }
-			 
-			 log.info("Application shutting down with exitCode={}", exitCode);
-			 exitCode = SpringApplication.exit(context, () -> exitCode);
-			 log.info("System exit being called with exitCode={}", exitCode);
-
-			 System.exit(exitCode);	
 		}
 	}
 	
