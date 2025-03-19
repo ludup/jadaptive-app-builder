@@ -289,6 +289,7 @@ public class Header extends AbstractPageExtension {
 						}
 						return false;
 					}
+					c.getBundle();
 					return true;
 				}).
 				sorted((o1,o2) -> o1.weight().compareTo(o2.weight())).toList());

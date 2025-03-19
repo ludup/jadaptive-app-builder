@@ -210,6 +210,9 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		
 		@Override
 		public boolean isEnabled() {
+			if(StringUtils.isNotBlank(m.feature())) {
+				return App.bean(FeatureEnablementService.class).isEnabled(m.feature());
+			}
 			return enabled;
 		}
 		

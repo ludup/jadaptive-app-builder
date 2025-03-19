@@ -22,7 +22,6 @@ import org.bouncycastle.asn1.x9.ECNamedCurveTable;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.util.PrivateKeyFactory;
-import org.bouncycastle.math.ec.ECCurve;
 
 public class ECKeyPairLoaderNoCurveName {
 

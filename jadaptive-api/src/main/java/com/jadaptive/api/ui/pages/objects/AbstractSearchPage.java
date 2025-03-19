@@ -23,7 +23,6 @@ import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectTemplate;
-import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.pages.objects.AbstractSearchPage.SearchForm;
