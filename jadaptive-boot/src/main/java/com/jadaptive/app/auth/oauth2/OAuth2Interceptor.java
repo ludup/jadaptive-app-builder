@@ -16,6 +16,8 @@ import com.jadaptive.api.auth.oauth2.OAuth2Scope;
 import com.jadaptive.api.auth.oauth2.OAuth2Token;
 import com.jadaptive.api.auth.oauth2.OAuth2TokenService;
 import com.jadaptive.api.auth.oauth2.ResponseEntityException;
+import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.PermissionService.UncheckedCloseable;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,10 +31,15 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 	private OAuth2TokenService oauth2TokenService;
 
 	@Autowired
+	private PermissionService permissionService;
+
+	@Autowired
 	private App applicationService;
 
 	@Autowired
 	private AllApiAccessScope allApiAccessScope;
+	
+	private final ThreadLocal<UncheckedCloseable> userContext = new ThreadLocal<>();
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -77,7 +84,11 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 				}
 				
 				try {
-					OAuth2Token.set(oauth2TokenService.authenticateRequest(request, response, authHdr, scope));
+					var tkn = oauth2TokenService.authenticateRequest(request, response, authHdr, scope);
+					OAuth2Token.set(tkn);
+					if(acAnnotation.asUser()) {
+						userContext.set(permissionService.userContext());
+					}
 				}
 				catch(ResponseEntityException e) {
 					/* We can't send an entity here, so just send the header and the response code */
@@ -94,6 +105,15 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 			ModelAndView modelAndView) throws Exception {
 		OAuth2Token.clear();
+		var uc = userContext.get();
+		if(uc != null) {
+			try {
+				uc.close();
+			}
+			finally { 
+				userContext.remove();
+			}
+		}
 	}
 
 }
