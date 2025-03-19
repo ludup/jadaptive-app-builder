@@ -57,15 +57,15 @@ public class UsageController extends AuthenticatedController {
 			Map<Date, List> cache = cacheService.getCacheOrCreate(String.format("daily.%d.%s", days, key), Date.class, List.class, Duration.ofHours(1).toMillis());
 			int hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
 			@SuppressWarnings("unchecked")
-			List<BarChartDateLongValue> revenue = cache.get(Utils.tomorrow());
+			List<BarChartDateLongValue> revenue = cache.get(Utils.today());
 			if(Objects.isNull(revenue)) {
 				
 				revenue = new ArrayList<>();
 
 				Calendar from = Calendar.getInstance();
 				from.setTime(DateUtils.addDays(Utils.today(), -days));
-				
-				while(from.before(Utils.today())) {
+
+				while(from.before(Utils.tomorrowCalendar())) {
 						
 					if(Boolean.getBoolean("jadaptive.development")) {
 						if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
@@ -108,16 +108,17 @@ public class UsageController extends AuthenticatedController {
 			int hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
 			
 			@SuppressWarnings("unchecked")
-			List<BarChartDateLongValue> revenue = cache.get(Utils.tomorrow());
+			List<BarChartDateLongValue> revenue = cache.get(Utils.today());
 			if(Objects.isNull(revenue)) {
 				
 				revenue = new ArrayList<>();
 
 				Calendar from = Calendar.getInstance();
 				from.setTime(DateUtils.addDays(Utils.today(), -days));
+
 				Date to = DateUtils.addDays(from.getTime(), 1);
 				
-				while(from.before(Utils.today())) {
+				while(from.before(Utils.tomorrowCalendar())) {
 						
 					if(Boolean.getBoolean("jadaptive.development")) {
 						if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
