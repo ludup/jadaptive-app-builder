@@ -91,7 +91,7 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 	public void reload() throws IOException {
 		
 		defaultKeyHolder = null;
-		String[] certs = ApplicationProperties.getValue("jadaptive.bundles", "default").split(",");
+		String[] certs = ApplicationProperties.getValue("jadaptive.sni.bundles", "default").split(",");
 		for(String cert : certs) {
 			reload(cert);
 		}
@@ -104,10 +104,11 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 				
 		KeyStore serverKeyStore = null, caKeyStore = getCertificateAuthorities();
 
-		String alias = ApplicationProperties.getValue(String.format("spring.ssl.bundle.pem.%s.keystore.alias", name), "");
-		String password = ApplicationProperties.getValue(String.format("spring.ssl.bundle.pem.%s.keystore.password", DEFAULT_KEYSTORE_PASSWORD), "");
-		String pemPath = ApplicationProperties.getValue(String.format("spring.ssl.bundle.pem.%s.keystore.private-key", name), "");
-		String certPath = ApplicationProperties.getValue(String.format("spring.ssl.bundle.pem.%s.keystore.certificate", name), "");
+		String alias = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.keystore.alias", name), name);
+		String password = ApplicationProperties.getValue(String.format("jadaptive.sni..%s.keystore.password", name), DEFAULT_KEYSTORE_PASSWORD);
+		String pemPath = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.pem.private-key", name), "");
+		String pemPassword = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.pem.password", name), "");
+		String certPath = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.pem.certificate", name), "");
 		if(StringUtils.isNotBlank(pemPath) && StringUtils.isNotBlank(certPath)) {
 			Path key = Paths.get(pemPath);
 			Path cert = Paths.get(certPath);
@@ -115,7 +116,7 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 				try {
 					serverKeyStore = X509CertificateUtils.loadKeystoreFromPEM(Files.newInputStream(key),
 							Files.newInputStream(cert), 
-							null,
+							pemPassword.toCharArray(),
 							password.toCharArray(),
 							alias);
 					
@@ -134,12 +135,12 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 			var serverKeystoreFile = Paths.get(ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.location", name), 
 					String.format("conf.d/%s/cert.p12", name)));
 
+			alias = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.alias", name), "server");
+			password = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.password", name), DEFAULT_KEYSTORE_PASSWORD);
 			try(var in = Files.newInputStream(serverKeystoreFile)) {
 				try {
 					serverKeyStore = KeyStore.getInstance("PKCS12");
-					serverKeyStore.load(in, ApplicationProperties.getValue(
-							String.format("spring.ssl.bundle.jks.%s.keystore.password", name),
-							"changeit").toCharArray());
+					serverKeyStore.load(in, password.toCharArray());
 					
 					LOG.info("Loaded PKCS12 file for {} certificate", name);
 					
@@ -155,7 +156,7 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 			Enumeration<String> aliasEnum = serverKeyStore.aliases();
 			while (aliasEnum.hasMoreElements()) {
 				var aliasName = aliasEnum.nextElement();
-				var key = serverKeyStore.getKey(aliasName, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
+				var key = serverKeyStore.getKey(aliasName, password.toCharArray());
 				var cert = decodeCertificate(serverKeyStore.getCertificate(aliasName).getEncoded());
 				var certChain = decodeCertificates(serverKeyStore.getCertificateChain(aliasName));
 				
@@ -196,7 +197,7 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 				entries.add(entry);
 			}
 			
-			keyEntries.put(name, entries);
+			keyEntries.put(alias, entries);
 			
 		} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateEncodingException e) {
 			throw new IOException(e.getMessage(), e);

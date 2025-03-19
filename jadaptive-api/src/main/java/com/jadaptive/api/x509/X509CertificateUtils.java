@@ -24,8 +24,12 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,7 +50,12 @@ import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.jce.spec.ECPublicKeySpec;
+import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -298,6 +307,8 @@ public class X509CertificateUtils {
 				PrivateKey prv = converter.getPrivateKey(i);
 				if(prv instanceof RSAPrivateCrtKey) {
 					return loadKeyPair((RSAPrivateCrtKey)prv);
+				} else if(prv instanceof ECPrivateKey) {
+					return ECKeyPairLoaderNoCurveName.loadECKeyPair(i);
 				} else {
 					throw new FileFormatException("Unsupported private key type");
 				}
@@ -307,7 +318,7 @@ public class X509CertificateUtils {
 								+ privatekey);
 			}
 
-		} catch (IOException ex) {
+		} catch (IOException | InvalidParameterSpecException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
 			throw new CertificateException("Failed to read from key file", ex);
 		} finally {
 			closeQuietly(keyfile);
@@ -323,6 +334,8 @@ public class X509CertificateUtils {
 		} catch (IOException e) {
 		}
 	}
+	
+  
 
 	private static KeyPair loadKeyPair(RSAPrivateCrtKey privatekey)
 			throws CertificateException {
