@@ -36,7 +36,9 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public String getCopyright() {
-		return String.format("&copy; 2002-%s Jadaptive Limited", Calendar.getInstance().get(Calendar.YEAR));
+		return String.format("&copy; 2002-%s %s", 
+				Calendar.getInstance().get(Calendar.YEAR),
+				getVendor());
 	}
 	
 	@Override

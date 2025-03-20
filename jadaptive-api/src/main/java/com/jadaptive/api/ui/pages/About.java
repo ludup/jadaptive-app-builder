@@ -30,7 +30,6 @@ public class About extends AuthenticatedPage {
 	@Override
 	protected void generateAuthenticatedContent(Document document) throws IOException {
 		document.getElementById("productName").html(productService.getProductName());
-		document.getElementById("vendor").html(productService.getVendor());
 		document.getElementById("copyright").html(productService.getCopyright());
 		document.getElementById("poweredBy").html(productService.getPoweredBy());
 		document.getElementById("version").html(productService.getVersion());
