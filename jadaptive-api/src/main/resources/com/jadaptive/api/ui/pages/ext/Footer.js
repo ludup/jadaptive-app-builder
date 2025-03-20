@@ -148,7 +148,8 @@ $(function() {
 								$(this).data('id'),
 								$(this).closest(".dropdown").find('.dropdown-menu'),
 								$(this),
-								'collectionSearchInputSelection');
+								'collectionSearchInputSelection',
+								true);
 	});
 	
 	$(document).on('click', '.collectionTextAdd', function(e) {
@@ -270,13 +271,15 @@ $(function() {
 		menu.append('<a data-resourcekey="' + key + '" class="' + selectionClass + ' dropdown-item" href="#">' + value + '</a>');
 	}
 	
-	var createDropdown = function(text, url, field, id, menu, toggle, selectionClass) {
+	var createDropdown = function(text, url, field, id, menu, toggle, selectionClass, required, placeholder) {
 
 		$.getJSON(url + '?searchField=' + field + '&searchValue=' + text, function(data) {
 			
 			menu.empty();
 			menu.removeClass('show');
 			if(data.total > 0) {
+				if(!required)
+					createItem(menu, "", placeholder? placeholder : "&lt;Not Set&gt;", selectionClass);
 				$.each(data.rows, function(idx, obj) {
 					createItem(menu, obj[id], obj[field], selectionClass);
 				});
@@ -297,7 +300,8 @@ $(function() {
 							$(this).data('id'),
 							$(this).closest(".dropdown").find('.dropdown-menu'),
 							$(this),
-							"jdropdown-item");
+							"jdropdown-item",
+							$(this).siblings('input[type="hidden"]').attr('required'));
 
 	});
 	

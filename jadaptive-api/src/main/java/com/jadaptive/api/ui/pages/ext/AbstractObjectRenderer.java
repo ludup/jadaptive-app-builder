@@ -515,7 +515,13 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					renderFormField(element, obj, fieldView, scope, panel);
 				}
 				
-				
+				Elements thisElement = element.select("#" + field.getResourceKey());
+				if(field.isRequired()) {
+					thisElement.attr("required", "true");
+				}
+				if(field.isReadOnly() || scope == FieldView.READ) {
+					thisElement.attr("readonly", "readonly");
+				}
 			}
 			Elements thisElement = element.select("#" + field.getResourceKey());
 			processDynamicElements(thisElement, fieldView, obj);
@@ -1236,15 +1242,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			throw new IllegalStateException("Object cannot be rendered by renderField");
 		default:
 			throw new IllegalStateException("Missing field type " + field.getFieldType().name());
-		}
-		
-		
-		Elements thisElement = element.select("#" + field.getResourceKey());
-		if(field.isRequired()) {
-			thisElement.attr("required", "true");
-		}
-		if(field.isReadOnly() || view == FieldView.READ) {
-			thisElement.attr("readonly", "readonly");
 		}
 		
 	}
