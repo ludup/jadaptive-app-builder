@@ -23,6 +23,11 @@ public class ResourceList<T> extends ResourceStatus<T> {
 		this.resources = resources;
 	}
 	
+	public ResourceList(Collection<T> resources, String message) {
+		this.resources = resources;
+		this.setMessage(message);
+	}
+	
 	public ResourceList(boolean success, String message) {
 		super(success, message);
 	}

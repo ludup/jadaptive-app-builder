@@ -11,7 +11,7 @@ import com.jadaptive.api.user.User;
 public class AuthenticatedService {
 
 	@Autowired
-	private PermissionService permissionService; 
+	protected PermissionService permissionService; 
 	
 	@Autowired
 	protected TenantService tenantService; 
