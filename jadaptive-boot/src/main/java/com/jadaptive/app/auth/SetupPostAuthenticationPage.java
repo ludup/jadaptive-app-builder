@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.PostAuthenticatorPage;
@@ -15,6 +16,7 @@ import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -61,7 +63,7 @@ public class SetupPostAuthenticationPage extends HtmlPage implements PostAuthent
 
 
 	@Override
-	public boolean requiresProcessing(AuthenticationState state) {
+	public boolean requiresProcessing(AuthenticationPolicy policy, User user) {
 		return true;
 	}
 

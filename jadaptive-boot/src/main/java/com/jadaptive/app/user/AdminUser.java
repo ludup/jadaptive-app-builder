@@ -51,6 +51,9 @@ public class AdminUser extends PasswordEnabledUser {
 	@Validator(type = ValidationType.REQUIRED)
 	boolean passwordChangeRequired;
 	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String passwordPartHash;
+	
 	@Override
 	public String getName() {
 		return "Administrator";
@@ -112,6 +115,14 @@ public class AdminUser extends PasswordEnabledUser {
 	@Override
 	public Date getPasswordExpiry() {
 		return null;
+	}
+
+	public String getPasswordPartHash() {
+		return passwordPartHash;
+	}
+
+	public void setPasswordPartHash(String passwordPartHash) {
+		this.passwordPartHash = passwordPartHash;
 	}
 
 }

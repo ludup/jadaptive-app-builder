@@ -40,6 +40,9 @@ public class BuiltinUser extends PasswordEnabledUser {
 	@ObjectView(value = "passwordOptions")
 	boolean passwordChangeRequired;
 
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String passwordPartHash;
+	
 	@Override
 	public String getEncodedPassword() {
 		return encodedPassword;
@@ -91,6 +94,14 @@ public class BuiltinUser extends PasswordEnabledUser {
 	@Override
 	public Date getPasswordExpiry() {
 		return null;
+	}
+
+	public String getPasswordPartHash() {
+		return passwordPartHash;
+	}
+
+	public void setPasswordPartHash(String passwordPartHash) {
+		this.passwordPartHash = passwordPartHash;
 	}
 	
 }

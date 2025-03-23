@@ -4,6 +4,7 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.LoginAuthenticationPolicy;
@@ -67,13 +68,13 @@ public class ChangePassword extends AuthenticationPage<PasswordForm> implements 
 	}
 
 	@Override
-	public boolean requiresProcessing(AuthenticationState state) {
+	public boolean requiresProcessing(AuthenticationPolicy policy, User user) {
 		
-		if(state.getPolicy() instanceof LoginAuthenticationPolicy) {
-			if(state.getUser() instanceof PasswordChangeSupport) {
+		if(policy instanceof LoginAuthenticationPolicy) {
+			if(user instanceof PasswordChangeSupport) {
 				
-		    	if(((PasswordChangeSupport)state.getUser()).getPasswordChangeRequired()) {
-		    		permissionService.setupUserContext(state.getUser());
+		    	if(((PasswordChangeSupport)user).getPasswordChangeRequired()) {
+		    		permissionService.setupUserContext(user);
 		    		try {
 			    		permissionService.assertPermission(UserService.CHANGE_PASSWORD_PERMISSION);
 						return true;

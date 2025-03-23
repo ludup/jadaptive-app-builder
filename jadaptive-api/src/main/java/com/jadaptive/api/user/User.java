@@ -110,7 +110,7 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	@ObjectView(PHONE_VIEW)
 	Collection<String> otherTelephone = new ArrayList<>();
-
+	
 	public String getUsername() {
 		return username;
 	}

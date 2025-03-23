@@ -26,5 +26,9 @@ public abstract class PasswordEnabledUser extends User implements PasswordChange
 	public abstract void setPasswordChangeRequired(boolean passwordChangeRequired);
 	
 	public abstract Date getPasswordExpiry();
+	
+	public abstract String getPasswordPartHash();
+	
+	public abstract void setPasswordPartHash(String passwordPartHash);
 
 }

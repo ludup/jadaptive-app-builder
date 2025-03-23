@@ -515,13 +515,26 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		return m;
 	}	
+	
+	@Override
+	public boolean requiresPostAuthentication(AuthenticationPolicy policy, User user) {
+		
+		List<PostAuthenticatorPage> additional = new ArrayList<>();
+		for(PostAuthenticatorPage a : applicationService.getBeans(PostAuthenticatorPage.class)) {
+			if(a.requiresProcessing(policy, user) && !(a instanceof SetupPostAuthenticationPage)) {
+				log.info("{} requires post authentication {}", user.getUsername(), a.getUri());
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public void setupPostAuthentication(AuthenticationState state) {
 		
 		List<PostAuthenticatorPage> additional = new ArrayList<>();
 		for(PostAuthenticatorPage a : applicationService.getBeans(PostAuthenticatorPage.class)) {
-			if(a.requiresProcessing(state) && !(a instanceof SetupPostAuthenticationPage)) {
+			if(a.requiresProcessing(state.getPolicy(), state.getUser()) && !(a instanceof SetupPostAuthenticationPage)) {
 				additional.add(a);
 			}
 		}
@@ -842,6 +855,13 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public AuthenticationProvider getAuthenticationProviderByUUID(String uuid) {
 		return authenticationProvidersByUUID.get(uuid);
+	}
+
+	@Override
+	public boolean hasAuthenticationState() {
+		HttpSession httpSession = Request.get().getSession();
+		return Objects.nonNull((AuthenticationState) httpSession
+					.getAttribute(AUTHENTICATION_STATE_ATTR));
 	}
 	
 	

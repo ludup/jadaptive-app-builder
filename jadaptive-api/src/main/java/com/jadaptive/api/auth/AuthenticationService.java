@@ -127,5 +127,9 @@ public interface AuthenticationService {
 	Collection<AuthenticationModule> resolveRequiredUserModules(User user);
 
 	Collection<AuthenticationModule> resolveOptionalUserModules(User user);
+
+	boolean requiresPostAuthentication(AuthenticationPolicy policy, User user);
+
+	boolean hasAuthenticationState();
 	
 }

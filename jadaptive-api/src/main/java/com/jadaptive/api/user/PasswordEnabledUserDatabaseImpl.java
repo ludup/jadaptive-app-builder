@@ -1,11 +1,14 @@
 package com.jadaptive.api.user;
 
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
@@ -42,12 +45,19 @@ public abstract class PasswordEnabledUserDatabaseImpl
 				user.setSalt(Base64.getEncoder().encodeToString(salt));
 				user.setEncodedPassword(ENCRYPTION_PREFIX + Base64.getEncoder().encodeToString(encodedPassword));
 			
+				user.setPasswordPartHash(
+						Base64.getEncoder().encodeToString(
+						DigestUtils.sha512(
+								ArrayUtils.addAll(
+										new String(password).getBytes("UTF-8"), 
+										u.getUsername().getBytes("UTF-8")))).substring(0, 12).toUpperCase()
+				);
 			}
 			
 			user.setPasswordChangeRequired(passwordChangeRequired);
 			objectDatabase.saveOrUpdate(user);
 			
-		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+		} catch (InvalidKeySpecException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
 			throw new ObjectException(e);
 		}
 	}
