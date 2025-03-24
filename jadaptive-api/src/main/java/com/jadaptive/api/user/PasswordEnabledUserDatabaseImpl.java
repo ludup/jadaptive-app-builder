@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.tomcat.util.buf.HexUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
@@ -46,12 +47,12 @@ public abstract class PasswordEnabledUserDatabaseImpl
 				user.setEncodedPassword(ENCRYPTION_PREFIX + Base64.getEncoder().encodeToString(encodedPassword));
 			
 				user.setPasswordPartHash(
-						Base64.getEncoder().encodeToString(
-						DigestUtils.sha512(
-								ArrayUtils.addAll(
-										new String(password).getBytes("UTF-8"), 
-										u.getUsername().getBytes("UTF-8")))).substring(0, 12).toUpperCase()
-				);
+						HexUtils.toHexString(
+								DigestUtils.sha512(
+										ArrayUtils.addAll(
+												new String(password).getBytes("UTF-8"), 
+												u.getUsername().getBytes("UTF-8")))).substring(0, 16).toLowerCase());
+					
 			}
 			
 			user.setPasswordChangeRequired(passwordChangeRequired);
