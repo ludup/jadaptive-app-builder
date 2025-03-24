@@ -45,6 +45,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.sshtools</groupId>
+			<artifactId>maverick-synergy-jdk16-server</artifactId>
+			<version>${synergy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-synergy-callback-server</artifactId>
 			<version>${synergy.version}</version>
 			<exclusions>
