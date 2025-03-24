@@ -64,7 +64,6 @@ public class ResourceController extends ExceptionHandlingController {
 	}
 
 	@RequestMapping(value={"/app/content/**", "/**"}, method = RequestMethod.GET)
-	
 	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		tenantService.setCurrentTenant(request);
