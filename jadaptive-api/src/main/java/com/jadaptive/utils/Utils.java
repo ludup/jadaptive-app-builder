@@ -227,6 +227,10 @@ public class Utils {
 		return DateUtils.addMonths(thisMonth(), -1);
 	}
 	
+	public static Date nextMonth() {
+		return DateUtils.addMonths(thisMonth(), 1);
+	}
+	
 
 	public static Calendar tomorrowCalendar() {
 
