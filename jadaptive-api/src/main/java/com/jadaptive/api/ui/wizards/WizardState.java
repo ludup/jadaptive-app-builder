@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.repository.UUIDEntity;
@@ -143,6 +144,10 @@ public class WizardState {
 	public Collection<WizardSection> getSections() {
 		return pages;
 	}
+	
+	public UUIDEntity removeObject(String key) {
+		return stateObjects.remove(key);
+	}
 
 	public UUIDEntity getObject(WizardSection section) {
 		return stateObjects.get(section.getStateKey());
@@ -152,14 +157,18 @@ public class WizardState {
 		stateObjects.put(section.getStateKey(), obj);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public <T extends UUIDEntity> T getObject(Class<T> type) {
+		return getObjectOr(type).orElseThrow(() -> new IllegalStateException("No object of type " + type.getSimpleName()));
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T extends UUIDEntity> Optional<T> getObjectOr(Class<T> type) {
 		for(UUIDEntity e : stateObjects.values()) {
 			if(e.getClass().equals(type)) {
-				return (T)e;
+				return Optional.of((T)e);
 			}
 		}
-		throw new IllegalStateException("No object of type " + type.getSimpleName());
+		return Optional.empty();
 	}
 
 	public void insertNextPage(WizardSection setupSection) {
