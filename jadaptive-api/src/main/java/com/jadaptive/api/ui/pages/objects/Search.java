@@ -12,6 +12,9 @@ import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UriRedirect;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 @Component
 @RequestPage(path="search/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
@@ -27,8 +30,9 @@ public class Search extends AbstractSearchPage  {
 	}
 
 	@Override
-	public void onCreate() throws FileNotFoundException {
-		super.onCreate();
+	public void beforeProcess(String uri, HttpServletRequest req, HttpServletResponse res) throws FileNotFoundException {
+		
+		super.beforeProcess(resourcePath, req, res);
 		
 		Request.get().getSession().removeAttribute(template.getResourceKey());
 		
