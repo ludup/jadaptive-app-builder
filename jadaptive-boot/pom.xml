@@ -233,6 +233,10 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<classifier>launcher</classifier>
+					<attach>true</attach>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
