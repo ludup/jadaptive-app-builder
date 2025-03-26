@@ -23,7 +23,8 @@ public interface ProductService {
 		LICENSE_SERVER,
 		WINDOWS_CONNECT,
 		GABBLE_CLOUD,
-		PASSWORD_EXPRESS_CLOUD
+		PASSWORD_EXPRESS_CLOUD,
+		NODAL_CLOUD
 	}
 	
 	ProductId getProductId(); 
