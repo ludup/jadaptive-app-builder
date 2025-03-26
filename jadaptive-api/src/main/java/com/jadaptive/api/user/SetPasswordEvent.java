@@ -30,6 +30,12 @@ public class SetPasswordEvent extends PasswordEvent {
 	@ObjectView(TARGET_VIEW)
 	String targetName;
 	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String previousPasswordPartHash;
+	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String currentPasswordPartHash;
+	
 	public SetPasswordEvent() { 
 		super(RESOURCE_KEY);
 	}
@@ -40,11 +46,13 @@ public class SetPasswordEvent extends PasswordEvent {
 		setTargetName(user.getName());
 	}
 	
-	public SetPasswordEvent(User user) {
+	public SetPasswordEvent(User user, String previousPasswordPartHash, String currentPasswordPartHash) {
 		super(RESOURCE_KEY);
 		setEventDescription(user.getUsername());
 		setTargetUsername(user.getUsername());
 		setTargetName(user.getName());
+		setPreviousPasswordPartHash(previousPasswordPartHash);
+		setCurrentPasswordPartHash(currentPasswordPartHash);
 	}
 
 	public String getTargetUsername() {
@@ -62,4 +70,22 @@ public class SetPasswordEvent extends PasswordEvent {
 	public void setTargetName(String targetName) {
 		this.targetName = targetName;
 	}
+
+	public String getPreviousPasswordPartHash() {
+		return previousPasswordPartHash;
+	}
+
+	public void setPreviousPasswordPartHash(String previousPasswordPartHash) {
+		this.previousPasswordPartHash = previousPasswordPartHash;
+	}
+
+	public String getCurrentPasswordPartHash() {
+		return currentPasswordPartHash;
+	}
+
+	public void setCurrentPasswordPartHash(String currentPasswordPartHash) {
+		this.currentPasswordPartHash = currentPasswordPartHash;
+	}
+	
+	
 }
