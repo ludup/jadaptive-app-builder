@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.auth.oauth2.OAuth2Requirement;
+import com.jadaptive.api.auth.oauth2.OAuth2Response;
 import com.jadaptive.api.auth.oauth2.OAuth2Scope;
 import com.jadaptive.api.auth.oauth2.OAuth2Token;
 import com.jadaptive.api.auth.oauth2.OAuth2TokenService;
@@ -78,22 +79,32 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 					}
 				}
 				if(authHdr == null) {
-					response.addHeader("WWW-Authenticate", "Bearer realm=\"JAD\"");
-					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-					return false;
+					if(acAnnotation.required()) {
+						if(acAnnotation.response()) {
+							OAuth2Response.authenticateResponse(response, "JAD");
+							return false;
+						}
+						else {
+							throw new IllegalStateException("No authorization provided.");
+						}
+					}
 				}
 				
 				try {
-					var tkn = oauth2TokenService.authenticateRequest(request, response, authHdr, scope);
-					OAuth2Token.set(tkn);
-					if(acAnnotation.asUser()) {
-						userContext.set(permissionService.userContext());
+					if(authHdr != null) {
+						var tkn = oauth2TokenService.authenticateRequest(request, response, authHdr, scope);
+						OAuth2Token.set(tkn);
+						if(acAnnotation.asUser()) {
+							userContext.set(permissionService.userContext());
+						}
 					}
 				}
 				catch(ResponseEntityException e) {
 					/* We can't send an entity here, so just send the header and the response code */
-					response.sendError(e.getEntity().getStatusCode().value());
-					return false;
+					if(acAnnotation.required()) {
+						response.sendError(e.getEntity().getStatusCode().value());
+						return false;
+					}
 				}
 			}
 		}
