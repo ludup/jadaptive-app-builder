@@ -519,7 +519,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public boolean requiresPostAuthentication(AuthenticationPolicy policy, User user) {
 		
-		List<PostAuthenticatorPage> additional = new ArrayList<>();
 		for(PostAuthenticatorPage a : applicationService.getBeans(PostAuthenticatorPage.class)) {
 			if(a.requiresProcessing(policy, user) && !(a instanceof SetupPostAuthenticationPage)) {
 				log.info("{} requires post authentication {}", user.getUsername(), a.getUri());
