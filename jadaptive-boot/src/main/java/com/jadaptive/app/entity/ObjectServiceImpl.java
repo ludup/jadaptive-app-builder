@@ -188,8 +188,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 		
 		for(ObjectTemplate reference : templateRepository.findReferences(template)) {
-			if(log.isInfoEnabled()) {
-				log.info("Found foreign reference to {} in {}", template.getResourceKey(),
+			if(log.isDebugEnabled()) {
+				log.debug("Found foreign reference to {} in {}", template.getResourceKey(),
 						reference.getResourceKey());
 			}
 		}

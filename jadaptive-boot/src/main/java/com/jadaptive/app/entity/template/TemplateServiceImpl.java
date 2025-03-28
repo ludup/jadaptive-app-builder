@@ -198,8 +198,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	private void generateExtensionTemplates() {
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
-			if(log.isInfoEnabled()) {
-				log.info("Scanning plugin {} for entity templates in {}", 
+			if(log.isDebugEnabled()) {
+				log.debug("Scanning plugin {} for entity templates in {}", 
 						w.getPluginId(),
 						w.getPlugin().getClass().getPackage().getName());
 			}
@@ -217,8 +217,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
                 for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectExtension.class.getName())) {
 
                     if(classInfo.getPackageName().startsWith(w.getPlugin().getClass().getPackage().getName())) {
-                        if(log.isInfoEnabled()) {
-    						log.info("Found extension {}", classInfo.getName());
+                        if(log.isDebugEnabled()) {
+    						log.debug("Found extension {}", classInfo.getName());
     					}
                         registerExtension((Class<? extends UUIDDocument>) classInfo.loadClass());
                     }
@@ -239,6 +239,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
                 registerExtension((Class<? extends UUIDDocument>) classInfo.loadClass());
             }
         }
+		
 		extensionTemplatesGenerated = true;
 		
 		

@@ -497,8 +497,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		for(PluginWrapper w : pluginManager.getPlugins()) {
 
-			if(log.isInfoEnabled()) {
-				log.info("Scanning plugin {} for custom permissions in {}", 
+			if(log.isDebugEnabled()) {
+				log.debug("Scanning plugin {} for custom permissions in {}", 
 						w.getPluginId(),
 						w.getPlugin().getClass().getPackage().getName());
 			}
