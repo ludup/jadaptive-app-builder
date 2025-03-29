@@ -201,7 +201,9 @@ public class Header extends AbstractPageExtension {
 		if(umenuLink != null) {
 			
 			var user = session.getUser();
-			var txt = Html.span(user.getUsername());
+			var txt = session.getTenant().isSystem() ?
+					Html.span(user.getUsername()) :
+					Html.span(String.format("%s@%s", user.getUsername(), session.getTenant().getDomain()));
 			txt.addClass("fw-bold");
 			txt.addClass("me-3");
 			
