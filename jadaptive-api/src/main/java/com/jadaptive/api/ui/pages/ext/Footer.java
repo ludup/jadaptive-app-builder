@@ -39,15 +39,15 @@ public class Footer extends AbstractPageExtension {
 			log.debug("Bootstrap css is {}", bootstrap);
 		}
 		if(Objects.nonNull(bootstrap) && page.isThemePage()) {
-			BootstrapTheme current = themeResolver.getTheme();
+			var current = themeResolver.getTheme();
 			if(log.isDebugEnabled()) {
 				log.debug("Bootstrap theme is {}", current);
 			}
-			if(BootstrapTheme.hasCss(current)) {
+			if(current.hasCss()) {
 				if(log.isDebugEnabled()) {
 					log.debug("Applying theme {}", current);
 				}
-				PageHelper.appendStylesheet(document, BootstrapTheme.getThemeCssUrl(current), "bootstrapTheme");	
+				PageHelper.appendStylesheet(document, current.getThemeCssUrl(), "bootstrapTheme");	
 			}
 
 			Element footer = document.selectFirst("#footer");
@@ -65,7 +65,7 @@ public class Footer extends AbstractPageExtension {
 		}
 	}
 
-	public static BootstrapTheme getThemeFromCookie(BootstrapTheme defaultValue) {
+	public static Theme getThemeFromCookie(Theme defaultValue) {
 		
 		Cookie[] cookies = Request.get().getCookies();
 		if(Objects.nonNull(cookies)) {

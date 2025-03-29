@@ -1,6 +1,6 @@
 package com.jadaptive.api.ui.pages.ext;
 
-public enum BootstrapTheme {
+public enum BootstrapTheme implements Theme {
 
 	DEFAULT,
 	CERULEAN,
@@ -29,6 +29,7 @@ public enum BootstrapTheme {
 	YETI,
 	ZERPHYR;
 	
+	@Override
 	public boolean isDark() {
 		switch(this) {
 		case CYBORG:
@@ -44,9 +45,9 @@ public enum BootstrapTheme {
 		}
 	}
 
-	public static boolean hasCss(BootstrapTheme current) {
-		
-		switch(current) {
+	@Override
+	public boolean hasCss() {
+		switch(this) {
 		case DEFAULT:
 			return false;
 		default:
@@ -54,7 +55,8 @@ public enum BootstrapTheme {
 		}
 	}
 
-	public static String getThemeCssUrl(BootstrapTheme current) {
-		return String.format("/app/content/npm2mvn/npm/bootswatch/current/dist/%s/bootstrap.min.css", current.name().toLowerCase().toString());
+	@Override
+	public String getThemeCssUrl() {
+		return String.format("/app/content/npm2mvn/npm/bootswatch/current/dist/%s/bootstrap.min.css", name().toLowerCase().toString());
 	}
 }

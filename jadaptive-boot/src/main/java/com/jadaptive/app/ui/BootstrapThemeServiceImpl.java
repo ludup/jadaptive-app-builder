@@ -10,6 +10,7 @@ import com.jadaptive.api.ui.pages.ext.BootstrapTheme;
 import com.jadaptive.api.ui.pages.ext.BootstrapThemeResolver;
 import com.jadaptive.api.ui.pages.ext.BootstrapThemeService;
 import com.jadaptive.api.ui.pages.ext.Footer;
+import com.jadaptive.api.ui.pages.ext.Theme;
 
 @Service
 public class BootstrapThemeServiceImpl implements BootstrapThemeService {
@@ -18,7 +19,7 @@ public class BootstrapThemeServiceImpl implements BootstrapThemeService {
 	private App applicationService;
 	
 	@Override
-	public BootstrapTheme getTheme() {
+	public Theme getTheme() {
 		return applicationService.getBeans(BootstrapThemeResolver.class).stream().
 				sorted(Comparator.comparingInt(o -> o.weight())).
 				findFirst().
