@@ -9,5 +9,8 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface EnforceFeature {
+	
+	public final static String UNLICENSED = "unlicensed";
+	
 	String value();
 }

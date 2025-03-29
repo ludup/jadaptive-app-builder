@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.permissions.EnforceFeature;
 import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.PageDependencies;
@@ -17,6 +18,7 @@ import com.jadaptive.api.ui.menu.PageMenu;
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils" })
 @PageProcessors(extensions = { "i18n" })
 @PageMenu(parent = ApplicationMenuService.CONFIGURATION_MENU_UUID, icon = "fa-address-card", weight = Integer.MAX_VALUE, withPermission = "tenant.read", path = "/app/ui/about", bundle = "userInterface", i18n = "about.name")
+@EnforceFeature(EnforceFeature.UNLICENSED)
 public class About extends AuthenticatedPage {
 
 	@Autowired

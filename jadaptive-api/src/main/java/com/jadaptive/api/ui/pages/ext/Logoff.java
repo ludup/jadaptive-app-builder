@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.EnforceFeature;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.ui.AuthenticatedPage;
@@ -17,6 +18,7 @@ import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.pages.RevertImpersonatePage;
 
 @Component
+@EnforceFeature(EnforceFeature.UNLICENSED)
 public class Logoff extends AuthenticatedPage { 
 	
 	@Autowired

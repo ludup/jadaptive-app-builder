@@ -4,6 +4,7 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.permissions.EnforceFeature;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.Feedback;
@@ -19,6 +20,7 @@ import com.jadaptive.api.user.UserService;
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @ModalPage
 @PageProcessors(extensions = { "i18n" })
+@EnforceFeature(EnforceFeature.UNLICENSED)
 public class ChangeMyPassword extends AuthenticatedPage implements FormProcessor<PasswordForm>{
 
 	@Autowired
