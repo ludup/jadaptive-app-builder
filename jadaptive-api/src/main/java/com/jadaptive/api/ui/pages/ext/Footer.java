@@ -3,7 +3,6 @@ package com.jadaptive.api.ui.pages.ext;
 import java.io.IOException;
 import java.util.Objects;
 
-import org.apache.commons.lang.math.NumberUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -11,16 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.CustomizablePage;
 import com.jadaptive.api.ui.HtmlPage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
-import com.jadaptive.utils.Utils;
-
-import jakarta.servlet.http.Cookie;
 
 @Component
 @CustomizablePage
@@ -60,26 +55,11 @@ public class Footer extends AbstractPageExtension {
 						.appendChild(new Element("div")
 							.addClass("ms-3")
 							.appendChild(input.renderInput())));
-				input.renderValues(BootstrapTheme.values(), current.name(), false, true);
+				themeResolver.getAllThemes().forEach(set -> {
+					input.renderValues(set, current.name(), false, true);
+				});
 			}
 		}
-	}
-
-	public static Theme getThemeFromCookie(Theme defaultValue) {
-		
-		Cookie[] cookies = Request.get().getCookies();
-		if(Objects.nonNull(cookies)) {
-			for(Cookie c : cookies) {
-				if("userTheme".equals(c.getName())) {
-					if(NumberUtils.isNumber(c.getValue())) {
-						return BootstrapTheme.values()[Utils.parseIntOrDefault(c.getValue(), 0)];
-					} else {
-						return BootstrapTheme.valueOf(c.getValue());
-					}
-				}
-			}
-		}
-		return defaultValue;
 	}
 
 	@Override
