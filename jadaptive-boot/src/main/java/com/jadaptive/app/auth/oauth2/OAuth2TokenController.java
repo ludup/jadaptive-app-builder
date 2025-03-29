@@ -365,6 +365,7 @@ public class OAuth2TokenController extends AuthenticatedController {
 			token.setRefreshToken(OAuth2AuthorizationService.genToken());
 		}
 		token.setOwner(user);
+		token.setTenant(getCurrentTenant().getUuid());
 		token.setScopes(Arrays.asList(scope));
 		token.setNonce(nonce);
 

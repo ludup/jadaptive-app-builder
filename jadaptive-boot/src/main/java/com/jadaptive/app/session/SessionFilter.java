@@ -321,7 +321,11 @@ public class SessionFilter implements Filter {
 				 * 
 				 * TODO invalidate the session
 				 */
+				Tenant tenant = tenantService.getCurrentTenant();
 				var tkn = oauth2TokenService.byToken(authorization[1]);
+				if(!tkn.getTenant().equals(tenant.getUuid())) {
+					throw new IllegalStateException("Incorrect tenant.");
+				}
 				
 				LogonCompletedResult result = authenticationService.logonUser(
 						tkn.getOwner(), 

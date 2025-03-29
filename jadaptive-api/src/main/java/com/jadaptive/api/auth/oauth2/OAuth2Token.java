@@ -54,6 +54,10 @@ public class OAuth2Token extends NamedUUIDEntity {
 	@ObjectView(value = VIEW_TOKEN)
 	private User owner;
 
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", hidden = true, readOnly = true)
+	@ObjectView(value = VIEW_TOKEN)
+	private String tenant;
+
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = OAuth2Application.RESOURCE_KEY, readOnly = true)
 	@ObjectView(value = VIEW_TOKEN)
 	private OAuth2Application application;
@@ -74,6 +78,14 @@ public class OAuth2Token extends NamedUUIDEntity {
 	
 	public OAuth2Application getApplication() {
 		return application;
+	}
+
+	public String getTenant() {
+		return tenant;
+	}
+
+	public void setTenant(String tenant) {
+		this.tenant = tenant;
 	}
 
 	public String getRefreshToken() {
