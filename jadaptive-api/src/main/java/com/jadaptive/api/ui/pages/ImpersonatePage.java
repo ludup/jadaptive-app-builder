@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
 import com.jadaptive.api.tenant.Tenant;
@@ -13,6 +14,7 @@ import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
+import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.RequestPage;
 import com.jadaptive.api.ui.UriRedirect;
 
@@ -28,6 +30,9 @@ public class ImpersonatePage extends AuthenticatedPage {
 
 	@Autowired
 	private SessionService sessionService; 
+
+	@Autowired
+	private PermissionService permissionService; 
 	
 	@Autowired
 	private PageCache pageCache;
@@ -55,13 +60,17 @@ public class ImpersonatePage extends AuthenticatedPage {
 			Tenant tenant = tenantService.getTenantByUUID(uuid);
 			
 			sessionService.impersonate(tenant, session);
-			Feedback.success("userInterface", "impersonate.success", tenant.getName());
-		} catch(Throwable e) {
+			try(var uc = permissionService.userContext(session.getUser())) {
+				Feedback.success("userInterface", "impersonate.success", tenant.getName());
+				throw new PageRedirect(pageCache.getHomePage());
+			}
+		} catch(Redirect r) {
+			throw r;
+		}catch(Throwable e) {
 			Feedback.error(e.getMessage());
 			throw new UriRedirect("/app/ui/search/tenant");
 		}
 		
-		throw new PageRedirect(pageCache.getHomePage());
 	}
 
 }
