@@ -21,7 +21,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDEntity;
-import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.Session;
 import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.tenant.FeatureEnablementService;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
@@ -47,10 +47,12 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 	
 	public Collection<ApplicationMenu> getMenus() {
 		
-		@SuppressWarnings("unchecked")
-		Collection<ApplicationMenu> tmp = (Collection<ApplicationMenu>) Request.get().getSession().getAttribute(MENU_CACHE);
-		if(Objects.nonNull(tmp)) {
-			return tmp;
+		if(Session.getOr().isPresent()) {
+			@SuppressWarnings("unchecked")
+			Collection<ApplicationMenu> tmp = (Collection<ApplicationMenu>) Session.get().getAttribute(MENU_CACHE);
+			if(Objects.nonNull(tmp)) {
+				return tmp;
+			}
 		}
 		
 		List<ApplicationMenu> results = new ArrayList<>();
@@ -124,8 +126,9 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 			
 		}
 		
-		Request.get().getSession().setAttribute(MENU_CACHE, tmp = Collections.unmodifiableCollection(results));
-		return tmp;
+		var newtmp = Collections.unmodifiableCollection(results);
+		Session.getOr().ifPresent(s -> s.setAttribute(MENU_CACHE, newtmp));
+		return newtmp;
 	}
 	
 	@Override

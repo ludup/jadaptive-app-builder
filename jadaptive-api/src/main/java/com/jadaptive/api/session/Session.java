@@ -196,8 +196,11 @@ public class Session extends AbstractUUIDEntity {
 		return impersonatingUser;
 	}
 
+	public static final String MENU_CACHE = "menuCache";
+
 	public void setImpersonatingUser(User impersonatingUser) {
 		this.impersonatingUser = impersonatingUser;
+		removeAttribute(MENU_CACHE);
 	}
 
 	public Tenant getImpersontatingTenant() {
@@ -206,6 +209,7 @@ public class Session extends AbstractUUIDEntity {
 
 	public void setImpersontatingTenant(Tenant impersontatingTenant) {
 		this.impersontatingTenant = impersontatingTenant;
+		removeAttribute(MENU_CACHE);
 	}
 
 	public boolean isImpersontating() {
