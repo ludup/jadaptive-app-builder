@@ -46,23 +46,30 @@ public abstract class PasswordEnabledUserDatabaseImpl
 				user.setSalt(Base64.getEncoder().encodeToString(salt));
 				user.setEncodedPassword(ENCRYPTION_PREFIX + Base64.getEncoder().encodeToString(encodedPassword));
 			
-				user.setPasswordPartHash(
-						HexUtils.toHexString(
-								DigestUtils.sha512(
-										ArrayUtils.addAll(
-												new String(password).getBytes("UTF-8"), 
-												u.getUsername().getBytes("UTF-8")))).substring(0, 16).toLowerCase());
+				user.setPasswordPartHash(generatePasswordPartHash(u.getUsername(), new String(password)));
 					
 			}
 			
 			user.setPasswordChangeRequired(passwordChangeRequired);
 			objectDatabase.saveOrUpdate(user);
 			
-		} catch (InvalidKeySpecException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new ObjectException(e);
 		}
 	}
 	
+	public static String generatePasswordPartHash(String username, String password) {
+		try {
+			return HexUtils.toHexString(
+					DigestUtils.sha512(
+							ArrayUtils.addAll(
+									new String(password).getBytes("UTF-8"), 
+									username.getBytes("UTF-8")))).substring(0, 16).toLowerCase();
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+
 	@Override
 	public boolean hasPassword(User u) {
 
