@@ -5,10 +5,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
@@ -48,47 +47,32 @@ public class UsageController extends AuthenticatedController {
 	public ResourceStatus<BarChartDateLongValue[]> getDailyInstances(HttpServletRequest request,
 			HttpServletResponse response, @PathVariable String key, @PathVariable Integer days)
 			throws IOException {
-
-		setupUserContext(request);
 		
-		try {
-			
-			@SuppressWarnings("rawtypes")
-			Map<Date, List> cache = cacheService.getCacheOrCreate(String.format("daily.%d.%s", days, key), Date.class, List.class, Duration.ofHours(1).toMillis());
+		return new ResourceStatus<>(cacheOrSupply(request, String.format("daily.%d.%s", days, key), () -> {
+
 			int hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
-			@SuppressWarnings("unchecked")
-			List<BarChartDateLongValue> revenue = cache.get(Utils.today());
-			if(Objects.isNull(revenue)) {
-				
-				revenue = new ArrayList<>();
+			var revenue = new ArrayList<BarChartDateLongValue>();
+			var from = Calendar.getInstance();
+			from.setTime(DateUtils.addDays(Utils.today(), -days));
 
-				Calendar from = Calendar.getInstance();
-				from.setTime(DateUtils.addDays(Utils.today(), -days));
-
-				while(from.before(Utils.tomorrowCalendar())) {
-						
-					if(Boolean.getBoolean("jadaptive.development")) {
-						if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-							revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint / 2)));
-						} else {
-							revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint)));
-						}
+			while(from.before(Utils.tomorrowCalendar())) {
+					
+				if(Boolean.getBoolean("jadaptive.development")) {
+					if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+						revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint / 2)));
 					} else {
-						revenue.add(new BarChartDateLongValue(from.getTime(), usageService.getDailyValue(key, from.getTime())));
+						revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint)));
 					}
-						
-					from.setTime(DateUtils.addDays(from.getTime(), 1));
+				} else {
+					revenue.add(new BarChartDateLongValue(from.getTime(), usageService.getDailyValue(key, from.getTime())));
 				}
-				
-				if(!Boolean.getBoolean("jadaptive.development")) {
-					cache.put(Utils.today(), revenue);
-				}
+					
+				from.setTime(DateUtils.addDays(from.getTime(), 1));
 			}
 			
-			return new ResourceStatus<BarChartDateLongValue[]>(revenue.toArray(new BarChartDateLongValue[0]));
-		} finally {
-			clearUserContext();
-		}
+			return revenue.toArray(new BarChartDateLongValue[0]);
+			
+		}, days, key));
 	}
 	
 	@RequestMapping(value="/app/api/usage/sum/days/{keys}/{days}/", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
@@ -97,50 +81,98 @@ public class UsageController extends AuthenticatedController {
 	public ResourceStatus<BarChartDateLongValue[]> sumDailyValues(HttpServletRequest request,
 			HttpServletResponse response, @PathVariable String keys, @PathVariable Integer days)
 			throws IOException {
-
-		setupUserContext(request);
 		
-		try {
+		return new ResourceStatus<>(cacheOrSupply(request, String.format("sumByDay.%d.%s", days, keys), () -> {
 			
-			@SuppressWarnings("rawtypes")
-			Map<Date, List> cache = cacheService.getCacheOrCreate(String.format("sumByDay.%d.%s", days, keys), Date.class, List.class, Duration.ofHours(1).toMillis());
-			
-			int hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
-			
-			@SuppressWarnings("unchecked")
-			List<BarChartDateLongValue> revenue = cache.get(Utils.today());
-			if(Objects.isNull(revenue)) {
-				
-				revenue = new ArrayList<>();
+			var revenue = new ArrayList<BarChartDateLongValue>();
+			var hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
 
-				Calendar from = Calendar.getInstance();
-				from.setTime(DateUtils.addDays(Utils.today(), -days));
+			var from = Calendar.getInstance();
+			from.setTime(DateUtils.addDays(Utils.today(), -days));
 
-				Date to = DateUtils.addDays(from.getTime(), 1);
-				
-				while(from.before(Utils.tomorrowCalendar())) {
-						
-					if(Boolean.getBoolean("jadaptive.development")) {
-						if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-							revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint / 2)));
-						} else {
-							revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint)));
-						}
-					} else {
-						revenue.add(new BarChartDateLongValue(from.getTime(), usageService.sumAnd(from.getTime(), to, keys.split(","))));
-					}
+			var to = DateUtils.addDays(from.getTime(), 1);
+			
+			while(from.before(Utils.tomorrowCalendar())) {
 					
-					to = from.getTime();
-					from.setTime(DateUtils.addDays(from.getTime(), 1));
+				if(Boolean.getBoolean("jadaptive.development")) {
+					if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+						revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint / 2)));
+					} else {
+						revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint)));
+					}
+				} else {
+					revenue.add(new BarChartDateLongValue(from.getTime(), usageService.sumAnd(from.getTime(), to, keys.split(","))));
 				}
 				
-				if(!Boolean.getBoolean("jadaptive.development")) {
-					cache.put(Utils.today(), revenue);
-				}
+				to = from.getTime();
+				from.setTime(DateUtils.addDays(from.getTime(), 1));
 			}
 			
-			return new ResourceStatus<BarChartDateLongValue[]>(revenue.toArray(new BarChartDateLongValue[0]));
-		} finally {
+			return revenue.toArray(new BarChartDateLongValue[0]);
+			
+		}, days, keys));
+	}
+	
+	@RequestMapping(value="/app/api/usage/all/{keys}/{days}/", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public ResourceStatus<BarChartDateLongValue[]> allValues(HttpServletRequest request,
+			HttpServletResponse response, @PathVariable String keys, @PathVariable Integer days)
+			throws IOException {
+
+		return new ResourceStatus<>(cacheOrSupply(request, String.format("all.%d.%s", days, keys), () -> {
+			
+			var revenue = new ArrayList<BarChartDateLongValue>();
+			
+			// TODO what is this all about ... something about crossing weekends? not sure we care here
+//			var hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
+
+			var from = Calendar.getInstance();
+			from.setTime(DateUtils.addDays(Utils.today(), -days));
+
+			var to = DateUtils.addDays(from.getTime(), 1);
+			
+			while(from.before(Utils.tomorrowCalendar())) {
+					
+//				if(Boolean.getBoolean("jadaptive.development")) {
+//					if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
+//						revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint / 2)));
+//					} else {
+//						revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint)));
+//					}
+//				} else {
+				usageService.values(from.getTime(), to, keys.split(",")).forEach(val -> {
+					revenue.add(new BarChartDateLongValue(from.getTime(), val));
+				});
+//				}
+				
+				to = from.getTime();
+				from.setTime(DateUtils.addDays(from.getTime(), 1));
+			}
+			
+			return revenue.toArray(new BarChartDateLongValue[0]);
+			
+		}, days, keys));
+	}
+	
+	private BarChartDateLongValue[] cacheOrSupply(HttpServletRequest request, String key, Supplier<BarChartDateLongValue[]> supplier, int days, String keys) {
+
+		setupUserContext(request);
+		try {
+			var cache = cacheService.getCacheOrCreate(key, Date.class, BarChartDateLongValue[].class, Duration.ofHours(1).toMillis());
+			var values = (BarChartDateLongValue[])cache.get(Utils.today());
+			
+			if(Objects.isNull(values)) {
+				values = supplier.get();
+				
+				if(!Boolean.getBoolean("jadaptive.development")) {
+					cache.put(Utils.today(), values);
+				}
+			}
+
+			return values;
+		}
+		finally {
 			clearUserContext();
 		}
 	}

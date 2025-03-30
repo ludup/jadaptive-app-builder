@@ -2,6 +2,8 @@ package com.jadaptive.app.tenant;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -155,6 +157,18 @@ public class UsageServiceImpl implements UsageService {
 		counter.setValue(byValue);
 		dailyDatabase.saveOrUpdate(counter);
 		
+	}
+	
+	@Override
+	public Stream<Long> values(Date from, Date to, String... keys) {
+		/* TODO can we get stream of individual attributes from on object ? */
+		return usageDatabase.searchObjects(Usage.class,
+				SearchField.and(IntStream.range(0, keys.length)
+//			        .filter(i -> keys[i].length() <= i)
+			        .mapToObj(i -> SearchField.eq("keys." + i, keys[i]))
+			        .toList().toArray(new SearchField[0])),
+				SearchField.gte("created", from),
+				SearchField.lt("created", to)).stream().map(Usage::getValue);
 	}
 	
 	@Override

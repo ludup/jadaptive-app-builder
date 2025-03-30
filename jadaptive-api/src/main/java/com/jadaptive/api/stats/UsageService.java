@@ -1,6 +1,7 @@
 package com.jadaptive.api.stats;
 
 import java.util.Date;
+import java.util.stream.Stream;
 
 public interface UsageService {
 
@@ -17,6 +18,8 @@ public interface UsageService {
 	long getDailyValue(String uuid);
 
 	Long sumAnd(Date from, Date to, String... keys);
+
+	Stream<Long> values(Date from, Date to, String... keys);
 
 	void setMonthlyValue(String key, Date date, long val);
 

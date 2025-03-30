@@ -3,32 +3,26 @@ package com.jadaptive.app.product;
 import java.util.Calendar;
 import java.util.Locale;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.App;
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.I18N;
+import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.product.Product;
 import com.jadaptive.api.product.ProductLogoSource;
 import com.jadaptive.api.product.ProductService;
 
 @Service
-public class ProductServiceImpl implements ProductService {
+public class ProductServiceImpl implements ProductService, StartupAware {
 
 	@Autowired
 	App appService; 
 	
 	final private Product defaultProduct = new Product() { };
-	
-	@PostConstruct
-	private void postConstruct() {
-		I18N.addI18n(Locale.getDefault(), "vendor", "product.name", getProductName());
-	}
 	
 	public String getVersion() {
 		return ApplicationVersion.getVersion();
@@ -108,6 +102,11 @@ public class ProductServiceImpl implements ProductService {
 		} catch (NoSuchBeanDefinitionException e1) {
 			return defaultProduct;
 		}
+	}
+
+	@Override
+	public void onApplicationStartup() {
+		I18N.addI18n(Locale.getDefault(), "vendor", "product.name", getProductName());
 	}
 
 
