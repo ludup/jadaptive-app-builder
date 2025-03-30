@@ -66,40 +66,40 @@ public class Session extends AbstractUUIDEntity {
 	
 	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
-	String remoteAddress;
+	private String remoteAddress;
 	
 	@ObjectField(type = FieldType.ENUM, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
-	SessionType type;
+	private SessionType type;
 	
 	@ObjectField(type = FieldType.ENUM, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
-	SessionState state;
+	private SessionState state;
 	
 	@ObjectField(type = FieldType.TIMESTAMP)
 	@Validator(type = ValidationType.REQUIRED)
-	Date lastUpdated;
+	private Date lastUpdated;
 	
 	@ObjectField(type = FieldType.TIMESTAMP)
 	@Validator(type = ValidationType.REQUIRED)
-	Date signedIn;
+	private Date signedIn;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, searchable = true)
-	Date signedOut;
+	private Date signedOut;
 		
 	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
-	String userAgent;
+	private String userAgent;
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = User.RESOURCE_KEY, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
-	User user;
+	private User user;
 	
-	Tenant tenant;
+	private Tenant tenant;
 	
-	User impersonatingUser;
-	Tenant impersontatingTenant;
-	Map<String,Object> attrs = new HashMap<>();
+	private User impersonatingUser;
+	private Tenant impersonatingTenant;
+	private Map<String,Object> attrs = new HashMap<>();
 	
 	public Session() {
 
@@ -152,7 +152,7 @@ public class Session extends AbstractUUIDEntity {
 	@JsonIgnore
 	public Tenant getTenant() {
 		if(isImpersontating()) {
-			return impersontatingTenant;
+			return impersonatingTenant;
 		}
 		return tenant;
 	}
@@ -203,12 +203,12 @@ public class Session extends AbstractUUIDEntity {
 		removeAttribute(MENU_CACHE);
 	}
 
-	public Tenant getImpersontatingTenant() {
-		return impersontatingTenant;
+	public Tenant getImpersonatingTenant() {
+		return impersonatingTenant;
 	}
 
-	public void setImpersontatingTenant(Tenant impersontatingTenant) {
-		this.impersontatingTenant = impersontatingTenant;
+	public void setImpersonatingTenant(Tenant impersontatingTenant) {
+		this.impersonatingTenant = impersontatingTenant;
 		removeAttribute(MENU_CACHE);
 	}
 

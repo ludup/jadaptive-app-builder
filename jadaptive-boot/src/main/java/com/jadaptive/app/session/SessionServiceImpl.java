@@ -209,7 +209,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 		User administrativeUser = roleService.getAdministrationRole().getUsers().iterator().next();
 		
 		session.setImpersonatingUser(administrativeUser);
-		session.setImpersontatingTenant(tenant);
+		session.setImpersonatingTenant(tenant);
 		
 		getCache(tenant).put(session.getUuid(), session);
 		
@@ -218,14 +218,14 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	@Override
 	public void unimpersonate(Session session) {
 		
-		Tenant tenant = session.getImpersontatingTenant();
+		Tenant tenant = session.getImpersonatingTenant();
 		
 		if(Objects.isNull(tenant)) {
 			throw new IllegalStateException("You cannot unimpersontate this session as there is no impersonation in progress");
 		}
 		
 		session.setImpersonatingUser(null);
-		session.setImpersontatingTenant(null);
+		session.setImpersonatingTenant(null);
 		
 		tenantService.setCurrentTenant(session.getTenant());
 		
