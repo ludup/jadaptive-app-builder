@@ -51,7 +51,7 @@ public class ImpersonatePage extends AuthenticatedPage {
 		try {
 			Session session = Session.get(request);
 			if(session.isImpersontating()) {
-				throw new IllegalStateException("The session is already impersonating in " + session.getImpersontatingTenant().getDomain());
+				throw new IllegalStateException("The session is already impersonating in " + session.getImpersonatingTenant().getDomain());
 			}
 			if(!session.getTenant().isSystem()) {
 				throw new IllegalStateException("You cannot impersonate from a non-system tenant!");
