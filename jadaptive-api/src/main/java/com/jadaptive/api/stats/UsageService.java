@@ -3,6 +3,8 @@ package com.jadaptive.api.stats;
 import java.util.Date;
 import java.util.stream.Stream;
 
+import com.jadaptive.api.charts.BarChartDateLongValue;
+
 public interface UsageService {
 
 	void log(long value, String... keys);
@@ -19,7 +21,7 @@ public interface UsageService {
 
 	Long sumAnd(Date from, Date to, String... keys);
 
-	Stream<Long> values(Date from, Date to, String... keys);
+	Stream<BarChartDateLongValue> values(Date from, Date to, String... keys);
 
 	void setMonthlyValue(String key, Date date, long val);
 
