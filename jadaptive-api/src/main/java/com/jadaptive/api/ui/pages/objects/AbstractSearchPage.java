@@ -429,7 +429,12 @@ public abstract class AbstractSearchPage extends BaseSearchPage<SearchForm> {
 			if(StringUtils.isNotBlank(searchValue))
 				log.info("Searching for {} {}", searchField, searchValue);
 		}
-		return SearchUtils.generateSearch(searchField, searchValue, template);
+		return SearchUtils.generateSearch(searchField, searchValue, useRegex, searchFieldTemplates);
+	}
+	
+	@Override
+	public boolean isBackStop() {
+		return true;
 	}
 
 }

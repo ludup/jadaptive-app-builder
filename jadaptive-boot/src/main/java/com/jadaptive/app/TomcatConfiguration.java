@@ -3,12 +3,9 @@ package com.jadaptive.app;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.connector.Connector;
 import org.apache.catalina.session.StandardManager;
 import org.apache.catalina.session.StandardSession;
-import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.descriptor.web.LoginConfig;
-import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
 import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
@@ -73,31 +70,8 @@ public class TomcatConfiguration {
 				});
 			}
 		});
-		
-	    /* This is for SSL reloading */
-		tomcat.addConnectorCustomizers(new DefaultSSLConnectorCustomizer());
+
 		return tomcat;
 	}
 
-	/**
-	 * NOTE: This will not be needed when we update to Spring Boot 3.2+, it can
-	 * do it's own SSL configuration reloading
-	 */
-	@Deprecated
-	public static class DefaultSSLConnectorCustomizer implements TomcatConnectorCustomizer {
-
-		private Http11NioProtocol protocol;
-
-		@Override
-		public void customize(Connector connector) {
-			var protocol = (Http11NioProtocol) connector.getProtocolHandler();
-			if (connector.getSecure()) {
-				this.protocol = protocol;
-			}
-		}
-
-		protected Http11NioProtocol getProtocol() {
-			return protocol;
-		}
-	}
 }

@@ -119,9 +119,4 @@ public class Import extends ObjectTemplatePage {
 		}
 		
 	}
-	
-	@Override
-	protected String getCancelURI() {
-		return "/app/ui/search/" + resourceKey;
-	}
 }

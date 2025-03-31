@@ -23,4 +23,6 @@ public interface SessionService extends UUIDObjectService<Session> {
 
 	void unimpersonate(Session session);
 
+	void impersonate(User user, Session session);
+
 }

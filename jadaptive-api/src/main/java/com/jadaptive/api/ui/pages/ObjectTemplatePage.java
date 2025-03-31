@@ -7,7 +7,6 @@ import java.util.Objects;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -17,6 +16,7 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.ui.ObjectPage;
 
@@ -72,8 +72,8 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		}
 	}
 	
-	protected String getCancelURI() {
-		return Request.get().getHeader(HttpHeaders.REFERER);
+	protected final String getCancelURI() {
+		return (String) Request.get().getSession().getAttribute(Session.BACK_URL);
 	}
 
 	public void onCreate() throws FileNotFoundException {

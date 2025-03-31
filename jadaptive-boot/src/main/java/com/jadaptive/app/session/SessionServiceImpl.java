@@ -216,6 +216,15 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	}
 	
 	@Override
+	public void impersonate(User user, Session session) {
+		
+		permissionService.assertAdministrator();
+		session.setImpersonatingUser(user);
+		session.setImpersonatingTenant(getCurrentTenant());
+		
+	}
+	
+	@Override
 	public void unimpersonate(Session session) {
 		
 		Tenant tenant = session.getImpersonatingTenant();

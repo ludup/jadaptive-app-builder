@@ -43,6 +43,7 @@ import com.jadaptive.utils.Utils;
 requiresUpdate = true, sortField = "username")
 @TableAction(resourceKey = "enableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-unlock", target = Target.ROW, url = "/app/api/accounts/enable/{uuid}", filter = DisabledAccountAction.class)
 @TableAction(resourceKey = "disableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-lock", target = Target.ROW, url = "/app/api/accounts/disable/{uuid}", filter = EnabledAccountAction.class)
+@TableAction(resourceKey = "impersonateUser", bundle = User.RESOURCE_KEY,  icon = "fa-mask", target = Target.ROW, url = "/app/ui/impersonateUser/{uuid}", permissions = "tenant.read")
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
 @LicensedFeature(group = FeatureGroup.FOUNDATION, includedWithPAYG = true, value = User.RESOURCE_KEY)
