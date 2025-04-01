@@ -184,18 +184,19 @@ public class Dashboard extends AuthenticatedPage {
 		Element help;
 		Element e = new Element("div")
 				.addClass("col-md-12 mb-3")
+				.addClass(widget.getName() + "DashboardWidget")
 				.appendChild(new Element("div")
 						.addClass("card h-100")
 						.appendChild(new Element("div")
-								.addClass("card-header")
-								.appendChild(Html.div("w-75 float-start")
+								.addClass("card-header").addClass("d-flex").addClass("align-items-center")
+								.appendChild(Html.div("flex-grow-1")
 									.appendChild(new Element("i")
 											.addClass(widget.getIconGroup() + " " + widget.getIcon()))
 									.appendChild(new Element("span")
 											.addClass("ms-2")
 											.attr("jad:bundle", widget.getBundle())
 											.attr("jad:i18n",String.format("%s.name", widget.getName()) )))
-									.appendChild(help = Html.div("w-25 float-end text-end")))
+									.appendChild(help = Html.div("widget-accessories text-end")))
 						.appendChild(w = new Element("div")
 								.addClass("card-body")));
 		
