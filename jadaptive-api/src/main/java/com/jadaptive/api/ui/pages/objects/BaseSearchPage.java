@@ -68,6 +68,8 @@ public abstract class BaseSearchPage<T extends BaseSearchForm> extends TemplateP
 	
 	public void processForm(Document document, T form) throws IOException {
 		
+		document.selectFirst("#form").attr("action", generateSearchPostURI());
+		
 		start = form.getStart();
 		setCachedValue("start", String.valueOf(start));
 		
@@ -92,6 +94,8 @@ public abstract class BaseSearchPage<T extends BaseSearchForm> extends TemplateP
 
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws IOException {
+		
+		document.selectFirst("#form").attr("action", generateSearchPostURI());
 		
 		sortColumn = Request.get().getParameter("sortColumn");
 		if(Objects.isNull(sortColumn)) {

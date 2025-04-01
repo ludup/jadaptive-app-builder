@@ -306,6 +306,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				default:
 					
 					Element f = Html.div("field");
+					f.attr("id", String.format("%sField", field.getResourceKey()));
 					lastRow.appendChild(f);
 					int cols = Math.min(field.getMetaValueInt("cols", 12), 12);
 					int size = Math.min(field.getMetaValueInt("size", 12), 12);

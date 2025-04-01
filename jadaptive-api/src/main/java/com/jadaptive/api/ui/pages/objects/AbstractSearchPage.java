@@ -94,7 +94,6 @@ public abstract class AbstractSearchPage extends BaseSearchPage<SearchForm> {
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws IOException {
 		
-		document.selectFirst("#form").attr("action", generateSearchPostURI());
 		searchField = Request.get().getParameter("column");
 		if(Objects.isNull(searchField)) {
 			searchField = getCachedValue("searchField", StringUtils.defaultIfBlank(Request.get().getParameter("column"), template.getDefaultColumn()));
