@@ -197,8 +197,8 @@ public class DropdownFormInput extends FieldInputRender {
 				.addClass("jdropdown-item dropdown-item"));
 	}
 
-	public void setSelectedI18nValue(String uuid, String value) {
-		nameElement.val(I18N.getResource(bundle, value));
+	public void setSelectedI18nValue(String key, String value) {
+		nameElement.val(I18N.getResource(bundle, key));
 		valueElement.val(value);
     }
     

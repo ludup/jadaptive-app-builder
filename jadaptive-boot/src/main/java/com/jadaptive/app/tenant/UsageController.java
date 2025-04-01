@@ -113,7 +113,7 @@ public class UsageController extends AuthenticatedController {
 		}, days, keys));
 	}
 	
-	@RequestMapping(value="/app/api/usage/all/{keys}/{days}/", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
+	@RequestMapping(value="/app/api/usage/all/{keys}/{days}", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
 	@ResponseBody
 	@ResponseStatus(value=HttpStatus.OK)
 	public ResourceStatus<BarChartDateLongValue[]> allValues(HttpServletRequest request,
@@ -122,35 +122,12 @@ public class UsageController extends AuthenticatedController {
 
 		return new ResourceStatus<>(cacheOrSupply(request, String.format("all.%d.%s", days, keys), () -> {
 			
-			var revenue = new ArrayList<BarChartDateLongValue>();
-			
-			// TODO what is this all about ... something about crossing weekends? not sure we care here
-//			var hint = Integer.parseInt(StringUtils.defaultIfEmpty(Request.get().getParameter("hint"), "10"));
-
 			var from = Calendar.getInstance();
-			from.setTime(DateUtils.addDays(Utils.today(), -days));
-
-			var to = DateUtils.addDays(from.getTime(), 1);
+			var today = Utils.today();
+			from.setTime(DateUtils.addDays(today, -days));
+			var to = DateUtils.addDays(today, 1);
 			
-			while(from.before(Utils.tomorrowCalendar())) {
-					
-//				if(Boolean.getBoolean("jadaptive.development")) {
-//					if(from.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY || from.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-//						revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint / 2)));
-//					} else {
-//						revenue.add(new BarChartDateLongValue(from.getTime(), new Random().nextLong(0, hint)));
-//					}
-//				} else {
-				usageService.values(from.getTime(), to, keys.split(",")).forEach(val -> {
-					revenue.add(new BarChartDateLongValue(from.getTime(), val));
-				});
-//				}
-				
-				to = from.getTime();
-				from.setTime(DateUtils.addDays(from.getTime(), 1));
-			}
-			
-			return revenue.toArray(new BarChartDateLongValue[0]);
+			return usageService.values(from.getTime(), to, keys.split(",")).toList().toArray(new BarChartDateLongValue[0]);
 			
 		}, days, keys));
 	}
