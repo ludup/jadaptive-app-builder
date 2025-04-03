@@ -1,5 +1,7 @@
 package com.jadaptive.api.ui;
 
+import java.security.MessageDigest;
+import java.util.Base64;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;
@@ -154,7 +156,15 @@ public class PageHelper {
 	
 	public static void appendHeadScriptSnippet(Document document, String script) {
 
-		String nonce = Utils.generateRandomAlphaNumericString(32);
+		String nonce = nonce(script.getBytes());
+
+		Element head = PageHelper.getOrCreateTag(document, "head");
+		for(Element e : head.getElementsByTag("script")) {
+			if(nonce.equals(e.attr("nonce"))) {
+				return;
+			}
+		}
+		
 		document.selectFirst("head").appendChild(new Element("script")
 				.attr("nonce", nonce)
 				.attr("type", "application/javascript")
@@ -173,4 +183,15 @@ public class PageHelper {
 		head.appendChild(new Element("style").append(css));
 	}
 
+
+	static String nonce(byte[] in) {
+		try {
+			var md = MessageDigest.getInstance("SHA-512");
+			md.update(in);
+			byte[] bytes = md.digest();
+			return Base64.getEncoder().encodeToString(bytes);
+		} catch (Exception e) {
+			throw new IllegalStateException("Failed to hash.", e);
+		}
+	}
 }
