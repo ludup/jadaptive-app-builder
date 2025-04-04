@@ -31,6 +31,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -372,7 +373,7 @@ public class X509CertificateUtils {
 	}
 
 	public static X509Certificate generateSelfSignedCertificate(
-			String cn, String ou, String o, String l, String s, String c, KeyPair pair, String signatureType) {
+			String cn, String ou, String o, String l, String s, String c, KeyPair pair, String signatureType, String... sans) {
 		try {
 			// Generate self-signed certificate
 			X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
@@ -395,9 +396,19 @@ public class X509CertificateUtils {
 					builder.build(), serial, notBefore, notAfter,
 					builder.build(), pair.getPublic());
 			
-			GeneralName altName = new GeneralName(GeneralName.dNSName, cn);
-			GeneralNames subjectAltName = new GeneralNames(altName);
-			certGen.addExtension(Extension.subjectAlternativeName, false, subjectAltName); 
+			GeneralNames subjectAltName;
+			if(sans.length == 0) {
+				subjectAltName = new GeneralNames(new GeneralName(GeneralName.dNSName, cn));
+			}
+			else {
+				subjectAltName = new GeneralNames(
+					Arrays.asList(sans).stream().map(san -> {
+						var arr = san.split(":");
+						return new GeneralName(SANType.valueOf(arr[0]).ordinal(), arr[1]);
+					}).toList().toArray(new GeneralName[0])
+				);
+			}
+			certGen.addExtension(Extension.subjectAlternativeName, false, subjectAltName);
 			
 			ContentSigner sigGen = new JcaContentSignerBuilder(
 					signatureType).setProvider(BC).build(
