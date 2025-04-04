@@ -31,7 +31,7 @@ import com.jadaptive.utils.Utils;
 @ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)
 @TableView(defaultColumns = { "name", "hostname", "code", "database" })
 @CreateURL(value = "/app/ui/wizards/setupTenant", i18n = "wizard.name")
-@TableAction(bundle = Tenant.RESOURCE_KEY, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}")
+@TableAction(bundle = Tenant.RESOURCE_KEY, defaultAction = true, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}")
 public class Tenant extends NamedUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 1567817173441528990L;

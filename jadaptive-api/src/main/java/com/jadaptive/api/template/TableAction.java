@@ -31,6 +31,8 @@ public @interface TableAction  {
 	
 	String iconGroup() default "fa-solid";
 	
+	boolean defaultAction() default false;
+	
 	boolean writeAction() default false;
 	
 	boolean deleteAction() default false;

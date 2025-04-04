@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -144,6 +145,7 @@ public class TableRenderer {
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
 			Collection<TableAction> tableActions = generateActions(template.getParentTemplate(), template.getCollectionKey());
 			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || view.multipleDelete();
+			var defaultAction = tableActions.stream().filter(TableAction::defaultAction).findFirst();
 			
 			
 			if(hasMultipleSelection && Objects.nonNull(objects) && !objects.isEmpty()) {
@@ -288,7 +290,7 @@ public class TableRenderer {
 													row.appendChild(Html.td().appendChild(Html.span("<missing column: " + column + ">")));
 												}
 												else {
-													row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t)));
+													row.appendChild(Html.td().appendChild(renderElement(obj, rowTemplate, t, defaultAction)));
 												}
 											}
 										}
@@ -796,7 +798,7 @@ public class TableRenderer {
 		return url;
 	}
 
-	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field) throws UnsupportedEncodingException {
+	private Node renderElement(AbstractObject obj, ObjectTemplate template, FieldTemplate field, Optional<TableAction> defaultAction) throws UnsupportedEncodingException {
 		
 		List<TemplateView> views = templateService.getViews(template, true);
 		TemplateViewField fieldView = views.iterator().next().getField(field);
@@ -811,7 +813,19 @@ public class TableRenderer {
 		Class<?> clz = templateService.getTemplateClass(template.getResourceKey());
 		
 		if(isDefault) {
-			if(canUpdate && !readOnly) {
+			if(defaultAction.isPresent()) {
+				String url = replaceVariables(defaultAction.get().url(), obj);
+				if(Objects.isNull(parentObject)) {
+					return Html.a(url, "underline").appendChild(processFieldValue(obj, template, field, fieldView));
+				} else {
+					return Html.a("#", "underline", "stash")
+							.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+							.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + this.field.getResourceKey() + "/" + obj.getUuid())
+							.appendChild(processFieldValue(obj, template, field, fieldView));
+				}
+				
+			}
+			else if(canUpdate && !readOnly) {
 				
 				
 				String url = replaceVariables("/app/ui/update/{resourceKey}/{uuid}", obj);
