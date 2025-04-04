@@ -11,7 +11,7 @@ import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.ui.pages.config.ConfigurationItem;
 
 @ObjectDefinition(resourceKey = FilesConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON, system = true)
-@ConfigurationItem(bundle = FilesConfiguration.RESOURCE_KEY, icon = "fa-files", resourceKey = FilesConfiguration.RESOURCE_KEY)
+@ConfigurationItem(bundle = FilesConfiguration.RESOURCE_KEY, icon = "fa-files", resourceKey = FilesConfiguration.RESOURCE_KEY, system = true)
 public class FilesConfiguration extends SingletonUUIDEntity {
 
 	private static final long serialVersionUID = -6094738664134766407L;
