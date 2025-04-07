@@ -208,6 +208,21 @@ public class Utils {
 		return date;
 	}
 	
+	public static Calendar thisWeekCalendar() {
+
+		Calendar date = Calendar.getInstance();
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+		date.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+		return date;
+	}
+	
+	public static Date thisWeek() {
+		return thisWeekCalendar().getTime();
+	}
+	
 	public static Calendar thisMonthCalendar() {
 
 		Calendar date = Calendar.getInstance();
@@ -219,12 +234,36 @@ public class Utils {
 		return date;
 	}
 	
+	public static Calendar thisYearCalendar() {
+
+		Calendar date = Calendar.getInstance();
+		date.set(Calendar.HOUR_OF_DAY, 0);
+		date.set(Calendar.MINUTE, 0);
+		date.set(Calendar.SECOND, 0);
+		date.set(Calendar.MILLISECOND, 0);
+		date.set(Calendar.DAY_OF_MONTH, 1);
+		date.set(Calendar.MONTH, 1);
+		return date;
+	}
+	
+	public static Date thisYear() {
+		return thisYearCalendar().getTime();
+	}
+	
 	public static Date thisMonth() {
 		return thisMonthCalendar().getTime();
 	}
 	
 	public static Date lastMonth() {
 		return DateUtils.addMonths(thisMonth(), -1);
+	}
+	
+	public static Date lastWeek() {
+		return DateUtils.addWeeks(thisWeek(), -1);
+	}
+	
+	public static Date lastYear() {
+		return DateUtils.addMonths(thisYear(), -1);
 	}
 	
 	public static Date nextMonth() {
