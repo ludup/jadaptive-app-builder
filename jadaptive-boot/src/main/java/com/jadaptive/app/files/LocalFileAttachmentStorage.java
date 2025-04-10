@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -28,6 +29,7 @@ public class LocalFileAttachmentStorage implements FileAttachmentStorage {
 	public static final String UUID = "b908313d-be99-446c-966e-89107b3901ca";
 	
 	public static final File LOCATION = new File(ApplicationProperties.getConfdFolder(), "attachments");
+	public static final File FILES = new File(ApplicationProperties.getConfdFolder(), "files");
 	
 	@Autowired
 	private SystemOnlyObjectDatabase<FileStorageProvider> providerDatabase;
@@ -85,6 +87,16 @@ public class LocalFileAttachmentStorage implements FileAttachmentStorage {
 	@Override
 	public String getName() {
 		return "Local File System";
+	}
+
+	@Override
+	public InputStream getInputstream(String path) throws IOException {
+		return new FileInputStream(new File(FILES, path));
+	}
+
+	@Override
+	public OutputStream getOutputStream(String path) throws IOException {
+		return  new FileOutputStream(new File(FILES, path));
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.jadaptive.app.role;
 
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,15 +8,18 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
+import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.entity.ObjectException;
-import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.role.Role;
 import com.jadaptive.api.role.RoleService;
@@ -26,9 +30,10 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserAware;
 import com.jadaptive.api.user.UserService;
 import com.jadaptive.app.user.UserServiceImpl;
+import com.jadaptive.utils.Utils;
 
 @Service
-public class RoleServiceImpl extends AuthenticatedService implements RoleService, TenantAware, UserAware {
+public class RoleServiceImpl extends AbstractUUIDObjectServceImpl<Role> implements RoleService, TenantAware, UserAware {
 
 	@Autowired
 	private TenantAwareObjectDatabase<Role> repository; 
@@ -59,6 +64,27 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 		upgradeRolesWithTemplates(tenant);
 	}
 	
+	
+	
+	@Override
+	protected void beforeSave(Role role) {
+		
+		TreeSet<String> uuids = new TreeSet<>();
+		for(User user : role.getUsers()) {
+			uuids.add(user.getUuid());
+		}
+		
+		MessageDigest m = DigestUtils.getSha256Digest();
+		
+		DigestUtils.digest(m, Utils.getUTF8Bytes(role.getUuid()));
+		DigestUtils.digest(m, Utils.getUTF8Bytes(role.getName()));
+		for(String uuid : uuids) {
+			DigestUtils.digest(m, Utils.getUTF8Bytes(uuid));
+		}
+		
+		role.setVersionHash(Hex.encodeHexString(m.digest()));
+	}
+
 	private void upgradeRolesWithTemplates(Tenant tenant) {
 		
 		Role role = getAdministrationRole();
@@ -382,8 +408,8 @@ public class RoleServiceImpl extends AuthenticatedService implements RoleService
 	}
 
 	@Override
-	public void saveOrUpdate(Role role) {
-		repository.saveOrUpdate(role);
+	protected Class<Role> getResourceClass() {
+		return Role.class;
 	}
 
 }

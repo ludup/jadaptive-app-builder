@@ -2,6 +2,7 @@ package com.jadaptive.app.files;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -54,6 +55,17 @@ public class FileAttachmentServiceImpl implements FileAttachmentService, Startup
 		}
 	}
 	
+	@Override
+	public OutputStream getOutputStream(String path) throws IOException {
+		FileAttachmentStorage provider = getProvider();
+		return provider.getOutputStream(path);
+	}
+	
+	@Override
+	public InputStream getInputStream(String path) throws IOException {
+		FileAttachmentStorage provider = getProvider();
+		return provider.getInputstream(path);
+	}
 	
 	@Override
 	public FileAttachment createAttachment(InputStream in, String filename, String contentType, String formVariable, String template) throws IOException {
