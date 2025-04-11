@@ -76,10 +76,10 @@ public class RoleServiceImpl extends AbstractUUIDObjectServceImpl<Role> implemen
 		
 		MessageDigest m = DigestUtils.getSha256Digest();
 		
-		DigestUtils.digest(m, Utils.getUTF8Bytes(role.getUuid()));
-		DigestUtils.digest(m, Utils.getUTF8Bytes(role.getName()));
+		m.update(Utils.getUTF8Bytes(role.getUuid()));
+		m.update(Utils.getUTF8Bytes(role.getName()));
 		for(String uuid : uuids) {
-			DigestUtils.digest(m, Utils.getUTF8Bytes(uuid));
+			m.update(Utils.getUTF8Bytes(uuid));
 		}
 		
 		role.setVersionHash(Hex.encodeHexString(m.digest()));
