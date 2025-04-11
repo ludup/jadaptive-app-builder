@@ -66,6 +66,7 @@ import com.jadaptive.api.ui.renderers.form.CollectionTextFormInput;
 import com.jadaptive.api.ui.renderers.form.CssEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
+import com.jadaptive.api.ui.renderers.form.DropdownMenu;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.ImageFormInput;
@@ -454,6 +455,15 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 						if(Objects.nonNull(ref)) {
 							dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
 						}
+					} else if(fieldView.getRenderer() == FieldRenderer.DROPDOWN_MENU) {
+						DropdownMenu dropdown = new DropdownMenu(fieldView);
+						dropdown.renderInput(element, "", scope == FieldView.READ);
+						for(String resourceKey : objectTemplate.getChildTemplates()) {
+							dropdown.addI18nValue(resourceKey, resourceKey + ".name");
+						}
+						if(Objects.nonNull(ref)) {
+							dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
+						}
 					} else {
 						FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
 								String.format("/app/api/templates/%s/table", objectType),
@@ -483,6 +493,20 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					AbstractObject ref = obj.getChild(field);
 					if(fieldView.getRenderer() == FieldRenderer.DROPDOWN) {
 						DropdownFormInput dropdown = new DropdownFormInput(fieldView);
+						if(!decorate) {
+							dropdown.disableDecoration();
+						}
+						dropdown.renderInput(element, "", scope == FieldView.READ);
+						if(scope!=FieldView.READ) {
+							for(AbstractObject o : objectService.list(objectType)) {
+								dropdown.addInputValue(o.getUuid(), (String) o.getValue(objectTemplate.getNameField()));
+							}
+						}
+						if(Objects.nonNull(ref)) {
+							dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
+						}
+					} else if(fieldView.getRenderer() == FieldRenderer.DROPDOWN_MENU) {
+						DropdownMenu dropdown = new DropdownMenu(fieldView);
 						if(!decorate) {
 							dropdown.disableDecoration();
 						}

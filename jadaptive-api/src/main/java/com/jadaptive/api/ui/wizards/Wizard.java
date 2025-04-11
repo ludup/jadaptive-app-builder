@@ -166,11 +166,12 @@ public class Wizard extends HtmlPage implements ObjectPage {
 									.attr("jad:i18n", state.getCurrentPage().getStepNamei18n()));
 							
 							
-							h2.after(new Element("h4")
-												.appendChild(Html.i("fa-solid fa-info-square text-primary me-2"))
+							h2.after(new Element("div")
+												.addClass("alert alert-info")
+												.appendChild(Html.i("fa-solid fa-info-square me-2"))
 												.appendChild(Html.i18n(state.getCurrentPage().getBundle(),
 																state.getCurrentPage().getStepSummaryi18n()))
-																.addClass("my-3 text-primary"));
+																.addClass("my-3"));
 							
 					} else {
 						h2.appendChild(new Element("span")
@@ -197,6 +198,9 @@ public class Wizard extends HtmlPage implements ObjectPage {
 						document.selectFirst("#backButton")
 							.attr("form",  form.id());
 					}
+					if(!state.isBackAllowed()) {
+						document.selectFirst("#backButton").attr("disabled", "true");
+					}
 				}
 				
 				if(!state.hasNextButton()) {
@@ -205,6 +209,9 @@ public class Wizard extends HtmlPage implements ObjectPage {
 					if(Objects.nonNull(form)) {
 						document.selectFirst("#nextButton")
 							.attr("form",  form.id());
+					}
+					if(!state.isNextAllowed()) {
+						document.selectFirst("#nextButton").attr("disabled", "true");
 					}
 				}
 				
@@ -245,13 +252,13 @@ public class Wizard extends HtmlPage implements ObjectPage {
 
 		URL url = ext.getClass().getResource(ext.getJsResource());
 		if(Objects.nonNull(url)) {
-			PageHelper.appendHeadScript(document, "/app/script/" +
+			PageHelper.appendBodyScript(document, "/app/script/" +
 					ext.getClass().getPackage().getName().replace('.', '/') 
 						+ "/" + FileUtils.checkStartsWithNoSlash(ext.getJsResource()));
 		} else {
 			url = classService.getResource(ext.getJsResource());
 			if(Objects.nonNull(url)) {
-				PageHelper.appendHeadScript(document, "/app/script/" +
+				PageHelper.appendBodyScript(document, "/app/script/" +
 						FileUtils.checkStartsWithNoSlash(ext.getJsResource()));
 			}
 		}

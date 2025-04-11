@@ -15,23 +15,28 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.Page;
 
-public class WizardState {
+import jakarta.servlet.http.HttpSessionBindingEvent;
+import jakarta.servlet.http.HttpSessionBindingListener;
 
-	Integer currentStep = 0;
-	Integer displayStep = 1;
-	List<WizardSection> pages = new ArrayList<>();
-	WizardSection startPage;
-	WizardSection finishPage;
-	WizardFlow flow;
+public class WizardState implements HttpSessionBindingListener {
 
-	Map<String,UUIDEntity> stateObjects = new HashMap<>(); 
-	Map<String,Object> stateParameters = new HashMap<>();
-	UUIDEntity completedObject;
+	private Integer currentStep = 0;
+	private Integer displayStep = 1;
+	private List<WizardSection> pages = new ArrayList<>();
+	private WizardSection startPage;
+	private WizardSection finishPage;
+	private WizardFlow flow;
+	private boolean nextAllowed = true;
+	private boolean backAllowed = true;
+	private Map<String,UUIDEntity> stateObjects = new HashMap<>(); 
+	private Map<String,Object> stateParameters = new HashMap<>();
+	private UUIDEntity completedObject;
 	
 	private boolean finished;;
 	private String uuid;
 	
-	CompletionCallback onFinish = null;
+	private CompletionCallback onFinish = null;
+	private CompletionCallback onDestroy = null;
 	
 	public WizardState(WizardFlow flow, String uuid) {
 		this.flow = flow;
@@ -66,6 +71,11 @@ public class WizardState {
 	}
 	
 	public WizardSection moveNext() {
+		if(!nextAllowed)
+			throw new IllegalStateException("May not move on.");
+		
+		backAllowed = true;
+		
 		if(isFinishPage()) {
 			return getFinishPage();
 		}
@@ -74,6 +84,11 @@ public class WizardState {
 	}
 	
 	public WizardSection moveBack() {
+
+		if(!backAllowed)
+			throw new IllegalStateException("May not move back.");
+		nextAllowed = true;
+		
 		if(currentStep > 1) {
 			currentStep--;
 		}
@@ -240,6 +255,11 @@ public class WizardState {
 		return stateParameters.get(name);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public <T> T getParameter(String name, T defaultValue) {
+		return (T)stateParameters.getOrDefault(name, defaultValue);
+	}
+	
 	public void setParameter(String name, Object value) {
 		stateParameters.put(name, value);
 	}
@@ -260,6 +280,22 @@ public class WizardState {
 		this.finished = finished;
 	}
 
+	public boolean isBackAllowed() {
+		return backAllowed;
+	}
+
+	public void setBackAllowed(boolean backAllowed) {
+		this.backAllowed = backAllowed;
+	}
+
+	public boolean isNextAllowed() {
+		return nextAllowed;
+	}
+
+	public void setNextAllowed(boolean nextAllowed) {
+		this.nextAllowed = nextAllowed;
+	}
+
 	public void setCompletedObject(UUIDEntity completedObject) {
 		this.completedObject = completedObject;
 	}
@@ -274,6 +310,10 @@ public class WizardState {
 	
 	public void onComplete(CompletionCallback onFinish) {
 		this.onFinish = onFinish;
+	}
+	
+	public void onDestroyed(CompletionCallback onDestroy) {
+		this.onDestroy = onDestroy;
 	}
 	
 	@FunctionalInterface
@@ -305,4 +345,9 @@ public class WizardState {
 			return String.format("/app/ui/wizards/%s", getResourceKey());
 		}
 	}
+
+    public void valueUnbound(HttpSessionBindingEvent event) {
+    	if(onDestroy != null)
+    		onDestroy.finish(this);    	
+    }
 }

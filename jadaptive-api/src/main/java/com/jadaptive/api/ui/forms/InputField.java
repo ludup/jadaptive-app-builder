@@ -48,7 +48,7 @@ public interface InputField extends PageResources, ExtensionPoint {
 		
 		url = getClass().getResource(getJsResource());
 		if(Objects.nonNull(url)) {
-			PageHelper.appendHeadScript(document, "/app/script/" + getResourceClass().getPackageName().replace('.', '/') + "/" + getJsResource());
+			PageHelper.appendBodyScript(document, "/app/script/" + getResourceClass().getPackageName().replace('.', '/') + "/" + getJsResource());
 		}
 		
 		url = getClass().getResource(getCssResource());
