@@ -2,11 +2,12 @@ package com.jadaptive.api.role;
 
 import java.util.Collection;
 
+import com.jadaptive.api.entity.AbstractUUIDObjectService;
 import com.jadaptive.api.permissions.PermissionUtils;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.user.User;
 
-public interface RoleService {
+public interface RoleService extends AbstractUUIDObjectService<Role> {
 
 	public static final String READ_PERMISSION = PermissionUtils.getReadPermission(Role.RESOURCE_KEY);
 	public static final String READ_WRITE_PERMISSION = PermissionUtils.getReadWritePermission(Role.RESOURCE_KEY);
@@ -68,8 +69,6 @@ public interface RoleService {
 	<T extends AssignableUUIDEntity> boolean hasEveryoneRole(T obj);
 
 	Collection<Role> getAllUserRoles(User user);
-
-	void saveOrUpdate(Role role);
 
 	Collection<User> getUsers(AssignableUUIDEntity object);
 

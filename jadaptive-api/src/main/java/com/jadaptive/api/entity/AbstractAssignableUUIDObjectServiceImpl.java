@@ -28,6 +28,7 @@ public abstract class AbstractAssignableUUIDObjectServiceImpl <T extends Assigna
 	public String saveOrUpdate(T object) {
 		beforeSave(object);
 		objectDatabase.saveOrUpdate(object);
+		afterSave(object);
 		return object.getUuid();
 	}
 
@@ -44,6 +45,10 @@ public abstract class AbstractAssignableUUIDObjectServiceImpl <T extends Assigna
 	}
 	
 	protected void beforeSave(T object) {
+		
+	}
+	
+	protected void afterSave(T object) {
 		
 	}
 

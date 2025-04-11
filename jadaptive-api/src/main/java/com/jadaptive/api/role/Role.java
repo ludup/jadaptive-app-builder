@@ -25,10 +25,9 @@ import com.jadaptive.api.user.User;
 					scope = ObjectScope.GLOBAL,
 					type = ObjectType.COLLECTION,
 					defaultColumn = "name")
-@ObjectViews({ 
-	@ObjectViewDefinition(value = Role.USERS_VIEW, bundle = "users"),
-	@ObjectViewDefinition(value = Role.PERMISSIONS_VIEW, bundle = "permissions", weight = 50),
-	@ObjectViewDefinition(value = Role.OPTIONS_VIEW, bundle = Role.RESOURCE_KEY, weight = 100)})
+@ObjectViewDefinition(value = Role.USERS_VIEW, bundle = "users")
+@ObjectViewDefinition(value = Role.PERMISSIONS_VIEW, bundle = "permissions", weight = 50)
+@ObjectViewDefinition(value = Role.OPTIONS_VIEW, bundle = Role.RESOURCE_KEY, weight = 100)
 @TableView(defaultColumns = { "name", "allPermissions", "allUsers" })
 @GenerateEventTemplates(Role.RESOURCE_KEY)
 @LicensedFeature(group = FeatureGroup.FOUNDATION, includedWithPAYG = true, value = Role.RESOURCE_KEY)
@@ -69,6 +68,9 @@ public class Role extends NamedUUIDEntity {
 	@ObjectView(USERS_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
 	Collection<User> users = new HashSet<>();
+	
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	String versionHash;
 	
 	public String getResourceKey() {
 		return RESOURCE_KEY;
@@ -113,7 +115,13 @@ public class Role extends NamedUUIDEntity {
 	public void setUserTemplates(Collection<String> userTemplates) {
 		this.userTemplates = userTemplates;
 	}
-	
-	
+
+	public String getVersionHash() {
+		return versionHash;
+	}
+
+	public void setVersionHash(String versionHash) {
+		this.versionHash = versionHash;
+	}
 	
 }
