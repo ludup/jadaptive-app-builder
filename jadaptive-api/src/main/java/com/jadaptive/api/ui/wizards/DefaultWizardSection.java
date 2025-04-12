@@ -33,6 +33,10 @@ public class DefaultWizardSection extends WizardSection {
 		super(bundle, name, resource, weight);
 	}
 	
+	public DefaultWizardSection(String bundle, String name, Class<?> resource, int weight) {
+		super(bundle, name, "/" + resource.getName().replace('.', '/') + ".html", weight);
+	}
+	
 	protected Element renderObjectSection(Document document, String resourceKey, String...ignores) {
 		
 		Element object;
@@ -51,6 +55,10 @@ public class DefaultWizardSection extends WizardSection {
 	}
 	
 	protected void renderObjectReview(Document document, WizardState state) {
+		renderObjectReview(document, state, false);
+	}
+	
+	protected void renderObjectReview(Document document, WizardState state, boolean renderBlankValues) {
 		
 		Element content = document.selectFirst("#wizardContent");
 		UUIDDocument uuidObject = state.getObject(this);
@@ -70,12 +78,12 @@ public class DefaultWizardSection extends WizardSection {
 					.addClass("row")));
 		
 		AbstractObject object = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).toAbstractObject(uuidObject);
-		renderObject(object, template, row);
+		renderObject(object, template, row, renderBlankValues);
 		
 		
 	}
 	
-	private void renderObject(AbstractObject object, ObjectTemplate template, Element row) {
+	private void renderObject(AbstractObject object, ObjectTemplate template, Element row, boolean renderBlankValues) {
 		for(FieldTemplate field : template.getFields()) { 
 			if(field.isHidden() && !field.getOptions().contains(FieldOptions.SHOW_IN_WIZARD_SUMMARISE)) {
 				continue;
@@ -95,13 +103,13 @@ public class DefaultWizardSection extends WizardSection {
 			default:
 				
 				Object v  = object.getValue(field);
-				if(Objects.isNull(v)) {
+				if(!renderBlankValues && Objects.isNull(v)) {
 					continue;
 				}
 				
-				String value = v.toString();
+				String value = v == null ? "" : v.toString();
 				
-				if(StringUtils.isBlank(value)) {
+				if(!renderBlankValues && StringUtils.isBlank(value)) {
 					continue;
 				}
 			}
@@ -153,7 +161,7 @@ public class DefaultWizardSection extends WizardSection {
 					if(Objects.nonNull(obj)) {
 						renderObject(obj, 
 								ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(obj.getResourceKey()), 
-								row);
+								row, renderBlankValues);
 					}
 				}
 				break;

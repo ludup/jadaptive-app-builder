@@ -2,7 +2,21 @@ $(function() {
 	
 	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
 	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
-	
+
+	$(document).on('click', '[role=dropdown-menu-item-select]', function(e) {
+		e.preventDefault();
+		var sel = $(this);
+		var target = sel.data("dropdownMenuItemTarget");
+		var value = sel.data("resourcekey"); 
+		$("[name=\"" + target + "\"]").val(value);
+		$("[data-dropdown-menu-item-target=\"" + target + "\"]").each(function(index) {
+			var otherVal = $(this).data("resourcekey");
+			$(this).removeClass("active");
+			if(val === otherVal)
+				$(this).addClass("active");
+		});
+	});
+		
 	$(document).on('click', '.jdropdown-item', function(e) {
 		e.preventDefault();
 		$(this).closest(".dropdown").find('input[type="text"]').val($(this).text());

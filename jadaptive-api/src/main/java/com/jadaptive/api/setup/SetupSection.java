@@ -25,6 +25,10 @@ public class SetupSection extends DefaultWizardSection {
 		super(bundle, name, resource, weight);
 	}
 	
+	public SetupSection(String bundle, String name, Class<?> resource, int weight) {
+		super(bundle, name, resource, weight);
+	}
+
 	public boolean isSystem() {
 		return false;
 	}
