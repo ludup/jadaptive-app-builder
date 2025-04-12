@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
-import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.avatar.Avatar;
 import com.jadaptive.api.avatar.AvatarRequest;
 import com.jadaptive.api.avatar.AvatarService;
@@ -29,7 +28,6 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -249,21 +247,21 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
 		
-		if(ApplicationServiceImpl.getInstance().getBean(ProductService.class).isUserLicensing()) {
-			eventService.committed(User.class, (e)->{
-				synchronized(UserServiceImpl.this) {
-					cachedAllTenantsCount = -1;
-					allTenantsEnabledCount();
-					if(log.isInfoEnabled()) {
-						log.info("User event {} for {}. Licensed user count is {}",
-								e.getResourceKey(),
-								e.getObject().getUsername(),
-								cachedAllTenantsCount);
-					}
-				}
-				
-			});
-		}
+//		if(ApplicationServiceImpl.getInstance().getBean(ProductService.class).isUserLicensing()) {
+//			eventService.committed(User.class, (e)->{
+//				synchronized(UserServiceImpl.this) {
+//					cachedAllTenantsCount = -1;
+//					allTenantsEnabledCount();
+//					if(log.isInfoEnabled()) {
+//						log.info("User event {} for {}. Licensed user count is {}",
+//								e.getResourceKey(),
+//								e.getObject().getUsername(),
+//								cachedAllTenantsCount);
+//					}
+//				}
+//				
+//			});
+//		}
 	}
 	
 	@Override

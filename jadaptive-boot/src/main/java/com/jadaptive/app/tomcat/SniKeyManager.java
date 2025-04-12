@@ -12,6 +12,7 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.StandardConstants;
 import javax.net.ssl.X509ExtendedKeyManager;
 
+import org.apache.tomcat.util.net.SSLHostConfigCertificate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.app.certificates.Keyring;
@@ -19,12 +20,18 @@ import com.jadaptive.utils.Utils;
 
 public final class SniKeyManager extends X509ExtendedKeyManager {
 
-	private final String defaultAlias = "default";
+	private final String DEFAULT_ALIAS = "default";
 
 	@Autowired
 	private Keyring keyring;
+	/**
+	 * TODO: Process all certificates here in this key manager.
+	 */
+	@SuppressWarnings("unused")
+	private SSLHostConfigCertificate certificate;
 	
-	public SniKeyManager() {
+	public SniKeyManager(SSLHostConfigCertificate certificate) {
+		this.certificate = certificate;
 	}
 
 	@Override
@@ -81,12 +88,13 @@ public final class SniKeyManager extends X509ExtendedKeyManager {
 			}
 		}
 		
-		return defaultAlias;
+		return DEFAULT_ALIAS;
 	}
 
 	protected boolean isMatchingAlias(String hostname) {
 		return getCertificateChain(hostname) != null && getPrivateKey(hostname) != null;
 	}
+	
 	@Override
 	public X509Certificate[] getCertificateChain(String alias) {
 		return keyring.getCertificateChain(alias);

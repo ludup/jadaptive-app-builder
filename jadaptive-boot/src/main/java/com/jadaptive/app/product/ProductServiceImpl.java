@@ -90,11 +90,6 @@ public class ProductServiceImpl implements ProductService, StartupAware {
 		return getProduct().getProductId();
 	}
 	
-	@Override
-	public boolean isUserLicensing() {
-		return getProduct().isUserLicensing();
-	}
-	
 	private Product getProduct() {
 		try {
 			Product product = appService.getBean(Product.class);

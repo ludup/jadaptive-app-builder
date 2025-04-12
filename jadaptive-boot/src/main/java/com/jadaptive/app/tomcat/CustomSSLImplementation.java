@@ -21,7 +21,7 @@ public class CustomSSLImplementation extends JSSEImplementation {
             public SSLContext createSSLContextInternal(List<String> negotiableProtocols)
                     throws NoSuchAlgorithmException {
                 try {
-					return createCustomJavaSSLContext();
+					return createCustomJavaSSLContext(certificate);
 				} catch (Exception e) {
 					throw new IllegalStateException(e.getMessage(), e);
 				}
@@ -29,9 +29,9 @@ public class CustomSSLImplementation extends JSSEImplementation {
         };
     }
 
-    private SSLContext createCustomJavaSSLContext() throws Exception {
+    private SSLContext createCustomJavaSSLContext(SSLHostConfigCertificate certificate) throws Exception {
     	
-        SniKeyManager customKm = App.wire(new SniKeyManager());
+        SniKeyManager customKm = App.wire(new SniKeyManager(certificate));
         javax.net.ssl.SSLContext sslContext = javax.net.ssl.SSLContext.getInstance("TLS");
         sslContext.init(new KeyManager[]{customKm}, null, null);
 
