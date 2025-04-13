@@ -64,7 +64,7 @@ public abstract class PasswordEnabledUserDatabaseImpl
 					DigestUtils.sha512(
 							ArrayUtils.addAll(
 									new String(password).getBytes("UTF-8"), 
-									username.getBytes("UTF-8")))).substring(0, 16).toLowerCase();
+									username.toLowerCase().getBytes("UTF-8")))).substring(0, 16).toLowerCase();
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
