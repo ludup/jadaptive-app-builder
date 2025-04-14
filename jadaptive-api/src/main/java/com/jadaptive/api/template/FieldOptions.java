@@ -26,7 +26,6 @@ public enum FieldOptions {
 	 */
 	CASCADE_ON_DELETED_REFERENCE, 
 	
-	
 	/**
 	 * Can be used on hidden fields that you want to display in a wizard summary.
 	 */
@@ -38,7 +37,6 @@ public enum FieldOptions {
 	 */
 	DISABLE_FORM_ENCODING,
 	
-	
 	/**
 	 * Only displayed to users in the System tenant. 
 	 */
@@ -47,5 +45,16 @@ public enum FieldOptions {
 	/**
 	 * Objects with a field with this option are autosaved when he field changes.
 	 */
-	AUTOSAVE_VIEW
+	AUTOSAVE_VIEW,
+	
+	/**
+	 * THe field is automatically encrypted at rest, and decrypted when desearialised from the document.
+	 */
+	AUTOMATIC_ENCRYPTION,
+	
+	/**
+	 * The field is automatically encrypted when saved to the document, but requires manual decryption
+	 * to access the value. 
+	 */
+	MANUAL_ENCRYPTION
 }

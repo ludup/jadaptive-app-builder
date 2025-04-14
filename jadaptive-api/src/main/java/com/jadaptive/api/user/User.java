@@ -15,6 +15,7 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.ExcludeView;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
@@ -72,13 +73,13 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@ObjectView(DETAILS_VIEW)
 	Boolean enabled = Boolean.TRUE;
 	
-	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
 	@Validator(type = ValidationType.EMAIL)
 	@ObjectView(EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
 	String email;
 
-	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
 	@ObjectView(PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	String mobilePhone;
@@ -102,12 +103,12 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	@ObjectView(value = DETAILS_VIEW, renderer = FieldRenderer.OPTIONAL)
 	Collection<String> aliases;
 
-	@ObjectField(type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
 	@Validator(type = ValidationType.EMAIL)
 	@ObjectView(EMAIL_VIEW)
 	Collection<String> otherEmail = new ArrayList<>();
 	
-	@ObjectField(type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	@ObjectView(PHONE_VIEW)
 	Collection<String> otherTelephone = new ArrayList<>();

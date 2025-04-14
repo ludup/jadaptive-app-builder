@@ -56,6 +56,7 @@ import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.repository.UUIDReference;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -205,7 +206,8 @@ public class DocumentHelper {
 
 
 	private static String checkForAndPerformEncryption(ObjectField columnDefinition, String value) {
-		if(Objects.nonNull(columnDefinition) && (columnDefinition.manualEncryption() || columnDefinition.automaticEncryption())) {
+		if(Objects.nonNull(columnDefinition) && (Arrays.asList(columnDefinition.options()).contains(FieldOptions.AUTOMATIC_ENCRYPTION)
+				|| Arrays.asList(columnDefinition.options()).contains(FieldOptions.MANUAL_ENCRYPTION))) {
 			if(Objects.nonNull(value) && !ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).isEncrypted(value)) {
 				return ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).encrypt(value);
 			}
@@ -214,7 +216,7 @@ public class DocumentHelper {
 	}
 	
 	private static String checkForAndPerformDecryption(ObjectField columnDefinition, String value) {
-		if(Objects.nonNull(columnDefinition) && columnDefinition.automaticEncryption()) {
+		if(Objects.nonNull(columnDefinition) && Arrays.asList(columnDefinition.options()).contains(FieldOptions.AUTOMATIC_ENCRYPTION)) {
 			if(Objects.nonNull(value) && ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).isEncrypted(value)) {
 				return ApplicationServiceImpl.getInstance().getBean(EncryptionService.class).decrypt(value);
 			}

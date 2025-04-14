@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -35,23 +36,23 @@ public class UserContactPreferences extends AbstractUUIDEntity {
 		this.otherTelephone = new ArrayList<>(user.getOtherTelephone());
 	}
 	
-	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
 	@Validator(type = ValidationType.EMAIL)
 	@ObjectView(User.EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
 	String email;
 
-	@ObjectField(nameField = false, type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
 	@ObjectView(User.PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	String mobilePhone;
 	
-	@ObjectField(type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
 	@Validator(type = ValidationType.EMAIL)
 	@ObjectView(User.EMAIL_VIEW)
 	Collection<String> otherEmail = new ArrayList<>();
 	
-	@ObjectField(type = FieldType.TEXT, automaticEncryption = true)
+	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	@ObjectView(User.PHONE_VIEW)
 	Collection<String> otherTelephone = new ArrayList<>();

@@ -18,10 +18,6 @@ public @interface ObjectField {
 		boolean readOnly() default false;
 
 		boolean hidden() default false;
-
-		boolean manualEncryption() default false;
-		
-		boolean automaticEncryption() default false;
 		
 		boolean searchable() default false;
 		

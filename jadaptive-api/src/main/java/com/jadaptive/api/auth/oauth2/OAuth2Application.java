@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -35,7 +36,7 @@ public class OAuth2Application extends NamedUUIDEntity {
 
 	public static final String VIEW_APPLICATION = "applicationView";
 
-	@ObjectField(type = FieldType.PASSWORD, defaultValue = "", automaticEncryption = true)
+	@ObjectField(type = FieldType.PASSWORD, defaultValue = "", options = FieldOptions.AUTOMATIC_ENCRYPTION)
 	@ObjectView(VIEW_APPLICATION)
 	private String secret;
 

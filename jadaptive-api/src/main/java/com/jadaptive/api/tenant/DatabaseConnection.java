@@ -8,6 +8,7 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -26,7 +27,7 @@ public class DatabaseConnection extends NamedUUIDEntity implements NamedDocument
 
 	public static final String RESOURCE_KEY = "databases";
 	
-	@ObjectField(type = FieldType.TEXT, manualEncryption = true)
+	@ObjectField(type = FieldType.TEXT,  options = FieldOptions.MANUAL_ENCRYPTION)
 	String connectionString;
 	
 	@ObjectField(type = FieldType.TEXT)

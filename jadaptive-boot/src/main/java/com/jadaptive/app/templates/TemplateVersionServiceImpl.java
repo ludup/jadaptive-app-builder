@@ -1172,9 +1172,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		t.setMeta(field.meta());
 		t.setCollection(f.getType().isAssignableFrom(Collection.class));
 		t.setReadOnly(field.readOnly());
-
-		t.setManuallyEncrypted(field.manualEncryption());
-		t.setAutomaticallyEncrypted(field.automaticEncryption());
 		
 		switch(field.type()) {
 		case OBJECT_EMBEDDED:

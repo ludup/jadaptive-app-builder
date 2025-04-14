@@ -52,12 +52,6 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	boolean hidden;
 	
 	@ObjectField(type = FieldType.BOOL)
-	boolean manuallyEncrypted;
-	
-	@ObjectField(type = FieldType.BOOL)
-	boolean automaticallyEncrypted;
-	
-	@ObjectField(type = FieldType.BOOL)
 	boolean searchable;
 	
 	@ObjectField(type = FieldType.BOOL)
@@ -157,21 +151,13 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	}
 
 	public boolean isManuallyEncrypted() {
-		return manuallyEncrypted;
-	}
-
-	public void setManuallyEncrypted(boolean manuallyEncrypted) {
-		this.manuallyEncrypted = manuallyEncrypted;
+		return options.contains(FieldOptions.MANUAL_ENCRYPTION);
 	}
 
 	public boolean isAutomaticallyEncrypted() {
-		return automaticallyEncrypted;
+		return options.contains(FieldOptions.AUTOMATIC_ENCRYPTION);
 	}
-
-	public void setAutomaticallyEncrypted(boolean automaticallyEncrypted) {
-		this.automaticallyEncrypted = automaticallyEncrypted;
-	}
-
+	
 	public boolean getCollection() {
 		return collection;
 	}
