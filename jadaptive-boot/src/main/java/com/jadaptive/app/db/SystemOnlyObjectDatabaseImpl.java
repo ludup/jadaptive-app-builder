@@ -1,10 +1,13 @@
 package com.jadaptive.app.db;
 
 import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.jadaptive.api.db.Change;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemOnlyObjectDatabase;
 import com.jadaptive.api.entity.AbstractObject;
@@ -32,6 +35,55 @@ public class SystemOnlyObjectDatabaseImpl<T extends UUIDEntity>
 	
 	protected Tenant getCurrentTenant() {
 		return tenantService.getSystemTenant();
+	}
+	
+	@Override
+	public void watch(Class<T> resourceClass, Consumer<Change<T>> consumer) {
+		db.watch(getCollectionName(resourceClass), getCurrentTenant().getUuid(), chg -> {
+			var chgtype = Change.Type.valueOf(chg.getOperationType().name());
+			var chgkey = chg.getDocumentKey();
+			var chgdoc = chg.getFullDocument();
+			if(chgdoc != null) {
+				var doc = DocumentHelper.convertDocumentToObject(resourceClass, chgdoc);
+				consumer.accept(new Change<T>() {
+
+					@Override
+					public String uuid() {
+						return doc.getUuid();
+					}
+
+					@Override
+					public Type type() {
+						return chgtype;
+					}
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public Optional<T> document() {
+						return Optional.of((T)doc);
+					}
+				});
+			}
+			else {
+				consumer.accept(new Change<T>() {
+
+					@Override
+					public String uuid() {
+						return chgkey.getString("uuid").toString();
+					}
+
+					@Override
+					public Type type() {
+						return chgtype;
+					}
+
+					@Override
+					public Optional<T> document() {
+						return Optional.empty();
+					}
+				});
+			}
+		});
 	}
 	
 	@Override

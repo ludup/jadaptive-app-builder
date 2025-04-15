@@ -1,6 +1,7 @@
 package com.jadaptive.api.db;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
@@ -8,6 +9,7 @@ import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.SortOrder;
 
 public interface SystemOnlyObjectDatabase<T extends UUIDEntity> {
+	void watch(Class<T> resourceClass, Consumer<Change<T>> consumer); 
 
 	Iterable<T> list(Class<T> resourceClass, SearchField...fields);
 	
