@@ -174,7 +174,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			for(SSHInterface iface : interfaces) {
 				
 				SSHInterfaceFactory<?,?> factory = appContext.getBean(iface.getInterfaceFactory());
-				addInterface(iface.getAddressToBind(),  iface.getPortToBind(), 
+				addInterface(iface.getAddressToBind(),  iface.getActualPortToBind(), 
 						new SSHDInterface<>(factory, iface));
 			}
 			
@@ -422,7 +422,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	@Override
 	public void addInterface(SSHInterface iface) throws IOException {
 		SSHInterfaceFactory<?,?> factory = appContext.getBean(iface.getInterfaceFactory());
-		addInterface(iface.getAddressToBind(),  iface.getPortToBind(), new SSHDInterface<>(factory, iface));
+		addInterface(iface.getAddressToBind(),  iface.getActualPortToBind(), new SSHDInterface<>(factory, iface));
 	}
 
 	@Override
@@ -454,7 +454,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 
 	@Override
 	public void removeInterface(SSHInterface sshInterface) throws UnknownHostException {
-		removeInterface(sshInterface.getAddressToBind(), sshInterface.getPortToBind());
+		removeInterface(sshInterface.getAddressToBind(), sshInterface.getActualPortToBind());
 		interfaces.remove(sshInterface.getInterface());
 	}
 

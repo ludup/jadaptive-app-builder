@@ -1,5 +1,6 @@
 package com.jadaptive.plugins.sshd;
 
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -58,6 +59,11 @@ public abstract class SSHInterface extends NamedUUIDEntity {
 
 	public int getPortToBind() {
 		return portToBind;
+	}
+	
+	public int getActualPortToBind() {
+		/* This lets us run two server nodes on the same host (e.g. development environment) */
+		return getPortToBind() + ApplicationProperties.getValue("ssh.portOffset", 0);
 	}
 
 	public void setPortToBind(int portToBind) {

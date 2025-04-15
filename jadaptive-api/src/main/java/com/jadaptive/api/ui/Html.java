@@ -41,9 +41,13 @@ public class Html {
 	public static Element option(String id, String value, String text, String classes) {
 		return option(value, text, classes).attr("id", id);
 	}
+
+	public static Element span() {
+		return new Element("span");
+	}
 	
 	public static Element span(String text) {
-		return new Element("span").text(text);
+		return span().text(text);
 	}
 	
 	public static Element small(String text) {

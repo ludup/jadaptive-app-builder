@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
@@ -85,6 +86,9 @@ public class SystemEvent extends UUIDEvent {
 	@ObjectView(value = EVENT_VIEW, weight = 9998, renderer = FieldRenderer.OPTIONAL)
 	String eventDescription;
 	
+	@JsonIgnore
+	private transient boolean remote; 
+	
 	public SystemEvent() {
 		
 	}
@@ -106,6 +110,14 @@ public class SystemEvent extends UUIDEvent {
 		attachSession();
 	}
 	
+	public boolean isRemote() {
+		return remote;
+	}
+
+	public void setRemote(boolean remote) {
+		this.remote = remote;
+	}
+
 	public void setEventDescription(String objectName) {
 		this.eventDescription = objectName;
 	}

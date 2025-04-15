@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
@@ -34,6 +35,7 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.utils.Utils;
 import com.mongodb.BasicDBObject;
+import com.mongodb.MongoQueryException;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.FindIterable;
@@ -48,7 +50,9 @@ import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.result.DeleteResult;
 
 @Repository
@@ -270,6 +274,44 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void watch(String table, String database, Consumer<ChangeStreamDocument<Document>> consumer) {
+		var pipeline = Arrays.asList(
+//			Aggregates.match(
+//				Filters.or(
+//					Filters.eq("operationType", "insert"), 
+//					Filters.eq("operationType", "update"),
+//					Filters.eq("operationType", "replace"), 
+//					Filters.eq("operationType", "delete")
+//				)
+//			),
+			Aggregates.project(
+					Projections.fields(
+							Projections.excludeId(),
+							Projections.include("documentKey", "operationType", "fullDocument"),
+							Projections.computed(table, "$fullDocument")
+						)
+				)
+		);
+
+		var collection = getCollection(table, database);
+		// TOOD what to do for this?
+//		        ,  new FindOptions().setMaxAwaitTime(60, TimeUnit.SECONDS)
+		while(true) {
+			try { 
+				collection.watch(/* pipeline */).forEach(consumer);
+			}
+			catch(MongoQueryException mqe) {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					throw new IllegalStateException(e);
+				}
+			}
+		}
+		
 	}
 
 	@Override
