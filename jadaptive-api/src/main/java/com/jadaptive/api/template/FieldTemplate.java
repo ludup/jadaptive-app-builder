@@ -84,7 +84,7 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	@ObjectField(type = FieldType.ENUM)
 	FieldRenderer renderer = FieldRenderer.DEFAULT;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "0")
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "0")
 	int weight = 0;
 	
 	@ObjectField(type = FieldType.TEXT)
