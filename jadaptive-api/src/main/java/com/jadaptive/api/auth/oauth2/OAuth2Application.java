@@ -9,7 +9,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
@@ -36,26 +35,21 @@ public class OAuth2Application extends NamedUUIDEntity {
 
 	public static final String VIEW_APPLICATION = "applicationView";
 
-	@ObjectField(type = FieldType.PASSWORD, defaultValue = "", options = FieldOptions.AUTOMATIC_ENCRYPTION)
-	@ObjectView(VIEW_APPLICATION)
+	@ObjectField(type = FieldType.PASSWORD, defaultValue = "", options = FieldOptions.AUTOMATIC_ENCRYPTION, view = VIEW_APPLICATION)
 	private String secret;
 
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(VIEW_APPLICATION)
+	@ObjectField(type = FieldType.TEXT, view = VIEW_APPLICATION)
 	@Validator(type = ValidationType.CIDR_V4)
 	@Validator(type = ValidationType.CIDR_V6)
 	private Collection<String> redirectUris;
 
-	@ObjectView(value = VIEW_APPLICATION)
-	@ObjectField(type = FieldType.ENUM, readOnly = true)
+	@ObjectField(type = FieldType.ENUM, readOnly = true, view = VIEW_APPLICATION)
 	private GrantType grantType;
 
-	@ObjectField(type = FieldType.LONG)
-	@ObjectView(VIEW_APPLICATION)
+	@ObjectField(type = FieldType.LONG, view = VIEW_APPLICATION)
 	private long expiryTime;
 
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(VIEW_APPLICATION)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = VIEW_APPLICATION)
 	private boolean issueRefreshToken;
 
 	@Override

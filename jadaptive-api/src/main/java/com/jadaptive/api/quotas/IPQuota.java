@@ -6,7 +6,6 @@ import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
@@ -22,12 +21,10 @@ public class IPQuota extends QuotaThreshold {
 	public static final String RESOURCE_KEY = "ipQuotas";
 	public static final String IP_VIEW = "ipQuotaView";
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(IP_VIEW)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = IP_VIEW)
 	Boolean allAddresses;
 	
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(value = IP_VIEW)
+	@ObjectField(type = FieldType.TEXT, view = IP_VIEW)
 	@Validator(type = ValidationType.IPV4)
 	@Validator(type = ValidationType.IPV6)
 	@Validator(type = ValidationType.CIDR_V4)

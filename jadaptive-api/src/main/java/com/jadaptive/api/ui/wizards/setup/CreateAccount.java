@@ -6,7 +6,6 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 import com.jadaptive.api.ui.wizards.WizardUUIDEntity;
@@ -26,13 +25,11 @@ public class CreateAccount extends WizardUUIDEntity {
 	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", bundle = RESOURCE_KEY, i18n = "email.invalid")
 	String email;
 
-	@ObjectField(type = FieldType.PASSWORD)
-	@ObjectView(value = "", renderer = FieldRenderer.SET_PASSWORD)
+	@ObjectField(type = FieldType.PASSWORD, renderer = FieldRenderer.SET_PASSWORD)
 	@Validator(bundle = CreateAccount.RESOURCE_KEY, type = ValidationType.REGEX, i18n = "invalid.password", value = "^(?=^.{8,}$)(?=.*\\d)|(?=.*\\W+)(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$")
 	String firstPassword;
 
-	@ObjectField(type = FieldType.PASSWORD)
-	@ObjectView(value = "", renderer = FieldRenderer.SET_PASSWORD)
+	@ObjectField(type = FieldType.PASSWORD, renderer = FieldRenderer.SET_PASSWORD)
 	@Validator(bundle = CreateAccount.RESOURCE_KEY, type = ValidationType.REGEX, i18n = "invalid.password", value = "^(?=^.{8,}$)(?=.*\\d)|(?=.*\\W+)(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$")
 	String secondPassword;
 

@@ -81,6 +81,18 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	@ObjectField(type = FieldType.ENUM)
 	Collection<FieldOptions> options;
 	
+	@ObjectField(type = FieldType.ENUM)
+	FieldRenderer renderer = FieldRenderer.DEFAULT;
+	
+	@ObjectField(type = FieldType.TEXT, defaultValue = "0")
+	int weight = 0;
+	
+	@ObjectField(type = FieldType.TEXT)
+	String view;
+	
+	@ObjectField(type = FieldType.TEXT)
+	String bundle;
+	
 	public FieldTemplate() {
 	}
 
@@ -311,8 +323,38 @@ public class FieldTemplate extends TemplateUUIDEntity {
 		}
 		return data;
 	}
-	
-	
+
+	public String getBundle() {
+		return bundle;
+	}
+
+	public void setBundle(String bundle) {
+		this.bundle = bundle;
+	}
+
+	public String getView() {
+		return view;
+	}
+
+	public void setView(String view) {
+		this.view = view;
+	}
+
+	public FieldRenderer getRenderer() {
+		return renderer;
+	}
+
+	public void setRenderer(FieldRenderer renderer) {
+		this.renderer = renderer;
+	}
+
+	public int getWeight() {
+		return weight;
+	}
+
+	public void setWeight(int weight) {
+		this.weight = weight;
+	}
 
 	public Collection<FieldOptions> getOptions() {
 		return options;

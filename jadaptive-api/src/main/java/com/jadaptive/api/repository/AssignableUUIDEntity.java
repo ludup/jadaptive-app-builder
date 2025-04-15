@@ -8,7 +8,6 @@ import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.user.User;
@@ -25,15 +24,13 @@ public abstract class AssignableUUIDEntity extends AbstractUUIDEntity implements
 	
 	@ObjectField(
 			type = FieldType.OBJECT_REFERENCE,
-			references = "roles")
-	@ObjectView(ROLES_VIEW)
+			references = "roles", view = ROLES_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
 	Collection<Role> roles = new HashSet<>();
 	
 	@ObjectField(
 			type = FieldType.OBJECT_REFERENCE,
-			references = "users")
-	@ObjectView(USERS_VIEW)
+			references = "users", view = USERS_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
 	Collection<User> users = new HashSet<>();
 	

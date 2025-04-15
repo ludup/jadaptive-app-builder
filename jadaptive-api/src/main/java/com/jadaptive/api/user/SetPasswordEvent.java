@@ -6,7 +6,6 @@ import com.jadaptive.api.events.AuditedObject;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
@@ -22,12 +21,10 @@ public class SetPasswordEvent extends PasswordEvent {
 	
 	public static final String TARGET_VIEW = "setPasswordTarget";
 	
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(TARGET_VIEW)
+	@ObjectField(type = FieldType.TEXT, view = TARGET_VIEW)
 	String targetUsername;
 	
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(TARGET_VIEW)
+	@ObjectField(type = FieldType.TEXT, view = TARGET_VIEW)
 	String targetName;
 	
 	@ObjectField(type = FieldType.TEXT, hidden = true)

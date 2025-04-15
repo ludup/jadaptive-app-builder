@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target(FIELD)
+@Deprecated
 public @interface ObjectView {
 	String value();
 

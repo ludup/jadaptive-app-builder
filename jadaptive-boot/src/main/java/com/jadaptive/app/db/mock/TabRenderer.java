@@ -3,7 +3,6 @@ package com.jadaptive.app.db.mock;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 
 //@ObjectDefinition(resourceKey = TabRenderer.RESOURCE_KEY)
 //@ObjectViews({ @ObjectViewDefinition(value = TabRenderer.VIEW_OBJECT1_TAB, bundle = TabRenderer.RESOURCE_KEY),
@@ -23,12 +22,10 @@ public class TabRenderer extends NamedUUIDEntity {
 		return RESOURCE_KEY;
 	}
 	
-	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = "")
-	@ObjectView(VIEW_OBJECT1_TAB)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = "", view = VIEW_OBJECT1_TAB)
 	Object1 obj1;
 	
-	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = "")
-	@ObjectView(VIEW_OBJECT2_TAB)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = "", view = VIEW_OBJECT2_TAB)
 	Object2 obj2;
 
 	public Object1 getObj1() {

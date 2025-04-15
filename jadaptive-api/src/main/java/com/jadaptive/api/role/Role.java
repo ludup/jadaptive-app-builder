@@ -15,7 +15,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.user.User;
@@ -41,13 +40,11 @@ public class Role extends NamedUUIDEntity {
 	public static final String OPTIONS_VIEW = "options";
 	
 	@ObjectField(defaultValue = "false", 
-			type = FieldType.BOOL)
-	@ObjectView(OPTIONS_VIEW)
+			type = FieldType.BOOL, view = OPTIONS_VIEW)
 	boolean allPermissions;
 	
 	@ObjectField(defaultValue = "false", 
-			type = FieldType.BOOL)
-	@ObjectView(OPTIONS_VIEW)
+			type = FieldType.BOOL, view = OPTIONS_VIEW)
 	boolean allUsers;
 	
 	@ObjectField(type = FieldType.TEXT, hidden = true)
@@ -55,16 +52,14 @@ public class Role extends NamedUUIDEntity {
 	
 	@ObjectField(
 			type = FieldType.PERMISSION,
-			searchable = true)
-	@ObjectView(PERMISSIONS_VIEW)
+			searchable = true, view = PERMISSIONS_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
 	Collection<String> permissions = new HashSet<>();
 	
 	@ObjectField(
 			type = FieldType.OBJECT_REFERENCE,
 			searchable = true,
-			references = "users")
-	@ObjectView(USERS_VIEW)
+			references = "users", view = USERS_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
 	Collection<User> users = new HashSet<>();
 	

@@ -14,7 +14,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
@@ -55,8 +54,7 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 	@Validator(type = ValidationType.REGEX, value = Utils.EMAIL_PATTERN)
 	String ownerEmail;
 	
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(value = DOMAINS_VIEW)
+	@ObjectField(type = FieldType.TEXT, view = DOMAINS_VIEW)
 	Collection<String> alternativeDomains = new HashSet<>();
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE)

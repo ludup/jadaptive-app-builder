@@ -15,7 +15,6 @@ import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableView;
@@ -52,27 +51,22 @@ public class AuthorizedKey extends PersonalUUIDEntity implements NamedDocument {
 	@Validator(type = ValidationType.REQUIRED)
 	String name;
 	
-	@ObjectField(type = FieldType.DATE)
-	@ObjectView(value = "", renderer = FieldRenderer.OPTIONAL)
+	@ObjectField(type = FieldType.DATE, renderer = FieldRenderer.OPTIONAL)
 	Date expires;
 	
-	@ObjectField(readOnly = true, type = FieldType.TEXT_AREA)
+	@ObjectField(readOnly = true, type = FieldType.TEXT_AREA, view = KEY_VIEW)
 	@ExcludeView(values = { FieldView.TABLE })
-	@ObjectView(KEY_VIEW)
 	String publicKey;
 	
-	@ObjectField(readOnly = true,  type = FieldType.TEXT, searchable = true, unique = true)
+	@ObjectField(readOnly = true,  type = FieldType.TEXT, searchable = true, unique = true, view = KEY_VIEW)
 	@ExcludeView(values = { FieldView.CREATE })
-	@ObjectView(KEY_VIEW)
 	String fingerprint;
 	
-	@ObjectField(readOnly = true, type = FieldType.TEXT, searchable = true)
+	@ObjectField(readOnly = true, type = FieldType.TEXT, searchable = true, view = KEY_VIEW)
 	@ExcludeView(values = { FieldView.CREATE })
-	@ObjectView(KEY_VIEW)
 	String type;
 	
-	@ObjectField(readOnly = true,  type = FieldType.INTEGER)
-	@ObjectView(value = KEY_VIEW, renderer = FieldRenderer.OPTIONAL)
+	@ObjectField(readOnly = true,  type = FieldType.INTEGER, view = KEY_VIEW, renderer = FieldRenderer.OPTIONAL)
 	Integer bits;
 	
 //	@ObjectField(readOnly = true, type = FieldType.BOOL)

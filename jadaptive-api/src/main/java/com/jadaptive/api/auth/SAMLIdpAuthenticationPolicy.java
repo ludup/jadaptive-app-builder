@@ -2,7 +2,6 @@ package com.jadaptive.api.auth;
 
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 
 //@ObjectDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, resourceKey = SAMLIdpAuthenticationPolicy.RESOURCE_KEY, scope = ObjectScope.GLOBAL, defaultColumn = "name")
 //@ObjectServiceBean(bean = AuthenticationPolicyService.class)
@@ -19,12 +18,10 @@ public class SAMLIdpAuthenticationPolicy extends AuthenticationPolicy {
 		return RESOURCE_KEY;
 	}
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
-	@ObjectView(value = "factors")
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = "factors")
 	Boolean passwordOnFirstPage;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
-	@ObjectView(value = "factors")
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = "factors")
 	Boolean passwordRequired;
 	
 	public Boolean getPasswordOnFirstPage() {

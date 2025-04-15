@@ -8,7 +8,6 @@ import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.ValidationType;
@@ -27,33 +26,26 @@ public class TenantConfiguration extends SingletonUUIDEntity {
 	public static final String DOMAIN_VIEW = "domain";
 	public static final String ANALYTICS_VIEW = "analytics";
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(CREATE_VIEW)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = CREATE_VIEW)
 	Boolean publicRegistration;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
-	@ObjectView(DOMAIN_VIEW)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", view = DOMAIN_VIEW)
 	String rootDomain = "";
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
-	@ObjectView(DOMAIN_VIEW)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", view = DOMAIN_VIEW)
 	Collection<String> additionalDomains = new ArrayList<>();
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(DOMAIN_VIEW)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = DOMAIN_VIEW)
 	Boolean forceRegistrationOnIncomingRootDomain;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
-	@ObjectView(DOMAIN_VIEW)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", view = DOMAIN_VIEW)
 	String registrationDomain = "";
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(DOMAIN_VIEW)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = DOMAIN_VIEW)
 	Boolean requireValidDomain;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", view = DOMAIN_VIEW)
 	@Validator(type = ValidationType.URL)
-	@ObjectView(DOMAIN_VIEW)
 	String invalidDomainRedirect;
 	
 	

@@ -14,8 +14,6 @@ import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExtensionRegistration;
-import com.jadaptive.api.template.FieldRenderer;
-import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableAction;
@@ -104,11 +102,7 @@ public class MockEntityTemplateService implements TemplateService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	@Override
-	public FieldRenderer getRenderer(FieldTemplate field, ObjectTemplate template) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 	@Override
 	public SortOrder getTableSortOrder(ObjectTemplate template) {
 		// TODO Auto-generated method stub

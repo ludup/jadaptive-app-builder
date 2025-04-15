@@ -34,8 +34,6 @@ public interface TemplateService {
 
 	Iterable<ObjectTemplate> getTemplatesWithScope(ObjectScope personal);
 
-//	void registerObjectDependency(String resourceKey, ObjectTemplate template);
-
 	List<TemplateView> getViews(ObjectTemplate template, boolean singleView);
 
 	Iterable<ObjectTemplate> allCollectionTemplates();
@@ -47,8 +45,6 @@ public interface TemplateService {
 	String getTemplateResourceKey(Class<?> clz);
 
 	String getTemplateResourceKey(String clz);
-
-	FieldRenderer getRenderer(FieldTemplate field, ObjectTemplate template);
 
 	SortOrder getTableSortOrder(ObjectTemplate template);
 

@@ -32,4 +32,12 @@ public @interface ObjectField {
 		String references() default "";
 
 		String meta() default "";
+		
+		String view() default "";
+		
+		int weight() default 0;
+		
+		FieldRenderer renderer() default FieldRenderer.DEFAULT;
+
+		String bundle() default "";
 }

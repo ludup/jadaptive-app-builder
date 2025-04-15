@@ -7,7 +7,6 @@ import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.ValidationType;
@@ -38,94 +37,72 @@ public class SSHDConfiguration extends SingletonUUIDEntity {
 	public static final String ADVANCED_VIEW =  "advanced";
 	public static final String PROXY_VIEW =  "proxy";
 	
-	@ObjectField(type = FieldType.ENUM, defaultValue = "STRONG")
-	@ObjectView(GENERAL_VIEW)
+	@ObjectField(type = FieldType.ENUM, defaultValue = "STRONG", view = GENERAL_VIEW)
 	SecurityLevel securityLevel;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "600")
-	@ObjectView(GENERAL_VIEW)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "600", view = GENERAL_VIEW)
 	Integer idleConnectionTimeoutSecs = 600;
 
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "6144000")
-	@ObjectView(ADVANCED_VIEW)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "6144000", view = ADVANCED_VIEW)
 	Integer sftpMaximumWindowSpace = 6144000;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "1048576")
-	@ObjectView(ADVANCED_VIEW)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "1048576", view = ADVANCED_VIEW)
 	Integer sftpMinimumWindowSpace = 1048576;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "34000")
-	@ObjectView(ADVANCED_VIEW)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "34000", view = ADVANCED_VIEW)
 	Integer sftpMaximumPacketSize = 34000;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
-	@ObjectView(FILESYSTEM_VIEW)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = FILESYSTEM_VIEW)
 	Boolean enableSCP = true;
 
-	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
-	@ObjectView(AUTHENTICATION_VIEW)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = AUTHENTICATION_VIEW)
 	Boolean enablePassword = true;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "UTF-8")
-	@ObjectView(FILESYSTEM_VIEW)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "UTF-8", view = FILESYSTEM_VIEW)
 	String sftpCharacterSetEncoding = "UTF-8";
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "15")
-	@ObjectView(value = IP_VIEW, weight = 25)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "15", view = IP_VIEW, weight = 25)
 	Integer failedAuthenticationCount = 15;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "5")
-	@ObjectView(value = IP_VIEW, weight = 50)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "5", view = IP_VIEW, weight = 50)
 	Integer failedAuthenticationThreshold = 5;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "300")
-	@ObjectView(value = IP_VIEW, weight = 100)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "300", view = IP_VIEW, weight = 100)
 	Integer temporaryBanPeriod = 300;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
-	@ObjectView(value = IP_VIEW, weight = 0)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = IP_VIEW, weight = 0)
 	Boolean enableBanning = true;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(value = FORWARDING_VIEW, weight = 0)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = FORWARDING_VIEW, weight = 0)
 	Boolean enableLocalForwarding = true;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
-	@ObjectView(FORWARDING_VIEW)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", view = FORWARDING_VIEW)
 	Collection<String> allowedForwarding;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
-	@ObjectView(IP_BLACKLIST)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", view = IP_BLACKLIST)
 	@Validator(bundle = "default", type = ValidationType.REGEX, i18n = "blockedIP.invalid.ipAddress", value = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(3[0-2]|[1-2][0-9]|[0-9]))$|^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*|^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\\/(12[0-8]|1[0-1][0-9]|[1-9][0-9]|[0-9]))$")
 	Collection<String> blockedIPs;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
-	@ObjectView(IP_BLACKLIST)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", view = IP_BLACKLIST)
 	@Validator(bundle = "default", type = ValidationType.REGEX, i18n = "allowedIP.invalid.ipAddress", value = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(3[0-2]|[1-2][0-9]|[0-9]))$|^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*|^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\\/(12[0-8]|1[0-1][0-9]|[1-9][0-9]|[0-9]))$")
 	Collection<String> allowedIPs;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(value = ADVANCED_VIEW, weight = 900)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = ADVANCED_VIEW, weight = 900)
 	Boolean keepAlive = false;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(value = ADVANCED_VIEW, weight = 901)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = ADVANCED_VIEW, weight = 901)
     boolean tcpNoDelay = false;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "0")
-	@ObjectView(value = ADVANCED_VIEW, weight = 200)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "0", view = ADVANCED_VIEW, weight = 200)
     int receiveBufferSize = 0;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "0")
-	@ObjectView(value = ADVANCED_VIEW, weight = 201)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "0", view = ADVANCED_VIEW, weight = 201)
     int sendBufferSize = 0;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(PROXY_VIEW)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = PROXY_VIEW)
 	Boolean proxyProtocolEnabled = false;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
-	@ObjectView(PROXY_VIEW)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", view = PROXY_VIEW)
 	@Validator(bundle = RESOURCE_KEY, type = ValidationType.REGEX, i18n = "allowedIP.invalid.ipAddress", value = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(3[0-2]|[1-2][0-9]|[0-9]))$|^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*|^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\\/(12[0-8]|1[0-1][0-9]|[1-9][0-9]|[0-9]))$")
 	Collection<String> loadBalancerIPs;
 	

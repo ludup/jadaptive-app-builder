@@ -9,7 +9,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.user.PasswordEnabledUser;
 import com.jadaptive.api.user.User;
@@ -32,12 +31,10 @@ public class BuiltinUser extends PasswordEnabledUser {
 	@ObjectField(hidden = true, type = FieldType.TEXT)
 	String salt;
 
-	@ObjectField(defaultValue = "PBKDF2_SHA512_50000", type = FieldType.ENUM, hidden = true)
-	@ObjectView(value = "passwordOptions")
+	@ObjectField(defaultValue = "PBKDF2_SHA512_50000", type = FieldType.ENUM, hidden = true, view = "passwordOptions")
 	PasswordEncryptionType encodingType;
 
-	@ObjectField(defaultValue = "false", type = FieldType.BOOL)
-	@ObjectView(value = "passwordOptions")
+	@ObjectField(defaultValue = "false", type = FieldType.BOOL, view = "passwordOptions")
 	boolean passwordChangeRequired;
 
 	@ObjectField(type = FieldType.TEXT, hidden = true)

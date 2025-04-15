@@ -7,7 +7,6 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.ui.pages.config.ConfigurationItem;
 
 @ObjectDefinition(resourceKey = FilesConfiguration.RESOURCE_KEY, type = ObjectType.SINGLETON, system = true)
@@ -18,8 +17,7 @@ public class FilesConfiguration extends SingletonUUIDEntity {
 	
 	public static final String RESOURCE_KEY = "fileConfiguration";
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = FileStorageProvider.RESOURCE_KEY)
-	@ObjectView(value = "", renderer = FieldRenderer.DROPDOWN)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = FileStorageProvider.RESOURCE_KEY, renderer = FieldRenderer.DROPDOWN)
 	FileStorageProvider storageProvider;
 	
 	@Override

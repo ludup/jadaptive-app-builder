@@ -10,7 +10,6 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
@@ -25,8 +24,7 @@ public class AuthenticationSuccessEvent extends UserGeneratedEvent {
 
 	public static final String RESOURCE_KEY = "authenticationSuccess";
 
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY)
-	@ObjectView(value = ObjectEvent.OBJECT_VIEW)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY, view = ObjectEvent.OBJECT_VIEW)
 	AuthenticationModule authenticationModule;
 	
 	public AuthenticationSuccessEvent() { }

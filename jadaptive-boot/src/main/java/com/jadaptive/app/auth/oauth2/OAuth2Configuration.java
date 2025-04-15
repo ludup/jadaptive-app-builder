@@ -5,7 +5,6 @@ import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.ui.pages.config.ConfigurationItem;
@@ -23,29 +22,23 @@ public class OAuth2Configuration extends SingletonUUIDEntity {
 	public static final String OPTIONS_VIEW = "options";
 	public static final String DEVICE_VIEW = "device";
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(value = OPTIONS_VIEW, weight = 0)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = OPTIONS_VIEW, weight = 0)
 	private boolean requireApplicationRegistration;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
-	@ObjectView(value = OPTIONS_VIEW, weight = 10)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = OPTIONS_VIEW, weight = 10)
 	/* TODO only show when requireApplicationRegistration is false */
 	private boolean issueRefreshTokenForUnregisteredRequests = true;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "3600")
-	@ObjectView(value = OPTIONS_VIEW, weight = 20)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "3600", view = OPTIONS_VIEW, weight = 20)
 	private int defaultExpiryTime = 3600;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "1800")
-	@ObjectView(value = DEVICE_VIEW, weight = 10)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "1800", view = DEVICE_VIEW, weight = 10)
 	private int deviceCodeExpiryTime = 1800;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "5")
-	@ObjectView(value = DEVICE_VIEW, weight = 20)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "5", view = DEVICE_VIEW, weight = 20)
 	private int deviceCodeInterval = 5;
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "AAAAAA")
-	@ObjectView(value = DEVICE_VIEW, weight = 30)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "AAAAAA", view = DEVICE_VIEW, weight = 30)
 	private String deviceCodePattern = "AAAAAA";
 	
 	@Override

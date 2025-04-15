@@ -10,7 +10,6 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
@@ -25,8 +24,7 @@ public class SessionClosedEvent extends UserGeneratedEvent {
 
 	public static final String RESOURCE_KEY = "sessionClosed";
 
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(value = SystemEvent.EVENT_VIEW, weight = 9999, bundle = Session.RESOURCE_KEY)
+	@ObjectField(type = FieldType.TEXT, view = SystemEvent.EVENT_VIEW, weight = 9999, bundle = Session.RESOURCE_KEY)
 	String userAgent;
 
 	public SessionClosedEvent() {

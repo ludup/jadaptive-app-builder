@@ -5,7 +5,6 @@ import com.jadaptive.api.repository.SingletonUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
@@ -19,8 +18,7 @@ public class IPStackConfiguration extends SingletonUUIDEntity {
 	
 	public static final String API_VIEW = "api";
 	
-	@ObjectField(type = FieldType.TEXT, defaultValue = "")
-	@ObjectView(API_VIEW)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", view = API_VIEW)
 	String apiKey;
 	
 	public String getApiKey() {

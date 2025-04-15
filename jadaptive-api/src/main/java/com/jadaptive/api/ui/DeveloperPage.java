@@ -4,7 +4,6 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.TableView;
 
 @ObjectDefinition(resourceKey = DeveloperPage.RESOURCE_KEY)
@@ -19,28 +18,22 @@ public class DeveloperPage {
 	@ObjectField(type = FieldType.TEXT)
 	String uri;
 	
-	@ObjectField(type = FieldType.TEXT_AREA)
-	@ObjectView(value = HTML_VIEW, renderer = FieldRenderer.HTML_EDITOR)
+	@ObjectField(type = FieldType.TEXT_AREA, view = HTML_VIEW, renderer = FieldRenderer.HTML_EDITOR)
 	String developerHtml;
 	
-	@ObjectField(type = FieldType.TEXT_AREA)
-	@ObjectView(value = HTML_VIEW, renderer = FieldRenderer.HTML_EDITOR)
+	@ObjectField(type = FieldType.TEXT_AREA, view = HTML_VIEW, renderer = FieldRenderer.HTML_EDITOR)
 	String originalHtml;
 	
-	@ObjectField(type = FieldType.TEXT_AREA)
-	@ObjectView(value = HTML_VIEW, renderer = FieldRenderer.JAVA_EDITOR)
+	@ObjectField(type = FieldType.TEXT_AREA, view = HTML_VIEW, renderer = FieldRenderer.JAVA_EDITOR)
 	String developerScript;
 	
-	@ObjectField(type = FieldType.TEXT_AREA)
-	@ObjectView(value = HTML_VIEW, renderer = FieldRenderer.JAVA_EDITOR)
+	@ObjectField(type = FieldType.TEXT_AREA, view = HTML_VIEW, renderer = FieldRenderer.JAVA_EDITOR)
 	String originalScript;
 	
-	@ObjectField(type = FieldType.TEXT_AREA)
-	@ObjectView(value = HTML_VIEW, renderer = FieldRenderer.CSS_EDITOR)
+	@ObjectField(type = FieldType.TEXT_AREA, view =  HTML_VIEW, renderer = FieldRenderer.CSS_EDITOR)
 	String developerStyle;
 	
-	@ObjectField(type = FieldType.TEXT_AREA)
-	@ObjectView(value = HTML_VIEW, renderer = FieldRenderer.CSS_EDITOR)
+	@ObjectField(type = FieldType.TEXT_AREA, view = HTML_VIEW, renderer = FieldRenderer.CSS_EDITOR)
 	String originalStyle;
 
 	public String getUri() {

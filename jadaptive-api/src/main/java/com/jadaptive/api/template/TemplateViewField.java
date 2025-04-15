@@ -3,8 +3,6 @@ package com.jadaptive.api.template;
 import java.util.LinkedList;
 import java.util.Objects;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.jadaptive.api.entity.AbstractObject;
 
 public class TemplateViewField {
@@ -16,19 +14,19 @@ public class TemplateViewField {
 	String bundle = null;
 	boolean disableEncoding;
 	FieldRenderer renderer = null;
-	ObjectView view;
+	String view;
 	boolean parentIsHidden;
 	
-	public TemplateViewField(ObjectView view, TemplateView panel, FieldTemplate field, LinkedList<FieldTemplate> objectPath, boolean parentIsHidden) {
+	public TemplateViewField(String view, TemplateView panel, FieldTemplate field, LinkedList<FieldTemplate> objectPath, boolean parentIsHidden) {
 		super();
 		this.view = view;
 		this.field = field;
 		this.panel = panel;
 		this.objectPath = objectPath;
-		this.weight = view != null ? view.weight() : 0;
-		this.disableEncoding = Objects.nonNull(view) && field.getOptions().contains(FieldOptions.DISABLE_FORM_ENCODING);
-		this.bundle = Objects.nonNull(view) && StringUtils.isNotBlank(view.bundle()) ? view.bundle() : panel.getBundle();
-		this.renderer = view != null ? view.renderer() : FieldRenderer.DEFAULT;
+		this.weight = field.getWeight();
+		this.disableEncoding = field.getOptions().contains(FieldOptions.DISABLE_FORM_ENCODING);
+		this.bundle = field.getBundle();
+		this.renderer = field.getRenderer();
 		this.parentIsHidden = parentIsHidden;
 	}
 	

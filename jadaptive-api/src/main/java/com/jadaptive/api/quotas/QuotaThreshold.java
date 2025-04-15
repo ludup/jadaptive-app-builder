@@ -9,7 +9,6 @@ import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
@@ -30,26 +29,22 @@ public abstract class QuotaThreshold extends AbstractUUIDEntity {
 	public static final String QUOTA_VIEW = "quotaView";
 	public static final String OPTIONS_VIEW = "quotaOptions";
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = QuotaKey.RESOURCE_KEY, searchable = true)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = QuotaKey.RESOURCE_KEY, searchable = true, view = QUOTA_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
-	@ObjectView(QUOTA_VIEW)
 	QuotaKey key;
 		
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT, view = QUOTA_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
 	@Validator(type = ValidationType.BYTESIZE, i18n = "bytesize.info")
-	@ObjectView(QUOTA_VIEW)
 	String value;
 	
-	@ObjectField(type = FieldType.LONG)
+	@ObjectField(type = FieldType.LONG, view = QUOTA_VIEW)
 	@Validator(type = ValidationType.RANGE, value = "1-" + Long.MAX_VALUE)
 	@Validator(type = ValidationType.REQUIRED)
-	@ObjectView(QUOTA_VIEW)
 	long periodValue;
 	
-	@ObjectField(type = FieldType.ENUM)
+	@ObjectField(type = FieldType.ENUM, view = QUOTA_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
-	@ObjectView(QUOTA_VIEW)
 	TimeUnit periodUnit; 
 	
 	@Override

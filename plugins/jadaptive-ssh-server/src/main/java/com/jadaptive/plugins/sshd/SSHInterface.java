@@ -5,7 +5,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.TableView;
@@ -26,18 +25,15 @@ public abstract class SSHInterface extends NamedUUIDEntity {
 	
 	private static final long serialVersionUID = 3220349031259390699L;
 
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT, view = SSHInterface.VIEW_INTERFACE)
 	@Validator(type = ValidationType.REQUIRED)
-	@ObjectView(SSHInterface.VIEW_INTERFACE)
 	String addressToBind;
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "22")
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "22", view = SSHInterface.VIEW_INTERFACE)
 	@Validator(type = ValidationType.RANGE, value = "1-65535", bundle = RESOURCE_KEY, i18n = "port.invalid")
-	@ObjectView(SSHInterface.VIEW_INTERFACE)
 	int portToBind;
 	
-	@ObjectField(type = FieldType.ENUM, defaultValue = "STRONG")
-	@ObjectView(SSHInterface.VIEW_INTERFACE)
+	@ObjectField(type = FieldType.ENUM, defaultValue = "STRONG", view = SSHInterface.VIEW_INTERFACE)
 	SecurityLevel securityLevel;
 	
 	public SecurityLevel getSecurityLevel() {

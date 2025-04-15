@@ -974,7 +974,7 @@ public class TableRenderer {
 	}
 
 	private Element renderText(FieldTemplate field, AbstractObject obj, ObjectTemplate template, TemplateViewField view) {
-		FieldRenderer renderer = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getRenderer(field, template);
+		FieldRenderer renderer = field.getRenderer();
 		switch(renderer) {
 		case BOOTSTRAP_BADGE:
 		case TAGS:

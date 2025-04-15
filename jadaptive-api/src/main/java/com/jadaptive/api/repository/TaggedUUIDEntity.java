@@ -10,7 +10,6 @@ import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 
 @JsonIgnoreProperties(value = { "_clz" })
 public abstract class TaggedUUIDEntity extends UUIDEntity {
@@ -30,8 +29,7 @@ public abstract class TaggedUUIDEntity extends UUIDEntity {
 	Date lastModified;
 
 
-	@ObjectField(type = FieldType.TEXT, searchable = true)
-	@ObjectView(value = "", renderer = FieldRenderer.TAGS, weight = 9999)
+	@ObjectField(type = FieldType.TEXT, searchable = true, renderer = FieldRenderer.TAGS, weight = 9999)
 	Collection<String> tags = new HashSet<>();
 	
 	public Date getCreated() {

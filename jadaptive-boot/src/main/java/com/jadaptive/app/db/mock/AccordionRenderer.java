@@ -3,7 +3,6 @@ package com.jadaptive.app.db.mock;
 import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 
 //@ObjectDefinition(resourceKey = AccordionRenderer.RESOURCE_KEY)
 //@ObjectViews({ @ObjectViewDefinition(value = AccordionRenderer.VIEW_OBJECT1, bundle = AccordionRenderer.RESOURCE_KEY, type = ViewType.ACCORDION),
@@ -22,12 +21,10 @@ public class AccordionRenderer extends NamedUUIDEntity {
 		return RESOURCE_KEY;
 	}
 	
-	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = "")
-	@ObjectView(VIEW_OBJECT1)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = "", view = VIEW_OBJECT1)
 	Object1 obj1;
 	
-	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = "")
-	@ObjectView(VIEW_OBJECT2)
+	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = "", view = VIEW_OBJECT2)
 	Object2 obj2;
 
 	public Object1 getObj1() {

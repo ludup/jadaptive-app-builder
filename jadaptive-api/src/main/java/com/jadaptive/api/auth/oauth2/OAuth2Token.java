@@ -9,7 +9,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.template.ValidationType;
@@ -46,32 +45,25 @@ public class OAuth2Token extends NamedUUIDEntity {
 	public static final String RESOURCE_KEY = "oauth2Tokens";
 	public static final String VIEW_TOKEN = "tokenView";
 
-	@ObjectField(type = FieldType.TIMESTAMP)
-	@ObjectView(VIEW_TOKEN)
+	@ObjectField(type = FieldType.TIMESTAMP, view = VIEW_TOKEN)
 	private long expires;
 
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = User.RESOURCE_KEY, readOnly = true)
-	@ObjectView(value = VIEW_TOKEN)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = User.RESOURCE_KEY, readOnly = true, view = VIEW_TOKEN)
 	private User owner;
 
-	@ObjectField(type = FieldType.TEXT, defaultValue = "", hidden = true, readOnly = true)
-	@ObjectView(value = VIEW_TOKEN)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", hidden = true, readOnly = true, view = VIEW_TOKEN)
 	private String tenant;
 
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = OAuth2Application.RESOURCE_KEY, readOnly = true)
-	@ObjectView(value = VIEW_TOKEN)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = OAuth2Application.RESOURCE_KEY, readOnly = true, view = VIEW_TOKEN)
 	private OAuth2Application application;
 
-	@ObjectField(type = FieldType.TEXT, defaultValue = "", hidden = true)
-	@ObjectView(VIEW_TOKEN)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", hidden = true, view = VIEW_TOKEN)
 	private String nonce;
 
-	@ObjectField(type = FieldType.TEXT, defaultValue = "", hidden = true)
-	@ObjectView(VIEW_TOKEN)
+	@ObjectField(type = FieldType.TEXT, defaultValue = "", hidden = true, view = VIEW_TOKEN)
 	private String refreshToken;
 	
-	@ObjectField(type = FieldType.TEXT, readOnly = true)
-	@ObjectView(VIEW_TOKEN)
+	@ObjectField(type = FieldType.TEXT, readOnly = true, view = VIEW_TOKEN)
 	@Validator(type = ValidationType.CIDR_V4)
 	@Validator(type = ValidationType.CIDR_V6)
 	private Collection<String> scopes;

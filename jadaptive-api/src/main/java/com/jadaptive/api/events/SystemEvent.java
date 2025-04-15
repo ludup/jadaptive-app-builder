@@ -20,7 +20,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.template.SortOrder;
@@ -47,42 +46,33 @@ public class SystemEvent extends UUIDEvent {
 	
 	public static final String EVENT_VIEW = "event";
 	
-	@ObjectField(type = FieldType.TIMESTAMP, searchable = true)
-	@ObjectView(value = SystemEvent.EVENT_VIEW, weight = 200)
+	@ObjectField(type = FieldType.TIMESTAMP, searchable = true, view = SystemEvent.EVENT_VIEW, weight = 200)
 	Date timestamp;
 	
-	@ObjectField(type = FieldType.TEXT, searchable = true)
-	@ObjectView(value = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.I18N, weight = 100)
+	@ObjectField(type = FieldType.TEXT, searchable = true, view = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.I18N, weight = 100)
 	String eventKey;
 	
-	@ObjectField(type = FieldType.TEXT, searchable = true)
+	@ObjectField(type = FieldType.TEXT, searchable = true, view = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.I18N)
 	@ExcludeView(values = { FieldView.READ, FieldView.TABLE })
-	@ObjectView(value = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.I18N)
 	String eventGroup;
 	
-	@ObjectField(type = FieldType.TEXT, searchable = true)
-	@ObjectView(value = SystemEvent.EVENT_VIEW, weight = 300)
+	@ObjectField(type = FieldType.TEXT, searchable = true, view = SystemEvent.EVENT_VIEW, weight = 300)
 	String ipAddress;
 	
-	@ObjectField(type = FieldType.TEXT_AREA)
-	@ObjectView(value = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.OPTIONAL, weight = 9999)
+	@ObjectField(type = FieldType.TEXT_AREA, view = SystemEvent.EVENT_VIEW, renderer = FieldRenderer.OPTIONAL, weight = 9999)
 	@ExcludeView(values = FieldView.TABLE)
 	String extendedInformation;
 	
-	@ObjectField(type = FieldType.ENUM, searchable = true)
-	@ObjectView(value = "", renderer = FieldRenderer.BOOTSTRAP_BADGE, weight = Integer.MIN_VALUE)
+	@ObjectField(type = FieldType.ENUM, searchable = true, renderer = FieldRenderer.BOOTSTRAP_BADGE, weight = Integer.MIN_VALUE)
 	EventState state = EventState.SUCCESS;
 	
-	@ObjectField(type = FieldType.TEXT, searchable = true)
-	@ObjectView(value = EVENT_VIEW, weight = 9997, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
+	@ObjectField(type = FieldType.TEXT, searchable = true, view = EVENT_VIEW, weight = 9997, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
 	String username;
 	
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(value = EVENT_VIEW, weight = 9998, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
+	@ObjectField(type = FieldType.TEXT, view = EVENT_VIEW, weight = 9998, bundle = Session.RESOURCE_KEY, renderer = FieldRenderer.OPTIONAL)
 	String name;
 	
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(value = EVENT_VIEW, weight = 9998, renderer = FieldRenderer.OPTIONAL)
+	@ObjectField(type = FieldType.TEXT, view = EVENT_VIEW, weight = 9998, renderer = FieldRenderer.OPTIONAL)
 	String eventDescription;
 	
 	public SystemEvent() {

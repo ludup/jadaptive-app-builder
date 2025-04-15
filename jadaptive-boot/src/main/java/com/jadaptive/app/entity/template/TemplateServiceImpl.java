@@ -36,7 +36,6 @@ import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExtensionRegistration;
-import com.jadaptive.api.template.FieldRenderer;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldValidator;
@@ -44,7 +43,6 @@ import com.jadaptive.api.template.ObjectExtension;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ObjectTemplateRepository;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.template.TableAction;
@@ -554,37 +552,19 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 		return val;
 		
 	}
+
 	
-	@Override
-	public FieldRenderer getRenderer(FieldTemplate field, ObjectTemplate template) {
-		
-		try {
-			Class<?> clz = getTemplateClass(template.getResourceKey());
-			if(Objects.isNull(clz)) {
-				log.warn("Template class for {} appears to be missing", template.getResourceKey());
-				return FieldRenderer.DEFAULT;
-			}
-			Field f = ReflectionUtils.getField(clz, field.getResourceKey());
-			ObjectView v = f.getAnnotation(ObjectView.class);
-			if(Objects.nonNull(v)) {
-				return v.renderer() == null ? FieldRenderer.DEFAULT : v.renderer();
-			}
-		} catch (NoSuchFieldException e) {
-		}
-		
-		return FieldRenderer.DEFAULT;
-	}
-	
-	private void processFields(ObjectView currentView, ObjectTemplate template, Class<?> clz, Map<String, TemplateView> views, LinkedList<FieldTemplate> objectPath, boolean disableViews, boolean parentIsHidden) throws NoSuchFieldException, ClassNotFoundException {
+	private void processFields(String currentView, ObjectTemplate template, Class<?> clz, Map<String, TemplateView> views, LinkedList<FieldTemplate> objectPath, boolean disableViews, boolean parentIsHidden) throws NoSuchFieldException, ClassNotFoundException {
 		
 		for(FieldTemplate field : template.getFields()) {
 			
-			Field f = ReflectionUtils.getField(clz, field.getResourceKey());
-			ObjectView v = f.getAnnotation(ObjectView.class);
-			if(Objects.isNull(v)) {
+			String v = field.getView();
+			if(StringUtils.isBlank(v)) {
 				v = currentView;
 			}
+			
 			if(field.getFieldType()==FieldType.OBJECT_EMBEDDED && !field.getCollection()) {
+				Field f = ReflectionUtils.getField(clz, field.getResourceKey());
 				Class<?> c = ReflectionUtils.getObjectType(f);
 				String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
 				ObjectTemplate ct = get(resourceKey);
@@ -598,25 +578,18 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 				continue;
 			}
 			
-			if(Objects.isNull(v)) { 
-				TemplateView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
-				if(Objects.isNull(o)) {
-					o = new TemplateView(template.getBundle(), currentView.value());
-					views.put(currentView.value(), o);
-				}
-				o.addField(new TemplateViewField(null, o, field, objectPath, parentIsHidden));				
-			} else if(StringUtils.isBlank(v.value())) {
-				TemplateView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView.value() : null);
+			if(StringUtils.isBlank(field.getView())) {
+				TemplateView o = views.get(!disableViews && Objects.nonNull(currentView) ? currentView : null);
 				if(Objects.isNull(o)) {
 					o = new TemplateView(template.getBundle());
 					views.put(null, o);
 				}
 				o.addField(new TemplateViewField(v, o, field, objectPath, parentIsHidden));
 			} else {
-				TemplateView o = views.get(disableViews ? null : v.value());
+				TemplateView o = views.get(disableViews ? null : v);
 				if(Objects.isNull(o)) {
-					o = new TemplateView(template.getBundle(), v.value());
-					views.put(v.value(), o);
+					o = new TemplateView(template.getBundle(), v);
+					views.put(v, o);
 				}
 				o.addField(new TemplateViewField(v, o, field, objectPath, parentIsHidden));
 			}

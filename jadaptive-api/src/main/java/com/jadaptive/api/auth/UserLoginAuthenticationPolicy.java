@@ -6,7 +6,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViews;
 
 @ObjectDefinition(bundle = AuthenticationPolicy.RESOURCE_KEY, resourceKey = UserLoginAuthenticationPolicy.RESOURCE_KEY, scope = ObjectScope.GLOBAL, defaultColumn = "name")
@@ -24,12 +23,10 @@ public class UserLoginAuthenticationPolicy extends LoginAuthenticationPolicy {
 		return RESOURCE_KEY;
 	}
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
-	@ObjectView(value = "factors")
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = "factors")
 	Boolean passwordOnFirstPage;
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "true")
-	@ObjectView(value = "factors")
+	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = "factors")
 	Boolean passwordRequired;
 	
 	public Boolean getPasswordOnFirstPage() {

@@ -22,7 +22,6 @@ import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.TableAction;
 import com.jadaptive.api.template.TableAction.Target;
@@ -59,33 +58,27 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	
 	private static final long serialVersionUID = 2210375165051752363L;
 
-	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true)
-	@ObjectView(DETAILS_VIEW)
+	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true, view = DETAILS_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
 	String username;
 
-	@ObjectField(searchable = true, type = FieldType.TEXT, nameField = true)
+	@ObjectField(searchable = true, type = FieldType.TEXT, nameField = true, view = DETAILS_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
-	@ObjectView(DETAILS_VIEW)
 	String name;
 
-	@ObjectField(type = FieldType.BOOL, hidden = true, defaultValue = "true")
-	@ObjectView(DETAILS_VIEW)
+	@ObjectField(type = FieldType.BOOL, hidden = true, defaultValue = "true", view = DETAILS_VIEW)
 	Boolean enabled = Boolean.TRUE;
 	
-	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
+	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
-	@ObjectView(EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
 	String email;
 
-	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
-	@ObjectView(PHONE_VIEW)
+	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
 	String mobilePhone;
 	
-	@ObjectField(type = FieldType.IMAGE)
-	@ObjectView(value = AVATAR_VIEW, weight = 9999)
+	@ObjectField(type = FieldType.IMAGE, view = AVATAR_VIEW, weight = 9999)
 	@Validators({
 		@Validator(type = ValidationType.CLASSES, value = "p-3 bg-light"),
 		@Validator(type = ValidationType.IMAGE_HEIGHT, value = "512"),
@@ -94,23 +87,19 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	})
 	String avatar;
 	
-	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true)
+	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true, view = DETAILS_VIEW)
 	@ExcludeView(values =  { FieldView.CREATE })
-	@ObjectView(DETAILS_VIEW)
 	Date lastLogin;
 	
-	@ObjectField(type = FieldType.TEXT, readOnly = true)
-	@ObjectView(value = DETAILS_VIEW, renderer = FieldRenderer.OPTIONAL)
+	@ObjectField(type = FieldType.TEXT, readOnly = true, view = DETAILS_VIEW, renderer = FieldRenderer.OPTIONAL)
 	Collection<String> aliases;
 
-	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
+	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
-	@ObjectView(EMAIL_VIEW)
 	Collection<String> otherEmail = new ArrayList<>();
 	
-	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION)
+	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
-	@ObjectView(PHONE_VIEW)
 	Collection<String> otherTelephone = new ArrayList<>();
 	
 	public String getUsername() {

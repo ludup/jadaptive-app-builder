@@ -11,7 +11,6 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.template.ObjectViews;
 
@@ -26,8 +25,7 @@ public class AuthenticationFailedEvent extends UserGeneratedEvent {
 
 	public static final String RESOURCE_KEY = "authenticationFailed";
 
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(value = ObjectEvent.OBJECT_VIEW)
+	@ObjectField(type = FieldType.TEXT, view = ObjectEvent.OBJECT_VIEW)
 	String authenticator;
 	
 	public AuthenticationFailedEvent() { }

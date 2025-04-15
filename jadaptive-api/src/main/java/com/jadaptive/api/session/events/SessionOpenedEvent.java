@@ -9,7 +9,6 @@ import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 
 @AuditedObject
 @ObjectDefinition(resourceKey = SessionOpenedEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, 
@@ -21,8 +20,7 @@ public class SessionOpenedEvent extends UserGeneratedEvent {
 
 	public static final String RESOURCE_KEY = "sessionOpened";
 	
-	@ObjectField(type = FieldType.TEXT)
-	@ObjectView(value = SystemEvent.EVENT_VIEW, weight = 9999, bundle = Session.RESOURCE_KEY)
+	@ObjectField(type = FieldType.TEXT, view = SystemEvent.EVENT_VIEW, weight = 9999, bundle = Session.RESOURCE_KEY)
 	String userAgent;
 	
 	public SessionOpenedEvent() { 

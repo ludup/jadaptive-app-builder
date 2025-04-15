@@ -6,7 +6,6 @@ import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
-import com.jadaptive.api.template.ObjectView;
 import com.jadaptive.api.template.ObjectViewDefinition;
 import com.jadaptive.api.templates.ObjectDynamicField;
 import com.jadaptive.api.tenant.Tenant;
@@ -21,12 +20,10 @@ public class TenantQuota extends QuotaThreshold {
 	public static final String RESOURCE_KEY = "tenantQuotas";
 	public static final String TENANTS_VIEW = "tenantsQuotaView";
 	
-	@ObjectField(type = FieldType.BOOL, defaultValue = "false")
-	@ObjectView(TENANTS_VIEW)
+	@ObjectField(type = FieldType.BOOL, defaultValue = "false", view = TENANTS_VIEW)
 	Boolean allTenants;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = Tenant.RESOURCE_KEY)
-	@ObjectView(value = TENANTS_VIEW)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = Tenant.RESOURCE_KEY, view = TENANTS_VIEW)
 	Collection<Tenant> tenants;
 
 	public Collection<Tenant> getTenants() {
