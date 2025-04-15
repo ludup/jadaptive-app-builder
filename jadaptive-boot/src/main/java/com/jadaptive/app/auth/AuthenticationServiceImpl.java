@@ -534,6 +534,9 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		List<PostAuthenticatorPage> additional = new ArrayList<>();
 		for(PostAuthenticatorPage a : applicationService.getBeans(PostAuthenticatorPage.class)) {
 			if(a.requiresProcessing(state.getPolicy(), state.getUser()) && !(a instanceof SetupPostAuthenticationPage)) {
+				if(log.isInfoEnabled()) {
+					log.info("{} has to complete {}", state.getUser().getName(), a.getUri());
+				}
 				additional.add(a);
 			}
 		}
