@@ -284,7 +284,9 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 					
 					/* We fired the event, we delete after a short delay (hopefully all
 					 * nodes have received by this time */
-					executor.schedule(() -> {}, DELETE_CLUSTER_EVENT.toMillis(), TimeUnit.MILLISECONDS);	
+					executor.schedule(() -> {
+						clusterEvents.delete(cevt);
+					}, DELETE_CLUSTER_EVENT.toMillis(), TimeUnit.MILLISECONDS);	
 				});
 				
 			}
