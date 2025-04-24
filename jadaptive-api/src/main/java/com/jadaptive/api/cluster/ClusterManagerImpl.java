@@ -82,6 +82,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 
 	private String serverId;
 	private Map<String, ClusterNodeStatus> lastKnownStatus = Collections.synchronizedMap(new HashMap<>());
+	private Set<ClusterService> services;
 
 	@Override
 	public void onApplicationStartup() {
@@ -113,7 +114,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			thisNode.setStatus(ClusterNodeStatus.ONLINE);
 			thisNode.setLastHeartbeat(nowInUTC().toEpochMilli());
 			
-			Set<ClusterService> services = new LinkedHashSet<>();
+			services = new LinkedHashSet<>();
 			for(var bean : app.getBeans(ClusterServiceProvider.class)) {
 				services = bean.transform(services);
 			}
@@ -171,6 +172,11 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	}
 
 	@Override
+	public Set<ClusterService> getServices() {
+		return services;
+	}
+
+	@Override
 	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
 
 		if (column.equals("uuid")) {
@@ -199,9 +205,9 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				if(node.getServices().size() > 0) {
 					var div = Html.div("mt-2", "ms-2", "text-muted");
 					node.getServices().forEach(s -> {
-						var srvcol = Html.div("col");
+						var srvcol = Html.div("col-8");
 						srvcol.text(s.getService());
-						var portcol = Html.div("col");
+						var portcol = Html.div("col-4");
 						portcol.text(String.valueOf(s.getPort()));
 	
 						var crow = Html.div("row");

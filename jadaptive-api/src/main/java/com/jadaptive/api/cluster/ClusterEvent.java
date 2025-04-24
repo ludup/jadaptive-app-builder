@@ -14,10 +14,6 @@ public final class ClusterEvent extends UUIDEntity {
 
 	public static final String RESOURCE_KEY = "clusterEvent";
 	
-	public enum ClusterNodeStatus {
-		LEADER, ONLINE, OFFLINE
-	}
-	
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	private SystemEvent event;
 

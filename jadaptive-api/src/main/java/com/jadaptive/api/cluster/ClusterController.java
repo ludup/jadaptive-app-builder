@@ -1,6 +1,7 @@
 package com.jadaptive.api.cluster;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.jadaptive.api.cluster.ClusterNode.ClusterNodeStatus;
 import com.jadaptive.api.json.ResourceStatus;
 import com.jadaptive.api.tenant.TenantService;
 
@@ -19,7 +21,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Controller
 public class ClusterController {
 	
-	public record ClusterInfo(String serverId, List<ClusterNode> nodes) { }
+	public record ClusterInfo(String serverId, ClusterNodeStatus status, Set<ClusterService> services, List<ClusterNode> nodes) { }
 	
 	@Autowired
 	private ClusterManager clusterManager;
@@ -32,6 +34,12 @@ public class ClusterController {
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.OK)
 	public ResourceStatus<ClusterInfo> cluster(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		return tenantService.asSystem(() -> new ResourceStatus<>(new ClusterInfo(clusterManager.getServerId(), clusterManager.streamAll().toList())));
+		return tenantService.asSystem(() -> new ResourceStatus<>(
+			new ClusterInfo(
+					clusterManager.getServerId(), 
+					clusterManager.isLeader() ? ClusterNodeStatus.LEADER : ClusterNodeStatus.ONLINE,
+					clusterManager.getServices(),
+					clusterManager.streamAll().toList())
+		));
 	}
 }
