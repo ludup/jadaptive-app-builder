@@ -57,7 +57,11 @@ public class MarkdownEditorInput extends FieldInputRender {
 		}
 		
 		rootElement.addClass("mb-3");
-
+		
+		scripts(document, "marked", 
+				"marked.min.js"
+		);
+		
 		scripts(document, "easymde", 
 				"dist/easymde.min.js"
 		);

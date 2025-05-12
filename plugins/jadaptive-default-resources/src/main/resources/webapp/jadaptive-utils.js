@@ -6,7 +6,7 @@ validate: function(form, callback, invalid) {
 		$('.mceEditor').each(function() {
 			var editor = tinymce.get($(this).attr('id'));
 			editor.save();
-		});
+		});		
 		
 		$.ajax({
 		   type: "POST",
@@ -179,6 +179,12 @@ processedFormData: function(form, removeFiles) {
 			fdata.delete($(this).attr('name'));
 		});
 	} 
+	
+	form.find('.mdeEditor').each(function() {
+		fdata.delete($(this).attr('id'));
+		fdata.append($(this).attr('id'),
+			marked.parse($(this).val()));
+	});
 	
 	form.find('.mceEditor').each(function() {
 		var editor = tinymce.get($(this).attr('id'));
