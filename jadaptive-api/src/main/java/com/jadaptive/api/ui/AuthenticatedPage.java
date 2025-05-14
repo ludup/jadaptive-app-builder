@@ -49,7 +49,7 @@ public abstract class AuthenticatedPage extends HtmlPage {
 				reqUrl.append(query);
 			}
 			authenticationService.createAuthenticationState(policy, new UriRedirect(reqUrl.toString()));
-			throw new PageRedirect(pageCache.resolvePage(Login.class));
+			throw new PageRedirect(pageCache.resolvePage(pageCache.getDefaultPage()));
 		}
 	}
 
