@@ -173,6 +173,8 @@ public class SessionFilter implements Filter {
 				return;
 			}
 			
+			sessionUtils.isValidCORSRequest(req, resp, properties);
+			
 			if(!preHandle(req, resp, properties)) {
 				return;
 			}
