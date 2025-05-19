@@ -124,7 +124,11 @@ public class ResourceController extends ExceptionHandlingController {
 				ResponseHelper.send404NotFound(resourceUri, request, response);
 			}
 		} catch(Throwable e) { 
-			log.error("Error loading content resource " + resourceUri, e);
+			if(log.isDebugEnabled()) {
+				log.debug("Error loading content resource " + resourceUri, e);
+			} else {
+				log.error("Error loading content resource " + resourceUri);
+			}
 		} finally {
 			tenantService.clearCurrentTenant();
 		}
