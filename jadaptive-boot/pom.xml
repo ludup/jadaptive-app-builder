@@ -130,7 +130,7 @@
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcmail-jdk15on</artifactId>
+			<artifactId>bcjmail-jdk15on</artifactId>
 			<version>1.70</version>
 		</dependency>
 
@@ -182,6 +182,11 @@
 		<dependency>
         	<groupId>org.eclipse.angus</groupId>
 	        <artifactId>angus-mail</artifactId>
+		</dependency>
+		
+		<dependency>
+		    <groupId>jakarta.activation</groupId>
+		    <artifactId>jakarta.activation-api</artifactId>
 		</dependency>
  
 	</dependencies>
