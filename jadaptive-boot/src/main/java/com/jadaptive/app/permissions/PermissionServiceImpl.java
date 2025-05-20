@@ -254,13 +254,15 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	
 	@Override
 	public boolean isAdministrator(User user) {
-		if(user.equals(SYSTEM_USER)) {
-			return true;
-		}
-		Collection<Role> roles = roleService.getRoles(user);
-		for(Role role : roles) {
-			if(role.isAllPermissions()) {
+		if(Objects.nonNull(user)) {
+			if(user.equals(SYSTEM_USER)) {
 				return true;
+			}
+			Collection<Role> roles = roleService.getRoles(user);
+			for(Role role : roles) {
+				if(role.isAllPermissions()) {
+					return true;
+				}
 			}
 		}
 		return false;
