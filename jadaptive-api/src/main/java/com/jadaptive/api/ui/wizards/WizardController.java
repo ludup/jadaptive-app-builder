@@ -35,6 +35,7 @@ public class WizardController extends AuthenticatedController {
 	
 	@Autowired
 	private WizardService wizardService; 
+
 	
 	@RequestMapping(value = "/app/api/wizard/start/{resourceKey}", method = { RequestMethod.POST, RequestMethod.GET }, produces = { "application/json" })
 	@ResponseBody

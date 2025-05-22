@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
@@ -56,6 +57,7 @@ import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.MongoEntity;
 import com.jadaptive.utils.ParameterHelper;
+import com.jadaptive.utils.Utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -639,13 +641,14 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		}
 	}
 	
-	@RequestMapping(value="/app/api/objects/image/{resourceKey}/{uuid}/{filename}", method = RequestMethod.GET)
+	@RequestMapping(value={ "/app/api/objects/image/{resourceKey}/{uuid}/{filename}", 
+			"/app/api/forms/image/{resourceKey}/{uuid}/{filename}"}, method = RequestMethod.GET)
 	public void downloadImage(HttpServletRequest request, HttpServletResponse response, @PathVariable String resourceKey,
 			 @PathVariable String uuid, @PathVariable String filename) throws ObjectException, IOException {
 		
 		try {
 			
-			FileAttachment att = fileService.getAttachment(uuid);
+ 			FileAttachment att = fileService.getAttachment(uuid);
 			response.setStatus(HttpStatus.OK.value());
 			response.setContentLengthLong(att.getSize());
 			response.setContentType(att.getContentType());
@@ -665,6 +668,19 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			}
 			throw new ObjectException(e);
 		}
+	}
+
+	
+	@RequestMapping(value="/app/api/forms/image/upload", method = RequestMethod.POST, produces = "application/json")
+	@ResponseStatus(value = HttpStatus.OK)
+	public void doImageUpload(HttpServletRequest request, HttpServletResponse response,
+	        @RequestParam("image") MultipartFile file) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
+
+		FileAttachment att = fileService.createAttachment(file.getInputStream(), file.getOriginalFilename(), file.getContentType(), "", "");
+		
+		response.setStatus(200);
+		response.getOutputStream().write(("{\"data\": {\"filePath\": \"app/api/forms/image/markdown/"
+				+ att.getUuid() + "/" + Utils.encodeURIPath(att.getFilename()) + "\"}}").getBytes("UTF-8"));
 	}
 	
 	

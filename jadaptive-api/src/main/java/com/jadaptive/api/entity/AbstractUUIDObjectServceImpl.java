@@ -85,11 +85,11 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 	}
 	@Override
 	public void deleteObject(T object) {
-		validateDelete(object);
+		beforeDelete(object);
 		objectDatabase.delete(object);
 	}
 
-	protected void validateDelete(T object) {
+	protected void beforeDelete(T object) {
 		
 	}
 	
@@ -100,7 +100,7 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 	@Override
 	public void deleteObjectByUUID(String uuid) {
 		T object = getObjectByUUID(uuid);
-		validateDelete(object);
+		beforeDelete(object);
 		objectDatabase.delete(object);
 	}
 	

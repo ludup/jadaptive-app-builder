@@ -409,11 +409,6 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	}
 
 	@Override
-	public void initializeSystem(boolean newSchema) {
-		initializeTenant(getCurrentTenant(), newSchema);
-	}
-
-	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
 		
 //		if(log.isInfoEnabled()) {

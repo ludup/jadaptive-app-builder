@@ -510,11 +510,6 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		
 		scanForPermissions(getClass().getClassLoader(), "com.jadaptive.app", newSchema);
 	}
-	
-	@Override
-	public void initializeSystem(boolean newSchema) {
-		initializeTenant(tenantService.getSystemTenant(), newSchema);
-	}
 
 	private void scanForPermissions(ClassLoader classloader, String name, boolean newSchema) {
 		

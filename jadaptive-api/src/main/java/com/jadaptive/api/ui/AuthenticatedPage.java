@@ -12,7 +12,6 @@ import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
-import com.jadaptive.api.ui.pages.auth.Login;
 import com.jadaptive.api.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;

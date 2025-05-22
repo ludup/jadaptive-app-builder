@@ -50,7 +50,6 @@ import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
-import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.result.DeleteResult;
@@ -278,7 +277,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void watch(String table, String database, Consumer<ChangeStreamDocument<Document>> consumer) {
-		var pipeline = Arrays.asList(
+//		var pipeline = Arrays.asList(
 //			Aggregates.match(
 //				Filters.or(
 //					Filters.eq("operationType", "insert"), 
@@ -287,14 +286,14 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 //					Filters.eq("operationType", "delete")
 //				)
 //			),
-			Aggregates.project(
-					Projections.fields(
-							Projections.excludeId(),
-							Projections.include("documentKey", "operationType", "fullDocument"),
-							Projections.computed(table, "$fullDocument")
-						)
-				)
-		);
+//			Aggregates.project(
+//					Projections.fields(
+//							Projections.excludeId(),
+//							Projections.include("documentKey", "operationType", "fullDocument"),
+//							Projections.computed(table, "$fullDocument")
+//						)
+//				)
+//		);
 
 		var collection = getCollection(table, database);
 		// TOOD what to do for this?
@@ -963,10 +962,14 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 				tmp.add(Filters.lte(field.getColumn(), field.getValue()[0]));
 				break;
 			case OR:
-				tmp.add(buildFilter(SearchField.Type.OR, field.getFields()));
+				if(field.getFields().length > 0) {
+					tmp.add(buildFilter(SearchField.Type.OR, field.getFields()));
+				}
 				break;
 			case AND:
-				tmp.add(buildFilter(SearchField.Type.AND, field.getFields()));
+				if(field.getFields().length > 0) {
+					tmp.add(buildFilter(SearchField.Type.AND, field.getFields()));
+				}
 				break;
 			}
 		}

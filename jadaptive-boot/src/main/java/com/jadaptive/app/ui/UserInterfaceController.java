@@ -185,7 +185,6 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 		Page page = pageCache.resolvePage(resourceUri, true);
 		page.doPost(resourceUri, request, response);
-
 	}
 	
 	@RequestMapping(value="/app/css/{name}", method = RequestMethod.GET, produces = { "text/css" })

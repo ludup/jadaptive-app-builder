@@ -48,11 +48,6 @@ public class RoleServiceImpl extends AbstractUUIDObjectServceImpl<Role> implemen
 	public Integer getOrder() {
 		return Integer.MIN_VALUE;
 	}
-	
-	@Override
-	public void initializeSystem(boolean newSchema) {
-		initializeTenant(getCurrentTenant(), newSchema);
-	}
 
 	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {

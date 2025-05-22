@@ -1,5 +1,6 @@
 package com.jadaptive.app.scheduler;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
@@ -54,12 +55,17 @@ public class TenantJobRunner implements Runnable {
 	
 	public void schedule(TenantTask task, Date startTime, long repeat) {
 		this.task = task;
-		future = taskScheduler.scheduleAtFixedRate(task, startTime, repeat);
+		future = taskScheduler.scheduleAtFixedRate(task, startTime.toInstant(), Duration.ofMillis(repeat));
 	}
 	
 	public void runNow(TenantTask task) {
 		this.task = task;
-		future = taskScheduler.schedule(this, Utils.now());
+		future = taskScheduler.schedule(this, Utils.now().toInstant());
+	}
+	
+	public void schedule(TenantTask task, Date startTime) {
+		this.task = task;
+		future = taskScheduler.schedule(task, startTime.toInstant());
 	}
 	
 	@Override

@@ -246,26 +246,6 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		
 		permissionService.registerCustomPermission(CHANGE_PASSWORD_PERMISSION);
 		permissionService.registerCustomPermission(SET_PASSWORD_PERMISSION);
-		
-//		if(ApplicationServiceImpl.getInstance().getBean(ProductService.class).isUserLicensing()) {
-//			eventService.committed(User.class, (e)->{
-//				synchronized(UserServiceImpl.this) {
-//					cachedAllTenantsCount = -1;
-//					allTenantsEnabledCount();
-//					if(log.isInfoEnabled()) {
-//						log.info("User event {} for {}. Licensed user count is {}",
-//								e.getResourceKey(),
-//								e.getObject().getUsername(),
-//								cachedAllTenantsCount);
-//					}
-//				}
-//				
-//			});
-//		}
-	}
-	
-	@Override
-	public void initializeTenant(Tenant tenant, boolean newSchema) {
 
 	}
 

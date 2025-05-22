@@ -12,4 +12,6 @@ public interface SchedulerService {
 
 	void schedule(TenantTask task, Date startTime, long repeat, String taskUUID);
 
+	void schedule(TenantTask task, Date startTime, String taskUUID);
+
 }

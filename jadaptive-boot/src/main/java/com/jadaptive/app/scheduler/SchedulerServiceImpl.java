@@ -12,8 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.App;
+import com.jadaptive.api.app.ApplicationProperties;
+import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -24,7 +25,7 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 
 @Service
-public class SchedulerServiceImpl extends AuthenticatedService implements SchedulerService, TenantAware {
+public class SchedulerServiceImpl extends AuthenticatedService implements SchedulerService, TenantAware, StartupAware {
 
 	static Logger log = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 	
@@ -51,15 +52,6 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	public void initializeSystem(boolean newSchema) {
 		initializeTenant(getCurrentTenant(), newSchema);
 		configureScheduler();
-		
-		eventService.deleted(Tenant.class, (evt)-> {
-			for(TenantJobRunner job : new ArrayList<>(scheduledJobs.values())) {
-				if(job.getTenantUUID().equals(evt.getObject().getUuid())) {
-					cancelTask(job.getTaskUUID(), true);
-					scheduledJobs.remove(job.getTaskUUID());
-				}
-			}
-		});
 	}
 
 	@Override
@@ -121,6 +113,17 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		scheduledJobs.put(taskUUID, job);	
 	}
 	
+	@Override
+	public void schedule(TenantTask task, Date startTime, String taskUUID) {
+		
+		applicationService.autowire(task);
+		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), taskUUID);
+		applicationService.autowire(job);
+
+		job.schedule(task, startTime);
+		scheduledJobs.put(taskUUID, job);	
+	}
+	
 	public void schedule(TenantTask task) {
 		
 		
@@ -133,6 +136,19 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		if(Objects.nonNull(job)) {
 			job.cancel(mayInterrupt);
 		}
+	}
+
+	@Override
+	public void onApplicationStartup() {
+		
+		eventService.deleted(Tenant.class, (evt)-> {
+			for(TenantJobRunner job : new ArrayList<>(scheduledJobs.values())) {
+				if(job.getTenantUUID().equals(evt.getObject().getUuid())) {
+					cancelTask(job.getTaskUUID(), true);
+					scheduledJobs.remove(job.getTaskUUID());
+				}
+			}
+		});
 	}
 
 }

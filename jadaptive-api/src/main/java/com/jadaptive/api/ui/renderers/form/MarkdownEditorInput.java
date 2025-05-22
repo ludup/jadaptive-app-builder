@@ -62,9 +62,22 @@ public class MarkdownEditorInput extends FieldInputRender {
 				"marked.min.js"
 		);
 		
+		
+		Npm.stylesheets(document, "highlight.js", "styles/default.min.css");
+		
+		scripts(document, "highlight.js", 
+				"highlight.min.js"
+		);
+		
+		scripts(document, "highlight.js", 
+				"languages/javascript.min.js"
+		);
+		
 		scripts(document, "easymde", 
 				"dist/easymde.min.js"
 		);
+		
+		
 
 		ObjectRenderer renderer = App.bean(ObjectRenderer.class);
 		Page page = renderer.getCurrentPage();
@@ -74,8 +87,15 @@ public class MarkdownEditorInput extends FieldInputRender {
 		+ "  var simplemde = new EasyMDE({\n"
 		+ "      element: $(\"#" + resourceKey + "\")[0],\n"
 	    + "      forceSync: true,"
+	    + "      imageUploadEndpoint: '/app/api/forms/image/upload',"
+	    + "      uploadImage: true,"
+	    + "      imagePathAbsolute: false,"
+	    + "      previewImagesInEditor: true,"
 		+ "      autosave: { enabled: true, uniqueId: '" + uniqueId + "', delay: 1000 },"
-		+ "      spellChecker: true"
+		+ "      spellChecker: true,"
+		+ "      renderingConfig: {"
+		+ "          codeSyntaxHighlighting: true"
+		+ "      }"
 		+ "  });\n"
 		+ "  $('#" + resourceKey + "').data('simplemde', simplemde);\n"
 		+ "});";

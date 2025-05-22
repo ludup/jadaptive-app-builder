@@ -88,6 +88,11 @@
 		    <artifactId>easymde</artifactId>
 		    <version>2.20.0</version>
 		</dependency>
+		<dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>highlight.js</artifactId>
+		    <version>11.11.1</version>
+		</dependency>
 		
 	</dependencies>
 

@@ -780,11 +780,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			throws FileNotFoundException {
 		return createAuthenticationState(policy, homePage, null);
 	}
-	
-	public void initializeSystem(boolean newSchema) {
-		initializeTenant(getCurrentTenant(), newSchema);
-	};
-	
+
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
 		
 		if(moduleDatabase.count(AuthenticationModule.class, SearchField.eq("uuid", PASSWORD_MODULE_UUID)) > 0) {
