@@ -63,7 +63,10 @@ public class ResourceController extends ExceptionHandlingController {
 		return "PONG\r\n";
 	}
 
-	@RequestMapping(value={"/app/content/**", "/**"}, method = RequestMethod.GET)
+	/* TODO The wildcard pattern is too broad, and will prevent websockets (and other handlers?) 
+	 * from working correctly.
+	 */
+	@RequestMapping(value = { "/app/content/**", /* "/**" */}, method = RequestMethod.GET)
 	public void doResourceGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
 		tenantService.setCurrentTenant(request);
