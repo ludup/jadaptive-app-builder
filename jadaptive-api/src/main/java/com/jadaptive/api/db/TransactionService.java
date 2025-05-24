@@ -19,4 +19,6 @@ public interface TransactionService {
 
 	TX tx();
 
+	void executeOrDelayUntilCommitted(Runnable r);
+
 }

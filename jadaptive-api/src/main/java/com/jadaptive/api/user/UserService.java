@@ -1,6 +1,8 @@
 package com.jadaptive.api.user;
 
 import java.util.Collection;
+import java.util.Iterator;
+
 import com.jadaptive.api.avatar.AvatarProvider;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.template.DynamicColumnService;
@@ -59,5 +61,7 @@ public interface UserService extends UUIDObjectService<User>, AvatarProvider, Dy
 	void setPassword(User user, char[] newPassword, boolean passwordChangeRequired, boolean log);
 
 	void assertPasswordRules(User user, char[] newPassword, boolean administrative);
+
+	Iterable<User> iterateUsers();
 
 }

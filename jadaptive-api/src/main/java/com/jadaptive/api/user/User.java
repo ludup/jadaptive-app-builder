@@ -41,8 +41,8 @@ import com.jadaptive.utils.Utils;
 @TableView(defaultColumns = { "avatar", "username", "enabled", "name", "email", "lastLogin" }, otherColumns = {
 		@DynamicColumn(resourceKey = "avatar", service = UserService.class) },
 requiresUpdate = true, sortField = "username")
-@TableAction(resourceKey = "enableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-unlock", target = Target.ROW, url = "/app/api/accounts/enable/{uuid}", filter = DisabledAccountAction.class)
-@TableAction(resourceKey = "disableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-lock", target = Target.ROW, url = "/app/api/accounts/disable/{uuid}", filter = EnabledAccountAction.class)
+@TableAction(resourceKey = "enableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-unlock", target = Target.ROW, url = "/app/api/accounts/enable/{uuid}", filter = DisabledAccountAction.class, permissions = "users.write")
+@TableAction(resourceKey = "disableUser", bundle = User.RESOURCE_KEY,  icon = "fa-user-lock", target = Target.ROW, url = "/app/api/accounts/disable/{uuid}", filter = EnabledAccountAction.class, permissions = "users.write")
 @TableAction(resourceKey = "impersonateUser", bundle = User.RESOURCE_KEY,  icon = "fa-mask", target = Target.ROW, url = "/app/ui/impersonateUser/{uuid}", permissions = "tenant.read")
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)

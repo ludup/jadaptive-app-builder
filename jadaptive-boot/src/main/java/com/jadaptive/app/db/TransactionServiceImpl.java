@@ -13,12 +13,15 @@ import com.jadaptive.api.tenant.TenantService;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
-	private static Logger LOG = LoggerFactory.getLogger(TransactionServiceImpl.class);
+	
+	private static Logger log = LoggerFactory.getLogger(TransactionServiceImpl.class);
 	
 	private final ThreadLocal<TX> tx = new ThreadLocal<>();
 	
 	@Autowired
 	private TenantService tenantService; 
+	
+	private ThreadLocal<List<Runnable>> completionTasks = ThreadLocal.withInitial(()->new ArrayList<>());
 	
 	protected final DocumentDatabase db;
 	
@@ -35,12 +38,28 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 	
 	@Override
+	public void executeOrDelayUntilCommitted(Runnable r) {
+		if(!isTransactionActive()) {
+			r.run();
+		} else {
+			completionTasks.get().add(r);
+		}
+	}
+	
+	@Override
 	public void executeTransaction(Runnable r) {
 		var rollbacks = new ArrayList<ThrowingRunnable>();
 		var tx = new TXImpl(rollbacks);
 		this.tx.set(tx);
 		try {
 			db.doInTransaction(tenantService.getCurrentTenant().getUuid(), r);
+			for(Runnable task : completionTasks.get()) {
+				try {
+					task.run();
+				} catch(Throwable e) {
+					log.error("Transaction completion task failed with exception", e);
+				}
+			}
 		}
 		catch(RuntimeException e) {
 			try {
@@ -49,7 +68,7 @@ public class TransactionServiceImpl implements TransactionService {
 				}
 			}
 			catch(Exception e2) {
-				LOG.warn("Transaction failed, and rollback failed.", e2);
+				log.warn("Transaction failed, and rollback failed.", e2);
 			} 
 			throw e;
 		}

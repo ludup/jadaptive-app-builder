@@ -1,5 +1,7 @@
 package com.jadaptive.utils;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,6 +22,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +38,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.OutputKeys;
@@ -926,5 +930,56 @@ public class Utils {
 				contentType,
 				Utils.base64Encode(IOUtils.toByteArray(source)));
 	}
+	
+	public static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) throws IOException {
+	    Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
+	    BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+	    outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
+	    return outputImage;
+	}
+	
+	/**
+     * Loads a BufferedImage from a Base64 encoded string typically found in an HTML img src attribute.
+     *
+     * @param base64EncodedImage The full base64 string from the img src, e.g., "data:image/png;base64,..."
+     * @return A BufferedImage object, or null if decoding fails.
+     * @throws IOException If an error occurs during image reading.
+     */
+    public static BufferedImage loadBufferedImageFromBase64Src(String base64EncodedImage) throws IOException {
+        if (base64EncodedImage == null || base64EncodedImage.isEmpty()) {
+            return null;
+        }
+
+        // 1. Extract the Base64 String by removing the prefix
+        // The prefix usually looks like "data:image/png;base64,"
+        // or "data:image/jpeg;base64," etc.
+        String base64String = base64EncodedImage;
+        int commaIndex = base64EncodedImage.indexOf(',');
+        if (commaIndex != -1) {
+            base64String = base64EncodedImage.substring(commaIndex + 1).trim();
+        } else {
+            // Handle cases where the prefix might be missing, though it's less common for img src
+            // You might want to throw an IllegalArgumentException here if the prefix is mandatory for your use case.
+            System.err.println("Warning: Base64 string does not contain a data URL prefix. Attempting to decode directly.");
+        }
+
+        // 2. Decode the Base64 String into a byte array
+        byte[] imageBytes;
+        try {
+            imageBytes = Base64.getDecoder().decode(base64String);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error decoding Base64 string: " + e.getMessage());
+            return null; // Or rethrow as a more specific exception
+        }
+
+        // 3. Read the bytes into a BufferedImage
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes)) {
+            BufferedImage image = ImageIO.read(bis);
+            if (image == null) {
+                System.err.println("Error: Could not read image from byte array. Invalid image format or corrupted data.");
+            }
+            return image;
+        }
+    }
 	
 }

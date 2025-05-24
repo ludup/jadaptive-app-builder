@@ -426,4 +426,9 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		
 		return (int) cachedAllTenantsCount;
 	}
+
+	@Override
+	public Iterable<User> iterateUsers() {
+		return userRepository.list(User.class);
+	}
 }
