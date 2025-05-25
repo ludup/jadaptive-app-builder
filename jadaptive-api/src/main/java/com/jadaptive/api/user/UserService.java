@@ -1,7 +1,6 @@
 package com.jadaptive.api.user;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import com.jadaptive.api.avatar.AvatarProvider;
 import com.jadaptive.api.repository.UUIDObjectService;
