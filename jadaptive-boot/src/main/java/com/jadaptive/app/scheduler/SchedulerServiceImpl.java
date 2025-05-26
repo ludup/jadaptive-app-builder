@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.events.EventService;
@@ -62,6 +63,15 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		
 		for(ScheduledTask task  : applicationService.getBeans(ScheduledTask.class)) {
 			if(task.isSystemOnly() && !tenant.isSystem()) {
+				continue;
+			}
+			String scopes = ApplicationProperties.getValue("ha.taskScopes", "NODE,GLOBAL");
+			
+			if(!scopes.contains(task.getScope().name())) {
+				if(log.isInfoEnabled()) {
+					log.info("Not scheduling task {} because it is {} scope and this node only supports {}",
+							task.getClass().getSimpleName(), task.getScope().name(), scopes);
+				}
 				continue;
 			}
 			TenantJobRunner job = new TenantJobRunner(tenant, UUID.randomUUID().toString());
