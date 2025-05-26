@@ -63,15 +63,15 @@ public class MarkdownEditorInput extends FieldInputRender {
 		);
 		
 		
-		Npm.stylesheets(document, "highlight.js", "styles/default.min.css");
+//		Npm.stylesheets(document, "highlight.js", "styles/default.min.css");
 		
-		scripts(document, "highlight.js", 
-				"highlight.min.js"
-		);
-		
-		scripts(document, "highlight.js", 
-				"languages/javascript.min.js"
-		);
+//		scripts(document, "highlight.js", 
+//				"highlight.min.js"
+//		);
+//		
+//		scripts(document, "highlight.js", 
+//				"languages/javascript.min.js"
+//		);
 		
 		scripts(document, "easymde", 
 				"dist/easymde.min.js"
@@ -93,9 +93,9 @@ public class MarkdownEditorInput extends FieldInputRender {
 	    + "      previewImagesInEditor: true,"
 		+ "      autosave: { enabled: true, uniqueId: '" + uniqueId + "', delay: 1000 },"
 		+ "      spellChecker: true,"
-		+ "      renderingConfig: {"
-		+ "          codeSyntaxHighlighting: true"
-		+ "      }"
+//		+ "      renderingConfig: {"
+//		+ "          codeSyntaxHighlighting: true"
+//		+ "      }"
 		+ "  });\n"
 		+ "  $('#" + resourceKey + "').data('simplemde', simplemde);\n"
 		+ "});";
@@ -108,7 +108,7 @@ public class MarkdownEditorInput extends FieldInputRender {
 		PageHelper.appendBodyScriptSnippet(document, tinyMCEScript);
 		Npm.stylesheets(document, "easymde", "dist/easymde.min.css");
 		if(App.bean(BootstrapThemeService.class).getTheme().isDark()) {
-			PageHelper.appendStylesheet(document, "/simplemde/easymde.bootstrap.min.css");
+			PageHelper.appendStylesheet(document, "/app/content/simplemde/easymde.bootstrap.min.css");
 		} 
 	}
 
