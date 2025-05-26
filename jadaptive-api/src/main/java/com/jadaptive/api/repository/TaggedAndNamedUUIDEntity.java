@@ -9,7 +9,7 @@ import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
-public abstract class TaggedAndNamedUUIDEntity extends AssignableUUIDEntity implements NamedDocument {
+public abstract class TaggedAndNamedUUIDEntity extends AbstractUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 2690511827179922811L;
 
