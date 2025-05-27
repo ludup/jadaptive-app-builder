@@ -73,6 +73,7 @@ public class TransactionServiceImpl implements TransactionService {
 			throw e;
 		}
 		finally {
+			this.completionTasks.remove();
 			this.tx.remove();
 		}
 	}
