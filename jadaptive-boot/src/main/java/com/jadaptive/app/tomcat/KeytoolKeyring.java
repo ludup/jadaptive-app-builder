@@ -24,39 +24,39 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationProperties;
-import com.jadaptive.api.app.StartupAware;
+import com.jadaptive.api.app.certificates.CertificateProvider;
 import com.jadaptive.api.app.certificates.KeyHolder;
 import com.jadaptive.api.app.certificates.KeyType;
 import com.jadaptive.api.app.certificates.Keyring;
+import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.x509.FileFormatException;
 import com.jadaptive.api.x509.InvalidPassphraseException;
 import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
 
+
 @Component
-public class KeytoolKeyring implements Keyring, StartupAware {
+public class KeytoolKeyring implements Keyring, TenantAware {
 	private static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
 	private static Logger LOG = LoggerFactory.getLogger(KeytoolKeyring.class);
 	
 	private KeyHolder defaultKeyHolder = null;
 	private Map<String,Set<KeyHolder>> keyEntries = new HashMap<>();
-
-	@PostConstruct
-	private void setup() throws IOException {
-		reload();
-	}
 	
 	@Override
-	public void onApplicationStartup() {
+	public void initializeSystem(boolean newSchema) {
+		try {
+			reload();
+		} catch (IOException e) {
+		}
 	}
 
 	@Override
@@ -64,6 +64,7 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 		if("default".equals(name)) {
 			return Optional.of(defaultKeyHolder);
 		}
+
 		if(keyEntries.containsKey(name)) {
 			return keyEntries.get(name).stream().filter(e -> e.type().equals(type)).findFirst();
 		} else {
@@ -91,67 +92,33 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 	public void reload() throws IOException {
 		
 		defaultKeyHolder = null;
-		String[] certs = ApplicationProperties.getValue("jadaptive.sni.bundles", "default").split(",");
+		reload("default");
+		String[] certs = ApplicationProperties.getValue("jadaptive.sni.bundles", "").split(",");
 		for(String cert : certs) {
 			reload(cert);
 		}
-		
-		// TODO load others from application properties
 	}
 	
 	public void reload(String name) throws IOException {
 		var entries = new LinkedHashSet<KeyHolder>();
-				
-		KeyStore serverKeyStore = null, caKeyStore = getCertificateAuthorities();
-
-		String alias = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.keystore.alias", name), name);
-		String password = ApplicationProperties.getValue(String.format("jadaptive.sni..%s.keystore.password", name), DEFAULT_KEYSTORE_PASSWORD);
-		String pemPath = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.pem.private-key", name), "");
-		String pemPassword = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.pem.password", name), "");
-		String certPath = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.pem.certificate", name), "");
-		if(StringUtils.isNotBlank(pemPath) && StringUtils.isNotBlank(certPath)) {
-			Path key = Paths.get(pemPath);
-			Path cert = Paths.get(certPath);
-			if(Files.exists(key) && Files.exists(cert)) {
-				try {
-					serverKeyStore = X509CertificateUtils.loadKeystoreFromPEM(Files.newInputStream(key),
-							Files.newInputStream(cert), 
-							pemPassword.toCharArray(),
-							password.toCharArray(),
-							alias);
-					
-					LOG.info("Loaded PEM file for {} certificate", name);
-				} catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException
-						| InvalidPassphraseException | FileFormatException | MismatchedCertificateException e) {
-					LOG.error("Failed to load PEM key/certificate {}", name, e);
-				}
-			}
-		}
+		String alias = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.alias", name), "server");
+		String password = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.password", name), DEFAULT_KEYSTORE_PASSWORD);
 		
+		KeyStore serverKeyStore = null, caKeyStore = getCertificateAuthorities();
+		
+		if(!"default".equals(name)) {
+			serverKeyStore = loadCustomCertificates(name, name, password.toCharArray());
+		}
+		if(Objects.isNull(serverKeyStore)) {
+			serverKeyStore = loadPEMCertificates(name);
+		}
 		
 		if(Objects.isNull(serverKeyStore)) {
-			LOG.info("Cannot find default PEM certificate! Looking for PKCS12 keystore");
-			
-			var serverKeystoreFile = Paths.get(ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.location", name), 
-					String.format("conf.d/%s/cert.p12", name)));
-
-			alias = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.alias", name), "server");
-			password = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.password", name), DEFAULT_KEYSTORE_PASSWORD);
-			try(var in = Files.newInputStream(serverKeystoreFile)) {
-				try {
-					serverKeyStore = KeyStore.getInstance("PKCS12");
-					serverKeyStore.load(in, password.toCharArray());
-					
-					LOG.info("Loaded PKCS12 file for {} certificate", name);
-					
-				} catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
-					throw new IOException(e.getMessage(), e);
-				}
-			} 
+			serverKeyStore = loadPKSC12Certificates(name, password);
 		}
-
-
+		
 		try {
+	
 			// Add the server key store entries
 			Enumeration<String> aliasEnum = serverKeyStore.aliases();
 			while (aliasEnum.hasMoreElements()) {
@@ -197,12 +164,76 @@ public class KeytoolKeyring implements Keyring, StartupAware {
 				entries.add(entry);
 			}
 			
-			keyEntries.put(alias, entries);
+			keyEntries.put(name, entries);
 			
 		} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateEncodingException e) {
 			throw new IOException(e.getMessage(), e);
 		}
 
+	}
+
+	private KeyStore loadCustomCertificates(String name, String aliasRequired, char[] passwordRequired) {
+		
+		for(CertificateProvider provider : App.beans(CertificateProvider.class)) {
+			KeyStore ret = provider.loadCertificate(name, aliasRequired, passwordRequired);
+			if(Objects.nonNull(ret)) {
+				LOG.info("Loaded custom certificate source for {}", name);
+				return ret;
+			}
+		}
+		return null;
+	}
+
+	private KeyStore loadPKSC12Certificates(String name, String password) throws IOException {
+		
+
+		LOG.info("Cannot find default PEM certificate! Looking for PKCS12 keystore");
+		
+		var serverKeystoreFile = Paths.get(ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.location", name), 
+				String.format("conf.d/%s/cert.p12", name)));
+
+		try(var in = Files.newInputStream(serverKeystoreFile)) {
+			try {
+				KeyStore ret = KeyStore.getInstance("PKCS12");
+				ret.load(in, password.toCharArray());
+				
+				LOG.info("Loaded PKCS12 file for {} certificate", name);
+				
+				return ret;
+			} catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
+				throw new IOException(e.getMessage(), e);
+			}
+		} 
+	}
+
+	private KeyStore loadPEMCertificates(String name) {
+		
+		String alias = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.keystore.alias", name), name);
+		String password = ApplicationProperties.getValue(String.format("jadaptive.sni..%s.keystore.password", name), DEFAULT_KEYSTORE_PASSWORD);
+		String pemPath = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.pem.private-key", name), "");
+		String pemPassword = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.pem.password", name), "");
+		String certPath = ApplicationProperties.getValue(String.format("jadaptive.sni.%s.pem.certificate", name), "");
+		if(StringUtils.isNotBlank(pemPath) && StringUtils.isNotBlank(certPath)) {
+			Path key = Paths.get(pemPath);
+			Path cert = Paths.get(certPath);
+			if(Files.exists(key) && Files.exists(cert)) {
+				try {
+					 KeyStore ret = X509CertificateUtils.loadKeystoreFromPEM(Files.newInputStream(key),
+							Files.newInputStream(cert), 
+							pemPassword.toCharArray(),
+							password.toCharArray(),
+							alias);
+					 LOG.info("Loaded PEM file for {} certificate", name);
+					 return ret;
+					
+				} catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException
+						| InvalidPassphraseException | FileFormatException | MismatchedCertificateException e) {
+					LOG.error("Failed to load PEM key/certificate {}", name, e);
+				}
+			}
+		}
+		
+		return null;
 	}
 
 	private X509Certificate[] decodeCertificates(Certificate[] certificateChain) throws CertificateEncodingException {
