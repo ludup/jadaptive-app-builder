@@ -37,7 +37,7 @@ public class ClusterController {
 		return tenantService.asSystem(() -> new ResourceStatus<>(
 			new ClusterInfo(
 					clusterManager.getServerId(), 
-					clusterManager.isLeader() ? ClusterNodeStatus.LEADER : ClusterNodeStatus.ONLINE,
+					ClusterNodeStatus.ONLINE,
 					clusterManager.getServices(),
 					clusterManager.streamAll().toList())
 		));

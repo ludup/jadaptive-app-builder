@@ -3,6 +3,7 @@ package com.jadaptive.app.scheduler;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.StartupAware;
+import com.jadaptive.api.cluster.ClusterManager;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -41,7 +43,12 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	@Autowired
 	private EventService eventService;
 	
-	Map<String,TenantJobRunner> scheduledJobs = new HashMap<>();
+	@Autowired
+	private ClusterManager clusterManager;
+	
+	private Map<String,TenantJobRunner> scheduledJobs = new HashMap<>();
+	private boolean ready;
+	private List<TenantTask> deferred =  new ArrayList<>();
 	
 	private void configureScheduler() {
 		SchedulerConfiguration config = schedulerConfig.getObject(SchedulerConfiguration.class);
@@ -83,12 +90,17 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	
 	@Override
 	public void runNow(TenantTask task) {
-	
-		applicationService.autowire(task);
-		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), UUID.randomUUID().toString());
-		applicationService.autowire(job);
-		
-		job.runNow(task);
+		if(ready) {
+			applicationService.autowire(task);
+			TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), UUID.randomUUID().toString());
+			applicationService.autowire(job);
+			
+			job.runNow(task);
+		}
+		else {
+			log.info("Deferring task {} until startup is complete.", task.getClass().getName());
+			deferred.add(task);
+		}
 	}
 	
 	@Override
@@ -124,10 +136,10 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		scheduledJobs.put(taskUUID, job);	
 	}
 	
-	public void schedule(TenantTask task) {
-		
-		
-	}
+//	public void schedule(TenantTask task) {
+//		
+//		
+//	}
 
 	@Override
 	public void cancelTask(String uuid, boolean mayInterrupt) {
@@ -148,6 +160,11 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 					scheduledJobs.remove(job.getTaskUUID());
 				}
 			}
+		});
+		ready = true;
+		clusterManager.queueTask(() -> {
+			deferred.forEach(d -> runNow(d));
+			deferred.clear();
 		});
 	}
 

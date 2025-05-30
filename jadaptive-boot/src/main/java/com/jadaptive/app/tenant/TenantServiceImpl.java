@@ -602,11 +602,13 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public void executeAs(Tenant tenant, Runnable r) {
 		setCurrentTenant(tenant);
 		try {
-			permissionService.setupSystemContext();
+			if(permissionService != null)
+				permissionService.setupSystemContext();
 			try {
 				r.run();
 			} finally {
-				permissionService.clearUserContext();
+				if(permissionService != null)
+					permissionService.clearUserContext();
 			}
 		} finally {
 			clearCurrentTenant();

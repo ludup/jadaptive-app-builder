@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang.StringUtils;
@@ -25,10 +26,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.coditory.sherlock.Sherlock;
+import com.coditory.sherlock.mongo.MongoSherlock;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.csv.CsvImportService;
+import com.jadaptive.api.db.ContendedLockException;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SearchField.Type;
+import com.jadaptive.api.db.TransactionService.UncheckedCloseable;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.repository.RepositoryException;
@@ -65,7 +70,9 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	@Autowired
 	private CsvImportService importService; 
 	
-	ThreadLocal<Transaction> currentSession = new ThreadLocal<>();
+	private ThreadLocal<Transaction> currentSession = new ThreadLocal<>();
+	private Map<String, Sherlock> locks = new ConcurrentHashMap<>();
+
 	
 	private MongoCollection<Document> getCollection(String table, String database) {
 		MongoDatabase db = mongo.getClient(database).getDatabase(getDatabaseName(database));
@@ -78,6 +85,29 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			return String.format("%s-%s", prefix, database);
 		}
 		return database;
+	}
+
+	@Override
+	public UncheckedCloseable withLock(String database, String lockName) {
+		Sherlock lock;
+		synchronized(locks) {
+			lock = locks.get(database);
+			if(lock == null) {
+				lock = MongoSherlock.create(getCollection("locks", database));
+				locks.put(database, lock);
+			}
+		}
+		
+		var distLock = lock.createLock(lockName);
+		if(!distLock.acquire()) {
+			throw new ContendedLockException(lockName);
+		}
+		return new UncheckedCloseable() {
+			@Override
+			public void close() {
+				distLock.release();
+			}
+		};
 	}
 
 	@Override

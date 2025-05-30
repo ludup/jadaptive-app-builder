@@ -9,8 +9,6 @@ import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.cluster.ClusterManager;
 import com.jadaptive.api.cluster.ClusterNodeConnectedEvent;
 import com.jadaptive.api.cluster.ClusterNodeDisconnectedEvent;
-import com.jadaptive.api.cluster.LeadershipLostEvent;
-import com.jadaptive.api.cluster.LeadershipObtainedEvent;
 import com.jadaptive.api.events.EventService;
 import com.sshtools.common.ssh.GlobalRequest;
 import com.sshtools.common.ssh.SshConnection;
@@ -35,8 +33,6 @@ public abstract class AbstractClusterInterfaceFactory<T extends ProtocolContext,
 	public final void onApplicationStartup() {
 		eventService.on(ClusterNodeConnectedEvent.class, e -> clusterServerChanged());
 		eventService.on(ClusterNodeDisconnectedEvent.class, e -> clusterServerChanged());
-		eventService.on(LeadershipLostEvent.class, e -> clusterServerChanged());
-		eventService.on(LeadershipObtainedEvent.class, e -> clusterServerChanged());
 	}
 
 	public final void clusterServerChanged() {

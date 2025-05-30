@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.TransactionService.UncheckedCloseable;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.app.db.DocumentDatabase;
@@ -226,6 +227,12 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public Double sumDoubleValues(String table, String database, String groupBy, SearchField... fields) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public UncheckedCloseable withLock(String database, String lockName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

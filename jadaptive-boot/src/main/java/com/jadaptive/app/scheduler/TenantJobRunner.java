@@ -11,10 +11,12 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.cluster.ClusterManager;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.jobs.TaskRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.scheduler.ScheduledTask;
+import com.jadaptive.api.scheduler.TaskScope;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
@@ -32,6 +34,9 @@ public class TenantJobRunner implements Runnable {
 	
 	@Autowired
 	private PermissionService permissionService; 
+	
+	@Autowired
+	private ClusterManager clusterManager; 
 	
 	String taskUUID;
 	TenantTask task;
@@ -70,7 +75,23 @@ public class TenantJobRunner implements Runnable {
 	
 	@Override
 	public void run() {
-		
+		/**
+		 * should this be in a transaction?
+		 */
+		if(task.getScope() == TaskScope.GLOBAL && !clusterManager.runOnceOnCluster("task-" + task.getClass().getName(), () -> {
+			doRun();
+		})) {
+			if(log.isInfoEnabled()) {
+				log.info("Not executing task {} because the task is GLOBAL and another node is already running it",
+						task.getClass().getSimpleName());
+			}
+			return;
+		}
+		else
+			doRun();
+	}
+
+	private void doRun() {
 		Tenant tenant = null;
 		
 		try {

@@ -1,5 +1,5 @@
 
-package com.jadaptive.api.cluster;
+package com.jadaptive.app.cluster;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -29,7 +29,16 @@ import org.springframework.stereotype.Service;
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.StartupAware;
+import com.jadaptive.api.cluster.BroadcastableEvent;
+import com.jadaptive.api.cluster.ClusterEvent;
+import com.jadaptive.api.cluster.ClusterManager;
+import com.jadaptive.api.cluster.ClusterNode;
 import com.jadaptive.api.cluster.ClusterNode.ClusterNodeStatus;
+import com.jadaptive.api.cluster.ClusterNodeConnectedEvent;
+import com.jadaptive.api.cluster.ClusterNodeDisconnectedEvent;
+import com.jadaptive.api.cluster.ClusterService;
+import com.jadaptive.api.cluster.ClusterServiceProvider;
+import com.jadaptive.api.db.ContendedLockException;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemOnlyObjectDatabase;
 import com.jadaptive.api.db.TransactionService;
@@ -127,15 +136,6 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			
 			saveOrUpdate(thisNode);
 
-			executor.execute(() -> {
-				try {
-					startLeaderElection();
-				}
-				catch(Exception e) {
-					LOG.error("Election failed.", e);
-				}
-			});
-			
 			executor.scheduleWithFixedDelay(this::heartBeat, HEARTBEAT.toMillis(), HEARTBEAT.toMillis(), TimeUnit.MILLISECONDS);
 			
 			new Thread(() -> {
@@ -157,10 +157,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 							var deletedKey = change.uuid();
 							LOG.info("Server with ID {} deleted from cluster nodes.", deletedKey);
 							// Handle server offline
-							var leader = isLeader();
 							lastKnownStatus.remove(deletedKey);
-							if(deletedKey.equals(serverId) || !leader)
-								startLeaderElection();
 							break;
 						default:
 							break;
@@ -227,9 +224,6 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 					row.addClass("fw-bolder");
 				}
 				switch(node.getStatus()) {
-				case LEADER:
-					row.appendChild(Html.i("fa-solid", "fa-star", "text-success"));
-					break;
 				case ONLINE:
 					row.appendChild(Html.i("fa-solid", "fa-circle-check","text-success"));
 					break;
@@ -338,7 +332,6 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			ClusterNodeStatus newStatus) {
 		LOG.info("Server with ID of {} status changed from {} to {}.", document.getUuid(), lastStatus, newStatus);
 
-		var weWereLeader = isLeader();
 		lastKnownStatus.put(document.getUuid(), newStatus);
 		
 		if(!document.getUuid().equals(serverId)) {
@@ -352,22 +345,6 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		}
 
 		
-		if(!document.getUuid().equals(serverId) && newStatus == ClusterNodeStatus.LEADER && weWereLeader) {
-			/* Somebody else is now the leader */
-			var us = getObjectByUUID(serverId);
-			us.setStatus(ClusterNodeStatus.ONLINE);
-			saveOrUpdate(us);
-			eventService.publishEvent(new LeadershipLostEvent(us));
-		}
-		else if(document.getUuid().equals(serverId)) {
-			if(newStatus == ClusterNodeStatus.LEADER) {
-				eventService.publishEvent(new LeadershipObtainedEvent(document));
-			}
-			else if(lastStatus == ClusterNodeStatus.LEADER) {
-				eventService.publishEvent(new LeadershipLostEvent(document));
-			}
-		}
-		
 	}
 
 	@Override
@@ -380,8 +357,40 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	}
 
 	@Override
+	public boolean runOnceOnCluster(String taskName, Runnable r) {
+		try(@SuppressWarnings("unused")
+		var ldr = transactionService.withLock(taskName)) {
+			try {
+				r.run();
+			}
+			finally {
+				LOG.info("Task `{}` run on this node.", taskName);
+			}
+			return true;
+		}
+		catch(ContendedLockException cle) {
+			return false;
+		}
+	}
+
+	@Override
 	public boolean isLeader() {
-		return lastKnownStatus.computeIfAbsent(serverId, k -> getObjectByUUID(k).getStatus()) == ClusterNodeStatus.LEADER;
+		/* Leader is just the first online server when nodes are sorted
+		 * by their UUID
+		 */
+		return lastKnownStatus.entrySet().stream().
+				filter(ent -> ent.getValue() == ClusterNodeStatus.ONLINE).
+				sorted((c1,c2) -> {
+					return c1.getKey().compareTo(c2.getKey());
+				}).
+				findFirst().
+				map(ent -> ent.getKey().equals(serverId)).
+				orElse(false);
+	}
+
+	@Override
+	public void queueTask(Runnable task) {
+		executor.execute(task);
 	}
 
 	@Override
@@ -425,47 +434,8 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			LOG.info("Node {} ({}) was {}, is now offline.", node.getUuid(), node.getHostname(), was);
 			node.setStatus(ClusterNodeStatus.OFFLINE);
 			saveOrUpdate(node);
-			if(was == ClusterNodeStatus.LEADER) {
-				executor.execute(() -> {
-					startLeaderElection();	
-				});
-			}
 		});
 	}
-	
-	private void startLeaderElection() {
-		LOG.info("Starting election");
-		heartBeat();
-		tenantService.asSystem(() -> {
-			do {
-				transactionService.executeTransaction(() -> {
-					try {
-						try {
-							Thread.sleep(1000 + (int)( Math.random() * 1000));
-						} catch (InterruptedException e) {
-							return;
-						}
-						
-						var obj = clusterNodes.get(getServerId(), getResourceClass());
-						obj.setStatus(ClusterNodeStatus.LEADER);
-						saveOrUpdate(obj);
-						return;
-					}
-					catch(Exception e) {
-					}
-
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e2) {
-						return;
-					}
-				});
-			
-			} while (!isLeader());
-		});
-	}
-
-
 
 	private int getPort() {
 		return Integer.parseInt(

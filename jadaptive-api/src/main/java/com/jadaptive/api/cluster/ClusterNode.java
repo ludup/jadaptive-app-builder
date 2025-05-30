@@ -33,7 +33,7 @@ public final class ClusterNode extends UUIDEntity {
 	public static final String RESOURCE_KEY = "clusterNode";
 	
 	public enum ClusterNodeStatus {
-		LEADER, ONLINE, OFFLINE
+		ONLINE, OFFLINE
 	}
 	
 	@ObjectField(type = FieldType.ENUM)

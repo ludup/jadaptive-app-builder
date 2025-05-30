@@ -47,6 +47,11 @@ public class TransactionServiceImpl implements TransactionService {
 	}
 	
 	@Override
+	public UncheckedCloseable withLock(String lockName) {
+		return db.withLock(tenantService.getCurrentTenant().getUuid(), lockName);
+	}
+
+	@Override
 	public void executeTransaction(Runnable r) {
 		var rollbacks = new ArrayList<ThrowingRunnable>();
 		var tx = new TXImpl(rollbacks);

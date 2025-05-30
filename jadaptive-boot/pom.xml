@@ -188,6 +188,12 @@
 		    <groupId>jakarta.activation</groupId>
 		    <artifactId>jakarta.activation-api</artifactId>
 		</dependency>
+		
+		<dependency>
+		    <groupId>com.coditory.sherlock</groupId>
+		    <artifactId>sherlock-mongo</artifactId>
+		    <version>1.0.3</version>
+		</dependency>
  
 	</dependencies>
 
