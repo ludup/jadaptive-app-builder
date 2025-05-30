@@ -24,6 +24,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
@@ -43,6 +45,8 @@ import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
 
 
+
+
 @Component
 public class KeytoolKeyring implements Keyring, TenantAware {
 	private static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
@@ -50,6 +54,11 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 	
 	private KeyHolder defaultKeyHolder = null;
 	private Map<String,Set<KeyHolder>> keyEntries = new HashMap<>();
+	
+	@PostConstruct
+	private void postConstruct() throws IOException { 
+		reload("default");
+	}
 	
 	@Override
 	public void initializeSystem(boolean newSchema) {
@@ -62,6 +71,9 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 	@Override
 	public Optional<KeyHolder> find(String name, KeyType type) {
 		if("default".equals(name)) {
+			if(defaultKeyHolder == null) {
+				return Optional.empty();
+			}
 			return Optional.of(defaultKeyHolder);
 		}
 
@@ -101,7 +113,7 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 	
 	public void reload(String name) throws IOException {
 		var entries = new LinkedHashSet<KeyHolder>();
-		String alias = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.alias", name), "server");
+//		String alias = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.alias", name), "server");
 		String password = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.password", name), DEFAULT_KEYSTORE_PASSWORD);
 		
 		KeyStore serverKeyStore = null, caKeyStore = getCertificateAuthorities();
