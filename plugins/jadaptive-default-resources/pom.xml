@@ -80,11 +80,6 @@
 		</dependency>
 		<dependency>
 		    <groupId>npm</groupId>
-		    <artifactId>simplemde</artifactId>
-		    <version>1.11.2</version>
-		</dependency>
-		<dependency>
-		    <groupId>npm</groupId>
 		    <artifactId>easymde</artifactId>
 		    <version>2.20.0</version>
 		</dependency>
@@ -92,6 +87,12 @@
 		    <groupId>npm</groupId>
 		    <artifactId>highlight.js</artifactId>
 		    <version>11.11.1</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>npm</groupId>
+		    <artifactId>europa</artifactId>
+		    <version>6.0.0</version>
 		</dependency>
 		
 	</dependencies>

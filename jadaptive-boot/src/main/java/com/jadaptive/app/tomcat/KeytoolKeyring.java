@@ -111,25 +111,30 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 		}
 	}
 	
-	public void reload(String name) throws IOException {
-		var entries = new LinkedHashSet<KeyHolder>();
-//		String alias = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.alias", name), "server");
-		String password = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.password", name), DEFAULT_KEYSTORE_PASSWORD);
-		
-		KeyStore serverKeyStore = null, caKeyStore = getCertificateAuthorities();
-		
-		if(!"default".equals(name)) {
-			serverKeyStore = loadCustomCertificates(name, name, password.toCharArray());
-		}
-		if(Objects.isNull(serverKeyStore)) {
-			serverKeyStore = loadPEMCertificates(name);
-		}
-		
-		if(Objects.isNull(serverKeyStore)) {
-			serverKeyStore = loadPKSC12Certificates(name, password);
-		}
-		
+	public void reload(String name) {
 		try {
+			var entries = new LinkedHashSet<KeyHolder>();
+	//		String alias = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.alias", name), "server");
+			String password = ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.password", name), DEFAULT_KEYSTORE_PASSWORD);
+			
+			KeyStore serverKeyStore = null, caKeyStore = getCertificateAuthorities();
+			
+			if(!"default".equals(name)) {
+				serverKeyStore = loadCustomCertificates(name, name, password.toCharArray());
+			}
+			if(Objects.isNull(serverKeyStore)) {
+				serverKeyStore = loadPEMCertificates(name);
+			}
+			
+			if(Objects.isNull(serverKeyStore)) {
+				serverKeyStore = loadPKSC12Certificates(name, password);
+			}
+			
+			if(Objects.isNull(serverKeyStore)) {
+				LOG.info("No certificate found for {}", name);
+				return;
+			}
+		
 	
 			// Add the server key store entries
 			Enumeration<String> aliasEnum = serverKeyStore.aliases();
@@ -178,10 +183,9 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 			
 			keyEntries.put(name, entries);
 			
-		} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateEncodingException e) {
-			throw new IOException(e.getMessage(), e);
+		} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateEncodingException | IOException e) {
+			LOG.error("Cannot load {}", name, e);
 		}
-
 	}
 
 	private KeyStore loadCustomCertificates(String name, String aliasRequired, char[] passwordRequired) {
@@ -204,6 +208,10 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 		var serverKeystoreFile = Paths.get(ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.location", name), 
 				String.format("conf.d/%s/cert.p12", name)));
 
+		if(!Files.exists(serverKeystoreFile)) {
+			return null;
+		}
+		
 		try(var in = Files.newInputStream(serverKeystoreFile)) {
 			try {
 				KeyStore ret = KeyStore.getInstance("PKCS12");
