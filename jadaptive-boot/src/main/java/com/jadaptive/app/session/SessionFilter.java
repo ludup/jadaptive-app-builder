@@ -105,67 +105,68 @@ public class SessionFilter implements Filter {
 		if(log.isDebugEnabled()) {
 			log.debug(req.getMethod() + " " + req.getRequestURI().toString());
 		}
+		
+		if(!tenantService.isReady()) {
+			if(!req.getRequestURI().startsWith("/app/ui/startup") && !isContent(req)) {
+				resp.sendRedirect("/app/ui/startup");
+				return;
+			}
+		} 
 
 		tenantService.setCurrentTenant(req);
 		
 		try {
 			
-			if(!tenantService.isReady()) {
-				if(!req.getRequestURI().startsWith("/app/ui/startup") && !isContent(req)) {
-					resp.sendRedirect("/app/ui/startup");
-					return;
+			Tenant tenant = tenantService.getCurrentTenant();
+
+			if(Objects.nonNull(tenant)) {
+				String serverName = req.getServerName();
+				TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
+				String hostName;
+				try {
+					hostName = InetAddress.getLocalHost().getHostName();
 				}
-			} else {
-				Tenant tenant = tenantService.getCurrentTenant();
-	
-				if(Objects.nonNull(tenant)) {
-					String serverName = req.getServerName();
-					TenantConfiguration config = tenantConfig.getObject(TenantConfiguration.class);
-					String hostName;
-					try {
-						hostName = InetAddress.getLocalHost().getHostName();
-					}
-					catch(Exception e) {
-						hostName = "localhost";
-					}
-					if(!isValidHostname(config, tenant, serverName) && !serverName.equals(hostName) ) {
-						if(serverName.equalsIgnoreCase(config.getRegistrationDomain())) {
-							if(req.getRequestURI().equals("/")) {
-								if(req.getServerPort() != -1 && req.getServerPort() != 443) {
-									resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
-											config.getRegistrationDomain(),
-											request.getServerPort()));
-								} else {
-									resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
-								}	
-								return;
-							}
-						} else {
-							if(config.getRequireValidDomain()) {
-								String redir;
-								if(StringUtils.isBlank(config.getInvalidDomainRedirect())) {
-									if(StringUtils.isBlank(config.getRootDomain())) {
-										resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-										return;
-									}
-									else {
-										redir = "https://" + config.getRootDomain();	
-									}
-								}
-								else {
-									redir = config.getInvalidDomainRedirect();
-								}
-	
-								URI redirUri = URI.create(redir);
-								if(!redirUri.getHost().equals(serverName)) {
-									resp.sendRedirect(redir);
+				catch(Exception e) {
+					hostName = "localhost";
+				}
+				if(!isValidHostname(config, tenant, serverName) && !serverName.equals(hostName) ) {
+					if(serverName.equalsIgnoreCase(config.getRegistrationDomain())) {
+						if(req.getRequestURI().equals("/")) {
+							if(req.getServerPort() != -1 && req.getServerPort() != 443) {
+								resp.sendRedirect(String.format("https://%s:%d/app/ui/wizards/setupTenant", 
+										config.getRegistrationDomain(),
+										request.getServerPort()));
+							} else {
+								resp.sendRedirect(String.format("https://%s/app/ui/wizards/setupTenant", config.getRegistrationDomain()));
+							}	
+							return;
+						}
+					} else {
+						if(config.getRequireValidDomain()) {
+							String redir;
+							if(StringUtils.isBlank(config.getInvalidDomainRedirect())) {
+								if(StringUtils.isBlank(config.getRootDomain())) {
+									resp.sendError(HttpServletResponse.SC_NOT_FOUND);
 									return;
 								}
+								else {
+									redir = "https://" + config.getRootDomain();	
+								}
+							}
+							else {
+								redir = config.getInvalidDomainRedirect();
+							}
+
+							URI redirUri = URI.create(redir);
+							if(!redirUri.getHost().equals(serverName)) {
+								resp.sendRedirect(redir);
+								return;
 							}
 						}
 					}
 				}
 			}
+			
 		
 			Properties properties = securityService.resolveSecurityProperties(req.getRequestURI());
 
