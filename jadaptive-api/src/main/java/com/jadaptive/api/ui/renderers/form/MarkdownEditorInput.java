@@ -104,7 +104,6 @@ public class MarkdownEditorInput extends FieldInputRender {
 //		+ "          codeSyntaxHighlighting: true"
 //		+ "      }"
 		+ "  });\n"
-        + "  mde.togglePreview();"
 		+ "  $('#" + resourceKey + "').data('mde', mde);\n"
 		+ "});";
 		
