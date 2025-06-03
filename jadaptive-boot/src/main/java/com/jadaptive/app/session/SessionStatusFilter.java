@@ -47,17 +47,14 @@ public class SessionStatusFilter implements Filter {
 			 * also access and update the session.
 			 */
 			setPreventAccess(req, true);
-			try {
-				var sesh = req.getSession(false);
-				resp.setHeader("Cache-Control", "no-store");
-				if(sesh == null) {
-					resp.sendError(HttpServletResponse.SC_GONE);
-				}
-				else {
-					resp.sendError(HttpServletResponse.SC_OK);
-				}
-			} catch(Throwable e) {
+			
+			var sesh = req.getSession(false);
+			resp.setHeader("Cache-Control", "no-store");
+			if(sesh == null) {
 				resp.sendError(HttpServletResponse.SC_GONE);
+			}
+			else {
+				resp.sendError(HttpServletResponse.SC_OK);
 			}
 			
 			response.flushBuffer();
