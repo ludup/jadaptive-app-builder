@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 
 import org.pf4j.PluginManager;
@@ -63,24 +64,26 @@ public class SecurityPropertyServiceImpl implements SecurityPropertyService {
 			log.error("Failed to read security properties from system classpath", e);
 		}
 		
-		if(!tenant.isSystem()) {
-			
-		    try {
-				securityProperties.addAll(resolveSecurityFiles(resourceUri, 
-						ConfigHelper.getTenantSubFolder(tenant, "webapp"),
-						ConfigHelper.getTenantPackages(tenant), uriOnly));
-			} catch (IOException e) {
-				log.error("Failed to read security properties of tenant packages", e);
-			}
-			
-		} else {
-			
-			try {
-				securityProperties.addAll(resolveSecurityFiles(resourceUri, 
-						ConfigHelper.getSystemPrivateSubFolder("webapp"),
-						ConfigHelper.getSystemPrivatePackages(), uriOnly));
-			} catch (IOException e) {
-				log.error("Failed to read security properties of system packages", e);
+		if(Objects.nonNull(tenant)) {
+			if(!tenant.isSystem()) {
+				
+			    try {
+					securityProperties.addAll(resolveSecurityFiles(resourceUri, 
+							ConfigHelper.getTenantSubFolder(tenant, "webapp"),
+							ConfigHelper.getTenantPackages(tenant), uriOnly));
+				} catch (IOException e) {
+					log.error("Failed to read security properties of tenant packages", e);
+				}
+				
+			} else {
+				
+				try {
+					securityProperties.addAll(resolveSecurityFiles(resourceUri, 
+							ConfigHelper.getSystemPrivateSubFolder("webapp"),
+							ConfigHelper.getSystemPrivatePackages(), uriOnly));
+				} catch (IOException e) {
+					log.error("Failed to read security properties of system packages", e);
+				}
 			}
 		}
 		
