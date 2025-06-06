@@ -167,67 +167,77 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override
 	public void setPassword(User user, char[] newPassword, boolean passwordChangeRequired, boolean log) {
 		
-		if(user instanceof PasswordEnabledUser pu) {
-			assertPasswordRules(user, newPassword, true);
-			
-			try {
-				String previousPasswordPartHash = pu.getPasswordPartHash();
+		assertPasswordRules(user, newPassword, true);
+		
+		try {
+			if(user instanceof PasswordEnabledUser pu) {
+				
+					String previousPasswordPartHash = pu.getPasswordPartHash();
+					getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+					if(log) {
+						eventService.publishEvent(new SetPasswordEvent(user, previousPasswordPartHash, pu.getPasswordPartHash()));
+					}
+					return;
+				
+			} else {
 				getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
 				if(log) {
-					eventService.publishEvent(new SetPasswordEvent(user, previousPasswordPartHash, pu.getPasswordPartHash()));
+					eventService.publishEvent(new SetPasswordEvent(user, "", ""));
 				}
-				return;
-			} catch(Throwable e) {
-				if(log) {
-					eventService.publishEvent(new SetPasswordEvent(user, e));
-				}
-				throw e;
 			}
+		} catch(Throwable e) {
+			if(log) {
+				eventService.publishEvent(new SetPasswordEvent(user, e));
+			}
+			throw e;
 		}
-		
-		throw new AccessDeniedException("User cannot change password!");
+
 	}
 	
 	@Override
 	public void changePassword(User user, char[] oldPassword, char[] newPassword) {
 		
-		if(user instanceof PasswordEnabledUser pu) {
-			assertPasswordRules(user, newPassword, false);
-			
-			try {
-				verifyPassword(user, oldPassword);
+		assertPasswordRules(user, newPassword, false);
+		
+		try {
+			if(user instanceof PasswordEnabledUser pu) {
+				
 				String previousPasswordPartHash = pu.getPasswordPartHash();
 				getDatabase(user).setPassword(user, newPassword, false);
-				eventService.publishEvent(new ChangePasswordEvent(previousPasswordPartHash, pu.getPasswordPartHash()));
+				eventService.publishEvent(new SetPasswordEvent(user, previousPasswordPartHash, pu.getPasswordPartHash()));
 				return;
-			} catch(Throwable e) {
-				eventService.publishEvent(new ChangePasswordEvent(e));
+				
+			} else {
+				getDatabase(user).setPassword(user, newPassword, false);
+				eventService.publishEvent(new ChangePasswordEvent("", ""));
 			}
-		}
-		
-		throw new AccessDeniedException("User cannot change password");
-		
+		} catch(Throwable e) {
+			eventService.publishEvent(new ChangePasswordEvent(e));
+			throw e;
+		}		
 	}
 	
 	@Override
 	public void changePassword(User user, char[] newPassword, boolean passwordChangeRequired) {
 		
-		if(user instanceof PasswordEnabledUser pu) {
 			assertPasswordRules(user, newPassword, false);
 			
 			try {
-				String previousPasswordPartHash = pu.getPasswordPartHash();
-				getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
-				eventService.publishEvent(new ChangePasswordEvent(previousPasswordPartHash, pu.getPasswordPartHash()));
-				return;
+				if(user instanceof PasswordEnabledUser pu) {
+					String previousPasswordPartHash = pu.getPasswordPartHash();
+					getDatabase(user).setPassword(user, newPassword, passwordChangeRequired);
+					eventService.publishEvent(new ChangePasswordEvent(previousPasswordPartHash, pu.getPasswordPartHash()));
+					return;
+				} else {
+					getDatabase(user).setPassword(user, newPassword, false);
+					eventService.publishEvent(new ChangePasswordEvent("", ""));
+					
+				}
 			} catch(Throwable e) {
 				eventService.publishEvent(new ChangePasswordEvent(e));
 				throw e;
 			}
-		
-		}
-		
-		throw new AccessDeniedException("User cannot change password");
+
 	}
 	
 	@Override
