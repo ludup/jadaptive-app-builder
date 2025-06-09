@@ -17,6 +17,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 
 import com.jadaptive.api.app.ApplicationProperties;
@@ -54,6 +56,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @WebFilter(urlPatterns = { "/*" }, dispatcherTypes = { DispatcherType.REQUEST })
+@Order(Ordered.HIGHEST_PRECEDENCE+1)
 public class SessionFilter implements Filter {
 
 	static Logger log = LoggerFactory.getLogger(SessionFilter.class);

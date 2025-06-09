@@ -19,7 +19,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebFilter(urlPatterns = { "/*" }, dispatcherTypes = { DispatcherType.REQUEST })
+@WebFilter(urlPatterns = { "/app/verify" }, dispatcherTypes = { DispatcherType.REQUEST })
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SessionStatusFilter implements Filter {
 
@@ -39,10 +39,15 @@ public class SessionStatusFilter implements Filter {
 
 		Request.setUp((HttpServletRequest)request, (HttpServletResponse)response);
 		
-		HttpServletRequest req = (HttpServletRequest)request;
-		HttpServletResponse resp = (HttpServletResponse)response;
+//		try {
+			HttpServletRequest req = (HttpServletRequest)request;
+			HttpServletResponse resp = (HttpServletResponse)response;
+	
+			/**
+			 * LDP - This only need to be performed on one URL so am adding the URL pattern
+			 * for this rather than a check inside the filter.
+			 */
 
-		if(req.getRequestURI().equals("/app/verify")) {
 			/* This is the one call we do not the session last access time to be updated 
 			 * with. So we check the session ourselves, and just return what is effectively
 			 * a session valid / invalid status. 
@@ -62,9 +67,9 @@ public class SessionStatusFilter implements Filter {
 			}
 			
 			response.flushBuffer();
-			return;
-		}
 		
-		chain.doFilter(req, resp);
+//		} finally {
+//			Request.tearDown();
+//		}
 	}
 }
