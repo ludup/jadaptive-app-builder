@@ -403,7 +403,6 @@ $(function() {
 	
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
-		
 		$('.processDepends').each(function() {
 			var dependsOn = $(this).data('depends-on');
 			var dependsValue = $(this).attr('data-depends-value');
@@ -431,9 +430,8 @@ $(function() {
 					} else {
 						value = input.val();
 					}
-					if(obj == value) {
-						matches = expectedResult;
-						return true;
+					if(expectedResult == (obj == value)) {
+						return matches = true;
 					}
 					return false;
 				});
