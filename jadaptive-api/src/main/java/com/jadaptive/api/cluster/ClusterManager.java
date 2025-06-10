@@ -2,6 +2,7 @@ package com.jadaptive.api.cluster;
 
 import java.io.Closeable;
 import java.util.Set;
+import java.util.Optional;
 
 import com.jadaptive.api.entity.AbstractUUIDObjectService;
 import com.jadaptive.api.template.DynamicColumnService;
@@ -17,4 +18,8 @@ public interface ClusterManager extends Closeable, AbstractUUIDObjectService<Clu
 	void queueTask(Runnable task);
 
 	boolean isLeader();
+
+	Optional<String> getExternalHostname();
+
+	String getHostname();
 }

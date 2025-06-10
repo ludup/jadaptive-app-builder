@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -92,22 +93,25 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	private String serverId;
 	private Map<String, ClusterNodeStatus> lastKnownStatus = Collections.synchronizedMap(new HashMap<>());
 	private Set<ClusterService> services;
+	private String configuredHostname;
+	private String hostname;
 
 	@Override
 	public void onApplicationStartup() {
 		setupEventsProxy();
+		configuredHostname = hostname = ApplicationProperties.getValue("ha.hostname", "");
+		if (hostname.equals("")) {
+			try {
+				hostname = InetAddress.getLocalHost().getHostAddress();
+			} catch (UnknownHostException e) {
+				hostname = "localhost";
+			}	
+			LOG.warn("ha.hostname is not set, using a generated ha.hostname of " + hostname);
+		}
 		
 		tenantService.asSystem(() -> {
 		
-			var hostname = ApplicationProperties.getValue("ha.hostname", "");
-			if (hostname.equals("")) {
-				try {
-					hostname = InetAddress.getLocalHost().getHostAddress();
-				} catch (UnknownHostException e) {
-					hostname = "localhost";
-				}	
-				LOG.warn("ha.hostname is not set, using a generated ha.hostname of " + hostname);
-			}
+			
 			
 			serverId = ApplicationProperties.getValue("ha.id","");
 			if (serverId.equals("")) {
@@ -166,6 +170,17 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				});
 			}, "ClusterManagerMembershipMonitor").start();
 		});
+	}
+	
+	@Override
+	public String getHostname() {
+		return hostname;
+	}
+
+	@Override
+	public Optional<String> getExternalHostname() {
+		var hostname = ApplicationProperties.getValue("ha.externalHostname", configuredHostname);
+		return hostname.equals("") ? Optional.empty() : Optional.of(hostname);
 	}
 
 	@Override
