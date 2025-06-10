@@ -1,6 +1,7 @@
 package com.jadaptive.api.cluster;
 
 import java.io.Closeable;
+import java.util.Optional;
 import java.util.Set;
 
 import com.jadaptive.api.entity.AbstractUUIDObjectService;
@@ -13,5 +14,9 @@ public interface ClusterManager extends Closeable, AbstractUUIDObjectService<Clu
 	boolean isLeader();
 
 	Set<ClusterService> getServices();
+
+	Optional<String> getExternalHostname();
+
+	String getHostname();
 
 }
