@@ -127,7 +127,13 @@ public class DocumentHelper {
 				Object value = m.invoke(obj);
 				if(!Objects.isNull(value)) { 
 					if(m.getReturnType().equals(Date.class)) {
-						document.put(name,  value);
+						if(Objects.nonNull(columnDefinition) && columnDefinition.type() == FieldType.DATE) {
+							// Date - remove any hours/minutes/seconds/milliseconds
+							document.put(name, Utils.trim((Date)value));
+						} else {
+							// Timestamp - store everything
+							document.put(name,  value);
+						}
 					} else if(isSupportedPrimative(m.getReturnType())) {
 						document.put(name,  value);
 					} else if(m.getReturnType().isEnum()) {
