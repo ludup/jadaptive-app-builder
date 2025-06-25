@@ -97,7 +97,8 @@ public class OAuth2Approve extends AuthenticatedPage
 		var strictness = Strictness.forScopes(scopes);
 		if(strictness == Strictness.LAX && "device_code".equals(oauthRequest.requestedGrantType())) {
 			try {
-				approve(oauthRequest, uri, getCurrentUser(), scopes);
+				User cuser = getCurrentUser();
+				approve(oauthRequest, uri, cuser, scopes);
 			} catch (UnsupportedEncodingException e) {
 				throw new IllegalStateException(e);
 			}
@@ -239,6 +240,9 @@ public class OAuth2Approve extends AuthenticatedPage
 						Feedback.success("oauth2", "info.approvedApproval", scopesToUl(scopes));
 					
 					scopes.forEach(scope -> scope.onApproved(oauthRequest));
+				}
+				catch(Redirect redir) {
+					throw redir;
 				}
 				catch(Exception e) {
 					LOG.error("Approval failed.", e);
