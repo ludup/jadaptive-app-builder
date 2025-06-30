@@ -93,8 +93,8 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
 	@Override
 	public void registerTemplateClass(String resourceKey, Class<? extends UUIDDocument> templateClazz, ObjectTemplate template) {
 		
-		if(log.isInfoEnabled()) {
-			log.info("Registering template class for {} -> {}", resourceKey, templateClazz.getName());
+		if(log.isDebugEnabled()) {
+			log.debug("Registering template class for {} -> {}", resourceKey, templateClazz.getName());
 		}
 		for(String alias : template.getAliases()) {
 			templateClazzes.put(alias, templateClazz);
@@ -231,7 +231,7 @@ public class TemplateServiceImpl extends AuthenticatedService implements Templat
                     .whitelistPackages("com.jadaptive")   
                     .scan()) {                  
             for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(ObjectExtension.class.getName())) {
-                if(log.isInfoEnabled()) {
+                if(log.isDebugEnabled()) {
 					log.info("Found extension {}", classInfo.getName());
 				}
                 registerExtension((Class<? extends UUIDDocument>) classInfo.loadClass());
