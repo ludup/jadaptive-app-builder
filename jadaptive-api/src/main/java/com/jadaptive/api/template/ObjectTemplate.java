@@ -48,6 +48,9 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	String defaultFilter;
 	
 	@ObjectField(type = FieldType.TEXT)
+	String hash;
+	
+	@ObjectField(type = FieldType.TEXT)
 	String defaultColumn;
 	
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED, references = FieldTemplate.RESOURCE_KEY)
@@ -193,6 +196,14 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 
 	public void setDefaultFilter(String defaultFilter) {
 		this.defaultFilter = defaultFilter;
+	}
+
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
 	}
 
 	public String getDefaultColumn() {
