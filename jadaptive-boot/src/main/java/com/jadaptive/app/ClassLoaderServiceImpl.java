@@ -210,9 +210,13 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	}
 	
 	@Override
-	public void injectClass(ObjectTemplate template) {
+	public Class<?> injectClass(ObjectTemplate template) {
 		byte[] tmp = Base64.getDecoder().decode(template.getClassDefinition());
-		defineClass(template.getTemplateClass(), tmp, 0, tmp.length);
-		
+		return injectClass(template, tmp);
+	}
+	
+	@Override
+	public Class<?> injectClass(ObjectTemplate template, byte[] bytecode) {
+		return defineClass(template.getTemplateClass(), bytecode, 0, bytecode.length);
 	}
 }
