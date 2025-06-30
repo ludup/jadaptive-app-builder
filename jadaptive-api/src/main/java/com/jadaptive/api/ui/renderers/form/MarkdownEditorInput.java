@@ -3,6 +3,7 @@ package com.jadaptive.api.ui.renderers.form;
 import static com.jadaptive.utils.Npm.scripts;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -85,7 +86,7 @@ public class MarkdownEditorInput extends FieldInputRender {
 
 		ObjectRenderer renderer = App.bean(ObjectRenderer.class);
 		Page page = renderer.getCurrentPage();
-		String uniqueId = (page != null && page instanceof ObjectPage ? ((ObjectPage)page).getObject().getUuid() : "__") + "_" + renderer.getCurrentTemplate().getResourceKey() + "_" + resourceKey;
+		String uniqueId = (page != null && page instanceof ObjectPage op && Objects.nonNull(op.getObject()) ? ((ObjectPage)page).getObject().getUuid() : "__") + "_" + renderer.getCurrentTemplate().getResourceKey() + "_" + resourceKey;
 		
 		String tinyMCEScript = "$(function() { debugger;\n" 
 	    + "  const europa = new Europa();\n"
