@@ -45,7 +45,7 @@ public class ScanningExtensionFinder extends AbstractExtensionFinder {
 	                        .whitelistPackages(plugin.getPlugin().getClass().getPackage().getName())   
 	                        .scan()) {              
 	                for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Extension.class.getName())) {
-	                    if(log.isInfoEnabled()) {
+	                    if(log.isDebugEnabled()) {
 							log.info("Found extension {}", classInfo.getName());
 						}
 						bucket.add(classInfo.getName());
@@ -76,7 +76,7 @@ public class ScanningExtensionFinder extends AbstractExtensionFinder {
                     .scan()) {                  
             for (ClassInfo classInfo : scanResult.getClassesWithAnnotation(Extension.class.getName())) {
                 
-                if(log.isInfoEnabled()) {
+                if(log.isDebugEnabled()) {
 					log.info("Found extension {}", classInfo.getName());
 				}
 				bucket.add(classInfo.getName());

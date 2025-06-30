@@ -308,8 +308,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	private synchronized void doRegisterPermission(Set<String> allPermissions, Set<NamePairValue> objectPermissions, Map<String,Set<String>> aliasPermissions, String permission, String... aliases) {
 		
 		
-		if(log.isInfoEnabled()) {
-			log.info("Registering permission {} for tenant {}", permission, tenantService.getCurrentTenant().getDomain());
+		if(log.isDebugEnabled()) {
+			log.debug("Registering permission {} for tenant {}", permission, tenantService.getCurrentTenant().getDomain());
 		}
 		
 		if(allPermissions.contains(permission)) {
