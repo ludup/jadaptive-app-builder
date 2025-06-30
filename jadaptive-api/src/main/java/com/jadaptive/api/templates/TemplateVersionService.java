@@ -4,12 +4,15 @@ import java.util.Collection;
 
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.ObjectUpdateEvent;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.template.RecordType;
 import com.jadaptive.api.tenant.Tenant;
 
 public interface TemplateVersionService {
@@ -39,5 +42,10 @@ public interface TemplateVersionService {
 	void onUpdated(Runnable r);
 
 	void doUpdateOperations();
+
+	ObjectTemplate createTemplate(RecordType recordType, boolean uniqueName, ObjectType objectType, String domainName,
+			String name, FieldTemplate... fields);
+
+	ObjectTemplate registerAnnotatedTemplate(Class<? extends UUIDDocument> clz, boolean newSchema, byte[] bytecode);
 
 }
