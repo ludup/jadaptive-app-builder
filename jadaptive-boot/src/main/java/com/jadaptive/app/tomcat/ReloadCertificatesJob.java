@@ -41,6 +41,8 @@ public class ReloadCertificatesJob implements ScheduledTask {
 		return "0 1 * * * *";
 	}
 	
-	
+	public boolean isSystemOnly() { 
+		return true; 
+	}
 
 }
