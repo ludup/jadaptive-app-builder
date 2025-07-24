@@ -54,12 +54,12 @@ public class AbstractSpringPlugin extends SpringPlugin {
 				throw new IllegalStateException("Invalid plugin id " + depend.getPluginId());
 			}
 			
-			if(log.isInfoEnabled()) {
-				log.info("Checking dependency {} for Springness", dependWrapper.getPluginId());
+			if(log.isDebugEnabled()) {
+				log.debug("Checking dependency {} for Springness", dependWrapper.getPluginId());
 			}
 			
 			if(dependWrapper.getPlugin() instanceof SpringPlugin) {
-				if(log.isInfoEnabled()) {
+				if(log.isDebugEnabled()) {
 					log.info("Plugin {} has {} Spring parent context from {}",
 							wrapper.getPluginId(), 
 							parentContexts.isEmpty() ? "primary" : "secondary",
@@ -73,7 +73,7 @@ public class AbstractSpringPlugin extends SpringPlugin {
 			}
 		}
 		
-		if(log.isInfoEnabled()) {
+		if(log.isDebugEnabled()) {
 			log.info("Creating application context for {} from parent context {}", 
 					wrapper.getPluginId(),
 					parentContext.getDisplayName());

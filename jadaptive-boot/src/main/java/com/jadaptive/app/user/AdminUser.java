@@ -52,11 +52,6 @@ public class AdminUser extends PasswordEnabledUser {
 	String passwordPartHash;
 	
 	@Override
-	public String getName() {
-		return "Administrator";
-	}
-
-	@Override
 	public boolean getPasswordChangeRequired() {
 		return passwordChangeRequired;
 	}

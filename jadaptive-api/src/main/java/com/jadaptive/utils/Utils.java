@@ -205,7 +205,7 @@ public class Utils {
 
 	public static Calendar todayCalendar() {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
@@ -215,7 +215,7 @@ public class Utils {
 	
 	public static Calendar thisWeekCalendar() {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
@@ -230,7 +230,7 @@ public class Utils {
 	
 	public static Calendar thisMonthCalendar() {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
@@ -241,7 +241,7 @@ public class Utils {
 	
 	public static Calendar thisYearCalendar() {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
@@ -278,7 +278,7 @@ public class Utils {
 
 	public static Calendar tomorrowCalendar() {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
@@ -300,7 +300,7 @@ public class Utils {
 
 	public static Calendar yesterdayCalendar() {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
@@ -544,7 +544,7 @@ public class Utils {
 
 	public static Calendar thirtyDaysCalendar() {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
@@ -562,7 +562,7 @@ public class Utils {
 
 	public static Calendar thirtyDaysAgoCalendar() {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
@@ -580,7 +580,7 @@ public class Utils {
 	
 	public static Calendar sevenDaysAgoCalendar() {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.set(Calendar.HOUR_OF_DAY, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.SECOND, 0);
@@ -658,7 +658,7 @@ public class Utils {
 
 	public static Date getMonthEnd(Date timestamp) {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.setTime(getMonthStart(timestamp));
 		date.add(Calendar.MONTH, 1);
 		date.add(Calendar.DAY_OF_MONTH, -1);
@@ -672,7 +672,7 @@ public class Utils {
 
 	public static Date getMonthStart(Date timestamp) {
 
-		Calendar date = Calendar.getInstance();
+		Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		date.setTime(timestamp);
 		date.set(Calendar.DAY_OF_MONTH, 1);
 		date.set(Calendar.HOUR_OF_DAY, 0);
@@ -989,5 +989,35 @@ public class Utils {
         throwable.printStackTrace(pw); // Print the stack trace to the PrintWriter
         return sw.toString(); // Return the accumulated string
     }
+
+	public static Date startOfDay(Date effectiveDate) {
+		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		c.setTime(effectiveDate);
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		return c.getTime();
+	}
+
+	public static Date nextDay(Date effectiveDate) {
+		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		c.setTime(DateUtils.addDays(effectiveDate, 1));
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		return c.getTime();
+	}
+	
+	public static Date trim(Date date) {
+		Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		c.setTime(date);
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		return c.getTime();
+	}
 	
 }

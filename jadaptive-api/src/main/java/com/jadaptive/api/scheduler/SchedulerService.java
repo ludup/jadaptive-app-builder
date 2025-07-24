@@ -14,4 +14,6 @@ public interface SchedulerService {
 
 	void schedule(TenantTask task, Date startTime, String taskUUID);
 
+	void runNow(Runnable task);
+
 }

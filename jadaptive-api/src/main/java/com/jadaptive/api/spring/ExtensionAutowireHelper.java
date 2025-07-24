@@ -24,7 +24,7 @@ public class ExtensionAutowireHelper {
 				field.setAccessible(true);
 				if(Objects.isNull(field.get(bean))) {
 					field.set(bean, findExtension(field.getType(), parentContexts));
-					if(log.isInfoEnabled()) {
+					if(log.isDebugEnabled()) {
 						log.info("Autowired {} Extension on {}", field.getType().getSimpleName(), bean.getClass().getSimpleName());
 					}
 				}

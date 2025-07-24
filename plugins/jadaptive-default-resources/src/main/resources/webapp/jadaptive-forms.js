@@ -23,7 +23,7 @@ submit : function(form, callback, invalid) {
            success: function(data)
            {
 				$('.mdeEditor').each(function() {
-					$(this).data('simplemde').clearAutosavedValue();
+					$(this).data('mde').clearAutosavedValue();
 				});
 				
 				if(callback) {

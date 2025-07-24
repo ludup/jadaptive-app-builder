@@ -12,7 +12,7 @@ public class TemplateUtils {
 			Field resourceKeyField = clz.getField("RESOURCE_KEY");
 			return (String) resourceKeyField.get(null);
 		} catch(Throwable e) {
-			throw new IllegalStateException("Missing RESOURCE_KEY attribute from OBJECT_REFERENCE typed @ObjectField annotation");
+			throw new IllegalStateException("Missing RESOURCE_KEY attribute from OBJECT_REFERENCE typed @ObjectField annotation", e);
 		}
 	}
 	

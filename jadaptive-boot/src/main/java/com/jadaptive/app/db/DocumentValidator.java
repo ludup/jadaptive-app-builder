@@ -241,13 +241,6 @@ public class DocumentValidator {
 					}
 					break;
 				}
-				case URL:
-				{
-					if(StringUtils.isNotBlank(value)) {
-						validateRegex(Utils.HTTP_URL_PATTERN, value, v, field);
-					}
-					break;
-				}
 				case TIME_24:
 				{
 					if(StringUtils.isNotBlank(value)) {
@@ -297,6 +290,13 @@ public class DocumentValidator {
 				{
 					validateRegex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))?$", 
 							value, v, field);
+					return;
+				}
+				case URL:
+				{
+					if(StringUtils.isNotBlank(value)) {
+						validateRegex(Utils.HTTP_URL_PATTERN, value, v, field);
+					}
 					return;
 				}
 				case HOSTNAME:

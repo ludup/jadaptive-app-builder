@@ -3,6 +3,7 @@ package com.jadaptive.api.ui.renderers.form;
 import static com.jadaptive.utils.Npm.scripts;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -62,6 +63,10 @@ public class MarkdownEditorInput extends FieldInputRender {
 				"marked.min.js"
 		);
 		
+		scripts(document, "europa", 
+				"lib/umd/europa.js"
+		);
+		
 		
 //		Npm.stylesheets(document, "highlight.js", "styles/default.min.css");
 		
@@ -81,11 +86,14 @@ public class MarkdownEditorInput extends FieldInputRender {
 
 		ObjectRenderer renderer = App.bean(ObjectRenderer.class);
 		Page page = renderer.getCurrentPage();
-		String uniqueId = (page != null && page instanceof ObjectPage ? ((ObjectPage)page).getObject().getUuid() : "__") + "_" + renderer.getCurrentTemplate().getResourceKey() + "_" + resourceKey;
+		String uniqueId = (page != null && page instanceof ObjectPage op && Objects.nonNull(op.getObject()) ? ((ObjectPage)page).getObject().getUuid() : "__") + "_" + renderer.getCurrentTemplate().getResourceKey() + "_" + resourceKey;
 		
-		String tinyMCEScript = "$(function() { \n" 
-		+ "  var simplemde = new EasyMDE({\n"
-		+ "      element: $(\"#" + resourceKey + "\")[0],\n"
+		String tinyMCEScript = "$(function() { debugger;\n" 
+	    + "  const europa = new Europa();\n"
+	    + "  const html = document.getElementById('" + resourceKey + "');\n"
+        + "  $('#" + resourceKey + "').val(europa.convert(html.value));\n"
+		+ "  var mde = new EasyMDE({\n"
+		+ "      element: $('#" + resourceKey + "')[0],\n"
 	    + "      forceSync: true,"
 	    + "      imageUploadEndpoint: '/app/api/forms/image/upload',"
 	    + "      uploadImage: true,"
@@ -97,7 +105,7 @@ public class MarkdownEditorInput extends FieldInputRender {
 //		+ "          codeSyntaxHighlighting: true"
 //		+ "      }"
 		+ "  });\n"
-		+ "  $('#" + resourceKey + "').data('simplemde', simplemde);\n"
+		+ "  $('#" + resourceKey + "').data('mde', mde);\n"
 		+ "});";
 		
 		PageHelper.addContentSecurityPolicy("style-src", SessionUtils.UNSAFE_INLINE);
@@ -108,7 +116,7 @@ public class MarkdownEditorInput extends FieldInputRender {
 		PageHelper.appendBodyScriptSnippet(document, tinyMCEScript);
 		Npm.stylesheets(document, "easymde", "dist/easymde.min.css");
 		if(App.bean(BootstrapThemeService.class).getTheme().isDark()) {
-			PageHelper.appendStylesheet(document, "/app/content/simplemde/easymde.bootstrap.min.css");
+			PageHelper.appendStylesheet(document, "/app/content/easymde/easymde.bootstrap.min.css");
 		} 
 	}
 

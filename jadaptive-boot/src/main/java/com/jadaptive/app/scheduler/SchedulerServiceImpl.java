@@ -22,6 +22,7 @@ import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AuthenticatedService;
 import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.SchedulerService;
+import com.jadaptive.api.scheduler.TaskScope;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
@@ -101,6 +102,26 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 			log.info("Deferring task {} until startup is complete.", task.getClass().getName());
 			deferred.add(task);
 		}
+	}
+	
+	@Override
+	public void runNow(Runnable task) {
+	
+		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), UUID.randomUUID().toString());
+		applicationService.autowire(job);
+		job.runNow(new TenantTask() {
+			
+			@Override
+			public void run() {
+				task.run();
+			}
+			
+			@Override
+			public TaskScope getScope() {
+				return TaskScope.NODE;
+			}
+		});
+
 	}
 	
 	@Override

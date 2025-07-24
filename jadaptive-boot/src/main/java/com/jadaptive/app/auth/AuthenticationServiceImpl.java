@@ -393,7 +393,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				if(log.isInfoEnabled()) {
 					log.info("User {} has completed POST authentication", state.getUser().getUsername());
 				}
-				
+				 
 				if(state.getPolicy().isSessionRequired()) {
 					
 					if(log.isInfoEnabled()) {
@@ -421,31 +421,16 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					finally {
 						clearUserContext();
 					}
+				} else {
+					return new AuthenticationCompletedResult(
+							state.nextRedirectOrFinish(pageCache), 
+							Optional.empty()) {
+						public void close() {
+							
+						}
+					};
 				}
-				
-//				if(state.getScope() == AuthenticationScope.SAML_IDP) {
-//					DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) Request.get().getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-//				    
-//					if(defaultSavedRequest != null){
-//				    	AbstractAuthenticationToken auth = 
-//								  new NoAuthAuthenticationToken(new IDPUserDetails(state.getUser(),
-//										  buildAttributes(state.getUser())), getAuthorities());
-//				    	auth.setDetails(new WebAuthenticationDetails(Request.get()));
-//				    	auth.setAuthenticated(true);
-//				    	
-//				    	SecurityContext context = SecurityContextHolder.createEmptyContext(); 
-//				    	context.setAuthentication(auth); 
-//				    	SecurityContextHolder.setContext(context);
-//				    	
-//				    	HttpSession session = Request.get().getSession(false);
-//						if (session != null) {
-//							session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
-//						}
-//						session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
-//				    	String targetURL = defaultSavedRequest.getRedirectUrl();
-//				        throw new UriRedirect(targetURL);
-//				    }
-//				}
+		        
 			}
 			
 		}
