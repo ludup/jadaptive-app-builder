@@ -303,6 +303,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			for(TemplateViewField fieldView : view.getFields()) {
 				FieldTemplate field = fieldView.getField();
 
+				if(field.getResourceKey().equals("lastLogin")) {
+					System.out.println();
+				}
 				switch(field.getFieldType()) {
 				default:
 					

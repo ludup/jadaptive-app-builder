@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -558,7 +559,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(!loadCached) {
 				
 				if(log.isInfoEnabled()) {
-					log.info("Registering template from annotations on class {}", clz.getSimpleName());
+					log.info("Hash differs template from annotations on class {} {}/{}", 
+							clz.getSimpleName(), 
+							template.getHash(),
+							hash);
 				}
 				Class<?> baseClass = TemplateUtils.getBaseClass(clz);
 				ObjectDefinition collection = e; 
@@ -614,15 +618,15 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				String nameField = "uuid";
 				
 				
-				List<Field> fields = new ArrayList<>();
-				resolveFields(clz, fields, e.recurse());
+				Map<Field,String> fields = new HashMap<>();
+				resolveFields(clz, fields, e.recurse(), resourceKey);
 				
-				for(Field field :fields) {
+				for(Field field :fields.keySet()) {
 					
 					ObjectField objectAnnotation = field.getAnnotation(ObjectField.class);
 					
 					if(Objects.nonNull(objectAnnotation)) {
-						FieldTemplate t = processFieldAnnotations(objectAnnotation, "", field,  template);
+						FieldTemplate t = processFieldAnnotations(objectAnnotation, "", field,  template, fields.get(field));
 						if(objectAnnotation.nameField()) {
 							nameField =t.getResourceKey();
 						}
@@ -1219,7 +1223,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 	}
 
-	private FieldTemplate processFieldAnnotations(ObjectField field, String parentPrefix, Field f, ObjectTemplate template) {
+	private FieldTemplate processFieldAnnotations(ObjectField field, String parentPrefix, Field f, ObjectTemplate template, String bundle) {
 
 		FieldTemplate t = new FieldTemplate();
 		t.setResourceKey(f.getName());
@@ -1238,7 +1242,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		t.setReadOnly(field.readOnly());
 		t.setView(field.view());
 		t.setRenderer(field.renderer());
-		t.setBundle(StringUtils.isBlank(field.bundle()) ? template.getBundle() : field.bundle());
+		t.setBundle(StringUtils.isBlank(field.bundle()) ? bundle : field.bundle());
 		t.setWeight(field.weight());
 		
 		switch(field.type()) {
@@ -1422,16 +1426,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	
 
-	private void resolveFields(Class<?> clz, List<Field> fields, boolean recurse) {
+	private void resolveFields(Class<?> clz, Map<Field,String> fields, boolean recurse, String resourceKey) {
+		
+		String parentKey = TemplateUtils.lookupClassResourceKeyWithDefault(clz, resourceKey);
 		
 		if(recurse) {
 			if(!clz.getSuperclass().equals(Object.class)) {
-				resolveFields(clz.getSuperclass(), fields, true);
+				
+				resolveFields(clz.getSuperclass(), fields, true, parentKey);
 			}
 		}
 		
 		for(Field field : clz.getDeclaredFields()) {
-			fields.add(field);
+			if(ReflectionUtils.hasAnnotation(field, ObjectField.class)) {
+				fields.put(field, parentKey);
+			}
 		}
 	}
 

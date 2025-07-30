@@ -12,6 +12,10 @@ public class TemplateUtils {
 			Field resourceKeyField = clz.getField("RESOURCE_KEY");
 			return (String) resourceKeyField.get(null);
 		} catch(Throwable e) {
+			ObjectDefinition def = clz.getAnnotation(ObjectDefinition.class);
+			if(Objects.nonNull(def)) {
+				return def.resourceKey();
+			}
 			throw new IllegalStateException("Missing RESOURCE_KEY attribute from OBJECT_REFERENCE typed @ObjectField annotation", e);
 		}
 	}
@@ -30,5 +34,18 @@ public class TemplateUtils {
 		}
 		
 		return templateBase;
+	}
+
+	public static String lookupClassResourceKeyWithDefault(Class<?> clz, String resourceKey) {
+		try {
+			Field resourceKeyField = clz.getField("RESOURCE_KEY");
+			return (String) resourceKeyField.get(null);
+		} catch(Throwable e) {
+			ObjectDefinition def = clz.getAnnotation(ObjectDefinition.class);
+			if(Objects.nonNull(def)) {
+				return def.resourceKey();
+			}
+			return resourceKey;
+		}
 	}
 }
