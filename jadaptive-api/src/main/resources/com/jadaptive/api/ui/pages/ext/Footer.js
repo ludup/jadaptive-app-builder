@@ -498,8 +498,11 @@ $(function() {
     $('.selectionAction').click(function(e) {
 		e.preventDefault();
 		
+		
 		if($('input[name="selectedUUID"]').length > 0) {
 			
+			JadaptiveUtils.startAwesomeSpin($(this).find('i'), '');
+				
 			var form = new FormData();
 
 			$('input[name="selectedUUID"]').each(function() {
@@ -518,7 +521,7 @@ $(function() {
    				processData: false, 
 		        complete: function()
 		        {
-		          window.location.reload();
+		          window.location = window.location;
 		        }
 		    });
 			
