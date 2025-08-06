@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -461,22 +460,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                 }
             }
 		}
-		
-//		FieldTemplate t = new FieldTemplate();
-//		t.setCollection(true);
-//		t.setFieldType(FieldType.TEXT);
-//		t.setMeta("");
-//		t.setResourceKey("collectionOfStrings");
-//		
-//		FieldTemplate t2 = new FieldTemplate();
-//		t2.setCollection(false);
-//		t2.setFieldType(FieldType.DATE);
-//		t2.setMeta("");
-//		t2.setResourceKey("fooDate");
-//
-//		createTemplate(RecordType.UNIQUE_NAMED, ObjectScope.GLOBAL, ObjectType.COLLECTION, "sshtools.com", "Contract", t, t2);
-//		
-		
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -554,7 +538,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			boolean generateEventTemplates = hasGenerateTemplatesAnnotation(clz);
-			boolean loadCached = hash.equals(template.getHash());
+			boolean loadCached = false; //hash.equals(template.getHash());
 			
 			if(!loadCached) {
 				
@@ -618,15 +602,18 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				String nameField = "uuid";
 				
 				
-				Map<Field,String> fields = new HashMap<>();
-				resolveFields(clz, fields, e.recurse(), resourceKey);
+				Map<Field,String> fieldsResourceKey = new HashMap<>();
+				List<Field> fields = new ArrayList<>();
 				
-				for(Field field :fields.keySet()) {
+				resolveFields(clz, fields, fieldsResourceKey, e.recurse(), resourceKey, template.getBundle());
+				
+				
+				for(Field field : fields) {
 					
 					ObjectField objectAnnotation = field.getAnnotation(ObjectField.class);
 					
 					if(Objects.nonNull(objectAnnotation)) {
-						FieldTemplate t = processFieldAnnotations(objectAnnotation, "", field,  template, fields.get(field));
+						FieldTemplate t = processFieldAnnotations(objectAnnotation, "", field,  template, fieldsResourceKey.get(field));
 						if(objectAnnotation.nameField()) {
 							nameField =t.getResourceKey();
 						}
@@ -1258,19 +1245,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				t.getValidators().add(new FieldValidator(
 						ValidationType.RESOURCE_KEY, 
 						resourceKey, ObjectTemplate.RESOURCE_KEY, "resourceKey.invalid"));
-				
-//				List<Field> fields = new ArrayList<>();
-//				resolveFields(clz, fields, true);
-//				ObjectTemplate t2 = templateService.get(objd.resourceKey());
-//				for(Field f2 : fields) {
-//					
-//					ObjectField objectAnnotation = f2.getAnnotation(ObjectField.class);
-//					
-//					if(Objects.nonNull(objectAnnotation)) {
-//						FieldTemplate t3 = processFieldAnnotations(objectAnnotation, parentPrefix + f.getName() + ".", f2,  t2);
-//						template.getFields().add(t3);
-//					}
-//				}
+
 			}
 			
 			t.getValidators().add(new FieldValidator(
@@ -1426,20 +1401,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	
 
-	private void resolveFields(Class<?> clz, Map<Field,String> fields, boolean recurse, String resourceKey) {
+	private void resolveFields(Class<?> clz, List<Field> fields, Map<Field,String> fieldsResourceKey, boolean recurse, String resourceKey, String bundle) {
 		
-		String parentKey = TemplateUtils.lookupClassResourceKeyWithDefault(clz, resourceKey);
+		String parentKey = Objects.nonNull(bundle)? bundle : TemplateUtils.lookupClassResourceKeyWithDefault(clz, resourceKey);
 		
 		if(recurse) {
 			if(!clz.getSuperclass().equals(Object.class)) {
 				
-				resolveFields(clz.getSuperclass(), fields, true, parentKey);
+				resolveFields(clz.getSuperclass(), fields, fieldsResourceKey, true, parentKey, bundle);
 			}
 		}
 		
 		for(Field field : clz.getDeclaredFields()) {
 			if(ReflectionUtils.hasAnnotation(field, ObjectField.class)) {
-				fields.put(field, parentKey);
+				fieldsResourceKey.put(field, parentKey);
+				fields.add(field);
 			}
 		}
 	}
