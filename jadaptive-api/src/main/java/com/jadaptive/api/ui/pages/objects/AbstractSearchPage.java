@@ -101,7 +101,7 @@ public abstract class AbstractSearchPage extends BaseSearchPage<SearchForm> {
 		
 		searchValue = Request.get().getParameter("filter");
 		if(Objects.isNull(searchValue)) {
-			searchValue = getCachedValue("searchValue", StringUtils.defaultIfBlank(Request.get().getParameter("filter"), template.getDefaultFilter()));
+			searchValue = getCachedValue("searchValue", StringUtils.defaultIfBlank(Request.get().getParameter("filter"), ""));
 			if(StringUtils.isBlank(searchValue)) {
 				searchValue = null;
 			}

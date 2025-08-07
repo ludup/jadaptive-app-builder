@@ -589,7 +589,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template.setTemplateClass(clz.getName());
 				template.getAliases().clear();
 				template.getAliases().addAll(Arrays.asList(e.aliases()));
-				template.setDefaultFilter(e.defaultFilter());
 				template.setDefaultColumn(e.defaultColumn());
 				
 				template.setCreatable(e.creatable());
