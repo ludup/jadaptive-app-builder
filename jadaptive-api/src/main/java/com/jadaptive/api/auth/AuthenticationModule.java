@@ -6,8 +6,10 @@ import com.jadaptive.api.repository.NamedUUIDEntity;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
+import com.jadaptive.api.template.TableView;
 
 @ObjectDefinition(resourceKey = AuthenticationModule.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION)
+@TableView(defaultColumns = "name")
 public class AuthenticationModule extends NamedUUIDEntity {
 
 	private static final long serialVersionUID = -2303774620847729028L;
