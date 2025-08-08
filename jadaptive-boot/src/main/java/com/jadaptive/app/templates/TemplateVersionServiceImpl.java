@@ -63,6 +63,7 @@ import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
@@ -604,8 +605,19 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				Map<Field,String> fieldsResourceKey = new HashMap<>();
 				List<Field> fields = new ArrayList<>();
 				
-				resolveFields(clz, fields, fieldsResourceKey, e.recurse(), resourceKey, template.getBundle());
+				if(resourceKey.equals("customer")) {
+					System.out.println();
+				}
 				
+				if(e.recurse()) {
+					List<Class<?>> classes = findClassesWithObjectDefinitions(clz);
+					String rootBundle = TemplateUtils.resolveRootBundle(classes);
+					for(Class<?> c2 : classes) {
+						rootBundle = resolveFields(c2, fields, fieldsResourceKey, rootBundle);
+					}
+				} else {
+					resolveFields(clz, fields, fieldsResourceKey, template.getBundle());
+				}
 				
 				for(Field field : fields) {
 					
@@ -1398,25 +1410,31 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return displayKey;
 	}
 	
-	
+	private List<Class<?>> findClassesWithObjectDefinitions(Class<?> clz) {
+		List<Class<?>> tmp = new ArrayList<>();
+		
+		
+		do {
+			tmp.add(clz);
+			clz = clz.getSuperclass();
+		} while(!clz.equals(Object.class));
+		
+		Collections.reverse(tmp);
+		return tmp;
+	}
 
-	private void resolveFields(Class<?> clz, List<Field> fields, Map<Field,String> fieldsResourceKey, boolean recurse, String resourceKey, String bundle) {
+	private String resolveFields(Class<?> clz, List<Field> fields, Map<Field,String> fieldsResourceKey, String bundle) {
 		
-		String parentKey = Objects.nonNull(bundle)? bundle : TemplateUtils.lookupClassResourceKeyWithDefault(clz, resourceKey);
-		
-		if(recurse) {
-			if(!clz.getSuperclass().equals(Object.class)) {
-				
-				resolveFields(clz.getSuperclass(), fields, fieldsResourceKey, true, parentKey, bundle);
-			}
-		}
+		bundle = TemplateUtils.lookupBundleWithDefault(clz, bundle);
 		
 		for(Field field : clz.getDeclaredFields()) {
 			if(ReflectionUtils.hasAnnotation(field, ObjectField.class)) {
-				fieldsResourceKey.put(field, parentKey);
+				fieldsResourceKey.put(field, bundle);
 				fields.add(field);
 			}
 		}
+		
+		return bundle;
 	}
 
 	private FieldType selectFieldType(Class<?> type, FieldType declaredType) {
