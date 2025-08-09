@@ -605,10 +605,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				Map<Field,String> fieldsResourceKey = new HashMap<>();
 				List<Field> fields = new ArrayList<>();
 				
-				if(resourceKey.equals("customer")) {
-					System.out.println();
-				}
-				
 				if(e.recurse()) {
 					List<Class<?>> classes = findClassesWithObjectDefinitions(clz);
 					String rootBundle = TemplateUtils.resolveRootBundle(classes);
