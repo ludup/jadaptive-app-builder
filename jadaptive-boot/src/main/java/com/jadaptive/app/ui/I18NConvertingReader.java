@@ -53,7 +53,7 @@ public class I18NConvertingReader extends Reader {
 			return data;
 
 		data = this.pushbackReader.read();
-		if (data != '{') {
+		if (data != '[') {
 			this.pushbackReader.unread(data);
 			return '$';
 		}
@@ -72,7 +72,7 @@ public class I18NConvertingReader extends Reader {
 		}
 		
 		data = this.pushbackReader.read();
-		while (data != ':' && data != '}') {
+		while (data != ':' && data != ']') {
 			this.keyNameBuffer.append((char) data);
 			if(keyNameBuffer.length() > 99) {
 				 throw new IllegalStateException("Potential bad i18n format found in file " + filename);
@@ -82,7 +82,7 @@ public class I18NConvertingReader extends Reader {
 		
 		while(data!='}') {
 			data = this.pushbackReader.read();
-			 while (data != ':' && data != '}'); {
+			 while (data != ':' && data != ']'); {
 				this.argsValueBuffer.append((char) data);
 				data = this.pushbackReader.read();
 				 if(argsValueBuffer.length() > 99) {

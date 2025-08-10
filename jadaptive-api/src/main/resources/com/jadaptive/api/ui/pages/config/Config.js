@@ -24,7 +24,7 @@ $(document).ready(function() {
            success: function(data)
            {
 			if(data.success) {
-           	    JadaptiveUtils.success($('#feedback'), '${userInterface:configuration.saved}');
+           	    JadaptiveUtils.success($('#feedback'), '$[userInterface:configuration.saved]');
 			} else {
 				JadaptiveUtils.error(data.message);
 			}
