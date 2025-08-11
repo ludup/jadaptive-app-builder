@@ -80,8 +80,11 @@ public class I18NConvertingReader extends Reader {
 			data = this.pushbackReader.read();
 		}
 		
-		while(data!='}') {
+		while(data!=']') {
 			data = this.pushbackReader.read();
+			if(data == -1) {
+				break;
+			}
 			 while (data != ':' && data != ']'); {
 				this.argsValueBuffer.append((char) data);
 				data = this.pushbackReader.read();
@@ -98,7 +101,7 @@ public class I18NConvertingReader extends Reader {
 
 		this.tokenValue = i18n.format(bundleNameBuffer.toString(), Locale.getDefault(), keyNameBuffer.toString(), args.toArray(new Object[0]));
 
-		if (this.tokenValue.length() == 0) {
+		if (this.tokenValue==null || this.tokenValue.length() == 0) {
 			return read();
 		} else {
 			return this.tokenValue.charAt(this.tokenValueIndex++);
