@@ -136,11 +136,12 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			sessionUtils.verifySameSiteRequest(request, LOGIN_IDENTIFIER);
 			
 			if(doForm(document, state, form)) {
+				log.info("{} form was COMPLETED", getClass().getSimpleName());
 				throw authenticationService.completeAuthentication(state, Optional.of(this)).
 							maybeAttachToSession(request, sessionUtils.getTimeout());
 			}
 			
-			log.info("REMOVEME: {} form was not completed", getClass().getSimpleName());
+			log.info("{} form was not completed", getClass().getSimpleName());
 			
 			Request.response().setStatus(HttpStatus.FORBIDDEN.value());
 			
