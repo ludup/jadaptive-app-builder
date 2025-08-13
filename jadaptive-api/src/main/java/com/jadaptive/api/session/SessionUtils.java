@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.PermissionService.RunnableWithException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
@@ -33,6 +35,7 @@ import com.jadaptive.utils.Utils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Component
 public class SessionUtils {
@@ -325,6 +328,14 @@ public class SessionUtils {
 		cookie.setDomain(request.getServerName());
 		addCookie(cookie, response);
 
+	}
+	
+	public <T> T doInSession(HttpSession session, Callable<T> r) {
+		return permissionService.as(Session.get(session).getUser(), r);
+	}
+	
+	public void doInSession(HttpSession session, RunnableWithException r) {
+		permissionService.as(Session.get(session).getUser(), r);
 	}
 
 	public void touch(Session session) throws SessionTimeoutException  {

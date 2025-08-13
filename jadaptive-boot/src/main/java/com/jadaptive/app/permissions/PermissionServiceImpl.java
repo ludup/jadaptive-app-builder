@@ -283,6 +283,20 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
+	public void as(User user, RunnableWithException call) {
+		setupUserContext(user);
+		try {
+			call.run();
+		}  catch(Redirect e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			clearUserContext();
+		}
+	}
+	
+	@Override
 	public <T> T asSystem(Callable<T> call) {
 		setupUserContext(SYSTEM_USER);
 		try {

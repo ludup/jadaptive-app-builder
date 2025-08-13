@@ -24,6 +24,7 @@ import com.jadaptive.api.scheduler.TaskScope;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.user.User;
 
 @Service
 public class SchedulerServiceImpl extends AuthenticatedService implements SchedulerService, TenantAware, StartupAware {
@@ -102,6 +103,28 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 			@Override
 			public void run() {
 				task.run();
+			}
+			
+			@Override
+			public TaskScope getScope() {
+				return TaskScope.NODE;
+			}
+		});
+
+	}
+	
+	@Override
+	public void runAs(User user, Runnable task) {
+	
+		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), UUID.randomUUID().toString());
+		applicationService.autowire(job);
+		job.runNow(new TenantTask() {
+	
+			@Override
+			public void run() {
+				permissionService.as(user, ()->{
+					task.run();
+				});
 			}
 			
 			@Override

@@ -97,4 +97,9 @@ public interface PermissionService {
 	void assertAnyResolvedPermission(Set<String> resolvedPermissions, String... permissions)
 			throws AccessDeniedException;
 
+	void as(User user, RunnableWithException r);
+
+	interface RunnableWithException {
+		public void run() throws Exception;
+	}
 }

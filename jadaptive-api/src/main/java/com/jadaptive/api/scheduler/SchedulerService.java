@@ -2,6 +2,8 @@ package com.jadaptive.api.scheduler;
 
 import java.util.Date;
 
+import com.jadaptive.api.user.User;
+
 public interface SchedulerService {
 
 	void schedule(TenantTask job, String expression, String taskUuid);
@@ -15,5 +17,7 @@ public interface SchedulerService {
 	void schedule(TenantTask task, Date startTime, String taskUUID);
 
 	void runNow(Runnable task);
+
+	void runAs(User currentUser, Runnable task);
 
 }
