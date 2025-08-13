@@ -9,7 +9,6 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectViewDefinition;
-import com.jadaptive.api.template.ObjectViews;
 import com.jadaptive.api.user.User;
  
 @ObjectViewDefinition(value = AssignableUUIDEntity.USERS_VIEW, bundle = "users", weight = Integer.MAX_VALUE-1)
