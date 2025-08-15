@@ -33,9 +33,6 @@ public class ClosestIpFinder {
 	@Autowired
 	private SingletonObjectDatabase<IPStackConfiguration> config;
     
-    /**
-     * Entry point of the program.
-     */
     public String getClosestIPAddress(String SOURCE_IP, List<String> TARGET_IPS ) {
         try {
             CompletableFuture<IpLocation> sourceFuture = getIpLocationAsync(SOURCE_IP);
