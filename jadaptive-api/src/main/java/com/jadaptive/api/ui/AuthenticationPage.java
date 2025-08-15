@@ -145,17 +145,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			log.info("{} form was not completed", getClass().getSimpleName());
 			
 			Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-			
-			if(Objects.nonNull(form)) {
-				
-				if(!isAllowFormExternalRedirect()) {
-					sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
-				}
-				
-				log.info("Setting up CRSF token in Login form...");
-				sessionUtils.setupFormCSRFFToken(Request.get(), LOGIN_IDENTIFIER, document.selectFirst("form"));
-			}
-			
+
 			if(!Feedback.isSet()) {
 		    	Feedback.error("default", "error.invalidCredentials");
 			}
@@ -168,7 +158,14 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
     	} catch (UnauthorizedException e) {
     		log.error("REMOVEME:", e);
     		Feedback.error("userInterface","error.invalidCredentials");
-    	} 
+    	} finally {
+    		if(!isAllowFormExternalRedirect()) {
+				sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
+			}
+			
+			log.info("Setting up CRSF token in Login form...");
+			sessionUtils.setupFormCSRFFToken(Request.get(), LOGIN_IDENTIFIER, document.selectFirst("form"));
+    	}
 		
 		authenticationService.reportAuthenticationFailure(state, this);
 		

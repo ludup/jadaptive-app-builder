@@ -459,36 +459,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		};
 
 	}
-	
-//	private List<Attribute> buildAttributes(User user) {
-//		
-//		var tmp = new ArrayList<Attribute>();
-//		List<Attribute> attrs = new ArrayList<>();
-//        attrs.add(new Attribute().setName("emailAddress").setValues(Collections.singletonList(user.getEmail())));
-//        attrs.add(new Attribute().setName("name").setValues(Collections.singletonList(user.getName())));
-//        
-//        List<String> roles = new ArrayList<String>();
-//        for(com.jadaptive.api.role.Role role : roleService.getRolesByUser(user)) {
-//        	roles.add(role.getName());
-//        }
-//        attrs.add(new Attribute().setName("roles").addValues(roles));
-//        return tmp;
-//	}
-//
-//	
-//	public Collection<GrantedAuthority> getAuthorities() {
-//        //make everyone ROLE_USER
-//        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
-//        GrantedAuthority grantedAuthority = new GrantedAuthority() {
-//            //anonymous inner type
-//            public String getAuthority() {
-//                return "ROLE_USER";
-//            }
-//        }; 
-//        grantedAuthorities.add(grantedAuthority);
-//        return grantedAuthorities;
-//    }
-
 
 	private AuthenticationModule getPasswordAuthenticationModule() {
 		
@@ -550,13 +520,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					.getAttribute(AUTHENTICATION_STATE_ATTR);
 			if (Objects.isNull(state)) {
 
-
-//				DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) Request.get().getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-			    
-//				AuthenticationScope scope = defaultSavedRequest==null? 
-//						AuthenticationScope.USER_LOGIN :
-//							AuthenticationScope.SAML_IDP;
-				
 				state = createAuthenticationState();
 				
 				processRequiredAuthentication(state, state.getPolicy());
@@ -596,26 +559,29 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		}
 		
 		for(AuthenticationModule m : policy.getRequiredAuthenticators()) {
+			
+			Class<? extends Page> page = registeredAuthenticationPages.get(m.getAuthenticatorKey());
+			if(state.hasUser()) {
+			
+				if(AuthenticationPage.class.isAssignableFrom(page)) {
+					AuthenticationPage<?> nextPage = (AuthenticationPage<?>) pageCache.getPage(page);
+					if(!nextPage.canAuthenticate(state)) {
+						throw new AccessDeniedException(
+								AuthenticationPolicy.RESOURCE_KEY,
+								"missingCredentials.text");
+					}
+				}
+			}
+			
 			state.addRequiredAuthentication(
-					registeredAuthenticationPages.get(m.getAuthenticatorKey()),
+					page,
 					m);
 		}
 		
 		state.setPasswordEnabled(policy.getPasswordOnFirstPage() || policy.getPasswordRequired() || policy.getPasswordProvided());
 		state.clearOptionalAuthentications();
-		
-//		if(policy instanceof LoginAuthenticationPolicy && Objects.nonNull(state.getUser())) {
-//			LoginAuthenticationPolicy loginPolicy = (LoginAuthenticationPolicy) policy;
-//			if(loginPolicy.getEnsureOptionalSetup()) {
-//				Collection<AuthenticationModule> modules = resolveUserModules(state.getUser());
-//				Collection<AuthenticationModule> missing = resolveMissingModules(state.getUser(), modules);
-//				configueOptional(state, policy, missing, 1);
-//			} else {
-//				configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
-//			}
-//		} else {
-			configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
-//		}
+
+		configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
 		
 		state.setPolicy(policy);
 		
