@@ -105,4 +105,6 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	String getTenantDatabaseConnection(String uuid, String defaultConnection);
 
 	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, DatabaseConnection con);
+
+	void recordLastLogin();
 }

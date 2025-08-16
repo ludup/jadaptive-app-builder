@@ -388,6 +388,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				log.info("User {} has completed authentication", state.getUser().getUsername());
 			}
 			
+			tenantService.recordLastLogin();
+			
 			if(!state.hasPostAuthentication()) {
 			
 				if(log.isInfoEnabled()) {

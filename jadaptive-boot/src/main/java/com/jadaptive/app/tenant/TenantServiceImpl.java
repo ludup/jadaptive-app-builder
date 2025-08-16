@@ -707,4 +707,12 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		return defaultConnection;
 	}
+
+	@Override
+	public void recordLastLogin() {
+		Tenant t = getCurrentTenant();
+		t.setLastLogin(Utils.now());
+		saveOrUpdate(t);
+		
+	}
 }
