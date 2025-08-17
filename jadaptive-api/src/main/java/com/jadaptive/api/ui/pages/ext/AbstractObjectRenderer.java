@@ -523,10 +523,12 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 							dropdown.setSelectedValue(ref.getUuid(), (String) ref.getValue("name"));
 						}
 					} else {
+						String url = fieldView.getField().getMetaValue("url", String.format("/app/api/%s/%s/table", 
+								currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
+								objectType));
+						url = url.replace("{uuid}", Objects.nonNull(obj) && StringUtils.isNotBlank(obj.getUuid()) ? obj.getUuid() : "");
 						FieldSearchFormInput input = new FieldSearchFormInput(fieldView, 
-								fieldView.getField().getMetaValue("url", String.format("/app/api/%s/%s/table", 
-										currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
-										objectType)),
+								url,
 								"name", fieldView.getFormVariable(), "uuid");
 						if(!decorate) {
 							input.diableDecoration();
@@ -712,10 +714,13 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				return;
 			}
 
+			String url = fieldView.getField().getMetaValue("url", String.format("/app/api/%s/%s/table", 
+					currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
+					objectType));
+			url = url.replace("{uuid}", Objects.nonNull(obj) ? obj.getUuid() : "");
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
-					currentTemplate.get(), fieldView, String.format("/app/api/%s/%s/table", 
-							currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
-							objectType),
+					currentTemplate.get(), fieldView, 
+					url,
 					"name", "uuid");
 			render.renderInput(element, values, false, 
 					(view == FieldView.READ || fieldView.getField().isReadOnly()));
