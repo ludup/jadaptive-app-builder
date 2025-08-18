@@ -3,6 +3,7 @@ package com.jadaptive.app.auth.oauth2;
 import java.time.Instant;
 
 import com.jadaptive.api.auth.oauth2.OAuth2Request;
+import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 
 public final class PendingDevice {
@@ -15,17 +16,19 @@ public final class PendingDevice {
 	private final String userCode;
 	private final Instant created;
 	private final OAuth2Request request;
+	private final Tenant tenant;
 	
 	private Instant lastPoll;
 	private Status status = Status.PENDING;
 	private User user;
 
-	PendingDevice(String deviceCode, String userCode, OAuth2Request request) {
+	PendingDevice(String deviceCode, String userCode, OAuth2Request request, Tenant tenant) {
 		super();
 		this.deviceCode = deviceCode;
 		this.userCode = userCode;
 		this.created = Instant.now();
 		this.request = request;
+		this.tenant = tenant;
 	}
 	
 	public User user() {
@@ -66,5 +69,9 @@ public final class PendingDevice {
 
 	public String userCode() {
 		return userCode;
+	}
+
+	public Tenant tenant() {
+		return tenant;
 	}
 }

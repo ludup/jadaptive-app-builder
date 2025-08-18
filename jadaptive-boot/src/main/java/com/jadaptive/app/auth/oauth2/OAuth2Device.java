@@ -16,6 +16,7 @@ import com.jadaptive.api.auth.oauth2.OAuth2Request;
 import com.jadaptive.api.auth.oauth2.Strictness;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.servlet.Request;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticatedPage;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.FormProcessor;
@@ -48,6 +49,9 @@ public class OAuth2Device extends AuthenticatedPage implements FormProcessor<OAu
 	private OAuth2Service oAuth2Service; 
 	
 	@Autowired
+	private TenantService tenantService; 
+	
+	@Autowired
 	private PageCache pageCache;
 	
 	@Autowired
@@ -65,7 +69,7 @@ public class OAuth2Device extends AuthenticatedPage implements FormProcessor<OAu
 
 	public boolean processForm(Document document, DeviceForm form) throws Exception {
 		var userCode = form.getUserCode().toUpperCase();
-		var pendingDevice = oAuth2Service.getPendingDevice(userCode);
+		var pendingDevice = checkTenant(oAuth2Service.getPendingDevice(userCode));
 		if(form.isApproved()) {
 			if(pendingDevice == null) {
 		    	Request.response().setStatus(HttpStatus.FORBIDDEN.value());
@@ -96,7 +100,7 @@ public class OAuth2Device extends AuthenticatedPage implements FormProcessor<OAu
 
 		var uc = request.getParameter("user_code"); 
 		if(StringUtils.isNotBlank(uc)) {
-			var pendingDevice = oAuth2Service.getPendingDevice(uc);
+			var pendingDevice = checkTenant(oAuth2Service.getPendingDevice(uc));
 			if(pendingDevice == null)
 				throw new IllegalStateException("No such pending device.");
 			var strictness = Strictness.forScopes(oAuth2Service.getScopes(pendingDevice.request().requestedScopes()));
@@ -126,6 +130,17 @@ public class OAuth2Device extends AuthenticatedPage implements FormProcessor<OAu
 			attr("size", String.valueOf(len)).
 			attr("maxlength", String.valueOf(len)).
 			attr("minlength", String.valueOf(len));
+	}
+	
+	private PendingDevice checkTenant(PendingDevice pendingDevice) {
+		if (pendingDevice != null && !pendingDevice.tenant().equals(tenantService.getCurrentTenant())) {
+			throw new IllegalStateException(
+					"Pending device is on a different tenant. Are you authorizing the "
+					+ "device using the same tenant as was used on the requesting device. "
+					+ "If the URLs are  different, you may be using an incorrect address "
+					+ "for one or the other.");
+		}
+		return pendingDevice;
 	}
 
 	private void approve(String userCode, PendingDevice pendingDevice) throws FileNotFoundException {
