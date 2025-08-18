@@ -595,7 +595,7 @@ public class DocumentHelper {
 			Class<?> c;
 			
 			String resourceKey = document.getString("resourceKey");
-			
+
 			if(isTemplateClass(baseClass)) {
 				c = baseClass;
 			} else {
@@ -714,7 +714,7 @@ public class DocumentHelper {
 									
 									
 								} else {
-									resourceKey = getTemplateResourceKey(parameter.getType());
+									//resourceKey = getTemplateResourceKey(parameter.getType());
 	
 									try {
 										AbstractObject e = (AbstractObject) ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(resourceKey, (String)objectUUID);
@@ -770,10 +770,10 @@ public class DocumentHelper {
 							} else if(embedded instanceof Document) {
 								UUIDReference ref = DocumentHelper.convertDocumentToObject(UUIDReference.class, (Document) embedded);
 								if(!UUIDReference.class.equals(type)) {
-									resourceKey = StringUtils.defaultIfEmpty(columnDefinition.references(), TemplateUtils.lookupClassResourceKey(type));
+									String thisResourceKey = StringUtils.defaultIfEmpty(columnDefinition.references(), TemplateUtils.lookupClassResourceKey(type));
 									AbstractObject e = (AbstractObject) 
 											ApplicationServiceImpl.getInstance().getBean(ObjectService.class).get(
-													resourceKey, ref.getUuid());
+													thisResourceKey, ref.getUuid());
 									UUIDEntity ue = convertDocumentToObject(
 											ApplicationServiceImpl.getInstance().getBean(TemplateService.class).getTemplateClass(resourceKey),
 											new Document(e.getDocument()), 
