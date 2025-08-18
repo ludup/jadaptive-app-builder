@@ -134,6 +134,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public Collection<AuthenticationModule> resolveUserModules(User user) {
 		
+		if(permissionService.isAdministrator(user)) {
+			return moduleDatabase.searchObjects(AuthenticationModule.class);
+		}
+		
 		Set<AuthenticationModule> modules = new HashSet<>();
 		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
 			modules.addAll(policy.getRequiredAuthenticators());
