@@ -18,6 +18,7 @@ import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService;
 import com.jadaptive.api.auth.oauth2.OAuth2Request;
 import com.jadaptive.api.auth.oauth2.OAuth2Scope;
 import com.jadaptive.api.db.SingletonObjectDatabase;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.auth.oauth2.PendingDevice.Status;
 
@@ -68,6 +69,9 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 	
 	@Autowired
 	private App applicationService;
+	
+	@Autowired
+	private TenantService tenantService;
 
 	@Autowired
 	private SingletonObjectDatabase<OAuth2Configuration> config;
@@ -149,8 +153,9 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 		var userCode = genUniqueUserCode(oauth2Config);
 		var expiry = oauth2Config.getDeviceCodeExpiryTime();
 		var interval = oauth2Config.getDeviceCodeInterval();
+		var tenant = tenantService.getCurrentTenant();
 
-		var pending = new PendingDevice(deviceCode, userCode, request);
+		var pending = new PendingDevice(deviceCode, userCode, request, tenant);
 		pendingDevicesByUserCode.put(userCode, pending);
 		pendingDevicesByDeviceCode.put(deviceCode, pending);
 
