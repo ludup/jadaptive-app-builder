@@ -618,9 +618,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			e = objectService.toUUIDDocument((AbstractObject) e);
 		}
 		
-		if(e instanceof PersonalUUIDEntity) {
-			PersonalUUIDEntity obj = (PersonalUUIDEntity) e;
-			if(Objects.isNull(obj.getOwnerUUID()) || !obj.getOwnerUUID().equals(getCurrentUser().getUuid())) {
+		if(e instanceof PersonalUUIDEntity obj) {
+			if(Objects.isNull(obj.getOwner()) || !obj.getOwner().equals(getCurrentUser())) {
 				throw new AccessDeniedException(String.format("Current user is the owner the object " + e.getUuid()));
 			}
 		} else {

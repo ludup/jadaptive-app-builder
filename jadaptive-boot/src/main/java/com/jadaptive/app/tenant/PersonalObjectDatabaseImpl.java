@@ -69,13 +69,13 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	
 	@Override
 	public void saveOrUpdate(T obj, User user) {
-		obj.setOwnerUUID(user.getUuid());
+		obj.setOwner(user);
 		objectDatabase.saveOrUpdate(obj);
 	}
 	
 	@Override
 	public void saveOrUpdate(T obj) {
-		if(Objects.isNull(obj.getOwnerUUID())) {
+		if(Objects.isNull(obj.getOwner())) {
 			throw new ObjectException("Personal object cannot be saved without an owner UUID");
 		}
 		objectDatabase.saveOrUpdate(obj);

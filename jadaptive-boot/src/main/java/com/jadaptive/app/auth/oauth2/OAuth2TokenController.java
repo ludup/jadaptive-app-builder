@@ -39,7 +39,6 @@ import com.jadaptive.api.permissions.AuthenticatedContext;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.UnauthorizedException;
-import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;

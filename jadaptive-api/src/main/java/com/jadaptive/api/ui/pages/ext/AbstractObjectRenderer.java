@@ -717,7 +717,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			String url = fieldView.getField().getMetaValue("url", String.format("/app/api/%s/%s/table", 
 					currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
 					objectType));
-			url = url.replace("{uuid}", Objects.nonNull(obj) ? obj.getUuid() : "");
+			url = url.replace("{uuid}", Objects.nonNull(obj) && StringUtils.isNotBlank(obj.getUuid()) ? obj.getUuid() : "");
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), fieldView, 
 					url,

@@ -163,7 +163,7 @@ public class AuthorizedKeyServiceImpl extends AbstractUUIDObjectServceImpl<Autho
 	@Override
 	public void deleteKey(AuthorizedKey key) {
 		
-		assertAssign(userService.getUserByUUID(key.getOwnerUUID()));
+		assertAssign(key.getOwner());
 		objectDatabase.deletePersonalObject(key);
 	}
 	
