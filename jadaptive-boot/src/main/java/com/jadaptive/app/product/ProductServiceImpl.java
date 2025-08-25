@@ -46,6 +46,11 @@ public class ProductServiceImpl implements ProductService, StartupAware {
 	}
 	
 	@Override
+	public boolean supportsPAYG() {
+		return getProduct().supportsPAYG();
+	}
+	
+	@Override
 	public String getFaviconResource() { 
 		return ApplicationProperties.getValue("app.favicon", getProduct().getFaviconResource());
 	}

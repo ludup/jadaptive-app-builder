@@ -51,4 +51,6 @@ public interface ProductService {
 
 	boolean isRevenueGenerating();
 
+	boolean supportsPAYG();
+
 }

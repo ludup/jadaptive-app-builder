@@ -50,6 +50,10 @@ public interface Product extends ExtensionPoint {
 	default boolean isRevenueGenerating() {
 		return true;
 	}
+	
+	default boolean supportsPAYG() {
+		return false;
+	}
 
 	default ProductId getProductId() {
 		return ProductId.FRAMEWORK;
