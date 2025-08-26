@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -146,17 +147,21 @@ public class SessionUtils {
 			if(Objects.isNull(requestToken)) {
 				requestToken = request.getHeader("CsrfToken");
 			}
-			String csrf = (String)request.getSession().getAttribute(formIdentifier);
-			if(Objects.isNull(csrf)) {
+			@SuppressWarnings("unchecked")
+			Map<String,String> tokens = (Map<String,String>) request.getSession().getAttribute(CSRF_TOKEN_ATTRIBUTE);
+			if(Objects.isNull(tokens)) {
+				throw new UnauthorizedException(String.format("Missing CSRF token setup in %s", request.getRequestURI()));
+			}
+			String form = tokens.remove(requestToken);
+			if(Objects.isNull(form)) {
 				log.warn("No CSRF token in session!");
 				throw new UnauthorizedException("No CSRF token in session!");
 			}
 			if(Objects.isNull(requestToken)) {
 				throw new UnauthorizedException("No CSRF token in form!");
 			}
-			if(!requestToken.equals(csrf)) {
+			if(!formIdentifier.equals(form)) {
 				log.warn("CSRF token mistmatch for {} from {}", formIdentifier, request.getRequestURI());
-				log.debug("REMOVEME: Current token for {} is {}", formIdentifier, csrf);
 				log.debug("REMOVEME: Request token {}", requestToken);
 				debugRequest(request);
 				throw new UnauthorizedException(String.format("CSRF token mistmatch from %s", 
@@ -367,12 +372,22 @@ public class SessionUtils {
 			}
 		}
 		
-		request.getSession().setAttribute(formIdentifier, token);
+		registerCSRFToken(request, formIdentifier, token);
 		
 		if(log.isDebugEnabled()) {
-			log.debug("REMOVEME: Set CSRF token for {} to {}", token);
+			log.debug("REMOVEME: Generated CSRF token for {} to {}", token);
 		}
 		return token;
+	}
+
+	private void registerCSRFToken(HttpServletRequest request, String formIdentifier, String token) {
+		@SuppressWarnings("unchecked")
+		Map<String,String> tokens = (Map<String,String>) request.getSession().getAttribute(CSRF_TOKEN_ATTRIBUTE);
+		if(Objects.isNull(tokens)) {
+			tokens = new HashMap<>();
+			request.getSession().setAttribute(CSRF_TOKEN_ATTRIBUTE, tokens);
+		}
+		tokens.put(token, formIdentifier);
 	}
 
 	public String setupCSRFToken(HttpServletRequest request, String formIdentifier) {
