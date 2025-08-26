@@ -155,17 +155,16 @@ public class SessionUtils {
 			String form = tokens.remove(requestToken);
 			if(Objects.isNull(form)) {
 				log.warn("No CSRF token in session!");
-				throw new UnauthorizedException("No CSRF token in session!");
+				throw new UnauthorizedException(String.format("No CSRF token in session! %s", request.getRequestURI()));
 			}
 			if(Objects.isNull(requestToken)) {
-				throw new UnauthorizedException("No CSRF token in form!");
+				throw new UnauthorizedException(String.format("No CSRF token in form!", request.getRequestURI()));
 			}
 			if(!formIdentifier.equals(form)) {
 				log.warn("CSRF token mistmatch for {} from {}", formIdentifier, request.getRequestURI());
 				log.debug("REMOVEME: Request token {}", requestToken);
 				debugRequest(request);
-				throw new UnauthorizedException(String.format("CSRF token mistmatch from %s", 
-						request.getRequestURI()));
+				throw new UnauthorizedException(String.format("CSRF token mistmatch from %s", request.getRequestURI()));
 			}
 		}
 	}
@@ -375,7 +374,7 @@ public class SessionUtils {
 		registerCSRFToken(request, formIdentifier, token);
 		
 		if(log.isDebugEnabled()) {
-			log.debug("REMOVEME: Generated CSRF token for {} to {}", token);
+			log.debug("REMOVEME: Setting CSRF token for page {} to {}", request.getRequestURI(), token);
 		}
 		return token;
 	}
