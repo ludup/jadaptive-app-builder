@@ -991,7 +991,8 @@ public class TableRenderer {
 		}
 		case I18N:
 		{
-			return Html.i18n(view.getBundle(), Utils.checkNullToString(getStringValue(field, obj)));
+			var val = Utils.checkNullToString(getStringValue(field, obj));
+			return Html.i18nWithFallback(view.getBundle(), val, template.getBundle(), val);
 		}
 		default:
 		{
