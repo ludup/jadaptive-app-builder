@@ -65,6 +65,7 @@ startAwesomeSpin : function(el, icon, spinner) {
 				});
 			}
 		}
+		el.parent().attr('disabled', true);
 		el.removeClass(icon);
 		if(spinner) {
 			el.addClass(spinner);
@@ -77,6 +78,7 @@ stopAwesomeSpin : function(el, icon, spinner) {
 	    if(!icon) {
 			icon = el.data('faicon');
 		}
+		el.parent().removeAttr('disabled');
 		el.removeClass('fa-spin');
 		if(spinner) {
 			el.removeClass(spinner);
