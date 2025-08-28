@@ -279,26 +279,27 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Override
 	public <T extends UUIDDocument> void stashObject(T object) throws ValidationException, RepositoryException, ObjectException {
-		
-		tenantService.asSystem(()->{
+// TODO See https://logonboxlimited.slack.com/archives/GNCA26336/p1756377494945439	
+//		tenantService.asSystem(()->{
 			Document doc = new Document();
 			DocumentHelper.convertObjectToDocument(object, doc);
 			MongoEntity e = new MongoEntity(doc);
 			if(!stashViaObjectBean(e, templateRepository.get(object.getResourceKey()))) {
 				Request.get().getSession().setAttribute(object.getResourceKey(), object);
 			}
-		});
+//		});
 
 	}
 	
 	@Override
 	public <T extends UUIDDocument> void stashObject(AbstractObject object) throws ValidationException, RepositoryException, ObjectException {
-		
-		tenantService.asSystem(()->{
+
+// TODO See https://logonboxlimited.slack.com/archives/GNCA26336/p1756377494945439			
+//		tenantService.asSystem(()->{
 			if(!stashViaObjectBean(object, templateRepository.get(object.getResourceKey()))) {
 				Request.get().getSession().setAttribute(object.getResourceKey(), object);
 			}
-		});
+//		});
 	}
 	
 	@SuppressWarnings("unchecked")
