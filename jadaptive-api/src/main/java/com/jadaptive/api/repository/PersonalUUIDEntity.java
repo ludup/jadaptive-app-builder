@@ -35,5 +35,6 @@ public abstract class PersonalUUIDEntity extends AbstractUUIDEntity {
 
 	public void setOwner(User owner) {
 		this.owner = owner;
+		this.ownerUUID = owner.getUuid();
 	}
 }

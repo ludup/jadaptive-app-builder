@@ -57,7 +57,9 @@ public class ObjectRepositoryImpl implements ObjectRepository {
 		
 		List<AbstractObject> results = new ArrayList<>();
 		
-		for(Document document : db.list(def.getCollectionKey(), getDatabase(def), SearchField.eq("ownerUUID", user.getUuid()))) {
+		for(Document document : db.list(def.getCollectionKey(), getDatabase(def), 
+				SearchField.or(SearchField.eq("owner.uuid", user.getUuid()),
+						SearchField.eq("ownerUUID", user.getUuid())))) {
 			results.add(buildEntity(def, document));
 		}
 		
