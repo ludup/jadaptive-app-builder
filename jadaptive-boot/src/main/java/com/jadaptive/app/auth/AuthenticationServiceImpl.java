@@ -205,18 +205,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	public void decorateAuthenticationPage(Document content) {
 		AuthenticationState state = getCurrentState();
 
-		if (state.canReset()) {
-			
-			Element el = content.selectFirst("#actions");
-			if(Objects.nonNull(el)) {
-				el.appendChild(Html.a(state.getResetURL())
-					.addClass("text-decoration-none d-block")
-					.appendChild(new Element("sup")
-							.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "resetLogin.text"))));
-			}
-		} 
-		
-		
 		if (!state.isDecorateWindow()) {
 			Element el = content.selectFirst("header");
 			if (Objects.nonNull(el)) {
@@ -802,7 +790,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		AuthenticationState state = createAuthenticationState(temporaryPolicy, 
 				new UriRedirect(redirectURI),
 				getCurrentUser());
-		state.setResetURL(redirectURI);
+		state.setCancelURL(redirectURI);
+		state.disableStartAgain();
 		throw state.nextRedirectOrFinish(pageCache);
 
 	}
