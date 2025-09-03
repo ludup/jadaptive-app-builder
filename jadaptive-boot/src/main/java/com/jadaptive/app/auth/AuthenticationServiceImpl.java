@@ -555,7 +555,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		for(AuthenticationModule m : policy.getRequiredAuthenticators()) {
 			
 			Class<? extends Page> page = registeredAuthenticationPages.get(m.getAuthenticatorKey());
-			if(state.hasUser()) {
+			if(state.hasUser() && !policy.isTemporary()) {
 			
 				if(AuthenticationPage.class.isAssignableFrom(page)) {
 					AuthenticationPage<?> nextPage = (AuthenticationPage<?>) pageCache.getPage(page);
