@@ -129,7 +129,8 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		return results.get(0);
 	}
 	
-	protected boolean assertIPAddress(String remoteAddress, AuthenticationPolicy policy ) {
+	@Override
+	public boolean assertIPAddress(String remoteAddress, AuthenticationPolicy policy ) {
 		
 		boolean assertion = !policy.getAllowedIPs().isEmpty();
 		

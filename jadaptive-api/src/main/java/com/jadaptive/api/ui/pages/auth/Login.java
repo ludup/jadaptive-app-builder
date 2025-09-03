@@ -143,6 +143,17 @@ public class Login extends AuthenticationPage<LoginForm> {
 				assigned = state.getPolicy();
 			}
 			
+			if(state.hasUser()) {
+				if(!policyService.assertIPAddress(Request.getRemoteAddress(), assigned)) {
+					if(log.isInfoEnabled()) {
+						log.info("{} cannot access with policy {} due to IP permissions", 
+								state.getUser().getUsername(), 
+								assigned.getName());
+					}
+					return false;
+				}
+			}
+			
 			authenticationService.changePolicy(state, assigned, passwordVerified);
 			
 			if(passwordVerified || !passwordRequired) {
