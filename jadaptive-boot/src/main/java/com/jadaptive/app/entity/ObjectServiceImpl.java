@@ -495,8 +495,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 
 	private boolean stashViaObjectBean(AbstractObject obj, ObjectTemplate template) {
 		
-		assertWrite(template);
-		
 		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(template.getResourceKey());
 		if(Objects.nonNull(clz)) {
 			ObjectServiceBean annotation = ReflectionUtils.getAnnotation(clz, ObjectServiceBean.class);
