@@ -22,9 +22,12 @@ import com.jadaptive.api.events.Events;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.ObjectUpdateEvent;
 import com.jadaptive.api.events.SystemEvent;
+import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 
@@ -45,6 +48,9 @@ public class EventServiceImpl implements EventService {
 	
 	@Autowired
 	private TenantService tenantService; 
+	
+	@Autowired
+	private PermissionService permissionService; 
 	
 	List<Runnable> preRegistrations = new ArrayList<>();
 	
@@ -128,7 +134,7 @@ public class EventServiceImpl implements EventService {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void fireEvent(EventListener listener, SystemEvent evt) {
 		if(evt.async()) {
-			eventExecutor.execute(()-> tenantService.execute(() -> listener.onEvent(evt)));
+			executeAsync(listener, evt);
 
 		} else {
 			/**
@@ -136,6 +142,19 @@ public class EventServiceImpl implements EventService {
 			 */
 			listener.onEvent(evt);
 		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void executeAsync(EventListener listener, SystemEvent evt) {
+		
+		Tenant tenant = tenantService.getCurrentTenant();
+		try {
+			User user = permissionService.getCurrentUser();
+			eventExecutor.execute(()->tenantService.asUser(tenant, user, ()->listener.onEvent(evt)));
+		} catch(AccessDeniedException e) {
+			eventExecutor.execute(()->tenantService.asSytemContext(tenant, ()->listener.onEvent(evt)));
+		}
+		
 	}
 
 	@SuppressWarnings("rawtypes")

@@ -269,6 +269,11 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
+	public <T> T as(Callable<T> call) {
+		return as(getCurrentUser(), call);
+	}
+	
+	@Override
 	public <T> T as(User user, Callable<T> call) {
 		setupUserContext(user);
 		try {
@@ -297,10 +302,30 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
+	public void as(RunnableWithException call) {
+		as(getCurrentUser(), call);
+	}
+
+	
+	@Override
 	public <T> T asSystem(Callable<T> call) {
 		setupUserContext(SYSTEM_USER);
 		try {
 			return call.call();
+		}  catch(Redirect e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			clearUserContext();
+		}
+	}
+	
+	@Override
+	public void asSystem(RunnableWithException r) {
+		setupSystemContext();
+		try {
+			r.run();
 		}  catch(Redirect e) {
 			throw e;
 		} catch (Exception e) {
@@ -642,7 +667,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			}
 		}
 	}
-
+	
 //	@Override
 //	public void assertRead(ObjectTemplate template) {
 //		if(template.getPermissionProtected()) {

@@ -4,9 +4,11 @@ import java.util.concurrent.Callable;
 
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.AccessDeniedException;
+import com.jadaptive.api.permissions.PermissionService.RunnableWithException;
 import com.jadaptive.api.permissions.PermissionService.UncheckedCloseable;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDObjectService;
+import com.jadaptive.api.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -107,4 +109,10 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	Tenant createTenant(String uuid, String name, String primaryDomain, boolean system, DatabaseConnection con);
 
 	void recordLastLogin();
+
+	void asUser(Tenant tenant, User user, RunnableWithException r);
+	
+	void asUser(Tenant tenant, RunnableWithException r);
+
+	void asSytemContext(Tenant tenant, RunnableWithException r);
 }

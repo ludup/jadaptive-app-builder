@@ -61,10 +61,10 @@ public interface PermissionService {
 	void assertAdministrator();
 
 	void assertAssignment(AssignableUUIDEntity obj);
-	
-	
 
 	<T> T as(User user, Callable<T> call);
+	
+	<T> T as(Callable<T> call);
 
 	<T> T asSystem(Callable<T> call);
 
@@ -102,4 +102,8 @@ public interface PermissionService {
 	interface RunnableWithException {
 		public void run() throws Exception;
 	}
+
+	void as(RunnableWithException call);
+
+	void asSystem(RunnableWithException r);
 }

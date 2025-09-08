@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,6 +31,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.PermissionService.RunnableWithException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
@@ -43,6 +46,7 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -614,6 +618,37 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 	
 	@Override
+	public void asUser(Tenant tenant, User user, RunnableWithException r) {
+		setCurrentTenant(tenant);
+		try {
+			permissionService.as(user, r);
+		} finally {
+			clearCurrentTenant();
+		}
+	}
+	
+
+	@Override
+	public void asSytemContext(Tenant tenant, RunnableWithException r) {
+		setCurrentTenant(tenant);
+		try {
+			permissionService.asSystem(r);
+		} finally {
+			clearCurrentTenant();
+		}
+	}
+	
+	@Override
+	public void asUser(Tenant tenant, RunnableWithException r) {
+		setCurrentTenant(tenant);
+		try {
+			permissionService.as(r);
+		} finally {
+			clearCurrentTenant();
+		}
+	}
+	
+	@Override
 	public <T> T executeAs(Tenant tenant, Callable<T> r) {
 		setCurrentTenant(tenant);
 		try {
@@ -715,4 +750,5 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		saveOrUpdate(t);
 		
 	}
+
 }

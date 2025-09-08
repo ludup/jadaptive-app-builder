@@ -116,6 +116,7 @@ import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.FixedValue;
 import net.bytebuddy.implementation.MethodCall;
 import net.bytebuddy.matcher.ElementMatchers;
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 @Service
 public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl implements TemplateVersionService  {
@@ -729,37 +730,37 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 		generateEventTemplate(StringUtils.capitalize(group) + "Created",
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.created(template.getResourceKey()), newSchema, true);
+				Events.created(template.getResourceKey()), newSchema, true, true);
 		
 		generateUpdateEventTemplate(StringUtils.capitalize(group) + "Updated", 
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.updated(template.getResourceKey()), newSchema, true);
+				Events.updated(template.getResourceKey()), newSchema, true, true);
 		
 		generateEventTemplate(StringUtils.capitalize(group) + "Deleted",
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.deleted(template.getResourceKey()), newSchema, true);
+				Events.deleted(template.getResourceKey()), newSchema, true, true);
 		
 		generateEventTemplate(StringUtils.capitalize(group) + "Stashed",
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.stashed(template.getResourceKey()), newSchema, false);
+				Events.stashed(template.getResourceKey()), newSchema, false, true);
 		
 		generateEventTemplate(StringUtils.capitalize(group) + "Creating",
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.creating(template.getResourceKey()), newSchema, false);
+				Events.creating(template.getResourceKey()), newSchema, false, false);
 		
 		generateUpdateEventTemplate(StringUtils.capitalize(group) + "Updating", 
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.updating(template.getResourceKey()), newSchema, false);
+				Events.updating(template.getResourceKey()), newSchema, false, false);
 		
 		generateEventTemplate(StringUtils.capitalize(group) + "Deleting",
 				template.getResourceKey(), template.getBundle(), group, clz, 
-				Events.deleting(template.getResourceKey()), newSchema, false);
+				Events.deleting(template.getResourceKey()), newSchema, false, false);
 		
 	}
 	
 	@SuppressWarnings("unchecked")
 	private void generateEventTemplate(String className, String resourceKey, String bundle, String group, Class<?> clz, 
-			String eventKey, boolean newSchema, boolean audited) {
+			String eventKey, boolean newSchema, boolean audited, boolean async) {
 		
 		Generic genericType = TypeDescription.Generic.Builder.parameterizedType(ObjectEvent.class, clz).build();
 		
@@ -797,6 +798,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				 }
 			 }
 			 
+			 b = b.method(named("async").and(takesNoArguments()).and(returns(boolean.class)))
+			 .intercept(FixedValue.value(async));
+			 
 			 b = b.defineConstructor(Visibility.PUBLIC)
 			  .withParameters(clz)
 			  .intercept(MethodCall
@@ -832,7 +836,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	
 	@SuppressWarnings("unchecked")
 	private void generateUpdateEventTemplate(String className, String resourceKey, String bundle, String group, Class<?> clz, 
-			String eventKey, boolean newSchema, boolean audited) {
+			String eventKey, boolean newSchema, boolean audited, boolean async) {
 		
 		Generic genericType = TypeDescription.Generic.Builder.parameterizedType(ObjectUpdateEvent.class, clz).build();
 		
@@ -869,6 +873,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					 b = b.annotateType(a);
 				 }
 			 }
+			 
+			 b = b.method(named("async").and(takesNoArguments()).and(returns(boolean.class)))
+					 .intercept(FixedValue.value(async));
 			 
 			 b = b.defineConstructor(Visibility.PUBLIC)
 			  .withParameters(clz, clz)
