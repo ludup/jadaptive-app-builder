@@ -131,7 +131,9 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 			}
 			
 			if(Objects.isNull(serverKeyStore)) {
-				LOG.info("No certificate found for {}", name);
+				if(LOG.isDebugEnabled()) {
+					LOG.debug("No certificate found for {}", name);
+				}
 				return;
 			}
 		
@@ -202,9 +204,9 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 
 	private KeyStore loadPKSC12Certificates(String name, String password) throws IOException {
 		
-
-		LOG.info("Cannot find default PEM certificate! Looking for PKCS12 keystore");
-		
+		if(LOG.isDebugEnabled()) {
+			LOG.debug("Cannot find default PEM certificate! Looking for PKCS12 keystore");
+		}
 		var serverKeystoreFile = Paths.get(ApplicationProperties.getValue(String.format("spring.ssl.bundle.jks.%s.keystore.location", name), 
 				String.format("conf.d/%s/cert.p12", name)));
 
@@ -217,8 +219,9 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 				KeyStore ret = KeyStore.getInstance("PKCS12");
 				ret.load(in, password.toCharArray());
 				
-				LOG.info("Loaded PKCS12 file for {} certificate", name);
-				
+				if(LOG.isDebugEnabled()) {
+					LOG.debug("Loaded PKCS12 file for {} certificate", name);
+				}
 				return ret;
 			} catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException e) {
 				throw new IOException(e.getMessage(), e);
@@ -243,7 +246,9 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 							pemPassword.toCharArray(),
 							password.toCharArray(),
 							alias);
-					 LOG.info("Loaded PEM file for {} certificate", name);
+					 if(LOG.isDebugEnabled()) {
+						 LOG.debug("Loaded PEM file for {} certificate", name);
+					 }
 					 return ret;
 					
 				} catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException
