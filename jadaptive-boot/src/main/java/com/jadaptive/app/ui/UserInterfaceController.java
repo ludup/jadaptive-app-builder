@@ -63,10 +63,7 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@Autowired
 	private PageCache pageCache; 
-	
-	@Autowired
-	private SessionUtils sessionUtils;
-	
+
 	@Autowired
 	private ClassLoaderService classLoader; 
 	
@@ -75,6 +72,9 @@ public class UserInterfaceController extends AuthenticatedController {
 	
 	@Autowired
 	private SystemOnlyObjectDatabase<ReplaceTextContentEdit> replacementDatabase;
+	
+	@Autowired
+	private ServerLifetimeCacheIdentifier cacheId;
 	
 	@ExceptionHandler(UnauthorizedException.class)
 	public void handleException(HttpServletRequest request,
@@ -190,7 +190,10 @@ public class UserInterfaceController extends AuthenticatedController {
 	@RequestMapping(value="/app/css/{name}", method = RequestMethod.GET, produces = { "text/css" })
 	public void doStylesheet(HttpServletRequest request, HttpServletResponse response, @PathVariable("name") String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
-		sessionUtils.setCachable(response, 600);
+		if(checkCache(request)) {
+			response.setStatus(HttpStatus.NOT_MODIFIED.value());
+			return;
+		}
 		
 		try {
 			Page page = pageCache.resolvePage(pageCache.resolvePageClass(name.replace(".css", "")));
@@ -220,7 +223,10 @@ public class UserInterfaceController extends AuthenticatedController {
 	@RequestMapping(value="/app/js/{name}", method = RequestMethod.GET, produces = { "text/javascript" })
 	public void doScript(HttpServletRequest request, HttpServletResponse response, @PathVariable("name") String name) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 		
-		sessionUtils.setCachable(response, 600);
+		if(checkCache(request)) {
+			response.setStatus(HttpStatus.NOT_MODIFIED.value());
+			return;
+		}
 		
 		try {
 			try {
@@ -257,13 +263,18 @@ public class UserInterfaceController extends AuthenticatedController {
 	@RequestMapping(value="/app/script/**", method = RequestMethod.GET)
 	public void doScript(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
-		sessionUtils.setCachable(response, 600);
+		if(checkCache(request)) {
+			response.setStatus(HttpStatus.NOT_MODIFIED.value());
+			return;
+		}
 		
 		try {
 			String name = request.getRequestURI().substring(12);
 			URL url = classLoader.getResource(name);
 			if(Objects.isNull(url)) {
-				throw new FileNotFoundException();
+				log.warn("Not found {}", request.getRequestURI());
+				response.setStatus(404);
+				return;
 			}
 			response.setContentType("application/javascript");
 			response.setStatus(HttpStatus.OK.value());
@@ -282,12 +293,17 @@ public class UserInterfaceController extends AuthenticatedController {
 	@RequestMapping(value="/app/style/**", method = RequestMethod.GET, produces = { "text/css"})
 	public void doStyle(HttpServletRequest request, HttpServletResponse response) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
 
-		sessionUtils.setCachable(response, 600);
+		if(checkCache(request)) {
+			response.setStatus(HttpStatus.NOT_MODIFIED.value());
+			return;
+		}
 		
 		String name = request.getRequestURI().substring(11);
 		URL url = classLoader.getResource(name);
 		if(Objects.isNull(url)) {
-			throw new FileNotFoundException();
+			log.warn("Not found {}", request.getRequestURI());
+			response.setStatus(404);
+			return;
 		}
 		response.setContentType("text/css;charset=UTF-8");
 		response.setStatus(HttpStatus.OK.value());
@@ -324,5 +340,25 @@ public class UserInterfaceController extends AuthenticatedController {
 			return new RequestStatusImpl(false);
 		}
 		
+	}
+	
+	private boolean checkCache(HttpServletRequest request) {
+		
+		if(Boolean.getBoolean("jadaptive.development")) {
+			return false;
+		}
+		// 1. Get the current, server-side ETag.
+        String currentEtag = cacheId.getEtag();
+
+        // 2. Manually get the browser's ETag from the request header.
+        String ifNoneMatchHeader = request.getHeader("If-None-Match");
+
+        // 3. Compare the ETags.
+        if (ifNoneMatchHeader != null && ifNoneMatchHeader.equals(currentEtag)) {
+            // The browser's version is up-to-date. Return 304 Not Modified.
+            return true;
+        }
+        
+        return false;
 	}
 }
