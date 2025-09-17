@@ -56,7 +56,6 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Feedback;
-import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
@@ -147,27 +146,27 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return modules;
 	}
 	
-	@Override
-	public Collection<AuthenticationModule> resolveRequiredUserModules(User user) {
-		
-		Set<AuthenticationModule> modules = new HashSet<>();
-		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
-			modules.addAll(policy.getRequiredAuthenticators());
-		}
-		
-		return modules;
-	}
+//	@Override
+//	public Collection<AuthenticationModule> resolveRequiredUserModules(User user) {
+//		
+//		Set<AuthenticationModule> modules = new HashSet<>();
+//		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
+//			modules.addAll(policy.getRequiredAuthenticators());
+//		}
+//		
+//		return modules;
+//	}
 	
-	@Override
-	public Collection<AuthenticationModule> resolveOptionalUserModules(User user) {
-		
-		Set<AuthenticationModule> modules = new HashSet<>();
-		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
-			modules.addAll(policy.getOptionalAuthenticators());
-		}
-		
-		return modules;
-	}
+//	@Override
+//	public Collection<AuthenticationModule> resolveOptionalUserModules(User user) {
+//		
+//		Set<AuthenticationModule> modules = new HashSet<>();
+//		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
+//			modules.addAll(policy.getOptionalAuthenticators());
+//		}
+//		
+//		return modules;
+//	}
 		
 	@SuppressWarnings("unused")
 	private Collection<AuthenticationModule> resolveMissingModules(User user, Collection<AuthenticationModule> modules) {
@@ -692,10 +691,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Override
 	public void onApplicationStartup() {
-		/**
-		 * Removing this because we now specify password as a switch on policy
-		 */
-//		registerAuthenticationPage(getAuthenticationModule(PASSWORD_MODULE_UUID), Password.class, Login.class);
+
 	}
 
 	@Override

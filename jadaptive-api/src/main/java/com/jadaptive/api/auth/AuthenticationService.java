@@ -124,9 +124,9 @@ public interface AuthenticationService {
 
 	int countUserCredentials(User user);
 
-	Collection<AuthenticationModule> resolveRequiredUserModules(User user);
+//	Collection<AuthenticationModule> resolveRequiredUserModules(User user);
 
-	Collection<AuthenticationModule> resolveOptionalUserModules(User user);
+//	Collection<AuthenticationModule> resolveOptionalUserModules(User user);
 
 	boolean requiresPostAuthentication(AuthenticationPolicy policy, User user);
 
