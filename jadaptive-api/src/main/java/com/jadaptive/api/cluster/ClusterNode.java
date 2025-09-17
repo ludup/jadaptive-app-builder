@@ -10,8 +10,8 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.TableView;
-import com.jadaptive.api.ui.menu.ApplicationMenuService;
-import com.jadaptive.api.ui.menu.PageMenu;
+//import com.jadaptive.api.ui.menu.ApplicationMenuService;
+//import com.jadaptive.api.ui.menu.PageMenu;
 
 @ObjectDefinition(resourceKey = ClusterNode.RESOURCE_KEY, type = ObjectType.COLLECTION, creatable = false, updatable = false, deletable = false, system = true)
 @TableView(defaultColumns = {"status", "uuid", "hostname", "lastHeartbeat" }, 
