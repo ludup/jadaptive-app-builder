@@ -21,11 +21,12 @@ otherColumns = {
 		  @DynamicColumn(resourceKey = "lastHeartbeat", service = ClusterManager.class),
 		  @DynamicColumn(resourceKey = "hostname", service = ClusterManager.class),
 }, multipleDelete = false)
-@PageMenu(
-		parent = ApplicationMenuService.REPORTING_MENU_UUID, 
-		icon = "fa-stars", 
-		weight = 2000, 
-		withPermission = "system.read")
+//https://logonboxlimited.slack.com/files/UK6PMG66Q/F09FVKER4D7/untitled
+//@PageMenu(
+//		parent = ApplicationMenuService.REPORTING_MENU_UUID, 
+//		icon = "fa-stars", 
+//		weight = 2000, 
+//		withPermission = "system.read")
 public final class ClusterNode extends UUIDEntity {
 
 	private static final long serialVersionUID = -7912946488135263747L;
