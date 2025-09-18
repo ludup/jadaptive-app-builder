@@ -27,7 +27,7 @@ public abstract class PersonalUUIDEntity extends AbstractUUIDEntity {
 	}
 
 	public User getOwner() {
-		if(Objects.isNull(owner)) {
+		if(Objects.nonNull(owner)) {
 			return owner = App.bean(UserService.class).getObjectByUUID(ownerUUID);
 		}
 		return owner;
