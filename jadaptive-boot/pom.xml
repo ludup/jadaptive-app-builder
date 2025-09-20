@@ -17,6 +17,7 @@
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder</plugin.projectUrl>
 		<plugin.dependencies></plugin.dependencies>
+		<jackson-bom.version>2.17.1</jackson-bom.version>
 	</properties>
 
 	<dependencies>
@@ -282,13 +283,21 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+	            <groupId>com.fasterxml.jackson</groupId>
+	            <artifactId>jackson-bom</artifactId>
+	            <version>2.17.2</version> <type>pom</type>
+	            <scope>import</scope>
+	        </dependency>
+			<dependency>
 				<!-- Import dependency management from Spring Boot -->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>3.2.4</version>
+				<version>3.2.6</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
+
 </project>
