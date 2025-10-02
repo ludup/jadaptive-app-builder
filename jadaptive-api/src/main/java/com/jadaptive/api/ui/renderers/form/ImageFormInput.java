@@ -44,7 +44,7 @@ public class ImageFormInput extends FormInputRender {
 				  attr("data-reset-type", "image").
 				  attr("data-reset-for", getFormVariable()).
 				  appendChild(
-					new Element("i").addClass("fa fa-broom-wide")
+					new Element("i").addClass("fa-solid fa-broom-wide")
 				)
 			));
 		}

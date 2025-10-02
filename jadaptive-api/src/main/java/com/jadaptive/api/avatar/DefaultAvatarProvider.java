@@ -12,7 +12,7 @@ public class DefaultAvatarProvider implements AvatarProvider {
 	@Override
 	public Optional<Avatar> find(AvatarRequest request) {
 		return Optional.of(() -> 
-			Html.i("fa", "fa-user")
+			Html.i("fa-solid", "fa-user")
 		);
 	}
 
