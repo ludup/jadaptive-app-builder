@@ -1,72 +1,41 @@
 package com.jadaptive.api.ui.pages.ext;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Objects;
-
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageHelper;
 
 @Component
 public class Fontawesome extends AbstractPageExtension {
-
-	final String free = "/app/content/npm2mvn/npm.fortawesome/fontawesome-free/current/css/all.css";
-	final String pro = "/app/content/fontawesome-pro-7.1.0-web/css/all.css";
-	boolean isPro = false;
-	String iconSet = "fa-solid";
 	
-	@Autowired
-	private ClassLoaderService classService; 
-	
-	String runtimePath = null;
+	String iconset = "fa-solid";
 	
 	@Override
 	public void process(Document document, Element element, Page page) {
-	
-		if(Objects.isNull(runtimePath)) {
-			Collection<Class<?>> classes = classService.resolveAnnotatedClasses(EnableFontAwesomePro.class);
-			if(classes.isEmpty()) {
-				runtimePath = free;
-			} else {
-				Class<?> clz = classes.iterator().next();
-				EnableFontAwesomePro a = clz.getAnnotation(EnableFontAwesomePro.class);
-				
-				runtimePath = pro;
-				isPro = true;
-				iconSet = a.iconSet();		
-			}
-		}
 		
-		PageHelper.appendStylesheet(document, runtimePath);
-
-		if(isPro) {
-			page.addProcessor(new AbstractPageExtension() {
-				@Override
-				public void process(Document document, Element extensionElement, Page page) throws IOException {
-					String appliedIconset = document.select("body").hasAttr("data-iconset") ?
-							document.select("body").attr("data-iconset") : iconSet;
-					document.select(".fa-solid").removeClass("fa-solid").addClass(appliedIconset);
-					document.select("body").attr("data-iconset", appliedIconset);
-				}
-
-				@Override
-				public String getName() {
-					return "fontawesome-pro";
-				}
-			});
+		if(StringUtils.isBlank(document.selectFirst("body").attr("data-iconset"))) {
+			document.selectFirst("body").attr("data-iconset", "fa-solid");
+			PageHelper.appendStylesheet(document, 
+					"/app/content/npm2mvn/npm.fortawesome/fontawesome-free/current/css/all.css",
+					"fontawesomeCss");
 		}
 	}
 	
 	@Override
 	public String getName() {
 		return "fontawesome";
+	}
+
+	public String iconset() {
+		return iconset;
+	}
+	
+	public void setIconSet(String iconset) {
+		this.iconset = iconset;
 	}
 
 }
