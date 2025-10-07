@@ -652,7 +652,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			return template;
 			
-		} catch(RepositoryException | ObjectException | IOException e) {
+		} catch(RepositoryException | ObjectException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
 			throw new IllegalStateException();
 		}
