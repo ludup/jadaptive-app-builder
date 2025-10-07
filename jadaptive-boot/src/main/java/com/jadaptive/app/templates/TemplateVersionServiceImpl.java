@@ -474,7 +474,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(Objects.isNull(bytecode)) {
 				bytecode = ClassChecksumGenerator.getBytecode(clz);
 			}
-			String hash = ClassChecksumGenerator.getChecksum(bytecode);
 			
 			String resourceKey = e.resourceKey();
 			if(StringUtils.isBlank(resourceKey)) {
@@ -535,6 +534,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				}
 				
 				templateRepository.saveOrUpdate(parentTemplate);
+			} else if(StringUtils.isNotBlank(template.getParentTemplate())) {
+				template.setParentTemplate("");
 			}
 			
 			boolean generateEventTemplates = hasGenerateTemplatesAnnotation(clz);
@@ -542,12 +543,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			if(!loadCached) {
 				
-				if(log.isInfoEnabled()) {
-					log.info("Hash differs template from annotations on class {} {}/{}", 
-							clz.getSimpleName(), 
-							template.getHash(),
-							hash);
-				}
 				Class<?> baseClass = TemplateUtils.getBaseClass(clz);
 				ObjectDefinition collection = e; 
 				if(Objects.nonNull(baseClass)) {
@@ -572,10 +567,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					templateRepository.saveOrUpdate(parentTemplate);
 				}
 	
-				template.setHash(hash);
 				if(saveBytecode) {
 					template.setClassDefinition(Base64.getEncoder().encodeToString(bytecode));
 				}
+				
 				template.setDisplayKey(getDisplayKey(clz, resourceKey));
 				template.setResourceKey(resourceKey);
 				template.setTemplateType(e.templateType());
