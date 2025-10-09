@@ -672,7 +672,7 @@ $(function() {
 		$('#' + target + "Holder").addClass("d-none");
 		
 		$('#' + target + 'Holder')
-			.before('<div id="' + target + 'Restore" class="text-warning mt-2"><small class="me-2">' + $(this).data('filename') + ' $[userInterface:restoreAttachment.text]</small> <a href="#" class="attachment-restore" data-target="' + target + '"><i class="fa-solid fa-trash-undo"></i></a></div>');
+			.before('<div id="' + target + 'Restore" class="text-warning mt-2"><small class="me-2">' + $(this).data('filename') + ' $[userInterface:restoreAttachment.text]</small> <a href="#" class="attachment-restore" data-target="' + target + '"><i class="' + $('body').data('iconset') + ' fa-trash-undo"></i></a></div>');
 	
 		$('.attachment-restore').click(function(e) {
 			e.preventDefault();
