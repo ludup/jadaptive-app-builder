@@ -24,6 +24,7 @@ public class CreateTenant extends WizardUUIDEntity {
 
 	@ObjectField(type = FieldType.TEXT)
 	@Validator(type = ValidationType.REQUIRED)
+	@Validator(type = ValidationType.REGEX, value = "^[^0-9]+.*$", bundle = RESOURCE_KEY, i18n = "name.invalid")
 	String name;
 	
 	@ObjectField(type = FieldType.TEXT)
