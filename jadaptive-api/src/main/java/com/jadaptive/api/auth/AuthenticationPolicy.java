@@ -54,6 +54,7 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 	Collection<AuthenticationModule> requiredAuthenticators = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.INTEGER, view = "optional", weight = 0)
+	@Validator(type = ValidationType.RANGE, value = "0-" + Integer.MAX_VALUE)
 	Integer optionalRequired = 0;
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY, view = "optional", weight = 10)
