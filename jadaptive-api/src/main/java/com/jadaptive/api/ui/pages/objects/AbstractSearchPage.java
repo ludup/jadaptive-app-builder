@@ -63,6 +63,14 @@ public abstract class AbstractSearchPage extends BaseSearchPage<SearchForm> {
 		
 		super.processForm(document, form);
 	}
+	
+	@Override
+	protected void setupTemplate(Document document) {
+		super.setupTemplate(document);
+		document.selectFirst("#start").val("0");
+	}
+
+
 
 	@Override
 	public final String getJsResource() {
