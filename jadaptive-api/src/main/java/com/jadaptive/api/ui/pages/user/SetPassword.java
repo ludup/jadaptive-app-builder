@@ -24,7 +24,7 @@ import com.jadaptive.api.user.UserService;
 @Component
 @RequestPage(path = "set-password/{uuid}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = { "freemarker", "i18n" })
+@PageProcessors(extensions = {  "i18n" })
 @ModalPage
 public class SetPassword extends HtmlPage implements FormProcessor<PasswordForm> {
 

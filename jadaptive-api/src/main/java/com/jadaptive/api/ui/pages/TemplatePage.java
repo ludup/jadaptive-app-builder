@@ -90,6 +90,33 @@ public abstract class TemplatePage extends AuthenticatedPage {
 
 	}
 		
+	protected void setupTemplate(Document document) {
+		
+		for(Element e : document.select("[jad:bundle]")) {
+			e.attr("jad:bundle", e.attr("jad:bundle")
+					.replace("${page.template.bundle}", template.getBundle()
+							.replace("${page.template.name}", template.getBundle())));
+		}
+		
+		for(Element e : document.select("[jad:i18n]")) {
+			e.attr("jad:i18n", e.attr("jad:i18n")
+					.replace("${page.template.resourceKey}", template.getResourceKey()));
+		}
+		
+		for(Element e : document.select("[jad:help]")) {
+			e.attr("jad:help", e.attr("jad:help")
+					.replace("${page.template.resourceKey}", template.getResourceKey()));
+		}
+
+		Element form = document.selectFirst("#form");
+		if(Objects.nonNull(form)) {
+			String action = form.attr("action");
+			document.selectFirst("#form").attr("action", action.replace("${page.template.resourceKey}", template.getResourceKey()));
+		}
+		
+	}
+
+	
 	@Override
 	protected final void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
 
@@ -103,7 +130,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 	}
 
 	protected void beforeGenerateContent(Document document) {
-
+		setupTemplate(document);
 	}
 	
 	protected void documentComplete(Document document) throws IOException {

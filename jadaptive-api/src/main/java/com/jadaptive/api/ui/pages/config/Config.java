@@ -14,7 +14,7 @@ import com.jadaptive.api.ui.pages.ObjectTemplatePage;
 @Component
 @RequestPage(path = "config/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = { "freemarker", "i18n"} )
+@PageProcessors(extensions = {  "i18n"} )
 public class Config extends ObjectTemplatePage {
 	
 	@Override

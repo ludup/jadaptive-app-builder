@@ -25,7 +25,7 @@ import com.jadaptive.api.user.UserService;
 @Component
 @RequestPage(path="admin-search/{resourceKey}/{uuid}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = { "freemarker", "help", "i18n"} )
+@PageProcessors(extensions = {  "help", "i18n"} )
 public class AdministrativePersonalSearch extends AbstractSearchPage  {
 
 	String uuid;

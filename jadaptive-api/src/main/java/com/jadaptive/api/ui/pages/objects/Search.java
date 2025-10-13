@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 @RequestPage(path="search/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = { "freemarker", "help", "i18n"} )
+@PageProcessors(extensions = { "help", "i18n"} )
 public class Search extends AbstractSearchPage  {
 
 	@Autowired
