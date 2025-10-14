@@ -16,7 +16,7 @@ public class StatsConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "statsConfiguration";
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "90", weight = 0)
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "00", weight = 0)
 	private int daysToRetain;
 	
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "28", weight = 10)
