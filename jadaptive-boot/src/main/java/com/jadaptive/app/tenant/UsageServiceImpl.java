@@ -39,12 +39,9 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.Utils;
 
 @Service
-@LicensedFeature(value = UsageServiceImpl.QUERY_ALL_USAGE_DATA, group = FeatureGroup.PROFESSIONAL, includedWithPAYG = true)
 public class UsageServiceImpl implements UsageService, TenantAware {
 	
-	private final static Logger LOG = LoggerFactory.getLogger(UsageServiceImpl.class); 
-	
-	public final static String QUERY_ALL_USAGE_DATA = "Query All Usage Data";
+	private final static Logger LOG = LoggerFactory.getLogger(UsageServiceImpl.class);
 
 	@Autowired
 	private TenantAwareObjectDatabase<Usage> usageDatabase;

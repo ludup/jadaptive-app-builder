@@ -16,11 +16,12 @@ public class StatsConfiguration extends SingletonUUIDEntity {
 
 	public static final String RESOURCE_KEY = "statsConfiguration";
 	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "90", weight = 0)
+	/**
+	 * Default to retain everything. This can be changed per-deployment.
+	 * DO NOT CHANGE THIS DEFAULT FROM ZERO IN AS IT WOULD DELETE DATA FROM LIVE DEPLOYMENTS
+	 */
+	@ObjectField(type = FieldType.INTEGER, defaultValue = "0", weight = 0)
 	private int daysToRetain;
-	
-	@ObjectField(type = FieldType.INTEGER, defaultValue = "28", weight = 10)
-	private int evaluatorQueryDays;
 
 	@Override
 	public String getResourceKey() {
@@ -34,15 +35,5 @@ public class StatsConfiguration extends SingletonUUIDEntity {
 	public void setDaysToRetain(int daysToRetain) {
 		this.daysToRetain = daysToRetain;
 	}
-
-	public int getEvaluatorQueryDays() {
-		return evaluatorQueryDays;
-	}
-
-	public void setEvaluatorQueryDays(int evaluatorQueryDays) {
-		this.evaluatorQueryDays = evaluatorQueryDays;
-	}
-
-
 
 }

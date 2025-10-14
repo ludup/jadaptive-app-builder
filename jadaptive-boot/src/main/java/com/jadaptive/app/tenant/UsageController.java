@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.charts.BarChartDateLongValue;
 import com.jadaptive.api.db.SingletonObjectDatabase;
@@ -27,8 +29,8 @@ import com.jadaptive.api.json.ResourceStatus;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.stats.StatsConfiguration;
+import com.jadaptive.api.stats.UsageQueryConfiguration;
 import com.jadaptive.api.stats.UsageService;
-import com.jadaptive.api.tenant.FeatureEnablementService;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.Utils;
 
@@ -46,10 +48,6 @@ public class UsageController extends AuthenticatedController {
 	
 	@Autowired
 	private TenantService tenantService;
-	
-//	@Autowired
-	// TODO featureService is NULL - cant inject !!!!!!
-	private FeatureEnablementService featureService; 
 	
 	@Autowired
 	private SingletonObjectDatabase<StatsConfiguration> config;
@@ -176,16 +174,16 @@ public class UsageController extends AuthenticatedController {
 			/* System tenant always gets all  usage data */
 			return days;
 		}
-		// TODO featureService is NULL - cant inject !!!!!!
-		else if(featureService != null && featureService.isEnabled(UsageServiceImpl.QUERY_ALL_USAGE_DATA)) {
-			/* As does anyone with license with QUERY_ALL_USAGE_DATA */
-			return days;
-		}
 		else {
-			/* Everyone else gets a default amount 
-			 */
-			var statsConfig = config.getObject(StatsConfiguration.class);
-			return Math.min(statsConfig.getEvaluatorQueryDays(), days);
+			
+			try {
+				/** Product may define this **/
+				UsageQueryConfiguration conf = App.bean(UsageQueryConfiguration.class);
+				return conf.getMaxQueryDays(days);
+			} catch(NoSuchBeanDefinitionException e) {
+				return days;
+			}
+			
 		}
 	}
 }
