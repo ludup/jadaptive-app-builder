@@ -63,4 +63,7 @@ public interface UserService extends UUIDObjectService<User>, AvatarProvider, Dy
 
 	Iterable<User> iterateUsers();
 
+	void configureTelephone(User user, String phone, boolean primary);
+
+	void configureEmailAddress(User user, String emailAddress, boolean primary);
 }

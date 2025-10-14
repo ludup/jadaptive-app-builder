@@ -18,5 +18,9 @@ public interface FeatureEnablementService {
 	void assertFeature(String feature);
 
 	Set<LicensedFeature> getFeaturesByGroup(FeatureGroup group);
+
+	FeatureGroup edition();
+	
+	boolean isEvaluation();
 	
 }

@@ -21,7 +21,7 @@ import com.jadaptive.api.ui.PageResources;
 import com.jadaptive.utils.FileUtils;
 
 @Service
-@LicensedFeature(group = FeatureGroup.DEVELOPER, value = HtmlContentService.DEVELOPER_TOOLS, includedWithPAYG = false)
+@LicensedFeature(group = FeatureGroup.ENTERPRISE, value = HtmlContentService.DEVELOPER_TOOLS, includedWithPAYG = false)
 public class HtmlContentServiceImpl implements HtmlContentService {
 
 	@Autowired
