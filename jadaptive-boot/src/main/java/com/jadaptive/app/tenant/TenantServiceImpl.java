@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,7 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 
@@ -655,6 +657,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			} finally {
 				permissionService.clearUserContext();
 			}
+		} catch(Redirect e) { 
+			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		} finally {
