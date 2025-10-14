@@ -94,13 +94,14 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		
 		for(Element e : document.select("[jad:bundle]")) {
 			e.attr("jad:bundle", e.attr("jad:bundle")
-					.replace("${page.template.bundle}", template.getBundle()
-							.replace("${page.template.name}", template.getBundle())));
+					.replace("${page.template.bundle}", template.getBundle())
+							.replace("${page.template.name}", template.getBundle()));
 		}
 		
 		for(Element e : document.select("[jad:i18n]")) {
 			e.attr("jad:i18n", e.attr("jad:i18n")
-					.replace("${page.template.resourceKey}", template.getResourceKey()));
+					.replace("${page.template.resourceKey}", template.getResourceKey())
+					.replace("${page.template.name}", template.getResourceKey()));
 		}
 		
 		for(Element e : document.select("[jad:help]")) {
