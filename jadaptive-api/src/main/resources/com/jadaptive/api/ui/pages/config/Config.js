@@ -23,11 +23,10 @@ $(document).ready(function() {
            data: new FormData(form[0]),
            success: function(data)
            {
-			if(data.success) {
-           	    JadaptiveUtils.success($('#feedback'), '$[userInterface:configuration.saved]');
-			} else {
-				JadaptiveUtils.error(data.message);
-			}
+			if(data.success)
+			  		window.location = '/app/ui/options';
+			else
+				window.location.reload();
            },
            complete: function() {
            		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
