@@ -399,4 +399,8 @@ public class AuthenticationState {
 	public boolean hasSetupPostAuthentication() {
 		return Objects.nonNull(getAttribute(PROCESS_POST_AUTHENTICATION));
 	}
+
+	public boolean inPostAuthentication() {
+		return hasSetupPostAuthentication() && isRequiredAuthenticationComplete() && isOptionalComplete();
+	}
 }
