@@ -75,6 +75,11 @@ public class TenantJobRunner implements Runnable {
 		future = taskScheduler.schedule(this, Utils.now().toInstant());
 	}
 	
+	public void runAfter(TenantTask task, Duration duration) {
+		this.task = task;
+		future = taskScheduler.schedule(this, Utils.now().toInstant().plus(duration));
+	}
+	
 	public void schedule(TenantTask task, Date startTime) {
 		this.task = task;
 		future = taskScheduler.schedule(this, startTime.toInstant());

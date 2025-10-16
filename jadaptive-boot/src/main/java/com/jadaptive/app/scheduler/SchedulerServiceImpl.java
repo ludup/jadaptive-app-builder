@@ -198,19 +198,14 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 
 	@Override
 	public void scheduleIn(Runnable task, Duration duration, User user) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void scheduleIn(Runnable task, Duration duration) {
-		
 		String taskUUID = UUID.randomUUID().toString();
 
 		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), taskUUID);
+		job.setUser(user);
+		
 		applicationService.autowire(job);
 
-		job.scheduleIn(new TenantTask() {
+		job.runAfter(new TenantTask() {
 
 			@Override
 			public void run() {
@@ -225,6 +220,11 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 		}, duration);
 		
 		scheduledJobs.put(taskUUID, job);
+	}
+
+	@Override
+	public void scheduleIn(Runnable task, Duration duration) {
+		scheduleIn(task, duration, null);
 	}
 
 }
