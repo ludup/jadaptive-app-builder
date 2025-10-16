@@ -24,11 +24,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.charts.BarChartDateLongValue;
-import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.json.ResourceStatus;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.stats.StatsConfiguration;
 import com.jadaptive.api.stats.UsageQueryConfiguration;
 import com.jadaptive.api.stats.UsageService;
 import com.jadaptive.api.tenant.TenantService;
@@ -48,9 +46,6 @@ public class UsageController extends AuthenticatedController {
 	
 	@Autowired
 	private TenantService tenantService;
-	
-	@Autowired
-	private SingletonObjectDatabase<StatsConfiguration> config;
 	
 	@RequestMapping(value="/app/api/usage/daily/{key}/{days}/", method = RequestMethod.GET, produces = {"application/json;charset-UTF-8"})
 	@ResponseBody

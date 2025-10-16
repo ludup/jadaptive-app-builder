@@ -23,7 +23,6 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.user.User;
-import com.jadaptive.api.user.UserService;
 import com.jadaptive.utils.Utils;
 import com.sshtools.common.publickey.SshKeyPairGenerator;
 import com.sshtools.common.publickey.SshKeyUtils;
@@ -38,9 +37,6 @@ public class AuthorizedKeyServiceImpl extends AbstractUUIDObjectServceImpl<Autho
 	
 	@Autowired
 	private PersonalObjectDatabase<AuthorizedKey> objectDatabase; 
-	
-	@Autowired
-	private UserService userService; 
 	
 	@Override
 	public Collection<AuthorizedKey> getAuthorizedKeys(User user) {

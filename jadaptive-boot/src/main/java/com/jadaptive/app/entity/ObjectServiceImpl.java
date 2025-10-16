@@ -51,7 +51,6 @@ import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
-import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.MongoEntity;
@@ -87,9 +86,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Autowired
 	private DocumentDatabase documentDatabase;
-
-	@Autowired
-	private TenantService tenantService; 
 	
 	@Autowired
 	private TransactionService transactionService; 

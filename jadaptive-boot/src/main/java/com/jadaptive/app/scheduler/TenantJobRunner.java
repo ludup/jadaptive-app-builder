@@ -18,6 +18,7 @@ import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 
 public class TenantJobRunner implements Runnable {
@@ -37,10 +38,17 @@ public class TenantJobRunner implements Runnable {
 	TenantTask task;
 	ScheduledFuture<?> future;
 	String tenantUUID;
+	User user = null;
 	
 	public TenantJobRunner(Tenant tenant, String taskUUID) {
 		this.tenantUUID = tenant.getUuid();
 		this.taskUUID = taskUUID;
+	}
+	
+	public TenantJobRunner(Tenant tenant, String taskUUID, User user) {
+		this.tenantUUID = tenant.getUuid();
+		this.taskUUID = taskUUID;
+		this.user = user;
 	}
 	
 	public void schedule(ScheduledTask task) {
@@ -68,43 +76,42 @@ public class TenantJobRunner implements Runnable {
 		future = taskScheduler.schedule(task, startTime.toInstant());
 	}
 	
+	public void scheduleIn(TenantTask task, Duration duration) {
+		this.task = task;
+		future = taskScheduler.scheduleWithFixedDelay(task, duration);
+	}
+	
 	@Override
 	public void run() {
 		
-		Tenant tenant = null;
-		
-		try {
-			tenant = tenantService.getTenantByUUID(tenantUUID);
-		} catch(ObjectNotFoundException e) {
-			log.error("Tenant does not exist for UUID {}", tenantUUID);
-			future.cancel(false);
-			return;
-		}
-		
+		final Tenant tenant = tenantService.getTenantByUUID(tenantUUID);
 		tenantService.setCurrentTenant(tenant);
 		
-		// TODO run as a different user
-		permissionService.setupSystemContext();
-		
 		try {
-			for(TaskRunnerContext ctx : ApplicationServiceImpl.getInstance().getBeans(TaskRunnerContext.class)) {
-				ctx.setupContext();
-			}
-			
-			if(task.isLogging() && log.isInfoEnabled()) {
-				log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());
-			}
-			try {
-				task.run();
-			} catch(Throwable e) {
-				log.error("Task ended with error", e);
-		    } finally {
-				tenantService.clearCurrentTenant();
-			}
 
+			permissionService.as(user == null ? permissionService.getSystemUser() : user, ()->{
+				for(TaskRunnerContext ctx : ApplicationServiceImpl.getInstance().getBeans(TaskRunnerContext.class)) {
+					ctx.setupContext();
+				}
+				
+				if(task.isLogging() && log.isInfoEnabled()) {
+					log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());
+				}
+				try {
+					task.run();
+				} catch(Throwable e) {
+					log.error("Task ended with error", e);
+			    } 
+			});
+		} catch(Throwable e) {
+			log.error("Scheduled task {} failed", tenantUUID, e);
+			future.cancel(false);
+			return;
 		} finally {
-			permissionService.clearUserContext();
+			tenantService.clearCurrentTenant();
 		}
+		
+		
 	}
 	public void cancel(boolean mayInterrupt) {
 		future.cancel(mayInterrupt);

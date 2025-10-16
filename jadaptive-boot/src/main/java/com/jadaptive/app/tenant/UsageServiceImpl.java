@@ -26,8 +26,6 @@ import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
-import com.jadaptive.api.permissions.FeatureGroup;
-import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.stats.DailyCounter;
 import com.jadaptive.api.stats.MonthlyCounter;
 import com.jadaptive.api.stats.StatsConfiguration;
