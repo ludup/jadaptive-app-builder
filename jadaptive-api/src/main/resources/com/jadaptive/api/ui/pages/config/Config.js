@@ -35,37 +35,7 @@ $(document).ready(function() {
               JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
               $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
               $('#feedbackText').text(data.message);
-          });
-        
-        
-        /*
-        JadaptiveUtils.validate(form, function() {
-            $.ajax({
-               type: "POST",
-               url: url,
-               cache: false,
-               contentType: false,
-               processData: false,
-               data: new FormData(form[0]),
-               success: function(data)
-               {
-                debugger;
-                if(data.success)
-                        window.location = '/app/ui/options';
-                else
-                    window.location.reload();
-               },
-               complete: function() {
-                    debugger;
-                    JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
-               }
-             });
-          }, function() {
-              debugger;
-              JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
-          });
-          */
-    	
+          });    	
     });
     
     var stashFunc = function(e) {
