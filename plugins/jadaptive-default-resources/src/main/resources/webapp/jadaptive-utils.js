@@ -44,7 +44,7 @@ validate: function(form, callback, invalid) {
 				  });
 			     
 			     if(invalid) {
-			     	invalid();
+			     	invalid(data);
 			     }
 			  }
 		   }

@@ -175,6 +175,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			form.addClass("jadaptiveForm")
 				.attr("method", "POST")
+				.id("formFor" + page.getClass().getSimpleName())
 				.attr("autocomplete", "off")
 				.attr("data-resourcekey", template.getResourceKey())
 				.attr("enctype", "multipart/form-data")
@@ -968,7 +969,16 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 							return super.getInputType();
 						}
 					}
-					
+
+					@Override
+					protected String getAutocomplete() {
+						if(fieldView.getRenderer() == FieldRenderer.SET_PASSWORD) {
+							return "new-password";
+						}
+						else {
+							return "off";
+						}
+					}
 				};
 				
 				if(!decorate) {

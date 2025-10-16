@@ -1,10 +1,6 @@
 $(document).ready(function() {
 
-	$('form').submit(function(e) {
-		e.preventDefault();
-	});
-	
-    $('#saveButton').click(function(e) {
+    $('form').submit(function(e) {
         e.preventDefault();
     
         $('#feedback').remove();
@@ -13,25 +9,63 @@ $(document).ready(function() {
     	var url = form.attr('action');
 
         JadaptiveUtils.startAwesomeSpin($('#saveButton i'), 'fa-save');
-
-    	$.ajax({
-           type: "POST",
-           url: url,
-           cache: false,
-           contentType: false,
-    	   processData: false,
-           data: new FormData(form[0]),
-           success: function(data)
-           {
-			if(data.success)
-			  		window.location = '/app/ui/options';
-			else
-				window.location.reload();
-           },
-           complete: function() {
-           		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
-           }
-         });
+        
+        JadaptiveUtils.validate(form, function() {
+              $.ajax({
+                 type: "POST",
+                 url: url,
+                 cache: false,
+                 contentType: false,
+                 processData: false,
+                 data: JadaptiveUtils.processedFormData(form, false),
+                 success: function(data)
+                 {
+                     if(data.success) {
+                       window.location = '/app/ui/options';
+                     } else {
+                         $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
+                         $('#feedbackText').text(data.message);
+                     }
+                 },
+                 complete: function() {
+                      JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
+                 }
+               });
+           }, function(data) {
+              JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
+              $('#content').prepend('<p id="feedback" class="alert alert-danger col-12"><i class="' + $('body').data('iconset') + ' fa-exclamation-square"></i> <span id="feedbackText"></span></p>');
+              $('#feedbackText').text(data.message);
+          });
+        
+        
+        /*
+        JadaptiveUtils.validate(form, function() {
+            $.ajax({
+               type: "POST",
+               url: url,
+               cache: false,
+               contentType: false,
+               processData: false,
+               data: new FormData(form[0]),
+               success: function(data)
+               {
+                debugger;
+                if(data.success)
+                        window.location = '/app/ui/options';
+                else
+                    window.location.reload();
+               },
+               complete: function() {
+                    debugger;
+                    JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
+               }
+             });
+          }, function() {
+              debugger;
+              JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
+          });
+          */
+    	
     });
     
     var stashFunc = function(e) {
