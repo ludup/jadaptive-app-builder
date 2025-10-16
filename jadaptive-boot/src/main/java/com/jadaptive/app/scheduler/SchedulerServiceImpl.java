@@ -137,38 +137,6 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	}
 	
 	@Override
-	public void scheduleIn(Runnable task, Duration duration, User user) {
-	
-		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), UUID.randomUUID().toString(), user);
-		applicationService.autowire(job);
-		scheduleIn(new TenantTask() {
-	
-			@Override
-			public void run() {
-				task.run();
-			}
-			
-			@Override
-			public TaskScope getScope() {
-				return TaskScope.NODE;
-			}
-		}, duration);
-
-	}
-	
-	private void scheduleIn(TenantTask task, Duration duration) {
-		
-		String taskUUID = UUID.randomUUID().toString();
-		applicationService.autowire(task);
-		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), taskUUID);
-		applicationService.autowire(job);
-
-		job.scheduleIn(task, duration);
-		scheduledJobs.put(taskUUID, job);	
-
-	}
-
-	@Override
 	public void schedule(TenantTask task, String expression, String taskUUID) {
 		
 		applicationService.autowire(task);
@@ -229,8 +197,34 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	}
 
 	@Override
-	public void scheduleIn(Runnable runnable, Duration duration) {
-		scheduleIn(runnable, duration, null);
+	public void scheduleIn(Runnable task, Duration duration, User user) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void scheduleIn(Runnable task, Duration duration) {
+		
+		String taskUUID = UUID.randomUUID().toString();
+
+		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), taskUUID);
+		applicationService.autowire(job);
+
+		job.scheduleIn(new TenantTask() {
+
+			@Override
+			public void run() {
+				task.run();
+			}
+
+			@Override
+			public TaskScope getScope() {
+				return TaskScope.NODE;
+			}
+			
+		}, duration);
+		
+		scheduledJobs.put(taskUUID, job);
 	}
 
 }

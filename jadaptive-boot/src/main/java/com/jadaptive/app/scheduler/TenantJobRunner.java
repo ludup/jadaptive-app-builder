@@ -51,6 +51,10 @@ public class TenantJobRunner implements Runnable {
 		this.user = user;
 	}
 	
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
 	public void schedule(ScheduledTask task) {
 		this.task = task;
 		future = taskScheduler.schedule(this, new CronTrigger(task.cron()));
@@ -63,7 +67,7 @@ public class TenantJobRunner implements Runnable {
 	
 	public void schedule(TenantTask task, Date startTime, long repeat) {
 		this.task = task;
-		future = taskScheduler.scheduleAtFixedRate(task, startTime.toInstant(), Duration.ofMillis(repeat));
+		future = taskScheduler.scheduleAtFixedRate(this, startTime.toInstant(), Duration.ofMillis(repeat));
 	}
 	
 	public void runNow(TenantTask task) {
@@ -73,12 +77,12 @@ public class TenantJobRunner implements Runnable {
 	
 	public void schedule(TenantTask task, Date startTime) {
 		this.task = task;
-		future = taskScheduler.schedule(task, startTime.toInstant());
+		future = taskScheduler.schedule(this, startTime.toInstant());
 	}
 	
 	public void scheduleIn(TenantTask task, Duration duration) {
 		this.task = task;
-		future = taskScheduler.scheduleWithFixedDelay(task, duration);
+		future = taskScheduler.scheduleWithFixedDelay(this, duration);
 	}
 	
 	@Override
