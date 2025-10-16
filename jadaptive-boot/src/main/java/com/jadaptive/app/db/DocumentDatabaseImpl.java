@@ -1002,7 +1002,6 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			if(!index.getString("name").equals("_id_")) {
 				results.add(index.getString("name"));
 			}
-			System.out.println(index.toString());
 		}
 		return results;
 	}
