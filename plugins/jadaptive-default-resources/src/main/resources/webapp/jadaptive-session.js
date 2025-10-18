@@ -22,18 +22,30 @@ $.ajaxSetup({
 });
 
 
+var serverIsDown = false;
 var verifySession = function() {
-	$.ajax({
-		url: '/app/verify'
-	}).done(function() {
-		setTimeout(verifySession, 10000);
-	}).fail(function(xhr) {
-		if(xhr.status == 410 && !window.location.pathname.startsWith('/app/ui/login')) {
-			window.location = '/app/ui/login';
-		}
-		else
-			setTimeout(verifySession, 10000);
-	});
+    $.ajax({
+        url: '/app/verify'
+    }).done(function() {
+        if (serverIsDown) {
+            console.log("Server is back up, redirecting to login ....");
+            window.location = '/app/ui/login';
+        }
+        else {
+            setTimeout(verifySession, 10000);
+        }
+    }).fail(function(xhr) {
+        if (xhr.status == 0 && !serverIsDown) {
+            serverIsDown = true;
+            console.log("Server is down, waiting ....");
+            setTimeout(verifySession, 10000);
+        }
+        else if (xhr.status == 410 && !window.location.pathname.startsWith('/app/ui/login')) {
+            window.location = '/app/ui/login';
+        }
+        else
+            setTimeout(verifySession, 10000);
+    });
 };
 
 $(function() {

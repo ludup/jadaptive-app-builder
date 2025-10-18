@@ -189,7 +189,9 @@ public abstract class HtmlPage implements Page {
 		
 	}
 
-	protected void documentComplete(Document document) throws FileNotFoundException, IOException { };
+	protected void documentComplete(Document document) throws FileNotFoundException, IOException { 
+		PageHelper.appendHeadScript(document, "/app/content/jadaptive-session.js");
+	};
 	
 	private void processPageExtensions(String uri, Document document) throws IOException {
 		

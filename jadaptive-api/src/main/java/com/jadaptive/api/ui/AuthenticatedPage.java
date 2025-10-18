@@ -73,13 +73,6 @@ public abstract class AuthenticatedPage extends HtmlPage {
 		generateAuthenticatedContent(document);			
 	}
 
-	@Override
-	protected void documentComplete(Document document) throws IOException {
-		PageHelper.appendHeadScript(document, "/app/content/jadaptive-session.js");
-		super.documentComplete(document);
-	}
-
-
 	protected void generateAuthenticatedContent(Document document) throws FileNotFoundException, IOException {
 		
 	}
