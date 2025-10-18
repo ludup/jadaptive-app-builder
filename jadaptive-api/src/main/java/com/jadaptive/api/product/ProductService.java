@@ -1,6 +1,10 @@
 package com.jadaptive.api.product;
 
 public interface ProductService {
+	
+	public enum ImageURIFormat {
+		PUBLIC_WEB_URI, BASE64_ENCODED
+	}
 
 	public enum ProductId {
 		FRAMEWORK,
@@ -31,9 +35,9 @@ public interface ProductService {
 	
 	String getCopyright();
 
-	String getLogoResource();
+	String getLogoResource(ImageURIFormat imageFormat);
 
-	String getFaviconResource();
+	String getFaviconResource(ImageURIFormat imageFormat);
 
 	String getProductName();
 

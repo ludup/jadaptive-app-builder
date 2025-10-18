@@ -395,7 +395,7 @@ public class SessionUtils {
 	
 	public void populateSecurityHeaders(HttpServletResponse response) {
 		
-		if(Objects.isNull(Request.get().getAttribute(DISABLE_CONTENT_SECURITY))) {
+		if(Objects.isNull(Request.getOr().map(o -> o.getAttribute(DISABLE_CONTENT_SECURITY)).orElse(null))) {
 			response.setHeader("X-Content-Type-Options", "nosniff");
 			response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 			response.setHeader("Content-Security-Policy", 

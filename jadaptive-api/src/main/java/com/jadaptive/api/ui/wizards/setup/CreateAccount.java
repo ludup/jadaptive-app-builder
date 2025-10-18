@@ -18,18 +18,22 @@ public class CreateAccount extends WizardUUIDEntity {
 	public static final String RESOURCE_KEY = "createAccount";
 
 	@ObjectField(type = FieldType.TEXT, renderer = FieldRenderer.SET_PASSWORD)
+	@Validator(type = ValidationType.REQUIRED)
 	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9@_\\-\\.]{4,128}$", bundle = RESOURCE_KEY, i18n = "username.invalid")
 	String username;
 
 	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.REQUIRED)
 	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", bundle = RESOURCE_KEY, i18n = "email.invalid")
 	String email;
 
 	@ObjectField(type = FieldType.PASSWORD, renderer = FieldRenderer.SET_PASSWORD)
+	@Validator(type = ValidationType.REQUIRED)
 	@Validator(bundle = CreateAccount.RESOURCE_KEY, type = ValidationType.REGEX, i18n = "invalid.password", value = "^(?=^.{8,}$)(?=.*\\d)|(?=.*\\W+)(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$")
 	String firstPassword;
 
 	@ObjectField(type = FieldType.PASSWORD, renderer = FieldRenderer.SET_PASSWORD)
+	@Validator(type = ValidationType.REQUIRED)
 	@Validator(bundle = CreateAccount.RESOURCE_KEY, type = ValidationType.REGEX, i18n = "invalid.password", value = "^(?=^.{8,}$)(?=.*\\d)|(?=.*\\W+)(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$")
 	String secondPassword;
 

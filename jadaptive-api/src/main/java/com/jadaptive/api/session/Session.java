@@ -50,7 +50,7 @@ public class Session extends AbstractUUIDEntity {
 	}
 
 	public final static Optional<Session> getOr() {
-		return getOr(Request.get());
+		return Request.getOr().map(r->getOr(r).orElse(null));
 	}
 
 	public final static Optional<Session> getOr(HttpServletRequest req) {

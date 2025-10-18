@@ -20,6 +20,7 @@ import com.jadaptive.api.avatar.AvatarRequest;
 import com.jadaptive.api.avatar.AvatarService;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.product.ProductService;
+import com.jadaptive.api.product.ProductService.ImageURIFormat;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.ui.AbstractPageExtension;
 import com.jadaptive.api.ui.CustomizablePage;
@@ -154,17 +155,19 @@ public class Header extends AbstractPageExtension {
 			}
 		}
 		
-		if(isNotBlank(productService.getLogoResource())) {
+		var lr = productService.getLogoResource(ImageURIFormat.PUBLIC_WEB_URI);
+		if(isNotBlank(lr)) {
 			var e = document.selectFirst("#logo");
 			if(Objects.nonNull(e)) {
-				e.attr("src", productService.getLogoResource());
+				e.attr("src", lr);
 			}
 		}
 		
-		if(isNotBlank(productService.getFaviconResource())) {
+		lr = productService.getFaviconResource(ImageURIFormat.PUBLIC_WEB_URI);
+		if(isNotBlank(lr)) {
 			document.selectFirst("head")
 				.appendElement("link")
-					.attr("href", productService.getFaviconResource())
+					.attr("href", lr)
 					.attr("rel", "icon");
 		}
 		
