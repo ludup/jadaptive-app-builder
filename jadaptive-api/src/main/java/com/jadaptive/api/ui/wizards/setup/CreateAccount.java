@@ -22,9 +22,9 @@ public class CreateAccount extends WizardUUIDEntity {
 	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9@_\\-\\.]{4,128}$", bundle = RESOURCE_KEY, i18n = "username.invalid")
 	String username;
 
-	@ObjectField(type = FieldType.TEXT)
+	@ObjectField(type = FieldType.TEXT, renderer = FieldRenderer.SET_PASSWORD)
 	@Validator(type = ValidationType.REQUIRED)
-	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$", bundle = RESOURCE_KEY, i18n = "email.invalid")
+	@Validator(type = ValidationType.EMAIL, bundle = RESOURCE_KEY, i18n = "email.invalid")
 	String email;
 
 	@ObjectField(type = FieldType.PASSWORD, renderer = FieldRenderer.SET_PASSWORD)
