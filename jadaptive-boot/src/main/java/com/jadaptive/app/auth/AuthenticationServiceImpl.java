@@ -409,7 +409,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 						};
 					}
 					catch(Exception e) {
-						e.printStackTrace();
+						log.error("Failed to create session.", e);
+						// TODO how do we communicate an error back to the user at this point? Currently it returns to login with no feedback.
 					}
 					finally {
 						clearUserContext();

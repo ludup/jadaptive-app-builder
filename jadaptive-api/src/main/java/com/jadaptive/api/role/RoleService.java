@@ -26,6 +26,12 @@ public interface RoleService extends AbstractUUIDObjectService<Role> {
 
 	void unassignRole(Role role, User... user);
 
+	/**
+	 * Get all of the {@link Role}s for the {@link User}, excluding roles that have {@link Role#isAllUsers()} <code>true</code>
+	 * 
+	 * @param user user
+	 * @return roles not including <strong>Everyone</strong> roles
+	 */
 	Collection<Role> getRoles(User user);
 
 	Role getRoleByName(String name);
@@ -50,6 +56,12 @@ public interface RoleService extends AbstractUUIDObjectService<Role> {
 
 	Iterable<Role> allRoles();
 
+	/**
+	 * Get all of the {@link Role}s for the {@link User}, including roles that have {@link Role#isAllUsers()} <code>true</code>
+	 * 
+	 * @param user user
+	 * @return roles including <strong>Everyone</strong> roles
+	 */
 	Collection<Role> getRolesByUser(User user);
 	
 	boolean isAssigned(AssignableUUIDEntity obj, User user);
@@ -67,8 +79,6 @@ public interface RoleService extends AbstractUUIDObjectService<Role> {
 	Collection<Role> getAdministrationRoles();
 
 	<T extends AssignableUUIDEntity> boolean hasEveryoneRole(T obj);
-
-	Collection<Role> getAllUserRoles(User user);
 
 	Collection<User> getUsers(AssignableUUIDEntity object);
 
