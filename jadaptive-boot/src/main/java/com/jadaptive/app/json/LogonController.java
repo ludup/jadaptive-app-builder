@@ -157,7 +157,7 @@ public class LogonController {
 
 		AuthenticationState state = authenticationService.getCurrentState();
 		authenticationService.clearAuthenticationState();
-		authenticationService.createAuthenticationState(state.getPolicy());
+		authenticationService.createAuthenticationState(state.getPolicy(), state.getHomePage());
 		
 		throw new PageRedirect(pageCache.resolvePage(Login.class));
 	}
