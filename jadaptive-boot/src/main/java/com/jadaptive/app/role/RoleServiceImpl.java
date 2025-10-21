@@ -142,8 +142,10 @@ public class RoleServiceImpl extends AbstractUUIDObjectServceImpl<Role> implemen
 	
 	@Override
 	public Collection<Role> getRoles(User user) {
+		
 		Set<Role> roles = new HashSet<>();
-		addUsersRoles(user, roles);
+		roles.addAll(getRolesByUser(user));
+		roles.addAll(getAllUserRoles(user));
 		return roles;
 	}
 	
@@ -310,11 +312,12 @@ public class RoleServiceImpl extends AbstractUUIDObjectServceImpl<Role> implemen
 	@Override
 	public Collection<Role> getRolesByUser(User user) {
 		List<Role> results = new ArrayList<>(getAllUserRoles(user));
-		addUsersRoles(user, results);
+		results.addAll(repository.searchObjects(Role.class, SearchField.all("users.uuid", user.getUuid())));
 		return results;
 	}
 
-	private Collection<Role> getAllUserRoles(User user) {
+	@Override
+	public Collection<Role> getAllUserRoles(User user) {
 		return repository.searchObjects(Role.class, 
 				SearchField.in("userTemplates", user.getResourceKey(), User.RESOURCE_KEY),
 				SearchField.eq("allUsers", true));
@@ -404,7 +407,4 @@ public class RoleServiceImpl extends AbstractUUIDObjectServceImpl<Role> implemen
 		return Role.class;
 	}
 
-	private boolean addUsersRoles(User user, Collection<Role> results) {
-		return results.addAll(repository.searchObjects(Role.class, SearchField.all("users.uuid", user.getUuid())));
-	}
 }
