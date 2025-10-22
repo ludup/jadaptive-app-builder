@@ -23,6 +23,7 @@ import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.pages.auth.Password.LoginForm;
+import com.jadaptive.api.user.FakeUser;
 import com.jadaptive.api.user.PasswordEnabledUser;
 
 @Component
@@ -97,7 +98,7 @@ public class Password extends AuthenticationPage<LoginForm> implements Authentic
 
 	@Override
 	public boolean canAuthenticate(AuthenticationState state) {
-		return state.getUser() instanceof PasswordEnabledUser;
+		return state.getUser() instanceof PasswordEnabledUser || state.getUser() instanceof FakeUser;
 	}
 
 	@Override

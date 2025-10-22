@@ -70,7 +70,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		
 		
 		if(LoginAuthenticationPolicy.class.isAssignableFrom(policyClz) && !App.bean(FeatureEnablementService.class).isEnabled(FEATURE_2FA)) {
-			return getDefaultAuthenticationPolicy(policyClz);
+			return getSystemDefaultPolicy(policyClz);
 		}
 		
 		List<AuthenticationPolicy> results =  new ArrayList<>();
@@ -144,7 +144,8 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		return results.get(0);
 	}
 	
-	private AuthenticationPolicy getDefaultAuthenticationPolicy(Class<? extends AuthenticationPolicy> clz) {
+	@Override
+	public AuthenticationPolicy getSystemDefaultPolicy(Class<? extends AuthenticationPolicy> clz) {
 		
 		AuthenticationPolicy defaultPolicy;
 		try {
@@ -232,7 +233,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		} else {
 			
 			if(!App.bean(FeatureEnablementService.class).isEnabled(FEATURE_2FA)) {
-				return getDefaultAuthenticationPolicy(clz);
+				return getSystemDefaultPolicy(clz);
 			}
 			
 			AuthenticationPolicy policy = policyDatabase.getObject(getResourceClass(), 
@@ -264,7 +265,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		try {
 			
 			if(!App.bean(FeatureEnablementService.class).isEnabled(FEATURE_2FA) && LoginAuthenticationPolicy.class.isAssignableFrom(clz)) {
-				return getDefaultAuthenticationPolicy(clz);
+				return getSystemDefaultPolicy(clz);
 			}
 			
 			List<AuthenticationPolicy> tmp = new ArrayList<>(policyDatabase.searchObjects(
@@ -298,7 +299,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	public Iterable<AuthenticationPolicy> getAssignedPolicies(User user) {
 		if(!App.bean(FeatureEnablementService.class).isEnabled(FEATURE_2FA)) {
-			return Arrays.asList(getDefaultAuthenticationPolicy(UserLoginAuthenticationPolicy.class));
+			return Arrays.asList(getSystemDefaultPolicy(UserLoginAuthenticationPolicy.class));
 		}
 		return policyDatabase.getAssignedObjectsA(AuthenticationPolicy.class, user);
 	}

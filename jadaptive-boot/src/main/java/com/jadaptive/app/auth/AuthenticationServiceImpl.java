@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
@@ -229,8 +230,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
 				Class<? extends Page> currentPage = state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass());
 				AuthenticationProvider module = registeredModulesByPage.get(currentPage);
+				log.warn("User failed authentication on page {}", currentPage.getSimpleName());
 				if(Objects.isNull(module)) {
-					log.warn("User failed authentication on page {} but no module is present!!!", currentPage.getSimpleName());
 					return;
 				}
 				eventService.publishEvent(new AuthenticationFailedEvent(module, 
@@ -349,7 +350,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	public AuthenticationCompletedResult completeAuthentication(AuthenticationState state, Optional<Page> page) {
 
 		if (Objects.isNull(state.getUser()) || !userService.supportsLogin(state.getUser())) {
-			throw new AccessDeniedException("Invalid credentials");
+			Feedback.error("Invalid credentials");
+			throw new PageRedirect(pageCache.getPage(Login.class));
 		}
 		
 		assertLoginThesholds();
@@ -378,6 +380,26 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			if(log.isInfoEnabled()) {
 				log.info("User {} has completed authentication", state.getUser().getUsername());
 			}
+			
+			if(state.isEnableEnumerationProtection()) {
+				clearAuthenticationState();
+				Feedback.error("default", "error.invalidCredentials");
+				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+				throw new PageRedirect(pageCache.getPage(Login.class));
+			} if(state.isNoPolicyProtection()) {
+				clearAuthenticationState();
+				Feedback.error("default", "error.noPolicy");
+				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+				throw new PageRedirect(pageCache.getPage(Login.class));
+			} else if(!state.getUser().isEnabled()) {
+				if(log.isInfoEnabled()) {
+					log.info("{} cannot login as the account is disabled.", state.getUser().getUsername());
+				}
+				clearAuthenticationState();
+				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+		    	Feedback.error("default", "error.accountDisabled");
+		    	throw new PageRedirect(pageCache.getPage(Login.class));
+			} 
 			
 			tenantService.recordLastLogin();
 			

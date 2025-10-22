@@ -50,6 +50,8 @@ public class AuthenticationState {
 	private int optionalCompleted = 0;
 	private int optionalRequired = 0;
 	private int optionalAvailable = 0;
+	private boolean enableEnumerationProtection = false;
+	private boolean noPolicyProtection = false;
 	
 	private AuthenticationPolicy policy;
 	
@@ -402,5 +404,21 @@ public class AuthenticationState {
 
 	public boolean inPostAuthentication() {
 		return hasSetupPostAuthentication() && isRequiredAuthenticationComplete() && isOptionalComplete();
+	}
+
+	public boolean isEnableEnumerationProtection() {
+		return enableEnumerationProtection;
+	}
+
+	public void setEnableEnumerationProtection(boolean enableEnumerationProtection) {
+		this.enableEnumerationProtection = enableEnumerationProtection;
+	}
+
+	public boolean isNoPolicyProtection() {
+		return noPolicyProtection;
+	}
+
+	public void setNoPolicyProtection(boolean noPolicyProtection) {
+		this.noPolicyProtection = noPolicyProtection;
 	}
 }

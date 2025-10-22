@@ -18,4 +18,6 @@ public interface AuthenticationPolicyService extends AbstractUUIDObjectService<A
 
 	boolean assertIPAddress(String remoteAddress, AuthenticationPolicy policy);
 
+	AuthenticationPolicy getSystemDefaultPolicy(Class<? extends AuthenticationPolicy> clz);
+
 }
