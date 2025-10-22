@@ -42,9 +42,9 @@ public class ProductServiceImpl implements ProductService, StartupAware {
 	@Override
 	public String getLogoResource(ImageURIFormat uriFormat) {
 		try {
-			return base64Images.encodeToString(uriFormat, getProduct().getClass(), appService.getBean(ProductLogoSource.class).getProductLogo());
+			return base64Images.encodeToString(uriFormat, appService.getBean(ProductLogoSource.class).getProductLogo());
 		} catch(Throwable e) {
-			return base64Images.encodeToString(uriFormat, getProduct().getClass(), ApplicationProperties.getValue("app.logo", getProduct().getLogoResource()));
+			return base64Images.encodeToString(uriFormat, ApplicationProperties.getValue("app.logo", getProduct().getLogoResource()));
 		}
 	}
 	
@@ -55,7 +55,7 @@ public class ProductServiceImpl implements ProductService, StartupAware {
 	
 	@Override
 	public String getFaviconResource(ImageURIFormat uriFormat) { 
-		return base64Images.encodeToString(uriFormat, getProduct().getClass(), ApplicationProperties.getValue("app.favicon", getProduct().getFaviconResource()));
+		return base64Images.encodeToString(uriFormat, ApplicationProperties.getValue("app.favicon", getProduct().getFaviconResource()));
 	}
 	
 	@Override

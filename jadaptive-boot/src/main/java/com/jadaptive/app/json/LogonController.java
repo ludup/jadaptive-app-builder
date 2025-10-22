@@ -146,8 +146,11 @@ public class LogonController {
 	@RequestMapping(value="/app/api/login/reset", method = { RequestMethod.GET }, produces = { "text/html"})
 	public void resetLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, AccessDeniedException, UnauthorizedException {
 
-		authenticationService.clearAuthenticationState();
-		authenticationService.createAuthenticationState();
+		var was = authenticationService.clearAuthenticationState();
+		if(was.isPresent())
+			authenticationService.createAuthenticationState(was.get().getHomePage());
+		else
+			authenticationService.createAuthenticationState();
 		
 		throw new PageRedirect(pageCache.resolvePage(Login.class));
 	}

@@ -681,8 +681,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //	}
 
 	@Override
-	public void clearAuthenticationState() {
+	public Optional<AuthenticationState> clearAuthenticationState() {
+		var was = Optional.ofNullable((AuthenticationState)Request.get().getSession().getAttribute(AUTHENTICATION_STATE_ATTR));
 		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
+		return was;
 	}
 
 	@Override

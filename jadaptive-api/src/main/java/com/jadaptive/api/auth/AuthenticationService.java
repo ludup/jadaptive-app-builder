@@ -77,7 +77,7 @@ public interface AuthenticationService {
 //
 //	Class<? extends Page> resetAuthentication(String authenticationFlow, @SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
 
-	void clearAuthenticationState();
+	Optional<AuthenticationState> clearAuthenticationState();
 
 	void decorateAuthenticationPage(Document content);
 

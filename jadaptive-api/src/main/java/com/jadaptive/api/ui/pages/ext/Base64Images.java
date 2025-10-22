@@ -8,8 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.product.ProductService.ImageURIFormat;
 
 /**
@@ -18,6 +20,9 @@ import com.jadaptive.api.product.ProductService.ImageURIFormat;
  */
 @Component
 public class Base64Images {
+	
+	@Autowired
+	private ClassLoaderService classLoaderService;
 
 	public record Base64ImageResource(String contentType, long size, String extension, byte[] data) {
 	}
@@ -28,13 +33,11 @@ public class Base64Images {
 	 * Convert a resource path into a Base64 encoded image, then decode that for
 	 * transmission.
 	 * 
-	 * @param clazz class (and so class loader) to derive resource from if it needs
-	 *              to be converted
 	 * @param value image path
 	 * @return image resource data
 	 */
-	public Base64ImageResource decode(Class<?> clazz, String value) {
-		return decodeBase64URI(encodeToString(ImageURIFormat.BASE64_ENCODED, clazz, value)).get();
+	public Base64ImageResource decode(String value) {
+		return decodeBase64URI(encodeToString(ImageURIFormat.BASE64_ENCODED, value)).get();
 	}
 
 	/**
@@ -70,23 +73,21 @@ public class Base64Images {
 	 * cache it for future use).
 	 * 
 	 * @param uriFormat preferred URI format
-	 * @param clazz     class (and so class loader) to derive resource from if it
-	 *                  needs to be converted
 	 * @param value     image URI
 	 * @return converted image URI
 	 */
-	public String encodeToString(ImageURIFormat uriFormat, Class<?> clazz, String value) {
+	public String encodeToString(ImageURIFormat uriFormat, String value) {
 
 		var b64img = decodeBase64URI(value);
 		var isB64 = b64img.isPresent();
 		var wantB64 = uriFormat == ImageURIFormat.BASE64_ENCODED;
 		if (isB64 != wantB64) {
 			if (wantB64) {
-				var cacheKey = value + "-" + clazz.getName();
+				var cacheKey = value + "-" + uriFormat.name();
 				var cachedB64 = b64ImageCache.get(cacheKey);
 				if (cachedB64 == null) {
 					if (value.startsWith("/app/content/")) {
-						var res = clazz.getClassLoader().getResource("webapp/" + value.substring(13));
+						var res = classLoaderService.getResource("webapp/" + value.substring(13));
 						if (res == null) {
 							throw new IllegalArgumentException("Image resource does not exist. " + value);
 						} else {
