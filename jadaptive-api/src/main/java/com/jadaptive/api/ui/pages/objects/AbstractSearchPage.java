@@ -63,6 +63,14 @@ public abstract class AbstractSearchPage extends BaseSearchPage<SearchForm> {
 		
 		super.processForm(document, form);
 	}
+	
+	@Override
+	protected void setupTemplate(Document document) {
+		super.setupTemplate(document);
+		document.selectFirst("#start").val("0");
+	}
+
+
 
 	@Override
 	public final String getJsResource() {
@@ -101,7 +109,7 @@ public abstract class AbstractSearchPage extends BaseSearchPage<SearchForm> {
 		
 		searchValue = Request.get().getParameter("filter");
 		if(Objects.isNull(searchValue)) {
-			searchValue = getCachedValue("searchValue", StringUtils.defaultIfBlank(Request.get().getParameter("filter"), template.getDefaultFilter()));
+			searchValue = getCachedValue("searchValue", StringUtils.defaultIfBlank(Request.get().getParameter("filter"), ""));
 			if(StringUtils.isBlank(searchValue)) {
 				searchValue = null;
 			}

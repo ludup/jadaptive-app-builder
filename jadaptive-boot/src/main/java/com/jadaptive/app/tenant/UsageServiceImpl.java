@@ -1,24 +1,45 @@
 package com.jadaptive.app.tenant;
 
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.charts.BarChartDateLongValue;
 import com.jadaptive.api.db.SearchField;
+import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.stats.DailyCounter;
 import com.jadaptive.api.stats.MonthlyCounter;
+import com.jadaptive.api.stats.StatsConfiguration;
 import com.jadaptive.api.stats.Usage;
 import com.jadaptive.api.stats.UsageService;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.utils.Utils;
 
 @Service
-public class UsageServiceImpl implements UsageService {
+public class UsageServiceImpl implements UsageService, TenantAware {
+	
+	private final static Logger LOG = LoggerFactory.getLogger(UsageServiceImpl.class);
 
 	@Autowired
 	private TenantAwareObjectDatabase<Usage> usageDatabase;
@@ -28,6 +49,29 @@ public class UsageServiceImpl implements UsageService {
 	
 	@Autowired
 	private TenantAwareObjectDatabase<MonthlyCounter> monthlyDatabase;
+	
+	@Autowired
+	private SingletonObjectDatabase<StatsConfiguration> config;
+	
+	@Autowired
+	private TenantService tenantService;
+	
+	@Autowired
+	private EventService eventService;
+	
+	private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+	private Map<String, ScheduledFuture<?>> tenantCleanUpTasks = new ConcurrentHashMap<>();
+	
+	@PostConstruct
+	private void onConstruct() {
+		eventService.eventRegistrations(() -> {
+			eventService.deleted(Tenant.class, (evt)-> {
+				var tsk = tenantCleanUpTasks.get(evt.getObject().getUuid());
+				if(tsk != null)
+					tsk.cancel(false);
+			});;
+		});
+	}
 	
 	@Override
 	public void log(long value, String... keys) {
@@ -225,5 +269,57 @@ public class UsageServiceImpl implements UsageService {
 	public Long sumAnd(String... keys) {
 		return usageDatabase.sumLongValues(Usage.class, "value", 
 				SearchField.all("keys", Arrays.asList(keys)));
+	}
+	
+	@Override
+	public void initializeTenant(Tenant tenant, boolean newSchema) {
+		schedule(tenant);
+	}
+	
+	private void cleanUp(Tenant tenant) {
+		
+		/* Clean up daily around midnight, but spread this out  between the hour between 12am and 1am.
+		 * Each tenant is assigned a minute of the hour they are always scheduled for (% 60). 
+		 */
+		var statsConfig = config.getObject(StatsConfiguration.class);
+		var days = Math.max(0, statsConfig.getDaysToRetain());
+		if(days == 0) {
+			LOG.warn("Not cleaning up usage statistics for {}, days to retain is ZERO. Data will accumulate forever.");
+		}
+		else {
+			
+			LOG.info("Cleaning up usage statistic for {}", tenant.getName());
+			
+			var z = ZoneId.systemDefault();
+			var started = System.currentTimeMillis();
+			var start = ZonedDateTime.now( z ).toLocalDate().minusDays(days);
+	
+			LOG.info("Delete usage older than {} ({} day(s))", start, days);
+			usageDatabase.delete(Usage.class, SearchField.lt("created", Date.from(start.atStartOfDay()
+				      .atZone(ZoneId.systemDefault())
+				      .toInstant())));
+			LOG.info("Cleaned up usage statistic for {}, took {}", tenant.getName(), System.currentTimeMillis() - started);
+		}
+		
+		/* Schedule next one */
+		schedule(tenant);
+	}
+
+	private void schedule(Tenant tenant) {
+		var z = ZoneId.systemDefault();
+		var now = ZonedDateTime.now( z );
+		var tomorrow = now.toLocalDate().plusDays(1);
+		var tomorrowStart = tomorrow.atStartOfDay( z );
+		
+		tenantCleanUpTasks.put(tenant.getUuid(), executor.schedule(() -> {
+			/* Make sure new task runs with an updated tenant (at the point it runs) */
+			tenantService.asSystem(() -> {
+				var ten = tenantService.getTenantByUUID(tenant.getUuid());
+				tenantService.executeAs(tenant, () -> {
+					cleanUp(ten);
+				});
+			});
+		}, Duration.between(now, tomorrowStart).toMinutes() + (Integer.toUnsignedLong(tenant.getUuid().hashCode()) % 60),
+				TimeUnit.MINUTES));
 	}
 }

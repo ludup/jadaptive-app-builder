@@ -15,12 +15,16 @@ import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.product.Product;
 import com.jadaptive.api.product.ProductLogoSource;
 import com.jadaptive.api.product.ProductService;
+import com.jadaptive.api.ui.pages.ext.Base64Images;
 
 @Service
 public class ProductServiceImpl implements ProductService, StartupAware {
 
 	@Autowired
-	App appService; 
+	private App appService; 
+
+	@Autowired
+	private Base64Images base64Images;
 	
 	final private Product defaultProduct = new Product() { };
 	
@@ -36,18 +40,22 @@ public class ProductServiceImpl implements ProductService, StartupAware {
 	}
 	
 	@Override
-	public String getLogoResource() {
+	public String getLogoResource(ImageURIFormat uriFormat) {
 		try {
-			ProductLogoSource source = appService.getBean(ProductLogoSource.class);
-			return source.getProductLogo();
+			return base64Images.encodeToString(uriFormat, appService.getBean(ProductLogoSource.class).getProductLogo());
 		} catch(Throwable e) {
-			return ApplicationProperties.getValue("app.logo", getProduct().getLogoResource());
+			return base64Images.encodeToString(uriFormat, ApplicationProperties.getValue("app.logo", getProduct().getLogoResource()));
 		}
 	}
 	
 	@Override
-	public String getFaviconResource() { 
-		return ApplicationProperties.getValue("app.favicon", getProduct().getFaviconResource());
+	public boolean supportsPAYG() {
+		return getProduct().supportsPAYG();
+	}
+	
+	@Override
+	public String getFaviconResource(ImageURIFormat uriFormat) { 
+		return base64Images.encodeToString(uriFormat, ApplicationProperties.getValue("app.favicon", getProduct().getFaviconResource()));
 	}
 	
 	@Override

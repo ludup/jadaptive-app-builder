@@ -7,6 +7,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.pf4j.ExtensionPoint;
 
+import com.jadaptive.api.ui.HtmlPage.PageEnd;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -34,9 +36,11 @@ public interface Page extends PageResources, ExtensionPoint {
 			throws IOException;;
 			
     void addProcessor(PageExtension ext);
-
+    
 	Document generateHTMLDocument(String uri) throws IOException;
 	
 	default boolean isBackStop() { return false; }
+
+	void addPageEnd(PageEnd end);
 
 }

@@ -51,7 +51,6 @@ import com.jadaptive.api.templates.JsonTemplateEnabledService;
 import com.jadaptive.api.templates.SystemTemplates;
 import com.jadaptive.api.templates.TemplateUtils;
 import com.jadaptive.api.tenant.AbstractTenantAwareObjectDatabase;
-import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.app.db.DocumentDatabase;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.MongoEntity;
@@ -87,9 +86,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Autowired
 	private DocumentDatabase documentDatabase;
-
-	@Autowired
-	private TenantService tenantService; 
 	
 	@Autowired
 	private TransactionService transactionService; 
@@ -279,26 +275,27 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	
 	@Override
 	public <T extends UUIDDocument> void stashObject(T object) throws ValidationException, RepositoryException, ObjectException {
-		
-		tenantService.asSystem(()->{
+// TODO See https://logonboxlimited.slack.com/archives/GNCA26336/p1756377494945439	
+//		tenantService.asSystem(()->{
 			Document doc = new Document();
 			DocumentHelper.convertObjectToDocument(object, doc);
 			MongoEntity e = new MongoEntity(doc);
 			if(!stashViaObjectBean(e, templateRepository.get(object.getResourceKey()))) {
 				Request.get().getSession().setAttribute(object.getResourceKey(), object);
 			}
-		});
+//		});
 
 	}
 	
 	@Override
 	public <T extends UUIDDocument> void stashObject(AbstractObject object) throws ValidationException, RepositoryException, ObjectException {
-		
-		tenantService.asSystem(()->{
+
+// TODO See https://logonboxlimited.slack.com/archives/GNCA26336/p1756377494945439			
+//		tenantService.asSystem(()->{
 			if(!stashViaObjectBean(object, templateRepository.get(object.getResourceKey()))) {
 				Request.get().getSession().setAttribute(object.getResourceKey(), object);
 			}
-		});
+//		});
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -494,8 +491,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 //	}
 
 	private boolean stashViaObjectBean(AbstractObject obj, ObjectTemplate template) {
-		
-		assertWrite(template);
 		
 		Class<? extends UUIDDocument> clz = templateService.getTemplateClass(template.getResourceKey());
 		if(Objects.nonNull(clz)) {

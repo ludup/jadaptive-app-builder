@@ -7,11 +7,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Component;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.db.SingletonObjectDatabase;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.PermissionService.RunnableWithException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
@@ -33,6 +36,7 @@ import com.jadaptive.utils.Utils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Component
 public class SessionUtils {
@@ -143,21 +147,24 @@ public class SessionUtils {
 			if(Objects.isNull(requestToken)) {
 				requestToken = request.getHeader("CsrfToken");
 			}
-			String csrf = (String)request.getSession().getAttribute(formIdentifier);
-			if(Objects.isNull(csrf)) {
+			@SuppressWarnings("unchecked")
+			Map<String,String> tokens = (Map<String,String>) request.getSession().getAttribute(CSRF_TOKEN_ATTRIBUTE);
+			if(Objects.isNull(tokens)) {
+				throw new UnauthorizedException(String.format("Missing CSRF token setup in %s", request.getRequestURI()));
+			}
+			String form = tokens.remove(requestToken);
+			if(Objects.isNull(form)) {
 				log.warn("No CSRF token in session!");
-				throw new UnauthorizedException("No CSRF token in session!");
+				throw new UnauthorizedException(String.format("No CSRF token in session! %s", request.getRequestURI()));
 			}
 			if(Objects.isNull(requestToken)) {
-				throw new UnauthorizedException("No CSRF token in form!");
+				throw new UnauthorizedException(String.format("No CSRF token in form!", request.getRequestURI()));
 			}
-			if(!requestToken.equals(csrf)) {
+			if(!formIdentifier.equals(form)) {
 				log.warn("CSRF token mistmatch for {} from {}", formIdentifier, request.getRequestURI());
-				log.debug("REMOVEME: Current token for {} is {}", formIdentifier, csrf);
 				log.debug("REMOVEME: Request token {}", requestToken);
 				debugRequest(request);
-				throw new UnauthorizedException(String.format("CSRF token mistmatch from %s", 
-						request.getRequestURI()));
+				throw new UnauthorizedException(String.format("CSRF token mistmatch from %s", request.getRequestURI()));
 			}
 		}
 	}
@@ -326,6 +333,14 @@ public class SessionUtils {
 		addCookie(cookie, response);
 
 	}
+	
+	public <T> T doInSession(HttpSession session, Callable<T> r) {
+		return permissionService.as(Session.get(session).getUser(), r);
+	}
+	
+	public void doInSession(HttpSession session, RunnableWithException r) {
+		permissionService.as(Session.get(session).getUser(), r);
+	}
 
 	public void touch(Session session) throws SessionTimeoutException  {
 		sessionService.touch(session);
@@ -356,12 +371,22 @@ public class SessionUtils {
 			}
 		}
 		
-		request.getSession().setAttribute(formIdentifier, token);
+		registerCSRFToken(request, formIdentifier, token);
 		
 		if(log.isDebugEnabled()) {
-			log.debug("REMOVEME: Set CSRF token for {} to {}", token);
+			log.debug("REMOVEME: Setting CSRF token for page {} to {}", request.getRequestURI(), token);
 		}
 		return token;
+	}
+
+	private void registerCSRFToken(HttpServletRequest request, String formIdentifier, String token) {
+		@SuppressWarnings("unchecked")
+		Map<String,String> tokens = (Map<String,String>) request.getSession().getAttribute(CSRF_TOKEN_ATTRIBUTE);
+		if(Objects.isNull(tokens)) {
+			tokens = new HashMap<>();
+			request.getSession().setAttribute(CSRF_TOKEN_ATTRIBUTE, tokens);
+		}
+		tokens.put(token, formIdentifier);
 	}
 
 	public String setupCSRFToken(HttpServletRequest request, String formIdentifier) {
@@ -370,7 +395,7 @@ public class SessionUtils {
 	
 	public void populateSecurityHeaders(HttpServletResponse response) {
 		
-		if(Objects.isNull(Request.get().getAttribute(DISABLE_CONTENT_SECURITY))) {
+		if(Objects.isNull(Request.getOr().map(o -> o.getAttribute(DISABLE_CONTENT_SECURITY)).orElse(null))) {
 			response.setHeader("X-Content-Type-Options", "nosniff");
 			response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 			response.setHeader("Content-Security-Policy", 

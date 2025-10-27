@@ -1,6 +1,8 @@
 package com.jadaptive.api.servlet;
 
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +16,10 @@ public class Request {
 	public static void setUp(HttpServletRequest request, HttpServletResponse response) {
 		threadRequests.set(request);
 		threadResponses.set(response);
+	}
+
+	public static Optional<HttpServletRequest> getOr() {
+		return Optional.ofNullable(threadRequests.get());
 	}
 	
 	public static HttpServletRequest get() {

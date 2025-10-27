@@ -53,7 +53,7 @@ public class I18NConvertingReader extends Reader {
 			return data;
 
 		data = this.pushbackReader.read();
-		if (data != '{') {
+		if (data != '[') {
 			this.pushbackReader.unread(data);
 			return '$';
 		}
@@ -72,7 +72,7 @@ public class I18NConvertingReader extends Reader {
 		}
 		
 		data = this.pushbackReader.read();
-		while (data != ':' && data != '}') {
+		while (data != ':' && data != ']') {
 			this.keyNameBuffer.append((char) data);
 			if(keyNameBuffer.length() > 99) {
 				 throw new IllegalStateException("Potential bad i18n format found in file " + filename);
@@ -80,9 +80,12 @@ public class I18NConvertingReader extends Reader {
 			data = this.pushbackReader.read();
 		}
 		
-		while(data!='}') {
+		while(data!=']') {
 			data = this.pushbackReader.read();
-			 while (data != ':' && data != '}'); {
+			if(data == -1) {
+				break;
+			}
+			 while (data != ':' && data != ']'); {
 				this.argsValueBuffer.append((char) data);
 				data = this.pushbackReader.read();
 				 if(argsValueBuffer.length() > 99) {
@@ -98,7 +101,7 @@ public class I18NConvertingReader extends Reader {
 
 		this.tokenValue = i18n.format(bundleNameBuffer.toString(), Locale.getDefault(), keyNameBuffer.toString(), args.toArray(new Object[0]));
 
-		if (this.tokenValue.length() == 0) {
+		if (this.tokenValue==null || this.tokenValue.length() == 0) {
 			return read();
 		} else {
 			return this.tokenValue.charAt(this.tokenValueIndex++);

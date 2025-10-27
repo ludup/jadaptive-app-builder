@@ -176,7 +176,7 @@ public class Dashboard extends AuthenticatedPage {
 		if(tabCount < 2) {
 			document.getElementById("nav-tab").addClass("d-none");
 		}
-		if(tabCount < 1) {
+		if(tabs < 1) {
 			document.getElementById("noWidgets").removeClass("d-none");
 		}
 	}

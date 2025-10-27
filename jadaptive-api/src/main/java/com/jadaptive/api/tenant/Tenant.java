@@ -1,6 +1,7 @@
 package com.jadaptive.api.tenant;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -28,7 +29,7 @@ import com.jadaptive.utils.Utils;
 @ObjectServiceBean(bean = TenantService.class)
 @GenerateEventTemplates(value = Tenant.RESOURCE_KEY)
 @ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)
-@TableView(defaultColumns = { "name", "hostname", "code", "database" })
+@TableView(defaultColumns = { "name", "hostname", "lastLogin", "code", "database" })
 @CreateURL(value = "/app/ui/wizards/setupTenant", i18n = "wizard.name")
 @TableAction(bundle = Tenant.RESOURCE_KEY, defaultAction = true, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}")
 public class Tenant extends NamedUUIDEntity implements NamedDocument {
@@ -59,6 +60,9 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE)
 	DatabaseConnection database;
+	
+	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true)
+	Date lastLogin;
 	
 	public Tenant() {
 		
@@ -149,5 +153,13 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 
 	public void setDatabase(DatabaseConnection database) {
 		this.database = database;
+	}
+
+	public Date getLastLogin() {
+		return lastLogin;
+	}
+
+	public void setLastLogin(Date lastLogin) {
+		this.lastLogin = lastLogin;
 	}
 }

@@ -460,22 +460,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
                 }
             }
 		}
-		
-//		FieldTemplate t = new FieldTemplate();
-//		t.setCollection(true);
-//		t.setFieldType(FieldType.TEXT);
-//		t.setMeta("");
-//		t.setResourceKey("collectionOfStrings");
-//		
-//		FieldTemplate t2 = new FieldTemplate();
-//		t2.setCollection(false);
-//		t2.setFieldType(FieldType.DATE);
-//		t2.setMeta("");
-//		t2.setResourceKey("fooDate");
-//
-//		createTemplate(RecordType.UNIQUE_NAMED, ObjectScope.GLOBAL, ObjectType.COLLECTION, "sshtools.com", "Contract", t, t2);
-//		
-		
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -489,7 +474,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			if(Objects.isNull(bytecode)) {
 				bytecode = ClassChecksumGenerator.getBytecode(clz);
 			}
-			String hash = ClassChecksumGenerator.getChecksum(bytecode);
 			
 			String resourceKey = e.resourceKey();
 			if(StringUtils.isBlank(resourceKey)) {
@@ -550,16 +534,15 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				}
 				
 				templateRepository.saveOrUpdate(parentTemplate);
+			} else if(StringUtils.isNotBlank(template.getParentTemplate())) {
+				template.setParentTemplate("");
 			}
 			
 			boolean generateEventTemplates = hasGenerateTemplatesAnnotation(clz);
-			boolean loadCached = hash.equals(template.getHash());
+			boolean loadCached = false; //hash.equals(template.getHash());
 			
 			if(!loadCached) {
 				
-				if(log.isInfoEnabled()) {
-					log.info("Registering template from annotations on class {}", clz.getSimpleName());
-				}
 				Class<?> baseClass = TemplateUtils.getBaseClass(clz);
 				ObjectDefinition collection = e; 
 				if(Objects.nonNull(baseClass)) {
@@ -584,10 +567,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					templateRepository.saveOrUpdate(parentTemplate);
 				}
 	
-				template.setHash(hash);
 				if(saveBytecode) {
 					template.setClassDefinition(Base64.getEncoder().encodeToString(bytecode));
 				}
+				
 				template.setDisplayKey(getDisplayKey(clz, resourceKey));
 				template.setResourceKey(resourceKey);
 				template.setTemplateType(e.templateType());
@@ -601,7 +584,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template.setTemplateClass(clz.getName());
 				template.getAliases().clear();
 				template.getAliases().addAll(Arrays.asList(e.aliases()));
-				template.setDefaultFilter(e.defaultFilter());
 				template.setDefaultColumn(e.defaultColumn());
 				
 				template.setCreatable(e.creatable());
@@ -614,15 +596,25 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				String nameField = "uuid";
 				
 				
+				Map<Field,String> fieldsResourceKey = new HashMap<>();
 				List<Field> fields = new ArrayList<>();
-				resolveFields(clz, fields, e.recurse());
 				
-				for(Field field :fields) {
+				if(e.recurse()) {
+					List<Class<?>> classes = findClassesWithObjectDefinitions(clz);
+					String rootBundle = TemplateUtils.resolveRootBundle(classes);
+					for(Class<?> c2 : classes) {
+						rootBundle = resolveFields(c2, fields, fieldsResourceKey, rootBundle);
+					}
+				} else {
+					resolveFields(clz, fields, fieldsResourceKey, template.getBundle());
+				}
+				
+				for(Field field : fields) {
 					
 					ObjectField objectAnnotation = field.getAnnotation(ObjectField.class);
 					
 					if(Objects.nonNull(objectAnnotation)) {
-						FieldTemplate t = processFieldAnnotations(objectAnnotation, "", field,  template);
+						FieldTemplate t = processFieldAnnotations(objectAnnotation, "", field,  template, fieldsResourceKey.get(field));
 						if(objectAnnotation.nameField()) {
 							nameField =t.getResourceKey();
 						}
@@ -660,7 +652,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			
 			return template;
 			
-		} catch(RepositoryException | ObjectException | IOException e) {
+		} catch(RepositoryException | ObjectException e) {
 			log.error("Failed to process annotated template {}", clz.getSimpleName(), e);
 			throw new IllegalStateException();
 		}
@@ -1219,7 +1211,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 	}
 
-	private FieldTemplate processFieldAnnotations(ObjectField field, String parentPrefix, Field f, ObjectTemplate template) {
+	private FieldTemplate processFieldAnnotations(ObjectField field, String parentPrefix, Field f, ObjectTemplate template, String bundle) {
 
 		FieldTemplate t = new FieldTemplate();
 		t.setResourceKey(f.getName());
@@ -1238,7 +1230,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		t.setReadOnly(field.readOnly());
 		t.setView(field.view());
 		t.setRenderer(field.renderer());
-		t.setBundle(StringUtils.isBlank(field.bundle()) ? template.getBundle() : field.bundle());
+		t.setBundle(StringUtils.isBlank(field.bundle()) ? bundle : field.bundle());
 		t.setWeight(field.weight());
 		
 		switch(field.type()) {
@@ -1254,19 +1246,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				t.getValidators().add(new FieldValidator(
 						ValidationType.RESOURCE_KEY, 
 						resourceKey, ObjectTemplate.RESOURCE_KEY, "resourceKey.invalid"));
-				
-//				List<Field> fields = new ArrayList<>();
-//				resolveFields(clz, fields, true);
-//				ObjectTemplate t2 = templateService.get(objd.resourceKey());
-//				for(Field f2 : fields) {
-//					
-//					ObjectField objectAnnotation = f2.getAnnotation(ObjectField.class);
-//					
-//					if(Objects.nonNull(objectAnnotation)) {
-//						FieldTemplate t3 = processFieldAnnotations(objectAnnotation, parentPrefix + f.getName() + ".", f2,  t2);
-//						template.getFields().add(t3);
-//					}
-//				}
+
 			}
 			
 			t.getValidators().add(new FieldValidator(
@@ -1420,19 +1400,31 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		return displayKey;
 	}
 	
-	
-
-	private void resolveFields(Class<?> clz, List<Field> fields, boolean recurse) {
+	private List<Class<?>> findClassesWithObjectDefinitions(Class<?> clz) {
+		List<Class<?>> tmp = new ArrayList<>();
 		
-		if(recurse) {
-			if(!clz.getSuperclass().equals(Object.class)) {
-				resolveFields(clz.getSuperclass(), fields, true);
+		
+		do {
+			tmp.add(clz);
+			clz = clz.getSuperclass();
+		} while(!clz.equals(Object.class));
+		
+		Collections.reverse(tmp);
+		return tmp;
+	}
+
+	private String resolveFields(Class<?> clz, List<Field> fields, Map<Field,String> fieldsResourceKey, String bundle) {
+		
+		bundle = TemplateUtils.lookupBundleWithDefault(clz, bundle);
+		
+		for(Field field : clz.getDeclaredFields()) {
+			if(ReflectionUtils.hasAnnotation(field, ObjectField.class)) {
+				fieldsResourceKey.put(field, bundle);
+				fields.add(field);
 			}
 		}
 		
-		for(Field field : clz.getDeclaredFields()) {
-			fields.add(field);
-		}
+		return bundle;
 	}
 
 	private FieldType selectFieldType(Class<?> type, FieldType declaredType) {

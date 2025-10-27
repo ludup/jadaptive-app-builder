@@ -77,7 +77,7 @@ public interface AuthenticationService {
 //
 //	Class<? extends Page> resetAuthentication(String authenticationFlow, @SuppressWarnings("unchecked") Class<? extends Page>... additionalPages);
 
-	void clearAuthenticationState();
+	Optional<AuthenticationState> clearAuthenticationState();
 
 	void decorateAuthenticationPage(Document content);
 
@@ -124,9 +124,9 @@ public interface AuthenticationService {
 
 	int countUserCredentials(User user);
 
-	Collection<AuthenticationModule> resolveRequiredUserModules(User user);
+//	Collection<AuthenticationModule> resolveRequiredUserModules(User user);
 
-	Collection<AuthenticationModule> resolveOptionalUserModules(User user);
+//	Collection<AuthenticationModule> resolveOptionalUserModules(User user);
 
 	boolean requiresPostAuthentication(AuthenticationPolicy policy, User user);
 

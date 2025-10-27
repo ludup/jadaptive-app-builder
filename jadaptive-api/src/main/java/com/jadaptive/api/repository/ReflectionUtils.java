@@ -16,6 +16,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.WordUtils;
 
+import com.jadaptive.api.template.ObjectField;
+
 
 
 public class ReflectionUtils {
@@ -247,5 +249,10 @@ public class ReflectionUtils {
 			}
 		}
 		return null;
+	}
+
+
+	public static boolean hasAnnotation(Field field, Class<ObjectField> annotationClazz) {
+		return field.getAnnotation(annotationClazz) != null;
 	}
 }

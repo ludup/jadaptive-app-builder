@@ -24,10 +24,10 @@ public class UserLoginAuthenticationPolicy extends LoginAuthenticationPolicy {
 	}
 	
 	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = "factors")
-	Boolean passwordOnFirstPage;
+	Boolean passwordOnFirstPage = Boolean.TRUE;
 	
 	@ObjectField(type = FieldType.BOOL, defaultValue = "true", view = "factors")
-	Boolean passwordRequired;
+	Boolean passwordRequired = Boolean.TRUE;
 	
 	public Boolean getPasswordOnFirstPage() {
 		return passwordOnFirstPage;

@@ -351,6 +351,7 @@ public class OAuth2TokenController extends AuthenticatedController {
 
 	protected OAuth2Response createToken(OAuth2Application application, User user, String nonce, String[] scope, OAuth2Configuration oauth2Config)
 			throws AccessDeniedException {
+		var currentTenant = getCurrentTenant();
 		
 		/* Double check the user still has permission for the requested scopes. If this is a refresh token, this may have
 		 * changed since the token was issued
@@ -365,7 +366,7 @@ public class OAuth2TokenController extends AuthenticatedController {
 			token.setRefreshToken(OAuth2AuthorizationService.genToken());
 		}
 		token.setOwner(user);
-		token.setTenant(getCurrentTenant().getUuid());
+		token.setTenant(currentTenant.getUuid());
 		token.setScopes(Arrays.asList(scope));
 		token.setNonce(nonce);
 

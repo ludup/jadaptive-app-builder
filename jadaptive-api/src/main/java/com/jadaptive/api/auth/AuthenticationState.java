@@ -34,8 +34,10 @@ public class AuthenticationState {
 	private String userAgent;
 	private Map<String,Object> attrs = new HashMap<>();
 	private boolean decorateWindow = true;
-	private String resetURL = "/app/api/reset-login";
-	private String resetText = "Reset";
+	//private String resetURL = "/app/api/login/reset";
+	private boolean canStartAgain = true;
+	private String startAgainURL = "/app/api/login/start-again";
+	private String cancelURL = "/app/api/login/reset";
 	private int failedAttempts = 0;
 	private int currentPostAuthenticationIndex = 0;
 	private Redirect homePage;
@@ -48,6 +50,8 @@ public class AuthenticationState {
 	private int optionalCompleted = 0;
 	private int optionalRequired = 0;
 	private int optionalAvailable = 0;
+	private boolean enableEnumerationProtection = false;
+	private boolean noPolicyProtection = false;
 	
 	private AuthenticationPolicy policy;
 	
@@ -271,24 +275,32 @@ public class AuthenticationState {
 		this.decorateWindow = decorateWindow;
 	}
 	
-	public String getResetURL() {
-		return resetURL;
+	public String getStartAgainURL() {
+		return startAgainURL;
 	}
 	
-	public void setResetURL(String resetURL) {
-		this.resetURL = resetURL;
+	public void setStartAgainURL(String startAgainURL) {
+		this.startAgainURL = startAgainURL;
 	}
 
-	public boolean canReset() {
-		return failedAttempts > 0 || currentPageIndex > 0;
-	}
-
-	public String getResetText() {
-		return resetText;
+	public boolean canStartAgain() {
+		return canStartAgain && (failedAttempts > 0 || currentPageIndex > 0);
 	}
 	
-	public void setResetText(String resetText) {
-		this.resetText = resetText;
+	public void disableStartAgain() {
+		this.canStartAgain = false;
+	}
+	
+	public boolean canCancel() {
+		return !policy.isLoginPolicy();
+	}
+
+	public String getCancelURL() {
+		return cancelURL;
+	}
+
+	public void setCancelURL(String cancelURL) {
+		this.cancelURL = cancelURL;
 	}
 
 	public void incrementFailedAttempts() {
@@ -388,5 +400,25 @@ public class AuthenticationState {
 
 	public boolean hasSetupPostAuthentication() {
 		return Objects.nonNull(getAttribute(PROCESS_POST_AUTHENTICATION));
+	}
+
+	public boolean inPostAuthentication() {
+		return hasSetupPostAuthentication() && isRequiredAuthenticationComplete() && isOptionalComplete();
+	}
+
+	public boolean isEnableEnumerationProtection() {
+		return enableEnumerationProtection;
+	}
+
+	public void setEnableEnumerationProtection(boolean enableEnumerationProtection) {
+		this.enableEnumerationProtection = enableEnumerationProtection;
+	}
+
+	public boolean isNoPolicyProtection() {
+		return noPolicyProtection;
+	}
+
+	public void setNoPolicyProtection(boolean noPolicyProtection) {
+		this.noPolicyProtection = noPolicyProtection;
 	}
 }

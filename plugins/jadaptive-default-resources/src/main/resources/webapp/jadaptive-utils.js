@@ -44,7 +44,7 @@ validate: function(form, callback, invalid) {
 				  });
 			     
 			     if(invalid) {
-			     	invalid();
+			     	invalid(data);
 			     }
 			  }
 		   }
@@ -58,13 +58,14 @@ startAwesomeSpin : function(el, icon, spinner) {
 			if(classList) {
 				$.each(classList.split(/\s+/), function(index, item) {
 				    if (item.startsWith('fa-') && !item.startsWith("fa-spin") && !item.startsWith("fa-spinner")
-				    && !item.startsWith($('body').data('iconset'))) {
+				    && $('body').data('iconset').indexOf(item) == -1) {
 				       icon = item;
 					   el.data('faicon', icon);
 				    }
 				});
 			}
 		}
+		el.parent().attr('disabled', true);
 		el.removeClass(icon);
 		if(spinner) {
 			el.addClass(spinner);
@@ -77,6 +78,7 @@ stopAwesomeSpin : function(el, icon, spinner) {
 	    if(!icon) {
 			icon = el.data('faicon');
 		}
+		el.parent().removeAttr('disabled');
 		el.removeClass('fa-spin');
 		if(spinner) {
 			el.removeClass(spinner);

@@ -37,9 +37,11 @@ public class SessionStatusFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 
-		Request.setUp((HttpServletRequest)request, (HttpServletResponse)response);
-		HttpServletRequest req = (HttpServletRequest)request;
-		HttpServletResponse resp = (HttpServletResponse)response;
+		var req = (HttpServletRequest)request;
+		var resp = (HttpServletResponse)response;
+		Request.setUp(req, resp);
+		
+		try {
 	
 		/**
 		 * LDP - This only need to be performed on one URL so am adding the URL pattern
@@ -54,7 +56,7 @@ public class SessionStatusFilter implements Filter {
 		 * also access and update the session.
 		 */
 		setPreventAccess(req, true);
-		
+
 		var sesh = req.getSession(false);
 		resp.setHeader("Cache-Control", "no-store");
 		if(sesh == null) {
@@ -65,5 +67,9 @@ public class SessionStatusFilter implements Filter {
 		}
 		
 		response.flushBuffer();
+
+		} finally {
+			Request.tearDown();
+		}
 	}
 }

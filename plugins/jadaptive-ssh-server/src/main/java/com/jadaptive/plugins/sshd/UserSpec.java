@@ -94,7 +94,7 @@ public final class UserSpec {
 	}
 
 	public String device() {
-		return deviceOr().orElseThrow(() -> new IllegalStateException("UserSpec does not have a device."));
+		return deviceOr().orElseThrow(() -> new IllegalStateException(username + " does not have a device on " + (this.tenant.isEmpty() ? "system" : this.tenant.get())));
 	}
 
 	public Optional<String> deviceOr() {

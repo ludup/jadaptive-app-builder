@@ -45,9 +45,6 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 	String bundle;
 	
 	@ObjectField(type = FieldType.TEXT)
-	String defaultFilter;
-	
-	@ObjectField(type = FieldType.TEXT)
 	String hash;
 	
 	@ObjectField(type = FieldType.TEXT)
@@ -188,14 +185,6 @@ public class ObjectTemplate extends TemplateUUIDEntity implements NamedDocument 
 
 	public void setAliases(Collection<String> aliases) {
 		this.aliases = aliases;
-	}
-
-	public String getDefaultFilter() {
-		return defaultFilter;
-	}
-
-	public void setDefaultFilter(String defaultFilter) {
-		this.defaultFilter = defaultFilter;
 	}
 
 	public String getHash() {

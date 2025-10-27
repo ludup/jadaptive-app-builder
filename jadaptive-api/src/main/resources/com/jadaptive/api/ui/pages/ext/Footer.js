@@ -352,14 +352,16 @@ $(function() {
 	});
 	
 	$('.copyURL').on('click', function(e) {
-		e.preventDefault();
-		navigator.clipboard.writeText($(this).attr('href'));
-		var msg = $(this).data('message');
-		if(msg) {
-			JadaptiveUtils.success($('#feedback'), msg);
-		} else {
-			JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
-		}
+        if(e.which == 1) {
+    		e.preventDefault();
+    		navigator.clipboard.writeText($(this).attr('href'));
+    		var msg = $(this).data('message');
+    		if(msg) {
+    			JadaptiveUtils.success($('#feedback'), msg);
+    		} else {
+    			JadaptiveUtils.success($('#feedback'), "The URL has been copied to the clipboard.");
+    		}
+        }
 	});
 	
 	$('.copyToClipboard').on('click', function(e) {
@@ -462,7 +464,7 @@ $(function() {
 		};
         if($('.dirty').length > 0) {
 	    	bootbox.confirm({
-	    		message: "${userInterface:exit.text}",
+	    		message: "$[userInterface:exit.text]",
 			    buttons: {
 			        confirm: {
 			            label: 'Yes',
@@ -498,8 +500,11 @@ $(function() {
     $('.selectionAction').click(function(e) {
 		e.preventDefault();
 		
+		
 		if($('input[name="selectedUUID"]').length > 0) {
 			
+			JadaptiveUtils.startAwesomeSpin($(this).find('i'), '');
+				
 			var form = new FormData();
 
 			$('input[name="selectedUUID"]').each(function() {
@@ -518,7 +523,7 @@ $(function() {
    				processData: false, 
 		        complete: function()
 		        {
-		          window.location.reload();
+		          window.location = window.location;
 		        }
 		    });
 			
@@ -534,7 +539,7 @@ $(function() {
 		var returnTo = $(this).data('returnto');
 
 		bootbox.confirm({
-    		message: '${userInterface:delete.text} ' + name + '?',
+    		message: '$[userInterface:delete.text] ' + name + '?',
 		    buttons: {
 		        confirm: {
 		            label: 'Yes',
@@ -577,7 +582,7 @@ $(function() {
 		var confirmReject = $(this).data('confirmReject');
 
 		bootbox.confirm({
-    		message: confirmText ? confirmText : ( '${userInterface:confirm.text} ' + name + '?' ),
+    		message: confirmText ? confirmText : ( '$[userInterface:confirm.text] ' + name + '?' ),
 		    buttons: {
 		        confirm: {
 		            label: confirmApprove ? confirmApprove : 'Yes',
@@ -611,7 +616,7 @@ $(function() {
 		e.preventDefault();
 		var copyText = $(this).attr('href');
 	  	navigator.clipboard.writeText(copyText);
-		$(this).append($('<span class="ms-3 text-success text-decoration-none"><sup>${default:copied.text}</sup></span>').fadeOut(2000));
+		$(this).append($('<span class="ms-3 text-success text-decoration-none"><sup>$[default:copied.text]</sup></span>').fadeOut(2000));
 	});
 	
 	$('.removeAction').on('click', function(e) {
@@ -619,7 +624,7 @@ $(function() {
 		var name = $(this).data('name');
 		var _row = $(this).closest('tr');
 		bootbox.confirm({
-    		message: '${userInterface:delete.text} ' + name + '?',
+    		message: '$[userInterface:delete.text] ' + name + '?',
 		    buttons: {
 		        confirm: {
 		            label: 'Yes',
@@ -634,7 +639,7 @@ $(function() {
 		        if(result)
 		        {
 		        	_row.remove();
-		        	JadaptiveUtils.success($('#feedback'), name + " ${userInterface:removed.text}");
+		        	JadaptiveUtils.success($('#feedback'), name + " $[userInterface:removed.text]");
 		        }
 		    }
 		});
@@ -667,7 +672,7 @@ $(function() {
 		$('#' + target + "Holder").addClass("d-none");
 		
 		$('#' + target + 'Holder')
-			.before('<div id="' + target + 'Restore" class="text-warning mt-2"><small class="me-2">' + $(this).data('filename') + ' ${userInterface:restoreAttachment.text}</small> <a href="#" class="attachment-restore" data-target="' + target + '"><i class="fa-solid fa-trash-undo"></i></a></div>');
+			.before('<div id="' + target + 'Restore" class="text-warning mt-2"><small class="me-2">' + $(this).data('filename') + ' $[userInterface:restoreAttachment.text]</small> <a href="#" class="attachment-restore" data-target="' + target + '"><i class="' + $('body').data('iconset') + ' fa-trash-undo"></i></a></div>');
 	
 		$('.attachment-restore').click(function(e) {
 			e.preventDefault();

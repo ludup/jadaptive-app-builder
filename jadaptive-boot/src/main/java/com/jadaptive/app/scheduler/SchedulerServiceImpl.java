@@ -1,5 +1,6 @@
 package com.jadaptive.app.scheduler;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import com.jadaptive.api.scheduler.TaskScope;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
+import com.jadaptive.api.user.User;
 
 @Service
 public class SchedulerServiceImpl extends AuthenticatedService implements SchedulerService, TenantAware, StartupAware {
@@ -125,6 +127,28 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 	}
 	
 	@Override
+	public void runAs(User user, Runnable task) {
+	
+		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), UUID.randomUUID().toString());
+		applicationService.autowire(job);
+		job.runNow(new TenantTask() {
+	
+			@Override
+			public void run() {
+				permissionService.as(user, ()->{
+					task.run();
+				});
+			}
+			
+			@Override
+			public TaskScope getScope() {
+				return TaskScope.NODE;
+			}
+		});
+
+	}
+	
+	@Override
 	public void schedule(TenantTask task, String expression, String taskUUID) {
 		
 		applicationService.autowire(task);
@@ -187,6 +211,37 @@ public class SchedulerServiceImpl extends AuthenticatedService implements Schedu
 			deferred.forEach(d -> runNow(d));
 			deferred.clear();
 		});
+	}
+
+	@Override
+	public void scheduleIn(Runnable task, Duration duration, User user) {
+		String taskUUID = UUID.randomUUID().toString();
+
+		TenantJobRunner job = new TenantJobRunner(getCurrentTenant(), taskUUID);
+		job.setUser(user);
+		
+		applicationService.autowire(job);
+
+		job.runAfter(new TenantTask() {
+
+			@Override
+			public void run() {
+				task.run();
+			}
+
+			@Override
+			public TaskScope getScope() {
+				return TaskScope.NODE;
+			}
+			
+		}, duration);
+		
+		scheduledJobs.put(taskUUID, job);
+	}
+
+	@Override
+	public void scheduleIn(Runnable task, Duration duration) {
+		scheduleIn(task, duration, null);
 	}
 
 }

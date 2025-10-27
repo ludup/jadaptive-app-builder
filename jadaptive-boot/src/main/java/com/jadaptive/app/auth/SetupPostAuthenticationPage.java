@@ -47,7 +47,7 @@ public class SetupPostAuthenticationPage extends HtmlPage implements PostAuthent
 		
 		AuthenticationState state = authenticationService.getCurrentState();
 		if(!state.hasSetupPostAuthentication()) {
-			log.info("Setting up post authentication for {}", state.getUser().getName());
+			log.info("Setting up post authentication for {}", state.getAttemptedUsername());
 			authenticationService.setupPostAuthentication(authenticationService.getCurrentState());
 			throw authenticationService.completeAuthentication(
 					authenticationService.getCurrentState(), 
@@ -55,7 +55,7 @@ public class SetupPostAuthenticationPage extends HtmlPage implements PostAuthent
 		
 		} else {
 			log.info("Redirecting {} to {}", 
-					state.getUser().getName(),
+					state.getAttemptedUsername(),
 					authenticationService.getCurrentPage().getSimpleName());
 			
 			throw new PageRedirect(pageCache.resolvePage(authenticationService.getCurrentPage()));

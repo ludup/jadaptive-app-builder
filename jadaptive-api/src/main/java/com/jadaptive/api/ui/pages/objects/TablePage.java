@@ -27,7 +27,7 @@ import com.jadaptive.api.ui.pages.TemplatePage;
 @Component
 @RequestPage(path="table/{resourceKey}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils" } )
-@PageProcessors(extensions = { "freemarker", "i18n"} )
+@PageProcessors(extensions = {  "i18n"} )
 public class TablePage extends TemplatePage {
 
 	@Autowired

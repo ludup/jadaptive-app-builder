@@ -12,7 +12,9 @@ public interface AuthenticationProvider extends ExtensionPoint {
 	
 	public default boolean supportsCredentialReset() { return false; }
 	
-	public default String getEnrollmentUri() { return "/app/api/start-temporary-auth"; }
+	public default String getEnrollmentUri() { 
+		return "/app/api/start-temporary-auth/" + getAuthenticatorUUID();
+	}
 	
 	public String getManagementUri();
 	

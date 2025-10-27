@@ -1,9 +1,12 @@
 package com.jadaptive.api.ui.pages.user;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +27,7 @@ import com.jadaptive.api.user.UserService;
 @Component
 @RequestPage(path = "set-password/{uuid}")
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
-@PageProcessors(extensions = { "freemarker", "i18n" })
+@PageProcessors(extensions = {  "i18n" })
 @ModalPage
 public class SetPassword extends HtmlPage implements FormProcessor<PasswordForm> {
 
@@ -42,6 +45,17 @@ public class SetPassword extends HtmlPage implements FormProcessor<PasswordForm>
 		return "set-password";
 	}
 	
+	
+	@Override
+	protected void documentComplete(Document document) throws FileNotFoundException, IOException {
+		super.documentComplete(document);
+		
+		Element e = document.selectFirst("#loginForm");
+		if(Objects.nonNull(e)) {
+			e.attr("action", "/app/ui/set-password/" + uuid);
+		}
+	}
+
 	public final void processForm(Document document, PasswordForm form) throws FileNotFoundException {
 		
 		if(StringUtils.isBlank(form.getPassword()) 

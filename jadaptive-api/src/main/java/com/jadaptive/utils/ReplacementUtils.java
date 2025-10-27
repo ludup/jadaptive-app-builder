@@ -13,7 +13,10 @@ public class ReplacementUtils {
 	
 	public static String processTokenReplacements(String value, ITokenResolver tokenResolver) {
 		
-		Pattern pattern = Pattern.compile("\\$\\{(.*?)\\}");
+		/**
+		 * Look for variations on the pattern so URL encoded versions also get captured.
+		 */
+		Pattern pattern = Pattern.compile("(?:\\$\\{|\\$%7B|%24%7B)(.*?)(?:\\}|%7D)");
 		Matcher matcher = pattern.matcher(value);
 
 		StringBuilder builder = new StringBuilder();

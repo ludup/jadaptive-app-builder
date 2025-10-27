@@ -36,9 +36,7 @@ public @interface ObjectDefinition {
 		
 		boolean deletable() default true;
 		
-		String[] aliases() default { };
-		
-		String defaultFilter() default "";
+		String[] aliases() default { }; 
 		
 		String defaultColumn() default "";
 

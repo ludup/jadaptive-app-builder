@@ -72,7 +72,7 @@ public abstract class AbstractClusterInterfaceFactory<T extends ProtocolContext,
 				}
 			});
 			
-			cnx.sendGlobalRequest(new GlobalRequest(CLUSTER_SERVERS, cnx, wtr.toByteArray()), false);
+			cnx.sendGlobalRequest(new GlobalRequest(CLUSTER_SERVERS, cnx, wtr.toByteArray()));
 		}
 		catch(IOException ioe) {
 			throw new UncheckedIOException(ioe);

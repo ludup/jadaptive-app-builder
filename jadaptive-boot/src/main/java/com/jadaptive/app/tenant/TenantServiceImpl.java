@@ -29,6 +29,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.permissions.PermissionService.RunnableWithException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
@@ -43,6 +44,8 @@ import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.tenant.TenantConfiguration;
 import com.jadaptive.api.tenant.TenantRepository;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.Redirect;
+import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -616,6 +619,37 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 	
 	@Override
+	public void asUser(Tenant tenant, User user, RunnableWithException r) {
+		setCurrentTenant(tenant);
+		try {
+			permissionService.as(user, r);
+		} finally {
+			clearCurrentTenant();
+		}
+	}
+	
+
+	@Override
+	public void asSytemContext(Tenant tenant, RunnableWithException r) {
+		setCurrentTenant(tenant);
+		try {
+			permissionService.asSystem(r);
+		} finally {
+			clearCurrentTenant();
+		}
+	}
+	
+	@Override
+	public void asUser(Tenant tenant, RunnableWithException r) {
+		setCurrentTenant(tenant);
+		try {
+			permissionService.as(r);
+		} finally {
+			clearCurrentTenant();
+		}
+	}
+	
+	@Override
 	public <T> T executeAs(Tenant tenant, Callable<T> r) {
 		setCurrentTenant(tenant);
 		try {
@@ -625,6 +659,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			} finally {
 				permissionService.clearUserContext();
 			}
+		} catch(Redirect e) { 
+			throw e;
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		} finally {
@@ -709,4 +745,13 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		
 		return defaultConnection;
 	}
+
+	@Override
+	public void recordLastLogin() {
+		Tenant t = getCurrentTenant();
+		t.setLastLogin(Utils.now());
+		saveOrUpdate(t);
+		
+	}
+
 }

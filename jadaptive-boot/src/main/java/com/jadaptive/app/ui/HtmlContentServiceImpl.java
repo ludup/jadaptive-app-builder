@@ -21,7 +21,7 @@ import com.jadaptive.api.ui.PageResources;
 import com.jadaptive.utils.FileUtils;
 
 @Service
-@LicensedFeature(group = FeatureGroup.DEVELOPER, value = HtmlContentService.DEVELOPER_TOOLS, includedWithPAYG = false)
+@LicensedFeature(group = FeatureGroup.ENTERPRISE, value = HtmlContentService.DEVELOPER_TOOLS, includedWithPAYG = false)
 public class HtmlContentServiceImpl implements HtmlContentService {
 
 	@Autowired
@@ -30,27 +30,31 @@ public class HtmlContentServiceImpl implements HtmlContentService {
 	@Override
 	public Document resolveDocument(Class<?> clz, PageResources page, String resource, boolean canFail) throws IOException {
 		
-		URL url = clz.getResource(resource);
-		if(Objects.isNull(url)) {
-			url = page.getResourceClass().getResource(resource);
-		}
-		if(Objects.isNull(url)) {
-			url = classService.getResource(resource);
-		}
-		if(resource.startsWith("/")) {
-			resource = FileUtils.checkStartsWithNoSlash(resource);
-			return resolveDocument(clz, page, resource, canFail);
-		}
-		if(Objects.nonNull(url)) {
-			return loadDocument(url);
-		} else {
+		if(Objects.nonNull(clz)) {
+			
+			URL url = clz.getResource(resource);
+			
+			if(Objects.isNull(url)) {
+				url = page.getResourceClass().getResource(resource);
+			}
+			if(Objects.isNull(url)) {
+				url = classService.getResource(resource);
+			}
+			if(resource.startsWith("/")) {
+				resource = FileUtils.checkStartsWithNoSlash(resource);
+				return resolveDocument(clz, page, resource, canFail);
+			}
+			if(Objects.nonNull(url)) {
+				return loadDocument(url);
+			} 
+			
 			if(canFail) {
 				throw new IOException("Missing document for " + resource);
 			}
-			Document doc = new Document(Request.get().getRequestURI());
-			doc.appendChild(new Element("body"));
-			return doc;
 		}
+		Document doc = new Document(Request.get().getRequestURI());
+		doc.appendChild(new Element("body"));
+		return doc;
 	}
 	
 	@Override

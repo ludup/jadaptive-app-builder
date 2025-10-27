@@ -24,17 +24,23 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	public Collection<T> getPersonalObjects(Class<T> resourceClass, User user) {
 		
 		return objectDatabase.searchObjects(resourceClass, 
-				SearchField.eq("ownerUUID", user.getUuid()));
+				SearchField.or(
+						SearchField.eq("ownerUUID", user.getUuid()),
+						SearchField.eq("owner.uuid", user.getUuid())));
 	}
 	
 	@Override
 	public Collection<T> getPersonalObjects(Class<T> resourceClass, User user, SearchField... search) {
 		if(search.length > 0) {
 			return objectDatabase.searchObjects(resourceClass, 
-				SearchField.eq("ownerUUID", user.getUuid()), SearchField.and(search));
+					SearchField.or(
+							SearchField.eq("ownerUUID", user.getUuid()),
+							SearchField.eq("owner.uuid", user.getUuid())), SearchField.and(search));
 		} else {
 			return objectDatabase.searchObjects(resourceClass, 
-					SearchField.eq("ownerUUID", user.getUuid()));
+					SearchField.or(
+							SearchField.eq("ownerUUID", user.getUuid()),
+							SearchField.eq("owner.uuid", user.getUuid())));
 		}
 	}
 	
@@ -42,17 +48,23 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	public T getPersonalObject(Class<T> resourceClass, User user, String uuid) {
 		return objectDatabase.get(resourceClass, 
 					SearchField.eq("uuid", uuid),
-					SearchField.eq("ownerUUID", user.getUuid()));
+					SearchField.or(
+							SearchField.eq("ownerUUID", user.getUuid()),
+							SearchField.eq("owner.uuid", user.getUuid())));
 	}
 	
 	@Override
 	public Long getPersonalObjectCount(Class<T> resourceClass, User user, SearchField... search) {
 		if(search.length > 0) {
 			return objectDatabase.searchCount(resourceClass, 
-				SearchField.eq("ownerUUID", user.getUuid()), SearchField.and(search));
+					SearchField.or(
+							SearchField.eq("ownerUUID", user.getUuid()),
+							SearchField.eq("owner.uuid", user.getUuid())), SearchField.and(search));
 		} else {
 			return objectDatabase.searchCount(resourceClass, 
-					SearchField.eq("ownerUUID", user.getUuid()));
+					SearchField.or(
+							SearchField.eq("ownerUUID", user.getUuid()),
+							SearchField.eq("owner.uuid", user.getUuid())));
 		}
 	}
 	
@@ -60,22 +72,26 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	public T getPersonalObject(Class<T> resourceClass, User user, SearchField... search) {
 		if(search.length > 0) {
 			return objectDatabase.get(resourceClass, 
-				SearchField.eq("ownerUUID", user.getUuid()), SearchField.and(search));
+					SearchField.or(
+							SearchField.eq("ownerUUID", user.getUuid()),
+							SearchField.eq("owner.uuid", user.getUuid())), SearchField.and(search));
 		} else {
 			return objectDatabase.get(resourceClass, 
-					SearchField.eq("ownerUUID", user.getUuid()));
+					SearchField.or(
+							SearchField.eq("ownerUUID", user.getUuid()),
+							SearchField.eq("owner.uuid", user.getUuid())));
 		}
 	}
 	
 	@Override
 	public void saveOrUpdate(T obj, User user) {
-		obj.setOwnerUUID(user.getUuid());
+		obj.setOwner(user);
 		objectDatabase.saveOrUpdate(obj);
 	}
 	
 	@Override
 	public void saveOrUpdate(T obj) {
-		if(Objects.isNull(obj.getOwnerUUID())) {
+		if(Objects.isNull(obj.getOwner())) {
 			throw new ObjectException("Personal object cannot be saved without an owner UUID");
 		}
 		objectDatabase.saveOrUpdate(obj);

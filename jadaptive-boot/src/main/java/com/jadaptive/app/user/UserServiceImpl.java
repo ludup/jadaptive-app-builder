@@ -441,4 +441,34 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	public Iterable<User> iterateUsers() {
 		return userRepository.list(User.class);
 	}
+
+	@Override
+	public void configureTelephone(User user, String phone, boolean primary) {
+		if(primary) {
+			String telephone = user.getMobilePhone();
+			if(StringUtils.isNotBlank(telephone) && !telephone.equals(phone)) {
+				user.getOtherTelephone().add(telephone);
+			}
+			user.setMobilePhone(phone);
+		} else {
+			user.getOtherTelephone().add(phone);
+		}
+		
+		saveOrUpdate(user);
+	}
+
+	@Override
+	public void configureEmailAddress(User user, String emailAddress, boolean primary) {
+		if(primary) {
+			String email = user.getEmail();
+			if(StringUtils.isNotBlank(email) && !email.toLowerCase().equals(emailAddress.toLowerCase())) {
+				user.getOtherEmail().add(email);
+			}
+			user.setEmail(emailAddress);
+		} else {
+			user.getOtherEmail().add(emailAddress);
+		}
+		
+		saveOrUpdate(user);
+	}
 }

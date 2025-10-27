@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -40,12 +39,11 @@ public abstract class HtmlPage implements Page {
 	protected SessionUtils sessionUtils;
 	
 	@Autowired
-	private App applicationService; 
-	
-	@Autowired
 	private HtmlContentService contentService; 
 	
 	private ThreadLocal<List<PageExtension>> extensions = new ThreadLocal<>();
+	private ThreadLocal<List<HtmlPageExtender>> extenders = new ThreadLocal<>();
+	private ThreadLocal<List<PageEnd>> pageEnd = ThreadLocal.withInitial(()->new ArrayList<>());
 	
 	protected String resourcePath;
 	
@@ -83,10 +81,6 @@ public abstract class HtmlPage implements Page {
 		onCreated();
 	}
 	
-	protected Collection<HtmlPageExtender> extenders() {
-		return applicationService.getBean(UserInterfaceService.class).getExtenders(this);
-	}
-	
 	protected boolean isCacheable() { return false; }
 	
 	protected int getMaxAge() { return 3600; }
@@ -103,6 +97,10 @@ public abstract class HtmlPage implements Page {
 			sessionUtils.setCachable(response, getMaxAge());
 		}
 		
+		for(PageEnd end : pageEnd.get()) {
+			end.finishPage(document, uri, this);
+		}
+		
 		ResponseHelper.sendContent(document.toString(), "text/html;charset=UTF-8;", request, response);
 	}
 
@@ -111,6 +109,7 @@ public abstract class HtmlPage implements Page {
 		
 		Document document = resolveDocument(this);
 		currentDocument.set(document);
+		setupExtenders(uri);
 		
 		try {
 			
@@ -122,12 +121,12 @@ public abstract class HtmlPage implements Page {
 				processPageDependencies(document);
 			}
 
-			var extenders = extenders();
-			if(Objects.nonNull(extenders)) {
+			var exts = extenders.get();
+			if(Objects.nonNull(exts)) {
 				try(var timed = timed("HtmlPage.generateHTMLDocument#extender.processStart(" + uri + ")")) {
-					for(HtmlPageExtender extender : extenders) {
-						try(var timed2 = timed(extender.getClass().getName())) {
-							extender.processStart(document, uri, this);
+					for(HtmlPageExtender ext : exts) {
+						try(var timed2 = timed(ext.getClass().getName())) {
+							ext.processStart(document, uri, this);
 						}
 					}
 				}
@@ -137,11 +136,11 @@ public abstract class HtmlPage implements Page {
 				generateContent(document);
 			}
 			
-			if(Objects.nonNull(extenders)) {
+			if(Objects.nonNull(exts)) {
 				try(var timed = timed("HtmlPage.generateHTMLDocument#extender.generateContent(" + uri + ")")) {
-					for(HtmlPageExtender extender : extenders) {
-						try(var timed2 = timed(extender.getClass().getName())) {
-							extender.generateContent(document, this);
+					for(HtmlPageExtender ext : exts) {
+						try(var timed2 = timed(ext.getClass().getName())) {
+							ext.generateContent(document, this);
 						}
 					}
 				}
@@ -159,11 +158,11 @@ public abstract class HtmlPage implements Page {
 				documentComplete(document);
 			}
 			
-			if(Objects.nonNull(extenders)) {
+			if(Objects.nonNull(exts)) {
 				try(var timed = timed("HtmlPage.generateHTMLDocument#extender.processEnd(" + uri + ")")) {
-					for(HtmlPageExtender extender : extenders) {
-						try(var timed2 = timed(extender.getClass().getName())) {
-							extender.processEnd(document, uri, this);
+					for(HtmlPageExtender ext : exts) {
+						try(var timed2 = timed(ext.getClass().getName())) {
+							ext.processEnd(document, uri, this);
 						}
 					}
 				}
@@ -179,7 +178,20 @@ public abstract class HtmlPage implements Page {
 		return document;
 	}
 
-	protected void documentComplete(Document document) throws FileNotFoundException, IOException { };
+	private void setupExtenders(String uri) {
+		
+		extenders.set(new ArrayList<>());
+		for(HtmlPageExtender ext : App.beans(HtmlPageExtender.class)) {
+			if(ext.isExtending(this, uri)) {
+				extenders.get().add(ext);
+			}
+		}
+		
+	}
+
+	protected void documentComplete(Document document) throws FileNotFoundException, IOException { 
+		PageHelper.appendHeadScript(document, "/app/content/jadaptive-session.js");
+	};
 	
 	private void processPageExtensions(String uri, Document document) throws IOException {
 		
@@ -231,15 +243,16 @@ public abstract class HtmlPage implements Page {
 
 			Document doc = resolveDocument(this);
 			currentDocument.set(doc);
-
+			setupExtenders(uri);
+			
 			beforeProcess(uri, request, response);
 			
 			processPageDependencies(doc);
 			
-			var extenders = extenders();
-			if(Objects.nonNull(extenders)) {
-				for(HtmlPageExtender extender : extenders) {
-					extender.processStart(doc, uri, this);
+			var exts = extenders.get();
+			if(Objects.nonNull(exts)) {
+				for(HtmlPageExtender ext : exts) {
+					ext.processStart(doc, uri, this);
 				}
 			}
 			
@@ -303,8 +316,8 @@ public abstract class HtmlPage implements Page {
 				processPost(doc, uri, request, response);
 			}
 			
-			if(Objects.nonNull(extenders)) {
-				for(HtmlPageExtender extender : extenders) {
+			if(Objects.nonNull(exts)) {
+				for(HtmlPageExtender extender : exts) {
 					extender.processPost(doc, this);
 				}
 			}
@@ -313,13 +326,17 @@ public abstract class HtmlPage implements Page {
 			
 			documentComplete(doc);
 			
-			if(Objects.nonNull(extenders)) {
-				for(HtmlPageExtender extender : extenders) {
+			if(Objects.nonNull(exts)) {
+				for(HtmlPageExtender extender : exts) {
 					extender.processEnd(doc, uri, this);
 				}
 			}
 
 			afterProcess(uri, request, response);
+			
+			for(PageEnd end : pageEnd.get()) {
+				end.finishPage(doc, uri, this);
+			}
 			
 			ResponseHelper.sendContent(doc.toString(), "text/html; charset=UTF-8;", request, response);
 			
@@ -571,11 +588,23 @@ public abstract class HtmlPage implements Page {
 		showFeedback(document, "fa-triangle-exclamation", bundle, i18n, Set.of("alert", "alert-warning"), args);
 	}
 	
+	@Override
 	public void addProcessor(PageExtension ext) {
 		
 		if(extensions.get()==null) {
 			extensions.set(new ArrayList<>());
 		}
 		extensions.get().add(ext);
+	}
+	
+	@Override
+	public void addPageEnd(PageEnd end) {
+		pageEnd.get().add(end);
+	}
+	
+	@FunctionalInterface
+	public interface PageEnd {
+		
+		void finishPage(Document doc, String uri, Page page);
 	}
 }

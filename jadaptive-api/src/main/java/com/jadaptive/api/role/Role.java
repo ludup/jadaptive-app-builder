@@ -28,7 +28,7 @@ import com.jadaptive.api.user.User;
 @ObjectViewDefinition(value = Role.OPTIONS_VIEW, bundle = Role.RESOURCE_KEY, weight = 100)
 @TableView(defaultColumns = { "name", "allPermissions", "allUsers" })
 @GenerateEventTemplates(Role.RESOURCE_KEY)
-@LicensedFeature(group = FeatureGroup.FOUNDATION, includedWithPAYG = true, value = Role.RESOURCE_KEY)
+@LicensedFeature(group = FeatureGroup.FREE, includedWithPAYG = true, value = Role.RESOURCE_KEY)
 public class Role extends NamedUUIDEntity {
 	
 	private static final long serialVersionUID = -5211370653998523985L;

@@ -2,6 +2,7 @@ package com.jadaptive.api.ui.renderers.form;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.ObjectTemplate;
@@ -127,7 +128,7 @@ public class CollectionSearchFormInput {
 								.attr("id", String.format("%sText", formVariable))
 								.attr("value", value.getName()))
 						.appendChild(new Element("td")
-								.appendChild(displayName = Html.span(value.getName(), "underline"))));
+								.appendChild(displayName = Html.span(StringUtils.defaultIfBlank(value.getName(), "-"), "underline"))));
 				if(!readOnly) {
 						row.appendChild(new Element("td")
 								.appendChild(Html.a("#", "collectionSearchDelete")

@@ -18,5 +18,10 @@ public class PasswordFormInput extends FormInputRender {
 		return "password";
 	}
 
+	@Override
+	protected String getAutocomplete() {
+		return "new-password";
+	}
+
 	
 }

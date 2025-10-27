@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
@@ -56,7 +57,6 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.ui.AuthenticationPage;
 import com.jadaptive.api.ui.Feedback;
-import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageRedirect;
@@ -134,6 +134,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Override
 	public Collection<AuthenticationModule> resolveUserModules(User user) {
 		
+		if(permissionService.isAdministrator(user)) {
+			return moduleDatabase.searchObjects(AuthenticationModule.class);
+		}
+		
 		Set<AuthenticationModule> modules = new HashSet<>();
 		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
 			modules.addAll(policy.getRequiredAuthenticators());
@@ -143,27 +147,27 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		return modules;
 	}
 	
-	@Override
-	public Collection<AuthenticationModule> resolveRequiredUserModules(User user) {
-		
-		Set<AuthenticationModule> modules = new HashSet<>();
-		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
-			modules.addAll(policy.getRequiredAuthenticators());
-		}
-		
-		return modules;
-	}
+//	@Override
+//	public Collection<AuthenticationModule> resolveRequiredUserModules(User user) {
+//		
+//		Set<AuthenticationModule> modules = new HashSet<>();
+//		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
+//			modules.addAll(policy.getRequiredAuthenticators());
+//		}
+//		
+//		return modules;
+//	}
 	
-	@Override
-	public Collection<AuthenticationModule> resolveOptionalUserModules(User user) {
-		
-		Set<AuthenticationModule> modules = new HashSet<>();
-		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
-			modules.addAll(policy.getOptionalAuthenticators());
-		}
-		
-		return modules;
-	}
+//	@Override
+//	public Collection<AuthenticationModule> resolveOptionalUserModules(User user) {
+//		
+//		Set<AuthenticationModule> modules = new HashSet<>();
+//		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
+//			modules.addAll(policy.getOptionalAuthenticators());
+//		}
+//		
+//		return modules;
+//	}
 		
 	@SuppressWarnings("unused")
 	private Collection<AuthenticationModule> resolveMissingModules(User user, Collection<AuthenticationModule> modules) {
@@ -201,18 +205,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	public void decorateAuthenticationPage(Document content) {
 		AuthenticationState state = getCurrentState();
 
-		if (state.canReset()) {
-			
-			Element el = content.selectFirst("#actions");
-			if(Objects.nonNull(el)) {
-				el.appendChild(Html.a(state.getResetURL())
-					.addClass("text-decoration-none d-block")
-					.appendChild(new Element("sup")
-							.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "resetLogin.text"))));
-			}
-		} 
-		
-		
 		if (!state.isDecorateWindow()) {
 			Element el = content.selectFirst("header");
 			if (Objects.nonNull(el)) {
@@ -238,8 +230,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			if(!state.isFirstPage() || (state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage())) {
 				Class<? extends Page> currentPage = state.getCurrentPage().orElseGet(() -> pageCache.getHomeClass());
 				AuthenticationProvider module = registeredModulesByPage.get(currentPage);
+				log.warn("User failed authentication on page {}", currentPage.getSimpleName());
 				if(Objects.isNull(module)) {
-					log.warn("User failed authentication on page {} but no module is present!!!", currentPage.getSimpleName());
 					return;
 				}
 				eventService.publishEvent(new AuthenticationFailedEvent(module, 
@@ -358,7 +350,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	public AuthenticationCompletedResult completeAuthentication(AuthenticationState state, Optional<Page> page) {
 
 		if (Objects.isNull(state.getUser()) || !userService.supportsLogin(state.getUser())) {
-			throw new AccessDeniedException("Invalid credentials");
+			Feedback.error("Invalid credentials");
+			throw new PageRedirect(pageCache.getPage(Login.class));
 		}
 		
 		assertLoginThesholds();
@@ -387,6 +380,28 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			if(log.isInfoEnabled()) {
 				log.info("User {} has completed authentication", state.getUser().getUsername());
 			}
+			
+			if(state.isEnableEnumerationProtection()) {
+				clearAuthenticationState();
+				Feedback.error("default", "error.invalidCredentials");
+				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+				throw new PageRedirect(pageCache.getPage(Login.class));
+			} if(state.isNoPolicyProtection()) {
+				clearAuthenticationState();
+				Feedback.error("default", "error.noPolicy");
+				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+				throw new PageRedirect(pageCache.getPage(Login.class));
+			} else if(!state.getUser().isEnabled()) {
+				if(log.isInfoEnabled()) {
+					log.info("{} cannot login as the account is disabled.", state.getUser().getUsername());
+				}
+				clearAuthenticationState();
+				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
+		    	Feedback.error("default", "error.accountDisabled");
+		    	throw new PageRedirect(pageCache.getPage(Login.class));
+			} 
+			
+			tenantService.recordLastLogin();
 			
 			if(!state.hasPostAuthentication()) {
 			
@@ -459,36 +474,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		};
 
 	}
-	
-//	private List<Attribute> buildAttributes(User user) {
-//		
-//		var tmp = new ArrayList<Attribute>();
-//		List<Attribute> attrs = new ArrayList<>();
-//        attrs.add(new Attribute().setName("emailAddress").setValues(Collections.singletonList(user.getEmail())));
-//        attrs.add(new Attribute().setName("name").setValues(Collections.singletonList(user.getName())));
-//        
-//        List<String> roles = new ArrayList<String>();
-//        for(com.jadaptive.api.role.Role role : roleService.getRolesByUser(user)) {
-//        	roles.add(role.getName());
-//        }
-//        attrs.add(new Attribute().setName("roles").addValues(roles));
-//        return tmp;
-//	}
-//
-//	
-//	public Collection<GrantedAuthority> getAuthorities() {
-//        //make everyone ROLE_USER
-//        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
-//        GrantedAuthority grantedAuthority = new GrantedAuthority() {
-//            //anonymous inner type
-//            public String getAuthority() {
-//                return "ROLE_USER";
-//            }
-//        }; 
-//        grantedAuthorities.add(grantedAuthority);
-//        return grantedAuthorities;
-//    }
-
 
 	private AuthenticationModule getPasswordAuthenticationModule() {
 		
@@ -550,13 +535,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					.getAttribute(AUTHENTICATION_STATE_ATTR);
 			if (Objects.isNull(state)) {
 
-
-//				DefaultSavedRequest defaultSavedRequest = (DefaultSavedRequest) Request.get().getSession().getAttribute("SPRING_SECURITY_SAVED_REQUEST");
-			    
-//				AuthenticationScope scope = defaultSavedRequest==null? 
-//						AuthenticationScope.USER_LOGIN :
-//							AuthenticationScope.SAML_IDP;
-				
 				state = createAuthenticationState();
 				
 				processRequiredAuthentication(state, state.getPolicy());
@@ -596,26 +574,29 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		}
 		
 		for(AuthenticationModule m : policy.getRequiredAuthenticators()) {
+			
+			Class<? extends Page> page = registeredAuthenticationPages.get(m.getAuthenticatorKey());
+			if(state.hasUser() && !policy.isTemporary()) {
+			
+				if(AuthenticationPage.class.isAssignableFrom(page)) {
+					AuthenticationPage<?> nextPage = (AuthenticationPage<?>) pageCache.getPage(page);
+					if(!nextPage.canAuthenticate(state)) {
+						throw new AccessDeniedException(
+								AuthenticationPolicy.RESOURCE_KEY,
+								"missingCredentials.text");
+					}
+				}
+			}
+			
 			state.addRequiredAuthentication(
-					registeredAuthenticationPages.get(m.getAuthenticatorKey()),
+					page,
 					m);
 		}
 		
 		state.setPasswordEnabled(policy.getPasswordOnFirstPage() || policy.getPasswordRequired() || policy.getPasswordProvided());
 		state.clearOptionalAuthentications();
-		
-//		if(policy instanceof LoginAuthenticationPolicy && Objects.nonNull(state.getUser())) {
-//			LoginAuthenticationPolicy loginPolicy = (LoginAuthenticationPolicy) policy;
-//			if(loginPolicy.getEnsureOptionalSetup()) {
-//				Collection<AuthenticationModule> modules = resolveUserModules(state.getUser());
-//				Collection<AuthenticationModule> missing = resolveMissingModules(state.getUser(), modules);
-//				configueOptional(state, policy, missing, 1);
-//			} else {
-//				configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
-//			}
-//		} else {
-			configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
-//		}
+
+		configueOptional(state, policy, policy.getOptionalAuthenticators(), policy.getOptionalRequired());
 		
 		state.setPolicy(policy);
 		
@@ -700,8 +681,10 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //	}
 
 	@Override
-	public void clearAuthenticationState() {
+	public Optional<AuthenticationState> clearAuthenticationState() {
+		var was = Optional.ofNullable((AuthenticationState)Request.get().getSession().getAttribute(AUTHENTICATION_STATE_ATTR));
 		Request.get().getSession().removeAttribute(AUTHENTICATION_STATE_ATTR);
+		return was;
 	}
 
 	@Override
@@ -732,10 +715,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Override
 	public void onApplicationStartup() {
-		/**
-		 * Removing this because we now specify password as a switch on policy
-		 */
-//		registerAuthenticationPage(getAuthenticationModule(PASSWORD_MODULE_UUID), Password.class, Login.class);
+
 	}
 
 	@Override
@@ -830,7 +810,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		AuthenticationState state = createAuthenticationState(temporaryPolicy, 
 				new UriRedirect(redirectURI),
 				getCurrentUser());
-		state.setResetURL(redirectURI);
+		state.setCancelURL(redirectURI);
+		state.disableStartAgain();
 		throw state.nextRedirectOrFinish(pageCache);
 
 	}

@@ -11,15 +11,14 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
-import com.jadaptive.api.cluster.ClusterManager;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.jobs.TaskRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.scheduler.ScheduledTask;
-import com.jadaptive.api.scheduler.TaskScope;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 
 public class TenantJobRunner implements Runnable {
@@ -35,17 +34,25 @@ public class TenantJobRunner implements Runnable {
 	@Autowired
 	private PermissionService permissionService; 
 	
-	@Autowired
-	private ClusterManager clusterManager; 
-	
 	String taskUUID;
 	TenantTask task;
 	ScheduledFuture<?> future;
 	String tenantUUID;
+	User user = null;
 	
 	public TenantJobRunner(Tenant tenant, String taskUUID) {
 		this.tenantUUID = tenant.getUuid();
 		this.taskUUID = taskUUID;
+	}
+	
+	public TenantJobRunner(Tenant tenant, String taskUUID, User user) {
+		this.tenantUUID = tenant.getUuid();
+		this.taskUUID = taskUUID;
+		this.user = user;
+	}
+	
+	public void setUser(User user) {
+		this.user = user;
 	}
 	
 	public void schedule(ScheduledTask task) {
@@ -60,7 +67,7 @@ public class TenantJobRunner implements Runnable {
 	
 	public void schedule(TenantTask task, Date startTime, long repeat) {
 		this.task = task;
-		future = taskScheduler.scheduleAtFixedRate(task, startTime.toInstant(), Duration.ofMillis(repeat));
+		future = taskScheduler.scheduleAtFixedRate(this, startTime.toInstant(), Duration.ofMillis(repeat));
 	}
 	
 	public void runNow(TenantTask task) {
@@ -68,64 +75,52 @@ public class TenantJobRunner implements Runnable {
 		future = taskScheduler.schedule(this, Utils.now().toInstant());
 	}
 	
+	public void runAfter(TenantTask task, Duration duration) {
+		this.task = task;
+		future = taskScheduler.schedule(this, Utils.now().toInstant().plus(duration));
+	}
+	
 	public void schedule(TenantTask task, Date startTime) {
 		this.task = task;
-		future = taskScheduler.schedule(task, startTime.toInstant());
+		future = taskScheduler.schedule(this, startTime.toInstant());
+	}
+	
+	public void scheduleIn(TenantTask task, Duration duration) {
+		this.task = task;
+		future = taskScheduler.scheduleWithFixedDelay(this, duration);
 	}
 	
 	@Override
 	public void run() {
-		/**
-		 * should this be in a transaction?
-		 */
-		if(task.getScope() == TaskScope.GLOBAL && !clusterManager.runOnceOnCluster("task-" + task.getClass().getName(), () -> {
-			doRun();
-		})) {
-			if(log.isInfoEnabled()) {
-				log.info("Not executing task {} because the task is GLOBAL and another node is already running it",
-						task.getClass().getSimpleName());
-			}
-			return;
-		}
-		else
-			doRun();
-	}
-
-	private void doRun() {
-		Tenant tenant = null;
 		
-		try {
-			tenant = tenantService.getTenantByUUID(tenantUUID);
-		} catch(ObjectNotFoundException e) {
-			log.error("Tenant does not exist for UUID {}", tenantUUID);
-			future.cancel(false);
-			return;
-		}
-		
+		final Tenant tenant = tenantService.getTenantByUUID(tenantUUID);
 		tenantService.setCurrentTenant(tenant);
 		
-		// TODO run as a different user
-		permissionService.setupSystemContext();
-		
 		try {
-			for(TaskRunnerContext ctx : ApplicationServiceImpl.getInstance().getBeans(TaskRunnerContext.class)) {
-				ctx.setupContext();
-			}
-			
-			if(task.isLogging() && log.isInfoEnabled()) {
-				log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());
-			}
-			try {
-				task.run();
-			} catch(Throwable e) {
-				log.error("Task ended with error", e);
-		    } finally {
-				tenantService.clearCurrentTenant();
-			}
 
+			permissionService.as(user == null ? permissionService.getSystemUser() : user, ()->{
+				for(TaskRunnerContext ctx : ApplicationServiceImpl.getInstance().getBeans(TaskRunnerContext.class)) {
+					ctx.setupContext();
+				}
+				
+				if(task.isLogging() && log.isInfoEnabled()) {
+					log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());
+				}
+				try {
+					task.run();
+				} catch(Throwable e) {
+					log.error("Task ended with error", e);
+			    } 
+			});
+		} catch(Throwable e) {
+			log.error("Scheduled task {} failed", tenantUUID, e);
+			future.cancel(false);
+			return;
 		} finally {
-			permissionService.clearUserContext();
+			tenantService.clearCurrentTenant();
 		}
+		
+		
 	}
 	public void cancel(boolean mayInterrupt) {
 		future.cancel(mayInterrupt);

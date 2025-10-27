@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
+import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.AuthenticationService.LogonCompletedResult;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
@@ -142,11 +143,24 @@ public class LogonController {
 
 	}
 	
-	@RequestMapping(value="/app/api/reset-login", method = { RequestMethod.GET }, produces = { "text/html"})
+	@RequestMapping(value="/app/api/login/reset", method = { RequestMethod.GET }, produces = { "text/html"})
+	public void resetLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, AccessDeniedException, UnauthorizedException {
+
+		var was = authenticationService.clearAuthenticationState();
+		if(was.isPresent())
+			authenticationService.createAuthenticationState(was.get().getHomePage());
+		else
+			authenticationService.createAuthenticationState();
+		
+		throw new PageRedirect(pageCache.resolvePage(Login.class));
+	}
+	
+	@RequestMapping(value="/app/api/login/start-again", method = { RequestMethod.GET }, produces = { "text/html"})
 	public void startUserLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, AccessDeniedException, UnauthorizedException {
 
+		AuthenticationState state = authenticationService.getCurrentState();
 		authenticationService.clearAuthenticationState();
-		authenticationService.createAuthenticationState();
+		authenticationService.createAuthenticationState(state.getPolicy(), state.getHomePage());
 		
 		throw new PageRedirect(pageCache.resolvePage(Login.class));
 	}

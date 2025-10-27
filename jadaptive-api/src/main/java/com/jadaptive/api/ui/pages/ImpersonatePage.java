@@ -58,6 +58,9 @@ public class ImpersonatePage extends AuthenticatedPage {
 			}
 
 			Tenant tenant = tenantService.getTenantByUUID(uuid);
+			if(tenant.getUuid().equals(session.getTenant().getUuid())) {
+				throw new IllegalStateException("You cannot impersonate the tenant that is already active.");
+			}
 			
 			sessionService.impersonate(tenant, session);
 			try(var uc = permissionService.userContext(session.getUser())) {

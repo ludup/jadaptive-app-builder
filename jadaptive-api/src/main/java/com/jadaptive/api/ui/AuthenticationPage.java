@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
+import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -83,13 +84,13 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		Element actions = doc.selectFirst("#actions");
 		if(Objects.nonNull(actions)) {
 			AuthenticationState state = authenticationService.getCurrentState();
-			if(state.canReset()) {
-				actions.appendChild(Html.a("/app/api/reset-login")
+			if(state.canStartAgain()) {
+				actions.appendChild(Html.a(state.getStartAgainURL())
 						.addClass("text-decoration-none d-block")
 						.appendChild(new Element("sup")
 								.appendChild(Html.i18n("userInterface", "reset.text"))));
-		}
-			
+			}
+		
 			if(state.isRequiredAuthenticationComplete()
 					&& !state.isOptionalComplete()
 					&& state.getOptionalAvailable() > 1
@@ -99,7 +100,16 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 						.appendChild(new Element("sup")
 								.appendChild(Html.i18n("userInterface", "changeAuthentication.text"))));
 			}
+		
+			if(state.canCancel()) {
+				actions.appendChild(Html.a(state.getCancelURL())
+					.addClass("text-decoration-none d-block")
+					.appendChild(new Element("sup")
+							.appendChild(Html.i18n(AuthenticationPolicy.RESOURCE_KEY, "cancel.text"))));
+			}
 		}
+		
+		
 		
 		Element form = doc.selectFirst("form");
 		if(Objects.nonNull(form)) {
@@ -108,6 +118,7 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 				sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
 			}
 			
+			log.info("Setting up CRSF token in Login form...");
 			sessionUtils.setupFormCSRFFToken(Request.get(), LOGIN_IDENTIFIER, form);
 		}
 		
@@ -136,14 +147,15 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 			sessionUtils.verifySameSiteRequest(request, LOGIN_IDENTIFIER);
 			
 			if(doForm(document, state, form)) {
+				log.info("{} form was COMPLETED", getClass().getSimpleName());
 				throw authenticationService.completeAuthentication(state, Optional.of(this)).
 							maybeAttachToSession(request, sessionUtils.getTimeout());
 			}
 			
-			log.info("REMOVEME: {} form was not completed", getClass().getSimpleName());
+			log.info("{} form was not completed", getClass().getSimpleName());
 			
 			Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-			
+
 			if(!Feedback.isSet()) {
 		    	Feedback.error("default", "error.invalidCredentials");
 			}
@@ -156,7 +168,14 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
     	} catch (UnauthorizedException e) {
     		log.error("REMOVEME:", e);
     		Feedback.error("userInterface","error.invalidCredentials");
-    	} 
+    	} finally {
+    		if(!isAllowFormExternalRedirect()) {
+				sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
+			}
+			
+			log.info("Setting up CRSF token in Login form...");
+			sessionUtils.setupFormCSRFFToken(Request.get(), LOGIN_IDENTIFIER, document.selectFirst("form"));
+    	}
 		
 		authenticationService.reportAuthenticationFailure(state, this);
 		

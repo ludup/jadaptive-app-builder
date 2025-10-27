@@ -30,8 +30,11 @@ import com.jadaptive.api.json.RedirectStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.UUIDStatus;
 import com.jadaptive.api.json.ValidationRequestImpl;
+import com.jadaptive.api.repository.NamedDocument;
+import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.template.FieldTemplate;
@@ -125,7 +128,6 @@ public class ObjectUploadServlet extends HttpServlet {
 
 				json.writer().writeValue(resp.getOutputStream(), new UUIDStatus(uuid));
 				
-				
 		    } catch(ValidationException ex) { 
 				Feedback.error(ex.getMessage());
 				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, ex.getMessage()));
@@ -156,11 +158,37 @@ public class ObjectUploadServlet extends HttpServlet {
 		
 		sessionUtils.verifySameSiteRequest(request, parameters, template);
 		
-		return objectService.getFormHandler(handler).saveObject(DocumentHelper.convertDocumentToObject(
+		UUIDEntity obj = DocumentHelper.convertDocumentToObject(
 				templateService.getTemplateClass(resourceKey), 
-				new Document(DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template).getDocument())));
+				new Document(DocumentHelper.buildRootObject(parameters, 
+						template.getResourceKey(), template).getDocument()));
+		String res = objectService.getFormHandler(handler).saveObject(obj);
+
+		if(template.isSingleton()) {
+			Feedback.success("default", "object.saved", I18N.getResource(
+					sessionUtils.getLocale(request), 
+					template.getBundle(),
+					template.getResourceKey() + ".name"));
+		} else {
+			Feedback.success("default", "object.saved", generateName(obj, template));
+		}
+		
+		return res;
+
 	}
 	
+	private Object generateName(UUIDEntity obj, ObjectTemplate template) {
+		if(obj instanceof NamedDocument nd) {
+			return nd.getName();
+		} else {
+			try {
+				return ReflectionUtils.getField(obj.getClass(), template.getNameField()).get(obj);
+			} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+			}
+			return I18N.getResource(template.getBundle(), String.format("%s.name", template.getResourceKey()));
+		}
+	}
+
 	private void processValidation(HttpServletRequest request, String resourceKey, Map<String, String[]> parameters) throws ValidationException, IOException {
 		
 
@@ -181,9 +209,31 @@ public class ObjectUploadServlet extends HttpServlet {
 		ObjectTemplate template = templateService.get(resourceKey);
 		sessionUtils.verifySameSiteRequest(request, parameters, template);
 		AbstractObject obj = DocumentHelper.buildRootObject(parameters, template.getResourceKey(), template);
-		return objectService.saveOrUpdate(obj);
+
+		String res = objectService.saveOrUpdate(obj);
+		if(template.isSingleton()) {
+			Feedback.success("default", "object.saved", I18N.getResource(
+					sessionUtils.getLocale(request), 
+					template.getBundle(),
+					template.getResourceKey() + ".name"));
+		} else {
+			Feedback.success("default", "object.saved", generateName(obj, template));
+		}
+		return res;
+
 	}
 	
+	private Object generateName(AbstractObject obj, ObjectTemplate template) {
+
+		try {
+			return obj.getValue(template.getField(template.getNameField()));
+		} catch (Throwable e) {
+		}
+		
+		return I18N.getResource(template.getBundle(), String.format("%s.name", template.getResourceKey()));
+		
+	}
+
 	private String processStashedObject(HttpServletRequest request, String resourceKey,
 			Map<String, String[]> parameters) throws ValidationException, RepositoryException, ObjectException, IOException {
 		

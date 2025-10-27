@@ -46,7 +46,7 @@ public class DocumentValidator {
 			return Long.valueOf(value);
 		case INTEGER:
 			validateNumber(value, field);
-			return Integer.valueOf(value);
+			return Long.valueOf(value).intValue();
 		case TIMESTAMP:
 			validateDate(value, field);
 			return Utils.parseDate(value, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

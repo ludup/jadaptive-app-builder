@@ -110,19 +110,11 @@ public class Login extends AuthenticationPage<LoginForm> {
 				user = userService.getUser(form.getUsername());
 			} catch(ObjectNotFoundException e) {
 				user = new FakeUser(form.getUsername());
-			}
-			
-			if(!user.isEnabled()) {
-				if(log.isInfoEnabled()) {
-					log.info("{} cannot login as the account is disabled.", user.getUsername());
-				}
-				Request.response().setStatus(HttpStatus.FORBIDDEN.value());
-		    	Feedback.error("default", "error.invalidCredentials");
-				return false;
+				state.setEnableEnumerationProtection(true);
 			}
 			
 			state.setUser(user);
-			boolean passwordRequired = state.getPolicy().getPasswordOnFirstPage() && state.getPolicy().getPasswordRequired();
+			
 			boolean passwordVerified = false;
 			
 			if(StringUtils.isNotBlank(Request.get().getParameter("password"))) {
@@ -140,10 +132,25 @@ public class Login extends AuthenticationPage<LoginForm> {
 					state.getPolicy().getClass());
 			
 			if(Objects.isNull(assigned)) {
-				assigned = state.getPolicy();
+				log.warn("User {} does not have a suitable authentication policy assigned.", state.getUser().getUsername());
+				state.setNoPolicyProtection(true);
+			} else {
+				authenticationService.changePolicy(state, assigned, passwordVerified);
 			}
 			
-			authenticationService.changePolicy(state, assigned, passwordVerified);
+			if(state.hasUser()) {
+				if(!policyService.assertIPAddress(Request.getRemoteAddress(), state.getPolicy())) {
+					if(log.isInfoEnabled()) {
+						log.info("{} cannot access with policy {} due to IP permissions", 
+								state.getUser().getUsername(), 
+								state.getPolicy().getName());
+					}
+					return false;
+				}
+			}
+			
+			boolean passwordRequired = state.getPolicy().getPasswordOnFirstPage() 
+					&& state.getPolicy().getPasswordRequired();
 			
 			if(passwordVerified || !passwordRequired) {
 				return true;

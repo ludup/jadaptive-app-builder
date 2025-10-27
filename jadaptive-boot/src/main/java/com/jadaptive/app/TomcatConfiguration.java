@@ -39,7 +39,6 @@ public class TomcatConfiguration {
 
 			public void customize(Context context) {
 				context.setManager(new StandardManager() {
-					@SuppressWarnings("serial")
 					@Override
 				    protected StandardSession getNewSession() {
 				        return new StandardSession(this) {

@@ -85,6 +85,11 @@
 		</dependency>
 		<dependency>
 		    <groupId>npm</groupId>
+		    <artifactId>html-to-md</artifactId>
+		    <version>0.8.8</version>
+		</dependency>
+		<dependency>
+		    <groupId>npm</groupId>
 		    <artifactId>highlight.js</artifactId>
 		    <version>11.11.1</version>
 		</dependency>

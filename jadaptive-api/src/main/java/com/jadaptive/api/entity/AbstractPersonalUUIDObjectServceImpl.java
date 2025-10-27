@@ -2,6 +2,7 @@ package com.jadaptive.api.entity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,8 @@ public abstract class AbstractPersonalUUIDObjectServceImpl<T extends PersonalUUI
 		if(StringUtils.isBlank(obj.getUuid())) {
 			throw new IllegalArgumentException("Expected UUIDDocument with initialised UUID value!");
 		}
-		if(StringUtils.isBlank(obj.getOwnerUUID())) {
-			obj.setOwnerUUID(getCurrentUser().getUuid());
+		if(Objects.isNull(obj.getOwner())) {
+			obj.setOwner(getCurrentUser());
 		}
 		try {
 			objectDatabase.getObjectByUUID(getResourceClass(),obj.getUuid());

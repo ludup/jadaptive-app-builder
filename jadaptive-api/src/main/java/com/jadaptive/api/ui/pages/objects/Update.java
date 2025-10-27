@@ -37,6 +37,8 @@ public class Update extends ObjectTemplatePage {
 	
 	protected void beforeGenerateContent(Document document) {
 
+		super.beforeGenerateContent(document);
+		
 		PageHelper.addContentSecurityPolicy("style-src", SessionUtils.UNSAFE_INLINE);
 		
 		if(!uiService.canUpdate(template)) {

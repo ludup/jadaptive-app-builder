@@ -269,6 +269,11 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
+	public <T> T as(Callable<T> call) {
+		return as(getCurrentUser(), call);
+	}
+	
+	@Override
 	public <T> T as(User user, Callable<T> call) {
 		setupUserContext(user);
 		try {
@@ -283,10 +288,44 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	}
 	
 	@Override
+	public void as(User user, RunnableWithException call) {
+		setupUserContext(user);
+		try {
+			call.run();
+		}  catch(Redirect e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			clearUserContext();
+		}
+	}
+	
+	@Override
+	public void as(RunnableWithException call) {
+		as(getCurrentUser(), call);
+	}
+
+	
+	@Override
 	public <T> T asSystem(Callable<T> call) {
 		setupUserContext(SYSTEM_USER);
 		try {
 			return call.call();
+		}  catch(Redirect e) {
+			throw e;
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		} finally {
+			clearUserContext();
+		}
+	}
+	
+	@Override
+	public void asSystem(RunnableWithException r) {
+		setupSystemContext();
+		try {
+			r.run();
 		}  catch(Redirect e) {
 			throw e;
 		} catch (Exception e) {
@@ -604,9 +643,8 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			e = objectService.toUUIDDocument((AbstractObject) e);
 		}
 		
-		if(e instanceof PersonalUUIDEntity) {
-			PersonalUUIDEntity obj = (PersonalUUIDEntity) e;
-			if(Objects.isNull(obj.getOwnerUUID()) || !obj.getOwnerUUID().equals(getCurrentUser().getUuid())) {
+		if(e instanceof PersonalUUIDEntity obj) {
+			if(Objects.isNull(obj.getOwner()) || !obj.getOwner().equals(getCurrentUser())) {
 				throw new AccessDeniedException(String.format("Current user is the owner the object " + e.getUuid()));
 			}
 		} else {
@@ -629,7 +667,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			}
 		}
 	}
-
+	
 //	@Override
 //	public void assertRead(ObjectTemplate template) {
 //		if(template.getPermissionProtected()) {
