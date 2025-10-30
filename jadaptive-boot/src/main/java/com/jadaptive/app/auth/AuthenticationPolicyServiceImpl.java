@@ -166,13 +166,43 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	public boolean assertIPAddress(String remoteAddress, AuthenticationPolicy policy ) {
 		
-		var allowed = policy.getAllowedIPs().isEmpty() || policy.getAllowedIPs().stream().
-				filter(address -> matchesAddress(address, remoteAddress)).findFirst().isPresent();
+		var allowAll = policy.getAllowedIPs().isEmpty();
+		var blockAll = policy.getBlockedIPs().isEmpty();
 		
-		var blocked = policy.getBlockedIPs().stream().
-				filter(address -> matchesAddress(address, remoteAddress)).findFirst().isPresent();
+		if(allowAll && blockAll) {
+			/* Both allow and block lists are empty, we so we always allow by default */
+			return true;
+		}
+		else {
+			var allow = policy.getAllowedIPs().stream().
+					filter(address -> matchesAddress(address, remoteAddress)).findFirst().isPresent();
+			
+			if(blockAll) {
+				/* The block list is empty, but the allow list has addresses. Immediately allow
+				 * if the remote address matches any in this list, otherwise immediately block */
+				return allow;
+			}
+			
+			var block = policy.getBlockedIPs().stream().
+					filter(address -> matchesAddress(address, remoteAddress)).findFirst().isPresent();
+			
+			if(allowAll) {
+				/* The allow list empty, but the block list has some addresses. Immediately allow 
+				 * if the remote addresses does NOT match any in the block list, otherwise immediately 
+				 * block  
+				 */
+				return !block;
+			}
+			else {
+				/* The allow list has addresses, so does the block list. Immediately allow
+				 * if the remote address IS in the allow list and is NOT in the block list.
+				 */
+				return allow && !block;
+			}
+			
+		}
 		
-		return !blocked || allowed;
+
 	}
 
 	private boolean matchesAddress(String address, String remoteAddress) {
