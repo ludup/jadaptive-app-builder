@@ -189,7 +189,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 			if(allowAll) {
 				/* The allow list empty, but the block list has some addresses. Immediately allow 
 				 * if the remote addresses does NOT match any in the block list, otherwise immediately 
-				 * allow  
+				 * block  
 				 */
 				return !block;
 			}
