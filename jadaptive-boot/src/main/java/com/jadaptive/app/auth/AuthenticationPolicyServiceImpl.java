@@ -172,7 +172,7 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 		var blocked = policy.getBlockedIPs().stream().
 				filter(address -> matchesAddress(address, remoteAddress)).findFirst().isPresent();
 		
-		return allowed && !blocked;
+		return !blocked || allowed;
 	}
 
 	private boolean matchesAddress(String address, String remoteAddress) {
