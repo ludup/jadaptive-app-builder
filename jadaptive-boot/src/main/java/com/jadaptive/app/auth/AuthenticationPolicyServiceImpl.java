@@ -195,9 +195,9 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 			}
 			else {
 				/* The allow list has addresses, so does the block list. Immediately allow
-				 * if the remote address IS in the allow list and is NOT in the block list.
+				 * if the remote address IS in the allow list OR it is NOT in the block list.
 				 */
-				return allow && !block;
+				return allow || !block;
 			}
 			
 		}
