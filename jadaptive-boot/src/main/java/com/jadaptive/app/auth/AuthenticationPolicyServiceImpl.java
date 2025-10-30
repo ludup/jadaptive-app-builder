@@ -166,36 +166,22 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	public boolean assertIPAddress(String remoteAddress, AuthenticationPolicy policy ) {
 		
-		boolean assertion = !policy.getAllowedIPs().isEmpty();
+		var allowed = policy.getAllowedIPs().isEmpty() || policy.getAllowedIPs().stream().
+				filter(address -> matchesAddress(address, remoteAddress)).findFirst().isPresent();
 		
-		if(assertion) {
-			for(String address : policy.getAllowedIPs()) {
-				try {
-					if(matchesAddress(address, remoteAddress)) {
-						return true;
-					}
-				} catch (UnknownHostException e) {
-					log.warn("Invalid IP address in allowed IPs {}", address);
-				}
-			}
-			return false;
-		}
+		var blocked = policy.getBlockedIPs().stream().
+				filter(address -> matchesAddress(address, remoteAddress)).findFirst().isPresent();
 		
-		for(String address : policy.getBlockedIPs()) {
-			try {
-				if(matchesAddress(address, remoteAddress)) {
-					return false;
-				}
-			} catch (UnknownHostException e) {
-				log.warn("Invalid IP address in blocked IPs {}", address);
-			}
-		}
-		
-		return true;
+		return allowed && !blocked;
 	}
 
-	private boolean matchesAddress(String address, String remoteAddress) throws UnknownHostException {
-		return new CIDRUtils(address).isInRange(remoteAddress);
+	private boolean matchesAddress(String address, String remoteAddress) {
+		try {
+			return new CIDRUtils(address).isInRange(remoteAddress);
+		} catch (UnknownHostException e) {
+			log.warn("Invalid IP address in blocked IPs {}", address);
+			return false;
+		}
 	}
 
 	@Override
