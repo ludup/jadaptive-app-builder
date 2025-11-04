@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -204,9 +205,14 @@ public class Header extends AbstractPageExtension {
 		if(umenuLink != null) {
 			
 			var user = session.getUser();
+			var name = StringUtils.defaultIfEmpty(user.getDisplayName(), 
+					StringUtils.defaultIfEmpty(user.getEmail(), 
+							user.getUsername()));
 			var txt = session.getTenant().isSystem() ?
-					Html.span(user.getUsername()) :
-					Html.span(String.format("%s@%s", user.getUsername(), session.getTenant().getDomain()));
+					Html.span(name) :
+					Html.span(
+							String.format("%s/%s", 
+							name, session.getTenant().getName()));
 			txt.addClass("fw-bold");
 			txt.addClass("me-3");
 			
