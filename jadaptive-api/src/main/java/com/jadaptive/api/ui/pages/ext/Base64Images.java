@@ -54,9 +54,9 @@ public class Base64Images {
 			var args = sl.split(";");
 			if (args.length > 1) {
 				if (args[args.length - 1].equals("base64")) {
-					var data = pl.substring(1);
-					var type = args[0];
-					var ext = type.split("/")[1];
+					var data = pl.substring(1).trim();
+					var type = args[0].trim();
+					var ext = (type.split("/")[1]).trim();
 					byte[] decoded = Base64.getDecoder().decode(data);
 					return Optional.of(new Base64ImageResource(args[0], decoded.length, ext, decoded));
 				}
