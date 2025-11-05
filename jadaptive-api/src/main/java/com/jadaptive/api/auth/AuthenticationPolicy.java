@@ -10,6 +10,7 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.permissions.FeatureGroup;
 import com.jadaptive.api.permissions.LicensedFeature;
+import com.jadaptive.api.product.ProductService.ProductId;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.DynamicColumn;
@@ -32,7 +33,9 @@ import com.jadaptive.api.template.Validator;
 			otherColumns = { @DynamicColumn(resourceKey = "scope", service = AuthenticationPolicyService.class)})
 @ObjectServiceBean(bean = AuthenticationPolicyService.class)
 @GenerateEventTemplates(AuthenticationPolicy.RESOURCE_KEY)
-@LicensedFeature(value = AuthenticationPolicy.FEATURE_NAME, group = FeatureGroup.PROFESSIONAL, includedWithPAYG = true)
+@LicensedFeature(value = AuthenticationPolicy.FEATURE_NAME, group = FeatureGroup.PROFESSIONAL, excludeProducts = ProductId.PASSWORD_EXPRESS_ONPREM)
+@LicensedFeature(value = AuthenticationPolicy.FEATURE_NAME, group = FeatureGroup.FREE, includeProducts = ProductId.PASSWORD_EXPRESS_ONPREM)
+
 @UniqueIndex(columns = { "resourceKey", "weight"})
 public abstract class AuthenticationPolicy extends AssignableUUIDEntity implements NamedDocument {
 

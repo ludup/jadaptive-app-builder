@@ -46,7 +46,7 @@ requiresUpdate = true, sortField = "username")
 @TableAction(resourceKey = "impersonateUser", bundle = User.RESOURCE_KEY,  icon = "fa-mask", target = Target.ROW, url = "/app/ui/impersonateUser/{uuid}", permissions = "tenant.read")
 @Transactional
 @GenerateEventTemplates(User.RESOURCE_KEY)
-@LicensedFeature(group = FeatureGroup.FREE, includedWithPAYG = true, value = User.RESOURCE_KEY)
+@LicensedFeature(group = FeatureGroup.FREE, value = User.RESOURCE_KEY)
 public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	public static final String RESOURCE_KEY = "users";
