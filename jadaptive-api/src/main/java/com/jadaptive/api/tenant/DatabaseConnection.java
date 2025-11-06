@@ -32,6 +32,13 @@ public class DatabaseConnection extends NamedUUIDEntity implements NamedDocument
 	
 	@ObjectField(type = FieldType.TEXT)
 	@Validator(type = ValidationType.HOSTNAME)
+	@Validator(type = ValidationType.REQUIRED)
+	String clusterHostname;
+	
+	@ObjectField(type = FieldType.TEXT)
+	@Validator(type = ValidationType.HOSTNAME)
+	@Validator(type = ValidationType.IPV4)
+	@Validator(type = ValidationType.IPV6)
 	Collection<String> nodes;
 	
 	@ObjectField(type = FieldType.COUNTRY)
@@ -65,4 +72,14 @@ public class DatabaseConnection extends NamedUUIDEntity implements NamedDocument
 	public void setNodes(Collection<String> nodes) {
 		this.nodes = nodes;
 	}
+
+	public String getClusterHostname() {
+		return clusterHostname;
+	}
+
+	public void setClusterHostname(String clusterHostname) {
+		this.clusterHostname = clusterHostname;
+	}
+	
+	
 }
