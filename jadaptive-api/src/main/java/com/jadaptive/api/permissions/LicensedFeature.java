@@ -18,7 +18,7 @@ public @interface LicensedFeature {
 	
 	FeatureGroup group();
 	
-	boolean includedWithPAYG() default false;
+	ProductId[] includeProducts() default {};
 	
-	ProductId[] products() default {};
+	ProductId[] excludeProducts() default {};
 }

@@ -30,6 +30,7 @@ import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.permissions.FeatureGroup;
 import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.product.ProductService.ProductId;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -40,7 +41,9 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.utils.CIDRUtils;
 
 @Service
-@LicensedFeature(value = AuthenticationPolicyServiceImpl.FEATURE_2FA, includedWithPAYG = true, group = FeatureGroup.PROFESSIONAL)
+@LicensedFeature(value = AuthenticationPolicyServiceImpl.FEATURE_2FA, group = FeatureGroup.PROFESSIONAL, excludeProducts = ProductId.PASSWORD_EXPRESS_ONPREM)
+@LicensedFeature(value = AuthenticationPolicyServiceImpl.FEATURE_2FA, group = FeatureGroup.FREE, includeProducts = ProductId.PASSWORD_EXPRESS_ONPREM)
+
 public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImpl<AuthenticationPolicy> implements AuthenticationPolicyService {
 
 	private static final Logger log = LoggerFactory.getLogger(AuthenticationPolicyService.class);

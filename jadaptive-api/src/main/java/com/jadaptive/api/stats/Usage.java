@@ -7,6 +7,7 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.Index;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.TableView;
@@ -15,6 +16,7 @@ import com.jadaptive.api.template.Validator;
 
 @ObjectDefinition(resourceKey = Usage.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.COLLECTION, creatable = false, updatable = false, deletable = false)
 @TableView(defaultColumns = { "timestamp",  "keys", "value" })
+@Index(columns = { "keys" })
 public class Usage extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = 2886275420185558997L;

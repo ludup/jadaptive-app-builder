@@ -29,7 +29,7 @@ import jakarta.servlet.http.HttpSession;
 @ObjectDefinition(resourceKey = Session.RESOURCE_KEY, scope = ObjectScope.GLOBAL, creatable = false, updatable = false, defaultColumn = "user")
 @ObjectServiceBean(bean = SessionService.class)
 @TableView(defaultColumns = { "user", "signedIn", "remoteAddress", "type", "state", "userAgent"})
-@LicensedFeature(group = FeatureGroup.FREE, includedWithPAYG = true, value = Session.RESOURCE_KEY)
+@LicensedFeature(group = FeatureGroup.FREE, value = Session.RESOURCE_KEY)
 public class Session extends AbstractUUIDEntity {
 	
 	public final static void set(HttpServletRequest request, LogonCompletedResult result) {
