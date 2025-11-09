@@ -30,6 +30,7 @@ import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.permissions.FeatureGroup;
 import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.product.ProductService.ProductId;
 import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -40,7 +41,9 @@ import com.jadaptive.api.user.User;
 import com.jadaptive.utils.CIDRUtils;
 
 @Service
-@LicensedFeature(value = AuthenticationPolicyServiceImpl.FEATURE_2FA, includedWithPAYG = true, group = FeatureGroup.PROFESSIONAL)
+@LicensedFeature(value = AuthenticationPolicyServiceImpl.FEATURE_2FA, group = FeatureGroup.PROFESSIONAL, excludeProducts = ProductId.PASSWORD_EXPRESS_ONPREM)
+@LicensedFeature(value = AuthenticationPolicyServiceImpl.FEATURE_2FA, group = FeatureGroup.FREE, includeProducts = ProductId.PASSWORD_EXPRESS_ONPREM)
+
 public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImpl<AuthenticationPolicy> implements AuthenticationPolicyService {
 
 	private static final Logger log = LoggerFactory.getLogger(AuthenticationPolicyService.class);
@@ -166,36 +169,52 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 	@Override
 	public boolean assertIPAddress(String remoteAddress, AuthenticationPolicy policy ) {
 		
-		boolean assertion = !policy.getAllowedIPs().isEmpty();
+		var allowAll = policy.getAllowedIPs().isEmpty();
+		var blockAll = policy.getBlockedIPs().isEmpty();
 		
-		if(assertion) {
-			for(String address : policy.getAllowedIPs()) {
-				try {
-					if(matchesAddress(address, remoteAddress)) {
-						return true;
-					}
-				} catch (UnknownHostException e) {
-					log.warn("Invalid IP address in allowed IPs {}", address);
-				}
+		if(allowAll && blockAll) {
+			/* Both allow and block lists are empty, we so we always allow by default */
+			return true;
+		}
+		else {
+			var allow = policy.getAllowedIPs().stream().
+					filter(address -> matchesAddress(address, remoteAddress)).findFirst().isPresent();
+			
+			if(blockAll) {
+				/* The block list is empty, but the allow list has addresses. Immediately allow
+				 * if the remote address matches any in this list, otherwise immediately block */
+				return allow;
 			}
-			return false;
+			
+			var block = policy.getBlockedIPs().stream().
+					filter(address -> matchesAddress(address, remoteAddress)).findFirst().isPresent();
+			
+			if(allowAll) {
+				/* The allow list empty, but the block list has some addresses. Immediately allow 
+				 * if the remote addresses does NOT match any in the block list, otherwise immediately 
+				 * block  
+				 */
+				return !block;
+			}
+			else {
+				/* The allow list has addresses, so does the block list. Immediately allow
+				 * if the remote address IS in the allow list OR it is NOT in the block list.
+				 */
+				return allow || !block;
+			}
+			
 		}
 		
-		for(String address : policy.getBlockedIPs()) {
-			try {
-				if(matchesAddress(address, remoteAddress)) {
-					return false;
-				}
-			} catch (UnknownHostException e) {
-				log.warn("Invalid IP address in blocked IPs {}", address);
-			}
-		}
-		
-		return true;
+
 	}
 
-	private boolean matchesAddress(String address, String remoteAddress) throws UnknownHostException {
-		return new CIDRUtils(address).isInRange(remoteAddress);
+	private boolean matchesAddress(String address, String remoteAddress) {
+		try {
+			return new CIDRUtils(address).isInRange(remoteAddress);
+		} catch (UnknownHostException e) {
+			log.warn("Invalid IP address in blocked IPs {}", address);
+			return false;
+		}
 	}
 
 	@Override

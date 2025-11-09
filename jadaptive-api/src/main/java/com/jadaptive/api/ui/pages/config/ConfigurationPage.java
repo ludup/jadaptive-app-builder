@@ -29,7 +29,7 @@ import com.jadaptive.api.ui.PageProcessors;
 @Component
 @PageDependencies(extensions = { "jquery", "bootstrap", "fontawesome", "jadaptive-utils"} )
 @PageProcessors(extensions = { "i18n"} )
-@LicensedFeature(group = FeatureGroup.FREE, includedWithPAYG = true, value = ConfigurationPage.CONFIGURATION_FEATURE)
+@LicensedFeature(group = FeatureGroup.FREE, value = ConfigurationPage.CONFIGURATION_FEATURE)
 public class ConfigurationPage extends AuthenticatedPage {
 
 	public static final String CONFIGURATION_FEATURE = "configuration";

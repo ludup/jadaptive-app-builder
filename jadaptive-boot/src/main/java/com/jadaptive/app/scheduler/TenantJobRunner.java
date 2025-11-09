@@ -11,7 +11,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
-import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.jobs.TaskRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.scheduler.ScheduledTask;
