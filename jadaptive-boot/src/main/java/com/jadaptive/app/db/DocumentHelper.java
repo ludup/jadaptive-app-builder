@@ -456,7 +456,7 @@ public class DocumentHelper {
 				}
 				
 				if(StringUtils.isBlank(uuid) && field.isRequired()) {
-					throw new ValidationException();
+					throw new ValidationException("No UUID for field " + field.getResourceKey() + " (" + formVariablePrefix + ")");
 				}
 				
 				if(StringUtils.isNotBlank(uuid)) {

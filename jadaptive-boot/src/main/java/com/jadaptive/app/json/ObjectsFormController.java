@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
@@ -93,7 +94,18 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		
 		Map<String,String[]> parameters = req.getParameterMap();
 		
-			try {
+		try {
+			if(req instanceof StandardMultipartHttpServletRequest mpartReq) {
+				var it = mpartReq.getFileNames();
+				while (it.hasNext()) {
+					var item = mpartReq.getFile(it.next());
+				    var attachment = fileService.createAttachment(
+				    			item.getInputStream(), item.getOriginalFilename(), 
+				    			item.getContentType(), item.getName(), template);
+			    	ParameterHelper.setValue(parameters, item.getName(), attachment.getUuid());
+				}
+			}
+			else {
 				// Create a new file upload handler
 				JakartaServletFileUpload<?,?> upload = new JakartaServletFileUpload<>();
 
@@ -115,12 +127,13 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 				    }
 				    
 				}
-				
-			} catch (IOException e) {
-				throw new IllegalStateException(e.getMessage(), e);
 			}
+			
+		} catch (IOException e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 
-			return parameters;
+		return parameters;
 		 
 	}
 	
@@ -524,6 +537,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 					new Document(obj.getDocument())));
 			return new UUIDStatus(obj.getUuid());
 		} catch(ValidationException ex) { 
+			ex.printStackTrace();
 			return new RequestStatusImpl(false, ex.getMessage());
 		} catch (UriRedirect e) {
 			return new RedirectStatus(e.getUri());
