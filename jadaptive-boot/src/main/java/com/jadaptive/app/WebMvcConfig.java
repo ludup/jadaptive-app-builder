@@ -6,6 +6,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.app.auth.oauth2.OAuth2Interceptor;
+import com.jadaptive.app.logging.LoggingInterceptor;
 import com.jadaptive.app.permissions.ControllerInterceptor;
 
 @Configuration
@@ -15,5 +16,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(ApplicationServiceImpl.getInstance().autowire(new ControllerInterceptor()));
         registry.addInterceptor(ApplicationServiceImpl.getInstance().autowire(new OAuth2Interceptor()));
+        registry.addInterceptor(ApplicationServiceImpl.getInstance().autowire(new LoggingInterceptor()));
     }
 }

@@ -193,10 +193,15 @@ public class KeytoolKeyring implements Keyring, TenantAware {
 	private KeyStore loadCustomCertificates(String name, String aliasRequired, char[] passwordRequired) {
 		
 		for(CertificateProvider provider : App.beans(CertificateProvider.class)) {
-			KeyStore ret = provider.loadCertificate(name, aliasRequired, passwordRequired);
-			if(Objects.nonNull(ret)) {
-				LOG.info("Loaded custom certificate source for {}", name);
-				return ret;
+			try {
+				KeyStore ret = provider.loadCertificate(name, aliasRequired, passwordRequired);
+				if(Objects.nonNull(ret)) {
+					LOG.info("Loaded custom certificate source for {}", name);
+					return ret;
+				}
+			}
+			catch(Exception e) {
+				LOG.error("Failed to load certificate provider. ", e);
 			}
 		}
 		return null;
