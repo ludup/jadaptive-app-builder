@@ -3,6 +3,7 @@ package com.jadaptive.app.json;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.entity.AbstractObject;
@@ -91,29 +93,46 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 	
 	private Map<String,String[]> generateFormParameters(HttpServletRequest req, String template) {
 		
-		Map<String,String[]> parameters = req.getParameterMap();
+		Map<String,String[]> parameters = new HashMap<>(req.getParameterMap());
 		
 			try {
-				// Create a new file upload handler
-				JakartaServletFileUpload<?,?> upload = new JakartaServletFileUpload<>();
-
-				// Parse the request
-				FileItemInputIterator iter = upload.getItemIterator(req);
-
-				while(iter.hasNext()) {
-				    FileItemInput item = iter.next();
-
-				    if (item.isFormField()) {
-				    	String name = item.getFieldName();
-				        String value = IOUtils.toString(item.getInputStream(), "UTF-8");
-				        ParameterHelper.setValue(parameters, name, value);
-				    } else {
-					    FileAttachment attachment = fileService.createAttachment(
-					    			item.getInputStream(), item.getName(), 
-					    			item.getContentType(), item.getFieldName(), template);
-				    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
-				    }
-				    
+				
+				if(req instanceof StandardMultipartHttpServletRequest mpartReq) {
+					var it = mpartReq.getFileNames();
+					while (it.hasNext()) {
+						var item = mpartReq.getFile(it.next());	
+						if(item.getSize() > 0) {
+							var attachment = fileService.createAttachment(
+						    			item.getInputStream(), item.getOriginalFilename(), 
+						    			item.getContentType(), item.getName(), template);
+					    	ParameterHelper.setValue(parameters, item.getName(), attachment.getUuid());
+					    	ParameterHelper.setValue(parameters, item.getName() + "_name", attachment.getFilename());
+						}
+					}
+				} else {
+				
+					// Create a new file upload handler
+					JakartaServletFileUpload<?,?> upload = new JakartaServletFileUpload<>();
+	
+					// Parse the request
+					FileItemInputIterator iter = upload.getItemIterator(req);
+	
+					while(iter.hasNext()) {
+					    FileItemInput item = iter.next();
+	
+					    if (item.isFormField()) {
+					    	String name = item.getFieldName();
+					        String value = IOUtils.toString(item.getInputStream(), "UTF-8");
+					        ParameterHelper.setValue(parameters, name, value);
+					    } else {
+						    FileAttachment attachment = fileService.createAttachment(
+						    			item.getInputStream(), item.getName(), 
+						    			item.getContentType(), item.getFieldName(), template);
+					    	ParameterHelper.setValue(parameters, item.getFieldName(), attachment.getUuid());
+					    	ParameterHelper.setValue(parameters, item.getFieldName() + "_name", attachment.getFilename());
+					    }
+					    
+					}
 				}
 				
 			} catch (IOException e) {
