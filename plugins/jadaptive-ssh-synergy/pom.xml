@@ -19,7 +19,7 @@
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.projectUrl>https://github.com/ludup/jadpative-common</plugin.projectUrl>
 		<plugin.dependencies></plugin.dependencies>
-		<synergy.version>3.1.4-SNAPSHOT</synergy.version>
+		<synergy.version>3.1.4</synergy.version>
 	</properties>
 
 	<dependencies>		
