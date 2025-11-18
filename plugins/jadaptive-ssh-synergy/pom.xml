@@ -19,7 +19,7 @@
 		<plugin.provider>JADAPTIVE Limited</plugin.provider>
 		<plugin.projectUrl>https://github.com/ludup/jadpative-common</plugin.projectUrl>
 		<plugin.dependencies></plugin.dependencies>
-		<synergy.version>3.1.4</synergy.version>
+		<synergy.version>3.2.0-SNAPSHOT</synergy.version>
 	</properties>
 
 	<dependencies>		
@@ -47,11 +47,6 @@
 		<dependency>
 			<groupId>com.sshtools</groupId>
 			<artifactId>maverick-synergy-server</artifactId>
-			<version>${synergy.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sshtools</groupId>
-			<artifactId>maverick-synergy-jdk16-server</artifactId>
 			<version>${synergy.version}</version>
 		</dependency>
 		<dependency>
