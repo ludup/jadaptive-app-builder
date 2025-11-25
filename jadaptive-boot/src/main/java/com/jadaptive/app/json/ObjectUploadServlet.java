@@ -98,8 +98,6 @@ public class ObjectUploadServlet extends HttpServlet {
 		
 		Map<String,String[]> parameters = new HashMap<>();
 		
-		DocumentHelper.enableMultipleValidation();
-		
 		try(var scope = SessionUtils.scopedIoWithoutSessionTimeout(request)) {
 
 			generateFormParameters(request, parameters, resourceKey);
@@ -111,6 +109,7 @@ public class ObjectUploadServlet extends HttpServlet {
 			try {
 				switch(handler) {
 				case VALIDATE:
+					DocumentHelper.enableMultipleValidation();
 					processValidation(request, resourceKey, parameters);
 					return;
 				case MULTIPART:

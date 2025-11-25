@@ -61,7 +61,7 @@
 			<version>5.1.0</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+	</dependencies> 
 
 	<properties>
 		<start-class>com.jadaptive.app.Application</start-class>
