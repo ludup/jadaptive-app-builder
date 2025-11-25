@@ -7,7 +7,7 @@
     </Properties>
     <Appenders>
 		<RollingFile name="FileAppender" fileName="logs/application.log"
-		         filePattern="application-%i.log.gz">
+		         filePattern="logs/application.log.%i.gz">
 		    <PatternLayout>
 		        <Pattern>${LOG_PATTERN}</Pattern>
 		    </PatternLayout>
