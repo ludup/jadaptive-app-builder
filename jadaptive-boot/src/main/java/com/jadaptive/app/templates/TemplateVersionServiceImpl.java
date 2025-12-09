@@ -559,7 +559,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			else {
 				hash = getHashFromBuildProperties(template);
-				loadCached = Objects.equals(hash, template.getHash());
+				loadCached = template.getHash() != null && Objects.equals(hash, template.getHash());
 			}
 			
 			if(!loadCached) {
