@@ -101,6 +101,10 @@
 					</compilerArgs>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>com.sshtools</groupId>
+                <artifactId>codehash-maven-plugin</artifactId>
+            </plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -119,6 +123,24 @@
 					<artifactId>maven-deploy-plugin</artifactId>
 					<version>3.1.1</version>
 				</plugin>
+				<plugin>
+                    <groupId>com.sshtools</groupId>
+                    <artifactId>codehash-maven-plugin</artifactId>
+                    <version>0.9.0</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>generate-hashes</goal>
+                            </goals>
+                            <phase>generate-resources</phase>
+                            <id>genhashes</id>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <annotationName>com.jadaptive.api.template.ObjectDefinition</annotationName>
+                        <outputFile>object-definition-hashes.properties</outputFile>
+                    </configuration>
+                </plugin>
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>

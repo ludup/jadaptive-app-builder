@@ -52,7 +52,7 @@ public abstract class AbstractClusterInterfaceFactory<T extends ProtocolContext,
 				try {
 					wtr.writeString(node.getUuid());
 					wtr.writeString(node.getStatus().name());
-					wtr.writeUINT64(node.getLastHeartbeat());
+					wtr.writeUINT64(0);
 					wtr.writeString(node.getHostname());
 					var srvs = node.getServices();
 					wtr.write(srvs.size());

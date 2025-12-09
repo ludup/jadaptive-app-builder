@@ -72,7 +72,7 @@ public class ClassLoaderServiceImpl extends ClassLoader implements ClassLoaderSe
 	}
 
 	@Override
-	protected Enumeration<URL> findResources(String name) throws IOException {
+	public Enumeration<URL> findResources(String name) throws IOException {
 		return new Enumeration<URL>() {
 
 			Set<URL> tmp = new HashSet<>();

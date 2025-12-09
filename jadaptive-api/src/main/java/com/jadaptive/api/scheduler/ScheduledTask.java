@@ -9,7 +9,5 @@ public interface ScheduledTask extends TenantTask {
 	static final String EVERY_10_MINUTES = "0 */10 * * * *";
 	static final String EVERY_DAY =    "0 0 0 */1 * *";
 	
-	String cron();
-	
 	default boolean isSystemOnly() { return false; }
 }

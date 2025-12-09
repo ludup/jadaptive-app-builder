@@ -1,8 +1,10 @@
 package com.jadaptive.api.db;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Enumeration;
 
 import com.jadaptive.api.repository.UUIDDocument;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -24,5 +26,7 @@ public interface ClassLoaderService {
 	Class<?> injectClass(ObjectTemplate template);
 
 	Class<?> injectClass(ObjectTemplate template, byte[] bytecode);
+	
+	Enumeration<URL> findResources(String name) throws IOException;
 
 }

@@ -1,94 +1,75 @@
 package com.jadaptive.app.scheduler;
 
-import java.time.Duration;
-import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.support.CronTrigger;
 
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.jobs.TaskRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
-import com.jadaptive.utils.Utils;
+import com.jadaptive.api.user.UserService;
+import com.sshtools.gardensched.SerializableRunnable;
 
-public class TenantJobRunner implements Runnable {
+@SuppressWarnings("serial")
+public class TenantJobRunner implements SerializableRunnable {
 
 	static Logger log = LoggerFactory.getLogger(TenantJobRunner.class);
 	
 	@Autowired
 	private TenantService tenantService; 
-	
+
 	@Autowired
-	private TaskScheduler taskScheduler;
+	private UserService userService;
 	
 	@Autowired
 	private PermissionService permissionService; 
 	
-	String taskUUID;
-	TenantTask task;
-	ScheduledFuture<?> future;
-	String tenantUUID;
-	User user = null;
+	private TenantTask task;
+	private ScheduledFuture<?> future;
+	private String tenantUUID;
+	private String user = null;
 	
-	public TenantJobRunner(Tenant tenant, String taskUUID) {
-		this.tenantUUID = tenant.getUuid();
-		this.taskUUID = taskUUID;
+	public TenantJobRunner() {
+		
 	}
 	
-	public TenantJobRunner(Tenant tenant, String taskUUID, User user) {
+	public TenantJobRunner(Tenant tenant, TenantTask task) {
 		this.tenantUUID = tenant.getUuid();
-		this.taskUUID = taskUUID;
+		this.task = task;
+	}
+	
+	public TenantJobRunner(Tenant tenant, TenantTask task, User user) {
+		this.tenantUUID = tenant.getUuid();
+		this.task = task;
+		this.user = user.getUuid();
+	}
+	
+	public void setUser(String user) {
 		this.user = user;
 	}
-	
-	public void setUser(User user) {
-		this.user = user;
+
+	public TenantTask getTask() {
+		return task;
 	}
-	
-	public void schedule(ScheduledTask task) {
+
+	public void setTask(TenantTask task) {
 		this.task = task;
-		future = taskScheduler.schedule(this, new CronTrigger(task.cron()));
 	}
-	
-	public void schedule(TenantTask task, String expression) {
-		this.task = task;
-		future = taskScheduler.schedule(this, new CronTrigger(expression));
+
+	public String getUser() {
+		return user;
 	}
-	
-	public void schedule(TenantTask task, Date startTime, long repeat) {
-		this.task = task;
-		future = taskScheduler.scheduleAtFixedRate(this, startTime.toInstant(), Duration.ofMillis(repeat));
+
+	public void setTenantUUID(String tenantUUID) {
+		this.tenantUUID = tenantUUID;
 	}
-	
-	public void runNow(TenantTask task) {
-		this.task = task;
-		future = taskScheduler.schedule(this, Utils.now().toInstant());
-	}
-	
-	public void runAfter(TenantTask task, Duration duration) {
-		this.task = task;
-		future = taskScheduler.schedule(this, Utils.now().toInstant().plus(duration));
-	}
-	
-	public void schedule(TenantTask task, Date startTime) {
-		this.task = task;
-		future = taskScheduler.schedule(this, startTime.toInstant());
-	}
-	
-	public void scheduleIn(TenantTask task, Duration duration) {
-		this.task = task;
-		future = taskScheduler.scheduleWithFixedDelay(this, duration);
-	}
-	
+
 	@Override
 	public void run() {
 		
@@ -97,7 +78,7 @@ public class TenantJobRunner implements Runnable {
 		
 		try {
 
-			permissionService.as(user == null ? permissionService.getSystemUser() : user, ()->{
+			permissionService.as(user == null ? permissionService.getSystemUser() : userService.getUserByUUID(user), ()->{
 				for(TaskRunnerContext ctx : ApplicationServiceImpl.getInstance().getBeans(TaskRunnerContext.class)) {
 					ctx.setupContext();
 				}
@@ -121,16 +102,10 @@ public class TenantJobRunner implements Runnable {
 		
 		
 	}
-	public void cancel(boolean mayInterrupt) {
-		future.cancel(mayInterrupt);
-	}
-
+	
 	public String getTenantUUID() {
 		return tenantUUID;
 	}
-	
-	public String getTaskUUID() {
-		return taskUUID;
-	}
+
 
 }

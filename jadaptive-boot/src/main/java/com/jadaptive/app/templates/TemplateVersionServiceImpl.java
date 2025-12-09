@@ -1,7 +1,10 @@
 package com.jadaptive.app.templates;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -25,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
@@ -152,6 +156,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	private Map<String,Class<? extends ObjectUpdateEvent<?>>> updateEventClasses = new HashMap<>();
 	
 	private List<Runnable> updatedOperations = new ArrayList<>();
+
+	private Properties templateHashes;
+	
+	private final static ThreadLocal<Boolean> eventTemplatesNotChanged = new ThreadLocal<Boolean>();  
 	
 	@Override
 	public Iterable<TemplateVersion> list() throws RepositoryException, ObjectException {
@@ -469,11 +477,6 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		
 		try {
 			ObjectDefinition e = clz.getAnnotation(ObjectDefinition.class);
-			boolean saveBytecode = Objects.nonNull(bytecode);
-			
-			if(Objects.isNull(bytecode)) {
-				bytecode = ClassChecksumGenerator.getBytecode(clz);
-			}
 			
 			String resourceKey = e.resourceKey();
 			if(StringUtils.isBlank(resourceKey)) {
@@ -504,11 +507,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				}
 			}
 			
+			boolean newTemplate = false;
 			try {
 				template = templateRepository.get(resourceKey);	
 			} catch (ObjectException ee) {
 				template = new ObjectTemplate();
 				template.setUuid(resourceKey);
+				newTemplate = true;
 			}
 			
 			Class<?> parentClass = getParentClass(clz);
@@ -539,9 +544,26 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			boolean generateEventTemplates = hasGenerateTemplatesAnnotation(clz);
-			boolean loadCached = false; //hash.equals(template.getHash());
+			boolean registeringEventTemplatesNotChanged = Boolean.TRUE.equals(eventTemplatesNotChanged.get());
+			boolean loadCached;
+			
+			String hash;
+			if(registeringEventTemplatesNotChanged) {
+				/* If currently registering an event template and the parent entity has not changed
+				 * then only rebuild if this is a new template.
+				 * 
+				 * Event templates don't have hashes
+				 */
+				loadCached = !newTemplate;
+				hash = null;
+			}
+			else {
+				hash = getHashFromBuildProperties(template);
+				loadCached = Objects.equals(hash, template.getHash());
+			}
 			
 			if(!loadCached) {
+				log.info("No cached template, rebuilding for {}", template.getTemplateClass());
 				
 				Class<?> baseClass = TemplateUtils.getBaseClass(clz);
 				ObjectDefinition collection = e; 
@@ -566,7 +588,12 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					}
 					templateRepository.saveOrUpdate(parentTemplate);
 				}
-	
+
+				boolean saveBytecode = Objects.nonNull(bytecode);
+				
+				if(Objects.isNull(bytecode)) {
+					bytecode = ClassChecksumGenerator.getBytecode(clz);
+				}
 				if(saveBytecode) {
 					template.setClassDefinition(Base64.getEncoder().encodeToString(bytecode));
 				}
@@ -592,6 +619,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				template.setPermissionProtected(e.requiresPermission());
 				template.getCapabilities().clear();
 				template.getCapabilities().addAll(Arrays.asList(e.capabilities()));
+				template.setHash(hash);
 				
 				String nameField = "uuid";
 				
@@ -627,6 +655,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				
 				registerIndexes(template, clz, newSchema);
 			}
+			else if(!registeringEventTemplatesNotChanged) {
+				eventTemplatesNotChanged.set(true);
+			}
 			
 			loadedTemplates.put(resourceKey, template);
 			templateService.registerTemplateClass(resourceKey, clz, template);
@@ -650,6 +681,10 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				}
 			}
 			
+			if(!registeringEventTemplatesNotChanged) {
+				eventTemplatesNotChanged.remove();
+			}
+			
 			return template;
 			
 		} catch(RepositoryException | ObjectException e) {
@@ -658,6 +693,38 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 	}
 	
+	private String getHashFromBuildProperties(ObjectTemplate template) {
+		if(templateHashes == null) {
+			templateHashes = new Properties();
+			var resources = 0; 
+			try {
+				var en = classService.findResources("META-INF/object-definition-hashes.properties");
+				while(en.hasMoreElements()) {
+					var url = en.nextElement();
+					var prps = new Properties();
+					try(var rdr = new BufferedReader(new InputStreamReader(url.openConnection().getInputStream(), "UTF-8"))) {
+						prps.load(rdr);
+					}
+					templateHashes.putAll(prps);
+					resources++;
+				}
+			}
+			catch(IOException ioe) {
+				throw new UncheckedIOException(ioe);
+			}
+			log.info("Loaded {} hash keys from {} library resources.", templateHashes.size(), resources);
+		}
+		var hsh = templateHashes.getProperty(template.getTemplateClass());
+		if(hsh == null) {
+			log.warn("No hash of {} in any META-INF/object-definition.hashes.properties resources", template.getTemplateClass());
+			
+		}
+		else {
+			log.debug("{}={}",template.getTemplateClass(),hsh);
+		}
+		return hsh;
+	}
+
 	private boolean hasGenerateTemplatesAnnotation(Class<? extends UUIDDocument> clz) {
 		return ReflectionUtils.hasAnnotation(clz, GenerateEventTemplates.class);
 	}

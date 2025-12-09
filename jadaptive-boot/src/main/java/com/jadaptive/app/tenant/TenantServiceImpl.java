@@ -195,26 +195,24 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 			
 			applicationService.getBeans(TenantAware.class).
-			stream().
-			sorted((o1,o2) -> o1.getOrder().compareTo(o2.getOrder())).
-			forEach(aware -> {
-				if(tenant.isSystem()) {
-					aware.initializeSystem(newSchema);
-				} else {
-					aware.initializeTenant(tenant, newSchema);
-				}
-			}
-		);
+				stream().
+				sorted((o1,o2) -> o1.getOrder().compareTo(o2.getOrder())).
+				forEach(aware -> {
+					if(tenant.isSystem()) {
+						aware.initializeSystem(newSchema);
+					} else {
+						aware.initializeTenant(tenant, newSchema);
+					}
+				});
 			
 			
 			applicationService.getBeans(JsonTemplateEnabledService.class).
-			stream().
-			filter(repository -> tenant.isSystem() || !repository.isSystemOnly()).
-			sorted((o1, o2) -> o1.getTemplateOrder().compareTo(o2.getTemplateOrder())).
-			forEach(repository -> {
-				templateService.processTemplates(tenant, repository);		
-			}
-		);
+				stream().
+				filter(repository -> tenant.isSystem() || !repository.isSystemOnly()).
+				sorted((o1, o2) -> o1.getTemplateOrder().compareTo(o2.getTemplateOrder())).
+				forEach(repository -> {
+					templateService.processTemplates(tenant, repository);		
+				});
 			
 			templateService.loadExtendedTemplates(tenant);
 			templateService.doUpdateOperations();
@@ -480,7 +478,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	public Tenant getTenantByUUID(String uuid) {
 		Tenant tenant = tenantsByUUID.get(uuid);
 		if(Objects.isNull(tenant)) {
-			throw new ObjectNotFoundException("Tenant does not exist for UUID");
+			throw new ObjectNotFoundException("Tenant does not exist for UUID " + uuid);
 		}
 		return tenant;
 	}

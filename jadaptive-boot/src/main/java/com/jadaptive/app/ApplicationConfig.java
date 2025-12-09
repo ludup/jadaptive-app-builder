@@ -47,7 +47,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.app.json.upload.UploadServlet;
-import com.jadaptive.app.scheduler.LockableTaskScheduler;
 import com.jadaptive.utils.FileUtils;
 
 @Configuration
@@ -199,11 +198,6 @@ public class ApplicationConfig {
 		};
 
 		return pluginManager;
-	}
-
-	@Bean
-	public LockableTaskScheduler taskScheduler() {
-		return new LockableTaskScheduler();
 	}
 
 	@PreDestroy

@@ -21,6 +21,7 @@ import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.core.env.Environment;
 
 import com.jadaptive.api.app.ApplicationProperties;
@@ -29,6 +30,7 @@ import com.jadaptive.api.x509.MismatchedCertificateException;
 import com.jadaptive.api.x509.X509CertificateUtils;
 
 @SpringBootApplication(exclude = { JmxAutoConfiguration.class })
+@EnableCaching
 public class Application {
 
 	private static Logger log = LoggerFactory.getLogger(Application.class);

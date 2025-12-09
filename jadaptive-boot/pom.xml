@@ -21,6 +21,18 @@
 	</properties>
 
 	<dependencies>
+
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+	
+        <dependency>
+            <groupId>com.sshtools</groupId>
+            <artifactId>garden-sched-spring</artifactId>
+            <version>0.0.5</version>
+        </dependency>
+        
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -36,12 +48,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
-		<!--		<dependency>-->
-		<!--            <groupId>org.springframework.boot</groupId>-->
-		<!--            <artifactId>spring-boot-starter-security</artifactId>-->
-		<!--        </dependency>-->
+        <!--		<dependency>-->
+        <!--            <groupId>org.springframework.boot</groupId>-->
+        <!--            <artifactId>spring-boot-starter-security</artifactId>-->
+        <!--        </dependency>-->
 
-		<!-- This dependency is to have an embedded mongodb -->
+        <!-- This dependency is to have an embedded mongodb -->
 		<dependency>
 			<groupId>de.flapdoodle.embed</groupId>
 			<artifactId>de.flapdoodle.embed.mongo</artifactId>
@@ -86,9 +98,9 @@
 		    <artifactId>blake2b</artifactId>
 		    <version>2.0.0</version>
 		</dependency>
-		<!--
+        <!--
 		https://mvnrepository.com/artifact/javax.websocket/javax.websocket-api -->
-		<!--		<dependency>
+        <!--		<dependency>
 			<groupId>javax.websocket</groupId>
 			<artifactId>javax.websocket-api</artifactId>
 		</dependency>
@@ -99,11 +111,11 @@
 			<version>3.12.10</version>
 		</dependency>
 
-		<!--		<dependency>-->
-		<!--			<groupId>net.java.dev.jna</groupId>-->
-		<!--			<artifactId>jna</artifactId>-->
-		<!--			<version>5.3.1</version> $NO-MVN-MAN-VER$ -->
-		<!--		</dependency>-->
+        <!--		<dependency>-->
+        <!--			<groupId>net.java.dev.jna</groupId>-->
+        <!--			<artifactId>jna</artifactId>-->
+        <!--			<version>5.3.1</version> $NO-MVN-MAN-VER$ -->
+        <!--		</dependency>-->
 
 		<dependency>
 			<groupId>com.jadaptive</groupId>
@@ -122,7 +134,7 @@
 			<version>2.4.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
@@ -146,18 +158,18 @@
 			<artifactId>cache-api</artifactId>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast -->
-		<dependency>
+        <!-- https://mvnrepository.com/artifact/com.hazelcast/hazelcast -->
+        <!--<dependency>
 			<groupId>com.hazelcast</groupId>
 			<artifactId>hazelcast</artifactId>
-		</dependency>
+		</dependency>-->
 
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
+        <!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
 			<artifactId>byte-buddy</artifactId>
@@ -188,12 +200,6 @@
 		<dependency>
 		    <groupId>jakarta.activation</groupId>
 		    <artifactId>jakarta.activation-api</artifactId>
-		</dependency>
-		
-		<dependency>
-		    <groupId>com.coditory.sherlock</groupId>
-		    <artifactId>sherlock-mongo</artifactId>
-		    <version>1.0.3</version>
 		</dependency>
  
 	</dependencies>
@@ -303,7 +309,7 @@
 	            <scope>import</scope>
 	        </dependency>
 			<dependency>
-				<!-- Import dependency management from Spring Boot -->
+                <!-- Import dependency management from Spring Boot -->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
 				<version>3.2.6</version>

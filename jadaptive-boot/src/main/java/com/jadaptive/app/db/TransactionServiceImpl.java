@@ -45,11 +45,6 @@ public class TransactionServiceImpl implements TransactionService {
 			completionTasks.get().add(r);
 		}
 	}
-	
-	@Override
-	public UncheckedCloseable withLock(String lockName) {
-		return db.withLock(tenantService.getCurrentTenant().getUuid(), lockName);
-	}
 
 	@Override
 	public void executeTransaction(Runnable r) {

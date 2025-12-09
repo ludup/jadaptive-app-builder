@@ -1,35 +1,27 @@
-
 package com.jadaptive.app.cluster;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
+import org.jgroups.Address;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.Lifecycle;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationProperties;
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.app.StartupAware;
+import com.jadaptive.api.app.VersionProvider;
 import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.cluster.ClusterEvent;
 import com.jadaptive.api.cluster.ClusterManager;
@@ -39,12 +31,11 @@ import com.jadaptive.api.cluster.ClusterNodeConnectedEvent;
 import com.jadaptive.api.cluster.ClusterNodeDisconnectedEvent;
 import com.jadaptive.api.cluster.ClusterService;
 import com.jadaptive.api.cluster.ClusterServiceProvider;
-import com.jadaptive.api.db.ContendedLockException;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemOnlyObjectDatabase;
-import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.permissions.PermissionService;
@@ -53,22 +44,18 @@ import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
+import com.sshtools.gardensched.DistributedScheduledExecutor;
 
 @Service
-public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode> implements ClusterManager, StartupAware {
-
-	private static final Duration HEARTBEAT = Duration.ofSeconds(Integer.parseInt(System.getProperty("ha.heartbeat", "5")));
-	private static final Duration HEARTBEAT_GRACE = Duration.ofSeconds(Integer.parseInt(System.getProperty("ha.heartbeatGrace", "5")));
-	private static final Duration DELETE_CLUSTER_EVENT = Duration.ofSeconds(Integer.parseInt(System.getProperty("ha.deleteClusterEvent", "10")));
+public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode> implements ClusterManager, StartupAware, Lifecycle {
 
 	private static Logger LOG = LoggerFactory.getLogger(ClusterManagerImpl.class);
-	
 
+	@Autowired
+	private DistributedScheduledExecutor executor;
+	
 	@Autowired
 	private SystemOnlyObjectDatabase<ClusterNode> clusterNodes;
-
-	@Autowired
-	private SystemOnlyObjectDatabase<ClusterEvent> clusterEvents;
 
 	@Autowired
 	private TenantService tenantService;
@@ -77,21 +64,15 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	private PermissionService permissionService;
 
 	@Autowired
-	private UserService userService;
-
-	@Autowired
 	private EventService eventService;
 
 	@Autowired
-	private TransactionService transactionService;
+	private UserService userService;
 
 	@Autowired
 	private App app;
 
-	private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
 	private String serverId;
-	private Map<String, ClusterNodeStatus> lastKnownStatus = Collections.synchronizedMap(new HashMap<>());
 	private Set<ClusterService> services;
 	private String configuredHostname;
 	private String hostname;
@@ -110,8 +91,6 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		}
 		
 		tenantService.asSystem(() -> {
-		
-			
 			
 			serverId = ApplicationProperties.getValue("ha.id","");
 			if (serverId.equals("")) {
@@ -119,13 +98,16 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				LOG.warn("ha.id is not set, using a generated ha.id of " + serverId);
 			} 
 		
-
 			var thisNode = new ClusterNode();
 			thisNode.setUuid(serverId);
 			thisNode.setHostname(hostname);
-
+			
+			thisNode.setVersion(Optional.ofNullable(
+				ApplicationServiceImpl.getInstance().getBean(VersionProvider.class)).map(VersionProvider::getVersion).
+				orElse("Unknown"));
+			
+			thisNode.setGroupAddress(executor.address().toString());
 			thisNode.setStatus(ClusterNodeStatus.ONLINE);
-			thisNode.setLastHeartbeat(nowInUTC().toEpochMilli());
 			
 			services = new LinkedHashSet<>();
 			for(var bean : app.getBeans(ClusterServiceProvider.class)) {
@@ -139,36 +121,37 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			thisNode.setServices(new ArrayList<>(services));
 			
 			saveOrUpdate(thisNode);
-
-			executor.scheduleWithFixedDelay(this::heartBeat, HEARTBEAT.toMillis(), HEARTBEAT.toMillis(), TimeUnit.MILLISECONDS);
 			
-			new Thread(() -> {
-				tenantService.asSystem(() -> {
-					clusterNodes.watch(ClusterNode.class, change -> {
-						switch (change.type()) {
-						case INSERT:
-						case UPDATE:
-						case REPLACE:
-							var doc = change.document().get();
-							var lastStatus = lastKnownStatus.getOrDefault(change.uuid(), ClusterNodeStatus.OFFLINE);
-							var newStatus = doc.getStatus();
-							
-							if(lastStatus != newStatus) {
-								nodeStatusChanged(doc, lastStatus, newStatus);
-							}
-							break;
-						case DELETE:
-							var deletedKey = change.uuid();
-							LOG.info("Server with ID {} deleted from cluster nodes.", deletedKey);
-							// Handle server offline
-							lastKnownStatus.remove(deletedKey);
-							break;
-						default:
-							break;
-						}
-					});
-				});
-			}, "ClusterManagerMembershipMonitor").start();
+			var currentMembers = executor.view().getMembers().stream().map(Address::toString).toList();
+			for(var node : clusterNodes.list(ClusterNode.class)) {
+				if(ClusterNodeStatus.ONLINE.equals(node.getStatus()) && 
+					!node.getUuid().equals(serverId) && 
+					!currentMembers.contains(node.getGroupAddress())) {
+					nodeStatusChanged(node, node.getStatus(), ClusterNodeStatus.OFFLINE);
+				}
+			}
+			
+			executor.addListener((leftMembers, joinedMembers) -> {
+				for(var left : leftMembers) {
+					LOG.info("{} left the cluster", left);
+					try {
+						nodeStatusChanged(clusterNodeForAddress(left.toString()), ClusterNodeStatus.ONLINE, ClusterNodeStatus.OFFLINE);
+					}
+					catch(Exception e) {
+						//
+					}
+				}
+				
+				for(var joined : joinedMembers) {
+					LOG.info("{} joined the cluster", joined);
+					try {
+						nodeStatusChanged(clusterNodeForAddress(joined.toString()), ClusterNodeStatus.OFFLINE, ClusterNodeStatus.ONLINE);
+					}
+					catch(Exception e) {
+						//
+					}
+				}
+			});
 		});
 	}
 	
@@ -187,6 +170,12 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	public Set<ClusterService> getServices() {
 		return services;
 	}
+	
+	public ClusterNode clusterNodeForAddress(String groupAddress) {
+		return clusterNodes.searchObjects(ClusterNode.class,
+				SearchField.eq("groupAddress", groupAddress)
+			).stream().findFirst().orElseThrow(() -> new ObjectNotFoundException(groupAddress));
+	}
 
 	@Override
 	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
@@ -200,8 +189,8 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		}
 		else {
 			var node = getObjectByUUID(obj.getUuid());
-			if (column.equals("lastHeartbeat")) {
-				var spn = Html.span(DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(node.getLastHeartbeat()), ZoneId.of("UTC"))));
+			if (column.equals("groupAddress")) {
+				var spn = Html.span(node.getGroupAddress());
 				if(obj.getUuid().equals(getServerId())) {
 					spn.addClass("fw-bolder");
 				}
@@ -282,80 +271,67 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				/* Put the actual save on the queue, we don't want to hold up normal local
 				 * event listeners for synchronous events
 				 */
-				executor.execute(() -> {
-
-					/* Send event */
-					LOG.info("Sending event {} to cluster as {} @ {}", 
-							sysevt.getResourceKey(),
-							fuuuid,
-							tenant);
-					var cevt = new ClusterEvent(
-							sysevt, 
-							serverId, 
-							tenant,
-							fuuuid);
-					cevt.setUuid(sysevt.getUuid());
-					clusterEvents.saveOrUpdate(cevt);
-					
-					/* We fired the event, we delete after a short delay (hopefully all
-					 * nodes have received by this time */
-					executor.schedule(() -> {
-						clusterEvents.delete(cevt);
-					}, DELETE_CLUSTER_EVENT.toMillis(), TimeUnit.MILLISECONDS);	
-				});
+				/* Send event */
+				LOG.info("Sending event {} to cluster as {} @ {}", 
+						sysevt.getResourceKey(),
+						fuuuid,
+						tenant);
+				var cevt = new ClusterEvent(
+						sysevt, 
+						serverId, 
+						tenant,
+						fuuuid);
+				cevt.setUuid(sysevt.getUuid());
+				executor.event(cevt);
 				
 			}
 		});
 		
-		
-		/* Receiver. Waits for cluster events and re-fires */
-		new Thread(() -> {
-			tenantService.asSystem(() -> {
-				clusterEvents.watch(ClusterEvent.class, change -> {
-					switch (change.type()) {
-					case INSERT:
-						var doc = change.document().get();
-						if(!doc.getClusterNode().equals(serverId)) {
-							LOG.info("Received broadcast event {} as tenant {} and user {}", doc.getEvent().getResourceKey(), doc.getTenant(), doc.getUser());
-							
-							/* Re-fire, in context of original tenant and user */
-							tenantService.executeAs(tenantService.getTenantByUUID(doc.getTenant()), () -> {
-								User usr = permissionService.getSystemUser();
-								if(!doc.getUser().equals(usr.getUuid())) {
-									usr = userService.getObjectByUUID(doc.getUser());
-								}
-								
-								/* Set to remote so it is not re-broadcast or audited */
-								doc.getEvent().setRemote(true);
-								
-								permissionService.as(usr, () -> {
-									eventService.publishEvent(doc.getEvent());
-									return null;
-								});
-							});
-						}
-						break;
-					default:
-						break;
+		executor.addBroadcastListener((sndr, evt) -> {
+			var cevt = (ClusterEvent)evt;
+			if(!sndr.equals(executor.address())) {
+				LOG.info("Received broadcast event {} as tenant {} and user {}", cevt.getEvent().getResourceKey(), cevt.getTenant(), cevt.getUser());
+				
+				/* Re-fire, in context of original tenant and user */
+				tenantService.executeAs(tenantService.getTenantByUUID(cevt.getTenant()), () -> {
+					User usr = permissionService.getSystemUser();
+					if(!cevt.getUser().equals(usr.getUuid())) {
+						usr = userService.getObjectByUUID(cevt.getUser());
 					}
+					
+					/* Set to remote so it is not re-broadcast or audited */
+					cevt.getEvent().setRemote(true);
+					
+					permissionService.as(usr, () -> {
+						eventService.publishEvent(cevt.getEvent());
+						return null;
+					});
 				});
-			});
-		}, "ClusterManagerEventProxy").start();
+			}
+		});
+
 	}
 
 	private void nodeStatusChanged(ClusterNode document, ClusterNodeStatus lastStatus,
 			ClusterNodeStatus newStatus) {
 		LOG.info("Server with ID of {} status changed from {} to {}.", document.getUuid(), lastStatus, newStatus);
 
-		lastKnownStatus.put(document.getUuid(), newStatus);
+		try {
+			tenantService.asSystem(() -> {
+				document.setStatus(newStatus);
+				saveOrUpdate(document);
+			});
+		}
+		finally {
 		
-		if(!document.getUuid().equals(serverId)) {
-			if(lastStatus == ClusterNodeStatus.OFFLINE) {
-				eventService.publishEvent(new ClusterNodeConnectedEvent(document));
-			}
-
-			if(newStatus == ClusterNodeStatus.OFFLINE) {
-				eventService.publishEvent(new ClusterNodeDisconnectedEvent(document));
+			if(!document.getUuid().equals(serverId)) {
+				if(lastStatus == ClusterNodeStatus.OFFLINE) {
+					eventService.publishEvent(new ClusterNodeConnectedEvent(document));
+				}
+	
+				if(newStatus == ClusterNodeStatus.OFFLINE) {
+					eventService.publishEvent(new ClusterNodeDisconnectedEvent(document));
+				}
 			}
 		}
 
@@ -372,84 +348,13 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	}
 
 	@Override
-	public boolean runOnceOnCluster(String taskName, Runnable r) {
-		try(@SuppressWarnings("unused")
-		var ldr = transactionService.withLock(taskName)) {
-			try {
-				r.run();
-			}
-			finally {
-				LOG.info("Task `{}` run on this node.", taskName);
-			}
-			return true;
-		}
-		catch(ContendedLockException cle) {
-			return false;
-		}
-	}
-
-	@Override
 	public boolean isLeader() {
-		/* Leader is just the first online server when nodes are sorted
-		 * by their UUID
-		 */
-		return lastKnownStatus.entrySet().stream().
-				filter(ent -> ent.getValue() == ClusterNodeStatus.ONLINE).
-				sorted((c1,c2) -> {
-					return c1.getKey().compareTo(c2.getKey());
-				}).
-				findFirst().
-				map(ent -> ent.getKey().equals(serverId)).
-				orElse(false);
-	}
-
-	@Override
-	public void queueTask(Runnable task) {
-		executor.execute(task);
+		return executor.rank() == 0;
 	}
 
 	@Override
 	protected Class<ClusterNode> getResourceClass() {
 		return ClusterNode.class;
-	}
-
-	private void heartBeat() {
-		try {
-			tenantService.asSystem(() -> {
-				transactionService.executeTransaction(() -> {
-					var now = nowInUTC().toEpochMilli();
-					var interval = HEARTBEAT.plus(HEARTBEAT_GRACE).toMillis() * 2;
-					var expire = now - interval;
-					
-					/* TODO can we just update a single attribute via the abstraction? */
-					var us = getObjectByUUID(serverId);
-					us.setLastHeartbeat(now);
-					saveOrUpdate(us);
-					
-					clusterNodes.list(ClusterNode.class,
-						SearchField.and(
-							SearchField.not("uuid", serverId),
-							SearchField.not("status", ClusterNodeStatus.OFFLINE.name()),
-							SearchField.lt("lastHeartbeat", expire)
-						)
-					).forEach(n -> {
-						executor.execute(() -> nodeNowOffline(n));
-					});
-				});
-			});
-		}
-		catch(Exception e) {
-			LOG.error("Error during heartbeat.", e);
-		}
-	}
-	
-	private void nodeNowOffline(ClusterNode node) {
-		tenantService.asSystem(() -> {
-			var was = node.getStatus();
-			LOG.info("Node {} ({}) was {}, is now offline.", node.getUuid(), node.getHostname(), was);
-			node.setStatus(ClusterNodeStatus.OFFLINE);
-			saveOrUpdate(node);
-		});
 	}
 
 	private int getPort() {
@@ -460,7 +365,18 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		);
 	}
 
-	private static Instant nowInUTC() {
-		return ZonedDateTime.now(ZoneId.of("UTC")).toInstant();
+	@Override
+	public void start() {
 	}
+
+	@Override
+	public void stop() {
+		executor.close();
+	}
+
+	@Override
+	public boolean isRunning() {
+		return !executor.isShutdown();
+	}
+
 }

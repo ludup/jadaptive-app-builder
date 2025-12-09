@@ -10,23 +10,22 @@ import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.TableView;
-//import com.jadaptive.api.ui.menu.ApplicationMenuService;
-//import com.jadaptive.api.ui.menu.PageMenu;
+import com.jadaptive.api.ui.menu.ApplicationMenuService;
+import com.jadaptive.api.ui.menu.PageMenu;
 
 @ObjectDefinition(resourceKey = ClusterNode.RESOURCE_KEY, type = ObjectType.COLLECTION, creatable = false, updatable = false, deletable = false, system = true)
-@TableView(defaultColumns = {"status", "uuid", "hostname", "lastHeartbeat" }, 
+@TableView(defaultColumns = {"status", "uuid", "hostname", "version", "groupAddress" }, 
 otherColumns = {
 		  @DynamicColumn(resourceKey = "uuid", service = ClusterManager.class),
 		  @DynamicColumn(resourceKey = "status", service = ClusterManager.class),
-		  @DynamicColumn(resourceKey = "lastHeartbeat", service = ClusterManager.class),
+		  @DynamicColumn(resourceKey = "groupAddress", service = ClusterManager.class),
 		  @DynamicColumn(resourceKey = "hostname", service = ClusterManager.class),
 }, multipleDelete = false)
-//https://logonboxlimited.slack.com/files/UK6PMG66Q/F09FVKER4D7/untitled
-//@PageMenu(
-//		parent = ApplicationMenuService.REPORTING_MENU_UUID, 
-//		icon = "fa-stars", 
-//		weight = 2000, 
-//		withPermission = "system.read")
+@PageMenu(
+		parent = ApplicationMenuService.REPORTING_MENU_UUID, 
+		icon = "fa-stars", 
+		weight = 2000, 
+		withPermission = "system.read")
 public final class ClusterNode extends UUIDEntity {
 
 	private static final long serialVersionUID = -7912946488135263747L;
@@ -43,14 +42,25 @@ public final class ClusterNode extends UUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	private String hostname;
 
-	@ObjectField(type = FieldType.LONG)
-	private long lastHeartbeat;
+	@ObjectField(type = FieldType.TEXT)
+	private String groupAddress;
+
+	@ObjectField(type = FieldType.TEXT)
+	private String version;
 
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	private List<ClusterService> services = new ArrayList<>();
 
 	public String getResourceKey() {
 		return RESOURCE_KEY;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
 	public ClusterNodeStatus getStatus() {
@@ -69,14 +79,6 @@ public final class ClusterNode extends UUIDEntity {
 		return services;
 	}
 
-	public long getLastHeartbeat() {
-		return lastHeartbeat;
-	}
-
-	public void setLastHeartbeat(long lastHeartbeat) {
-		this.lastHeartbeat = lastHeartbeat;
-	}
-
 	public String getHostname() {
 		return hostname;
 	}
@@ -85,12 +87,20 @@ public final class ClusterNode extends UUIDEntity {
 		this.hostname = hostname;
 	}
 
+	public String getGroupAddress() {
+		return groupAddress;
+	}
+
+	public void setGroupAddress(String groupAddress) {
+		this.groupAddress = groupAddress;
+	}
+
 	public void populate(ClusterNode other) {
 		this.hostname = other.hostname;
 		this.status = other.status;
-		this.lastHeartbeat = other.lastHeartbeat;
 		this.services.clear();
 		this.services.addAll(other.getServices());
+		this.groupAddress = other.groupAddress;
 	}
 
 	

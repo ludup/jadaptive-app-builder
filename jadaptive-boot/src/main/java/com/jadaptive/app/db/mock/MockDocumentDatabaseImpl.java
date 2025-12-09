@@ -231,10 +231,4 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return null;
 	}
 
-	@Override
-	public UncheckedCloseable withLock(String database, String lockName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

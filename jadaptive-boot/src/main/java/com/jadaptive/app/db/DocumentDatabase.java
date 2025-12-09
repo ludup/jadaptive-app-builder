@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.db.TransactionService.UncheckedCloseable;
 import com.jadaptive.api.template.SortOrder;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 
@@ -71,7 +70,5 @@ public interface DocumentDatabase {
 	Double sumDoubleValues(String table, String database, String groupBy, SearchField... fields);
 
 	void doInTransaction(String database, Runnable r);
-
-	UncheckedCloseable withLock(String database, String lockName);
 
 }

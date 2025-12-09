@@ -691,7 +691,9 @@ $(function() {
 		var val = $(this).attr('aria-valuenow');
 		var max = $(this).attr('aria-valuemax');
 		var pc = parseInt((val / max) * 100);
-		$(this).width(pc + '%');
+        $(this).find('.progress-bar').each(function(idx2) {
+            $(this).width(pc + '%'); 
+        }); 
 	});
 	
 	
@@ -701,7 +703,6 @@ $(function() {
 		fd.append('bundle', bundle);
 		fd.append('key', key);
 		fd.append('replacementValue', replacement);
-		debugger;
 		$.ajax({
            type: "POST",
            url: '/app/api/i18n/edit',

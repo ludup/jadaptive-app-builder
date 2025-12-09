@@ -8,7 +8,7 @@ import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 
 @ObjectDefinition(resourceKey = ClusterEvent.RESOURCE_KEY, type = ObjectType.COLLECTION)
-public final class ClusterEvent extends UUIDEntity {
+public class ClusterEvent extends UUIDEntity {
 
 	private static final long serialVersionUID = -7912946488135263747L;
 
@@ -57,9 +57,11 @@ public final class ClusterEvent extends UUIDEntity {
 		return RESOURCE_KEY;
 	}
 
+
 	public SystemEvent getEvent() {
 		return event;
 	}
+
 
 	public void setEvent(SystemEvent event) {
 		this.event = event;

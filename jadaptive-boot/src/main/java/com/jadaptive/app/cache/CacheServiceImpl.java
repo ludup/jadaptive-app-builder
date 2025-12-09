@@ -1,111 +1,140 @@
 package com.jadaptive.app.cache;
 
-import java.util.Date;
+import java.io.Serializable;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.jadaptive.api.app.ApplicationProperties;
+import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.sshtools.gardensched.DistributedScheduledExecutor;
 
 @Service
 public class CacheServiceImpl extends AuthenticatedService implements CacheService {
 	
-	Map<String,Map<?,?>> caches = new HashMap<>();
+	private final static Logger LOG = LoggerFactory.getLogger(CacheServiceImpl.class);
+
+	private Map<String,Map<?,?>> caches = new HashMap<>();
+	private Map<String,Map<?,?>> clusteredCaches = new HashMap<>();
 	
+	@Override
 	public <K,V> Map<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value){
-		return cache(name, key, value, 60000 * 60 * 24); // One day
+		return cache(name, key, value, 
+			ApplicationProperties.getValue("cache." + name + ".expiry", 
+				ApplicationProperties.getValue("cache.expiry", 60000 * 60 * 24)
+			)
+		); // One day
 	}
-	
+
+	@Override
 	public <K,V> Map<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value,long expiryTime){
 		return cache(name, key, value, expiryTime);
 	}
-	
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public <K,V> Map<K, V> getCacheIfExists(String name, Class<K> key, Class<V> value){
 		return (Map<K, V>) caches.get(generateName(name));
 	}
-	
-	private <K,V> Map<K, V> cache(String name, Class<K> key, Class<V> value, long exiryTime){
-		@SuppressWarnings("unchecked")
-		Map<K, V> cache = (Map<K, V>) caches.get(generateName(name));
+
+	@SuppressWarnings("unchecked")
+	private <K,V> Map<K, V> cache(String name, Class<K> key, Class<V> value, long expiryTime){
+		var cname = generateName(name);
+		Map<K, V> cache = (Map<K, V>) caches.get(cname);
 		if(cache==null) {
-			cache = new ExpiringConcurrentHashMap<K, V>(exiryTime);
-			caches.put(generateName(name), cache);
+
+			cache = (Map<K, V>) Caffeine.newBuilder()
+	            .expireAfterWrite(expiryTime, TimeUnit.MILLISECONDS)
+	            .maximumSize(ApplicationProperties.getValue("cache." + name + ".size", ApplicationProperties.getValue("cache.size", 1000)))
+	            .build()
+	            .asMap();
+			
+			caches.put(cname, cache);
+			
+			LOG.info("Creating new cache {} [`{}`]. There are now {} caches.", name, cname, caches.size());
+			
 		}
 		return cache;
 	}
 	
-	private String generateName(String name) {
-		return String.format("%s-%s", name, getCurrentTenant().getUuid());
+	@Override
+	public <K,V> Map<K, V> clusteredCacheOrCreate(String name,Class<K> key, Class<V> value){
+		return clusteredCache(name, key, value, 
+			ApplicationProperties.getValue("clusteredCache." + name + ".expiry", 
+				ApplicationProperties.getValue("clusteredCache.expiry", 60000 * 60 * 24)  // One day
+			)
+		);
 	}
 
-	class ExpiringConcurrentHashMap<K,V> extends ConcurrentHashMap<K,V> {
+	@Override
+	public <K,V> Map<K, V> clusteredCacheOrCreate(String name,Class<K> key, Class<V> value,long expiryTime){
+		return clusteredCache(name, key, value, expiryTime);
+	}
 
-		private static final long serialVersionUID = 4825825094828550762L;
+	@Override
+	@SuppressWarnings("unchecked")
+	public <K,V> Map<K, V> clusteredCacheIfExists(String name, Class<K> key, Class<V> value){
+		return (Map<K, V>) clusteredCaches.get(generateName(name));
+	}
 
-		private Map<K, Long> entryTime = new ConcurrentHashMap<K, Long>();
-		
-	    private long expiryInMillis;
-	    
-	    public ExpiringConcurrentHashMap(long expiryInMillis) {
-	    	this.expiryInMillis = expiryInMillis;
-	    }
+	@SuppressWarnings("unchecked")
+	private <K,V> Map<K, V> clusteredCache(String name, Class<K> key, Class<V> value, long expiryTime){
+		var cname = generateName(name);
+		Map<K, V> cache = (Map<K, V>) clusteredCaches.get(cname);
+		if(cache==null) {
 
-	    @Override
-	    public V put(K key, V value) {
-	        purgeEntries();
-	        return doPut(key, value);
-	    }
+			var executor = ApplicationServiceImpl.getInstance().getBean( DistributedScheduledExecutor.class);
 
-	    private V doPut(K key, V value) {
-	    	Long date = entryTime.getOrDefault(key, Long.valueOf(System.currentTimeMillis()));
-	        entryTime.put(key, date);
-	        V returnVal = super.put(key, value);
-	        return returnVal;
+			cache = new AbstractMap<K, V>() {
+				@Override
+				public Set<Entry<K, V>> entrySet() {
+					throw new UnsupportedOperationException();
+				}
+
+				@Override
+				public V get(Object key) {
+					return (V) executor.get(cname, (Serializable)key);
+				}
+
+				@Override
+				public V put(K key, V value) {
+					/* TODO find out if anybody cares about previous value and
+					 * avoid this retrieval for no reason */
+					var was = get(key);
+					executor.put(cname, (Serializable)key, (Serializable)value);
+					return was;
+				}
+
+				@Override
+				public V remove(Object key) {
+					/* TODO find out if anybody cares about previous value and
+					 * avoid this retrieval for no reason */
+					var was = get(key);
+					if(was != null) {
+						executor.remove(cname, (Serializable)key);
+					}
+					return was;
+				}
+			};
+			
+			clusteredCaches.put(cname, cache);
+			
+			LOG.info("Creating new clustered cache {} [`{}`]. There are now {} clustered caches.", name, cname, caches.size());
+			
 		}
+		return cache;
+	}
 
-		@Override
-	    public void putAll(Map<? extends K, ? extends V> m) {
-			purgeEntries();
-	        for (K key : m.keySet()) {
-	            doPut(key, m.get(key));
-	        }
-	    }
-
-	    @Override
-	    public V putIfAbsent(K key, V value) {
-	    	purgeEntries();
-	        if (!containsKey(key)) {
-	            return doPut(key, value);
-	        } else {
-	            return get(key);
-	        }
-	    }
-	    
-	    @Override
-		public V get(Object key) {
-	    	purgeEntries();
-			return super.get(key);
-		}
-
-		private void purgeEntries() {
-	        long currentTime = new Date().getTime();
-	        for (K key : entryTime.keySet()) {
-	        	Long val = entryTime.get(key);
-	        	if(Objects.nonNull(val)) {
-		        	long expiry = (val.longValue() + expiryInMillis);
-		            if (currentTime > expiry) {
-		                remove(key);
-		                entryTime.remove(key);
-		            }
-	        	} else {
-	        		entryTime.remove(key);
-	        	}
-	        }
-	    }
+	private String generateName(String name) {
+		return String.format("%s-%s", name, getCurrentTenant().getUuid());
 	}
 }

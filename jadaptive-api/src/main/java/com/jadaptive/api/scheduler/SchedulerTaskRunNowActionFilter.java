@@ -1,0 +1,37 @@
+package com.jadaptive.api.scheduler;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.jadaptive.api.entity.AbstractObject;
+import com.jadaptive.api.template.ActionFilter;
+import com.jadaptive.api.tenant.TenantService;
+import com.sshtools.gardensched.ClusterID;
+import com.sshtools.gardensched.DistributedScheduledExecutor;
+
+public class SchedulerTaskRunNowActionFilter implements ActionFilter {
+	@Autowired
+	private SchedulerService schedulerService;
+	
+	@Autowired
+	private DistributedScheduledExecutor executor;
+	
+	@Autowired
+	private TenantService tenantService;
+
+	@Override
+	public boolean showAction(AbstractObject object) {
+		var  tsk = schedulerService.getObjectByUUID(object.getUuid());
+		if(tsk != null) {
+			var fut = executor.future(ClusterID.parse(tsk.getId()));
+			if(fut != null) {
+				if(tenantService.isSystemTenant())
+					return (Boolean)fut.attributes().getOrDefault(SchedulerTask.ALLOW_RUN_NOW, false);
+				else
+					return (Boolean)fut.attributes().getOrDefault(SchedulerTask.ALLOW_TENANT_RUN_NOW, false);
+			}
+		}
+		return false;
+	}
+
+
+}

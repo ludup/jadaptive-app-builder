@@ -1,5 +1,6 @@
 package com.jadaptive.api.session.events;
 
+import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.AuditedObject;
@@ -14,7 +15,7 @@ import com.jadaptive.api.template.ObjectField;
 @ObjectDefinition(resourceKey = SessionOpenedEvent.RESOURCE_KEY, scope = ObjectScope.GLOBAL, 
 		type = ObjectType.OBJECT, bundle = Session.RESOURCE_KEY,
 			creatable = false, updatable = false, deletable = false)
-public class SessionOpenedEvent extends UserGeneratedEvent {
+public class SessionOpenedEvent extends UserGeneratedEvent implements BroadcastableEvent {
 
 	private static final long serialVersionUID = -6350681450369361249L;
 

@@ -12,10 +12,6 @@ public interface ClusterManager extends Closeable, AbstractUUIDObjectService<Clu
 	String getServerId();
 
 	Set<ClusterService> getServices();
-	
-	boolean runOnceOnCluster(String taskName, Runnable r);
-
-	void queueTask(Runnable task);
 
 	boolean isLeader();
 
