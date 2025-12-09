@@ -714,15 +714,21 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			log.info("Loaded {} hash keys from {} library resources.", templateHashes.size(), resources);
 		}
-		var hsh = templateHashes.getProperty(template.getTemplateClass());
-		if(hsh == null) {
-			log.warn("No hash of {} in any META-INF/object-definition.hashes.properties resources", template.getTemplateClass());
-			
+		if(template.getTemplateClass() == null) {
+			/* Initial configuration */
+			return null;
 		}
 		else {
-			log.debug("{}={}",template.getTemplateClass(),hsh);
+			var hsh = templateHashes.getProperty(template.getTemplateClass());
+			if(hsh == null) {
+				log.warn("No hash of {} in any META-INF/object-definition.hashes.properties resources", template.getTemplateClass());
+				
+			}
+			else {
+				log.debug("{}={}",template.getTemplateClass(),hsh);
+			}
+			return hsh;
 		}
-		return hsh;
 	}
 
 	private boolean hasGenerateTemplatesAnnotation(Class<? extends UUIDDocument> clz) {
