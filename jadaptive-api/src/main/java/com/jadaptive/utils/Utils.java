@@ -2,8 +2,10 @@ package com.jadaptive.utils;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -50,6 +52,12 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1019,5 +1027,44 @@ public class Utils {
 		c.set(Calendar.MILLISECOND, 0);
 		return c.getTime();
 	}
+	
+	public static void readTarGZ(String filePath) throws Exception {
+
+        try (InputStream fileStream = new FileInputStream(filePath);
+
+             InputStream bufferedStream = new BufferedInputStream(fileStream);
+             GzipCompressorInputStream gzipStream = new GzipCompressorInputStream(bufferedStream);
+
+             TarArchiveInputStream tarStream = new TarArchiveInputStream(gzipStream)) {
+
+            TarArchiveEntry entry;
+            // Loop through each file/directory entry inside the TAR archive
+            while ((entry = tarStream.getNextEntry()) != null) {
+                
+                String entryName = entry.getName();
+                
+                if (entry.isDirectory()) {
+                    System.out.println("Directory found: " + entryName);
+                    continue;
+                }
+                
+                System.out.println("File found: " + entryName);
+                
+                // Read the contents of the file entry
+                // Note: The content reading is streamlined by the TarArchiveInputStream
+                int bytesRead;
+                byte[] buffer = new byte[4096];
+                
+                // Read content bytes from tarStream until the end of the current entry
+                while ((bytesRead = tarStream.read(buffer, 0, buffer.length)) != -1) {
+                    // Process or save the file content here
+                    // e.g., print it, save it to a new file, or feed it to your AI processor
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 	
 }
