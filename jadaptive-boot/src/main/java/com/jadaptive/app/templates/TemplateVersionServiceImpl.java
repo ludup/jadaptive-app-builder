@@ -563,7 +563,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			}
 			
 			if(!loadCached) {
-				log.info("No cached template, rebuilding for {}", template.getTemplateClass());
+				log.info("No cached template, rebuilding for {}", clz.getName());
 				
 				Class<?> baseClass = TemplateUtils.getBaseClass(clz);
 				ObjectDefinition collection = e; 

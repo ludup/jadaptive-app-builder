@@ -66,52 +66,10 @@ public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandle
 	public ObjectStore objectStorage() {
 		return new SchedulerObjectStorage();
 	}
-	
-	
-	@Bean
-	public ObjectMapper objectMapper() {
-		var sm = new SimpleModule();
-		sm.addSerializer(CronTrigger.class, new CronTriggerSerializer());
-		sm.addSerializer(PeriodicTrigger.class, new PeriodicTriggerSerializer());
-
-		var ptv = BasicPolymorphicTypeValidator.builder().
-				allowIfSubType(TriggerAdapter.class).
-				allowIfSubType(TenantJobRunner.class).
-				allowIfSubType(CronTrigger.class).
-				allowIfSubType(PeriodicTrigger.class).
-				allowIfSubType(ClusterEvent.class).
-				allowIfSubType(Date.class).
-				allowIfBaseType(Enum.class).
-				allowIfBaseType(SystemEvent.class).
-				allowIfBaseType(BroadcastableEvent.class).
-				allowIfBaseType(TenantTask.class).
-				allowIfBaseType(DistributedTask.class).
-				allowIfBaseType(SerializableRunnable.class).
-				allowIfBaseType(SerializableCallable.class).
-				allowIfBaseType(Serializable.class).
-				build();
-				
-		var om = JsonMapper.builder()
-			    .addModule(new Jdk8Module())
-			    .addModule(sm)
-			    .configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true)
-			    .activateDefaultTyping(ptv, 
-			    		ObjectMapper.DefaultTyping.NON_FINAL_AND_ENUMS,
-			    		JsonTypeInfo.As.WRAPPER_ARRAY)
-				.visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.PUBLIC_ONLY)
-				.visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY)
-				.visibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY)
-				.visibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY)
-
-			    .build();
-		
-		om.setTypeFactory(om.getTypeFactory().withClassLoader((ClassLoader)classLoader));
-		return om;
-	}
 
 	@Bean
-	public PayloadSerializer taskSerializer(ObjectMapper mapper) {
-		return new JsonPayloadSerializer(mapper, appService::resolveClass);
+	public PayloadSerializer taskSerializer() {
+		return new JsonPayloadSerializer(createObjectMapper(), appService::resolveClass);
 	}
 
 	@Bean
@@ -151,13 +109,52 @@ public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandle
 	@Override
 	public void handleError(ClusterID id, TaskSpec spec, DistributedTask<?> task, TaskCompletionContext context,
 			Throwable exception) {
-		// TODO Auto-generated method stub
-		
+		// TODO Generate generic "Job Failed" system events (if annotated with "log=true" or something?)
 	}
 
 	@Override
 	public void handleSuccess(ClusterID id, TaskSpec spec, DistributedTask<?> task, TaskCompletionContext context) {
-		// TODO Auto-generated method stub
+		// TODO Generate generic "Job Completed" system events (if annotated with "log=true" or something)
 		
+	}
+	
+	private ObjectMapper createObjectMapper() {
+		var sm = new SimpleModule();
+		sm.addSerializer(CronTrigger.class, new CronTriggerSerializer());
+		sm.addSerializer(PeriodicTrigger.class, new PeriodicTriggerSerializer());
+
+		var ptv = BasicPolymorphicTypeValidator.builder().
+				allowIfSubType(TriggerAdapter.class).
+				allowIfSubType(TenantJobRunner.class).
+				allowIfSubType(CronTrigger.class).
+				allowIfSubType(PeriodicTrigger.class).
+				allowIfSubType(ClusterEvent.class).
+				allowIfSubType(Date.class).
+				allowIfBaseType(Enum.class).
+				allowIfBaseType(SystemEvent.class).
+				allowIfBaseType(BroadcastableEvent.class).
+				allowIfBaseType(TenantTask.class).
+				allowIfBaseType(DistributedTask.class).
+				allowIfBaseType(SerializableRunnable.class).
+				allowIfBaseType(SerializableCallable.class).
+				allowIfBaseType(Serializable.class).
+				build();
+				
+		var om = JsonMapper.builder()
+			    .addModule(new Jdk8Module())
+			    .addModule(sm)
+			    .configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true)
+			    .activateDefaultTyping(ptv, 
+			    		ObjectMapper.DefaultTyping.NON_FINAL_AND_ENUMS,
+			    		JsonTypeInfo.As.WRAPPER_ARRAY)
+				.visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.PUBLIC_ONLY)
+				.visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY)
+				.visibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY)
+				.visibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY)
+
+			    .build();
+		
+		om.setTypeFactory(om.getTypeFactory().withClassLoader((ClassLoader)classLoader));
+		return om;
 	}
 }
