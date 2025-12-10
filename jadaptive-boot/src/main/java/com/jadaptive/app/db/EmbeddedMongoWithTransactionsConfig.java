@@ -58,6 +58,10 @@ public class EmbeddedMongoWithTransactionsConfig {
     @Bean
     @Primary
     public Mongod mongod() throws IOException {
+    	if("false".equals(ApplicationProperties.getValue("mongodb.embedded", null))) {
+    		log.info("Embedded MongoDB disabled.");
+    		return null;
+    	}
 
     	if(log.isInfoEnabled()) {
     		log.info("Starting mongod");
