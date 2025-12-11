@@ -28,6 +28,7 @@ import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.cluster.ClusterEvent;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.events.SystemEvent;
+import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.sshtools.gardensched.ClusterID;
 import com.sshtools.gardensched.DistributedScheduledExecutor;
@@ -89,7 +90,8 @@ public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandle
 			PayloadFilter taskFilter, 
 			TaskStore taskStore,
 			ObjectStore objectStore) throws Exception {
-		return new DistributedScheduledExecutor.Builder().
+		
+		var bldr = new DistributedScheduledExecutor.Builder().
 				withPayloadSerializer(taskSerializer).
 				withPayloadFilter(taskFilter).
 				withTaskStore(taskStore).
@@ -102,20 +104,35 @@ public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandle
 				withCloseTimeout(Duration.ofMinutes(ApplicationProperties.getValue("ha.shutdownTimeout", Integer.MAX_VALUE))).
 				withSchedulerThreads(
 					ApplicationProperties.getValue("ha.poolThreads", Runtime.getRuntime().availableProcessors())
-				).
-				build();
+				);
+		
+		var haProps = ApplicationProperties.getValue("ha.props", "");
+		if(!haProps.equals("")) {
+			bldr.withJGroupsProps(haProps);
+		}
+		
+		var haClusterName = ApplicationProperties.getValue("ha.clusterName", "");
+		if(!haClusterName.equals("")) {
+			bldr.withClusterName(haClusterName);
+		}
+		
+		var haGroupName = ApplicationProperties.getValue("ha.groupName", "");
+		if(!haGroupName.equals("")) {
+			bldr.withGroupName(haGroupName);
+		}
+		
+		return bldr.build();
 	}
 
 	@Override
 	public void handleError(ClusterID id, TaskSpec spec, DistributedTask<?> task, TaskCompletionContext context,
 			Throwable exception) {
-		// TODO Generate generic "Job Failed" system events (if annotated with "log=true" or something?)
+		appService.getBean(SchedulerService.class).handleError(id, spec, task, context, exception);
 	}
 
 	@Override
 	public void handleSuccess(ClusterID id, TaskSpec spec, DistributedTask<?> task, TaskCompletionContext context) {
-		// TODO Generate generic "Job Completed" system events (if annotated with "log=true" or something)
-		
+		appService.getBean(SchedulerService.class).handleSuccess(id, spec, task, context);
 	}
 	
 	private ObjectMapper createObjectMapper() {
@@ -137,6 +154,9 @@ public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandle
 				allowIfBaseType(DistributedTask.class).
 				allowIfBaseType(SerializableRunnable.class).
 				allowIfBaseType(SerializableCallable.class).
+				/* TODO below is very liberal, possibly too liberal and negates most of the above,
+				 * but it was needed at the time. revisit
+				 */
 				allowIfBaseType(Serializable.class).
 				build();
 				

@@ -49,7 +49,7 @@ public final class SchedulerTask extends UUIDEntity {
 	public static final String RESOURCE_KEY = "schedulerTask";
 
 	public enum SchedulerTaskStatus {
-		WAITING, RUNNING, MISSING
+		WAITING, RUNNING, MISSING, ERROR
 	}
 
 	public enum SchedulerTaskType {

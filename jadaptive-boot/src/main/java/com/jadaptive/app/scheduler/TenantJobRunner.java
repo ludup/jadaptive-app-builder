@@ -1,7 +1,5 @@
 package com.jadaptive.app.scheduler;
 
-import java.util.concurrent.ScheduledFuture;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +29,6 @@ public class TenantJobRunner implements SerializableRunnable {
 	private PermissionService permissionService; 
 	
 	private TenantTask task;
-	private ScheduledFuture<?> future;
 	private String tenantUUID;
 	private String user = null;
 	
@@ -72,6 +69,8 @@ public class TenantJobRunner implements SerializableRunnable {
 
 	@Override
 	public void run() {
+
+		ApplicationServiceImpl.getInstance().autowire(task);
 		
 		final Tenant tenant = tenantService.getTenantByUUID(tenantUUID);
 		tenantService.setCurrentTenant(tenant);
@@ -86,16 +85,8 @@ public class TenantJobRunner implements SerializableRunnable {
 				if(task.isLogging() && log.isInfoEnabled()) {
 					log.info("Running {} on tenant {}", task.getClass().getSimpleName(), tenant.getName());
 				}
-				try {
-					task.run();
-				} catch(Throwable e) {
-					log.error("Task ended with error", e);
-			    } 
+				task.run();
 			});
-		} catch(Throwable e) {
-			log.error("Scheduled task {} failed", tenantUUID, e);
-			future.cancel(false);
-			return;
 		} finally {
 			tenantService.clearCurrentTenant();
 		}

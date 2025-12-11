@@ -7,8 +7,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import com.jadaptive.api.entity.AbstractUUIDObjectService;
 import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.user.User;
+import com.sshtools.gardensched.TaskErrorHandler;
+import com.sshtools.gardensched.TaskSuccessHandler;
 
-public interface SchedulerService extends AbstractUUIDObjectService<SchedulerTask>, DynamicColumnService {
+public interface SchedulerService extends AbstractUUIDObjectService<SchedulerTask>, DynamicColumnService, TaskSuccessHandler, TaskErrorHandler {
 
 	void schedule(TenantTask job, String expression, String taskUuid);
 

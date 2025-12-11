@@ -5,11 +5,16 @@ import static com.jadaptive.app.scheduler.Jobs.formatDisplayDuration;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
@@ -24,12 +29,15 @@ import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
+import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.ScheduledTaskConfig;
 import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.scheduler.SchedulerTask;
+import com.jadaptive.api.scheduler.SchedulerTaskCompleteEvent;
 import com.jadaptive.api.scheduler.SchedulerTask.SchedulerTaskStatus;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.scheduler.TenantTaskConfig;
@@ -44,6 +52,10 @@ import com.sshtools.gardensched.ConflictResolution;
 import com.sshtools.gardensched.DistributedRunnable;
 import com.sshtools.gardensched.DistributedRunnable.Builder;
 import com.sshtools.gardensched.DistributedScheduledExecutor;
+import com.sshtools.gardensched.DistributedTask;
+import com.sshtools.gardensched.IdentifiableScheduledFuture;
+import com.sshtools.gardensched.TaskCompletionContext;
+import com.sshtools.gardensched.TaskSpec;
 
 @Service
 public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<SchedulerTask>  implements SchedulerService, TenantAware, StartupAware {
@@ -185,8 +197,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 
 	@Override
 	public void runScheduledTaskNow(String uuid) {
-		// TODO Auto-generated method stub
-		log.warn("RUN SCHEDULED TASK NOW NOT IMPLEMENTED!");
+		executor.futureOr(ClusterID.parse(uuid)).ifPresentOrElse(ftr -> ftr.runNow(), () -> log.warn("Request to run task {} that does not exist.", uuid));
 	}
 
 	@Override
@@ -228,6 +239,22 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 		var future = executor.future(cid);
 		var info = future == null ? null : future.info();
 		
+		SchedulerTaskStatus status;
+		if(info != null && info.lastError().isPresent()) {
+			status = SchedulerTaskStatus.ERROR;
+		}
+		else if(future == null) {
+			status = SchedulerTaskStatus.MISSING;
+		}
+		else {
+			if(future.info().active()) {
+				status = SchedulerTaskStatus.RUNNING;
+			}
+			else {
+				status = SchedulerTaskStatus.WAITING;
+			}
+		}
+		
 		if (column.equals("displayName")) {
 			Element nameEl;
 			if(StringUtils.isEmpty(tsk.getName())) {
@@ -249,66 +276,113 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 				descSpan.addClass("text-muted");
 				div2.appendChild(descSpan);
 			}
-
-			Element div3 = null;
-			if(info != null && info.progress().isPresent()) {
-				div3 = Html.div("progress", "auto-progress-bar").
-						attr("role", "progressbar").
-						attr("aria-label", "Progress of task " + nameEl.text()).
-						attr("aria-valuenow", String.valueOf(info.progress().orElse(0l))).
-						attr("aria-valuemin", "0").
-						attr("aria-valuemax", String.valueOf(info.maxProgress().orElse(100l)));
-				
-				var div3i = Html.div("progress-bar", "bg-success");
-				if(info.message().isPresent()) {
-					div3i.text(info.message().get());
-				}
-				else if(info.key().isPresent()  && info.bundle().isPresent()) {
-					div3i.text(i18nService.format(info.bundle().get(), Locale.getDefault(), info.key().get(), (Object[])info.args().orElseGet(() -> new String[0])));
-				}
-				div3.appendChild(div3i);
-			}
-
 			
 			var odiv = Html.div();
 			odiv.appendChild(div1);
 			odiv.appendChild(div2);
-			if(div3 != null) {
-				odiv.appendChild(div3);
+			if(info != null) {
+				
+				if(info.progress().isPresent()) {
+					var div3 = Html.div("progress", "auto-progress-bar").
+							attr("role", "progressbar").
+							attr("aria-label", "Progress of task " + nameEl.text()).
+							attr("aria-valuenow", String.valueOf(info.progress().orElse(0l))).
+							attr("aria-valuemin", "0").
+							attr("aria-valuemax", String.valueOf(info.maxProgress().orElse(100l)));
+					
+					var div3i = Html.div("progress-bar", "bg-success");
+					if(info.message().isPresent()) {
+						div3i.text(info.message().get());
+					}
+					else if(info.key().isPresent()  && info.bundle().isPresent()) {
+						div3i.text(i18nService.format(info.bundle().get(), Locale.getDefault(), info.key().get(), (Object[])info.args().orElseGet(() -> new String[0])));
+					}
+					div3.appendChild(div3i);	
+					odiv.appendChild(div3);
+				} else {
+
+					var endTime = info.lastCompleted().map(lc -> 
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(lc.atZone(ZoneId.systemDefault()))).
+						orElse(null);
+					var taken = info.taken();
+					
+					if(info.lastError().isPresent()) {
+						var errDiv = new Element("em");
+						errDiv.addClass("text-muted");
+						taken.ifPresentOrElse(tkn -> {
+							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
+								"displayName.failedAtTaken", 
+								info.lastError().get().getMessage(),
+								tkn));
+						}, () -> {
+							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
+								info.lastCompleted().isPresent() 
+									? "displayName.failedAt" 
+									: "displayName.failed",
+								info.lastError().get().getMessage(),
+								endTime));
+						});
+						
+						odiv.appendChild(errDiv);
+					}
+					else if(info.lastCompleted().isPresent()) {
+						
+						var errDiv = new Element("em");
+						errDiv.addClass("text-muted");
+						
+						taken.ifPresentOrElse(tkn -> {
+							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
+								"displayName.completedAtTaken", endTime, Jobs.formatDisplayDuration(tkn)));
+						}, () -> {
+							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
+								"displayName.completedAt", endTime));
+						});
+						odiv.appendChild(errDiv);
+					}
+				}
 			}
 			return odiv;
 		}
 		else if (column.equals("details")) {
+
+			var odiv = Html.div();
+			
 			switch(tsk.getSchedule()) {
 			case TRIGGER:
-				return Html.i18n(SchedulerTask.RESOURCE_KEY, "details.trigger", info.spec().trigger().toString());
+				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.trigger", info.spec().trigger().toString()));
+				break;
 			case NOW:
-				return Html.i18n(SchedulerTask.RESOURCE_KEY, "details.now");
-			case ONE_SHOT:
-				return Html.i18n(SchedulerTask.RESOURCE_KEY, "details.oneShot", formatDisplayDuration(Duration.ofMillis(info.spec().initialDelay())));
+				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.now"));
+				break;
 			case FIXED_DELAY:
-				return Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedDelay", formatDisplayDuration(Duration.ofMillis(info.spec().initialDelay())), formatDisplayDuration(Duration.ofMillis(info.spec().period())));
+				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedDelay", formatDisplayDuration(Duration.ofMillis(info.spec().initialDelay())), formatDisplayDuration(Duration.ofMillis(info.spec().period()))));
+				break;
 			case FIXED_RATE:
-				return Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedDelay", formatDisplayDuration(Duration.ofMillis(info.spec().initialDelay())), formatDisplayDuration(Duration.ofMillis(info.spec().period())));
+				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedDelay", formatDisplayDuration(Duration.ofMillis(info.spec().initialDelay())), formatDisplayDuration(Duration.ofMillis(info.spec().period()))));
+				break;
+			case ONE_SHOT:
+				break;
 			}
+			
+			if(future instanceof IdentifiableScheduledFuture isf) {
+				var ediv = Html.div("text-muted");
+				var dur = Duration.ofMillis(isf.getDelay(TimeUnit.MILLISECONDS));
+				var et = Instant.ofEpochMilli(Instant.now().toEpochMilli() + dur.toMillis());
+				ediv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.remainBeforeTask", 
+						formatDisplayDuration(dur),
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(et.atZone(ZoneId.systemDefault()))));
+				odiv.appendChild(ediv);
+			}
+			
+			return odiv;
 		}
 		else if (column.equals("status")) {
 			var row = Html.span();
 			
-			SchedulerTaskStatus status;
-			if(future == null) {
-				status = SchedulerTaskStatus.MISSING;
-			}
-			else {
-				if(future.info().active()) {
-					status = SchedulerTaskStatus.RUNNING;
-				}
-				else {
-					status = SchedulerTaskStatus.WAITING;
-				}
-			}
-			
 			switch(status) {
+			case ERROR:
+				row.appendChild(Html.i("fa-solid", "fa-circle-exclamation","text-danger"));
+				break;
 			case RUNNING:
 				row.appendChild(Html.i("fa-solid", "fa-person-running","text-success"));
 				break;
@@ -333,6 +407,35 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	@Override
 	public ScheduledExecutorService getExecutor() {
 		return executor;
+	}
+
+	@Override
+	public void handleError(ClusterID id, TaskSpec spec, DistributedTask<?> task, TaskCompletionContext context,
+			Throwable exception) {
+		sendEvent(id, task, () -> new SchedulerTaskCompleteEvent(getObjectByUUID(SchedulerTaskStorage.toUuid(id)), exception));
+	}
+
+	@Override
+	public void handleSuccess(ClusterID id, TaskSpec spec, DistributedTask<?> task, TaskCompletionContext context) {
+		sendEvent(id, task, () -> new SchedulerTaskCompleteEvent(getObjectByUUID(SchedulerTaskStorage.toUuid(id))));
+	}
+
+	private void sendEvent(ClusterID id, DistributedTask<?> task, Supplier<SystemEvent> evt) {
+		task.classifiers().stream().findFirst().ifPresentOrElse(tenantUuid -> {
+			tenantService.asSystem(() -> {
+				var tenant = tenantService.getObjectByUUID(tenantUuid);
+				tenantService.executeAs(tenant, () -> {
+					try {
+						eventService.publishEvent(evt.get());
+					}
+					catch(ObjectNotFoundException onfe) {
+						log.warn("Failed to find task.", onfe);
+					}
+				});
+			});
+		}, () -> {
+			log.warn("Task has no classifiers so tenant UUID cannot be determined.");
+		});
 	}
 	
 	private void configureTenantTaskBuilder(Builder bldr, TenantTask task) {

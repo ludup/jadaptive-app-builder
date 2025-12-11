@@ -178,7 +178,7 @@ public class SchedulerTaskStorage implements TaskStore {
 		}
 	}
 
-	private static String toUuid(ClusterID id) {
+	static String toUuid(ClusterID id) {
 		if(id.getStrId() != null) {
 			try {
 				return UUID.fromString(id.getStrId()).toString();
