@@ -16,8 +16,7 @@ import com.sshtools.gardensched.TaskConfig;
 
 @Component
 @TaskConfig(key = "reloadCertificatesJob", bundle = "default",  affinity = Affinity.ALL)
-//@ScheduledTaskConfig(value = "0 1 * * * *", systemOnly = true)
-@ScheduledTaskConfig(value = ScheduledTask.EVERY_MINUTE, systemOnly = true)
+@ScheduledTaskConfig(value = "0 1 * * * *", systemOnly = true)
 @TenantTaskConfig(allowTenantRunNow = true, allowRunNow = true)
 public class ReloadCertificatesJob implements ScheduledTask {
 
