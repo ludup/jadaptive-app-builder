@@ -23,25 +23,50 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import com.jadaptive.api.encrypt.EncryptionProvider;
 import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.repository.RepositoryException;
-import com.jadaptive.app.db.RsaEncryptionProvider;
 
 @Service
 public class EncryptionServiceImpl implements EncryptionService {
 
-	static Logger log = LoggerFactory.getLogger(EncryptionServiceImpl.class);
+	private static Logger log = LoggerFactory.getLogger(EncryptionServiceImpl.class);
 	
 	public static final String ENCRYPTION_MARKER = "!!ENC!!";
 	public static final String ENCRYPTION_MARKER_EXTERNAL_KEY = "!!EWK!!";
 	
-	public static EncryptionService instance;
+	private EncryptionProvider encryptionProvider;
+	
+	@Autowired
+	private ApplicationContext context;
 	
 	@PostConstruct
 	private void postConstruct() {
-		instance = this;
+		log.info("Looking for encryption providers ..");
+		for(var provider : context.getBeansOfType(EncryptionProvider.class).values().stream().sorted((p1,p2) -> {
+			return Integer.valueOf(p1.priority()).compareTo(p2.priority());
+		}).toList()) {
+			try {
+				provider.init();
+				encryptionProvider = provider;
+				log.info("  {} - Activated.", provider.getClass().getName());
+				break;
+			}
+			catch(Exception e) {
+				log.error("  {} - Ignoring. {}", provider.getClass().getName(), e.getMessage());
+				if(log.isDebugEnabled()) {
+					log.error("Failed to init provider.", e);
+				}
+			}
+		}
+		
+		if(encryptionProvider == null) {
+			throw new IllegalStateException("No encryption provider. Cannot continue.");
+		}
 	}
 	
 	@Override
@@ -98,7 +123,7 @@ public class EncryptionServiceImpl implements EncryptionService {
 			buffer.append("|");
 			buffer.append(Base64.getEncoder().encodeToString(encryptAES(value, rawkey, iv)));
 			
-			return ENCRYPTION_MARKER.concat(RsaEncryptionProvider.getInstance().encrypt(buffer.toString()));
+			return ENCRYPTION_MARKER.concat(encryptionProvider.encrypt(buffer.toString()));
 		} catch (Exception e) {
 			throw new RepositoryException(e.getMessage(), e);
 		}
@@ -125,7 +150,7 @@ public class EncryptionServiceImpl implements EncryptionService {
 			StringBuffer buffer = new StringBuffer();
 			buffer.append(Base64.getEncoder().encodeToString(encryptAES(value, rawkey, iv)));
 			
-			return ENCRYPTION_MARKER_EXTERNAL_KEY.concat(RsaEncryptionProvider.getInstance().encrypt(buffer.toString()));
+			return ENCRYPTION_MARKER_EXTERNAL_KEY.concat(encryptionProvider.encrypt(buffer.toString()));
 		} catch (Exception e) {
 			throw new RepositoryException(e.getMessage(), e);
 		}
@@ -139,7 +164,7 @@ public class EncryptionServiceImpl implements EncryptionService {
 		}
 		
 		try {
-			String encodedData = RsaEncryptionProvider.getInstance().decrypt(value.substring(ENCRYPTION_MARKER_EXTERNAL_KEY.length()));
+			String encodedData = encryptionProvider.decrypt(value.substring(ENCRYPTION_MARKER_EXTERNAL_KEY.length()));
 
 			byte[] encrypted = Base64.getDecoder().decode(encodedData);
 			byte[] data = DigestUtils.sha3_512(keydata);
@@ -166,7 +191,7 @@ public class EncryptionServiceImpl implements EncryptionService {
 		}
 		
 		try {
-			String data = RsaEncryptionProvider.getInstance().decrypt(value.substring(ENCRYPTION_MARKER.length()));
+			String data = encryptionProvider.decrypt(value.substring(ENCRYPTION_MARKER.length()));
 			String[] elements = data.split("\\|");
 			byte[] key = Base64.getDecoder().decode(elements[0]);
 			byte[] iv = Base64.getDecoder().decode(elements[1]);
@@ -218,7 +243,4 @@ public class EncryptionServiceImpl implements EncryptionService {
 		System.out.println(service.decrypt(encrypted));
 	}
 
-	public static EncryptionService getInstance() {
-		return instance;
-	}
 }

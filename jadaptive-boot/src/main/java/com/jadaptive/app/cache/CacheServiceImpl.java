@@ -16,6 +16,7 @@ import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.tenant.Tenant;
 import com.sshtools.gardensched.DistributedScheduledExecutor;
 
 @Service
@@ -135,6 +136,7 @@ public class CacheServiceImpl extends AuthenticatedService implements CacheServi
 	}
 
 	private String generateName(String name) {
-		return String.format("%s-%s", name, getCurrentTenant().getUuid());
+		Tenant ten = getCurrentTenant();
+		return String.format("%s-%s", name, ten == null ? tenantService.getSystemTenant().getUuid() : ten.getUuid());
 	}
 }

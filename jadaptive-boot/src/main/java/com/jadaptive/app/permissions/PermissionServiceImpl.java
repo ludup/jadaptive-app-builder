@@ -1,5 +1,6 @@
 package com.jadaptive.app.permissions;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.PropertyService;
+import com.jadaptive.api.app.StartupAware;
+import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -58,7 +61,7 @@ import io.github.classgraph.ScanResult;
 
 @Service
 @Aspect
-public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements PermissionService, TenantAware {
+public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements PermissionService, TenantAware, StartupAware {
 
 
 	@Autowired
@@ -79,11 +82,16 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Autowired
 	private ObjectService objectService;
 	
-	Set<String> systemPermissions = new TreeSet<>();
-	Set<NamePairValue> systemPermissionObjects = new TreeSet<>();
-	Map<String,Set<String>> systemPermissionsAlias = new HashMap<>();
+	@Autowired
+	private CacheService cacheService;
 	
-	ThreadLocal<Stack<User>> currentUser = new ThreadLocal<>();
+	private Set<String> systemPermissions = new TreeSet<>();
+	private Set<NamePairValue> systemPermissionObjects = new TreeSet<>();
+	private Map<String,Set<String>> systemPermissionsAlias = new HashMap<>();
+	private Map<String, Boolean> isAdministratorCache;
+	private Map<String, String[]> resolvedPermissionsCache;
+	
+	private ThreadLocal<Stack<User>> currentUser = new ThreadLocal<>();
 	
 	final static User SYSTEM_USER = new User() {
 
@@ -121,6 +129,12 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		}
 
 	};
+	
+	@Override
+	public void onApplicationStartup() {
+		isAdministratorCache = cacheService.getCacheOrCreate("PermissionService_isAdministrator", String.class, Boolean.class, Duration.ofMinutes(1).toMillis());
+		resolvedPermissionsCache = cacheService.getCacheOrCreate("PermissionService_resolvedPermissions", String.class, String[].class, Duration.ofMinutes(1).toMillis());
+	}
 
 	@Around("@annotation(com.jadaptive.api.permissions.AuthenticatedContext)")
 	public Object logExecutionTime(ProceedingJoinPoint pjp) throws Throwable {
@@ -258,11 +272,26 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			if(user.equals(SYSTEM_USER)) {
 				return true;
 			}
-			Collection<Role> roles = roleService.getRoles(user);
-			for(Role role : roles) {
-				if(role.isAllPermissions()) {
-					return true;
+			
+			/* NOTE: Cache wont be usuable until full start up (caches are tenant aware) */
+			Boolean val = isAdministratorCache == null ? null : isAdministratorCache.get(user.getUuid());
+			if(val  == null) {
+				Collection<Role> roles = roleService.getRoles(user);
+				for(Role role : roles) {
+					if(role.isAllPermissions()) {
+						if(isAdministratorCache != null) {
+							isAdministratorCache.put(user.getUuid(), true);
+						}
+						return true;
+					}
 				}
+				
+				if(isAdministratorCache != null) {
+					isAdministratorCache.put(user.getUuid(), false);
+				}
+			}
+			else {
+				return val;
 			}
 		}
 		return false;
@@ -401,6 +430,13 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 	@Override
 	public Set<String> resolvePermissions(User user) {
 		
+		if(resolvedPermissionsCache != null) {
+			var cached = resolvedPermissionsCache.get(user.getUuid());
+			if(cached != null) {
+				return Set.of(cached);
+			}
+		}
+		
 		Set<String> allPermissions = new TreeSet<>();
 		Collection<Role> roles = roleService.getRoles(user);
 		if(isAdministrator(user)) {
@@ -419,6 +455,10 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 
 		Set<String> resolvedPermissions = new HashSet<>(allPermissions);
 		processAliases(systemPermissionsAlias, allPermissions, resolvedPermissions);
+		
+		if(resolvedPermissionsCache != null) {
+			resolvedPermissionsCache.put(user.getUuid(), resolvedPermissions.toArray(new String[0]));
+		}
 	
 		return resolvedPermissions;
 	}
