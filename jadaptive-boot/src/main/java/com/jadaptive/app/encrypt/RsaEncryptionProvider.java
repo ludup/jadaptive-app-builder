@@ -39,6 +39,10 @@ public class RsaEncryptionProvider extends AbstractEncryptionProvider {
 	@Override
 	public void init() throws Exception {
 		
+		if(!ApplicationProperties.getValue("private.enabled", true)) {
+			throw new IllegalArgumentException("Local private key disabled.");
+		}
+		
 		privateFolder = Paths.get(ApplicationProperties.getValue("private.dir", "conf")).
 				resolve(ApplicationProperties.getValue("private.conf", "private"));
 

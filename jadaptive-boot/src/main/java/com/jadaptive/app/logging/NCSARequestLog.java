@@ -31,6 +31,7 @@ import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,6 +52,7 @@ import jakarta.servlet.http.HttpServletResponse;
 /* ------------------------------------------------------------ */
 /**
  */
+@Component
 public class NCSARequestLog implements Closeable
 {
     public static final String __LINE_SEPARATOR = System.lineSeparator();
@@ -648,6 +650,10 @@ public class NCSARequestLog implements Closeable
             _ignorePathMap = null;
 
         _writer = new OutputStreamWriter(_out);
+    }
+    
+    public boolean isStarted() {
+    	return _out != null;
     }
 
     /* ------------------------------------------------------------ */

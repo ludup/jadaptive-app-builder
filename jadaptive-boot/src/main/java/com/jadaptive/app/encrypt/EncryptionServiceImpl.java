@@ -8,7 +8,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.BadPaddingException;
@@ -39,7 +41,7 @@ public class EncryptionServiceImpl implements EncryptionService {
 	public static final String ENCRYPTION_MARKER = "!!ENC!!";
 	public static final String ENCRYPTION_MARKER_EXTERNAL_KEY = "!!EWK!!";
 	
-	private EncryptionProvider encryptionProvider;
+	private final List<EncryptionProvider> encryptionProviders = new ArrayList<>();
 	
 	@Autowired
 	private ApplicationContext context;
@@ -52,19 +54,25 @@ public class EncryptionServiceImpl implements EncryptionService {
 		}).toList()) {
 			try {
 				provider.init();
-				encryptionProvider = provider;
+				encryptionProviders.add(provider);
 				log.info("  {} - Activated.", provider.getClass().getName());
 				break;
 			}
-			catch(Exception e) {
+			catch(IllegalArgumentException e) {
 				log.error("  {} - Ignoring. {}", provider.getClass().getName(), e.getMessage());
 				if(log.isDebugEnabled()) {
 					log.error("Failed to init provider.", e);
 				}
 			}
+			catch(RuntimeException re) {
+				throw re;
+			}
+			catch(Exception e) {
+				throw new IllegalStateException("Failed to configure encryption service. As a precaution, the service will be halted.", e);
+			}
 		}
 		
-		if(encryptionProvider == null) {
+		if(encryptionProviders.isEmpty()) {
 			throw new IllegalStateException("No encryption provider. Cannot continue.");
 		}
 	}
@@ -123,7 +131,7 @@ public class EncryptionServiceImpl implements EncryptionService {
 			buffer.append("|");
 			buffer.append(Base64.getEncoder().encodeToString(encryptAES(value, rawkey, iv)));
 			
-			return ENCRYPTION_MARKER.concat(encryptionProvider.encrypt(buffer.toString()));
+			return ENCRYPTION_MARKER.concat(encryptionProviders.get(0).encrypt(buffer.toString()));
 		} catch (Exception e) {
 			throw new RepositoryException(e.getMessage(), e);
 		}
@@ -150,7 +158,7 @@ public class EncryptionServiceImpl implements EncryptionService {
 			StringBuffer buffer = new StringBuffer();
 			buffer.append(Base64.getEncoder().encodeToString(encryptAES(value, rawkey, iv)));
 			
-			return ENCRYPTION_MARKER_EXTERNAL_KEY.concat(encryptionProvider.encrypt(buffer.toString()));
+			return ENCRYPTION_MARKER_EXTERNAL_KEY.concat(encryptionProviders.get(0).encrypt(buffer.toString()));
 		} catch (Exception e) {
 			throw new RepositoryException(e.getMessage(), e);
 		}
@@ -163,24 +171,30 @@ public class EncryptionServiceImpl implements EncryptionService {
 			return value;
 		}
 		
-		try {
-			String encodedData = encryptionProvider.decrypt(value.substring(ENCRYPTION_MARKER_EXTERNAL_KEY.length()));
-
-			byte[] encrypted = Base64.getDecoder().decode(encodedData);
-			byte[] data = DigestUtils.sha3_512(keydata);
-			
-			int keyLength = Math.min(Cipher.getMaxAllowedKeyLength("AES"), 256) / 8;
-			byte[] rawkey = new byte[keyLength];
-			System.arraycopy(data, 0, rawkey, 0, rawkey.length);
-
-			byte[] iv = new byte[16];
-			System.arraycopy(data, rawkey.length, iv, 0, iv.length);
-			
-			String tmp = new String(decryptAES(encrypted, rawkey, iv), "UTF-8");
-			return tmp;
-		} catch (Exception e) {
-			throw new RepositoryException(e.getMessage(), e);
+		RepositoryException  exception = null;
+		
+		for(var encryptionProvider : encryptionProviders) {
+			try {
+				String encodedData = encryptionProvider.decrypt(value.substring(ENCRYPTION_MARKER_EXTERNAL_KEY.length()));
+	
+				byte[] encrypted = Base64.getDecoder().decode(encodedData);
+				byte[] data = DigestUtils.sha3_512(keydata);
+				
+				int keyLength = Math.min(Cipher.getMaxAllowedKeyLength("AES"), 256) / 8;
+				byte[] rawkey = new byte[keyLength];
+				System.arraycopy(data, 0, rawkey, 0, rawkey.length);
+	
+				byte[] iv = new byte[16];
+				System.arraycopy(data, rawkey.length, iv, 0, iv.length);
+				
+				String tmp = new String(decryptAES(encrypted, rawkey, iv), "UTF-8");
+				return tmp;
+			} catch (Exception e) {
+				exception = new RepositoryException(e.getMessage(), e);
+			}
 		}
+		
+		throw exception;
 	}
 	
 	@Override
@@ -190,18 +204,24 @@ public class EncryptionServiceImpl implements EncryptionService {
 			return value;
 		}
 		
-		try {
-			String data = encryptionProvider.decrypt(value.substring(ENCRYPTION_MARKER.length()));
-			String[] elements = data.split("\\|");
-			byte[] key = Base64.getDecoder().decode(elements[0]);
-			byte[] iv = Base64.getDecoder().decode(elements[1]);
-			byte[] encrypted = Base64.getDecoder().decode(elements[2]);
-			
-			String tmp = new String(decryptAES(encrypted, key, iv), "UTF-8");
-			return tmp;
-		} catch (Exception e) {
-			throw new RepositoryException(e.getMessage(), e);
+		RepositoryException  exception = null;
+		
+		for(var encryptionProvider : encryptionProviders) {
+			try {
+				String data = encryptionProvider.decrypt(value.substring(ENCRYPTION_MARKER.length()));
+				String[] elements = data.split("\\|");
+				byte[] key = Base64.getDecoder().decode(elements[0]);
+				byte[] iv = Base64.getDecoder().decode(elements[1]);
+				byte[] encrypted = Base64.getDecoder().decode(elements[2]);
+				
+				String tmp = new String(decryptAES(encrypted, key, iv), "UTF-8");
+				return tmp;
+			} catch (Exception e) {
+				exception = new RepositoryException(e.getMessage(), e);
+			}
 		}
+		
+		throw exception;
 	}
 	
 	private byte[] encryptAES(String value, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException {

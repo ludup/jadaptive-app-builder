@@ -8,18 +8,15 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jgroups.util.UUID;
 import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.encrypt.EncryptionProvider;
 import com.jadaptive.utils.Instrumentation;
-import com.jadaptive.utils.Instrumentation.TimedHandle;
 
 @Component
 public class LBKeyServerEncryptionProvider implements EncryptionProvider {
-	private static Logger LOG = LoggerFactory.getLogger(LBKeyServerEncryptionProvider.class);
 	
 	private char[] secret;
 	private String uri;
@@ -34,17 +31,20 @@ public class LBKeyServerEncryptionProvider implements EncryptionProvider {
 	public void init() throws Exception {
 		var host = ApplicationProperties.getValue("keyserver.host", "");
 		if(host.equals("")) {
-			throw new IllegalStateException("No keyserver hostname configured (keyserver.host).");
+			throw new IllegalArgumentException("No keyserver hostname configured (keyserver.host).");
 		}
 		var port = ApplicationProperties.getValue("keyserver.port", 443);
 		var path = ApplicationProperties.getValue("keyserver.path", "/ks/api/secrets");
 		
 		uri = String.format("https://%s:%d%s", host, port, path);
 
-		reference = ApplicationProperties.getValue("keyserver.reference", "system-key");
+		reference = ApplicationProperties.getValue("keyserver.reference", "");
+		if(reference.equals("")) {
+			throw new IllegalStateException("A unique UUID must be set in the `keyserver.reference` system property. This UUID must be the same on members of this cluster. I will generate a UUID you can use ....\n\nkeyserver.reference=" + UUID.randomUUID().toString());
+		}
 		secret = ApplicationProperties.getValue("keyserver.secret", "").toCharArray();
 		if(secret.length == 0) {
-			throw new IllegalStateException("No keyserver secrete configured (keyserver.secret).");
+			throw new IllegalStateException("No keyserver secret configured (keyserver.secret).");
 		}
 	}
 
