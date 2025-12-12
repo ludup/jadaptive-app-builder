@@ -72,6 +72,18 @@ public class Html {
 		}
 		return el;
 	}
+
+	public static Element em(String text) {
+		Element el = new Element("em");
+		el.text(text);
+		return el;
+	}
+
+	public static Element em(Element child) {
+		Element el = new Element("em");
+		el.appendChild(child);
+		return el;
+	}
 	
 	public static Element i18nTag(String tag, String bundle, String i18n, Object... args) {
 		Element el = new Element(tag).attr("jad:bundle", bundle).attr("jad:i18n", i18n);

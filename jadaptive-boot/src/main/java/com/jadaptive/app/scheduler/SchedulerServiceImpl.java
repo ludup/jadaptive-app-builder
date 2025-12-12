@@ -60,7 +60,7 @@ import com.sshtools.gardensched.TaskSpec;
 @Service
 public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<SchedulerTask>  implements SchedulerService, TenantAware, StartupAware {
 
-	static Logger log = LoggerFactory.getLogger(SchedulerServiceImpl.class);
+	private static Logger LOG = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 	
 	@Autowired
 	private DistributedScheduledExecutor executor;	
@@ -85,8 +85,8 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
 		
-		if(log.isInfoEnabled()) {
-			log.info("Scheduling tasks for {}", tenant.getName());
+		if(LOG.isInfoEnabled()) {
+			LOG.info("Scheduling tasks for {}", tenant.getName());
 		}
 		
 		for(var task  : applicationService.getBeans(ScheduledTask.class)) {
@@ -112,7 +112,6 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 			var bldr = new DistributedRunnable.Builder(uuid.toString(), new TenantJobRunner(tenant, task)).
 				withKey(task.getClass().getName()).
 				withClassifiers(tenant.getUuid()).
-				onConflict(ConflictResolution.IGNORE).
 				fromAnnotatedObject(task);
 			
 			configureTenantTaskBuilder(bldr, task);
@@ -192,12 +191,12 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	
 	@Override
 	public void cancelTask(String uuid, boolean mayInterrupt) {
-		executor.futureOr(ClusterID.parse(uuid)).ifPresentOrElse(ftr -> ftr.cancel(mayInterrupt), () -> log.warn("Request to cancel task {} that does not exist.", uuid));
+		executor.futureOr(ClusterID.parse(uuid)).ifPresentOrElse(ftr -> ftr.cancel(mayInterrupt), () -> LOG.warn("Request to cancel task {} that does not exist.", uuid));
 	}
 
 	@Override
 	public void runScheduledTaskNow(String uuid) {
-		executor.futureOr(ClusterID.parse(uuid)).ifPresentOrElse(ftr -> ftr.runNow(), () -> log.warn("Request to run task {} that does not exist.", uuid));
+		executor.futureOr(ClusterID.parse(uuid)).ifPresentOrElse(ftr -> ftr.runNow(), () -> LOG.warn("Request to run task {} that does not exist.", uuid));
 	}
 
 	@Override
@@ -429,12 +428,12 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 						eventService.publishEvent(evt.get());
 					}
 					catch(ObjectNotFoundException onfe) {
-						log.warn("Failed to find task.", onfe);
+						LOG.warn("Failed to find task.", onfe);
 					}
 				});
 			});
 		}, () -> {
-			log.warn("Task has no classifiers so tenant UUID cannot be determined.");
+			LOG.warn("Task has no classifiers so tenant UUID cannot be determined.");
 		});
 	}
 	

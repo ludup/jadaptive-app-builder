@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import org.jgroups.Address;
@@ -83,7 +84,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		configuredHostname = hostname = ApplicationProperties.getValue("ha.hostname", "");
 		if (hostname.equals("")) {
 			try {
-				hostname = InetAddress.getLocalHost().getHostAddress();
+				hostname = InetAddress.getLocalHost().getHostName();
 			} catch (UnknownHostException e) {
 				hostname = "localhost";
 			}	
@@ -105,7 +106,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			thisNode.setVersion(Optional.ofNullable(
 				ApplicationServiceImpl.getInstance().getBean(VersionProvider.class)).map(VersionProvider::getVersion).
 				orElse("Unknown"));
-			
+			thisNode.setTimeZone(TimeZone.getDefault().getID());
 			thisNode.setGroupAddress(executor.address().toString());
 			thisNode.setStatus(ClusterNodeStatus.ONLINE);
 			
@@ -180,23 +181,38 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	@Override
 	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
 
+		var node = getObjectByUUID(obj.getUuid());
 		if (column.equals("uuid")) {
+			var row = Html.div();
 			var spn = Html.span(obj.getUuid());
 			if(obj.getUuid().equals(getServerId())) {
 				spn.addClass("fw-bolder");
 			}
-			return spn;
+			row.appendChild(spn);
+			
+			var div = Html.div("mt-2", "ms-2", "text-muted");
+			
+			var crow = Html.div("row");
+			crow.appendChild(Html.div("col-4").appendChild(Html.em(Html.i18n(ClusterNode.RESOURCE_KEY, "version.name"))));
+			crow.appendChild(Html.div("col-8").text(node.getVersion()));
+			div.appendChild(crow);
+			
+			crow = Html.div("row");
+			crow.appendChild(Html.div("col-4").appendChild(Html.em(Html.i18n(ClusterNode.RESOURCE_KEY, "groupAddress.name"))));
+			crow.appendChild(Html.div("col-8").text(node.getGroupAddress()));
+			div.appendChild(crow);
+			
+			crow = Html.div("row");
+			crow.appendChild(Html.div("col-4").appendChild(Html.em(Html.i18n(ClusterNode.RESOURCE_KEY, "timeZone.name"))));
+			crow.appendChild(Html.div("col-8").text(node.getTimeZone()));
+			div.appendChild(crow);
+			
+			row.appendChild(div);
+			
+			return row;
 		}
 		else {
-			var node = getObjectByUUID(obj.getUuid());
-			if (column.equals("groupAddress")) {
-				var spn = Html.span(node.getGroupAddress());
-				if(obj.getUuid().equals(getServerId())) {
-					spn.addClass("fw-bolder");
-				}
-				return spn;
-			}
-			else if (column.equals("hostname")) {
+			if (column.equals("hostname")) {
 				var row = Html.div();
 				var addr = Html.span(node.getHostname());
 				if(obj.getUuid().equals(getServerId())) {
@@ -207,7 +223,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 					var div = Html.div("mt-2", "ms-2", "text-muted");
 					node.getServices().forEach(s -> {
 						var srvcol = Html.div("col-8");
-						srvcol.text(s.getService());
+						srvcol.appendChild(Html.em(s.getService()));
 						var portcol = Html.div("col-4");
 						portcol.text(String.valueOf(s.getPort()));
 	

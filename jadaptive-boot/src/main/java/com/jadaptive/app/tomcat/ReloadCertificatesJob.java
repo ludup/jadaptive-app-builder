@@ -12,10 +12,11 @@ import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.ScheduledTaskConfig;
 import com.jadaptive.api.scheduler.TenantTaskConfig;
 import com.sshtools.gardensched.Affinity;
+import com.sshtools.gardensched.ConflictResolution;
 import com.sshtools.gardensched.TaskConfig;
 
 @Component
-@TaskConfig(key = "reloadCertificatesJob", bundle = "default",  affinity = Affinity.ALL)
+@TaskConfig(key = "reloadCertificatesJob", bundle = "default",  affinity = Affinity.ALL, onConflict = ConflictResolution.IGNORE)
 @ScheduledTaskConfig(value = "0 1 * * * *", systemOnly = true)
 @TenantTaskConfig(allowTenantRunNow = true, allowRunNow = true)
 public class ReloadCertificatesJob implements ScheduledTask {

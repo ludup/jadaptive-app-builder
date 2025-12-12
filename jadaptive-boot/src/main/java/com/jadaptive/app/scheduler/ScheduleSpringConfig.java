@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.time.Duration;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +30,8 @@ import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.cluster.ClusterEvent;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.events.SystemEvent;
+import com.jadaptive.api.product.Product;
+import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.sshtools.gardensched.ClusterID;
@@ -51,6 +55,7 @@ import com.sshtools.gardensched.spring.TriggerAdapter;
 
 @Configuration
 public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandler {
+	private static Logger LOG = LoggerFactory.getLogger(ScheduleSpringConfig.class);
 	
 	@Autowired
 	private ClassLoaderService classLoader;
@@ -91,6 +96,9 @@ public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandle
 			TaskStore taskStore,
 			ObjectStore objectStore) throws Exception {
 		
+		var poolThreads = ApplicationProperties.getValue("ha.poolThreads", Runtime.getRuntime().availableProcessors());
+		LOG.info("Schedule Threads: {}", poolThreads);
+		
 		var bldr = new DistributedScheduledExecutor.Builder().
 				withPayloadSerializer(taskSerializer).
 				withPayloadFilter(taskFilter).
@@ -103,17 +111,19 @@ public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandle
 				withObjectStore(objectStore).
 				withCloseTimeout(Duration.ofMinutes(ApplicationProperties.getValue("ha.shutdownTimeout", Integer.MAX_VALUE))).
 				withSchedulerThreads(
-					ApplicationProperties.getValue("ha.poolThreads", Runtime.getRuntime().availableProcessors())
+					poolThreads
 				);
 		
 		var haProps = ApplicationProperties.getValue("ha.props", "");
 		if(!haProps.equals("")) {
 			bldr.withJGroupsProps(haProps);
+			LOG.info("JGroups Properties: {}", haProps);
 		}
 		
-		var haClusterName = ApplicationProperties.getValue("ha.clusterName", "");
+		var haClusterName = ApplicationProperties.getValue("ha.clusterName", "generic-jad-cluster");
 		if(!haClusterName.equals("")) {
 			bldr.withClusterName(haClusterName);
+			LOG.info("Cluster Name: {}", haClusterName);
 		}
 		
 		var haGroupName = ApplicationProperties.getValue("ha.groupName", "");

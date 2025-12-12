@@ -14,12 +14,11 @@ import com.jadaptive.api.ui.menu.ApplicationMenuService;
 import com.jadaptive.api.ui.menu.PageMenu;
 
 @ObjectDefinition(resourceKey = ClusterNode.RESOURCE_KEY, type = ObjectType.COLLECTION, creatable = false, updatable = false, deletable = false, system = true)
-@TableView(defaultColumns = {"status", "uuid", "hostname", "version", "groupAddress" }, 
+@TableView(defaultColumns = {"status", "uuid", "hostname" }, 
 otherColumns = {
 		  @DynamicColumn(resourceKey = "uuid", service = ClusterManager.class),
 		  @DynamicColumn(resourceKey = "status", service = ClusterManager.class),
-		  @DynamicColumn(resourceKey = "groupAddress", service = ClusterManager.class),
-		  @DynamicColumn(resourceKey = "hostname", service = ClusterManager.class),
+		  @DynamicColumn(resourceKey = "hostname", service = ClusterManager.class)
 }, multipleDelete = false)
 @PageMenu(
 		parent = ApplicationMenuService.REPORTING_MENU_UUID, 
@@ -48,11 +47,22 @@ public final class ClusterNode extends UUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	private String version;
 
+	@ObjectField(type = FieldType.TEXT)
+	private String timeZone;
+
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	private List<ClusterService> services = new ArrayList<>();
 
 	public String getResourceKey() {
 		return RESOURCE_KEY;
+	}
+
+	public String getTimeZone() {
+		return timeZone;
+	}
+
+	public void setTimeZone(String timeZone) {
+		this.timeZone = timeZone;
 	}
 
 	public String getVersion() {
