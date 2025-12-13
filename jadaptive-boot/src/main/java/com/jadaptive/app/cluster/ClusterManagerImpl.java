@@ -10,18 +10,17 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jgroups.Address;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.Lifecycle;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationServiceImpl;
-import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.app.VersionProvider;
 import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.cluster.ClusterEvent;
@@ -48,12 +47,9 @@ import com.jadaptive.api.user.UserService;
 import com.sshtools.gardensched.DistributedScheduledExecutor;
 
 @Service
-public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode> implements ClusterManager, StartupAware, Lifecycle {
+public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode> implements ClusterManager {
 
 	private static Logger LOG = LoggerFactory.getLogger(ClusterManagerImpl.class);
-
-	@Autowired
-	private DistributedScheduledExecutor executor;
 	
 	@Autowired
 	private SystemOnlyObjectDatabase<ClusterNode> clusterNodes;
@@ -79,8 +75,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	private String hostname;
 
 	@Override
-	public void onApplicationStartup() {
-		setupEventsProxy();
+	public void initCluster() {
 		configuredHostname = hostname = ApplicationProperties.getValue("ha.hostname", "");
 		if (hostname.equals("")) {
 			try {
@@ -91,71 +86,98 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			LOG.warn("ha.hostname is not set, using a generated ha.hostname of " + hostname);
 		}
 		
-		tenantService.asSystem(() -> {
 			
-			serverId = ApplicationProperties.getValue("ha.id","");
-			if (serverId.equals("")) {
-				serverId = UUID.nameUUIDFromBytes((hostname + ":"+ getPort()).getBytes()).toString();
-				LOG.warn("ha.id is not set, using a generated ha.id of " + serverId);
-			} 
-		
-			var thisNode = new ClusterNode();
+		serverId = ApplicationProperties.getValue("ha.id","");
+		if (serverId.equals("")) {
+			serverId = UUID.nameUUIDFromBytes((hostname + ":"+ getPort()).getBytes()).toString();
+			LOG.warn("ha.id is not set, using a generated ha.id of " + serverId);
+		} 
+	
+		ClusterNode thisNode;
+		try {
+			thisNode = getObjectByUUID(serverId);
+		}
+		catch(ObjectNotFoundException onfe) {
+			thisNode = new ClusterNode();
 			thisNode.setUuid(serverId);
-			thisNode.setHostname(hostname);
-			
-			thisNode.setVersion(Optional.ofNullable(
-				ApplicationServiceImpl.getInstance().getBean(VersionProvider.class)).map(VersionProvider::getVersion).
-				orElse("Unknown"));
-			thisNode.setTimeZone(TimeZone.getDefault().getID());
-			thisNode.setGroupAddress(executor.address().toString());
-			thisNode.setStatus(ClusterNodeStatus.ONLINE);
-			
+		}
+		
+		if(StringUtils.isBlank(thisNode.getAuthenticationToken())) {
+			thisNode.setAuthenticationToken(UUID.randomUUID().toString());
+		}
+		ClusterAuth.setup(thisNode.getAuthenticationToken(), serverId);
+		
+		thisNode.setHostname(hostname);			
+		thisNode.setVersion(Optional.ofNullable(
+			ApplicationServiceImpl.getInstance().getBean(VersionProvider.class)).map(VersionProvider::getVersion).
+			orElse("Unknown"));
+		thisNode.setTimeZone(TimeZone.getDefault().getID());
+		thisNode.setStatus(ClusterNodeStatus.UNAUTHORIZED);
+		thisNode.setGroupAddress(null);
+		
+		services = new LinkedHashSet<>();
+		for(var bean : app.getBeans(ClusterServiceProvider.class)) {
+			services = bean.transform(services);
+		}
+		if(services == null)
 			services = new LinkedHashSet<>();
-			for(var bean : app.getBeans(ClusterServiceProvider.class)) {
-				services = bean.transform(services);
-			}
-			if(services == null)
-				services = new LinkedHashSet<>();
 
-			var port = getPort();
-			services.add(new ClusterService(ClusterService.HTTPS_SERVICE, port));
-			thisNode.setServices(new ArrayList<>(services));
+		var port = getPort();
+		services.add(new ClusterService(ClusterService.HTTPS_SERVICE, port));
+		thisNode.setServices(new ArrayList<>(services));
+		
+		saveOrUpdate(thisNode);
+	}
+
+	@Override
+	public void setupCluster(DistributedScheduledExecutor executor) {
+		
+		setupEventsProxy(executor);
 			
-			saveOrUpdate(thisNode);
-			
-			var currentMembers = executor.view().getMembers().stream().map(Address::toString).toList();
-			for(var node : clusterNodes.list(ClusterNode.class)) {
-				if(ClusterNodeStatus.ONLINE.equals(node.getStatus()) && 
-					!node.getUuid().equals(serverId) && 
-					!currentMembers.contains(node.getGroupAddress())) {
-					nodeStatusChanged(node, node.getStatus(), ClusterNodeStatus.OFFLINE);
+		var currentMembers = executor.view().getMembers().stream().map(Address::toString).toList();
+		for(var node : clusterNodes.list(ClusterNode.class)) {
+			if(ClusterNodeStatus.ONLINE.equals(node.getStatus()) && 
+				!node.getUuid().equals(serverId) && 
+				!currentMembers.contains(node.getGroupAddress())) {
+				nodeStatusChanged(node, node.getStatus(), ClusterNodeStatus.OFFLINE);
+			}
+		}
+		
+		executor.addListener((leftMembers, joinedMembers) -> {
+			for(var left : leftMembers) {
+				LOG.info("{} left the cluster", left);
+				try {
+					nodeStatusChanged(clusterNodeForAddress(left.toString()), ClusterNodeStatus.ONLINE, ClusterNodeStatus.OFFLINE);
+				}
+				catch(Exception e) {
+					//
 				}
 			}
 			
-			executor.addListener((leftMembers, joinedMembers) -> {
-				for(var left : leftMembers) {
-					LOG.info("{} left the cluster", left);
-					try {
-						nodeStatusChanged(clusterNodeForAddress(left.toString()), ClusterNodeStatus.ONLINE, ClusterNodeStatus.OFFLINE);
-					}
-					catch(Exception e) {
-						//
-					}
+			for(var joined : joinedMembers) {
+				LOG.info("{} joined the cluster", joined);
+				try {
+					nodeStatusChanged(clusterNodeForAddress(joined.toString()), ClusterNodeStatus.OFFLINE, ClusterNodeStatus.ONLINE);
 				}
-				
-				for(var joined : joinedMembers) {
-					LOG.info("{} joined the cluster", joined);
-					try {
-						nodeStatusChanged(clusterNodeForAddress(joined.toString()), ClusterNodeStatus.OFFLINE, ClusterNodeStatus.ONLINE);
-					}
-					catch(Exception e) {
-						//
-					}
+				catch(Exception e) {
+					//
 				}
-			});
+			}
 		});
+		
+		ClusterNode thisNode = getObjectByUUID(serverId);
+		thisNode.setStatus(ClusterNodeStatus.ONLINE);
+		thisNode.setGroupAddress(executor.address().toString());
+		saveOrUpdate(thisNode);
 	}
 	
+	@Override
+	protected void beforeDelete(ClusterNode object) {
+		if(object.getStatus() == ClusterNodeStatus.ONLINE) {
+			throw new IllegalStateException("Cannot delete nodes that are ONLINE");
+		}
+	}
+
 	@Override
 	public String getHostname() {
 		return hostname;
@@ -247,8 +269,11 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				case ONLINE:
 					row.appendChild(Html.i("fa-solid", "fa-circle-check","text-success"));
 					break;
+				case UNAUTHORIZED:
+					row.appendChild(Html.i("fa-solid", "fa-triangle-exclamation","text-warning"));
+					break;
 				default:
-					row.appendChild(Html.i("fa-solid", "fa-triangle-exclamation","text-danger"));
+					row.appendChild(Html.i("fa-solid", "fa-circle-exclamation","text-danger"));
 					break;
 				}
 				row.appendChild(Html.i18n(ClusterNode.RESOURCE_KEY, "clusterNode."+ node.getStatus().name()).addClass("ms-3"));
@@ -258,7 +283,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		return Html.span("");
 	}
 
-	private void setupEventsProxy() {
+	private void setupEventsProxy(DistributedScheduledExecutor executor) {
 		eventService.registerListener(evt -> {
 			if(evt instanceof SystemEvent sysevt && evt instanceof BroadcastableEvent && !sysevt.isRemote()) {
 				
@@ -364,11 +389,6 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	}
 
 	@Override
-	public boolean isLeader() {
-		return executor.rank() == 0;
-	}
-
-	@Override
 	protected Class<ClusterNode> getResourceClass() {
 		return ClusterNode.class;
 	}
@@ -382,17 +402,13 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	}
 
 	@Override
-	public void start() {
+	public ClusterNode getThisNode() {
+		return getObjectByUUID(serverId);
 	}
 
 	@Override
-	public void stop() {
-		executor.close();
-	}
-
-	@Override
-	public boolean isRunning() {
-		return !executor.isShutdown();
+	public ClusterNode getObjectByGroupName(String groupName) {
+		return clusterNodes.searchObjects(ClusterNode.class, SearchField.eq("groupName", groupName)).stream().findFirst().orElseThrow(() -> new ObjectNotFoundException(groupName));
 	}
 
 }

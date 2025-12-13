@@ -27,13 +27,13 @@ import com.sshtools.gardensched.ClusterID;
 import com.sshtools.gardensched.DistributedCallable;
 import com.sshtools.gardensched.DistributedRunnable;
 import com.sshtools.gardensched.DistributedTask;
+import com.sshtools.gardensched.PayloadSerializer;
 import com.sshtools.gardensched.SerializableCallable;
 import com.sshtools.gardensched.SerializableRunnable;
 import com.sshtools.gardensched.TaskEntry;
 import com.sshtools.gardensched.TaskSpec;
 import com.sshtools.gardensched.TaskStore;
 import com.sshtools.gardensched.TaskTrigger;
-import com.sshtools.gardensched.spring.JsonPayloadSerializer;
 
 @Component
 public class SchedulerTaskStorage implements TaskStore {
@@ -47,7 +47,7 @@ public class SchedulerTaskStorage implements TaskStore {
 	private TenantService tenantService;
 	
 	@Autowired
-	private JsonPayloadSerializer payloadSerializer;
+	private PayloadSerializer payloadSerializer;
 
 	@Override
 	public void store(TaskEntry entry) {

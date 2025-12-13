@@ -16,8 +16,8 @@ import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.cache.CacheService;
 import com.jadaptive.api.permissions.AuthenticatedService;
+import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.tenant.Tenant;
-import com.sshtools.gardensched.DistributedScheduledExecutor;
 
 @Service
 public class CacheServiceImpl extends AuthenticatedService implements CacheService {
@@ -93,7 +93,7 @@ public class CacheServiceImpl extends AuthenticatedService implements CacheServi
 		Map<K, V> cache = (Map<K, V>) clusteredCaches.get(cname);
 		if(cache==null) {
 
-			var executor = ApplicationServiceImpl.getInstance().getBean( DistributedScheduledExecutor.class);
+			var executor = ApplicationServiceImpl.getInstance().getBean( SchedulerService.class);
 
 			cache = new AbstractMap<K, V>() {
 				@Override

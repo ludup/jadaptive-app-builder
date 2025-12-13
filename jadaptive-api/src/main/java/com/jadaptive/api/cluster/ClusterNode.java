@@ -13,7 +13,7 @@ import com.jadaptive.api.template.TableView;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
 import com.jadaptive.api.ui.menu.PageMenu;
 
-@ObjectDefinition(resourceKey = ClusterNode.RESOURCE_KEY, type = ObjectType.COLLECTION, creatable = false, updatable = false, deletable = false, system = true)
+@ObjectDefinition(resourceKey = ClusterNode.RESOURCE_KEY, type = ObjectType.COLLECTION, creatable = false, updatable = false, deletable = true, system = true)
 @TableView(defaultColumns = {"status", "uuid", "hostname" }, 
 otherColumns = {
 		  @DynamicColumn(resourceKey = "uuid", service = ClusterManager.class),
@@ -32,7 +32,7 @@ public final class ClusterNode extends UUIDEntity {
 	public static final String RESOURCE_KEY = "clusterNode";
 	
 	public enum ClusterNodeStatus {
-		ONLINE, OFFLINE
+		ONLINE, UNAUTHORIZED, OFFLINE
 	}
 	
 	@ObjectField(type = FieldType.ENUM)
@@ -53,8 +53,19 @@ public final class ClusterNode extends UUIDEntity {
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
 	private List<ClusterService> services = new ArrayList<>();
 
+	@ObjectField(type = FieldType.TEXT, hidden = true)
+	private String authenticationToken;
+
 	public String getResourceKey() {
 		return RESOURCE_KEY;
+	}
+
+	public String getAuthenticationToken() {
+		return authenticationToken;
+	}
+
+	public void setAuthenticationToken(String authenticationToken) {
+		this.authenticationToken = authenticationToken;
 	}
 
 	public String getTimeZone() {

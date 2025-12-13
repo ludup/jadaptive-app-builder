@@ -1,17 +1,12 @@
 package com.jadaptive.app.scheduler;
 
 import java.io.Serializable;
-import java.time.Duration;
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.PeriodicTrigger;
 
@@ -25,17 +20,13 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.jadaptive.api.app.App;
-import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.cluster.ClusterEvent;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.events.SystemEvent;
-import com.jadaptive.api.product.Product;
-import com.jadaptive.api.product.ProductService;
 import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.sshtools.gardensched.ClusterID;
-import com.sshtools.gardensched.DistributedScheduledExecutor;
 import com.sshtools.gardensched.DistributedTask;
 import com.sshtools.gardensched.ObjectStore;
 import com.sshtools.gardensched.PayloadFilter;
@@ -45,28 +36,20 @@ import com.sshtools.gardensched.SerializableRunnable;
 import com.sshtools.gardensched.TaskCompletionContext;
 import com.sshtools.gardensched.TaskErrorHandler;
 import com.sshtools.gardensched.TaskSpec;
-import com.sshtools.gardensched.TaskStore;
 import com.sshtools.gardensched.TaskSuccessHandler;
 import com.sshtools.gardensched.spring.CronTriggerSerializer;
-import com.sshtools.gardensched.spring.GardenSchedTaskScheduler;
 import com.sshtools.gardensched.spring.JsonPayloadSerializer;
 import com.sshtools.gardensched.spring.PeriodicTriggerSerializer;
 import com.sshtools.gardensched.spring.TriggerAdapter;
 
 @Configuration
 public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandler {
-	private static Logger LOG = LoggerFactory.getLogger(ScheduleSpringConfig.class);
 	
 	@Autowired
 	private ClassLoaderService classLoader;
 	
 	@Autowired
 	private App  appService;
-
-	@Bean
-	public TaskScheduler taskScheduler(DistributedScheduledExecutor executor) {
-		return new GardenSchedTaskScheduler(executor);
-	}
 	
 	@Bean
 	public ObjectStore objectStorage() {
@@ -87,51 +70,6 @@ public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandle
 				return task == null ? null : appService.autowire(task);
 			}
 		};
-	}
-	@Bean
-	@Primary
-	public DistributedScheduledExecutor distributedScheduledExecutor(
-			PayloadSerializer taskSerializer, 
-			PayloadFilter taskFilter, 
-			TaskStore taskStore,
-			ObjectStore objectStore) throws Exception {
-		
-		var poolThreads = ApplicationProperties.getValue("ha.poolThreads", Runtime.getRuntime().availableProcessors());
-		LOG.info("Schedule Threads: {}", poolThreads);
-		
-		var bldr = new DistributedScheduledExecutor.Builder().
-				withPayloadSerializer(taskSerializer).
-				withPayloadFilter(taskFilter).
-				withTaskStore(taskStore).
-				withTaskErrorHandler(this).
-				withTaskSuccessHandler(this).
-				withDeferStorageUntilStarted().
-				withPersistentByDefault().
-				withStartPaused().
-				withObjectStore(objectStore).
-				withCloseTimeout(Duration.ofMinutes(ApplicationProperties.getValue("ha.shutdownTimeout", Integer.MAX_VALUE))).
-				withSchedulerThreads(
-					poolThreads
-				);
-		
-		var haProps = ApplicationProperties.getValue("ha.props", "");
-		if(!haProps.equals("")) {
-			bldr.withJGroupsProps(haProps);
-			LOG.info("JGroups Properties: {}", haProps);
-		}
-		
-		var haClusterName = ApplicationProperties.getValue("ha.clusterName", "generic-jad-cluster");
-		if(!haClusterName.equals("")) {
-			bldr.withClusterName(haClusterName);
-			LOG.info("Cluster Name: {}", haClusterName);
-		}
-		
-		var haGroupName = ApplicationProperties.getValue("ha.groupName", "");
-		if(!haGroupName.equals("")) {
-			bldr.withGroupName(haGroupName);
-		}
-		
-		return bldr.build();
 	}
 
 	@Override

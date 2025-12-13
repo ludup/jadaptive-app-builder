@@ -6,15 +6,11 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.ActionFilter;
 import com.jadaptive.api.tenant.TenantService;
 import com.sshtools.gardensched.ClusterID;
-import com.sshtools.gardensched.DistributedScheduledExecutor;
 
 public class SchedulerTaskCancelActionFilter implements ActionFilter {
 	
 	@Autowired
 	private SchedulerService schedulerService;
-	
-	@Autowired
-	private DistributedScheduledExecutor executor;
 	
 	@Autowired
 	private TenantService tenantService;
@@ -23,7 +19,7 @@ public class SchedulerTaskCancelActionFilter implements ActionFilter {
 	public boolean showAction(AbstractObject object) {
 		var tsk = schedulerService.getObjectByUUID(object.getUuid());
 		if(tsk != null) {
-			var fut = executor.future(ClusterID.parse(tsk.getId()));
+			var fut = schedulerService.future(ClusterID.parse(tsk.getId()));
 			if(fut != null) {
 				if(tenantService.isSystemTenant())
 					return (Boolean)fut.attributes().getOrDefault(SchedulerTask.ALLOW_CANCEL, false);

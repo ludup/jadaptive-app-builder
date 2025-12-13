@@ -216,6 +216,14 @@ public class EncryptionServiceImpl implements EncryptionService {
 				
 				String tmp = new String(decryptAES(encrypted, key, iv), "UTF-8");
 				return tmp;
+			} catch(IllegalArgumentException  iae) {
+				exception = new RepositoryException(
+						"Detected likely key change. An attempt has been made to decrypt a piece of information that was encrypted "
+						+ "with a different key. This may be due to the current encrypt service configuration being changed, or  "
+						+ "the private key has been corrupted. It may also occur if this nodes Mongo database is shared with other "
+						+ "nodes in a cluster, but the encryption service configuration on each node does not match. There is no "
+						+ "recovery from this error other than correcting the encryption configuration or recovering the encryption "
+						+ "key. ", iae);
 			} catch (Exception e) {
 				exception = new RepositoryException(e.getMessage(), e);
 			}

@@ -49,7 +49,7 @@ Create a `scheduler.properties` in `conf.d`.
 ha.hostname=cluster-node-1
 ha.id=XXXXXXXX-XXXX-XXXX-XXXXXXXXXXXXXXXXX
 ha.clusterName=my-cloud-cluster-1
-ha.props=udp.xml
+ha.props=jad-cluster.xml
 
 # defaults to number of local cores
 #ha.poolThreads=4
@@ -68,7 +68,7 @@ The `ha.id` is a UUID and must be node unique, i.e. every node should have it's 
 
 `ha.clusterName` is the name of the cluster the node will be joining. If using for example LAN  broadcast configuration, then any node on a named cluster will be able to communicate with other nodes on  the same named cluster. The default cluster name is `generic-jad-cluster`.
 
-The `ha.props` property is the gateway to advanced JGroups configuration, which is way beyond the scope of this document. It points to either one of the default well known configuration names, or the full path to a custom configuration file or URL. For now, `udp.xml` should be OK if the nodes are all on the same well protected private LAN. For any kind of security though, manual configuration will be required. AI will probably help here. 
+The `ha.props` property is the gateway to advanced JGroups configuration, which is way beyond the scope of this document. It points to either one of the default well known configuration names, or the full path to a custom configuration file or URL. For now, `jad-cluster.xml` should be OK if the nodes are all on the same well protected private LAN. For any kind of security though, manual configuration will be required. AI will probably help here. 
 
 There are other properties, shown commented out with an explanation above.
 
