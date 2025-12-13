@@ -1,11 +1,23 @@
 package com.jadaptive.app.cluster;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -18,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationServiceImpl;
@@ -42,9 +55,12 @@ import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Html;
+import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 import com.sshtools.gardensched.DistributedScheduledExecutor;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode> implements ClusterManager {
@@ -65,6 +81,9 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Autowired
 	private App app;
@@ -411,4 +430,163 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		return clusterNodes.searchObjects(ClusterNode.class, SearchField.eq("groupName", groupName)).stream().findFirst().orElseThrow(() -> new ObjectNotFoundException(groupName));
 	}
 
+	@Override
+	public boolean isJoined() {
+		return ApplicationProperties.getValue("ha.clusterName", "").length() > 0;
+	}
+	@Override
+	public void join(String token, String refreshToken, String url) throws IOException, InterruptedException {
+		
+		LOG.info("Obtaining cluster configuration.");
+	
+		var actionUri = url +"/oauth2/join-cluster";
+		LOG.info("Using token to obtain cluster configuration. {}", actionUri);
+		
+		var request = HttpRequest.newBuilder()
+				  .uri(URI.create(actionUri))
+				  .headers("Authentication", "Bearer " + token)
+				  .GET()
+				  .build();
+		
+		var response = HttpClient
+				  .newBuilder()
+				  .build()
+				  .send(request, BodyHandlers.ofString());
+		
+		if(response.statusCode() != HttpServletResponse.SC_OK) {
+			throw new IOException("Unexpected status code " + response.statusCode());
+		}
+		
+		var body = response.body();
+		var clusterResponseObj = objectMapper.readValue(body, ClusterInfoResponse.class);
+		var error = clusterResponseObj.getError(); 
+		if(isNotBlank(error)) {
+			if(isNotBlank(clusterResponseObj.getErrorDescription()))
+				throw new IOException("Failed to get token, error '" + error + ". " + clusterResponseObj.getErrorDescription());
+			else
+				throw new IOException("Failed to get token, error '" + error + ". ");
+		}
+		
+		LOG.info("Updating local configuration .. ");
+		
+		var clusterJoin = clusterResponseObj.getBody();
+
+		// TODO the joined node should also be normalized with the below upon the first join of another node
+		
+		
+		var confd = Paths.get("conf.d");
+
+		/* Database config */
+		var databasePropertiesFile = confd.resolve("database.properties");
+		var databaseProperties = new Properties();
+		if(Files.exists(databasePropertiesFile)) {
+			try(var rdr = Files.newBufferedReader(databasePropertiesFile)) {
+				databaseProperties.load(rdr);
+			}
+		}
+		
+		databaseProperties.put("mongodb.connection", clusterJoin.mongoDbUrl());
+		databaseProperties.put("mongodb.embedded", "false");
+		databaseProperties.remove("mongodb.hostname");
+		databaseProperties.remove("mongodb.port");
+		
+		LOG.info("Saving new database configuration .. ");
+
+		try(var rdr = Files.newBufferedWriter(databasePropertiesFile)) {
+			databaseProperties.store(rdr, "Properties updated as result of cluster join");
+		}
+		
+		/* Install4j config (or updates might change database) */
+		var install4jPropertiesFile = confd.resolve("database.properties");
+		var install4jProperties = new Properties();
+		if(Files.exists(install4jPropertiesFile)) {
+			try(var rdr = Files.newBufferedReader(install4jPropertiesFile)) {
+				install4jProperties.load(rdr);
+			}
+			install4jProperties.put("mongoConnectionString", clusterJoin.mongoDbUrl());
+			try(var rdr = Files.newBufferedWriter(install4jPropertiesFile)) {
+				install4jProperties.store(rdr, "Properties updated as result of cluster join");
+			}
+		}
+		
+		/* Cluster config */
+		var clusterPropertiesFile = confd.resolve("cluster.properties");
+		var clusterProperties = new Properties();
+		if(Files.exists(clusterPropertiesFile)) {
+			try(var rdr = Files.newBufferedReader(clusterPropertiesFile)) {
+				clusterProperties.load(rdr);
+			}
+		}
+		clusterProperties.put("ha.clusterName", clusterJoin.clusterName()); 
+		clusterProperties.put("ha.props", clusterJoin.props());
+		clusterProperties.put("ha.id", getServerId());
+
+		/* Local key config */
+		if(StringUtils.isNotBlank(clusterJoin.publicKey()) && StringUtils.isNotBlank(clusterJoin.privateKey())) {
+			
+			LOG.info("Saving new local keys .. ");
+			
+			var privateFolder = Paths.get(ApplicationProperties.getValue("private.dir", "conf")).
+					resolve(ApplicationProperties.getValue("private.conf", "private"));
+
+			var prvFile = privateFolder.resolve(ApplicationProperties.getValue("private.filename", "secrets"));
+			var pubFile = privateFolder.resolve(ApplicationProperties.getValue("private.filename", prvFile.getFileName().toString() + ".pub"));
+			
+			if(Files.exists(prvFile)) {
+				LOG.info("Backing up existing private key file .. ");
+				Files.move(prvFile, prvFile.getParent().resolve(prvFile.getFileName().toString() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
+			}
+			if(Files.exists(pubFile)) {
+				LOG.info("Backing up existing public key file .. ");
+				Files.move(pubFile, pubFile.getParent().resolve(pubFile.getFileName().toString() + ".bak"), StandardCopyOption.REPLACE_EXISTING);
+			}
+			
+			Files.write(prvFile, Base64.getDecoder().decode(clusterJoin.privateKey()));
+			Files.write(pubFile, Base64.getDecoder().decode(clusterJoin.publicKey()));
+			
+		}
+		
+		
+		/* Key server */
+		if(StringUtils.isBlank(clusterJoin.keyserverHost())) {
+			LOG.info("Removing key server configuration .. ");
+			
+			clusterProperties.remove("keyserver.host");
+			clusterProperties.remove("keyserver.port");
+			clusterProperties.remove("keyserver.path");
+			clusterProperties.remove("keyserver.secret");
+			clusterProperties.remove("keyserver.reference");
+		}
+		else {
+			LOG.info("Updating key server configuration .. ");
+			
+			clusterProperties.put("keyserver.host", clusterJoin.keyserverHost());
+			clusterProperties.put("keyserver.secret", clusterJoin.keyserverSecret());
+			clusterProperties.put("keyserver.reference", clusterJoin.keyserverReference());
+			if(clusterJoin.keyserverPort() > 0 && clusterJoin.keyserverPort() != 443) {
+				clusterProperties.put("keyserver.port", clusterJoin.keyserverPort());	
+			}
+			else {
+				clusterProperties.remove("keyserver.port");
+			}
+			if(Objects.equals("/ks/api/secrets", clusterJoin.keyserverPath())) {
+				clusterProperties.remove("keyserver.path");	
+			}
+			else {
+				clusterProperties.put("keyserver.path", clusterJoin.keyserverPath());
+			}
+			
+		}
+		
+		/* Save cluster config */
+		LOG.info("Saving cluster configuration .. ");
+
+		try(var rdr = Files.newBufferedWriter(clusterPropertiesFile)) {
+			clusterProperties.store(rdr, "Properties updated as result of cluster join");
+		}
+
+		LOG.info("Reconfigured for cluser ", clusterJoin.clusterName());
+		
+		throw new UriRedirect("/app/ui/" + JoinWithClusterPage.URI);
+	}
 }

@@ -1,21 +1,24 @@
 package com.jadaptive.app.ui.menu;
 
+import static com.jadaptive.utils.Instrumentation.timed;
+
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
-import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedService;
@@ -27,7 +30,9 @@ import com.jadaptive.api.tenant.FeatureEnablementService;
 import com.jadaptive.api.ui.menu.ApplicationMenu;
 import com.jadaptive.api.ui.menu.ApplicationMenuExtender;
 import com.jadaptive.api.ui.menu.ApplicationMenuService;
+import com.jadaptive.api.ui.menu.NoPageMenuFilter;
 import com.jadaptive.api.ui.menu.PageMenu;
+import com.jadaptive.api.ui.menu.PageMenuFilter;
 import com.jadaptive.utils.Instrumentation;
 
 @Service
@@ -66,14 +71,6 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 				if(Objects.nonNull(pageMenus)) {
 					for(PageMenu m : pageMenus) {
 						
-						boolean enabled = true;
-						if(StringUtils.isNotBlank(m.feature())) {
-							try {
-								enabled = ApplicationServiceImpl.getInstance().getBean(FeatureEnablementService.class).isEnabled(m.feature());
-							} catch(NoSuchBeanDefinitionException e) {
-								enabled = false;
-							}
-						}
 						String path = m.path();
 						String uuid = m.uuid();
 						String bundle = m.bundle();
@@ -97,7 +94,7 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 							} catch (IllegalArgumentException | SecurityException e) {
 							}
 						}
-						annotatedMenus.add(new DynamicMenu(m, path, bundle, uuid, i18n, enabled));
+						annotatedMenus.add(new DynamicMenu(m, path, bundle, uuid, i18n));
 					}
 				}
 			}
@@ -133,8 +130,10 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 	
 	@Override
 	public boolean checkPermission(ApplicationMenu m) {
-		try(var ptimed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission(" + m.getI18n() + ")")) {
-			try(var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.with(" + m.getI18n() + ")")) {
+		try(@SuppressWarnings("unused")
+		var ptimed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission(" + m.getI18n() + ")")) {
+			try(@SuppressWarnings("unused")
+			var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.with(" + m.getI18n() + ")")) {
 				for(String perm : m.getPermissions()) {
 					if(StringUtils.isNotBlank(perm)) {
 						try {
@@ -146,7 +145,8 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 				}
 			}
 	
-			try(var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.without(" + m.getI18n() + ")")) {
+			try(@SuppressWarnings("unused")
+			var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.without(" + m.getI18n() + ")")) {
 				for(String perm : m.getWithoutPermissions()) {
 					if(StringUtils.isNotBlank(perm)) {
 						try {
@@ -164,8 +164,10 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 	
 	@Override
 	public boolean checkPermission(ApplicationMenu m, Set<String> resolvedPermissions, boolean administrator) {
-		try(var ptimed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission(" + m.getI18n() + ")")) {
-			try(var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.with(" + m.getI18n() + ")")) {
+		try(@SuppressWarnings("unused")
+		var ptimed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission(" + m.getI18n() + ")")) {
+			try(@SuppressWarnings("unused")
+			var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.with(" + m.getI18n() + ")")) {
 				for(String perm : m.getPermissions()) {
 					if(StringUtils.isNotBlank(perm)) {
 						try {
@@ -177,7 +179,8 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 				}
 			}
 	
-			try(var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.without(" + m.getI18n() + ")")) {
+			try(@SuppressWarnings("unused")
+			var timed = Instrumentation.timed("ApplicationMenuServiceImpl#checkPermission.without(" + m.getI18n() + ")")) {
 				for(String perm : m.getWithoutPermissions()) {
 					if(StringUtils.isNotBlank(perm)) {
 						try {
@@ -199,24 +202,79 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		String bundle;
 		String uuid;
 		String i18n;
-		boolean enabled;
-		PageMenu m;
+		PageMenu m;	
 		
-		DynamicMenu(PageMenu m, String path, String bundle, String uuid, String i18n, boolean enabled) {
+		Map<Class<?>,PageMenuFilter> filters = new HashMap<>();
+		
+		
+		DynamicMenu(PageMenu m, String path, String bundle, String uuid, String i18n) {
 			this.m = m;
 			this.path = path;
 			this.bundle = bundle;
 			this.uuid = uuid;
 			this.i18n = i18n;
-			this.enabled = enabled;
 		}
 		
+		@SuppressWarnings("unused")
 		@Override
 		public boolean isEnabled() {
+			var enabledNow = true;
+			
 			if(StringUtils.isNotBlank(m.feature())) {
-				return App.bean(FeatureEnablementService.class).isEnabled(m.feature());
+				if(!App.bean(FeatureEnablementService.class).isEnabled(m.feature())) {
+					enabledNow = false;
+				}
 			}
-			return enabled;
+			
+			if(enabledNow) {
+				if(!m.filter().equals(NoPageMenuFilter.class)) {
+					try(var perms = timed("ApplicationMenuServiceImpl.DynamicMenu.isEnabled")) {
+						PageMenuFilter filter = getFilter();
+						try(var sa = timed("ApplicationMenuServiceImpl.DynamicMenu.isEnabled." + filter.getClass().getSimpleName())) {
+							if(!filter.isEnabled(this)) {
+								enabledNow = false;
+							}
+						}
+					}
+				}
+			}
+			
+			return enabledNow;
+		}
+
+		@Override
+		public boolean isVisible() {
+			var visibleNow = true;
+			if(visibleNow) {
+				if(!m.filter().equals(NoPageMenuFilter.class)) {
+					try(@SuppressWarnings("unused")
+					var perms = timed("ApplicationMenuServiceImpl.DynamicMenu.isVisible")) {
+						var filter = getFilter();
+						try(@SuppressWarnings("unused")
+						var sa = timed("ApplicationMenuServiceImpl.DynamicMenu.isVisible." + filter.getClass().getSimpleName())) {
+							if(!filter.isVisible(this)) {
+								visibleNow = false;
+							}
+						}
+					}
+				}
+			}
+			
+			return visibleNow;
+		}
+
+		private PageMenuFilter getFilter() {
+			PageMenuFilter filter = filters.get(m.filter());
+			if(Objects.isNull(filter)) {
+				try {
+					filter = applicationService.autowire(m.filter().getConstructor().newInstance());
+					filters.put(m.filter(), filter);
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+					throw new IllegalStateException(e.getMessage(), e);
+				}
+			}
+			return filter;
 		}
 		
 		@Override

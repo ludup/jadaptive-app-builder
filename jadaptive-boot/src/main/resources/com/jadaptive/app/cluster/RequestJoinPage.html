@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:jad="https://jadaptive.com/jadaptive">
+<head>
+<title jad:bundle="clusterNode" jad:i18n="requestJoin.title">Request Join</title>
+</head>
+<body>
+	<div class="wrapper">
+		<header jad:id="header"></header>
+		<main class="container my-auto">
+			<div class="row justify-content-center">
+				<div class="col-6">
+					<div class="card">
+						<div class="card-header text-center">
+							<span jad:bundle="clusterNode" jad:i18n="requestJoin.title">Request
+								Join</span>
+						</div>
+						<div class="card-body text-left">
+							<form id="requestJoinForm" method="POST" autocomplete="off">
+								<div class="form-group">
+									<label for="address" jad:bundle="clusterNode" jad:i18n="requestJoin.address.name">Address</label> 
+									<input type="url" class="form-control" name="address" id="address"
+										aria-describedby="addressHelp" placeholder="https://node1.yourcompany.com">
+									<small id="addressHelp" class="form-text text-muted"  jad:bundle="clusterNode" jad:i18n="requestJoin.address.desc"></small>
+								</div>
+								<div class="form-group mt-3 mb-3">
+									<div class="alert alert-warning" role="alert">
+										<i class="fa-solid fa-triangle-exclamation"></i><span jad:bundle="clusterNode" jad:i18n="requestJoin.address.warning"></span>
+									</div>
+								</div>
+								<button type="submit" class="btn btn-primary" jad:bundle="clusterNode" jad:i18n="requestJoin.join">Submit</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+	<footer jad:id="footer"></footer>
+</body>
+</html>

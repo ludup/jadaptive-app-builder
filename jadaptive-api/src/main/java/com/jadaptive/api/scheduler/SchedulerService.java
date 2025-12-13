@@ -16,6 +16,10 @@ import com.sshtools.gardensched.TaskSuccessHandler;
 
 public interface SchedulerService extends AbstractUUIDObjectService<SchedulerTask>, DynamicColumnService, TaskSuccessHandler, TaskErrorHandler, ObjectStore {
 
+	public static final String GENERIC_JAD_CLUSTER = "generic-jad-cluster";
+	public static final String JAD_JGROUPS = "jad-cluster.xml";
+	
+
 	void schedule(TenantTask job, String expression, String taskUuid);
 
 	void cancelTask(String uuid, boolean mayInterrupt);

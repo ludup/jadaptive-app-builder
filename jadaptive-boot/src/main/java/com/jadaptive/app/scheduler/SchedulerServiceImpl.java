@@ -69,6 +69,7 @@ import com.sshtools.gardensched.spring.GardenSchedTaskScheduler;
 @Service
 public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<SchedulerTask> implements SchedulerService, TenantAware, StartupAware, Lifecycle, ObjectStore {
 
+
 	private static Logger LOG = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 	
 	private DistributedScheduledExecutor executor;	
@@ -137,17 +138,13 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 					poolThreads
 				);
 		
-		var haProps = ApplicationProperties.getValue("ha.props", "jad-cluster.xml");
-		if(!haProps.equals("")) {
-			bldr.withJGroupsProps(haProps);
-			LOG.info("JGroups Properties: {}", haProps);
-		}
+		var haProps = ApplicationProperties.getValue("ha.props", SchedulerService.JAD_JGROUPS);
+		bldr.withJGroupsProps(haProps);
+		LOG.info("JGroups Properties: {}", haProps);
 		
-		var haClusterName = ApplicationProperties.getValue("ha.clusterName", "generic-jad-cluster");
-		if(!haClusterName.equals("")) {
+		var haClusterName = ApplicationProperties.getValue("ha.clusterName", clusterManager.getServerId());
 			bldr.withClusterName(haClusterName);
 			LOG.info("Cluster Name: {}", haClusterName);
-		}
 		
 		var haGroupName = ApplicationProperties.getValue("ha.groupName", "");
 		if(!haGroupName.equals("")) {

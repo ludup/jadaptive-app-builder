@@ -1,6 +1,7 @@
 package com.jadaptive.api.cluster;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.util.Set;
 import java.util.Optional;
 
@@ -25,4 +26,8 @@ public interface ClusterManager extends Closeable, AbstractUUIDObjectService<Clu
 	void initCluster();
 
 	void setupCluster(DistributedScheduledExecutor executor);
+
+	void join(String token, String refreshToken, String address) throws IOException, InterruptedException;
+
+	boolean isJoined();
 }

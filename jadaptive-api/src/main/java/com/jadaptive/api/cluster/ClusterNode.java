@@ -24,7 +24,8 @@ otherColumns = {
 		parent = ApplicationMenuService.REPORTING_MENU_UUID, 
 		icon = "fa-stars", 
 		weight = 2000, 
-		withPermission = "system.read")
+		withPermission = "system.read",
+		filter =  JoinedFilter.class)
 public final class ClusterNode extends UUIDEntity {
 
 	private static final long serialVersionUID = -7912946488135263747L;

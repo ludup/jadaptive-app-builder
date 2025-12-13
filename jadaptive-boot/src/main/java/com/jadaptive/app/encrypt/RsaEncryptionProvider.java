@@ -30,6 +30,7 @@ public class RsaEncryptionProvider extends AbstractEncryptionProvider {
 	private Path privateFolder;
 	private Path prvFile;
 	private Path pubFile;
+	private boolean enabled;
 
 	@Override
 	public int priority() {
@@ -38,8 +39,8 @@ public class RsaEncryptionProvider extends AbstractEncryptionProvider {
 
 	@Override
 	public void init() throws Exception {
-		
-		if(!ApplicationProperties.getValue("private.enabled", true)) {
+		enabled = ApplicationProperties.getValue("private.enabled", true);
+		if(!enabled) {
 			throw new IllegalArgumentException("Local private key disabled.");
 		}
 		
@@ -55,6 +56,14 @@ public class RsaEncryptionProvider extends AbstractEncryptionProvider {
 		} catch(FileNotFoundException e) {
 			generateKeys();
 		}
+	}
+
+	public Path getPrvFile() {
+		return prvFile;
+	}
+
+	public Path getPubFile() {
+		return pubFile;
 	}
 
 	private void generateKeys() throws Exception {
@@ -147,5 +156,9 @@ public class RsaEncryptionProvider extends AbstractEncryptionProvider {
 	@Override
 	public int getLength() {
 		return 128;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
 	}
 }
