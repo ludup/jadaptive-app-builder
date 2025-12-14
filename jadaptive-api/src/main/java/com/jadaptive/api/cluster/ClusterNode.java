@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.jadaptive.api.entity.ObjectType;
-import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.events.GenerateEventTemplates;
+import com.jadaptive.api.repository.AbstractUUIDEntity;
 import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -26,7 +27,8 @@ otherColumns = {
 		weight = 2000, 
 		withPermission = "system.read",
 		filter =  JoinedFilter.class)
-public final class ClusterNode extends UUIDEntity {
+@GenerateEventTemplates
+public class ClusterNode extends AbstractUUIDEntity {
 
 	private static final long serialVersionUID = -7912946488135263747L;
 

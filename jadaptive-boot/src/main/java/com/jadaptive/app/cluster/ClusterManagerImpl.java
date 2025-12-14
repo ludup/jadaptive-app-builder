@@ -146,6 +146,12 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		thisNode.setServices(new ArrayList<>(services));
 		
 		saveOrUpdate(thisNode);
+		
+		eventService.deleting(ClusterNode.class, evt -> {
+			if(evt.getObject().getStatus() == ClusterNodeStatus.ONLINE) {
+				throw new IllegalStateException("Cannot delete nodes that are ONLINE");
+			}
+		});
 	}
 
 	@Override
@@ -190,13 +196,6 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		saveOrUpdate(thisNode);
 	}
 	
-	@Override
-	protected void beforeDelete(ClusterNode object) {
-		if(object.getStatus() == ClusterNodeStatus.ONLINE) {
-			throw new IllegalStateException("Cannot delete nodes that are ONLINE");
-		}
-	}
-
 	@Override
 	public String getHostname() {
 		return hostname;

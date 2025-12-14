@@ -668,7 +668,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		} catch(Throwable e) {
 			onDeletingError(obj, e);
 			checkException(e);
-			throw new RepositoryException(String.format("%s: ", obj.getClass().getSimpleName(), e.getMessage()), e);
+			throw new RepositoryException(String.format("%s: %s", obj.getClass().getSimpleName(), e.getMessage()), e);
 		}
 	}
 	
