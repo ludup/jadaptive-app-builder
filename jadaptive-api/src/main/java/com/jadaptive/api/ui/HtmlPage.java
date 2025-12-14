@@ -104,6 +104,7 @@ public abstract class HtmlPage implements Page {
 		ResponseHelper.sendContent(document.toString(), "text/html;charset=UTF-8;", request, response);
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public Document generateHTMLDocument(String uri) throws IOException {
 		
@@ -193,6 +194,7 @@ public abstract class HtmlPage implements Page {
 		PageHelper.appendHeadScript(document, "/app/content/jadaptive-session.js");
 	};
 	
+	@SuppressWarnings("unused")
 	private void processPageExtensions(String uri, Document document) throws IOException {
 		
 
@@ -266,6 +268,7 @@ public abstract class HtmlPage implements Page {
 				} catch(NoSuchMethodException e) {
 					m = ReflectionUtils.getMethod(getClass(), "processForm", Document.class, Object.class);
 				}
+				@SuppressWarnings("unused")
 				Object formProxy = Proxy.newProxyInstance(
 						  getClass().getClassLoader(), 
 						  new Class<?>[] { fp.getFormClass() }, 
@@ -292,6 +295,9 @@ public abstract class HtmlPage implements Page {
 							name += method.getName().substring(3);
 						}
 						String value = Request.get().getParameter(name);
+						if(Objects.equals("on", value)) {
+							value = "true";
+						}
 						if(method.getReturnType().isAssignableFrom(boolean.class)) {
 							return StringUtils.isBlank(value) ? false : Boolean.parseBoolean(value);
 						} else {
@@ -422,7 +428,8 @@ public abstract class HtmlPage implements Page {
 	private void processDocumentExtensions(Document document) throws IOException {
 		Elements embeddedElement = document.getElementsByAttribute("jad:id");
 		for(Element embedded : embeddedElement) {
-			try(var timed = timed("HtmlPage.processDocumentExtensions#embedded(" + embedded.attr("jad:id") + ")")) {
+			try(@SuppressWarnings("unused")
+			var timed = timed("HtmlPage.processDocumentExtensions#embedded(" + embedded.attr("jad:id") + ")")) {
 				processEmbeddedExtensions(document, embedded);
 			}
 		}
