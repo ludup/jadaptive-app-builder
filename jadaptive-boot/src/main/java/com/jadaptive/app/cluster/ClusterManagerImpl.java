@@ -450,6 +450,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		
 		var bldr = HttpClient.newBuilder();
 		if(insecureSsl) {
+			LOG.warn("Ignoring SSL errors.");
 			bldr.sslContext(HttpHelpers.insecureContext());
 		}
 		
