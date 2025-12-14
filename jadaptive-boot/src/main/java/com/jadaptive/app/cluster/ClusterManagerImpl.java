@@ -51,6 +51,7 @@ import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.SystemEvent;
+import com.jadaptive.api.http.HttpHelpers;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.TenantService;
@@ -434,7 +435,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		return ApplicationProperties.getValue("ha.clusterName", "").length() > 0;
 	}
 	@Override
-	public void join(String token, String refreshToken, String url) throws IOException, InterruptedException {
+	public void join(String token, String refreshToken, String url, boolean insecureSsl) throws IOException, InterruptedException {
 		
 		LOG.info("Obtaining cluster configuration.");
 	
@@ -447,8 +448,12 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				  .GET()
 				  .build();
 		
-		var response = HttpClient
-				  .newBuilder()
+		var bldr = HttpClient.newBuilder();
+		if(insecureSsl) {
+			bldr.sslContext(HttpHelpers.insecureContext());
+		}
+		
+		var response = bldr
 				  .build()
 				  .send(request, BodyHandlers.ofString());
 		

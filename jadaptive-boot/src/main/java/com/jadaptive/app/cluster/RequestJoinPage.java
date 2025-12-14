@@ -46,6 +46,8 @@ public class RequestJoinPage extends AuthenticatedPage
 
 	public interface JoinForm {
 		String getAddress();
+		
+		boolean isInsecureSsl();
 	}
 	
 	@Autowired
@@ -67,16 +69,25 @@ public class RequestJoinPage extends AuthenticatedPage
 		return JoinForm.class;
 	}
 
+	@SuppressWarnings("unused")
 	public boolean processForm(Document document, JoinForm form) throws Exception {
 		
-		// TODO need page?
-		//OAuth2AuthorizationService.resolveUri(Request.get(), "/app/ui/" + JoinWithClusterPage.URI)
-		
 		var redirUri = "https://" + Request.getThisHost(Request.get()) + OAuth2CompleteController.PATH_PREFIX;
-		var baseUri = form.getAddress();
+
+		String baseUri;
+		if(!form.getAddress().startsWith("https://") && !form.getAddress().startsWith("http://")) {
+			baseUri = "https://" + form.getAddress();
+		}
+		else {
+			baseUri = form.getAddress();
+			
+		}
+		
+		var insecureSsl = form.isInsecureSsl();
 		if(baseUri == null) {
 			throw new IllegalStateException("No address.");
 		}
+		
 		var outhReq = new OAuth2Request.Builder().
 				withPKE().
 				withState().
@@ -86,7 +97,7 @@ public class RequestJoinPage extends AuthenticatedPage
 				build();
 		
 		oAuth2AuthorizationService.expectAuthorize(new OAuth2Authorization(PageCache.getPageURL(pageCache.getHomePage()), outhReq, (token, req, resp, authorization) -> {
-			clusterManager.join(token.token(), token.refreshToken(), baseUri);
+			clusterManager.join(token.token(), token.refreshToken(), baseUri, insecureSsl);
 		}));
 		
 		throw new UriRedirect(outhReq.uri("joinCluster"));

@@ -19,9 +19,17 @@
 								<div class="form-group">
 									<label for="address" jad:bundle="clusterNode" jad:i18n="requestJoin.address.name">Address</label> 
 									<input type="url" class="form-control" name="address" id="address"
-										aria-describedby="addressHelp" placeholder="https://node1.yourcompany.com">
+										aria-describedby="addressHelp" placeholder="node1.yourcompany.com">
 									<small id="addressHelp" class="form-text text-muted"  jad:bundle="clusterNode" jad:i18n="requestJoin.address.desc"></small>
 								</div>
+                                <div class="form-check mt-4"> 
+                                    <input type="checkbox" class="form-check-input" name="insecureSsl" id="insecureSsl"
+                                        aria-describedby="insecureSslHelp">
+                                    <label for="insecureSsl" jad:bundle="clusterNode" jad:i18n="requestJoin.insecureSsl.name">Accept Insecure SSL certificates</label>
+                                </div>
+                                <div class="mt-1 mb-4">
+                                    <small id="insecureSslHelp" class="form-text text-muted"  jad:bundle="clusterNode" jad:i18n="requestJoin.insecureSsl.desc"></small>
+                                </div>
 								<div class="form-group mt-3 mb-3">
 									<div class="alert alert-warning" role="alert">
 										<i class="fa-solid fa-triangle-exclamation"></i><span jad:bundle="clusterNode" jad:i18n="requestJoin.address.warning"></span>

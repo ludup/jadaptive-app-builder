@@ -27,7 +27,7 @@ public interface ClusterManager extends Closeable, AbstractUUIDObjectService<Clu
 
 	void setupCluster(DistributedScheduledExecutor executor);
 
-	void join(String token, String refreshToken, String address) throws IOException, InterruptedException;
+	void join(String token, String refreshToken, String address, boolean insecureSsl) throws IOException, InterruptedException;
 
 	boolean isJoined();
 }
