@@ -98,7 +98,7 @@ public class RequestJoinPage extends AuthenticatedPage
 		
 		oAuth2AuthorizationService.expectAuthorize(new OAuth2Authorization(PageCache.getPageURL(pageCache.getHomePage()), outhReq, (token, req, resp, authorization) -> {
 			clusterManager.join(token.token(), token.refreshToken(), baseUri, insecureSsl);
-		}));
+		}, insecureSsl));
 		
 		throw new UriRedirect(outhReq.uri("joinCluster"));
 	}

@@ -73,6 +73,11 @@ public class AcceptJoin implements OAuth2Scope, PluginController {
 				return new OAuth2ScopeResponse<>("invalid_state", new IllegalStateException("Cannot join a node that is not joined to a cluster."));
 			}
 			
+			var mongoDbUrl = ApplicationProperties.getValue("mongodb.connection", "mongodb://localhost:27017");
+			if(mongoDbUrl.startsWith("mongodb://localhost")) {
+				return new OAuth2ScopeResponse<>("invalid_state", new IllegalStateException("Cannot join a node that is using a localhost mongodb URL."));
+			}
+			
 			String ksHost = ApplicationProperties.getValue("keyserver.host", "");
 			String privKey = null;
 			String pubKey = null;
@@ -88,7 +93,7 @@ public class AcceptJoin implements OAuth2Scope, PluginController {
 					ClusterNodeStatus.ONLINE,
 					clusterManager.getServices(),
 					clusterManager.streamAll().toList()),
-				ApplicationProperties.getValue("mongodb.connection", "mongodb://localhost:27017"),
+				mongoDbUrl,
 				ksHost,
 				ApplicationProperties.getValue("keyserver.port", 443),
 				ApplicationProperties.getValue("keyserver.path", "/ks/api/secrets"),

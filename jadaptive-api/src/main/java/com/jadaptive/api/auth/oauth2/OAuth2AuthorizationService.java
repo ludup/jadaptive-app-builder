@@ -27,17 +27,24 @@ public interface OAuth2AuthorizationService {
 		private final String clientId;
 		private final OAuth2Authorized onAuthorized;
 
+		private boolean insecureSsl;
+
 		public OAuth2Authorization(String browserUri, 
-				OAuth2Request req, OAuth2Authorized onAuthorized) {
+				OAuth2Request req, OAuth2Authorized onAuthorized, boolean insecureSsl) {
 			this.clientId = req.clientId();
 			this.browserUri = browserUri;
 			this.codeVerifier = req.codeVerifier();
 			this.redirectUri = req.redirectUri();
 			this.state = req.state();
 			this.onAuthorized = onAuthorized;
+			this.insecureSsl = insecureSsl;
 
 			tokenUri = req.baseUri() + "/oauth2/token"; 
 			
+		}
+
+		public boolean isInsecureSsl() {
+			return insecureSsl;
 		}
 
 		public String getRedirectUri() {

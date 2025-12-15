@@ -502,7 +502,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		}
 		
 		/* Install4j config (or updates might change database) */
-		var install4jPropertiesFile = confd.resolve("database.properties");
+		var install4jPropertiesFile = Paths.get(".install4j").resolve("response.varfile");
 		var install4jProperties = new Properties();
 		if(Files.exists(install4jPropertiesFile)) {
 			try(var rdr = Files.newBufferedReader(install4jPropertiesFile)) {
