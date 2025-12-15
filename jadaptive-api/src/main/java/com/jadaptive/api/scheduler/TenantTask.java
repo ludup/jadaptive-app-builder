@@ -2,9 +2,9 @@ package com.jadaptive.api.scheduler;
 
 import org.pf4j.ExtensionPoint;
 
-import com.sshtools.gardensched.SerializableRunnable;
+import com.sshtools.gardensched.SerializableJob;
 
-public interface TenantTask extends SerializableRunnable, ExtensionPoint {
+public interface TenantTask extends SerializableJob, ExtensionPoint {
 
 	default boolean isLogging() {
 		var annot = getClass().getAnnotation(TenantTaskConfig.class);

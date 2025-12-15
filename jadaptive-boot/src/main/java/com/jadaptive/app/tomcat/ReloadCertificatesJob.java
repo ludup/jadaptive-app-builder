@@ -1,7 +1,5 @@
 package com.jadaptive.app.tomcat;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +27,11 @@ public class ReloadCertificatesJob implements ScheduledTask {
 	private Keyring keyring;
 	
 	@Override
-	public void run() {
-		try {
-			if(log.isInfoEnabled()) {
-				log.info("Reloading custom certificates");
-			}
-			keyring.reload();
-		} catch (IOException e) {
-			log.error("Failed to reload certificates", e);
+	public void execute() throws Exception {
+		if(log.isInfoEnabled()) {
+			log.info("Reloading custom certificates");
 		}
+		keyring.reload();
 	}
 
 }

@@ -1,6 +1,10 @@
 package com.jadaptive.api.ui.pages;
 
 public class ProcessingJob {
+	
+	public interface UncheckedRunnable {
+		void run() throws Exception;
+	}
 
 	String bundle;
 	String title;
@@ -8,11 +12,11 @@ public class ProcessingJob {
 	String feedbackSuccess;
 	String feedbackError;
 	String returnURL;
-	Runnable task;
+	UncheckedRunnable task;
 	
 	
 	public ProcessingJob(String bundle, String title, String message, String feedbackSuccess, String feedbackError,
-			String returnURL, Runnable task) {
+			String returnURL, UncheckedRunnable task) {
 		super();
 		this.bundle = bundle;
 		this.title = title;
@@ -59,10 +63,10 @@ public class ProcessingJob {
 	public void setReturnURL(String returnURL) {
 		this.returnURL = returnURL;
 	}
-	public Runnable getTask() {
+	public UncheckedRunnable getTask() {
 		return task;
 	}
-	public void setTask(Runnable task) {
+	public void setTask(UncheckedRunnable task) {
 		this.task = task;
 	}
 	

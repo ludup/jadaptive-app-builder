@@ -62,6 +62,7 @@ import com.sshtools.gardensched.ObjectStore;
 import com.sshtools.gardensched.PayloadFilter;
 import com.sshtools.gardensched.PayloadSerializer;
 import com.sshtools.gardensched.TaskCompletionContext;
+import com.sshtools.gardensched.TaskInfo;
 import com.sshtools.gardensched.TaskSpec;
 import com.sshtools.gardensched.TaskStore;
 import com.sshtools.gardensched.spring.GardenSchedTaskScheduler;
@@ -315,6 +316,13 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	}
 
 	@Override
+	public SchedulerTaskStatus getStatus(ClusterID cid) {
+		var future = executor.future(cid);
+		var info = future == null ? null : future.info();
+		return calcStatus(future, info);
+	}
+
+	@Override
 	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
 
 		var tsk = getObjectByUUID(obj.getUuid());
@@ -322,21 +330,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 		var future = executor.future(cid);
 		var info = future == null ? null : future.info();
 		
-		SchedulerTaskStatus status;
-		if(info != null && info.lastError().isPresent()) {
-			status = SchedulerTaskStatus.ERROR;
-		}
-		else if(future == null) {
-			status = SchedulerTaskStatus.MISSING;
-		}
-		else {
-			if(future.info().active()) {
-				status = SchedulerTaskStatus.RUNNING;
-			}
-			else {
-				status = SchedulerTaskStatus.WAITING;
-			}
-		}
+		SchedulerTaskStatus status = calcStatus(future, info);
 		
 		if (column.equals("displayName")) {
 			Element nameEl;
@@ -396,7 +390,8 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
 								"displayName.failedAtTaken", 
 								info.lastError().get().getMessage(),
-								tkn));
+								endTime,
+								Jobs.formatDisplayDuration(tkn)));
 						}, () -> {
 							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
 								info.lastCompleted().isPresent() 
@@ -573,6 +568,23 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	@Override
 	public boolean isLeader() {
 		return executor.leader();
+	}
+
+	private SchedulerTaskStatus calcStatus(IdentifiableFuture<?> future, TaskInfo info) {
+		if(info != null && info.lastError().isPresent()) {
+			return SchedulerTaskStatus.ERROR;
+		}
+		else if(future == null) {
+			return SchedulerTaskStatus.MISSING;
+		}
+		else {
+			if(future.info().active()) {
+				return SchedulerTaskStatus.RUNNING;
+			}
+			else {
+				return SchedulerTaskStatus.WAITING;
+			}
+		}
 	}
 
 }

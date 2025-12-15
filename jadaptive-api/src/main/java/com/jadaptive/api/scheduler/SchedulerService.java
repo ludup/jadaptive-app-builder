@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.jadaptive.api.entity.AbstractUUIDObjectService;
+import com.jadaptive.api.scheduler.SchedulerTask.SchedulerTaskStatus;
 import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.user.User;
 import com.sshtools.gardensched.ClusterID;
@@ -45,5 +46,7 @@ public interface SchedulerService extends AbstractUUIDObjectService<SchedulerTas
 	<V extends Serializable> IdentifiableFuture<V> future(ClusterID clusterID);
 
 	boolean isLeader();
+
+	SchedulerTaskStatus getStatus(ClusterID cid);
 
 }
