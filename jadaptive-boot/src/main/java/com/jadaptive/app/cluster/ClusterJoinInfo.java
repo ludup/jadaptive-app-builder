@@ -10,6 +10,7 @@ public record ClusterJoinInfo(
 		String keyserverPath,
 		String keyserverSecret,
 		String keyserverReference,
+		boolean keyserverInsecureSsl,
 		String privateKey,
 		String publicKey,
 		String clusterName,

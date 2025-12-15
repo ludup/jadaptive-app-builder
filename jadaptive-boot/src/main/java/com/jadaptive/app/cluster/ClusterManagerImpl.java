@@ -490,8 +490,8 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			}
 		}
 		
-		databaseProperties.put("mongodb.connection", clusterJoin.mongoDbUrl());
-		databaseProperties.put("mongodb.embedded", "false");
+		databaseProperties.setProperty("mongodb.connection", clusterJoin.mongoDbUrl());
+		databaseProperties.setProperty("mongodb.embedded", "false");
 		databaseProperties.remove("mongodb.hostname");
 		databaseProperties.remove("mongodb.port");
 		
@@ -522,9 +522,9 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				clusterProperties.load(rdr);
 			}
 		}
-		clusterProperties.put("ha.clusterName", clusterJoin.clusterName()); 
-		clusterProperties.put("ha.props", clusterJoin.props());
-		clusterProperties.put("ha.id", getServerId());
+		clusterProperties.setProperty("ha.clusterName", clusterJoin.clusterName()); 
+		clusterProperties.setProperty("ha.props", clusterJoin.props());
+		clusterProperties.setProperty("ha.id", getServerId());
 
 		/* Local key config */
 		if(StringUtils.isNotBlank(clusterJoin.publicKey()) && StringUtils.isNotBlank(clusterJoin.privateKey())) {
@@ -561,15 +561,17 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			clusterProperties.remove("keyserver.path");
 			clusterProperties.remove("keyserver.secret");
 			clusterProperties.remove("keyserver.reference");
+			clusterProperties.remove("keyserver.insecureSsl");
 		}
 		else {
 			LOG.info("Updating key server configuration .. ");
 			
-			clusterProperties.put("keyserver.host", clusterJoin.keyserverHost());
-			clusterProperties.put("keyserver.secret", clusterJoin.keyserverSecret());
-			clusterProperties.put("keyserver.reference", clusterJoin.keyserverReference());
+			clusterProperties.setProperty("keyserver.host", clusterJoin.keyserverHost());
+			clusterProperties.setProperty("keyserver.secret", clusterJoin.keyserverSecret());
+			clusterProperties.setProperty("keyserver.reference", clusterJoin.keyserverReference());
+			clusterProperties.setProperty("keyserver.insecureSsl", String.valueOf(clusterJoin.keyserverInsecureSsl()));
 			if(clusterJoin.keyserverPort() > 0 && clusterJoin.keyserverPort() != 443) {
-				clusterProperties.put("keyserver.port", clusterJoin.keyserverPort());	
+				clusterProperties.setProperty("keyserver.port", String.valueOf(clusterJoin.keyserverPort()));	
 			}
 			else {
 				clusterProperties.remove("keyserver.port");
@@ -578,7 +580,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				clusterProperties.remove("keyserver.path");	
 			}
 			else {
-				clusterProperties.put("keyserver.path", clusterJoin.keyserverPath());
+				clusterProperties.setProperty("keyserver.path", clusterJoin.keyserverPath());
 			}
 			
 		}

@@ -8,6 +8,8 @@ The automatic process only requires that you change a single on the *first* node
 
 ### First Node
 
+First ensure you are using a remote Mongo database that will be accessible by both the first and subsequently configured nodes.
+
 Create a file called `cluster.properties` in  the `conf.d` directory and place a single line it it. If the file already exists, your installation may already be at least partially configured. Refer to manual configuration guide below if that is the case.
 
 ```
@@ -29,6 +31,17 @@ After a few seconds, you will return back to the originating node and a success 
 *The node must be manually started again to complete joining the cluster*
 
 You can then repeat this whole section for as many nodes as are required.
+
+### Detach Node From Cluster
+
+Assuming the node was configured automatically as above, to detach from the cluster you would ..
+
+ * Shut down the products service, e.g. `systemctl stop nodal-cloud`.
+ * Delete `conf.d/cluster.properties`. 
+ * If the cluster used synchronized local encryption keys (and assuming you kept the backup files), remove `conf/private/secrets` and `conf/private/secrets.pub` and rename `conf/private/secrets.bak` to `conf/private/secrets` and `conf/private/secrets.pub.bak` to `conf/private/secrets.pub`. 
+ * Edit `conf.d/database.properties` and set `mongodb.connection` to `mongobdb://localhost:27017` (or 37017 if this a Nodal Cloud VM).
+ * Re-enable and start the local `mongod` service if you previously disabled it.
+ * Start the products service.
 
 ## Manual Configuration
 

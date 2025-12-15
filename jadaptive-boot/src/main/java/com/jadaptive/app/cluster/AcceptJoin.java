@@ -99,6 +99,7 @@ public class AcceptJoin implements OAuth2Scope, PluginController {
 				ApplicationProperties.getValue("keyserver.path", "/ks/api/secrets"),
 				ApplicationProperties.getValue("keyserver.secret", ""),
 				ApplicationProperties.getValue("keyserver.reference", ""),
+				ApplicationProperties.getValue("keyserver.insecureSsl", false),
 				privKey,
 				pubKey,
 				ApplicationProperties.getValue("ha.clusterName", SchedulerService.GENERIC_JAD_CLUSTER),

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.encrypt.EncryptionProvider;
+import com.jadaptive.api.http.HttpHelpers;
 import com.jadaptive.utils.Instrumentation;
 
 @Component
@@ -21,6 +22,7 @@ public class LBKeyServerEncryptionProvider implements EncryptionProvider {
 	private char[] secret;
 	private String uri;
 	private String reference;
+	private boolean insecureSsl;
 
 	@Override
 	public int priority() {
@@ -46,6 +48,7 @@ public class LBKeyServerEncryptionProvider implements EncryptionProvider {
 		if(secret.length == 0) {
 			throw new IllegalStateException("No keyserver secret configured (keyserver.secret).");
 		}
+		insecureSsl = ApplicationProperties.getValue("keyserver.insecureSsl", false);
 	}
 
 	@Override
@@ -69,8 +72,12 @@ public class LBKeyServerEncryptionProvider implements EncryptionProvider {
 				  .POST(HttpRequest.BodyPublishers.ofString(form))
 				  .build();
 		
-		try(var httpClient = HttpClient
-				  .newBuilder()
+		var bldr = HttpClient.newBuilder();
+		if(insecureSsl) {
+			bldr.sslContext(HttpHelpers.insecureContext());
+		}
+		
+		try(var httpClient = bldr
 				  .build()) {
 			
 			var response = httpClient.send(request, BodyHandlers.ofString());
