@@ -170,7 +170,7 @@ public class SchedulerTaskStorage implements TaskStore {
 			return new TaskEntry(
 				ClusterID.parse(tsk.getId()), 
 				ntsk, 
-				new IpAddress(tsk.getSubmitter()), 
+				new IpAddress(tsk.getSubmitter().replace('-', ':')), 
 				spec
 			);
 		} catch (Exception e) {
