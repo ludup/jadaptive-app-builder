@@ -38,23 +38,26 @@ import com.sshtools.common.files.AbstractFileFactory;
 import com.sshtools.common.files.vfs.VFSFileFactory;
 import com.sshtools.common.files.vfs.VirtualFileFactory;
 import com.sshtools.common.files.vfs.VirtualMountTemplate;
-import com.sshtools.common.forwarding.ForwardingPolicy;
+import com.sshtools.common.forwarding.ForwardingPolicy.ForwardingPolicyBuilder;
+import com.sshtools.common.forwarding.ForwardingRequest.ForwardingType;
 import com.sshtools.common.permissions.IPPolicy;
+import com.sshtools.common.permissions.IPPolicy.IPPolicyBuilder;
 import com.sshtools.common.permissions.PermissionDeniedException;
-import com.sshtools.common.policy.ClassLoaderPolicy;
+import com.sshtools.common.policy.ClassLoaderPolicy.ClassLoaderPolicyBuilder;
 import com.sshtools.common.policy.FileFactory;
 import com.sshtools.common.policy.FileSystemPolicy;
+import com.sshtools.common.policy.FileSystemPolicy.FileSystemPolicyBuilder;
 import com.sshtools.common.scp.ScpCommand;
 import com.sshtools.common.ssh.SshConnection;
 import com.sshtools.common.ssh.SshException;
 import com.sshtools.common.ssh.UnsupportedChannelException;
-import com.sshtools.common.util.UnsignedInteger32;
 import com.sshtools.server.LoadBalancerPolicy;
+import com.sshtools.server.LoadBalancerPolicy.LoadBalancerPolicyBuilder;
 import com.sshtools.server.SshServer;
 import com.sshtools.server.SshServerContext;
 import com.sshtools.server.vsession.ShellCommandFactory;
 import com.sshtools.server.vsession.VirtualChannelFactory;
-import com.sshtools.server.vsession.VirtualSessionPolicy;
+import com.sshtools.server.vsession.VirtualSessionPolicy.VirtualSessionPolicyBuilder;
 import com.sshtools.server.vsession.commands.fs.FileSystemCommandFactory;
 import com.sshtools.synergy.nio.ProtocolContextFactory;
 import com.sshtools.synergy.nio.SshEngineContext;
@@ -100,13 +103,8 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 	private SessionService sessionService; 
 	
 	
-	Map<String,SSHInterface> interfaces = new HashMap<>();
-	
-	IPPolicy ipPolicy = new IPPolicy();
-	LoadBalancerPolicy lbPolicy= new LoadBalancerPolicy();
-	
-	String softwareVersionComments = "JADAPTIVE";
-
+	private Map<String,SSHInterface> interfaces = new HashMap<>();
+	private String softwareVersionComments = "JADAPTIVE";
 	private boolean initialised;
 	
 	public SSHDServiceImpl() {
@@ -122,7 +120,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		};
 	}
 	
-	private void processConfigurationChanges(SSHDConfiguration sshdConfig) {
+	private void processConfigurationChanges(SSHDConfiguration sshdConfig) throws UnknownHostException {
 		
 		if(LOG.isInfoEnabled()) {
 			LOG.info("Applying SSHD configuration to local policies security={}", sshdConfig.getSecurityLevel().name());
@@ -130,32 +128,37 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		
 		setSecurityLevel(sshdConfig.getSecurityLevel());
 		
-		lbPolicy.setProxyProtocolEnabled(sshdConfig.getProxyProtocolEnabled());
+		@SuppressWarnings("unused")
+		var lbPolicy = createLbPolicy(sshdConfig);
+		// TODO set it
 		
-		if(lbPolicy.isProxyProtocolEnabled()) {
-			for(String address: sshdConfig.getLoadBalancerIPs()) {
-				lbPolicy.allowIPAddress(address);
-			}
-		}
 		
-		if(sshdConfig.getEnableBanning()) {
-			ipPolicy.enableTemporaryBanning();
-		} else {
-			ipPolicy.disableTemporaryBanning();
-		}
-		
-		ipPolicy.setTemporaryBanTime(sshdConfig.getTemporaryBanPeriod());
-		try {
-			ipPolicy.getBlacklist().reset(sshdConfig.getBlockedIPs());
-		} catch (UnknownHostException e) {
-			LOG.error("Invalid IP in blocked IP list", e);
-		}
-		try {
-			ipPolicy.getWhitelist().reset(sshdConfig.getAllowedIPs());
-		} catch (UnknownHostException e) {
-			LOG.error("Invalid IP in allowed IP list", e);
-		}
+		@SuppressWarnings("unused")
+		var ipPolicy= createIpPolicy(sshdConfig);
+
+		// TODO set it
 			
+	}
+
+	private IPPolicy createIpPolicy(SSHDConfiguration sshdConfig) {
+		try {
+			return IPPolicyBuilder.create().
+					withTemporaryBanTime(sshdConfig.getTemporaryBanPeriod()).
+					withTemporaryBanning(sshdConfig.getEnableBanning()).
+					withAllowedIPAddresses(sshdConfig.getAllowedIPs()).
+					withBlockedIPAddresses(sshdConfig.getBlockedIPs()).
+					build();
+		}
+		catch(UnknownHostException uhe) {
+			throw new IllegalArgumentException("Invalid IP address in allow or block list.", uhe);
+		}
+	}
+
+	private LoadBalancerPolicy createLbPolicy(SSHDConfiguration sshdConfig) {
+		return LoadBalancerPolicyBuilder.create().
+			withProxyProtocol(sshdConfig.getProxyProtocolEnabled()).
+			withSupportedIPAddresses(sshdConfig.getLoadBalancerIPs()).
+			build();
 	}
 
 	@Override
@@ -164,7 +167,11 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		try {
 			
 			eventService.updated(SSHDConfiguration.class, (evt) -> {
-				processConfigurationChanges(evt.getObject());
+				try {
+					processConfigurationChanges(evt.getObject());
+				} catch (UnknownHostException e) {
+					LOG.error("Failed to apply updated SSHD configuration.", e);
+				}
 			});
 			
 			processConfigurationChanges(configService.getObject(SSHDConfiguration.class));
@@ -242,6 +249,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 
 	}
 	
+	@SuppressWarnings("unused")
 	@Override
 	protected void configureForwarding(SshServerContext sshContext, SocketChannel sc) throws IOException, SshException {
 		
@@ -249,28 +257,24 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		SSHDConfiguration sshdConfig = configService.getObject(SSHDConfiguration.class);
 		
 		if(!sshdConfig.getEnableLocalForwarding()) {
-			ForwardingPolicy policy = new ForwardingPolicy();
-			policy.denyForwarding();
-			sshContext.setPolicy(ForwardingPolicy.class, policy);
+			sshContext.setPolicy(ForwardingPolicyBuilder.create().build());
 		} else {
-			ForwardingPolicy policy = new ForwardingPolicy() {
-				public boolean checkInterfacePermitted(SshConnection con, String originHost, int originPort) {
-					/**
-					 * We do not allow remote forwarding
-					 */
-					return false;
-				}
-				
-				public boolean checkHostPermitted(SshConnection con, String host, int port) {
-					SSHDConfiguration sshdConfig = configService.getObject(SSHDConfiguration.class);
-					return sshdConfig.getAllowedForwarding().contains(host) 
-							|| sshdConfig.getAllowedForwarding().contains(host + ":" + port);
-				}
-			};
-			
-			policy.allowForwarding();
-	
-			sshContext.setPolicy(ForwardingPolicy.class, policy);
+			sshContext.setPolicy(ForwardingPolicyBuilder.create().
+					allowTCPForwarding().
+					withValidator((type,request,role) -> {
+						if(type == ForwardingType.REMOTE) {
+							/**
+							 * We do not allow remote forwarding
+							 */
+							return false;
+						}
+						else {
+							SSHDConfiguration newSshdConfig = configService.getObject(SSHDConfiguration.class);
+							return newSshdConfig.getAllowedForwarding().contains(request.destinationAddress()) 
+									|| newSshdConfig.getAllowedForwarding().contains(request.destinationAddress() + ":" + request.destinationPort());
+						}
+					}).
+					build());
 		}
 
 	}
@@ -329,14 +333,16 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 		SSHDConfiguration sshdConfig = configService.getObject(SSHDConfiguration.class);
 		
 		sshContext.setIdleConnectionTimeoutSeconds(sshdConfig.getIdleConnectionTimeoutSecs());
-				
-		sshContext.getPolicy(FileSystemPolicy.class).setSftpMaxPacketSize(sshdConfig.getSftpMaximumPacketSize());
-		sshContext.getPolicy(FileSystemPolicy.class).setSftpMaxWindowSize(new UnsignedInteger32(sshdConfig.getSftpMaximumWindowSpace()));
-		sshContext.getPolicy(FileSystemPolicy.class).setSftpMinWindowSize(new UnsignedInteger32(sshdConfig.getSftpMinimumWindowSpace()));
-		sshContext.getPolicy(FileSystemPolicy.class).setSFTPCharsetEncoding(sshdConfig.getSftpCharacterSetEncoding());
+		
+		sshContext.setPolicy(FileSystemPolicyBuilder.create().
+				withSftpMaxPacketSize(sshdConfig.getSftpMaximumPacketSize()).
+				withSftpMaxWindowSize(sshdConfig.getSftpMaximumWindowSpace()).
+				withSftpMinWindowSize(sshdConfig.getSftpMinimumWindowSpace()).
+				withCharsetEncoding(sshdConfig.getSftpCharacterSetEncoding()).
+				build());
 
-		sshContext.setPolicy(IPPolicy.class, ipPolicy);
-		sshContext.setPolicy(LoadBalancerPolicy.class, lbPolicy);
+		sshContext.setPolicy(createLbPolicy(sshdConfig));
+		sshContext.setPolicy(createIpPolicy(sshdConfig));
 		
 		if(sshdConfig.getEnableSCP()) {
 			sshContext.getChannelFactory().supportedCommands().add(new ScpCommand.ScpCommandFactory());
@@ -414,9 +420,13 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 //			out.append("There are application updates. To install type 'updates -i'\n");
 //		}
 		
-		sshContext.getPolicy(VirtualSessionPolicy.class).setWelcomeText(out.toString());
-		ClassLoader classLoader = getClass().getClassLoader();
-		sshContext.getPolicy(ClassLoaderPolicy.class).setClassLoader(classLoader);
+		sshContext.setPolicy(VirtualSessionPolicyBuilder.create().
+				withWelcomeText(out.toString()).
+				build());
+		
+		sshContext.setPolicy(ClassLoaderPolicyBuilder.create().
+				withClassLoader(getClass().getClassLoader()).
+				build());
 	}
 
 	@Override

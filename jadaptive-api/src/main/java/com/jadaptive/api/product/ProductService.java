@@ -15,7 +15,7 @@ public interface ProductService {
 		SSH_PROXY_ONPREM,
 		LICENSE_SERVER,
 		GABBLE_CLOUD,
-		
+		SUPPORT_CALLBACK,
 		NODAL_CLOUD
 	}
 	

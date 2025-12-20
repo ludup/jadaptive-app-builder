@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -113,24 +114,27 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			
 			initialiseTenant(systemTenant, newSchema);
 			
-			for(Tenant tenant : allObjects()) {
-				setupCache(tenant);
-				if(!tenant.isSystem()) {
-					setCurrentTenant(tenant);
-					try {
-						templateService.registerTenantIndexes(newSchema);
-						initialiseTenant(tenant, false);
-							
-					} catch(Throwable e) { 
-						if(tenant.isSystem()) {
-							throw e;
+			StreamSupport.stream(allObjects().spliterator(), false).
+				/* Run tenant init in as many threads as there are cores */
+				parallel().
+				forEach(tenant -> {
+					setupCache(tenant);
+					if(!tenant.isSystem()) {
+						setCurrentTenant(tenant);
+						try {
+							templateService.registerTenantIndexes(newSchema);
+							initialiseTenant(tenant, false);
+								
+						} catch(Throwable e) { 
+							if(tenant.isSystem()) {
+								throw e;
+							}
+							log.error("Failed to initialize tenant", e);
+						}finally {
+							clearCurrentTenant();
 						}
-						log.error("Failed to initialize tenant", e);
-					}finally {
-						clearCurrentTenant();
-					}
-				}
-			}	
+					}				
+				});
 
 			this.ready = true;
 			
