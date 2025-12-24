@@ -118,7 +118,6 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 				sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
 			}
 			
-			log.info("Setting up CRSF token in Login form...");
 			sessionUtils.setupFormCSRFFToken(Request.get(), LOGIN_IDENTIFIER, form);
 		}
 		
@@ -173,7 +172,6 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 				sessionUtils.addContentSecurityPolicy(Request.response(), "form-action", "self");
 			}
 			
-			log.info("Setting up CRSF token in Login form...");
 			sessionUtils.setupFormCSRFFToken(Request.get(), LOGIN_IDENTIFIER, document.selectFirst("form"));
     	}
 		
