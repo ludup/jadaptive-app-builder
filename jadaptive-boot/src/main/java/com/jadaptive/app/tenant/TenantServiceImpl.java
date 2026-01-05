@@ -100,7 +100,8 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@EventListener
 	public void onApplicationStartup(ApplicationReadyEvent evt) {
 		
-		try(var ctx = permissionService.systemContext()) {			
+		try(@SuppressWarnings("unused")
+		var ctx = permissionService.systemContext()) {			
 			boolean newSchema = repository.isEmpty() || Boolean.getBoolean("jadaptive.runFresh");
 			if(newSchema) {
 				systemTenant = createTenant(SYSTEM_UUID, "System", "localhost", true, null);
@@ -114,24 +115,23 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			
 			initialiseTenant(systemTenant, newSchema);
 			
-			StreamSupport.stream(allObjects().spliterator(), false).
+			StreamSupport.stream(repository.listTenants().spliterator(), false).
 				/* Run tenant init in as many threads as there are cores */
 				parallel().
 				forEach(tenant -> {
 					setupCache(tenant);
 					if(!tenant.isSystem()) {
-						setCurrentTenant(tenant);
-						try {
-							templateService.registerTenantIndexes(newSchema);
-							initialiseTenant(tenant, false);
-								
-						} catch(Throwable e) { 
-							if(tenant.isSystem()) {
-								throw e;
-							}
-							log.error("Failed to initialize tenant", e);
-						}finally {
-							clearCurrentTenant();
+						try(@SuppressWarnings("unused")
+						var ctx2 = permissionService.systemContext()) {
+							runAsTenant(tenant, () -> {
+								try {
+									templateService.registerTenantIndexes(newSchema);
+									initialiseTenant(tenant, false);
+										
+								} catch(Throwable e) { 
+									log.error("Failed to initialize tenant", e);
+								}	
+							});
 						}
 					}				
 				});
@@ -142,6 +142,11 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				stream().
 				sorted((o1,o2) -> o2.getStartupPosition().compareTo(o1.getStartupPosition())).
 				forEach(StartupAware::onApplicationStartup);
+			
+			applicationService.getBeans(StartupAware.class).
+				stream().
+				sorted((o1,o2) -> o2.getStartupPosition().compareTo(o1.getStartupPosition())).
+				forEach(StartupAware::onAfterApplicationStartup);
 			
 			eventService.saved(Tenant.class, tevt -> {
 				if(tevt.getObject().getUuid().equals(systemTenant.getUuid())) {
@@ -182,12 +187,13 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 
 	@Override
-	public Iterable<Tenant> allObjects()  {
-		try {
-			return repository.listTenants();
-		} catch (RepositoryException | ObjectException e) {
-			throw new IllegalStateException(e.getMessage(), e);
-		}
+	public Iterable<Tenant> allObjects() {
+		return allObjects(new SearchField[0]);
+	}
+
+	@Override
+	public Iterable<Tenant> allObjects(SearchField... search)  {
+		return (Iterable<Tenant>) () -> SearchField.filter(tenantsByUUID.values().stream(), search).iterator();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -240,6 +246,9 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	}
 
 	public Tenant getSystemTenant() throws RepositoryException, ObjectException {
+		if(systemTenant == null) {
+			throw new IllegalStateException("System tenant not yet available.");
+		}
 		return systemTenant;
 	}
 	
@@ -710,26 +719,23 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	
 	@Override
 	public Collection<? extends UUIDDocument> searchTable(int start, int length, SortOrder sort, String sortField, SearchField... fields) {
-		return filter(fields);
+		return collection(fields);
 	}
 	
 	@Override
 	public long countTable(SearchField... fields) {
-		return filter(fields).size();
+		return streamAll(fields).count();
 	}
 	
-	protected Collection<Tenant> filter(SearchField...fields) {
-		return new ArrayList<>(tenantsByUUID.values());
-	}
-
 	@Override
 	public void onSetupComplete(Runnable run) {
 		onSetupComplete.add(run);
 	}
 
 	@Override
+	@Deprecated(since = "0.6.0")
 	public Collection<Tenant> collection(SearchField... fields) {
-		return filter(fields);
+		return StreamSupport.stream(allObjects(fields).spliterator(), false).toList();
 	}
 
 	@Override

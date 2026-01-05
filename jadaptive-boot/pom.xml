@@ -30,7 +30,6 @@
         <dependency>
             <groupId>com.sshtools</groupId>
             <artifactId>garden-sched-spring</artifactId>
-            <version>0.5.0</version>
         </dependency>
         
 		<dependency>

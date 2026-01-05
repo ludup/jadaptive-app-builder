@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.permissions.PermissionService.UncheckedCloseable;
@@ -30,6 +31,8 @@ public abstract class SSHDHelper {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	protected App applicationService;
 
 	public final UserSpecContext tryAs(SshConnection con) {
 		return tryAs(userSpec(con));
@@ -197,7 +200,18 @@ public abstract class SSHDHelper {
 		};
 	}
 
-	private Tenant getTenant(UserSpec spec) {
+	public final UserSpec userSpec(SshConnection con) {
+		return userSpec(con, con.getUsername());
+	}
+
+	public final UserSpec userSpec(SshConnection con, String userspec) {
+		return applicationService.getBean(getInterface(con).getInterfaceFactory()).userSpec(userspec);
+	}
+
+	public abstract SSHInterface getInterface(SshConnection con);
+
+
+	protected Tenant getTenant(UserSpec spec) {
 		try {
 			return tenantService.getTenantByDomain(spec.tenant());
 		}
@@ -205,15 +219,4 @@ public abstract class SSHDHelper {
 			return tenantService.getTenantByUUID(spec.tenant());
 		}
 	}
-
-	public final UserSpec userSpec(SshConnection con) {
-		return userSpec(con.getUsername());
-	}
-
-	public UserSpec userSpec(String username) {
-		return new UserSpec.Builder().
-				withSpec(username).
-				build();
-	}
-
 }

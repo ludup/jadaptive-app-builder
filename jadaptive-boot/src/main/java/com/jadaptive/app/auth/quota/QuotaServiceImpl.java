@@ -178,7 +178,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			}
 		}
 		
-		for(TenantQuota q : systemTenantQuotas.searchObjects(TenantQuota.class,
+		for(TenantQuota q : systemTenantQuotas.list(TenantQuota.class,
 				SearchField.eq("resourceKey", TenantQuota.RESOURCE_KEY),
 				SearchField.in("tenant.uuid", getCurrentTenant().getUuid()), 
 				SearchField.eq("key.uuid", key.getUuid()))) {
@@ -196,7 +196,7 @@ public class QuotaServiceImpl extends AuthenticatedService implements QuotaServi
 			}
 		}
 		
-		for(IPQuota q : ipQuotas.searchObjects(IPQuota.class,
+		for(IPQuota q : ipQuotas.list(IPQuota.class,
 				SearchField.eq("resourceKey", IPQuota.RESOURCE_KEY),
 				SearchField.eq("key.uuid", key.getUuid()))) {
 			if(!q.getKey().equals(key)) {

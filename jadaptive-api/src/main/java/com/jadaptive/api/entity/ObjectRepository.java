@@ -32,8 +32,5 @@ public interface ObjectRepository {
 	long count(ObjectTemplate def, SearchField... fields);
 
 	void delete(AbstractObject entity) throws RepositoryException, ObjectException;
-
-	Collection<AbstractObject> collection(ObjectTemplate def, SearchField... fields);
-
 	
 }

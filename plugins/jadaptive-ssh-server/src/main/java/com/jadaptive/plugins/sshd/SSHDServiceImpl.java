@@ -348,7 +348,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			sshContext.getChannelFactory().supportedCommands().add(new ScpCommand.ScpCommandFactory());
 		}
 		
-		if(sshdConfig.getEnablePassword()) {
+		if(sshdConfig.getEnablePassword() && passwordProvider != null) {
 			sshContext.getAuthenticationMechanismFactory().addProvider(passwordProvider);
 		}
 		

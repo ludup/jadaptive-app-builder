@@ -2,6 +2,7 @@ package com.jadaptive.app.tenant;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -29,6 +30,23 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 						SearchField.eq("owner.uuid", user.getUuid())));
 	}
 	
+	@Override
+	public Iterable<T> allPersonalObjects(Class<T> resourceClass, User user, SearchField... search) {
+		if(search.length > 0) {
+			return objectDatabase.list(resourceClass,
+				Stream.concat(Stream.of(search), Stream.of(SearchField.or(
+						SearchField.eq("ownerUUID", user.getUuid()),
+						SearchField.eq("owner.uuid", user.getUuid())))).toList().toArray(new SearchField[0])
+				);
+		}
+		else {
+			return objectDatabase.list(resourceClass, 
+					SearchField.or(
+							SearchField.eq("ownerUUID", user.getUuid()),
+							SearchField.eq("owner.uuid", user.getUuid())));
+		}
+	}
+
 	@Override
 	public Collection<T> getPersonalObjects(Class<T> resourceClass, User user, SearchField... search) {
 		if(search.length > 0) {

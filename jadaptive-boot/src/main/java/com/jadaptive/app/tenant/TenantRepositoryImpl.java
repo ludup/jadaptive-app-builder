@@ -31,8 +31,8 @@ public class TenantRepositoryImpl extends AbstractSystemObjectDatabaseImpl<Tenan
 	}
 		
 	@Override
-	public Iterable<Tenant> listTenants() throws RepositoryException, ObjectException {
-		return listObjects(TENANT_DATABASE, Tenant.class);
+	public Iterable<Tenant> listTenants(SearchField... search) throws RepositoryException, ObjectException {
+		return listObjects(TENANT_DATABASE, Tenant.class, search);
 	}
 	
 	@Override

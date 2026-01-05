@@ -3,6 +3,7 @@ package com.jadaptive.api.user;
 import java.util.Collection;
 
 import com.jadaptive.api.avatar.AvatarProvider;
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.UUIDObjectService;
 import com.jadaptive.api.template.DynamicColumnService;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -29,7 +30,7 @@ public interface UserService extends UUIDObjectService<User>, AvatarProvider, Dy
 
 	void changePassword(User user, char[] newPassword, boolean passwordChangeRequired);
 
-	Iterable<User> allObjects();
+	Iterable<User> allObjects(SearchField... search);
 
 	Collection<ObjectTemplate> getCreateUserTemplates();
 

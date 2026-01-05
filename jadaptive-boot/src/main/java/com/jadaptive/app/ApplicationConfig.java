@@ -112,7 +112,7 @@ public class ApplicationConfig {
 		}
 		
 		pluginManager = new SpringPluginManager(pluginRoot) {
-			
+
 			@Override
 			protected ExtensionFinder createExtensionFinder() {
 				return new ScanningExtensionFinder(this);

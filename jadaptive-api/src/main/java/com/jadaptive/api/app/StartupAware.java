@@ -1,6 +1,8 @@
 package com.jadaptive.api.app;
 
 public interface StartupAware {
+	
+	default void onAfterApplicationStartup() {}
 
 	void onApplicationStartup();
 	

@@ -287,23 +287,13 @@ public class AuthenticationPolicyServiceImpl extends AbstractUUIDObjectServceImp
 				return getSystemDefaultPolicy(clz);
 			}
 			
-			List<AuthenticationPolicy> tmp = new ArrayList<>(policyDatabase.searchObjects(
+			return policyDatabase.streamObjects(
 					AuthenticationPolicy.class, 
 					SearchField.eq("resourceKey", 
-							clz.getConstructor().newInstance().getResourceKey())));
+							clz.getConstructor().newInstance().getResourceKey())).sorted((o1,o2) ->
+								o1.getWeight().compareTo(o2.getWeight())
+							).findFirst().orElseThrow(() -> new IllegalStateException("No " + clz.getClass().getSimpleName() + " policies are configured!"));
 			
-			if(tmp.isEmpty()) {
-				throw new IllegalStateException("No " + clz.getClass().getSimpleName() + " policies are configured!");
-			}
-
-			Collections.sort(tmp, new Comparator<AuthenticationPolicy>() {
-				@Override
-				public int compare(AuthenticationPolicy o1, AuthenticationPolicy o2) {
-					return o1.getWeight().compareTo(o2.getWeight());
-				}
-			});
-			
-			return tmp.get(0);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			throw new IllegalStateException(e.getMessage(), e);

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -102,6 +103,21 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		
 		menus.addAll(annotatedMenus);
 		menus.addAll(applicationService.getBeans(ApplicationMenu.class));
+		
+		/* Remove duplicate IDs */
+		var ids = new HashSet<String>();
+		var it = menus.stream().sorted((o1, o2) -> o1.weight().compareTo(o2.weight())).iterator();
+		while(it.hasNext()) {
+			var nxt = it.next();
+			var id = nxt.getI18n();
+			if(ids.contains(id)) {
+				menus.remove(nxt);
+				continue;
+			}
+			else {
+				ids.add(id);
+			}
+		}
 		
 		for(ApplicationMenu menu :  menus) {
 			boolean extended = false;

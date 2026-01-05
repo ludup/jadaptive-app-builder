@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
@@ -344,10 +346,10 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 				String resourceKey = field.getValidationValue(ValidationType.RESOURCE_KEY);
 				ObjectTemplate parentTemplate = templateService.getParentTemplate(reference);
 				if(resourceKey.equals(foreignType)) {
-					Collection<AbstractObject> references = collection(reference.getResourceKey(), generateFieldName(parentField, field), foreignKey);
+					Collection<String> references = collection(reference.getResourceKey(), generateFieldName(parentField, field), foreignKey).map(AbstractObject::getUuid).toList();
 					if(references.size() > 0) {
 						if(field.getOptions().contains(FieldOptions.CASCADE_ON_DELETED_REFERENCE)) {
-							deleteAll(parentTemplate.getResourceKey(), convertToUUIDS(references));
+							deleteAll(parentTemplate.getResourceKey(), references.toArray(new String[0]));
 						} else {
 							if(parentTemplate.getType() == ObjectType.SINGLETON) {
 								throw new ObjectException("default", "foriegnReference.singleton.error",	references.size(), 
@@ -373,14 +375,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			}
 			}
 		}
-	}
-
-	private String[] convertToUUIDS(Collection<AbstractObject> objects) {
-		var tmp = new ArrayList<String>();
-		for(var o : objects) {
-			tmp.add(o.getUuid());
-		}
-		return tmp.toArray(new String[0]);
 	}
 
 	private void assertReferencesExist(ObjectTemplate template, AbstractObject entity) {
@@ -586,7 +580,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			
 			if(Objects.nonNull(annotation)) {
 				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-				return convertObjects(bean.searchTable(start, length, order, sortField, fields));
+				return StreamSupport.stream(convertObjects(bean.searchTable(start, length, order, sortField, fields)).spliterator(), false).toList();
 			}
 		}
 		
@@ -594,7 +588,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 	}
 	
-	private Collection<AbstractObject> collectionViaObjectBean(ObjectTemplate template, SearchField... fields) {
+	private Stream<AbstractObject> collectionViaObjectBean(ObjectTemplate template, SearchField... fields) {
 		
 		assertRead(template);
 		
@@ -607,11 +601,11 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			
 			if(Objects.nonNull(annotation)) {
 				UUIDObjectService<?> bean = appService.getBean(annotation.bean());
-				return convertObjects(bean.collection(fields));
+				return StreamSupport.stream(convertObjects(bean.allObjects(fields)).spliterator(), false);
 			}
 		}
 		
-		return objectRepository.collection(template, fields);
+		return StreamSupport.stream(objectRepository.list(template, fields).spliterator(), false);
 		
 	}
 	
@@ -689,8 +683,7 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		
 	}
 	
-	@Override
-	public Collection<AbstractObject> convertObjects(Iterable<? extends UUIDDocument> objects) {
+	private Iterable<AbstractObject> convertObjects(Iterable<? extends UUIDDocument> objects) {
 		
 		List<AbstractObject> results = new ArrayList<>();
 		for(UUIDDocument obj : objects) {
@@ -918,32 +911,6 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
-	public Collection<AbstractObject> collection(String resourceKey, String searchField, String searchValue) {
-		ObjectTemplate template = templateService.get(resourceKey);
-
-		switch(template.getScope()) {
-		case PERSONAL:
-			return objectRepository.collection(template,
-					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
-		case ASSIGNED:
-			if(isAdministrator(getCurrentUser())) {
-				return objectRepository.collection(template, 
-						SearchUtils.generateSearch(searchField, searchValue, template));
-			}
-			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
-			return objectRepository.collection(template,
-					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.or(
-							SearchField.all("users.uuid", getCurrentUser().getUuid()),
-							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
-		case GLOBAL:
-		default:
-			return collectionViaObjectBean(template, 
-					SearchUtils.generateSearch(searchField, searchValue, template));
-		}
-		
-	}
-	
-	@Override
 	public long countObjects(String resourceKey, SearchField... fields) {
 		ObjectTemplate template = templateService.get(resourceKey);
 		
@@ -1029,6 +996,31 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		}
 		return results;
 	}
+
 	
+	private Stream<AbstractObject> collection(String resourceKey, String searchField, String searchValue) {
+		ObjectTemplate template = templateService.get(resourceKey);
+
+		switch(template.getScope()) {
+		case PERSONAL:
+			return StreamSupport.stream(objectRepository.list(template,
+					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid()))).spliterator(), false);				
+		case ASSIGNED:
+			if(isAdministrator(getCurrentUser())) {
+				return StreamSupport.stream(objectRepository.list(template, 
+						SearchUtils.generateSearch(searchField, searchValue, template)).spliterator(), false);
+			}
+			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
+			return StreamSupport.stream(objectRepository.list(template,
+					SearchUtils.generateSearch(searchField, searchValue, template, SearchField.or(
+							SearchField.all("users.uuid", getCurrentUser().getUuid()),
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))))).spliterator(), false);			
+		case GLOBAL:
+		default:
+			return collectionViaObjectBean(template, 
+					SearchUtils.generateSearch(searchField, searchValue, template));
+		}
+		
+	}
 	
 }

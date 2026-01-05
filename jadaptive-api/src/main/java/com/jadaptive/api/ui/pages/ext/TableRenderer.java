@@ -209,15 +209,17 @@ public class TableRenderer {
 						el.appendChild(Html.td());
 					}
 					
-					ObjectTemplate tmp = template;
-					while(tmp.hasParent()) {
-						try(var timed2 = timed("TableRender.dataRendering.parentProcessing")) {
-							ObjectTemplate t = templateService.get(tmp.getParentTemplate());
-							TableView v = templateService.getTemplateClass(tmp.getParentTemplate()).getAnnotation(TableView.class);
-							if(Objects.nonNull(v)) {
-								renderTableColumns(v, el, t, columns, dynamicColumns);
+					if(view.parentColumns()) {
+						ObjectTemplate tmp = template;
+						while(tmp.hasParent()) {
+							try(var timed2 = timed("TableRender.dataRendering.parentProcessing")) {
+								ObjectTemplate t = templateService.get(tmp.getParentTemplate());
+								TableView v = templateService.getTemplateClass(tmp.getParentTemplate()).getAnnotation(TableView.class);
+								if(Objects.nonNull(v) && v.asParentColumns()) {
+									renderTableColumns(v, el, t, columns, dynamicColumns);
+								}
+								tmp = t;
 							}
-							tmp = t;
 						}
 					}
 					
@@ -225,14 +227,16 @@ public class TableRenderer {
 						renderTableColumns(view, el, template, columns, dynamicColumns);
 					}
 					
-					try(var timed2 = timed("TableRender.dataRendering.renderChildTemplateColumns")) {
-						for(String childTemplate : template.getChildTemplates()) {
-							ObjectTemplate t = templateService.get(childTemplate);
-							Class<?> clz = templateService.getTemplateClass(childTemplate);
-							if(Objects.nonNull(clz)) {
-								TableView v = clz.getAnnotation(TableView.class);
-								if(Objects.nonNull(v)) {
-									renderTableColumns(v, el, t, columns, dynamicColumns);
+					if(view.childColumns()) {
+						try(var timed2 = timed("TableRender.dataRendering.renderChildTemplateColumns")) {
+							for(String childTemplate : template.getChildTemplates()) {
+								ObjectTemplate t = templateService.get(childTemplate);
+								Class<?> clz = templateService.getTemplateClass(childTemplate);
+								if(Objects.nonNull(clz)) {
+									TableView v = clz.getAnnotation(TableView.class);
+									if(Objects.nonNull(v) && v.asChildColumns()) {
+										renderTableColumns(v, el, t, columns, dynamicColumns);
+									}
 								}
 							}
 						}

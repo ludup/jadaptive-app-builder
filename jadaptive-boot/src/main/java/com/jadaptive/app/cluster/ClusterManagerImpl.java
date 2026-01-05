@@ -12,7 +12,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.app.StartupAware;
 import com.jadaptive.api.app.VersionProvider;
 import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.cluster.ClusterEvent;
@@ -64,7 +65,7 @@ import com.sshtools.gardensched.DistributedScheduledExecutor;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Service
-public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode> implements ClusterManager {
+public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode> implements ClusterManager, StartupAware {
 
 	private static Logger LOG = LoggerFactory.getLogger(ClusterManagerImpl.class);
 	
@@ -90,7 +91,6 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	private App app;
 
 	private String serverId;
-	private Set<ClusterService> services;
 	private String configuredHostname;
 	private String hostname;
 
@@ -134,17 +134,8 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		thisNode.setTimeZone(TimeZone.getDefault().getID());
 		thisNode.setStatus(ClusterNodeStatus.UNAUTHORIZED);
 		thisNode.setGroupAddress(null);
-		
-		services = new LinkedHashSet<>();
-		for(var bean : app.getBeans(ClusterServiceProvider.class)) {
-			services = bean.transform(services);
-		}
-		if(services == null)
-			services = new LinkedHashSet<>();
 
-		var port = getPort();
-		services.add(new ClusterService(ClusterService.HTTPS_SERVICE, port));
-		thisNode.setServices(new ArrayList<>(services));
+		thisNode.setServices(Arrays.asList(new ClusterService(ClusterService.HTTPS_SERVICE, getPort())));
 		
 		saveOrUpdate(thisNode);
 		
@@ -153,6 +144,19 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				throw new IllegalStateException("Cannot delete nodes that are ONLINE");
 			}
 		});
+	}
+
+	@Override
+	public void onAfterApplicationStartup() {
+		tenantService.asSystem(() -> {
+			var thisNode = getThisNode();
+			thisNode.setServices(getServices().stream().toList());
+			saveOrUpdate(thisNode);
+		});
+	}
+
+	@Override
+	public void onApplicationStartup() {
 	}
 
 	@Override
@@ -210,6 +214,16 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 
 	@Override
 	public Set<ClusterService> getServices() {
+		
+		Set<ClusterService> services = new LinkedHashSet<ClusterService>();
+		for(var bean : app.getBeans(ClusterServiceProvider.class)) {
+			services = bean.transform(services);
+		}
+		if(services == null)
+			services = new LinkedHashSet<>();
+
+		var port = getPort();
+		services.add(new ClusterService(ClusterService.HTTPS_SERVICE, port));
 		return services;
 	}
 	

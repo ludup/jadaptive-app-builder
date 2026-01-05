@@ -259,6 +259,7 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public Collection<ObjectTemplate> getCreateUserTemplates() {
 		
@@ -368,8 +369,13 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	}
 
 	@Override
+	public Iterable<User> allObjects(SearchField... search) {
+		return userRepository.list(User.class, search);
+	}
+
+	@Override
 	public Iterable<User> allObjects(String userTemplate) {
-		return userRepository.list(User.class, SearchField.eq("resourceKey", userTemplate));
+		return allObjects(SearchField.eq("resourceKey", userTemplate));
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.jadaptive.api.db;
 
-import java.util.Collection;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import com.jadaptive.api.repository.AssignableDocument;
 import com.jadaptive.api.template.SortOrder;
@@ -20,15 +21,31 @@ public interface AssignableObjectDatabase<T extends AssignableDocument> {
 
 	T getAssignedObject(Class<T> resourceClass, User user, SearchField... fields);
 
-	Iterable<T> getObjects(Class<T> class1);
+	/**
+	 * Streeam all, or specific objects.
+	 * 
+	 * @param class1 type
+	 * @param fields search fields, or none for all
+	 * @return iterable
+	 */
+	default Stream<T> streamObjects(Class<T> class1, SearchField... fields) {
+		return StreamSupport.stream(getObjects(class1, fields).spliterator(), false);
+	}
+
+	/**
+	 * Get all, or specific objects.
+	 * 
+	 * @param class1 type
+	 * @param fields search fields, or none for all
+	 * @return iterable
+	 */
+	Iterable<T> getObjects(Class<T> class1, SearchField... fields);
 
 	T getObject(Class<T> resourceClass, SearchField... fields);
 
 	long countObjects(Class<T> resourceClass, SearchField... fields);
 
 	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields);
-
-	Collection<T> searchObjects(Class<T> clz, SearchField... fields);
 
 	T max(Class<T> clz, String column);
 }

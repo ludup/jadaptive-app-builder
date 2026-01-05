@@ -68,8 +68,8 @@ public abstract class AbstractPersonalUUIDObjectServceImpl<T extends PersonalUUI
 	}
 
 	@Override
-	public Iterable<T> allObjects() {
-		return objectDatabase.allObjects(getResourceClass());
+	public Iterable<T> allObjects(SearchField... fields) {
+		return objectDatabase.allObjects(getResourceClass(), fields);
 	}
 	
 	protected void validateSave(T object) {
@@ -78,10 +78,7 @@ public abstract class AbstractPersonalUUIDObjectServceImpl<T extends PersonalUUI
 
 	@Override
 	public void deleteAll() {
-		
-		for(T t : collection()) {
-			objectDatabase.deletePersonalObject(t);
-		}
+		streamAll().forEach(objectDatabase::deletePersonalObject);
 	}
 
 	@Override
@@ -96,6 +93,7 @@ public abstract class AbstractPersonalUUIDObjectServceImpl<T extends PersonalUUI
 	}
 
 	@Override
+	@Deprecated(since = "0.6.0", forRemoval = true)
 	public Collection<T> collection(SearchField... fields) {
 		return objectDatabase.getPersonalObjects(getResourceClass(), getCurrentUser(), fields);
 	}
