@@ -251,7 +251,9 @@ public class ApplicationConfig {
 					}, this::isDevelopment);
 				}
 
-				pluginRepository.add(new JarPluginRepository(getPluginsRoot()), this::isNotDevelopment);
+				pluginRepository.add(new JarPluginRepository(getPluginsRoot()), () -> {
+					return isNotDevelopment() || Boolean.getBoolean("jadaptive.loadPluginArchives");
+				});
 				pluginRepository.add(new DefaultPluginRepository(getPluginsRoot()), this::isNotDevelopment);
 
 				return pluginRepository;
