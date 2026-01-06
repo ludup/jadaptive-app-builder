@@ -128,13 +128,18 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		ClusterAuth.setup(thisNode.getAuthenticationToken(), serverId);
 		
 		thisNode.setHostname(hostname);			
-		thisNode.setVersion(Optional.ofNullable(
-			ApplicationServiceImpl.getInstance().getBean(VersionProvider.class)).map(VersionProvider::getVersion).
-			orElse("Unknown"));
+		try {
+			VersionProvider vp = ApplicationServiceImpl.getInstance().getBean(VersionProvider.class);
+			thisNode.setVersion(Optional.ofNullable(
+				vp).map(VersionProvider::getVersion).
+				orElse("Unknown"));
+		}
+		catch(Exception e) {
+			thisNode.setVersion("Unknown");
+		}
 		thisNode.setTimeZone(TimeZone.getDefault().getID());
 		thisNode.setStatus(ClusterNodeStatus.UNAUTHORIZED);
 		thisNode.setGroupAddress(null);
-
 		thisNode.setServices(Arrays.asList(new ClusterService(ClusterService.HTTPS_SERVICE, getPort())));
 		
 		saveOrUpdate(thisNode);

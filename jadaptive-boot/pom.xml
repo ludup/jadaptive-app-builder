@@ -31,7 +31,7 @@
             <groupId>com.sshtools</groupId>
             <artifactId>garden-sched-spring</artifactId>
             <exclusions>
-                <exclusion>
+                <!--<exclusion>
                     <groupId>org.springframework</groupId>
                     <artifactId>spring-context</artifactId>
                 </exclusion>
@@ -42,7 +42,7 @@
                 <exclusion>
                     <groupId>com.fasterxml.jackson.datatype</groupId>
                     <artifactId>jackson-datatype-jdk8</artifactId>
-                </exclusion>
+                </exclusion>-->
             </exclusions>
         </dependency>
         
@@ -325,7 +325,7 @@
                 <!-- Import dependency management from Spring Boot -->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>3.2.6</version>
+				<version>3.3.13</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

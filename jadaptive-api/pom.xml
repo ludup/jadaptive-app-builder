@@ -192,7 +192,7 @@
 				<!-- Import dependency management from Spring Boot -->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>3.2.6</version>
+				<version>3.3.13</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

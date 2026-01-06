@@ -7,17 +7,20 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
 
@@ -46,6 +49,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.jadaptive.api.app.ApplicationProperties;
+import com.jadaptive.api.plugins.PluginManagerService;
 import com.jadaptive.app.json.upload.UploadServlet;
 import com.jadaptive.utils.FileUtils;
 
@@ -58,15 +62,18 @@ public class ApplicationConfig {
 
 	static Logger log = LoggerFactory.getLogger(ApplicationConfig.class);
 
-	SpringPluginManager pluginManager;
-	Path repoBase = null;
-	Set<String> disabledPlugins;
-	Map<String, Collection<String>> repositories = null;
-	File repositoriesFile = new File("repositories");
-	Path pluginRoot = Paths.get("./plugins");
+	private SpringPluginManager pluginManager;
+	private Path repoBase = null;
+	private Set<String> disabledPlugins;
+	private Map<String, Collection<String>> repositories = null;
+	private File repositoriesFile = new File("repositories");
+	private Path pluginRoot = Paths.get("./plugins");
 	
 	@Autowired
 	private ApplicationContext applicationContext;
+	
+	@Autowired
+	private PluginManagerService pluginManagerService;
 
 	@Bean
 	public SpringPluginManager pluginManager() {
@@ -88,7 +95,7 @@ public class ApplicationConfig {
 				
 				String path = "jadaptive-app-builder";
 				if(repositories.containsKey("AppBuilder")) {
-					path = repositories.get("AppBuilder").iterator().next();
+					path = Paths.get(repositories.get("AppBuilder").iterator().next()).toAbsolutePath().toString();
 				}
 				
 				pluginRoot = Paths.get(FileUtils.checkEndsWithSlash(path) + "plugins");
@@ -135,9 +142,61 @@ public class ApplicationConfig {
 						}
 					}
 					
-					Collection<String> enabled = repositories.get("Enable");
+					Collection<String> mavenRepositories = repositories.getOrDefault("MavenRepository", Collections.emptyList());
+					for(var maven : mavenRepositories) {
+						var parts = maven.split("\\s+");
+						pluginManagerService.setRepository(
+							parts[0].trim(), 
+							parts.length > 1 ? parts[1] : null, 
+							parts.length > 2 ? parts[2].trim().toCharArray() : null
+						);
+						break;
+					}
+
+					Collection<String> installed = new ArrayList<String>();
+					for (var path : repositories.getOrDefault("Install", Collections.emptyList())) {
+						var parts = path.split(":");
+						
+						String group, artifact;
+						
+						if(parts.length == 1) {
+							artifact = parts[0];
+							if(artifact.startsWith("logonbox-")) {
+								group = "com.logonbox";
+							}
+							else if(artifact.startsWith("jadaptive-")) {
+								group = "com.jadaptive";
+							}
+							else if(artifact.startsWith("sshtools-")) {
+								group = "com.sshtools";
+							}
+							else {
+								throw new IllegalArgumentException("Extension `" + path + "` specifier invalid. Use <groupdId>:<artifactId>");
+							}
+						}
+						else if(parts.length == 2) {
+							group = parts[0];
+							artifact = parts[1];
+						}
+						else {
+							throw new IllegalArgumentException("Extension `" + path + "` specifier invalid. Use <groupdId>:<artifactId>");
+						}
+						
+						try {
+							if(!pluginManagerService.installed(group, artifact)) {
+								pluginManagerService.install(group, artifact);
+							}
+							installed.add(artifact);
+						} catch (IOException e) {
+							throw new UncheckedIOException(e);
+						}
+					}
+
+					Collection<String> enabled = 
+							Stream.concat(repositories.getOrDefault("Enable", Collections.emptyList()).stream(), 
+							installed.stream()).toList();
 					
-					for (String path : repositories.get("GitPlugins")) {
+					for (String path : repositories.getOrDefault("GitPlugins", Collections.emptyList())) {
 						
 						Path pluginsPath;
 						if(Objects.nonNull(repoBase)) {
@@ -176,6 +235,8 @@ public class ApplicationConfig {
 							}
 						});
 					}
+					
+					log.info("Disabled plugins: {}", String.join(", ", disabledPlugins));
 	
 					pluginRepository.add(new DevelopmentPluginRepository(getPluginsRoot()) {
 						protected FileFilter createHiddenPluginFilter() {
