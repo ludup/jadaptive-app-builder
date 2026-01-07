@@ -231,4 +231,10 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return null;
 	}
 
+	@Override
+	public long getNextSequence(String table, String database, String sequenceName) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

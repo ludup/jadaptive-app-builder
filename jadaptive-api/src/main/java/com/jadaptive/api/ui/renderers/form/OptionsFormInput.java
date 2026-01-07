@@ -41,7 +41,7 @@ public class OptionsFormInput {
 					.val(option.getUuid()))
 						.appendChild(new Element("label")
 								.attr("for", field.getFormVariable() + "_input")
-								.addClass("form-label")
+								.addClass("form-label ms-2")
 								.text((String)option.getValue("name"))));
 		
 			if(values.contains(option)) {
