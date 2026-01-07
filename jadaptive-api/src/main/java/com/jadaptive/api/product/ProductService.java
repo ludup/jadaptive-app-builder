@@ -15,8 +15,8 @@ public interface ProductService {
 		SSH_PROXY_ONPREM,
 		LICENSE_SERVER,
 		GABBLE_CLOUD,
-		
-		NODAL_CLOUD
+		NODAL_CLOUD, 
+		SSH_TEAM_CLOUD
 	}
 	
 	ProductId getProductId(); 
