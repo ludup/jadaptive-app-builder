@@ -140,7 +140,7 @@ In order to work on a plugin directly from it's source, you must adjust the `rep
 
 ```
 cd /path/to/your/workspace
-git-clone -b origin/0.6.0 https://github.com/ludup/jadaptive-2fa.git
+git clone -b origin/0.6.0 https://github.com/ludup/jadaptive-2fa.git
 ```
 
 Then in the `repositories`, add the following.
