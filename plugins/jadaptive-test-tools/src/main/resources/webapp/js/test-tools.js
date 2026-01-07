@@ -1,0 +1,1 @@
+window._automationHooks_.pageReady = true;
