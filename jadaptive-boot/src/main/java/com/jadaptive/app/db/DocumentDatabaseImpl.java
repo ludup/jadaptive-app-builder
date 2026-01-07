@@ -48,9 +48,12 @@ import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationStrength;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
+import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.Updates;
 import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.result.DeleteResult;
 
@@ -416,6 +419,30 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		}
 		return result.first();
 	}
+	
+	@Override
+	public long getNextSequence(String table, String database, String sequenceName) {
+       
+		MongoCollection<Document> collection = getCollection(table, database);
+		
+		// 1. Identify which sequence document to update
+        Bson filter = Filters.eq("_id", sequenceName);
+
+        // 2. Define the atomic increment ($inc)
+        Bson update = Updates.inc("currentValue", 1L);
+
+        // 3. Configure options:
+        // - upsert: true (create the document if it doesn't exist)
+        // - returnDocument: AFTER (give us the incremented value, not the old one)
+        FindOneAndUpdateOptions options = new FindOneAndUpdateOptions()
+                .upsert(true)
+                .returnDocument(ReturnDocument.AFTER);
+
+        // 4. Execute atomically
+        Document result = collection.findOneAndUpdate(filter, update, options);
+
+        return result.getLong("currentValue");
+    }
 	
 	@Override
 	public Long sumLongValues(String table, String database, String groupBy, SearchField... fields) {

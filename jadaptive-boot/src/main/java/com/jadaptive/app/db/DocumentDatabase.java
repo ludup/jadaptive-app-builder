@@ -71,4 +71,6 @@ public interface DocumentDatabase {
 
 	void doInTransaction(String database, Runnable r);
 
+	long getNextSequence(String table, String database, String sequenceName);
+
 }
