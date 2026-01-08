@@ -1,0 +1,66 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.jadaptive</groupId>
+		<artifactId>plugins</artifactId>
+		<relativePath>..</relativePath>
+		<version>0.5.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>jadaptive-test-tools</artifactId>
+	<name>Testing Tools</name>
+
+	<properties>
+		<plugin.id>jadaptive-test-tools</plugin.id>
+		<plugin.class>com.jadaptive.plugins.testtools.TestToolsPlugin</plugin.class>
+		<plugin.version>${project.version}</plugin.version>
+		<plugin.provider>JADAPTIVE Limited</plugin.provider>
+		<plugin.projectUrl>https://github.com/ludup/jadpative-app-builder/plugins</plugin.projectUrl>
+		<plugin.dependencies></plugin.dependencies>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.jadaptive</groupId>
+			<artifactId>jadaptive-api</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.sshtools</groupId>
+				<artifactId>pf4j-plugin-generator</artifactId>
+				<executions>
+					<execution>
+						<id>generate-plugin</id>
+						<phase>install</phase>
+						<goals>
+							<goal>generate-plugin</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>ext-releases-local</id>
+			<name>artifactory.jadaptive.com-ext-releases</name>
+			<url>https://artifactory.jadaptive.com/ext-releases-local</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases />
+		</repository>
+	</repositories>
+</project>

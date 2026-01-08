@@ -35,6 +35,7 @@
 		<module>jadaptive-ssh-synergy</module>
 		<module>jadaptive-ssh-keys</module>
 		<module>jadaptive-ssh-server</module>
+		<module>jadaptive-test-tools</module>
 	</modules>
 
 	<dependencies>
