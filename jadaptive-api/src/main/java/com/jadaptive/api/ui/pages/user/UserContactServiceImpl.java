@@ -65,7 +65,7 @@ public class UserContactServiceImpl extends AuthenticatedService implements User
 	}
 
 	@Override
-	public Iterable<UserContactPreferences> allObjects() {
+	public Iterable<UserContactPreferences> allObjects(SearchField... search) {
 		throw new UnsupportedOperationException();
 	}
 

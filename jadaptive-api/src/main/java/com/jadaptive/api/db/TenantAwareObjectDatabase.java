@@ -2,6 +2,8 @@ package com.jadaptive.api.db;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -11,6 +13,10 @@ import com.jadaptive.api.template.SortOrder;
 
 public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
+	default <X extends UUIDDocument> Stream<X> stream(Class<X> resourceClass, SearchField...fields) {
+		return StreamSupport.stream(list(resourceClass, fields).spliterator(), false);
+	}
+	
 	<X extends UUIDDocument> Iterable<X> list(Class<X> resourceClass, SearchField...fields);
 	
 	<X extends UUIDDocument> X get(String uuid, Class<X> resourceClass) throws RepositoryException, ObjectException;

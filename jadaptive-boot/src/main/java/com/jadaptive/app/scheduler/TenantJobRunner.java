@@ -12,10 +12,10 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.sshtools.gardensched.SerializableRunnable;
+import com.sshtools.gardensched.SerializableJob;
 
 @SuppressWarnings("serial")
-public class TenantJobRunner implements SerializableRunnable {
+public class TenantJobRunner implements SerializableJob {
 
 	static Logger log = LoggerFactory.getLogger(TenantJobRunner.class);
 	
@@ -68,7 +68,7 @@ public class TenantJobRunner implements SerializableRunnable {
 	}
 
 	@Override
-	public void run() {
+	public void execute() throws Exception {
 
 		ApplicationServiceImpl.getInstance().autowire(task);
 		

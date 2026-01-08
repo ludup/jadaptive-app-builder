@@ -13,7 +13,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jgroups.stack.IpAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,13 +26,13 @@ import com.sshtools.gardensched.ClusterID;
 import com.sshtools.gardensched.DistributedCallable;
 import com.sshtools.gardensched.DistributedRunnable;
 import com.sshtools.gardensched.DistributedTask;
+import com.sshtools.gardensched.PayloadSerializer;
 import com.sshtools.gardensched.SerializableCallable;
 import com.sshtools.gardensched.SerializableRunnable;
 import com.sshtools.gardensched.TaskEntry;
 import com.sshtools.gardensched.TaskSpec;
 import com.sshtools.gardensched.TaskStore;
 import com.sshtools.gardensched.TaskTrigger;
-import com.sshtools.gardensched.spring.JsonPayloadSerializer;
 
 @Component
 public class SchedulerTaskStorage implements TaskStore {
@@ -47,7 +46,7 @@ public class SchedulerTaskStorage implements TaskStore {
 	private TenantService tenantService;
 	
 	@Autowired
-	private JsonPayloadSerializer payloadSerializer;
+	private PayloadSerializer payloadSerializer;
 
 	@Override
 	public void store(TaskEntry entry) {
@@ -103,7 +102,7 @@ public class SchedulerTaskStorage implements TaskStore {
 			for(var tenant : tenantService.allObjects()) {
 				LOG.info("Gathering tasks for tenant {} ({})", tenant.getUuid(), tenant.getName());
 				tenantService.executeAs(tenant, () -> {
-					l.addAll(schedulerService.collection().stream().map(st -> {
+					l.addAll(schedulerService.streamAll().map(st -> {
 						return schedulerTaskToEntry(st);
 					}).toList());
 				});
@@ -170,7 +169,7 @@ public class SchedulerTaskStorage implements TaskStore {
 			return new TaskEntry(
 				ClusterID.parse(tsk.getId()), 
 				ntsk, 
-				new IpAddress(tsk.getSubmitter()), 
+				tsk.getSubmitter(), 
 				spec
 			);
 		} catch (Exception e) {

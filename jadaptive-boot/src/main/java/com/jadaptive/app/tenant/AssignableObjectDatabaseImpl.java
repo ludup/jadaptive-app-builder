@@ -66,7 +66,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 			 return getObjects(resourceClass);
 		} else {
 			Collection<Role> userRoles = roleService.getRolesByUser(user);
-			return objectDatabase.searchObjects(resourceClass, 
+			return objectDatabase.list(resourceClass, 
 					SearchField.add(fields,
 					SearchField.or(
 							SearchField.all("users.uuid", user.getUuid()),
@@ -79,7 +79,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 	public Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields) {
 		
 		Collection<Role> userRoles = roleService.getRolesByUser(user);
-		return objectDatabase.searchObjects(resourceClass, 
+		return objectDatabase.list(resourceClass, 
 				SearchField.add(fields,
 				SearchField.or(
 						SearchField.all("users.uuid", user.getUuid()),
@@ -125,8 +125,8 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 	}
 
 	@Override
-	public Iterable<T> getObjects(Class<T> resourceClass) {
-		return objectDatabase.list(resourceClass);
+	public Iterable<T> getObjects(Class<T> resourceClass, SearchField... fields) {
+		return objectDatabase.list(resourceClass, fields);
 	}
 
 	@Override
@@ -137,11 +137,6 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 	@Override
 	public long countObjects(Class<T> resourceClass, SearchField... fields) {
 		return objectDatabase.count(resourceClass, fields);
-	}
-
-	@Override
-	public Collection<T> searchObjects(Class<T> clz, SearchField... fields) {
-		return objectDatabase.searchObjects(clz, fields);
 	}
 
 	@Override

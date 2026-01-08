@@ -110,7 +110,7 @@ public class OAuth2CompleteController {
 					    .collect(Collectors.joining("&"));
 				
 				var clientBldr = HttpClient.newBuilder();
-				if(Boolean.getBoolean("jadaptive.oauth.insecureTokenRequest")) {
+				if(Boolean.getBoolean("jadaptive.oauth.insecureTokenRequest") || c.isInsecureSsl()) {
 					clientBldr.sslContext(HttpHelpers.insecureContext());
 				}
 				var client = clientBldr.build();

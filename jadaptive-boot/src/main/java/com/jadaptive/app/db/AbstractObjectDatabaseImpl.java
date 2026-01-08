@@ -586,22 +586,22 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 			case GT:
 				buf.append(field.getColumn());
 				buf.append(">");
-				buf.append(field.getValue());
+				buf.append(field.getValue()[0]);
 				break;
 			case GTE:
 				buf.append(field.getColumn());
 				buf.append(">=");
-				buf.append(field.getValue());
+				buf.append(field.getValue()[0]);
 				break;
 			case LT:
 				buf.append(field.getColumn());
 				buf.append("<");
-				buf.append(field.getValue());
+				buf.append(field.getValue()[0]);
 				break;
 			case LTE:
 				buf.append(field.getColumn());
 				buf.append("<=");
-				buf.append(field.getValue());
+				buf.append(field.getValue()[0]);
 				break;
 			}
 			
@@ -668,7 +668,7 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		} catch(Throwable e) {
 			onDeletingError(obj, e);
 			checkException(e);
-			throw new RepositoryException(String.format("%s: ", obj.getClass().getSimpleName(), e.getMessage()), e);
+			throw new RepositoryException(String.format("%s: %s", obj.getClass().getSimpleName(), e.getMessage()), e);
 		}
 	}
 	

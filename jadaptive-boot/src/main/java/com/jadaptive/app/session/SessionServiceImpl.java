@@ -2,12 +2,12 @@ package com.jadaptive.app.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,8 +174,8 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	}
 
 	@Override
-	public Iterable<Session> allObjects() {
-		return Collections.unmodifiableCollection(getCache(getCurrentTenant()).values());
+	public Iterable<Session> allObjects(SearchField... search) {
+		return (Iterable<Session>) () -> filter(search).iterator();
 	}
 
 	@Override
@@ -188,16 +188,16 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	
 	@Override
 	public Collection<? extends UUIDDocument> searchTable(int start, int length, SortOrder sort, String sortField, SearchField... fields) {
-		return filter(fields);
+		return filter(fields).toList();
 	}
 	
 	@Override
 	public long countTable(SearchField... fields) {
-		return filter(fields).size();
+		return filter(fields).count();
 	}
 	
-	protected Collection<Session> filter(SearchField...fields) {
-		return new ArrayList<>(getCache(getCurrentTenant()).values());
+	protected Stream<Session> filter(SearchField...fields) {
+		return SearchField.filter(getCache(getCurrentTenant()).values().stream(), fields);
 	}
 
 	@Override
@@ -244,7 +244,7 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 
 	@Override
 	public Collection<Session> collection(SearchField... fields) {
-		return filter(fields);
+		return filter(fields).toList();
 	}
 
 	@Override

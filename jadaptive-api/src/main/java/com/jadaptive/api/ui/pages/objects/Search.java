@@ -40,9 +40,9 @@ public class Search extends AbstractSearchPage  {
 			permissionService.assertRead(template.getResourceKey());
 		}
 
-		if(!template.getCollectionKey().equals(resourceKey)) {
-			throw new UriRedirect(String.format("/app/ui/search/%s", template.getCollectionKey()));
-		}
+//		if(!template.getCollectionKey().equals(resourceKey)) {
+//			throw new UriRedirect(String.format("/app/ui/search/%s", template.getCollectionKey()));
+//		}
 		
 		if(template.isSingleton()) {
 			throw new UriRedirect(String.format("/app/ui/config/%s", template.getCollectionKey()));

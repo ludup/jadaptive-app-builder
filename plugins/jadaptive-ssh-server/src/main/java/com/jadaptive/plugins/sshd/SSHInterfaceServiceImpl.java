@@ -27,7 +27,7 @@ public class SSHInterfaceServiceImpl extends AbstractUUIDObjectServceImpl<SSHInt
 	private PermissionService permissionService; 
 	
 	@Autowired
-	SSHDService sshdService; 
+	private SSHDService sshdService; 
 
 	@Override
 	protected void beforeSave(SSHInterface obj) {

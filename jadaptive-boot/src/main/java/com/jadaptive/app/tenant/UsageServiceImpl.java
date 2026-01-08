@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
 
@@ -86,7 +87,7 @@ public class UsageServiceImpl implements UsageService, TenantAware {
 	
 	@Override
 	public void delete(String key) {
-		for(Usage usage : usageDatabase.searchObjects(Usage.class, SearchField.all("keys", key))) {
+		for(Usage usage : usageDatabase.list(Usage.class, SearchField.all("keys", key))) {
 			usageDatabase.delete(usage);
 		}
 	}
@@ -205,10 +206,10 @@ public class UsageServiceImpl implements UsageService, TenantAware {
 	
 	@Override
 	public Stream<BarChartDateLongValue> values(Date from, Date to, String... keys) {
-		return usageDatabase.searchObjects(Usage.class,
+		return StreamSupport.stream(usageDatabase.list(Usage.class,
 				SearchField.all("keys", Arrays.asList(keys)),
 				SearchField.gte("created", from),
-				SearchField.lt("created", to)).stream().map(o -> {
+				SearchField.lt("created", to)).spliterator(), false).map(o -> {
 					return new BarChartDateLongValue(o.getCreated(), o.getValue());
 				});
 	}

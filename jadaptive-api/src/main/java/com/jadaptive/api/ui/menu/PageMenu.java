@@ -34,4 +34,6 @@ public @interface PageMenu {
 	
 	String feature() default "";
 	
+	Class<? extends PageMenuFilter> filter() default NoPageMenuFilter.class;
+	
 }

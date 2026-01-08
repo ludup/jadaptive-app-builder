@@ -1,11 +1,14 @@
 package com.jadaptive.api.db;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.util.ObjectUtils;
 
 import com.jadaptive.api.template.SearchTransformer;
@@ -148,5 +151,100 @@ public class SearchField {
 	
 	public boolean isMarked() {
 		return marked;
+	}
+	
+	private boolean matches(Object bean) {
+		switch (type) {
+		case EQUALS:
+			try {
+				if (Objects.equals(searchValue[0], PropertyUtils.getNestedProperty(bean, searchField))) {
+					return true;
+				}
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			}
+			break;
+		case NOT:
+			try {
+				if (!Objects.equals(searchValue[0], PropertyUtils.getNestedProperty(bean, searchField))) {
+					return true;
+				}
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			}
+			break;
+		case LT:
+			try {
+				if (((Number)PropertyUtils.getNestedProperty(bean, searchField)).doubleValue() < ((Number)searchValue[0]).doubleValue()) {
+					return true;
+				}
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			}
+			break;
+		case GT:
+			try {
+				if (((Number)PropertyUtils.getNestedProperty(bean, searchField)).doubleValue() > ((Number)searchValue[0]).doubleValue()) {
+					return true;
+				}
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			}
+			break;
+		case LTE:
+			try {
+				if (((Number)PropertyUtils.getNestedProperty(bean, searchField)).doubleValue() <= ((Number)searchValue[0]).doubleValue()) {
+					return true;
+				}
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			}
+			break;
+		case GTE:
+			try {
+				if (((Number)PropertyUtils.getNestedProperty(bean, searchField)).doubleValue() >= ((Number)searchValue[0]).doubleValue()) {
+					return true;
+				}
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			}
+			break;
+		case IN:
+			for(var val : searchValue) {
+				try {
+					if (Objects.equals(val, PropertyUtils.getNestedProperty(bean, searchField))) {
+						return true;
+					}
+				} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+				}
+				break;
+			}
+			break;
+		case OR:
+			for(var fld : fields) {
+				if(fld.matches(bean)) {
+					return true;
+				}
+			}
+			break;
+		case AND:
+			for(var fld : fields) {
+				if(!fld.matches(bean)) {
+					return false;
+				}
+			}
+			break;
+		default:
+			throw new UnsupportedOperationException(type + " is not currently supported by non-database filtering.");
+		}
+		return false;
+	}
+	
+	public static <T> Stream<T> filter(Stream<T> input, SearchField... filter) {
+		if(filter.length == 0)
+			return input;
+		else
+			return input.filter(p -> {
+				for(var f : filter) {
+					if(!f.matches(p)) {
+						return false;
+					}
+				}
+				return true;
+			});
 	}
 }

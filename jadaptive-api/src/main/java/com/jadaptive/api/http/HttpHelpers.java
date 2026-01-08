@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -12,6 +13,7 @@ public class HttpHelpers {
 
 	private final static class LazyInitContext {
 		private final static SSLContext DEFAULT;
+		private final static SSLParameters DEFAULT_PARAMETERS;
 
 		static {
 			try {
@@ -27,11 +29,18 @@ public class HttpHelpers {
 					public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
 					}
 				} }, new SecureRandom());
+
+				DEFAULT_PARAMETERS = DEFAULT.getDefaultSSLParameters();
+				DEFAULT_PARAMETERS.setEndpointIdentificationAlgorithm(null);
 			} catch (NoSuchAlgorithmException | KeyManagementException e) {
 				throw new IllegalStateException(e);
 			}
 		}
 
+	}
+	
+	public static SSLParameters insecureParameters() {
+		return LazyInitContext.DEFAULT_PARAMETERS;
 	}
 
 	public static SSLContext insecureContext() {

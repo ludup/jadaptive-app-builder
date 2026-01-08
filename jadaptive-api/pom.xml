@@ -19,7 +19,6 @@
         <dependency>
             <groupId>com.sshtools</groupId>
             <artifactId>garden-sched-lib</artifactId>
-            <version>0.0.7</version>
         </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -121,6 +120,12 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.15.1</version>
 		</dependency>
+		
+		<dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.11.0</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
@@ -193,7 +198,7 @@
 				<!-- Import dependency management from Spring Boot -->
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>3.2.6</version>
+				<version>3.3.13</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

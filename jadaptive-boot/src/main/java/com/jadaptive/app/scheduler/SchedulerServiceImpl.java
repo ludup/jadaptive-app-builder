@@ -2,6 +2,7 @@ package com.jadaptive.app.scheduler;
 
 import static com.jadaptive.app.scheduler.Jobs.formatDisplayDuration;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.Instant;
@@ -21,12 +22,14 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
+import org.springframework.context.Lifecycle;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.StartupAware;
+import com.jadaptive.api.cluster.ClusterManager;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.entity.ObjectNotFoundException;
@@ -37,8 +40,8 @@ import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.ScheduledTaskConfig;
 import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.scheduler.SchedulerTask;
-import com.jadaptive.api.scheduler.SchedulerTaskCompleteEvent;
 import com.jadaptive.api.scheduler.SchedulerTask.SchedulerTaskStatus;
+import com.jadaptive.api.scheduler.SchedulerTaskCompleteEvent;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.scheduler.TenantTaskConfig;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -53,16 +56,23 @@ import com.sshtools.gardensched.DistributedRunnable;
 import com.sshtools.gardensched.DistributedRunnable.Builder;
 import com.sshtools.gardensched.DistributedScheduledExecutor;
 import com.sshtools.gardensched.DistributedTask;
+import com.sshtools.gardensched.IdentifiableFuture;
 import com.sshtools.gardensched.IdentifiableScheduledFuture;
+import com.sshtools.gardensched.ObjectStore;
+import com.sshtools.gardensched.PayloadFilter;
+import com.sshtools.gardensched.PayloadSerializer;
 import com.sshtools.gardensched.TaskCompletionContext;
+import com.sshtools.gardensched.TaskInfo;
 import com.sshtools.gardensched.TaskSpec;
+import com.sshtools.gardensched.TaskStore;
+import com.sshtools.gardensched.spring.GardenSchedTaskScheduler;
 
 @Service
-public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<SchedulerTask>  implements SchedulerService, TenantAware, StartupAware {
+public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<SchedulerTask> implements SchedulerService, TenantAware, StartupAware, Lifecycle, ObjectStore {
 
-	static Logger log = LoggerFactory.getLogger(SchedulerServiceImpl.class);
+
+	private static Logger LOG = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 	
-	@Autowired
 	private DistributedScheduledExecutor executor;	
 	
 	@Autowired
@@ -72,21 +82,96 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	private EventService eventService;
 	
 	@Autowired
-	private TaskScheduler taskScheduler;
-	
-	@Autowired
 	private I18nService i18nService;
 	
+	@Autowired
+	private TaskStore taskStore;
+	
+	@Autowired
+	private ObjectStore objectStore;
+
+	@Autowired
+	private PayloadSerializer taskSerializer;
+
+	@Autowired
+	private PayloadFilter taskFilter;
+
+	@Autowired
+	private ClusterManager clusterManager;
+
+	private GardenSchedTaskScheduler taskScheduler;
+
 	@Override
 	public void initializeSystem(boolean newSchema) {
+		
+		/* We need a very particular start-up  order here.
+		 * 
+		 * 1. Firstly the MongoDB database collection of ClusterNode must be updated
+		 *    with as much information as we can initially gather.
+		 *    
+		 * 2. We start the distributed scheduler. If there are nodes on available in the cluster,
+		 *    we will authenticate with them. Encryption / Decryption services must be available at
+		 *    this point if that happens.
+		 *    
+		 * 3. We complete the cluster setup by setting up the event proxy and updating the final
+		 *    status and the nodes group name.
+		 *    
+		 * 4. Complete other initialization of system.
+		 */
+		
+		clusterManager.initCluster();
+		
+		var poolThreads = ApplicationProperties.getValue("ha.poolThreads", Runtime.getRuntime().availableProcessors());
+		LOG.info("Schedule Threads: {}", poolThreads);
+		
+		var bldr = new DistributedScheduledExecutor.Builder().
+				withPayloadSerializer(taskSerializer).
+				withPayloadFilter(taskFilter).
+				withTaskStore(taskStore).
+				withTaskErrorHandler(this).
+				withTaskSuccessHandler(this).
+				withDeferStorageUntilStarted().
+				withPersistentByDefault().
+				withStartPaused().
+				withObjectStore(objectStore).
+				withCloseTimeout(Duration.ofMinutes(ApplicationProperties.getValue("ha.shutdownTimeout", Integer.MAX_VALUE))).
+				withSchedulerThreads(
+					poolThreads
+				);
+		
+		var haProps = ApplicationProperties.getValue("ha.props", SchedulerService.JAD_JGROUPS);
+		bldr.withJGroupsProps(haProps);
+		LOG.info("JGroups Properties: {}", haProps);
+		
+		var haClusterName = ApplicationProperties.getValue("ha.clusterName", clusterManager.getServerId());
+			bldr.withClusterName(haClusterName);
+			LOG.info("Cluster Name: {}", haClusterName);
+		
+		var haGroupName = ApplicationProperties.getValue("ha.groupName", "");
+		if(!haGroupName.equals("")) {
+			bldr.withGroupName(haGroupName);
+		}
+		
+		try {
+			executor = bldr.build();
+		} catch(RuntimeException re) {
+			throw re;
+		} catch (Exception e) {
+			throw new IllegalStateException("Failed to start distributed scheduler.");
+		}
+		
+		taskScheduler = new GardenSchedTaskScheduler(executor);
+		
+		clusterManager.setupCluster(executor);
+		
 		initializeTenant(getCurrentTenant(), newSchema);
 	}
 
 	@Override
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
 		
-		if(log.isInfoEnabled()) {
-			log.info("Scheduling tasks for {}", tenant.getName());
+		if(LOG.isInfoEnabled()) {
+			LOG.info("Scheduling tasks for {}", tenant.getName());
 		}
 		
 		for(var task  : applicationService.getBeans(ScheduledTask.class)) {
@@ -112,7 +197,6 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 			var bldr = new DistributedRunnable.Builder(uuid.toString(), new TenantJobRunner(tenant, task)).
 				withKey(task.getClass().getName()).
 				withClassifiers(tenant.getUuid()).
-				onConflict(ConflictResolution.IGNORE).
 				fromAnnotatedObject(task);
 			
 			configureTenantTaskBuilder(bldr, task);
@@ -192,12 +276,12 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	
 	@Override
 	public void cancelTask(String uuid, boolean mayInterrupt) {
-		executor.futureOr(ClusterID.parse(uuid)).ifPresentOrElse(ftr -> ftr.cancel(mayInterrupt), () -> log.warn("Request to cancel task {} that does not exist.", uuid));
+		executor.futureOr(ClusterID.parse(uuid)).ifPresentOrElse(ftr -> ftr.cancel(mayInterrupt), () -> LOG.warn("Request to cancel task {} that does not exist.", uuid));
 	}
 
 	@Override
 	public void runScheduledTaskNow(String uuid) {
-		executor.futureOr(ClusterID.parse(uuid)).ifPresentOrElse(ftr -> ftr.runNow(), () -> log.warn("Request to run task {} that does not exist.", uuid));
+		executor.futureOr(ClusterID.parse(uuid)).ifPresentOrElse(ftr -> ftr.runNow(), () -> LOG.warn("Request to run task {} that does not exist.", uuid));
 	}
 
 	@Override
@@ -232,6 +316,13 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	}
 
 	@Override
+	public SchedulerTaskStatus getStatus(ClusterID cid) {
+		var future = executor.future(cid);
+		var info = future == null ? null : future.info();
+		return calcStatus(future, info);
+	}
+
+	@Override
 	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
 
 		var tsk = getObjectByUUID(obj.getUuid());
@@ -239,21 +330,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 		var future = executor.future(cid);
 		var info = future == null ? null : future.info();
 		
-		SchedulerTaskStatus status;
-		if(info != null && info.lastError().isPresent()) {
-			status = SchedulerTaskStatus.ERROR;
-		}
-		else if(future == null) {
-			status = SchedulerTaskStatus.MISSING;
-		}
-		else {
-			if(future.info().active()) {
-				status = SchedulerTaskStatus.RUNNING;
-			}
-			else {
-				status = SchedulerTaskStatus.WAITING;
-			}
-		}
+		SchedulerTaskStatus status = calcStatus(future, info);
 		
 		if (column.equals("displayName")) {
 			Element nameEl;
@@ -313,7 +390,8 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
 								"displayName.failedAtTaken", 
 								info.lastError().get().getMessage(),
-								tkn));
+								endTime,
+								Jobs.formatDisplayDuration(tkn)));
 						}, () -> {
 							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
 								info.lastCompleted().isPresent() 
@@ -429,12 +507,12 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 						eventService.publishEvent(evt.get());
 					}
 					catch(ObjectNotFoundException onfe) {
-						log.warn("Failed to find task.", onfe);
+						LOG.warn("Failed to find task.", onfe);
 					}
 				});
 			});
 		}, () -> {
-			log.warn("Task has no classifiers so tenant UUID cannot be determined.");
+			LOG.warn("Task has no classifiers so tenant UUID cannot be determined.");
 		});
 	}
 	
@@ -444,6 +522,69 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 		bldr.addAttribute(SchedulerTask.ALLOW_RUN_NOW, ttconfig != null && ttconfig.allowRunNow());
 		bldr.addAttribute(SchedulerTask.ALLOW_TENANT_RUN_NOW, ttconfig != null && ttconfig.allowTenantRunNow());
 		bldr.addAttribute(SchedulerTask.ALLOW_TENANT_CANCEL, ttconfig != null && ttconfig.allowTenantCancel());
+	}
+
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stop() {
+		executor.close();
+	}
+
+	@Override
+	public boolean isRunning() {
+		return executor != null && executor.isShutdown();
+	}
+
+	@Override
+	public boolean has(String path, Serializable key) {
+		return executor.has(path, key);
+	}
+
+	@Override
+	public Serializable get(String path, Serializable key) {
+		return executor.get(path, key);
+	}
+
+	@Override
+	public void put(String path, Serializable key, Serializable value) {
+		executor.put(path, key, value);
+	}
+
+	@Override
+	public boolean remove(String path, Serializable key) {
+		return executor.remove(path, key);
+	}
+
+	@Override
+	public <V extends Serializable> IdentifiableFuture<V> future(ClusterID clusterID) {
+		return executor.future(clusterID);
+	}
+
+	@Override
+	public boolean isLeader() {
+		return executor.leader();
+	}
+
+	private SchedulerTaskStatus calcStatus(IdentifiableFuture<?> future, TaskInfo info) {
+		if(info != null && info.lastError().isPresent()) {
+			return SchedulerTaskStatus.ERROR;
+		}
+		else if(future == null) {
+			return SchedulerTaskStatus.MISSING;
+		}
+		else {
+			if(future.info().active()) {
+				return SchedulerTaskStatus.RUNNING;
+			}
+			else {
+				return SchedulerTaskStatus.WAITING;
+			}
+		}
 	}
 
 }

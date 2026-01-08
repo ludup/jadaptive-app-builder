@@ -1,6 +1,7 @@
 package com.jadaptive.api.entity;
 
 import java.util.Collection;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +64,8 @@ public abstract class AbstractAssignableUUIDObjectServiceImpl <T extends Assigna
 	}
 
 	@Override
-	public Iterable<T> allObjects() {
-		return objectDatabase.searchObjects(getResourceClass());
+	public Iterable<T> allObjects(SearchField... searchField) {
+		return objectDatabase.getObjects(getResourceClass(), searchField);
 	}
 
 	@Override
@@ -75,7 +76,9 @@ public abstract class AbstractAssignableUUIDObjectServiceImpl <T extends Assigna
 	@Override
 	public Collection<? extends UUIDDocument> searchTable(int start, int length, SortOrder order, String sortField,
 			SearchField... fields) {
-		return objectDatabase.searchObjects(getResourceClass(), fields);
+		return StreamSupport.stream(objectDatabase.getObjects(getResourceClass(), fields).spliterator(), false).
+				skip(start).
+				limit(length).toList();
 	}
 
 	@Override
@@ -84,7 +87,8 @@ public abstract class AbstractAssignableUUIDObjectServiceImpl <T extends Assigna
 	}
 
 	@Override
+	@Deprecated(since = "0.6.0", forRemoval = true)
 	public Collection<T> collection(SearchField... fields) {
-		return objectDatabase.searchObjects(getResourceClass(), fields);
+		return StreamSupport.stream(allObjects(fields).spliterator(), false).toList();
 	}
 }

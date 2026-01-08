@@ -1,0 +1,14 @@
+package com.jadaptive.api.plugins;
+
+import java.io.IOException;
+import java.nio.file.Path;
+
+public interface PluginManagerService {
+	
+	boolean installed(String groupId, String artifactId) throws IOException;
+	
+	Path install(String groupId, String artifactId) throws IOException;
+
+	void setRepository(String url, String username, char[] password);
+	
+}

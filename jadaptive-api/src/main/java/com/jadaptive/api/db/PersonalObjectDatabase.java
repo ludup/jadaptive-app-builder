@@ -11,7 +11,10 @@ public interface PersonalObjectDatabase<T extends PersonalUUIDEntity> {
 
 	void saveOrUpdate(T obj, User user);
 
+	@Deprecated(since = "0.6.0")
 	Collection<T> getPersonalObjects(Class<T> resourceClass, User user, SearchField... search);
+
+	Iterable<T> allPersonalObjects(Class<T> resourceClass, User user, SearchField... search);
 
 	T getPersonalObject(Class<T> resourceClass, User user, SearchField... search);
 

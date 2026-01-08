@@ -110,8 +110,8 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 	}
 
 	@Override
-	public Iterable<T> allObjects() {
-		return objectDatabase.list(getResourceClass());
+	public Iterable<T> allObjects(SearchField... search) {
+		return objectDatabase.list(getResourceClass(), search);
 	}
 	
 	protected void beforeSave(T object) {
@@ -119,7 +119,7 @@ public abstract class AbstractUUIDObjectServceImpl<T extends UUIDEntity> extends
 	}
 	
 	@Override
-	public Collection<? extends UUIDDocument> searchTable(int start, int length, SortOrder sort, String sortField, SearchField... fields) {
+	public Iterable<? extends UUIDDocument> searchTable(int start, int length, SortOrder sort, String sortField, SearchField... fields) {
 		return objectDatabase.searchTable(getResourceClass(), start, length, sort, sortField, fields);
 	}
 	

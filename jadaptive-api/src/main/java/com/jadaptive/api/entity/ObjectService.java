@@ -45,8 +45,6 @@ public interface ObjectService {
 	
 	<T extends UUIDDocument> T peekStash(String resourceKey, Class<T> clz);
 
-	Collection<AbstractObject> convertObjects(Iterable<? extends UUIDDocument> objects);
-
 	AbstractObject fromStashToAbstractObject(String resourceKey);
 
 	long countObjects(String resourceKey, SearchField... fields);
@@ -64,8 +62,6 @@ public interface ObjectService {
 	AbstractObject createNew(String resourceKey);
 
 	void deleteAll(String resourceKey, String[] uuid);
-
-	Collection<AbstractObject> collection(String resourceKey, String searchField, String searchValue);
 
 	<T extends UUIDDocument> T objectFromReference(UUIDReference ref, Class<T> clz);
 

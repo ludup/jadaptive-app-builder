@@ -76,7 +76,7 @@ public class Application {
 				 out.println(" _/ |\\__,_|\\__,_|\\__,_| .__/ \\__|_| \\_/ \\___|");
 				 out.println("|__/                  |_|                    ");
 				 out.println("==============================================");
-				 out.println(String.format(":: ApplicationVersion %s ::", ApplicationVersion.getVersion()));
+				 out.println(String.format(":: Version %s ::", ApplicationVersion.getVersion()));
 			}
 			 
 		 });

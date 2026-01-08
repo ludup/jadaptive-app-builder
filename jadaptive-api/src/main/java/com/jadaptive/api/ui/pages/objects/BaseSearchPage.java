@@ -1,6 +1,7 @@
 package com.jadaptive.api.ui.pages.objects;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -64,6 +65,9 @@ public abstract class BaseSearchPage<T extends BaseSearchForm> extends TemplateP
 		super.beforeGenerateContent(document);
 		
 		tableView = templateClazz.getAnnotation(TableView.class);
+		if(tableView == null) {
+			throw new IllegalStateException(MessageFormat.format("{0} has no {1} annotation.", templateClazz.getName(), TableView.class.getName()));
+		}
 	}
 	
 	public void processForm(Document document, T form) throws IOException {

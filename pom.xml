@@ -62,6 +62,33 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies> 
+	
+	<dependencyManagement>
+	   <dependencies>
+            <dependency>
+                <groupId>com.sshtools</groupId>
+                <artifactId>garden-sched-lib</artifactId>
+                <version>0.5.2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.sshtools</groupId>
+                <artifactId>garden-sched-spring</artifactId>
+                <version>0.5.2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+	   </dependencies>
+	</dependencyManagement>
 
 	<properties>
 		<start-class>com.jadaptive.app.Application</start-class>

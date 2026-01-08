@@ -1,5 +1,6 @@
 package com.jadaptive.api.tenant;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 
@@ -11,7 +12,7 @@ public interface TenantRepository {
 
 	void deleteTenant(Tenant tenant) throws RepositoryException, ObjectException;
 	
-	Iterable<Tenant> listTenants() throws RepositoryException, ObjectException;
+	Iterable<Tenant> listTenants(SearchField... search) throws RepositoryException, ObjectException;
 
 //	void newSchema() throws RepositoryException, ObjectException;
 
