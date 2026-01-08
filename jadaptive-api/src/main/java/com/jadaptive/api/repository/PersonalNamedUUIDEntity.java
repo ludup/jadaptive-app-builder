@@ -7,7 +7,7 @@ import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.template.Validator;
 
 @UniqueIndex(columns = { "ownerUUID", "name" })
-public abstract class PersonalNamedUUIDEntity extends AssignableUUIDEntity implements NamedDocument {
+public abstract class PersonalNamedUUIDEntity extends PersonalUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 2690511827179922811L;
 
