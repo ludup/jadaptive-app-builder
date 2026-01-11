@@ -1,6 +1,7 @@
 package com.jadaptive.app;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -13,7 +14,7 @@ import com.jadaptive.app.permissions.ControllerInterceptor;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
+    public void addInterceptors(@NonNull InterceptorRegistry registry) {
         registry.addInterceptor(ApplicationServiceImpl.getInstance().autowire(new ControllerInterceptor()));
         registry.addInterceptor(ApplicationServiceImpl.getInstance().autowire(new OAuth2Interceptor()));
         registry.addInterceptor(ApplicationServiceImpl.getInstance().autowire(new LoggingInterceptor()));

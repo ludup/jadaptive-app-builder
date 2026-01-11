@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -36,7 +38,7 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	static final String HTTP_SESSION = "httpSession";
 	
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+	public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
 
 		HttpSession httpSession = (HttpSession) session.getAttributes().get(HTTP_SESSION);
 		
@@ -67,7 +69,7 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	}
 
 	@Override
-	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+	public void handleMessage(@NonNull WebSocketSession session, @NonNull WebSocketMessage<?> message) throws Exception {
 		
 		HttpSession httpSession = (HttpSession) session.getAttributes().get(HTTP_SESSION);
 		
@@ -97,7 +99,7 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	}
 
 	@Override
-	public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+	public void handleTransportError(@NonNull WebSocketSession session, @NonNull Throwable exception) throws Exception {
 		
 		HttpSession httpSession = (HttpSession) session.getAttributes().get(HTTP_SESSION);
 		
@@ -120,7 +122,7 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+	public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus closeStatus) throws Exception {
 		
 		HttpSession httpSession = (HttpSession) session.getAttributes().get(HTTP_SESSION);
 		
@@ -216,8 +218,8 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 
 
 	@Override
-	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
-			Map<String, Object> attributes) throws Exception {
+	public boolean beforeHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response, @NonNull WebSocketHandler wsHandler,
+			@NonNull Map<String, Object> attributes) throws Exception {
 		
 		if (request instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
@@ -231,8 +233,8 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	}
 
 	@Override
-	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
-			Exception exception) {
+	public void afterHandshake(@NonNull ServerHttpRequest request, @NonNull ServerHttpResponse response, @NonNull WebSocketHandler wsHandler,
+			@Nullable Exception exception) {
 		
 	}
 }

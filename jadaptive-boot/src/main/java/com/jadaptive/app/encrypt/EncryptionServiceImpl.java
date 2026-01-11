@@ -217,7 +217,7 @@ public class EncryptionServiceImpl implements EncryptionService {
 				String tmp = new String(decryptAES(encrypted, key, iv), "UTF-8");
 				return tmp;
 			} catch(IllegalArgumentException  iae) {
-				exception = new RepositoryException(
+				throw new RepositoryException(
 						"Detected likely key change. An attempt has been made to decrypt a piece of information that was encrypted "
 						+ "with a different key. This may be due to the current encrypt service configuration being changed, or  "
 						+ "the private key has been corrupted. It may also occur if this nodes Mongo database is shared with other "
@@ -225,11 +225,12 @@ public class EncryptionServiceImpl implements EncryptionService {
 						+ "recovery from this error other than correcting the encryption configuration or recovering the encryption "
 						+ "key. ", iae);
 			} catch (Exception e) {
-				exception = new RepositoryException(e.getMessage(), e);
+				throw new RepositoryException(e.getMessage(), e);
 			}
+			
 		}
+		throw new IllegalStateException("There appears to be no encryption provider installed!");
 		
-		throw exception;
 	}
 	
 	private byte[] encryptAES(String value, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, UnsupportedEncodingException, IllegalBlockSizeException, BadPaddingException {

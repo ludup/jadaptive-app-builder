@@ -5,6 +5,8 @@ import java.text.MessageFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -43,7 +45,7 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 	private final ThreadLocal<UncheckedCloseable> userContext = new ThreadLocal<>();
 
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+	public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler)
 			throws Exception {
 		if (handler instanceof HandlerMethod) {
 
@@ -113,8 +115,8 @@ public class OAuth2Interceptor implements HandlerInterceptor {
 	}
 
 	@Override
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-			ModelAndView modelAndView) throws Exception {
+	public void postHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler,
+			@Nullable ModelAndView modelAndView) throws Exception {
 		OAuth2Token.clear();
 		var uc = userContext.get();
 		if(uc != null) {

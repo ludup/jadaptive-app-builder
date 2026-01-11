@@ -1,6 +1,8 @@
 package com.jadaptive.app.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -18,15 +20,15 @@ public class DefaultTenantInterceptor implements HandlerInterceptor {
 	
 	
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+	public boolean preHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler)
 			throws Exception {
 		tenantService.setCurrentTenant(request);
 		return true;
 	}
 	
 	@Override
-	public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-			ModelAndView modelAndView) throws Exception {
+	public void postHandle(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler,
+			@Nullable ModelAndView modelAndView) throws Exception {
 		tenantService.clearCurrentTenant();
 	}
 }
