@@ -40,4 +40,6 @@ public interface PersonalObjectDatabase<T extends PersonalUUIDEntity> {
 	Long getPersonalObjectCount(Class<T> resourceClass, User user, SearchField... search);
 
 	T getPersonalObject(Class<T> resourceClass, User user, String uuid);
+
+	T getObject(Class<T> resourceClass, SearchField... search);
 }

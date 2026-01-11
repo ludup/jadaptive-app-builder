@@ -155,4 +155,9 @@ public class PersonalObjectDatabaseImpl<T extends PersonalUUIDEntity>
 	public T max(Class<T> resourceClass, String field, SearchField... fields) {
 		return objectDatabase.max(resourceClass, field, fields);
 	}
+
+	@Override
+	public T getObject(Class<T> resourceClass, SearchField... search) {
+		return objectDatabase.get(resourceClass, search);
+	}
 }
