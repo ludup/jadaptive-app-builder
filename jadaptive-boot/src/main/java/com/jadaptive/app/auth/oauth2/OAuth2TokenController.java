@@ -70,7 +70,7 @@ public class OAuth2TokenController extends AuthenticatedController {
 			response.sendRedirect("/app/ui/oauth2-device?" + request.getQueryString());
 	}
 
-	@RequestMapping(value = "oauth2/token", method = RequestMethod.POST, produces = { "application/json" })
+	@RequestMapping(value = "oauth2/token", method ={ RequestMethod.POST, RequestMethod.GET }, produces = { "application/json" })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.OK)
 	@AuthenticatedContext(system = true)
@@ -86,7 +86,7 @@ public class OAuth2TokenController extends AuthenticatedController {
 			if (clientId == null && requireApplicationRegistration)
 				throw new IllegalArgumentException("This type of authorize is unsupported.");
 
-			if(clientId != null) {
+			if(clientId != null && requireApplicationRegistration) {
 				try {
 					application = resourceService.getObjectByUUID(clientId);
 				}
@@ -276,7 +276,7 @@ public class OAuth2TokenController extends AuthenticatedController {
 		}
 	}
 	
-	@RequestMapping(value = "oauth2/device", method = RequestMethod.POST, produces = { "application/json" })
+	@RequestMapping(value = "oauth2/device", method = { RequestMethod.POST, RequestMethod.GET }, produces = { "application/json" })
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.OK)
 	@AuthenticatedContext(system = true)
@@ -288,15 +288,19 @@ public class OAuth2TokenController extends AuthenticatedController {
 			
 			var oauth2Config = config.getObject(OAuth2Configuration.class);
 			var requireApplicationRegistration =  oauth2Config.isRequireApplicationRegistration();
-			var clientId = request.getParameter("client_id");
-			if (clientId == null && requireApplicationRegistration)
-				throw new IllegalArgumentException("This type of authorize is unsupported.");
+			String clientId = null;
+			
+			if(requireApplicationRegistration) {
+				clientId = request.getParameter("client_id");
+				if (clientId == null)
+					throw new IllegalArgumentException("This type of authorize is unsupported.");
+			}
 
 			var scopes = request.getParameterValues("scope");
 			if(scopes == null)
 				scopes = new String[0];
 
-			if(clientId != null) {
+			if(clientId != null && requireApplicationRegistration) {
 				try {
 					application = resourceService.getObjectByUUID(clientId);
 				}

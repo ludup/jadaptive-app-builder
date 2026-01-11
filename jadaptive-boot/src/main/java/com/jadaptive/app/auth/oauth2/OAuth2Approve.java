@@ -162,7 +162,7 @@ public class OAuth2Approve extends AuthenticatedPage
 			if (isBlank(redirectUri))
 				throw new IllegalArgumentException("Redirect URI must be supplied.");
 			
-			if (isNotBlank(clientId)) {
+			if (isNotBlank(clientId) && config.getObject(OAuth2Configuration.class).isRequireApplicationRegistration()) {
 
 				var application = oAuth2ApplicationService.find(clientId);
 				
@@ -286,8 +286,10 @@ public class OAuth2Approve extends AuthenticatedPage
 
 		/* TODO how do you get i18n (of right locale) in code? */
 		
-		if(StringUtils.isBlank(oauthRequest.clientId())) {			
-			document.getElementById("detail").remove();
+		if(!config.getObject(OAuth2Configuration.class).isRequireApplicationRegistration()) {			
+			if(StringUtils.isBlank(oauthRequest.clientId())) {
+				document.getElementById("detail").remove();
+			}
 		}
 		else {
 			document.getElementById("detail").html(
