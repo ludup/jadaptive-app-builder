@@ -12,6 +12,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;
@@ -200,6 +202,31 @@ public class ApplicationConfig {
 		
 		pluginManager = new SpringPluginManager(pluginRoot) {
 
+//			@Override
+//			public void loadPlugins() {
+//				super.loadPlugins();
+//				
+//				/* WORKAROUND: Seems to be bug in pf4j where it doesn't  synchronize the last modified
+//				 * time of the plugin archives with the last mod time of their expanded directories or
+//				 * at least compares it incorrectly.  This means they always get expanded. The check is 
+//				 * there, so we just need to update the times ourselves and make sure the directory is
+//				 * newer. Its safest to round this to the nearest second as well.
+//				 */
+//				try(var str = Files.newDirectoryStream(pluginRoot, f -> !Files.isDirectory(f) && f.getFileName().toString().toLowerCase().endsWith("-jadx.zip"))) {
+//					for(var plugin : str) {
+//						var dir = PluginManagerService.expandedDirectoryForZipFile(plugin);
+//						if(Files.exists(dir)) {
+//							var time = FileTime.from(Files.getLastModifiedTime(plugin).to(TimeUnit.SECONDS), TimeUnit.SECONDS);
+//							Files.setLastModifiedTime(dir, time);
+//							Files.setLastModifiedTime(plugin, FileTime.from(time.to(TimeUnit.SECONDS) - 1, TimeUnit.SECONDS));
+//						}
+//					}
+//				}
+//				catch(IOException ioe) {
+//					throw new UncheckedIOException(ioe);
+//				}
+//			}
+
 			@Override
 			protected PluginLoader createPluginLoader() {
 				if(isHybrid()) {
@@ -307,7 +334,9 @@ public class ApplicationConfig {
 				pluginRepository.add(new JarPluginRepository(getPluginsRoot()), () -> {
 					return isNotDevelopment() || isHybrid();
 				});
-				pluginRepository.add(new DefaultPluginRepository(getPluginsRoot()), () -> {
+				pluginRepository.add(new DefaultPluginRepository(getPluginsRoot()) {
+					
+				}, () -> {
 					return isNotDevelopment() || isHybrid();
 				});
 

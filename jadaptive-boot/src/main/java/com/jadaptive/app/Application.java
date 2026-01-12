@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.security.KeyManagementException;
 import java.security.KeyPair;
 import java.security.KeyStore;
@@ -45,14 +47,16 @@ public class Application {
 		 File pluginsFolder = new File("plugins");
 
 		 if(pluginsFolder.exists()) {
-			 File[] files = pluginsFolder.listFiles();
-			 if(files!=null) {
-			 for(File file : files) {
-				 if(file.isFile() && file.getName().endsWith(".zip")) {
-					 continue;
+			 try(var str = Files.newDirectoryStream(pluginsFolder.toPath(), f -> Files.isDirectory(f))) {
+				 for(var path : str) {
+					 var zipFile = path.getParent().resolve(path.getFileName().toString() + ".zip");
+					 if(!Files.exists(zipFile)) {
+						 FileUtils.deleteQuietly(zipFile.toFile());
+					 }
 				 }
-				 FileUtils.deleteQuietly(file);
 			 }
+			 catch(IOException ioe) {
+				 throw new UncheckedIOException(ioe);
 			 }
 		 }
 		 

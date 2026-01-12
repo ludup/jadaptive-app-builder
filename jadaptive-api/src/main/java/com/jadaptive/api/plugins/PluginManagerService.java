@@ -13,4 +13,10 @@ public interface PluginManagerService {
 
 	boolean isUpdateable(String groupId, String artifactId) throws IOException;
 	
+	public static Path expandedDirectoryForZipFile(Path pdir) {
+		var fname = pdir.getFileName().toString();
+		var idx = fname.lastIndexOf('.');
+		return pdir.getParent().resolve(fname.substring(0, idx));
+	}
+	
 }

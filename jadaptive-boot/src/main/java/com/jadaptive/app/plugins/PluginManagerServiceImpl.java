@@ -76,13 +76,19 @@ public class PluginManagerServiceImpl implements PluginManagerService {
 
 							LOG.info("This is an upgrade, deleting other version {}", pdir);
 							recursiveDelete(pdir);
-							recursiveDelete(expandedDirectoryForZipFile(pdir));
+							var dir = PluginManagerService.expandedDirectoryForZipFile(pdir);
+							if(Files.exists(dir)) {
+								recursiveDelete(dir);
+							}
 						}
 					}
 				}
 				
 
-				recursiveDelete(expandedDirectoryForZipFile(pluginZip));
+				var dir = PluginManagerService.expandedDirectoryForZipFile(pluginZip);
+				if(Files.exists(dir)) {
+					recursiveDelete(dir);
+				}
 			}
 			catch(Exception ex) {
 				Files.delete(pluginZip);
@@ -175,12 +181,6 @@ public class PluginManagerServiceImpl implements PluginManagerService {
 			}
 		}
 		return Optional.empty();
-	}
-
-	private Path expandedDirectoryForZipFile(Path pdir) {
-		var fname = pdir.getFileName().toString();
-		var idx = fname.lastIndexOf('.');
-		return pdir.getParent().resolve(fname.substring(0, idx));
 	}
 
 	private boolean isFileForArtifact(String artifactId, Path f) {
