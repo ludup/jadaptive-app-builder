@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -26,11 +27,16 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.CompoundPluginRepository;
+import org.pf4j.DefaultPluginLoader;
 import org.pf4j.DefaultPluginRepository;
+import org.pf4j.DevelopmentPluginLoader;
 import org.pf4j.DevelopmentPluginRepository;
 import org.pf4j.ExtensionFactory;
 import org.pf4j.ExtensionFinder;
+import org.pf4j.JarPluginLoader;
 import org.pf4j.JarPluginRepository;
+import org.pf4j.PluginDescriptor;
+import org.pf4j.PluginLoader;
 import org.pf4j.PluginRepository;
 import org.pf4j.spring.SpringPluginManager;
 import org.pf4j.util.NameFileFilter;
@@ -116,6 +122,9 @@ public class ApplicationConfig {
 				if(repositories.containsKey("AppBuilder")) {
 					path = Paths.get(repositories.get("AppBuilder").iterator().next()).toAbsolutePath().toString();
 				}
+				if(path.equals(".")) {
+					path = System.getProperty("user.dir");
+				}
 				
 				pluginRoot = Paths.get(FileUtils.checkEndsWithSlash(path) + "plugins");
 				
@@ -192,6 +201,47 @@ public class ApplicationConfig {
 		pluginManager = new SpringPluginManager(pluginRoot) {
 
 			@Override
+			protected PluginLoader createPluginLoader() {
+				if(isHybrid()) {
+				    PluginLoader devLoader = new DevelopmentPluginLoader(this);
+				    PluginLoader jarLoader = new JarPluginLoader(this);
+				    PluginLoader zipLoader = new  DefaultPluginLoader(this);
+	
+				    return new PluginLoader() {
+				        @Override
+				        public boolean isApplicable(Path pluginPath) {
+				            return true;
+				        }
+	
+				        @Override
+				        public ClassLoader loadPlugin(Path pluginPath, PluginDescriptor pluginDescriptor) {
+				        	/* Is the path a directory that is NOT an expanded zip? */
+				            if (Files.isDirectory(pluginPath) &&
+				               !Files.exists(pluginPath.getParent().resolve(pluginPath.getFileName().toString() + ".zip"))) {
+				                return devLoader.loadPlugin(pluginPath, pluginDescriptor);
+				            }
+	
+				            String name = pluginPath.getFileName().toString().toLowerCase(Locale.ROOT);
+
+				            /* A jar? */
+				            
+				            if (name.endsWith(".jar")) {
+				                return jarLoader.loadPlugin(pluginPath, pluginDescriptor);
+				            }
+	
+				            /* Otherwise its a zip */
+				             return zipLoader.loadPlugin(pluginPath, pluginDescriptor);
+	
+				        }
+				    };
+				}
+				else {
+					/* Not hybrid loading, just do it the standard way */
+					return super.createPluginLoader();
+				}
+			}
+
+			@Override
 			protected ExtensionFinder createExtensionFinder() {
 				return new ScanningExtensionFinder(this);
 			}
@@ -249,19 +299,27 @@ public class ApplicationConfig {
 					
 					log.info("Disabled plugins: {}", String.join(", ", disabledPlugins));
 	
-					pluginRepository.add(new FilteredPluginRepository(getPluginsRoot()), this::isDevelopment);
+					pluginRepository.add(new FilteredPluginRepository(getPluginsRoot()), () -> {
+						return isDevelopment() || isHybrid();
+					});
 				}
 
 				pluginRepository.add(new JarPluginRepository(getPluginsRoot()), () -> {
-					return isNotDevelopment() || Boolean.getBoolean("jadaptive.loadPluginArchives");
+					return isNotDevelopment() || isHybrid();
 				});
-				pluginRepository.add(new DefaultPluginRepository(getPluginsRoot()), this::isNotDevelopment);
+				pluginRepository.add(new DefaultPluginRepository(getPluginsRoot()), () -> {
+					return isNotDevelopment() || isHybrid();
+				});
 
 				return pluginRepository;
 			}
 		};
 
 		return pluginManager;
+	}
+	
+	private boolean isHybrid() {
+		return Boolean.getBoolean("jadaptive.loadPluginArchives");
 	}
 
 	@PreDestroy

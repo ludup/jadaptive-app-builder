@@ -165,16 +165,16 @@ If you need to work on one of the core JAD framework module, i.e. `jadaptive-api
 
 ## Developing Plugins
 
-*Note, this part part is work in progress. It is not currently possible to mix plugins loaded with `Install` and plugins loaded with `Enable`. Expect an update soon!*
-
 In order to work on a plugin directly from it's source, you must adjust the `repositories` file. For example, say you wanted to work on the `jadaptive-sms-twilio` plugin. This exists in the `jadaptive-2fa` repository, which can be located at https://github.com/ludup/jadaptive-2fa.git. So this is the source repository you must clone.
+
+Whether you are creating a new plugin, or working on an existing one, you will have to clone one of the project repositories. If it a new plugin (or suite of plugins)  that it would not be appropriate to put in any of the existing repositories, you should should discuss it first on `#devtalk`. 
 
 ```
 cd /path/to/your/workspace
 git clone -b origin/0.6.0 https://github.com/ludup/jadaptive-2fa.git
 ```
 
-Then in the `repositories`, add the following.
+Then in the `repositories` file, add the following.
 
 ```
 GitBase /path/to/your/workspace
@@ -188,6 +188,22 @@ In the above ...
   * `GitBase` will always be the same.
   * There may be multiple `GitPlugins`, each named the same as the root directory of each Git repository.
   * There may be multiple `Enable` verbs, each with a plugin ID that exists in one of the `GitPlugins` roots.
+
+### Creating A New Plugin
+
+If you are creating a brand new plugin, the best advice I can offer at the moment is to copy an existing plugin structure and change the Maven artifact ID, and the `<properties>` in  the `pom.xml`. There will also be a `plugin.properties`. You can manually edit  this, or it will be  automatically generated when plugin meta-data is created (see below).
+  
+### Generate Developer Plugin Metadata
+
+There is an extra step that must be taken after adjusting the `repositories` or changing the Maven dependencies of any plugin  you might be working on.
+
+In the repository root of the project you have changed, run ..
+
+```
+mvn -DskipTests clean install
+```
+
+*TODO: Check if we *really* have to use `install`, is `package` not enough?*
   
 ## Product Repository Files
 
@@ -286,7 +302,6 @@ Install jadaptive-ssh-server
 Install jadaptive-ssh-keys
 Install jadaptive-ssh-terminal
 Install jadaptive-windows-users
-Install jadaptive-totp
 Install logonbox-authenticator-server
 Install jadaptive-duo
 Install jadaptive-users-google
