@@ -3,15 +3,20 @@ package com.jadaptive.app.plugins;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.http.HttpClient;
 import java.net.http.HttpClient.Builder;
+import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +41,7 @@ public class PluginManagerServiceImpl implements PluginManagerService {
 	}
 
 	@Override
-	public Path install(String groupId, String artifactId) throws IOException {
+	public Path installOrUpdate(String groupId, String artifactId) throws IOException {
 
 		var gav = gav(groupId, artifactId);
 		var repoBldr = new RemoteRepositoryBuilder().withRoot(repositoryUrl);
@@ -54,20 +59,62 @@ public class PluginManagerServiceImpl implements PluginManagerService {
 				throw new IllegalStateException(gav + " is already installed.");
 
 			LOG.info("Downloading from {}", resolved.uri());
-			var in = repo.download(fact, gav, resolved, Optional.empty());
-			try (var out = Files.newOutputStream(pluginZip)) {
-				in.transferTo(out);
+			
+			/* Download new extension, but only delete old ones the download
+			 * fails for any reason
+			 */
+			try {
+				var in = repo.download(fact, gav, resolved, Optional.empty());
+				try (var out = Files.newOutputStream(pluginZip)) {
+					in.transferTo(out);
+				}
+				
+				try(var str = Files.newDirectoryStream(pluginsDir, extensionFilter())) {
+					for(var pdir : str) {
+						if(!pdir.getFileName().toString().equals(resolved.filename()) &&
+							isFileForArtifact(artifactId, pdir)) {
+
+							LOG.info("This is an upgrade, deleting other version {}", pdir);
+							recursiveDelete(pdir);
+							recursiveDelete(expandedDirectoryForZipFile(pdir));
+						}
+					}
+				}
+				
+
+				recursiveDelete(expandedDirectoryForZipFile(pluginZip));
+			}
+			catch(Exception ex) {
+				Files.delete(pluginZip);
+				if(ex instanceof RuntimeException re) {
+					throw re;
+				}
+				else if(ex instanceof IOException ioe) {
+					throw ioe;
+				}
+				else {
+					throw new IOException("Failed to download.", ex);
+				}
 			}
 
 			return pluginZip;
 
 		} else {
-			throw new IllegalArgumentException("No results found.");
+			throw new IllegalArgumentException("No results found for " + groupId + ":" + artifactId);
 		}
 	}
 
 	@Override
 	public boolean installed(String groupId, String artifactId) throws IOException {
+		var pluginsDir = Paths.get("plugins");
+		if(Files.exists(pluginsDir)) {
+			return findArtifact(artifactId, pluginsDir).isPresent();
+		}
+		return false;
+	}
+
+	@Override
+	public boolean isUpdateable(String groupId, String artifactId) throws IOException {
 
 		var gav = gav(groupId, artifactId);
 		var repoBldr = new RemoteRepositoryBuilder().withRoot(repositoryUrl);
@@ -76,17 +123,19 @@ public class PluginManagerServiceImpl implements PluginManagerService {
 
 		var resolvedResult = repo.resolve(fact, gav);
 		if (resolvedResult.isPresent()) {
-
 			var resolved = resolvedResult.get();
 			var pluginsDir = Paths.get("plugins");
 			Files.createDirectories(pluginsDir);
 			var pluginZip = pluginsDir.resolve(resolved.filename());
-			if (Files.exists(pluginZip))
-				return true;
-
+			if (Files.exists(pluginZip)) {
+				return false;
+			}
+			else {
+				return findArtifact(artifactId, pluginsDir).isPresent();
+			}
 		}
-
-		return false;
+		else
+			throw new IllegalArgumentException("No results found for " + groupId + ":" + artifactId);
 	}
 
 	@Override
@@ -117,6 +166,31 @@ public class PluginManagerServiceImpl implements PluginManagerService {
 		return fact;
 	}
 
+	private Optional<Path> findArtifact(String artifactId, Path pluginsDir) throws IOException {
+		try(var str = Files.newDirectoryStream(pluginsDir, extensionFilter())) {
+			for(var f : str) {
+				if(isFileForArtifact(artifactId, f)) {
+					return Optional.of(f);
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	private Path expandedDirectoryForZipFile(Path pdir) {
+		var fname = pdir.getFileName().toString();
+		var idx = fname.lastIndexOf('.');
+		return pdir.getParent().resolve(fname.substring(0, idx));
+	}
+
+	private boolean isFileForArtifact(String artifactId, Path f) {
+		return f.getFileName().toString().matches(Pattern.quote(artifactId + "-") + "[0-9]+\\..*");
+	}
+
+	private Filter<? super Path> extensionFilter() {
+		return f -> !Files.isDirectory(f) && f.getFileName().toString().toLowerCase().endsWith("-jadx.zip");
+	}
+
 	private String calcVersion(boolean snapshot) {
 		var version = ApplicationVersion.getVersion("jadaptive-boot");
 		var idx = version.lastIndexOf('-');
@@ -136,5 +210,20 @@ public class PluginManagerServiceImpl implements PluginManagerService {
 		gavBldr.withVersion(calcVersion(true));
 		var gav = gavBldr.build();
 		return gav;
+	}
+	
+	private static void recursiveDelete(Path fileOrDirectory, FileVisitOption... options) {
+		try (var walk = Files.walk(fileOrDirectory, options)) {
+			walk.sorted(Comparator.reverseOrder()).forEach(p -> {
+				try {
+					Files.delete(p);
+				} catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			});
+		} 
+		catch(IOException ioe) {
+			throw new UncheckedIOException(ioe);
+		}
 	}
 }

@@ -60,6 +60,22 @@ import com.jadaptive.utils.FileUtils;
 @EnableScheduling
 public class ApplicationConfig {
 
+	private final class FilteredPluginRepository extends DevelopmentPluginRepository {
+		private FilteredPluginRepository(Path... pluginsRoots) {
+			super(pluginsRoots);
+		}
+
+		protected FileFilter createHiddenPluginFilter() {
+			OrFileFilter hiddenPluginFilter = (OrFileFilter) super.createHiddenPluginFilter();
+
+			for (String id : disabledPlugins) {
+				hiddenPluginFilter.addFileFilter(new NameFileFilter(id));
+			}
+
+			return hiddenPluginFilter;
+		}
+	}
+
 	static Logger log = LoggerFactory.getLogger(ApplicationConfig.class);
 
 	private SpringPluginManager pluginManager;
@@ -77,12 +93,15 @@ public class ApplicationConfig {
 
 	@Bean
 	public SpringPluginManager pluginManager() {
+		Collection<String> installed = new ArrayList<String>();
 
 		if(Boolean.getBoolean("jadaptive.development")) {
 		
 			try {
 				repositories = getConfiguration(repositoriesFile);
 				disabledPlugins = new HashSet<>();
+				
+				boolean autoUpdate = repositories.containsKey("AutoUpdate");
 				
 				if (repositories.containsKey("Disable")) {
 					disabledPlugins.addAll(repositories.get("Disable"));
@@ -113,6 +132,58 @@ public class ApplicationConfig {
 					repoBase = pluginRoot.getParent().getParent();
 				}
 				
+
+				
+				Collection<String> mavenRepositories = repositories.getOrDefault("MavenRepository", Collections.emptyList());
+				for(var maven : mavenRepositories) {
+					var parts = maven.split("\\s+");
+					pluginManagerService.setRepository(
+						parts[0].trim(), 
+						parts.length > 1 ? parts[1] : null, 
+						parts.length > 2 ? parts[2].trim().toCharArray() : null
+					);
+					break;
+				}
+
+				for (var ipath : repositories.getOrDefault("Install", Collections.emptyList())) {
+					var parts = ipath.split(":");
+					
+					String group, artifact;
+					
+					if(parts.length == 1) {
+						artifact = parts[0];
+						if(artifact.startsWith("logonbox-")) {
+							group = "com.logonbox";
+						}
+						else if(artifact.startsWith("jadaptive-")) {
+							group = "com.jadaptive";
+						}
+						else if(artifact.startsWith("sshtools-")) {
+							group = "com.sshtools";
+						}
+						else {
+							throw new IllegalArgumentException("Extension `" + ipath + "` specifier invalid. Use <groupdId>:<artifactId>");
+						}
+					}
+					else if(parts.length == 2) {
+						group = parts[0];
+						artifact = parts[1];
+					}
+					else {
+						throw new IllegalArgumentException("Extension `" + ipath + "` specifier invalid. Use <groupdId>:<artifactId>");
+					}
+					
+					try {
+						var isInstalled = pluginManagerService.installed(group, artifact); 
+						if(!isInstalled || ( autoUpdate && isInstalled && pluginManagerService.isUpdateable(group, artifact) )) {
+							pluginManagerService.installOrUpdate(group, artifact);
+						}
+						installed.add(artifact);
+					} catch (IOException e) {
+						throw new UncheckedIOException(e);
+					}
+				}
+				
 			} catch (IOException e) {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
@@ -139,56 +210,6 @@ public class ApplicationConfig {
 					if (repositories.containsKey("PluginPath")) {
 						for (String pluginPath : repositories.get("PluginPath")) {
 							pluginRepository.add(new SinglePluginRepository(Paths.get(pluginPath)));
-						}
-					}
-					
-					Collection<String> mavenRepositories = repositories.getOrDefault("MavenRepository", Collections.emptyList());
-					for(var maven : mavenRepositories) {
-						var parts = maven.split("\\s+");
-						pluginManagerService.setRepository(
-							parts[0].trim(), 
-							parts.length > 1 ? parts[1] : null, 
-							parts.length > 2 ? parts[2].trim().toCharArray() : null
-						);
-						break;
-					}
-
-					Collection<String> installed = new ArrayList<String>();
-					for (var path : repositories.getOrDefault("Install", Collections.emptyList())) {
-						var parts = path.split(":");
-						
-						String group, artifact;
-						
-						if(parts.length == 1) {
-							artifact = parts[0];
-							if(artifact.startsWith("logonbox-")) {
-								group = "com.logonbox";
-							}
-							else if(artifact.startsWith("jadaptive-")) {
-								group = "com.jadaptive";
-							}
-							else if(artifact.startsWith("sshtools-")) {
-								group = "com.sshtools";
-							}
-							else {
-								throw new IllegalArgumentException("Extension `" + path + "` specifier invalid. Use <groupdId>:<artifactId>");
-							}
-						}
-						else if(parts.length == 2) {
-							group = parts[0];
-							artifact = parts[1];
-						}
-						else {
-							throw new IllegalArgumentException("Extension `" + path + "` specifier invalid. Use <groupdId>:<artifactId>");
-						}
-						
-						try {
-							if(!pluginManagerService.installed(group, artifact)) {
-								pluginManagerService.install(group, artifact);
-							}
-							installed.add(artifact);
-						} catch (IOException e) {
-							throw new UncheckedIOException(e);
 						}
 					}
 
@@ -223,32 +244,12 @@ public class ApplicationConfig {
 							disabledPlugins.removeAll(enabled);
 						}
 						
-						pluginRepository.add(new DevelopmentPluginRepository(pluginsPath) {
-							protected FileFilter createHiddenPluginFilter() {
-								OrFileFilter hiddenPluginFilter = (OrFileFilter) super.createHiddenPluginFilter();
-	
-								for (String id : disabledPlugins) {
-									hiddenPluginFilter.addFileFilter(new NameFileFilter(id));
-								}
-	
-								return hiddenPluginFilter;
-							}
-						});
+						pluginRepository.add(new FilteredPluginRepository(pluginsPath));
 					}
 					
 					log.info("Disabled plugins: {}", String.join(", ", disabledPlugins));
 	
-					pluginRepository.add(new DevelopmentPluginRepository(getPluginsRoot()) {
-						protected FileFilter createHiddenPluginFilter() {
-							OrFileFilter hiddenPluginFilter = (OrFileFilter) super.createHiddenPluginFilter();
-	
-							for (String id : disabledPlugins) {
-								hiddenPluginFilter.addFileFilter(new NameFileFilter(id));
-							}
-	
-							return hiddenPluginFilter;
-						}
-					}, this::isDevelopment);
+					pluginRepository.add(new FilteredPluginRepository(getPluginsRoot()), this::isDevelopment);
 				}
 
 				pluginRepository.add(new JarPluginRepository(getPluginsRoot()), () -> {

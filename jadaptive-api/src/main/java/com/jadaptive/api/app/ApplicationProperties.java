@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 public class ApplicationProperties {
 
-	static Logger log = LoggerFactory.getLogger(ApplicationProperties.class);
 	
 	static ApplicationProperties instance = new ApplicationProperties();
     static Properties properties;
@@ -153,9 +152,12 @@ public class ApplicationProperties {
 				throw new IllegalStateException(e.getMessage(), e);
 			}
 		}
+		System.setProperty("log4j.configurationFile", log4j.getAbsolutePath());
 		
 		
 		properties = new Properties();
+		
+		Logger log = LoggerFactory.getLogger(ApplicationProperties.class);
 		for(File file : Arrays.asList(confdFolder.listFiles(f -> f.isFile() && f.getName().endsWith(".properties"))).stream().sorted().toList()) {
 			log.info("Loading properties file {}", file.getName());
 			try {
@@ -165,7 +167,7 @@ public class ApplicationProperties {
 			}
 		}
 		
-		checkLoaded();
+		checkLoaded(log);
 	}
 	
 	private void checkBouncyCastleProvider() {
@@ -235,7 +237,7 @@ public class ApplicationProperties {
 	}
 
 
-	private static void checkLoaded() {
+	private static void checkLoaded(Logger log) {
 		if(Objects.isNull(properties)) {
 			log.warn("No jadaptive.properties has been loaded. Using application defaults");
 		}

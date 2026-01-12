@@ -73,6 +73,7 @@ The primary file for configuration of how to obtain or locate *Plugins* is handl
 
 ```
 AppBuilder .
+AutoUpdate
 
 # The below is all on one line
 MavenRepository https://artifactory.jadaptive.com/libs-snapshots-local YOUR_ARTIFACTORY_USERNAME YOUR_ARTIFACTORY_PASSWORD
@@ -87,17 +88,23 @@ Install jadaptive-templates
 Install jadaptive-default-resources
 ```
 
-*In the above `MavenRepository` line, you will need to use your [https://artifactory.jadaptive.com](Artifactory) username and password. *
+*In the above `MavenRepository` line, you will need to use your [https://artifactory.jadaptive.com](Artifactory) username and password.*
 
-This configuration is a minimum required to be able to run a viable server. From this point, you can add more plugins using the `Install` verb, or if you wish to use a plugin in its source format, see [#developing-plugins](Developing Plugins).
+This configuration is a minimum required to be able to run a viable server. From this point, you can add more plugins using the `Install` verb, or if you wish to use a plugin in its source format, see [Developing Plugins](#developing-plugins).
 
-To install all the plugins for a particular product, see [#product-repository-files](Product Repository Files).
+To install all the plugins for a particular product, see [Product Repository Files](#product-repository-files).
 
-The full format for the `Install` verb is `Install [<groupId>:]<artifactId>`. If `groupId` is ommitted, then it will automatically detected as `com.jadaptive` if the artifact ID starts with `jadaptive-*`.  Similiarly, plugins that start with `logonbox-` will use the `com.logonbox` group, and again `sshtools-*` for `com.sshtools`.  If the plugin does not match this patter, the group ID *must* be provided, e.g. one such plugin is the nodal VPN plugin.
+The full format for the `Install` verb is `Install [<groupId>:]<artifactId>`. If `groupId` is ommitted, then it will automatically detected as `com.jadaptive` if the artifact ID starts with `jadaptive-*`.  Similiarly, plugins that start with `logonbox-` will use the `com.logonbox` group, and again `sshtools-*` for `com.sshtools`.  If the plugin does not match this pattern, the group ID *must* be provided, e.g. one such plugin is the nodal VPN plugin.
 
 ```
 Install com.jadaptive:nodal-vpn-server
 ```
+
+#### Automatic Updates
+
+If you add the `AutoUpdate` verb to the `repositories` file. This will ensure any `Install` extensions are kept up-to-date and using the latest `SNAPSHOT` version available in the repository.
+
+This is at the expense of a slightly slower startup, as every extension is checked on every boot.
 
 ### Database
 
@@ -108,6 +115,24 @@ Before you start the server for the first time, create the directory `conf.d`, a
 ```
 mongodb.embedded=false
 mongodb.connection=mongodb://blue.southpark.lan:27017
+```
+
+You will also likely need to configure Mongo so that transactions are supported. Run the following command using Mongo's command line tool `mongosh`.
+
+```bash
+mongosh --port 27017 << MONGO_SCRIPT
+use admin
+db.runCommand(
+   {
+     replSetInitiate : {
+        _id : 'rs0',
+         members : [
+             {_id : 0, host : '127.0.0.1:27017'},
+         ]
+    }
+   }
+)
+MONGO_SCRIPT
 ```
 
 If you wish to try the embedded database, either remove `database.properties`, or just comment out the above two lines if they exist.
@@ -132,9 +157,15 @@ Simply create a new launcher in your IDE to the the class `com.jadaptive.app.App
 -Djadaptive.development=true
 ```
 
-The UI will be available at `https://localhost:7443`. 
+The UI will be available at `https://localhost:7443`.
+
+## Developing The Core
+
+If you need to work on one of the core JAD framework module, i.e. `jadaptive-api` or `jadaptive-boot`, then simply clone the main repository at https://github.com/ludup/jadaptive-app-builder.git to your workspace and import into your IDE. If you IDE is correctly configured and the version matches, your `_run` project will then automatically run from the source module instead of from pre-built Maven artifacts.
 
 ## Developing Plugins
+
+*Note, this part part is work in progress. It is not currently possible to mix plugins loaded with `Install` and plugins loaded with `Enable`. Expect an update soon!*
 
 In order to work on a plugin directly from it's source, you must adjust the `repositories` file. For example, say you wanted to work on the `jadaptive-sms-twilio` plugin. This exists in the `jadaptive-2fa` repository, which can be located at https://github.com/ludup/jadaptive-2fa.git. So this is the source repository you must clone.
 
@@ -202,7 +233,6 @@ Install jadaptive-ssh-server
 Install jadaptive-ssh-terminal
 Install jadaptive-ssh-keys
 Install jadaptive-windows-users
-Install jadaptive-totp
 Install logonbox-authenticator-server
 Install jadaptive-duo
 Install jadaptive-users-google
