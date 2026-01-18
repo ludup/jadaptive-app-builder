@@ -64,7 +64,12 @@ public abstract class BaseSearchPage<T extends BaseSearchForm> extends TemplateP
 		
 		super.beforeGenerateContent(document);
 		
-		tableView = templateClazz.getAnnotation(TableView.class);
+		Class<?> tmp = templateClazz;
+		do {
+			tableView = tmp.getAnnotation(TableView.class);
+			tmp = tmp.getSuperclass();
+		} while(tableView == null && !tmp.equals(Object.class));
+		
 		if(tableView == null) {
 			throw new IllegalStateException(MessageFormat.format("{0} has no {1} annotation.", templateClazz.getName(), TableView.class.getName()));
 		}

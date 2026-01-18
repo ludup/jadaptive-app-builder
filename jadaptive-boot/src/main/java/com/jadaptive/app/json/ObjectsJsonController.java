@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectService;
@@ -268,6 +269,64 @@ public class ObjectsJsonController extends BootstrapTableController<AbstractObje
 						setupSystemContext();
 						try {
 							return objectService.count(resourceKey, template.getNameField(), searchPattern);
+						} finally {
+							clearUserContext();
+						}
+					}
+				});
+
+		} catch(Throwable e) {
+			if(log.isErrorEnabled()) {
+				log.error("GET api/objects/{}/table", resourceKey, e);
+			}
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+	
+	@RequestMapping(value="/app/api/filteredReferences/{resourceKey}/table", method = { RequestMethod.POST, RequestMethod.GET }, produces = {"application/json"})
+	@ResponseBody
+	@ResponseStatus(value=HttpStatus.OK)
+	public BootstrapTableResult<UUIDReference> filteredReferenceObjects(HttpServletRequest request, 
+			@PathVariable String resourceKey,
+			@RequestParam(required=false, defaultValue = "") String sort,
+			@RequestParam(required=false, defaultValue = "asc") String order,
+			@RequestParam(required=false, defaultValue = "0") int offset,
+			@RequestParam(required=false, defaultValue = "100") int limit) throws RepositoryException, UnknownEntityException, ObjectException {
+		
+		try {
+			
+			ObjectTemplate template = templateService.get(resourceKey);
+			
+			return processDataReferencesRequest(request, 
+					template,
+				new BootstrapTablePageProcessor() {
+
+					@Override
+					public Collection<?> getPage(String searchColumn, String searchPattern, int start,
+							int length, String sortBy)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						setupSystemContext();
+						try {
+							return objectService.table(resourceKey, template.getNameField(), 
+									searchPattern, offset, limit,
+									StringUtils.defaultIfEmpty(sort, template.getDefaultColumn()), 
+									SortOrder.valueOf(order.toUpperCase()),
+									SearchField.eq("resourceKey", resourceKey));
+						} finally {
+							clearUserContext();
+						}
+					}
+
+					@Override
+					public Long getTotalCount(String searchColumn, String searchPattern)
+							throws UnauthorizedException,
+							AccessDeniedException {
+						setupSystemContext();
+						try {
+							return objectService.count(resourceKey, 
+									template.getNameField(), searchPattern,
+									SearchField.eq("resourceKey", resourceKey));
 						} finally {
 							clearUserContext();
 						}

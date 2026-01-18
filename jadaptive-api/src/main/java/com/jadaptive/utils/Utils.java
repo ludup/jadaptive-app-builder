@@ -63,6 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriUtils;
 
+import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.NamedDocument;
 
 public class Utils {
@@ -1063,5 +1064,15 @@ public class Utils {
             e.printStackTrace();
         }
     }
+
+	public static <T> T[] addArray(T[] arr, T obj) {
+		// Copies the array and increases length by 1
+        T[] result = Arrays.copyOf(arr, arr.length + 1);
+        
+        // Assign the new item to the last index
+        result[result.length - 1] = obj;
+        
+        return result;
+	}
 	
 }

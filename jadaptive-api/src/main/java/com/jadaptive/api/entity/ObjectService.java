@@ -24,7 +24,7 @@ public interface ObjectService {
 
 	void delete(String resourceKey, String uuid) throws RepositoryException, ObjectException;
 
-	long count(String resourceKey, String searchField, String searchValue);
+	long count(String resourceKey, String searchField, String searchValue, SearchField... fields);
 
 	FormHandler getFormHandler(String handler);
 
@@ -55,7 +55,7 @@ public interface ObjectService {
 	UUIDDocument toUUIDDocument(AbstractObject entity);
 
 	Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit,
-			String sortColumn, SortOrder order);
+			String sortColumn, SortOrder order, SearchField... fields);
 
 	void cascadeDelete(ObjectTemplate template, AbstractObject e);
 

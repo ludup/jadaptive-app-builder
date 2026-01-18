@@ -59,6 +59,7 @@ import com.jadaptive.app.db.MongoEntity;
 import com.jadaptive.app.tenant.AbstractSystemObjectDatabaseImpl;
 import com.jadaptive.app.tenant.AbstractTenantAwareObjectDatabaseImpl;
 import com.jadaptive.utils.UUIDObjectUtils;
+import com.jadaptive.utils.Utils;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.description.type.TypeDescription;
@@ -822,27 +823,31 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 
 	@Override
-	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit, String sortColumn, SortOrder order) {
+	public Collection<AbstractObject> table(String resourceKey, String searchField, String searchValue, int offset, int limit, String sortColumn, SortOrder order, SearchField... fields) {
 		ObjectTemplate template = templateService.get(resourceKey);
 
 		switch(template.getScope()) {
 		case PERSONAL:
 			return objectRepository.table(template, offset, limit, sortColumn, order,
-					SearchUtils.generateSearch(searchField, searchValue, true, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+					SearchUtils.generateSearch(searchField, searchValue, true, template, 
+							Utils.addArray(fields,
+									SearchField.eq("ownerUUID", getCurrentUser().getUuid()))));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.table(template, offset, limit, sortColumn, order,
-						SearchUtils.generateSearch(searchField, searchValue, true, template));
+						SearchUtils.generateSearch(searchField, searchValue, true, template, fields));
 			}
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return objectRepository.table(template, offset, limit, sortColumn, order,
-					SearchUtils.generateSearch(searchField, searchValue, true, template, SearchField.or(
+					SearchUtils.generateSearch(searchField, searchValue, true, template, 
+							Utils.addArray(fields,
+							SearchField.or(
 							SearchField.all("users.uuid", getCurrentUser().getUuid()),
-							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))))));			
 		case GLOBAL:
 		default:
 			return tableViaObjectBean(template, offset, limit, SortOrder.ASC, searchField, 
-					SearchUtils.generateSearch(searchField, searchValue, true, template));
+					SearchUtils.generateSearch(searchField, searchValue, true, template, fields));
 		}
 		
 	}
@@ -858,7 +863,8 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		switch(template.getScope()) {
 		case PERSONAL:
 			return objectRepository.table(template, offset, limit, sortColumn, order,
-					SearchUtils.combine(fields, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+					SearchUtils.combine(fields, 
+							SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.table(template, offset, limit, sortColumn, order, fields);
@@ -886,23 +892,27 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 	}
 	
 	@Override
-	public long count(String resourceKey, String searchField, String searchValue) {
+	public long count(String resourceKey, String searchField, String searchValue, SearchField... fields) {
 		ObjectTemplate template = templateService.get(resourceKey);
 
 		switch(template.getScope()) {
 		case PERSONAL:
 			return objectRepository.count(template, 
-					SearchUtils.generateSearch(searchField, searchValue, true, template, SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+					SearchUtils.generateSearch(searchField, searchValue, true, template, 
+							Utils.addArray(fields,
+							SearchField.eq("ownerUUID", getCurrentUser().getUuid()))));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.count(template,  
-						SearchUtils.generateSearch(searchField, searchValue, true, template));
+						SearchUtils.generateSearch(searchField, searchValue, true, template, fields));
 			}
 			Collection<Role> userRoles = roleService.getRolesByUser(getCurrentUser());
 			return objectRepository.count(template, 
-					SearchUtils.generateSearch(searchField, searchValue, true, template, SearchField.or(
+					SearchUtils.generateSearch(searchField, searchValue, true, template, 
+							
+							Utils.addArray(fields,SearchField.or(
 							SearchField.all("users.uuid", getCurrentUser().getUuid()),
-							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));			
+							SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))))));			
 		case GLOBAL:
 		default:
 			return countViaObjectBean(template, SearchUtils.generateSearch(searchField, searchValue, true, template));

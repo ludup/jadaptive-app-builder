@@ -697,14 +697,23 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			String objectType = field.getValidationValue(ValidationType.RESOURCE_KEY);
 			ObjectTemplate objectTemplate = templateService.get(objectType);
 			List<NamePairValue> values = new ArrayList<>();
+			
+			String filterTo = fieldView.getField().getMetaValue("filterTo", "");
+			if(StringUtils.isNotBlank(filterTo)) {
+				objectType = filterTo;
+			}
+			
 			if(Objects.nonNull(obj)) {
 				for(Object o : obj.getObjectCollection(field.getResourceKey())) {
 					if(o instanceof String) {
 						AbstractObject referencedObject = objectService.get(objectType, (String)o);
 						values.add(new NamePairValue(referencedObject.getValue(objectTemplate.getNameField()).toString(), (String)o));
 					} else if(o instanceof AbstractObject) {
+						
 						AbstractObject ref = (AbstractObject) o;
-						values.add(new NamePairValue((String)ref.getValue("name"), ref.getUuid()));
+						if(StringUtils.isBlank(filterTo) || ref.getResourceKey().equals(filterTo)) {
+							values.add(new NamePairValue((String)ref.getValue("name"), ref.getUuid()));
+						}
 					}
 				}
 			}
@@ -714,11 +723,19 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					fieldView.getRenderer() == FieldRenderer.OPTIONAL) {
 				return;
 			}
-
-			String url = fieldView.getField().getMetaValue("url", String.format("/app/api/%s/%s/table", 
+			
+			String url;
+			if(StringUtils.isNotBlank(filterTo)) {
+				url = fieldView.getField().getMetaValue("url", 
+						String.format("/app/api/filteredReferences/%s/table", 
+						objectType));
+			} else {
+				url = fieldView.getField().getMetaValue("url", String.format("/app/api/%s/%s/table", 
 					currentTemplate.get().getScope() == ObjectScope.PERSONAL ? "personal" : "references",
 					objectType));
+			}
 			url = url.replace("{uuid}", Objects.nonNull(obj) && StringUtils.isNotBlank(obj.getUuid()) ? obj.getUuid() : "");
+
 			CollectionSearchFormInput render = new CollectionSearchFormInput(
 					currentTemplate.get(), fieldView, 
 					url,
