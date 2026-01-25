@@ -527,10 +527,13 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Override
 	public AuthenticationState getCurrentState() {
+		return getCurrentState(Request.get().getSession());
+	}
+	@Override
+	public AuthenticationState getCurrentState(HttpSession httpSession) {
 
 		try {
 
-			HttpSession httpSession = Request.get().getSession();
 			AuthenticationState state = (AuthenticationState) httpSession
 					.getAttribute(AUTHENTICATION_STATE_ATTR);
 			if (Objects.isNull(state)) {
@@ -826,6 +829,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		HttpSession httpSession = Request.get().getSession();
 		return Objects.nonNull((AuthenticationState) httpSession
 					.getAttribute(AUTHENTICATION_STATE_ATTR));
+	}
+
+	@Override
+	public Collection<AuthenticationProvider> providers() {
+		return new ArrayList<>(authenticationProvidersByUUID.values());
 	}
 	
 	

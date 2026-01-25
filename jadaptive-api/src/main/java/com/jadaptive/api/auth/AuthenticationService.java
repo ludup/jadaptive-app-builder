@@ -15,6 +15,7 @@ import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.user.User;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionBindingEvent;
 import jakarta.servlet.http.HttpSessionBindingListener;
 
@@ -131,5 +132,9 @@ public interface AuthenticationService {
 	boolean requiresPostAuthentication(AuthenticationPolicy policy, User user);
 
 	boolean hasAuthenticationState();
+
+	AuthenticationState getCurrentState(HttpSession httpSession);
+
+    Collection<AuthenticationProvider> providers();
 	
 }
