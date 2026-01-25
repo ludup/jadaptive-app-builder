@@ -67,7 +67,5 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 	void deleteIfExists(Class<T> resourceClass, SearchField... fields) throws RepositoryException, ObjectException;
 
 	Double sumDoubleValues(Class<T> resourceClass, String groupBy, SearchField... fields);
-	
-	long getNextSequence(String sequenceName);
 
 }

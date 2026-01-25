@@ -1,6 +1,7 @@
 package com.jadaptive.app;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.List;
@@ -24,8 +25,10 @@ import org.springframework.web.socket.adapter.standard.StandardWebSocketSession;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import com.jadaptive.api.app.App;
+import com.jadaptive.api.app.J;
 import com.jadaptive.api.app.PluginWebSocketHandler;
 import com.jadaptive.api.app.WebSocketClient;
+import com.jadaptive.api.app.WebSocketClient.RunnableWithIOException;
 import com.jadaptive.api.app.WebSocketOutput;
 import com.jadaptive.api.session.SessionUtils;
 
@@ -37,28 +40,40 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	
 	static final String HTTP_SESSION = "httpSession";
 	
-	@Override
-	public void afterConnectionEstablished(@NonNull WebSocketSession session) throws Exception {
-
-		HttpSession httpSession = (HttpSession) session.getAttributes().get(HTTP_SESSION);
-		
-		if(Objects.isNull(httpSession)) {
-			onConnect(session);
+	
+	private void doInSessionMaybe(@NonNull WebSocketSession socket, RunnableWithIOException r) throws IOException {
+		/**
+		 * LDP = HttpSession does not mean a user is logged on? Check the JAD session for state.
+		 */
+		HttpSession httpSession = (HttpSession) socket.getAttributes().get(HTTP_SESSION);
+		if(Objects.isNull(httpSession) || !J.b(SessionUtils.class).isLoggedOn()) {
+			r.run(httpSession);
 		} else {
-			App.bean(SessionUtils.class).doInSession(httpSession, ()->{
-				onConnect(session);
+			J.b(SessionUtils.class).doInSession(httpSession, ()->{
+				r.run(httpSession);
 			});
 		}
+	}
+	@Override
+	public void afterConnectionEstablished(@NonNull WebSocketSession socket) throws Exception {
+
+		doInSessionMaybe(socket, (session)->{
+			onConnect(socket);
+		});
 		
 		
 	}
 
 	private void onConnect(WebSocketSession session) throws IOException {
 		StandardWebSocketSession s = (StandardWebSocketSession) session;
-		String path = s.getUri().getPath().substring(8);
+		URI uri = s.getUri();
+		if(uri==null) {
+			throw new IOException("Unexpected null URI");
+		}
+ 		String path = uri.getPath().substring(8);
 		String handler = path.indexOf('/') > -1 ? path.substring(0, path.indexOf('/')) : path;
 
-		for(PluginWebSocketHandler wshandler : App.beans(PluginWebSocketHandler.class)) {
+		for(PluginWebSocketHandler<?> wshandler : App.beans(PluginWebSocketHandler.class)) {
 			if(wshandler.handles(handler)) {
 				PluginWebSocketClient client;
 				session.getAttributes().put("handler", wshandler);
@@ -71,15 +86,10 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	@Override
 	public void handleMessage(@NonNull WebSocketSession session, @NonNull WebSocketMessage<?> message) throws Exception {
 		
-		HttpSession httpSession = (HttpSession) session.getAttributes().get(HTTP_SESSION);
-		
-		if(Objects.isNull(httpSession)) {
+		doInSessionMaybe(session, (httpSession)->{
 			onMessage(session, message);
-		} else {
-			App.bean(SessionUtils.class).doInSession(httpSession, ()->{
-				onMessage(session, message);
-			});
-		}
+		});
+
 	}
 
 	private void onMessage(WebSocketSession session, WebSocketMessage<?> message) throws IOException {
@@ -101,15 +111,9 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	@Override
 	public void handleTransportError(@NonNull WebSocketSession session, @NonNull Throwable exception) throws Exception {
 		
-		HttpSession httpSession = (HttpSession) session.getAttributes().get(HTTP_SESSION);
-		
-		if(Objects.isNull(httpSession)) {
+		doInSessionMaybe(session, (httpSession)->{
 			onError(session, exception);
-		} else {
-			App.bean(SessionUtils.class).doInSession(httpSession, ()->{
-				onError(session, exception);
-			});
-		}
+		});
 	}
 
 	private void onError(WebSocketSession session, Throwable exception) {
@@ -124,15 +128,10 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	@Override
 	public void afterConnectionClosed(@NonNull WebSocketSession session, @NonNull CloseStatus closeStatus) throws Exception {
 		
-		HttpSession httpSession = (HttpSession) session.getAttributes().get(HTTP_SESSION);
-		
-		if(Objects.isNull(httpSession)) {
+		doInSessionMaybe(session, (httpSession)->{
 			onClose(session, closeStatus);
-		} else {
-			App.bean(SessionUtils.class).doInSession(httpSession, ()->{
-				onClose(session, closeStatus);
-			});
-		}
+		});
+	
 	}
 
 	private void onClose(WebSocketSession session, CloseStatus closeStatus) {
@@ -149,12 +148,16 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	}
 
 	
-	class PluginWebSocketClient implements WebSocketClient {
+	class PluginWebSocketClient<T extends WebSocketOutput> implements WebSocketClient<T> {
 		
 		StandardWebSocketSession session;
-		WebSocketOutput attachment;
+		T attachment;
 		public PluginWebSocketClient(StandardWebSocketSession session) {
 			this.session = session;
+		}
+		
+		public void doInSession(RunnableWithIOException r) throws IOException {
+			doInSessionMaybe((WebSocketSession)session, r);
 		}
 		
 		@Override
@@ -206,12 +209,12 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 		}
 
 		@Override
-		public void setAttachment(WebSocketOutput attachment) {
+		public void setAttachment(T attachment) {
 			this.attachment = attachment;
 		}
 
 		@Override
-		public WebSocketOutput getAttachment() {
+		public T getAttachment() {
 			return attachment;
 		}
 	}

@@ -11,7 +11,7 @@ import com.mongodb.client.model.changestream.ChangeStreamDocument;
 
 public interface DocumentDatabase {
 
-	void watch(String table, String database, Consumer<ChangeStreamDocument<Document>> consumer);
+	
 
 	void insertOrUpdate(Document document, String table, String database);
 
@@ -71,6 +71,5 @@ public interface DocumentDatabase {
 
 	void doInTransaction(String database, Runnable r);
 
-	long getNextSequence(String table, String database, String sequenceName);
 
 }

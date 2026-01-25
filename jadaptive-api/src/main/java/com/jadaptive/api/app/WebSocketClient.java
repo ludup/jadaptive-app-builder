@@ -6,7 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.List;
 
-public interface WebSocketClient extends Closeable {
+import jakarta.servlet.http.HttpSession;
+
+public interface WebSocketClient<T extends WebSocketOutput> extends Closeable {
 
 	void sendTextMessage(String text) throws IOException;
 	
@@ -22,7 +24,15 @@ public interface WebSocketClient extends Closeable {
 
 	String getParameter(String name);
 
-	void setAttachment(WebSocketOutput channel);
+	void setAttachment(T channel);
 	
-	WebSocketOutput getAttachment();
+	T getAttachment();
+	
+	void doInSession(RunnableWithIOException r) throws IOException;
+	
+	@FunctionalInterface
+	public interface RunnableWithIOException {
+		void run(HttpSession session) throws IOException;
+	}
+
 }

@@ -37,54 +37,54 @@ public class SystemOnlyObjectDatabaseImpl<T extends UUIDEntity>
 		return tenantService.getSystemTenant();
 	}
 	
-	@Override
-	public void watch(Class<T> resourceClass, Consumer<Change<T>> consumer) {
-		db.watch(getCollectionName(resourceClass), getCurrentTenant().getUuid(), chg -> {
-			var chgtype = Change.Type.valueOf(chg.getOperationType().name());
-			var chgkey = chg.getDocumentKey();
-			var chgdoc = chg.getFullDocument();
-			if(chgdoc != null) {
-				var doc = DocumentHelper.convertDocumentToObject(resourceClass, chgdoc);
-				consumer.accept(new Change<T>() {
-
-					@Override
-					public String uuid() {
-						return doc.getUuid();
-					}
-
-					@Override
-					public Type type() {
-						return chgtype;
-					}
-
-					@SuppressWarnings("unchecked")
-					@Override
-					public Optional<T> document() {
-						return Optional.of((T)doc);
-					}
-				});
-			}
-			else {
-				consumer.accept(new Change<T>() {
-
-					@Override
-					public String uuid() {
-						return chgkey.getString("uuid").toString();
-					}
-
-					@Override
-					public Type type() {
-						return chgtype;
-					}
-
-					@Override
-					public Optional<T> document() {
-						return Optional.empty();
-					}
-				});
-			}
-		});
-	}
+//	@Override
+//	public void watch(Class<T> resourceClass, Consumer<Change<T>> consumer) {
+//		db.watch(getCollectionName(resourceClass), getCurrentTenant().getUuid(), chg -> {
+//			var chgtype = Change.Type.valueOf(chg.getOperationType().name());
+//			var chgkey = chg.getDocumentKey();
+//			var chgdoc = chg.getFullDocument();
+//			if(chgdoc != null) {
+//				var doc = DocumentHelper.convertDocumentToObject(resourceClass, chgdoc);
+//				consumer.accept(new Change<T>() {
+//
+//					@Override
+//					public String uuid() {
+//						return doc.getUuid();
+//					}
+//
+//					@Override
+//					public Type type() {
+//						return chgtype;
+//					}
+//
+//					@SuppressWarnings("unchecked")
+//					@Override
+//					public Optional<T> document() {
+//						return Optional.of((T)doc);
+//					}
+//				});
+//			}
+//			else {
+//				consumer.accept(new Change<T>() {
+//
+//					@Override
+//					public String uuid() {
+//						return chgkey.getString("uuid").toString();
+//					}
+//
+//					@Override
+//					public Type type() {
+//						return chgtype;
+//					}
+//
+//					@Override
+//					public Optional<T> document() {
+//						return Optional.empty();
+//					}
+//				});
+//			}
+//		});
+//	}
 	
 	@Override
 	public AbstractObject createObject(String resourceKey) {

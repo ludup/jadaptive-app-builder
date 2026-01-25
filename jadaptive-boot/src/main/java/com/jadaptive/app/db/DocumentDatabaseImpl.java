@@ -58,137 +58,12 @@ import com.mongodb.client.model.changestream.ChangeStreamDocument;
 import com.mongodb.client.result.DeleteResult;
 
 @Repository
-public class DocumentDatabaseImpl implements DocumentDatabase {
+public class DocumentDatabaseImpl extends AbstractTenantAwareDatabase implements DocumentDatabase {
 
 	static Logger log = LoggerFactory.getLogger(DocumentDatabaseImpl.class);
 	
 	@Autowired
-	protected MongoDatabaseService mongo;
-	
-	@Autowired
 	private CsvImportService importService; 
-	
-	private ThreadLocal<Transaction> currentSession = new ThreadLocal<>();
-
-	
-	private MongoCollection<Document> getCollection(String table, String database) {
-		MongoDatabase db = mongo.getClient(database).getDatabase(getDatabaseName(database));
-		return db.getCollection(table);
-	}
-	
-	private String getDatabaseName(String database) {
-		String prefix = ApplicationProperties.getValue("mongodb.databasePrefix", null);
-		if(Objects.nonNull(prefix)) {
-			return String.format("%s-%s", prefix, database);
-		}
-		return database;
-	}
-
-	@Override
-	public void doInTransaction(String database, Runnable r) {
-		
-		if(isTransactionActive()) {
-			r.run();
-		} else {
-			
-			if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
-				log.info("TRANSACTION: Starting transaction");
-			}
-			
-			currentSession.set(new Transaction(database));
-			
-			try {
-				r.run();
-				if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
-					log.info("TRANSACTION: Committing transaction");
-				}
-				currentSession.get().commitTransaction();
-			} catch(Throwable t) {
-				if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
-					log.info("TRANSACTION: Aborting transaction");
-				}
-				currentSession.get().abortTransaction();
-				if(t instanceof RuntimeException) {
-					throw t;
-				}
-				throw new IllegalStateException("Transaction failed with " + t.getMessage(), t);
-			} finally {
-				if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
-					log.info("TRANSACTION: Closing session");
-				}
-				currentSession.get().close();
-				currentSession.remove();
-			}
-		}
-	}
-
-	@Override
-	public void createTextIndex(String fieldName, String table, String database) {
-		String indexName = "text_" + fieldName;
-		MongoCollection<Document> collection = getCollection(table, database);
-		IndexOptions indexOptions = new IndexOptions()
-				.collation(getCollation())
-				.name(indexName);
-		Transaction transaction = currentSession.get();
-		if(Objects.nonNull(transaction)) {
-			collection.createIndex(transaction.session(database), Indexes.text(fieldName), indexOptions);
-		} else {
-			collection.createIndex(Indexes.text(fieldName), indexOptions);		
-		}
-	}
-	
-	private Collation getCollation() {
-		return Collation.builder().collationStrength(CollationStrength.PRIMARY)
-				.locale(Locale.getDefault().getLanguage())
-				.build();
-	}
-
-	@Override
-	public void createIndex(String table, String database, String... fieldNames) {
-		String indexName = "index_" + StringUtils.join(fieldNames, "_");
-		MongoCollection<Document> collection = getCollection(table, database);
-		IndexOptions indexOptions = new IndexOptions()
-				.collation(getCollation())
-				.name(indexName);
-		
-		Transaction transaction = currentSession.get();
-		if(Objects.nonNull(transaction)) {
-			collection.createIndex(transaction.session(database), Indexes.ascending(fieldNames), indexOptions);
-		} else {
-			collection.createIndex(Indexes.ascending(fieldNames), indexOptions);		
-		}
-	}
-	
-	@Override
-	public void dropIndexes(String table, String database) {
-		MongoCollection<Document> collection = getCollection(table, database);
-
-		Transaction transaction = currentSession.get();
-		if(Objects.nonNull(transaction)) {
-			collection.dropIndexes(transaction.session(database));
-		} else {
-			collection.dropIndexes();	
-		}
-	}
-	
-	@Override
-	public void createUniqueIndex(String table, String database, String...fieldNames) {
-		String indexName = "unique_" + StringUtils.join(fieldNames, "_");
-		MongoCollection<Document> collection = getCollection(table, database);
-		IndexOptions indexOptions = new IndexOptions()
-				.collation(Collation.builder().collationStrength(CollationStrength.PRIMARY)
-						.locale(Locale.getDefault().getLanguage())
-						.caseLevel(false).build())
-				.unique(true)
-				.name(indexName);
-		
-		Transaction transaction = currentSession.get();
-		if(Objects.nonNull(transaction)) {
-			collection.createIndex(transaction.session(database), Indexes.ascending(fieldNames), indexOptions);
-		} else {
-			collection.createIndex(Indexes.ascending(fieldNames), indexOptions);
-		}
-	}
 	
 	@Override
 	public void insertOrUpdate(Document document, /*ObjectTemplate template,*/ String table, String database) {
@@ -212,7 +87,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			
 //			String contentHash = DocumentHelper.generateContentHash(document);
 //			document.put("contentHash", contentHash);
-			Transaction transaction = currentSession.get();
+			Transaction transaction = getCurrentSession();
 			if(Objects.nonNull(transaction)) {
 				collection.insertOne(transaction.session(database), document);	
 			} else {
@@ -242,7 +117,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 //			if(log.isDebugEnabled()) {
 //				log.debug("Saving {} object with content hash {}", table, contentHash);
 //			}
-			Transaction transaction = currentSession.get();
+			Transaction transaction = getCurrentSession();
 			if(Objects.nonNull(transaction)) {
 				collection.replaceOne(transaction.session(database), Filters.eq("_id", document.getString("_id")), 
 						document, new ReplaceOptions().upsert(true));
@@ -256,7 +131,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 			// Updated Event
 		}
 	}
-	
+
 	private void assertUniqueConstraints(MongoCollection<Document> collection, Document document, String existingUUID) {
 		
 		Iterable<Document> indexes;
@@ -279,43 +154,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		}
 	}
 
-	@Override
-	public void watch(String table, String database, Consumer<ChangeStreamDocument<Document>> consumer) {
-//		var pipeline = Arrays.asList(
-//			Aggregates.match(
-//				Filters.or(
-//					Filters.eq("operationType", "insert"), 
-//					Filters.eq("operationType", "update"),
-//					Filters.eq("operationType", "replace"), 
-//					Filters.eq("operationType", "delete")
-//				)
-//			),
-//			Aggregates.project(
-//					Projections.fields(
-//							Projections.excludeId(),
-//							Projections.include("documentKey", "operationType", "fullDocument"),
-//							Projections.computed(table, "$fullDocument")
-//						)
-//				)
-//		);
 
-		var collection = getCollection(table, database);
-		// TOOD what to do for this?
-//		        ,  new FindOptions().setMaxAwaitTime(60, TimeUnit.SECONDS)
-		while(true) {
-			try { 
-				collection.watch(/* pipeline */).forEach(consumer);
-			}
-			catch(MongoQueryException mqe) {
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e) {
-					throw new IllegalStateException(e);
-				}
-			}
-		}
-		
-	}
 
 	@Override
 	public Document getByUUID(String uuid, String table, String database) {
@@ -324,7 +163,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		if(Objects.nonNull(transaction)) {
 			result = collection.find(transaction.session(database), Filters.eq("_id", uuid));
 		} else {
@@ -344,7 +183,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		if(Objects.nonNull(transaction)) {
 			result = collection.find(transaction.session(database), buildFilter(fields))
 					.collation(getCollation());
@@ -372,7 +211,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		if(fields.length > 0) {
 			if(Objects.nonNull(transaction)) {
 				result = collection.find(transaction.session(database), buildFilter(fields)).sort(new BasicDBObject(field, -1));
@@ -400,7 +239,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		if(fields.length > 0) {
 			if(Objects.nonNull(transaction)) {
 				result = collection.find(transaction.session(database), buildFilter(fields)).sort(new BasicDBObject(field, 1));
@@ -421,29 +260,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		return result.first();
 	}
 	
-	@Override
-	public long getNextSequence(String table, String database, String sequenceName) {
-       
-		MongoCollection<Document> collection = getCollection(table, database);
-		
-		// 1. Identify which sequence document to update
-        Bson filter = Filters.eq("_id", sequenceName);
-
-        // 2. Define the atomic increment ($inc)
-        Bson update = Updates.inc("currentValue", 1L);
-
-        // 3. Configure options:
-        // - upsert: true (create the document if it doesn't exist)
-        // - returnDocument: AFTER (give us the incremented value, not the old one)
-        FindOneAndUpdateOptions options = new FindOneAndUpdateOptions()
-                .upsert(true)
-                .returnDocument(ReturnDocument.AFTER);
-
-        // 4. Execute atomically
-        Document result = collection.findOneAndUpdate(filter, update, options);
-
-        return result.getLong("currentValue");
-    }
+	
 	
 	@Override
 	public Long sumLongValues(String table, String database, String groupBy, SearchField... fields) {
@@ -451,7 +268,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		AggregateIterable<Document> results;
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(fields.length > 0) {
 		
@@ -498,7 +315,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		AggregateIterable<Document> results;
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(fields.length > 0) {
 		
@@ -546,7 +363,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		FindIterable<Document> result;
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(Objects.nonNull(transaction)) {
 			result = collection.find(transaction.session(database), Filters.eq(field, value))
@@ -568,7 +385,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		getByUUID(uuid, table, database);
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		if(Objects.nonNull(transaction)) {
 			collection.deleteOne(transaction.session(database), Filters.eq("_id", uuid));
 		} else {
@@ -590,7 +407,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		DeleteResult result;
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		if(Objects.nonNull(transaction)) {
 			result = collection.deleteMany(transaction.session(database), buildFilter(fields));
 		} else {
@@ -605,7 +422,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(fields.length == 0) {
 			if(Objects.nonNull(transaction)) {
@@ -629,7 +446,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(fields.length == 0) {
 			if(Objects.nonNull(transaction)) {
@@ -653,7 +470,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(fields.length == 0) {
 			if(Objects.nonNull(transaction)) {
@@ -682,7 +499,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(fields.length == 0) {
 			if(Objects.nonNull(transaction)) {
@@ -718,7 +535,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Long searchCount(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(fields.length == 0) {
 			if(Objects.nonNull(transaction)) {
@@ -745,7 +562,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 //		MongoCollection<Document> collection = getCollection(table, database);
 //		searchField = configureSearch(searchField);
 //		
-//		ClientSession session = currentSession.get();
+//		ClientSession session = getCurrentSession();
 //		
 //		if(StringUtils.isBlank(searchValue)) {
 //			if(Objects.nonNull(session)) {
@@ -767,7 +584,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Long count(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(fields.length > 0) {
 		
@@ -797,7 +614,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		MongoCollection<Document> collection = getCollection(table, database);
 		searchField = configureSearch(searchField);
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		if(StringUtils.isBlank(searchValue)) {
 			if(Objects.nonNull(transaction)) {
@@ -826,7 +643,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void dropCollection(String table, String database) {
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		if(Objects.nonNull(transaction)) {
 			getCollection(table, database).drop(transaction.session(database));
 		} else {
@@ -838,7 +655,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 	public Document getFirst(String uuid, String table, String database) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		
 		FindIterable<Document> result;
 		
@@ -856,7 +673,7 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 
 	@Override
 	public void dropDatabase(String database) {
-		Transaction transaction = currentSession.get();
+		Transaction transaction = getCurrentSession();
 		if(Objects.nonNull(transaction)) {
 			mongo.getClient(database).getDatabase(getDatabaseName(database)).drop(transaction.session(database));
 		} else {
@@ -1016,82 +833,5 @@ public class DocumentDatabaseImpl implements DocumentDatabase {
 		return tmp.get(0);
 	}
 
-	@Override
-	public Set<String> getIndexNames(String table, String database) {
-		
-		MongoCollection<Document> collection = getCollection(table, database);
-		Set<String> results = new HashSet<>();
-		
-		ListIndexesIterable<Document> indexes;
-		
-		indexes = collection.listIndexes();
-		
-		for(Document index : indexes) {
-			if(!index.getString("name").equals("_id_")) {
-				results.add(index.getString("name"));
-			}
-		}
-		return results;
-	}
-
-	@Override
-	public boolean isTransactionActive() {
-		Transaction session = currentSession.get();
-		if(Objects.nonNull(session)) {
-			return session.hasActiveTransaction();
-		}
-		return false;
-	}
-
-	class Transaction {
-		
-		String id = Utils.generateRandomAlphaNumericString(8);
-		Map<String,ClientSession> databaseSessions = new HashMap<>();
-		
-		public Transaction(String database) {
-			startTransaction(database);
-		}
-
-		public boolean hasActiveTransaction() {
-			return !databaseSessions.isEmpty();
-		}
-		
-		public ClientSession session(String database) {
-			ClientSession session = databaseSessions.get(database);
-			if(session==null) {
-				return startTransaction(database);
-			}
-			return session;
-		}
-
-		public void close() {
-			for(ClientSession session : databaseSessions.values()) {
-				session.close();
-			}
-			databaseSessions.clear();
-		}
-
-		public void abortTransaction() {
-			for(ClientSession session : databaseSessions.values()) {
-				session.abortTransaction();
-			}
-		}
-
-		public void commitTransaction() {
-			for(ClientSession session : databaseSessions.values()) {
-				session.commitTransaction();
-			}
-		}
-
-		public ClientSession startTransaction(String database) {
-			if(Boolean.getBoolean("jadaptive.logTransactions") && log.isInfoEnabled()) {
-				log.info("TRANSACTION: Creating session for transaction {} on database {}", id, database);
-			}
-			ClientSession session = mongo.getClient(database).startSession();
-			databaseSessions.put(database, session);
-			session.startTransaction();
-			return session;
-		}
-		
-	}
+	
 }

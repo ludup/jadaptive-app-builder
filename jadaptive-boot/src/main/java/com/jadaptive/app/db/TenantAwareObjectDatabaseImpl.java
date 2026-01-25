@@ -164,9 +164,4 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	public void stashObject(T obj) {
 		stash(obj);
 	}
-
-	@Override
-	public long getNextSequence(String sequenceName) {
-		return db.getNextSequence("sequences", getCurrentTenant().getUuid(), sequenceName);
-	}
 }

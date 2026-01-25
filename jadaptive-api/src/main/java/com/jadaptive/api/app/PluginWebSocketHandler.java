@@ -5,18 +5,18 @@ import java.nio.ByteBuffer;
 
 import org.pf4j.ExtensionPoint;
 
-public interface PluginWebSocketHandler extends ExtensionPoint {
+public interface PluginWebSocketHandler<T extends WebSocketOutput> extends ExtensionPoint {
 
 	boolean handles(String handler);
 
-	void handleError(WebSocketClient websocket, Throwable exception);
+	void handleError(WebSocketClient<T> websocket, Throwable exception);
 
-	void connectionClosed(WebSocketClient websocket, String reason);
+	void connectionClosed(WebSocketClient<T> websocket, String reason);
 
-	void handleBinaryMessage(WebSocketClient websocket, ByteBuffer payload, int payloadLength) throws IOException;
+	void handleBinaryMessage(WebSocketClient<T> websocket, ByteBuffer payload, int payloadLength) throws IOException;
 
-	void handleTextMessage(WebSocketClient websocket, String payload, int payloadLength) throws IOException;
+	void handleTextMessage(WebSocketClient<T> websocket, String payload, int payloadLength) throws IOException;
 
-	void connectionOpened(WebSocketClient websocket) throws IOException;
+	void connectionOpened(WebSocketClient<T> websocket) throws IOException;
 
 }

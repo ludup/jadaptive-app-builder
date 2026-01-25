@@ -31,10 +31,10 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return documents.get(database).get(table);
 	}
 	
-	@Override
-	public void watch(String table, String database, Consumer<ChangeStreamDocument<Document>> consumer) {
-		throw new UnsupportedOperationException();
-	}
+//	@Override
+//	public void watch(String table, String database, Consumer<ChangeStreamDocument<Document>> consumer) {
+//		throw new UnsupportedOperationException();
+//	}
 
 	@Override
 	public void insertOrUpdate(Document document, String table, String database) {
@@ -228,12 +228,6 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 	public Double sumDoubleValues(String table, String database, String groupBy, SearchField... fields) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public long getNextSequence(String table, String database, String sequenceName) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 
 }

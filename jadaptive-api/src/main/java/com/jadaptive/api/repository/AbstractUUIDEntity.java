@@ -1,4 +1,4 @@
-package com.jadaptive.api.repository;
+vpackage com.jadaptive.api.repository;
 
 import java.util.Date;
 import java.util.Objects;
