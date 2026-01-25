@@ -20,6 +20,7 @@ import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.SessionUtils;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication;
+import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -122,6 +123,10 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		}
 		
 
+	}
+	
+	protected User getAuthenticatingUser() {
+		return authenticationService.getCurrentState().getUser();
 	}
 	
 	protected boolean isAllowFormExternalRedirect() {
