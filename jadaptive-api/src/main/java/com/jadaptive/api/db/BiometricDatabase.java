@@ -19,4 +19,6 @@ public interface BiometricDatabase {
     */
 	double calculateCosineSimilarity(List<Double> vectorA, List<Double> vectorB);
 
+	boolean hasBiometricData(Tenant tenant, String collection, User user);
+
 }

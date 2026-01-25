@@ -102,4 +102,9 @@ public class BiometricDatabaseImpl extends AbstractTenantAwareDatabase implement
 
        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
    }
+
+   @Override
+   public boolean hasBiometricData(Tenant tenant, String collection, User user) {
+	   return getCollection(collection, tenant.getUuid()).count(Filters.eq("_id", user.getUuid())) > 0;
+   }
 }
