@@ -123,10 +123,13 @@ public class ApplicationProperties {
         <Property name="LOG_PATTERN">
             %d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%15.15t] %-40.40c{1.} : %m%n%ex
         </Property>
+        <Property name="LOG_PATTERN_COLOURED">
+            %highlight{%d{ABSOLUTE} %d{yyyy-MM-dd HH:mm:ss.SSS} %5p --- [%15.15t] %-40.40c{1.} : %m%n%ex}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=cyan, TRACE=black}
+        </Property>
     </Properties>
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT">
-            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <PatternLayout pattern="${LOG_PATTERN_COLOURED}"/>
         </Console>
 		<RollingFile name="FileAppender" fileName="logs/application.log"
 		         filePattern="application-%i.log.gz">
