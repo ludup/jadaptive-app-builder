@@ -203,6 +203,13 @@ In the repository root of the project you have changed, run ..
 mvn -DskipTests clean install
 ```
 
+You'll need to run this at any of the following stages in your development.
+
+ * Create a new plugin.
+ * Change any of a plugins properties (in the `<properties>` tag)
+ * Change the Maven dependencies of any plugin (i.e. in its `pom.xml`).
+ * If  you ever do a full Clean in your IDE, or anything else that would result in `target` getting removed. This means you'd have to run it in all repository roots that you have in your workspace too.
+
 *TODO: Check if we *really* have to use `install`, is `package` not enough?*
   
 ## Product Repository Files
