@@ -35,12 +35,6 @@ public class DatabaseConnection extends NamedUUIDEntity implements NamedDocument
 	@Validator(type = ValidationType.REQUIRED)
 	String clusterHostname;
 	
-	@ObjectField(type = FieldType.TEXT)
-	@Validator(type = ValidationType.HOSTNAME)
-	@Validator(type = ValidationType.IPV4)
-	@Validator(type = ValidationType.IPV6)
-	Collection<String> nodes;
-	
 	@ObjectField(type = FieldType.COUNTRY)
 	Collection<String> automaticMapping = new HashSet<>();
 
@@ -63,14 +57,6 @@ public class DatabaseConnection extends NamedUUIDEntity implements NamedDocument
 
 	public void setAutomaticMapping(Collection<String> automaticMapping) {
 		this.automaticMapping = automaticMapping;
-	}
-
-	public Collection<String> getNodes() {
-		return nodes;
-	}
-
-	public void setNodes(Collection<String> nodes) {
-		this.nodes = nodes;
 	}
 
 	public String getClusterHostname() {

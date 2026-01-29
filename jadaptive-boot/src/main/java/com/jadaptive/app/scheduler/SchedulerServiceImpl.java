@@ -157,7 +157,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 		} catch(RuntimeException re) {
 			throw re;
 		} catch (Exception e) {
-			throw new IllegalStateException("Failed to start distributed scheduler.");
+			throw new IllegalStateException("Failed to start distributed scheduler.", e);
 		}
 		
 		taskScheduler = new GardenSchedTaskScheduler(executor);
