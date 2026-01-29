@@ -1,5 +1,7 @@
 package com.jadaptive.api.auth.oauth2;
 
+import java.util.Objects;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,7 @@ public class OAuth2TokenServiceImpl extends AbstractUUIDObjectServceImpl<OAuth2T
 	@Override
 	public OAuth2Token authenticate(String authentication, OAuth2Scope scope)
 			throws AccessDeniedException, UnauthorizedException, ResponseEntityException {
-		if(authentication.startsWith("Bearer ")) {
+		if(Objects.nonNull(authentication) &&  authentication.startsWith("Bearer ")) {
 			var token = byToken(authentication.substring(7).trim());
 			for(String scopeName : token.getScopes()) {
 				if(scopeName.equals(scope.getId())) {

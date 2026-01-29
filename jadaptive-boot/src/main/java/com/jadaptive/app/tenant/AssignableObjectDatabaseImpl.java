@@ -42,6 +42,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 	}
 	
 	@Override
+	@Deprecated
 	public Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SortOrder order, String sortField, SearchField... fields) {
 		
 		if(permissionService.isAdministrator(user)) {
@@ -60,6 +61,22 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 	}
 	
 	@Override
+	public Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SortOrder order, String sortField, SearchField... fields) {
+
+		Collection<Role> userRoles = roleService.getRolesByUser(user);
+		return objectDatabase.searchObjects(resourceClass, 
+				order,
+				sortField,
+				SearchField.and(fields),
+				SearchField.or(
+						SearchField.all("users.uuid", user.getUuid()),
+						SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))
+				));
+
+	}
+	
+	@Override
+	@Deprecated
 	public Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SearchField... fields) {
 		
 		if(permissionService.isAdministrator(user)) {
@@ -105,6 +122,7 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 	}
 
 	@Override
+	@Deprecated
 	public T getAssignedObject(Class<T> resourceClass, User user, SearchField... fields) {
 		
 		if(permissionService.isAdministrator(user)) {

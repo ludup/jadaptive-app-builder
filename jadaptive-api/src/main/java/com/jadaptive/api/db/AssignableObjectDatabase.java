@@ -9,8 +9,10 @@ import com.jadaptive.api.user.User;
 
 public interface AssignableObjectDatabase<T extends AssignableDocument> {
 
+	@Deprecated(forRemoval = true, since = "0.6.0")
 	Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SearchField... fields);
 	
+	@Deprecated(forRemoval = true, since = "0.6.0")
 	Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SortOrder order, String sortField, SearchField... fields);
 
 	T getObjectByUUID(Class<T> resourceClass, String uuid);
@@ -19,6 +21,7 @@ public interface AssignableObjectDatabase<T extends AssignableDocument> {
 
 	void deleteObject(T virtualFolder);
 
+	@Deprecated(forRemoval = true, since = "0.6.0")
 	T getAssignedObject(Class<T> resourceClass, User user, SearchField... fields);
 
 	/**
@@ -48,4 +51,7 @@ public interface AssignableObjectDatabase<T extends AssignableDocument> {
 	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields);
 
 	T max(Class<T> clz, String column);
+
+	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SortOrder order, String sortField,
+			SearchField... fields);
 }
