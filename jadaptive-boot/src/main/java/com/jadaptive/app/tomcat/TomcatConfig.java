@@ -8,6 +8,8 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Configuration;
 
+import com.jadaptive.api.app.ApplicationProperties;
+
 @Configuration
 public class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
 
@@ -21,7 +23,13 @@ public class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWeb
 
 	@Override
     public void customize(TomcatServletWebServerFactory factory) {
+		// 1. This handles the primary connector AND the additional one
+	    factory.addConnectorCustomizers(connector -> {
+	        configureConnector(connector);
+	    });
+	    
         Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
+        configureConnector(connector);
         if(httpPort > 0) {
 	        connector.setPort(httpPort);
 	        factory.addAdditionalTomcatConnectors(connector);
@@ -37,4 +45,9 @@ public class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWeb
         });
    
     }
+
+	private void configureConnector(Connector connector) {
+		connector.setMaxParameterCount(ApplicationProperties.getValue("jadaptive.maxParameterCount", 10000));
+        connector.setMaxPartCount(ApplicationProperties.getValue("jadaptive.maxPartCount", 100));
+	}
 }
