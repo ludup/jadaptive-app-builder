@@ -13,7 +13,9 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -1073,6 +1075,10 @@ public class Utils {
         result[result.length - 1] = obj;
         
         return result;
+	}
+
+	public static InputStream getURLInputStream(String val) throws MalformedURLException, IOException, URISyntaxException {
+		return new URI(val).toURL().openStream();
 	}
 	
 }
