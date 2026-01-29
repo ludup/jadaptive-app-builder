@@ -1,5 +1,7 @@
 package com.jadaptive.app.tenant;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,15 +65,18 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 	@Override
 	public Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SortOrder order, String sortField, SearchField... fields) {
 
+		var search = new ArrayList<>(Arrays.asList(fields));
 		Collection<Role> userRoles = roleService.getRolesByUser(user);
+		
+		search.add(SearchField.or(
+				SearchField.in("users.uuid", user.getUuid()),
+				SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))
+		));
+		
 		return objectDatabase.searchObjects(resourceClass, 
 				order,
 				sortField,
-				SearchField.and(fields),
-				SearchField.or(
-						SearchField.all("users.uuid", user.getUuid()),
-						SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))
-				));
+				search.toArray(new SearchField[0]));
 
 	}
 	
