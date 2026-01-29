@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -276,15 +277,47 @@ public abstract class HtmlPage implements Page {
 						if(method.getName().length() > 4) {
 							name += method.getName().substring(4);
 						}
-						String value = Request.get().getParameter(name);
-						if(method.getReturnType().isAssignableFrom(int.class)) {
-							return StringUtils.isBlank(value) ? 0 : Integer.parseInt(value);
-						} else if(method.getReturnType().isAssignableFrom(long.class)) {
-							return StringUtils.isBlank(value) ? 0 : Long.parseLong(value);
-						} else if(method.getReturnType().isAssignableFrom(boolean.class)) {
-							return StringUtils.isBlank(value) ? false : Boolean.parseBoolean(value);
+						
+						if(method.getReturnType().isArray()) {
+							String[] values = Request.get().getParameterValues(name);
+							if(method.getReturnType().isAssignableFrom(int[].class)) {
+								return values == null || values.length == 0 
+										? new int[0] 
+										: Arrays.stream(values)
+					                       .mapToInt(Integer::parseInt)
+					                       .toArray();
+							} else if(method.getReturnType().isAssignableFrom(long.class)) {
+								return values == null || values.length == 0 
+										? new int[0] 
+										: Arrays.stream(values)
+					                       .mapToLong(Long::parseLong)
+					                       .toArray();
+							} else if(method.getReturnType().isAssignableFrom(boolean.class)) {
+								if(values == null || values.length == 0) {
+									return new boolean[0];
+								} else {
+									boolean[] boolArray = new boolean[values.length];
+
+									for (int i = 0; i < values.length; i++) {
+									    boolArray[i] = Boolean.parseBoolean(values[i]);
+									}
+									return boolArray;
+								}
+							} else {
+								return values;
+							}
+							
 						} else {
-							return value;
+							String value = Request.get().getParameter(name);
+							if(method.getReturnType().isAssignableFrom(int.class)) {
+								return StringUtils.isBlank(value) ? 0 : Integer.parseInt(value);
+							} else if(method.getReturnType().isAssignableFrom(long.class)) {
+								return StringUtils.isBlank(value) ? 0 : Long.parseLong(value);
+							} else if(method.getReturnType().isAssignableFrom(boolean.class)) {
+								return StringUtils.isBlank(value) ? false : Boolean.parseBoolean(value);
+							} else {
+								return value;
+							}
 						}
 					} else if(method.getName().startsWith("is") && method.getName().length() > 2) {
 						String name = method.getName().substring(2,3).toLowerCase();
