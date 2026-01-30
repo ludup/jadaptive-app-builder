@@ -97,7 +97,7 @@ public class ObjectUploadServlet extends HttpServlet {
 		String resourceKey = paths.get(4);
 		
 		Map<String,String[]> parameters = new HashMap<>();
-		
+		 
 		try(var scope = SessionUtils.scopedIoWithoutSessionTimeout(request)) {
 
 			generateFormParameters(request, parameters, resourceKey);

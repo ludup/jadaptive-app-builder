@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService;
-import com.jadaptive.api.auth.oauth2.OAuth2CompleteController;
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService.OAuth2Authorization;
+import com.jadaptive.api.auth.oauth2.OAuth2CompleteController;
 import com.jadaptive.api.auth.oauth2.OAuth2Request;
 import com.jadaptive.api.cluster.ClusterManager;
 import com.jadaptive.api.cluster.ClusterNode;

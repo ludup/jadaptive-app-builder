@@ -1,13 +1,11 @@
 package com.jadaptive.app.db;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.bson.Document;
 
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.template.SortOrder;
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 
 public interface DocumentDatabase {
 

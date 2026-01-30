@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;
-import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.auth.AuthenticationService.LogonCompletedResult;
+import com.jadaptive.api.auth.AuthenticationState;
 import com.jadaptive.api.json.RequestStatus;
 import com.jadaptive.api.json.RequestStatusImpl;
 import com.jadaptive.api.json.SessionStatus;

@@ -1,13 +1,10 @@
 package com.jadaptive.app.db;
 
 import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.jadaptive.api.db.Change;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemOnlyObjectDatabase;
 import com.jadaptive.api.entity.AbstractObject;

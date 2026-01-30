@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -15,7 +14,6 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.app.db.DocumentDatabase;
-import com.mongodb.client.model.changestream.ChangeStreamDocument;
 
 public class MockDocumentDatabaseImpl implements DocumentDatabase {
 
