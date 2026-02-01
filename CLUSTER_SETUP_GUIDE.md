@@ -1,19 +1,30 @@
 # JAD Clustering Setup Guide
 
-There are two methods of configuring a cluster. You can either take the (almost) completely automated route, or choose to manually configure if there are any special requirements.
+There are two methods of configuring a cluster. You can either take the (almost) completely automated route, or choose to manually configure if there are any special requirements. 
+
+*Developers probably want to use manual configuration, as it is likely they will want to run multiple nodes on the same machine / address. This works, but has implications on port assignment for various services.*
 
 ## Automatic Configuration (Recommended)
 
 The automatic process only requires that you change a single on the *first* node that will be part of the cluster.
 
+### Choose Mode
+
+You must decide if you are going to use **UDP** mode or **TCP** mode. The default is UDP mode, but because this relies on UDP broadcasts, it is known to not work out-of-the-box on on the Google Cloud Platform.
+
+TCP mode should be activated at the start of cluster setup, and requires that `ha.props` is set to `jad-tcp-cluster.xml`, see below.
+
 ### First Node
 
 First ensure you are using a remote Mongo database that will be accessible by both the first and subsequently configured nodes.
 
-Create a file called `cluster.properties` in  the `conf.d` directory and place a single line it it. If the file already exists, your installation may already be at least partially configured. Refer to manual configuration guide below if that is the case.
+Create a file called `cluster.properties` in  the `conf.d` directory and place a the following content it it. If the file already exists, your installation may already be at least partially configured. Refer to manual configuration guide below if that is the case.
 
 ```
 ha.clusterName=my-cluster-name
+
+# Optional, uncomment if you need to use TCP mode
+#ha.props=jad-tcp-cluster.xml
 ```
 
 You can call the cluster anything you want. Restart this node.
@@ -94,6 +105,7 @@ Create or amend the `cluster.properties` in `conf.d`.
 ha.hostname=cluster-node-1
 ha.id=XXXXXXXX-XXXX-XXXX-XXXXXXXXXXXXXXXXX
 ha.clusterName=my-cloud-cluster-1
+
 ha.props=jad-cluster.xml
 
 # defaults to number of local cores
@@ -114,6 +126,16 @@ The `ha.id` is a UUID and must be node unique, i.e. every node should have it's 
 `ha.clusterName` is the name of the cluster the node will be joining. If using for example LAN  broadcast configuration, then any node on a named cluster will be able to communicate with other nodes on  the same named cluster. The default cluster name is the same as `ha.id`, i.e. the node will be in a cluster of it's own.
 
 The `ha.props` property is the gateway to advanced JGroups configuration, which is way beyond the scope of this document. It points to either one of the default well known configuration names, or the full path to a custom configuration file or URL. For now, `jad-cluster.xml` should be OK if the nodes are all on the same well protected private LAN. For any kind of security though, manual configuration will be required. AI will probably help here. 
+
+If you are going to be using TCP mode (e.g. on Google Cloud Platform where UDP broadcasts are not enabled), then change `ha.props` to `jad-tcp-cluster.xml` and add the `ha.initialNodes`. This should be a comma separate list of IP address and optional port numbers of all the other known nodes.
+
+Optionally `ha.tcpBindPort` properties as well. The port number should be different for each node if you are trying run mulitple nodes on the same host.
+
+```
+ha.initialHosts=1.2.3.4[7800]
+ha.tcpBindPort=7800
+```
+
 
 There are other properties, shown commented out with an explanation above.
 
