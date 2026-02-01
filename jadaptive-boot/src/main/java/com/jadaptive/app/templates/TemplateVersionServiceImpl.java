@@ -1501,8 +1501,11 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 	}
 
 	private FieldType selectFieldType(Class<?> type, FieldType declaredType) {
-		if(Objects.nonNull(declaredType)) {
-			return declaredType;
+		
+		if(declaredType!=null && declaredType != FieldType.AUTO) {
+			if(Objects.nonNull(declaredType)) {
+				return declaredType;
+			}
 		}
 		
 		if(Long.class.equals(type) || long.class.equals(type)) {
@@ -1519,9 +1522,9 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			return FieldType.TEXT;
 		} else if(Enum.class.isAssignableFrom(type)) {
 			return FieldType.ENUM;
+		} else {
+			return FieldType.TEXT;
 		}
-		
-		throw new IllegalStateException(String.format("Could not detemine field type of class %s", type.getSimpleName()));
 	}
 
 	@Override

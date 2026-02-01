@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -30,9 +31,16 @@ public interface WebSocketClient<T extends WebSocketOutput> extends Closeable {
 	
 	void doInSession(RunnableWithIOException r) throws IOException;
 	
+	<X> X doInSession(CallableWithIOException<X> r) throws IOException;
+	
 	@FunctionalInterface
 	public interface RunnableWithIOException {
 		void run(HttpSession session) throws IOException;
+	}
+	
+	@FunctionalInterface
+	public interface CallableWithIOException<X> {
+		X run(HttpSession session) throws IOException;
 	}
 
 }

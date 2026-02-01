@@ -864,7 +864,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 		case PERSONAL:
 			return objectRepository.table(template, offset, limit, sortColumn, order,
 					SearchUtils.combine(fields, 
-							SearchField.eq("ownerUUID", getCurrentUser().getUuid())));				
+							SearchField.or(
+								SearchField.eq("owner.uuid", getCurrentUser().getUuid()),
+								SearchField.eq("ownerUUID", getCurrentUser().getUuid()))));				
 		case ASSIGNED:
 			if(isAdministrator(getCurrentUser())) {
 				return objectRepository.table(template, offset, limit, sortColumn, order, fields);

@@ -21,4 +21,6 @@ public interface BiometricDatabase {
 
 	boolean hasBiometricData(Tenant tenant, String collection, User user);
 
+	double getBestFaceMatchScore(List<Double> liveVector, List<List<Double>> storedVectors);
+
 }

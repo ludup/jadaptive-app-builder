@@ -28,9 +28,12 @@ import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.J;
 import com.jadaptive.api.app.PluginWebSocketHandler;
 import com.jadaptive.api.app.WebSocketClient;
+import com.jadaptive.api.app.WebSocketClient.CallableWithIOException;
 import com.jadaptive.api.app.WebSocketClient.RunnableWithIOException;
 import com.jadaptive.api.app.WebSocketOutput;
 import com.jadaptive.api.session.SessionUtils;
+import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.utils.Utils;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -40,20 +43,48 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 	
 	static final String HTTP_SESSION = "httpSession";
 	
-	
 	private void doInSessionMaybe(@NonNull WebSocketSession socket, RunnableWithIOException r) throws IOException {
 		/**
 		 * LDP = HttpSession does not mean a user is logged on? Check the JAD session for state.
 		 */
-		HttpSession httpSession = (HttpSession) socket.getAttributes().get(HTTP_SESSION);
-		if(Objects.isNull(httpSession) || !J.b(SessionUtils.class).isLoggedOn()) {
-			r.run(httpSession);
-		} else {
-			J.b(SessionUtils.class).doInSession(httpSession, ()->{
+		TenantService ts = J.b(TenantService.class);
+		
+		ts.setCurrentTenant(Utils.before(socket.getUri().getHost(), ":"));
+		try {
+			HttpSession httpSession = (HttpSession) socket.getAttributes().get(HTTP_SESSION);
+			if(Objects.isNull(httpSession) || !J.b(SessionUtils.class).isLoggedOn()) {
 				r.run(httpSession);
-			});
+			} else {
+				J.b(SessionUtils.class).doInSession(httpSession, ()->{
+					r.run(httpSession);
+				});
+			}
+		} finally {
+			ts.clearCurrentTenant();
 		}
 	}
+	
+	public <X> X doInSessionMaybe(@NonNull WebSocketSession socket, CallableWithIOException<X> r) throws IOException {
+		/**
+		 * LDP = HttpSession does not mean a user is logged on? Check the JAD session for state.
+		 */
+		TenantService ts = J.b(TenantService.class);
+		
+		ts.setCurrentTenant(Utils.before(socket.getUri().getHost(), ":"));
+		try {
+			HttpSession httpSession = (HttpSession) socket.getAttributes().get(HTTP_SESSION);
+			if(Objects.isNull(httpSession) || !J.b(SessionUtils.class).isLoggedOn()) {
+				return r.run(httpSession);
+			} else {
+				return J.b(SessionUtils.class).doInSession(httpSession, ()->{
+					return r.run(httpSession);
+				});
+			}
+		} finally {
+			ts.clearCurrentTenant();
+		}
+	}
+	
 	@Override
 	public void afterConnectionEstablished(@NonNull WebSocketSession socket) throws Exception {
 
@@ -158,6 +189,11 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 		
 		public void doInSession(RunnableWithIOException r) throws IOException {
 			doInSessionMaybe((WebSocketSession)session, r);
+		}
+		
+		@Override
+		public <X> X doInSession(CallableWithIOException<X> r) throws IOException {
+			return doInSessionMaybe((WebSocketSession)session, r);
 		}
 		
 		@Override

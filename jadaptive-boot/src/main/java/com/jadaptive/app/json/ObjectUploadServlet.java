@@ -136,11 +136,11 @@ public class ObjectUploadServlet extends HttpServlet {
 				Feedback.error(e.getMessage());
 				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, e.getMessage()));
 			} catch (Throwable e) {
-				Feedback.error(e.getMessage());
+				Feedback.error(Objects.toString(e.getMessage(), "Unknown error!"));
 				if(log.isErrorEnabled()) {
 					log.error("POST api/objects/{}", resourceKey, e);
 				}
-				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, e.getMessage()));
+				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, Objects.toString(e.getMessage(), "Unknown error!")));
 			} finally {
 				DocumentHelper.disableMultipleValidation();
 			}

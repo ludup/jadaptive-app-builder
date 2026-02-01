@@ -36,6 +36,7 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ActionFilter;
 import com.jadaptive.api.template.CreateURL;
@@ -95,7 +96,8 @@ public class TableRenderer {
 	private ObjectTemplate template;
 	private Class<?> templateClazz;
 	
-	private TableView view;
+	private Collection<TableView> views;
+	private TableView primaryView;
 	private AbstractObject parentObject = null;
 	private FieldTemplate field;
 	private boolean readOnly;
@@ -135,16 +137,29 @@ public class TableRenderer {
 			
 			Element tableholder = Html.div();
 			
-			view = templateClazz.getAnnotation(TableView.class);
+			views = new ArrayList<>();
+			Class<?> tv = templateClazz;
+			while(tv != null && !tv.equals(Object.class)) {
+				TableView v = tv.getAnnotation(TableView.class);
+				if(v != null) {
+					if(primaryView==null) {
+						primaryView = v;
+					}
+					views.add(v);
+				}
+				tv = tv.getSuperclass();
+			}
+
 	
-			if(Objects.isNull(view)) {
-				view = getClass().getAnnotation(TableView.class);
+			if(views.isEmpty()) {
+				primaryView = getClass().getAnnotation(TableView.class);
+				views.add(primaryView);
 			}
 			
 			Map<String,DynamicColumn> dynamicColumns = generateDynamicColumns();
 			Map<String,ObjectTemplate> columns = new LinkedHashMap<>();
 			Collection<TableAction> tableActions = generateActions(template.getParentTemplate(), template.getCollectionKey());
-			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || view.multipleDelete();
+			boolean hasMultipleSelection = checkMultipleSelectionActions(tableActions) || primaryView.multipleDelete();
 			var defaultAction = tableActions.stream().filter(TableAction::defaultAction).findFirst();
 			
 			
@@ -154,7 +169,7 @@ public class TableRenderer {
 						.attr("id", "selectionActions")
 						.appendChild(ae = Html.div("col-12")));
 			
-				if(view.multipleDelete()) {
+				if(primaryView.multipleDelete()) {
 					
 					try {
 						permissionService.assertWrite(template.getResourceKey());
@@ -209,7 +224,7 @@ public class TableRenderer {
 						el.appendChild(Html.td());
 					}
 					
-					if(view.parentColumns()) {
+					if(primaryView.parentColumns()) {
 						ObjectTemplate tmp = template;
 						while(tmp.hasParent()) {
 							try(var timed2 = timed("TableRender.dataRendering.parentProcessing")) {
@@ -224,10 +239,10 @@ public class TableRenderer {
 					}
 					
 					try(var timed2 = timed("TableRender.dataRendering.renderColumns")) {
-						renderTableColumns(view, el, template, columns, dynamicColumns);
+						renderTableColumns(primaryView, el, template, columns, dynamicColumns);
 					}
 					
-					if(view.childColumns()) {
+					if(primaryView.childColumns()) {
 						try(var timed2 = timed("TableRender.dataRendering.renderChildTemplateColumns")) {
 							for(String childTemplate : template.getChildTemplates()) {
 								ObjectTemplate t = templateService.get(childTemplate);
@@ -301,7 +316,7 @@ public class TableRenderer {
 									}
 								}
 								
-								renderRowActions(row, obj, view, rowTemplate, 
+								renderRowActions(row, obj, primaryView, rowTemplate, 
 										generateActions(rowTemplate.getCollectionKey(), 
 												rowTemplate.getResourceKey()), 
 										showUpdate && !(obj.isSystem() && rowTemplate.getCapabilities().contains(ObjectTemplateCapability.DISABLE_UPDATE_OF_SYSTEM_OBJECTS)), 
@@ -440,8 +455,10 @@ public class TableRenderer {
 
 	private Map<String, DynamicColumn> generateDynamicColumns() {
 		Map<String, DynamicColumn> results = new HashMap<>();
-		for(DynamicColumn column : view.otherColumns()) {
-			results.put(column.resourceKey(), column);
+		for(TableView view : views) {
+			for(DynamicColumn column : view.otherColumns()) {
+				results.put(column.resourceKey(), column);
+			}
 		}
 		return results;
 	}
@@ -594,15 +611,15 @@ public class TableRenderer {
 			}
 		}
 
-		if(view != null) {
-			if(Objects.nonNull(allActions)) {
-				for(TableAction action : allActions) {
-					if(action.target()==Target.TABLE) {
-						createTableAction(element, action.url(), action.bundle(), action.icon(), action.iconGroup(), action.classes(), action.resourceKey());
-					}
+
+		if(Objects.nonNull(allActions)) {
+			for(TableAction action : allActions) {
+				if(action.target()==Target.TABLE) {
+					createTableAction(element, action.url(), action.bundle(), action.icon(), action.iconGroup(), action.classes(), action.resourceKey());
 				}
 			}
 		}
+		
 		
 	}
 	
@@ -1014,7 +1031,7 @@ public class TableRenderer {
 	}
 
 	public TableView getView() {
-		return view;
+		return primaryView;
 	}
 
 	public void setSortColumn(String sortColumn) {

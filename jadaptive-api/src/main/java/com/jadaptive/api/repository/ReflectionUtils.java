@@ -5,9 +5,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -255,4 +257,5 @@ public class ReflectionUtils {
 	public static boolean hasAnnotation(Field field, Class<ObjectField> annotationClazz) {
 		return field.getAnnotation(annotationClazz) != null;
 	}
+
 }

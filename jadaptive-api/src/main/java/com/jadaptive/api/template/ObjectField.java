@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface ObjectField {
 		
-		FieldType type();	
+		FieldType type() default FieldType.AUTO;
 		
 		FieldOptions[] options() default {};
 		

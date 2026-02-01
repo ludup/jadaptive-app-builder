@@ -14,6 +14,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
+import com.jadaptive.api.repository.UUIDReference;
 
 @ObjectDefinition(resourceKey = FieldTemplate.RESOURCE_KEY, scope = ObjectScope.GLOBAL, type = ObjectType.OBJECT)
 public class FieldTemplate extends TemplateUUIDEntity {
@@ -371,6 +372,11 @@ public class FieldTemplate extends TemplateUUIDEntity {
 		case COUNTRY:
 		case PASSWORD:
 		case TIME:
+		case PERMISSION:
+		case IMAGE:
+		case ISO_CURRENCY:
+		case TEMPLATE_REFERENCE:
+		case OPTIONS:
 			return String.class;
 		case BOOL:
 			return Boolean.class;
@@ -383,7 +389,12 @@ public class FieldTemplate extends TemplateUUIDEntity {
 			return Integer.class;
 		case LONG:
 			return Long.class;
-		default:
+		case ENUM:
+			return Enum.class;
+		case OBJECT_REFERENCE:
+		case ATTACHMENT:
+			return UUIDReference.class;
+			default:
 			throw new IllegalStateException("Unsupported field type " + fieldType.name());
 		}
 	}

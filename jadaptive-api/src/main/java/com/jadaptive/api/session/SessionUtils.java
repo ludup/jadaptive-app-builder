@@ -152,7 +152,7 @@ public class SessionUtils {
 			if(Objects.isNull(tokens)) {
 				throw new UnauthorizedException(String.format("Missing CSRF token setup in %s", request.getRequestURI()));
 			}
-			String form = tokens.remove(requestToken);
+			String form = tokens.get(requestToken);
 			if(Objects.isNull(form)) {
 				log.warn("No CSRF token in session!");
 				throw new UnauthorizedException(String.format("No CSRF token in session! %s", request.getRequestURI()));
@@ -350,7 +350,7 @@ public class SessionUtils {
 		return Session.get(request).getUser();
 	}
 
-	public String setupFormCSRFFToken(HttpServletRequest request, String formIdentifier, Element form) {
+	public String setupFormCSRFToken(HttpServletRequest request, String formIdentifier, Element form) {
 		return doSetupCSRFToken(request, generateCSRFTokenName(formIdentifier), form);
 	}
 	

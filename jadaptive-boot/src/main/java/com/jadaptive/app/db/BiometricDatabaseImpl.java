@@ -67,8 +67,8 @@ public class BiometricDatabaseImpl extends AbstractTenantAwareDatabase implement
    @Override
    public List<List<Double>> getBiometricData(Tenant tenant, User user, String collection) {
 	   
-	   Document doc = getCollection(tenant.getUuid(), collection).find(Filters.eq("_id", user.getUuid())).first();
-	   return (List<List<Double>>) doc.get("biometrics.vector");
+	   Document doc = getCollection(collection, tenant.getUuid()).find(Filters.eq("_id", user.getUuid())).first();
+	   return (List<List<Double>>) ((Document)doc.get("biometrics")).get("vector");
 	   
    }
    
@@ -102,6 +102,22 @@ public class BiometricDatabaseImpl extends AbstractTenantAwareDatabase implement
 
        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
    }
+   
+   @Override
+   public double getBestFaceMatchScore(List<Double> liveVector, List<List<Double>> storedVectors) {
+	    double maxScore = -1.0;
+
+	    for (List<Double> enrolledVector : storedVectors) {
+	        double currentScore = calculateCosineSimilarity(liveVector, enrolledVector);
+	        
+	        // Track the highest similarity found
+	        if (currentScore > maxScore) {
+	            maxScore = currentScore;
+	        }
+	    }
+	    
+	    return maxScore;
+	}
 
    @Override
    public boolean hasBiometricData(Tenant tenant, String collection, User user) {

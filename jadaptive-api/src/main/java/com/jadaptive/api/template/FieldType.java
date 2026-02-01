@@ -23,7 +23,8 @@ public enum FieldType {
 	TIME,
 	ATTACHMENT, 
 	TEMPLATE_REFERENCE, 
-	ISO_CURRENCY;
+	ISO_CURRENCY,
+	AUTO;
 	
 	ValidationType[] options;
 	boolean canDefault = false;
