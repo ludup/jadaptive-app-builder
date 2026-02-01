@@ -1,5 +1,7 @@
 package com.jadaptive.app.cluster;
 
+import java.util.List;
+
 import com.jadaptive.api.cluster.ClusterController.ClusterInfo;
 
 public record ClusterJoinInfo(
@@ -14,4 +16,5 @@ public record ClusterJoinInfo(
 		String privateKey,
 		String publicKey,
 		String clusterName,
-		String props) { }
+		String props,
+		List<String> initialNodes) { }

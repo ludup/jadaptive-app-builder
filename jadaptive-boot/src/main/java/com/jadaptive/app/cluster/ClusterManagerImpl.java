@@ -3,8 +3,10 @@ package com.jadaptive.app.cluster;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -14,13 +16,16 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jgroups.Address;
@@ -54,6 +59,7 @@ import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.http.HttpHelpers;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Html;
@@ -106,6 +112,11 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			LOG.warn("ha.hostname is not set, using a generated ha.hostname of " + hostname);
 		}
 		
+		/* ha.initialNodes and ha.tcpBindPort need to be copied to System Properties
+		 * as JGroups configuration files read from those. 
+		 */
+		System.setProperty("ha.initialNodes", ApplicationProperties.getValue("ha.initialNodes", ""));
+		System.setProperty("ha.tcpBindPort", ApplicationProperties.getValue("ha.tcpBindPort", "7800"));
 			
 		serverId = ApplicationProperties.getValue("ha.id","");
 		if (serverId.equals("")) {
@@ -242,6 +253,10 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	public Element renderColumn(String column, AbstractObject obj, ObjectTemplate rowTemplate) {
 
 		var node = getObjectByUUID(obj.getUuid());
+		if(node == null) {
+			return Html.span("Missing node " + obj.getUuid());
+		}
+		
 		if (column.equals("uuid")) {
 			var row = Html.div();
 			var spn = Html.span(obj.getUuid());
@@ -303,18 +318,25 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				if(node.getUuid().equals(getServerId())) {
 					row.addClass("fw-bolder");
 				}
-				switch(node.getStatus()) {
-				case ONLINE:
-					row.appendChild(Html.i("fa-solid", "fa-circle-check","text-success"));
-					break;
-				case UNAUTHORIZED:
-					row.appendChild(Html.i("fa-solid", "fa-triangle-exclamation","text-warning"));
-					break;
-				default:
+				ClusterNodeStatus status = node.getStatus();
+				if(status == null ) {
 					row.appendChild(Html.i("fa-solid", "fa-circle-exclamation","text-danger"));
-					break;
+					row.appendChild(Html.span("Node has no status.").addClass("ms-3"));
 				}
-				row.appendChild(Html.i18n(ClusterNode.RESOURCE_KEY, "clusterNode."+ node.getStatus().name()).addClass("ms-3"));
+				else {
+					switch(status) {
+					case ONLINE:
+						row.appendChild(Html.i("fa-solid", "fa-circle-check","text-success"));
+						break;
+					case UNAUTHORIZED:
+						row.appendChild(Html.i("fa-solid", "fa-triangle-exclamation","text-warning"));
+						break;
+					default:
+						row.appendChild(Html.i("fa-solid", "fa-circle-exclamation","text-danger"));
+						break;
+					}
+					row.appendChild(Html.i18n(ClusterNode.RESOURCE_KEY, "clusterNode."+ status.name()).addClass("ms-3"));
+				}
 				return row;
 			}
 		}
@@ -457,8 +479,16 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	public void join(String token, String refreshToken, String url, boolean insecureSsl) throws IOException, InterruptedException {
 		
 		LOG.info("Obtaining cluster configuration.");
-	
+
 		var actionUri = url +"/oauth2/join-cluster";
+		
+		/* In case the cluster is using TCP, it will need to know our LAN
+		 * IP address and TCP bind port for JGroups
+		 */
+		actionUri += "?peerIpAddress=" +
+				URLEncoder.encode(InetAddress.getLocalHost().getHostAddress() + "[" + ApplicationProperties.getValue("ha.tcpBindPort", 7800) + "]", "UTF-8");
+				;
+		
 		LOG.info("Using token to obtain cluster configuration. {}", actionUri);
 		
 		var request = HttpRequest.newBuilder()
@@ -544,6 +574,21 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		clusterProperties.setProperty("ha.clusterName", clusterJoin.clusterName()); 
 		clusterProperties.setProperty("ha.props", clusterJoin.props());
 		clusterProperties.setProperty("ha.id", getServerId());
+		
+		/* Special case for Google Cloud. UDP Broadcast is not supported, so we
+		 * must use the TCP configuration for JGroups instead of UDP. 
+		 * 
+		 *  1. The initial node whould have set their "ha.props" to "jad-tcp-cluster.xml".
+		 *  2. The initial node would have an empty "ha.initialNodes".
+		 *  3. Second node joins and is given ha.props and ha.initialNodes.
+		 *  4. Second node adds the first nodes IP address to it's ha.initialNodes.
+		 *  5. First node adds the seconds nodes IP address to it's ha.initialNodes.  
+		 * 
+		 */
+		if(clusterJoin.props().equals("jad-tcp-cluster.xml")) {
+			LOG.info("Cluster is using TCP, setting initial nodes of " + String.join(",", clusterJoin.initialNodes()));
+			clusterProperties.setProperty("ha.initialNodes", String.join(",", clusterJoin.initialNodes()));
+		}
 
 		/* Local key config */
 		if(StringUtils.isNotBlank(clusterJoin.publicKey()) && StringUtils.isNotBlank(clusterJoin.privateKey())) {
@@ -614,5 +659,66 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		LOG.info("Reconfigured for cluser ", clusterJoin.clusterName());
 		
 		throw new UriRedirect("/app/ui/" + JoinWithClusterPage.URI);
+	}
+
+	@Override
+	public List<String> getInitialNodes() {
+		/* When using TCP JGroups config (because the hosting platform
+		 * does not easily support UDP broadcasts), nodes need an initial 
+		 * node list.
+		 * 
+		 * NOTE: We maintain this best we can at join time, but its possible it
+		 * might get out of sync if IP addresses change
+		 * 
+		 * This method returns the nodes that this node knows about, adding its
+		 * own details if needed
+		 */
+		if(ApplicationProperties.getValue("ha.props", SchedulerService.JAD_JGROUPS).equals(SchedulerService.JAD_TCP_JGROUPS)) {
+			try {
+				return Stream.concat(
+						getCurrentInitialNodes(),
+						Stream.of(InetAddress.getLocalHost().getHostAddress() + "[" + ApplicationProperties.getValue("ha.tcpBindPort", "7800") + "]")).
+						distinct().
+						toList();
+			} catch (UnknownHostException e) {
+				throw new UncheckedIOException(e);
+			} 
+		}
+		else {
+			return Collections.emptyList();
+		}
+	}
+
+	@Override
+	public void addInitialNode(String peerIpAddress) throws IOException {
+
+		/* Cluster config */
+		var confd = Paths.get("conf.d");
+		var clusterPropertiesFile = confd.resolve("cluster.properties");
+		var clusterProperties = new Properties();
+		if(Files.exists(clusterPropertiesFile)) {
+			try(var rdr = Files.newBufferedReader(clusterPropertiesFile)) {
+				clusterProperties.load(rdr);
+			}
+		}
+		clusterProperties.setProperty("ha.initialNodes",
+			String.join(",", Stream.concat(
+				Stream.of(peerIpAddress), 
+				getCurrentInitialNodes()
+			).distinct().toList())
+		); 
+		
+		/* Update system property as well for completeness */
+		System.setProperty("ha.initialNodes", clusterProperties.getProperty("ha.initialNodes"));
+
+		try(var rdr = Files.newBufferedWriter(clusterPropertiesFile)) {
+			clusterProperties.store(rdr, "Properties updated as result of cluster join");
+		}
+	}
+
+	private Stream<String> getCurrentInitialNodes() {
+		return Arrays.asList(ApplicationProperties.getValue("ha.initialNodes", "").split(",")).
+			stream().
+			filter(f -> !f.equals(""));
 	}
 }

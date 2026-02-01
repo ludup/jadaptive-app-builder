@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -64,7 +65,8 @@ public class AcceptJoin implements OAuth2Scope, PluginController {
 	@ResponseBody
 	@ResponseStatus(value = HttpStatus.OK)
 	public OAuth2ScopeResponse<ClusterJoinInfo> getUserDetails(HttpServletRequest request, HttpServletResponse response,
-			@RequestHeader("Authentication") String authentication) throws Exception {
+			@RequestHeader("Authentication") String authentication,
+			@RequestParam(name = "peerIpAddress") String peerIpAddress) throws Exception {
 		tokenService.authenticate(authentication, this);
 
 		return tenantService.asSystem(() -> {
@@ -87,7 +89,9 @@ public class AcceptJoin implements OAuth2Scope, PluginController {
 				pubKey = Base64.getEncoder().encodeToString(FileUtils.readFileToByteArray(encryptionProvider.getPubFile().toFile()));
 			}
 			
-			return new OAuth2ScopeResponse<>(new  ClusterJoinInfo(
+			var props = ApplicationProperties.getValue("ha.props", SchedulerService.JAD_JGROUPS); 
+			
+			var oresponse = new OAuth2ScopeResponse<>(new  ClusterJoinInfo(
 				new ClusterInfo(
 					clusterManager.getServerId(), 
 					ClusterNodeStatus.ONLINE,
@@ -103,8 +107,15 @@ public class AcceptJoin implements OAuth2Scope, PluginController {
 				privKey,
 				pubKey,
 				ApplicationProperties.getValue("ha.clusterName", SchedulerService.GENERIC_JAD_CLUSTER),
-				ApplicationProperties.getValue("ha.props", SchedulerService.JAD_JGROUPS)
+				props,
+				clusterManager.getInitialNodes()
 			));
+			
+			if(props.endsWith(SchedulerService.JAD_TCP_JGROUPS)) {
+				clusterManager.addInitialNode(peerIpAddress);
+			}
+			
+			return oresponse;
 		});
 		
 		

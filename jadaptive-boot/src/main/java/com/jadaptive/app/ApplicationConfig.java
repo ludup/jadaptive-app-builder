@@ -12,7 +12,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,7 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.annotation.PreDestroy;

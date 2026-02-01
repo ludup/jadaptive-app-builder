@@ -21,8 +21,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 
-import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.App;
+import com.jadaptive.api.app.ApplicationProperties;
 import com.jadaptive.api.app.ApplicationVersion;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.auth.AuthenticationService;

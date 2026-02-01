@@ -19,6 +19,7 @@ public interface SchedulerService extends AbstractUUIDObjectService<SchedulerTas
 
 	public static final String GENERIC_JAD_CLUSTER = "generic-jad-cluster";
 	public static final String JAD_JGROUPS = "jad-cluster.xml";
+	public static final String JAD_TCP_JGROUPS = "jad-tcp-cluster.xml";
 	
 
 	void schedule(TenantTask job, String expression, String taskUuid);
