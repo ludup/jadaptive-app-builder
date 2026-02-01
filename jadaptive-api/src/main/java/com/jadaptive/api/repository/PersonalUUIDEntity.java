@@ -14,9 +14,9 @@ public abstract class PersonalUUIDEntity extends AbstractUUIDEntity {
 	private static final long serialVersionUID = -8870385785883925751L;
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = User.RESOURCE_KEY, hidden = true, options = FieldOptions.CASCADE_ON_DELETED_REFERENCE)
-	User owner;
+	private User owner;
 	
-	String ownerUUID;
+	private String ownerUUID;
 
 	public String getOwnerUUID() {
 		return ownerUUID;

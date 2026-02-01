@@ -49,25 +49,25 @@ public class AuthorizedKey extends PersonalUUIDEntity implements NamedDocument {
 	
 	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
-	String name;
+	private String name;
 	
 	@ObjectField(type = FieldType.DATE, renderer = FieldRenderer.OPTIONAL)
-	Date expires;
+	private Date expires;
 	
 	@ObjectField(readOnly = true, type = FieldType.TEXT_AREA, view = KEY_VIEW)
 	@ExcludeView(values = { FieldView.TABLE })
-	String publicKey;
+	private String publicKey;
 	
 	@ObjectField(readOnly = true,  type = FieldType.TEXT, searchable = true, unique = true, view = KEY_VIEW)
 	@ExcludeView(values = { FieldView.CREATE })
-	String fingerprint;
+	private String fingerprint;
 	
 	@ObjectField(readOnly = true, type = FieldType.TEXT, searchable = true, view = KEY_VIEW)
 	@ExcludeView(values = { FieldView.CREATE })
-	String type;
+	private String type;
 	
 	@ObjectField(readOnly = true,  type = FieldType.INTEGER, view = KEY_VIEW, renderer = FieldRenderer.OPTIONAL)
-	Integer bits;
+	private Integer bits;
 	
 //	@ObjectField(readOnly = true, type = FieldType.BOOL)
 //	@ExcludeView(values = { FieldView.CREATE })

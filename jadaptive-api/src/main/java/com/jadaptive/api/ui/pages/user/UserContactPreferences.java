@@ -37,19 +37,19 @@ public class UserContactPreferences extends AbstractUUIDEntity {
 	
 	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = User.EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
-	String email;
+	private String email;
 
 	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = User.PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
-	String mobilePhone;
+	private String mobilePhone;
 	
 	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = User.EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
-	Collection<String> otherEmail = new ArrayList<>();
+	private Collection<String> otherEmail = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = User.PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
-	Collection<String> otherTelephone = new ArrayList<>();
+	private Collection<String> otherTelephone = new ArrayList<>();
 
 	@Override
 	public String getResourceKey() {

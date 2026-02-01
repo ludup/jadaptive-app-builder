@@ -11,7 +11,7 @@ public abstract class ReadOnlyNamedUUIDEntity extends AbstractUUIDEntity impleme
 
 	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true, readOnly = true)
 	@Validator(type = ValidationType.REQUIRED)
-	String name;
+	private String name;
 
 	public String getName() {
 		return name;

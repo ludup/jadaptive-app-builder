@@ -21,23 +21,22 @@ public class Quota extends AbstractUUIDEntity {
 	public static final String RESOURCE_KEY = "quota";
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = QuotaKey.RESOURCE_KEY)
-	QuotaKey key;
+	private QuotaKey key;
 	
 	@ObjectField(type = FieldType.TEXT)
-	
-	String group;
-	
-	@ObjectField(type = FieldType.LONG)
-	long quota;
+	private String group;
 	
 	@ObjectField(type = FieldType.LONG)
-	long period;
+	private long quota;
 	
 	@ObjectField(type = FieldType.LONG)
-	long value;
+	private long period;
+	
+	@ObjectField(type = FieldType.LONG)
+	private long value;
 
 	@ObjectField(type = FieldType.TIMESTAMP)
-	Date quotaStarted;
+	private Date quotaStarted;
 	
 	public String getGroup() {
 		return group;

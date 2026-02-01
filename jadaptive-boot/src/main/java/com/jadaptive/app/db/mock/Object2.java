@@ -17,7 +17,7 @@ public class Object2 extends AbstractUUIDEntity {
 	}
 	
 	@ObjectField(type = FieldType.TEXT)
-	String field2;
+	private String field2;
 
 	public String getField2() {
 		return field2;

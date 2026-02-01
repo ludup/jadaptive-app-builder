@@ -24,13 +24,13 @@ public abstract class AssignableUUIDEntity extends AbstractUUIDEntity implements
 			type = FieldType.OBJECT_REFERENCE,
 			references = "roles", view = ROLES_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
-	Collection<Role> roles = new HashSet<>();
+	private Collection<Role> roles = new HashSet<>();
 	
 	@ObjectField(
 			type = FieldType.OBJECT_REFERENCE,
 			references = "users", view = USERS_VIEW)
 	@ExcludeView(values = FieldView.TABLE)
-	Collection<User> users = new HashSet<>();
+	private Collection<User> users = new HashSet<>();
 	
 	public Collection<Role> getRoles() {
 		return roles;

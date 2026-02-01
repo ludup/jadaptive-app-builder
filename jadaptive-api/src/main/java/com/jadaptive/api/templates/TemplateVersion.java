@@ -21,11 +21,11 @@ public class TemplateVersion extends AbstractUUIDEntity {
 
 	@ObjectField(searchable = true, type = FieldType.TEXT)
 	@Validator(type = ValidationType.REQUIRED)
-	String version;
+	private String version;
 
 	@ObjectField(type = FieldType.TIMESTAMP)
 	@Validator(type = ValidationType.REQUIRED)
-	Date timestamp;
+	private Date timestamp;
 
 	public Date getTimestamp() {
 		return Objects.isNull(timestamp) ? new Date() : timestamp;

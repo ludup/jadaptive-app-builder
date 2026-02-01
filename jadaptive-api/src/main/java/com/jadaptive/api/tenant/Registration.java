@@ -6,9 +6,9 @@ public class Registration extends UUIDEntity {
 
 	private static final long serialVersionUID = 6453613448531239814L;
 	
-	String company;
-	String name;
-	String email;
+	private String company;
+	private String name;
+	private String email;
 	
 	public String getCompany() {
 		return company;

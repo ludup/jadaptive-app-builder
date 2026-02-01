@@ -31,21 +31,21 @@ public abstract class QuotaThreshold extends AbstractUUIDEntity {
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = QuotaKey.RESOURCE_KEY, searchable = true, view = QUOTA_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
-	QuotaKey key;
+	private QuotaKey key;
 		
 	@ObjectField(type = FieldType.TEXT, view = QUOTA_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
 	@Validator(type = ValidationType.BYTESIZE, i18n = "bytesize.info")
-	String value;
+	private String value;
 	
 	@ObjectField(type = FieldType.LONG, view = QUOTA_VIEW)
 	@Validator(type = ValidationType.RANGE, value = "1-" + Long.MAX_VALUE)
 	@Validator(type = ValidationType.REQUIRED)
-	long periodValue;
+	private long periodValue;
 	
 	@ObjectField(type = FieldType.ENUM, view = QUOTA_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
-	TimeUnit periodUnit; 
+	private TimeUnit periodUnit; 
 	
 	@Override
 	public String getResourceKey() {

@@ -15,16 +15,16 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 
 	private static final long serialVersionUID = -1903178803319512374L;
 	
-	Boolean system;
-	Boolean hidden;
+	private Boolean system;
+	private Boolean hidden;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, hidden = true, searchable = true)
 	@ExcludeView(values = FieldView.TABLE)
-	Date created;
+	private Date created;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, hidden = true, searchable = true)
 	@ExcludeView(values = FieldView.TABLE)
-	Date lastModified;
+	private Date lastModified;
 
 	public Date getCreated() {
 		return Objects.nonNull(created) ? created : Utils.now();
@@ -54,7 +54,7 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		result = prime * result + ((getUuid() == null) ? 0 : getUuid().hashCode());
 		return result;
 	}
 
@@ -67,10 +67,10 @@ public abstract class AbstractUUIDEntity extends UUIDEntity {
 		if (getClass() != obj.getClass())
 			return false;
 		AbstractUUIDEntity other = (AbstractUUIDEntity) obj;
-		if (uuid == null) {
-			if (other.uuid != null)
+		if (getUuid() == null) {
+			if (other.getUuid() != null)
 				return false;
-		} else if (!uuid.equals(other.uuid))
+		} else if (!getUuid().equals(other.getUuid()))
 			return false;
 		return true;
 	}

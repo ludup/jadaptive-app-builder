@@ -16,28 +16,28 @@ public class FileAttachment extends AbstractUUIDEntity implements NamedDocument 
 	public static final String RESOURCE_KEY = "fileAttachments";
 
 	@ObjectField(type = FieldType.TEXT, nameField = true)
-	String filename;
+	private String filename;
 
 	@ObjectField(type = FieldType.TEXT)
-	String downloadUrl;
+	private String downloadUrl;
 	
 	@ObjectField(type = FieldType.TEXT)
-	String contentType;
+	private String contentType;
 	
 	@ObjectField(type = FieldType.LONG)
-	Long size;
+	private Long size;
 	
 	@ObjectField(type = FieldType.TEXT)
-	String hash;
+	private String hash;
 	
 	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = FileStorageProvider.RESOURCE_KEY)
-	FileStorageProvider provider;
+	private FileStorageProvider provider;
 	
 	@ObjectField(type = FieldType.TEXT, hidden = true)
-	String formVariable;
+	private String formVariable;
 	
 	@ObjectField(type = FieldType.TEXT)
-	String attachedTo;
+	private String attachedTo;
 	
 	public String getName() {
 		return getFilename();

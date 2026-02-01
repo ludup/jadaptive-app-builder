@@ -13,7 +13,7 @@ public class UUIDReference extends UUIDEntity implements NamedDocument {
 	public static final String RESOURCE_KEY = "uuidReference";
 
 	@ObjectField(type = FieldType.TEXT)
-	String name;
+	private String name;
 
 	public UUIDReference() { }
 	

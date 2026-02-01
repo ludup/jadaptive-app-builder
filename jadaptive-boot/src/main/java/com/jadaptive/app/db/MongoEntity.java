@@ -23,11 +23,11 @@ import com.jadaptive.app.entity.AbstractObjectSerializer;
 public class MongoEntity  extends AbstractUUIDEntity implements AbstractObject {
 
 	private static final long serialVersionUID = 7834313955696773158L;
-	AbstractObject parent;
-	Map<String,AbstractObject> children = new HashMap<>();
-	Document document;
-	String contentHash;
-	String resourceKey;
+	private AbstractObject parent;
+	private Map<String,AbstractObject> children = new HashMap<>();
+	private Document document;
+	private String contentHash;
+	private String resourceKey;
 	
 	public MongoEntity(Map<String,Object> document) {	
 		this((String)document.get("resourceKey"), document);

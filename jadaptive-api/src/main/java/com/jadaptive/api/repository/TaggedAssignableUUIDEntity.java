@@ -15,10 +15,10 @@ public abstract class TaggedAssignableUUIDEntity extends AssignableUUIDEntity im
 
 	@ObjectField(searchable = true, unique = true, type = FieldType.TEXT, nameField = true, weight = 0)
 	@Validator(type = ValidationType.REQUIRED)
-	protected String name;
+	private String name;
 
 	@ObjectField(type = FieldType.TEXT, searchable = true, renderer = FieldRenderer.TAGS)
-	Collection<String> tags;
+	private Collection<String> tags;
 	
 	public String getName() {
 		return name;

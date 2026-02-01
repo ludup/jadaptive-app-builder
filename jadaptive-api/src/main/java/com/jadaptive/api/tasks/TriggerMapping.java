@@ -22,10 +22,10 @@ public class TriggerMapping extends UUIDEntity {
 	}
 	
 	@ObjectField(type = FieldType.TEXT)
-	String fieldName;
-	
+	private String fieldName;
+
 	@ObjectField(type = FieldType.TEXT_AREA)
-	String variableExpression;
+	private String variableExpression;
 	
 	@Override
 	public String getResourceKey() {

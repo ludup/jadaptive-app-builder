@@ -15,18 +15,18 @@ public class CustomEvent extends UUIDEntity {
 
 	@ObjectField(searchable = true,
 			type = FieldType.TEXT)
-	String resourceKey;
+	private String resourceKey;
 		
 	@ObjectField(searchable = true,
 			type = FieldType.BOOL)
-	boolean success;
-	
+	private boolean success;
+
 	@ObjectField(type = FieldType.TEXT_AREA)
-	String error;
-	
+	private String error;
+
 	@ObjectField(searchable = true,
 			type = FieldType.TIMESTAMP)
-	Date timestamp = new Date();
+	private Date timestamp = new Date();
 	
 	public CustomEvent(String resourceKey) {
 		this.resourceKey = resourceKey;

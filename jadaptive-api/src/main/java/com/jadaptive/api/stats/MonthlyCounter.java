@@ -18,13 +18,13 @@ public class MonthlyCounter extends AbstractUUIDEntity {
 	private static final long serialVersionUID = -8552673621693434319L;
 	
 	@ObjectField(type = FieldType.DATE)
-	Date date;
+	private Date date;
 	
 	@ObjectField(type = FieldType.TEXT)
-	String key;
+	private String key;
 	
 	@ObjectField(type = FieldType.LONG)
-	long value;
+	private long value;
 	
 	public static final String RESOURCE_KEY = "monthlyCounter";
 	

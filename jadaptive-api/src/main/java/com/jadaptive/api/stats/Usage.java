@@ -24,15 +24,15 @@ public class Usage extends AbstractUUIDEntity {
 	public static final String RESOURCE_KEY = "productUsage";
 
 	@ObjectField(type = FieldType.TIMESTAMP)
-	Date timestamp;
+	private Date timestamp;
 	
 	@ObjectField(type = FieldType.TEXT, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
-	Collection<String> keys;
+	private Collection<String> keys;
 	
 	@ObjectField(type = FieldType.LONG, searchable = true)
 	@Validator(type = ValidationType.REQUIRED)
-	Long value;
+	private Long value;
 
 	public Date getTimestamp() {
 		return timestamp;

@@ -16,21 +16,21 @@ public abstract class TaggedUUIDEntity extends UUIDEntity {
 
 	private static final long serialVersionUID = -1903178803319512374L;
 	
-	Boolean system;
-	Boolean hidden;
-	boolean summarise;
+	private Boolean system;
+	private Boolean hidden;
+	private boolean summarise;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, hidden = true, searchable = true)
 	@ExcludeView(values = FieldView.TABLE)
-	Date created;
+	private Date created;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, hidden = true, searchable = true)
 	@ExcludeView(values = FieldView.TABLE)
-	Date lastModified;
+	private Date lastModified;
 
 
 	@ObjectField(type = FieldType.TEXT, searchable = true, renderer = FieldRenderer.TAGS, weight = 9999)
-	Collection<String> tags = new HashSet<>();
+	private Collection<String> tags = new HashSet<>();
 	
 	public Date getCreated() {
 		return created;
@@ -68,7 +68,7 @@ public abstract class TaggedUUIDEntity extends UUIDEntity {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		result = prime * result + ((getUuid() == null) ? 0 : getUuid().hashCode());
 		return result;
 	}
 
@@ -81,10 +81,10 @@ public abstract class TaggedUUIDEntity extends UUIDEntity {
 		if (getClass() != obj.getClass())
 			return false;
 		TaggedUUIDEntity other = (TaggedUUIDEntity) obj;
-		if (uuid == null) {
-			if (other.uuid != null)
+		if (getUuid() == null) {
+			if (other.getUuid() != null)
 				return false;
-		} else if (!uuid.equals(other.uuid))
+		} else if (!getUuid().equals(other.getUuid()))
 			return false;
 		return true;
 	}

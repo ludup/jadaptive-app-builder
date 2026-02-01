@@ -6,7 +6,7 @@ public abstract class UUIDEntity implements UUIDDocument {
 
 	private static final long serialVersionUID = 4463484601829889960L;
 	
-	String uuid;
+	private String uuid;
 	
 	public abstract String getResourceKey();
 	

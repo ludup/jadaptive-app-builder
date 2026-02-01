@@ -15,10 +15,10 @@ public class Property extends AbstractUUIDEntity {
 	public static final String RESOURCE_KEY = "properties";
 	
 	@ObjectField(type=FieldType.TEXT, unique = true)
-	String key;
+	private String key;
 	
 	@ObjectField(type=FieldType.TEXT_AREA)
-	String value;
+	private String value;
 	
 	@Override
 	public String getResourceKey() {

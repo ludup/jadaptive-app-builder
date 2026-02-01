@@ -21,15 +21,15 @@ public class Redirect extends AbstractUUIDEntity {
 	public static final String RESOURCE_KEY = "redirects";
 	
 	@ObjectField(searchable = true, type = FieldType.TEXT)
-	String hostname;
-	
+	private String hostname;
+
 	@ObjectField(searchable = true, type = FieldType.TEXT)
 	@Validator(type = ValidationType.REQUIRED)
-	String path;
-	
+	private String path;
+
 	@ObjectField(type = FieldType.TEXT)
 	@Validator(type = ValidationType.REQUIRED)
-	String location;
+	private String location;
 	
 	public String getHostname() {
 		return hostname;

@@ -17,19 +17,19 @@ public class Trigger extends UUIDEntity {
 	public static final String RESOURCE_KEY = "trigger";
 	
 	@ObjectField(type = FieldType.ENUM)
-	TriggerType type;
+	private TriggerType type;
 	
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
-	List<TriggerMapping> taskMappings = new ArrayList<>();
+	private List<TriggerMapping> taskMappings = new ArrayList<>();
 
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
-	List<TriggerMapping> globalMappings = new ArrayList<>();
+	private List<TriggerMapping> globalMappings = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
-	Task task;
+	private Task task;
 	
 	@ObjectField(type = FieldType.OBJECT_EMBEDDED)
-	List<Trigger> triggers = new ArrayList<>();
+	private List<Trigger> triggers = new ArrayList<>();
 	
 	@Override
 	public String getResourceKey() {

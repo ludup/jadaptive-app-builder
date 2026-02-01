@@ -60,23 +60,23 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true, view = DETAILS_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
-	String username;
+	private String username;
 
 	@ObjectField(searchable = true, type = FieldType.TEXT, nameField = true, view = DETAILS_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
-	String name;
+	private String name;
 
 	@ObjectField(type = FieldType.BOOL, hidden = true, defaultValue = "true", view = DETAILS_VIEW)
-	Boolean enabled = Boolean.TRUE;
+	private Boolean enabled = Boolean.TRUE;
 	
 	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
 	@Validator(type = ValidationType.EMAIL)
-	String email;
+	private String email;
 
 	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
-	String mobilePhone;
+	private String mobilePhone;
 	
 	@ObjectField(type = FieldType.IMAGE, view = AVATAR_VIEW, weight = 9999)
 	@Validators({
@@ -85,22 +85,22 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 		@Validator(type = ValidationType.IMAGE_WIDTH, value = "512"),
 			
 	})
-	String avatar;
+	private String avatar;
 	
 	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true, view = DETAILS_VIEW)
 	@ExcludeView(values =  { FieldView.CREATE })
-	Date lastLogin;
+	private Date lastLogin;
 	
 	@ObjectField(type = FieldType.TEXT, readOnly = true, view = DETAILS_VIEW, renderer = FieldRenderer.OPTIONAL)
-	Collection<String> aliases;
+	private Collection<String> aliases;
 
 	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
-	Collection<String> otherEmail = new ArrayList<>();
+	private Collection<String> otherEmail = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = PHONE_VIEW)
 	@Validator(type = ValidationType.REGEX, value = Utils.PHONE_PATTERN, bundle=User.RESOURCE_KEY)
-	Collection<String> otherTelephone = new ArrayList<>();
+	private Collection<String> otherTelephone = new ArrayList<>();
 	
 	public String getUsername() {
 		return username;
