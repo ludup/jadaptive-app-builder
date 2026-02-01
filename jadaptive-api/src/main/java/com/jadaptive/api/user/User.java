@@ -67,7 +67,7 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 	private String name;
 
 	@ObjectField(type = FieldType.BOOL, hidden = true, defaultValue = "true", view = DETAILS_VIEW)
-	private Boolean enabled = Boolean.TRUE;
+	protected Boolean enabled = Boolean.TRUE;
 	
 	@ObjectField(nameField = false, type = FieldType.TEXT, options = FieldOptions.AUTOMATIC_ENCRYPTION, view = EMAIL_VIEW)
 	@Validator(type = ValidationType.EMAIL)
