@@ -5,16 +5,19 @@ import java.io.FileNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedContext;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.Redirect;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -103,6 +106,14 @@ public class ControllerInterceptor implements HandlerInterceptor {
 		if(thrw != null && !(thrw instanceof Redirect)) {
 			if(thrw instanceof FileNotFoundException || thrw instanceof NoResourceFoundException) {
 				log.warn("Resource not found {}", request.getRequestURI());
+				return;
+			} else if(thrw instanceof AccessDeniedException) {
+				log.warn("Access denied for {} URL {}", request.getMethod(), request.getRequestURL().toString());
+				response.sendError(HttpStatus.FORBIDDEN.value());
+				return;
+			} else if(thrw instanceof UnauthorizedException) {
+				log.warn("Unauthorised request {} URL {}", request.getMethod(), request.getRequestURL().toString());
+				response.sendError(HttpStatus.UNAUTHORIZED.value());
 				return;
 			}
 			log.error("Request failure on {} URL {}", request.getMethod(), request.getRequestURL().toString(), thrw);
