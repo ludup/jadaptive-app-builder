@@ -17,8 +17,13 @@ public class TestTools implements HtmlPageExtender {
 		return true;
 	}
 
+	@Override
+	public void processStart(Document doc, String uri, Page page) throws FileNotFoundException {
+		PageHelper.appendHeadScript(doc, "/app/content/js/test-tools-header.js");
+	}
+
+	@Override
 	public void processEnd(Document doc, String uri, Page page) throws FileNotFoundException {
 		PageHelper.appendBodyScript(doc, "/app/content/js/test-tools.js");
-
-	};
+	}
 }
