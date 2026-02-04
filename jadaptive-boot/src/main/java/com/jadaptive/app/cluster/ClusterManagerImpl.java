@@ -3,11 +3,8 @@ package com.jadaptive.app.cluster;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
@@ -50,17 +47,20 @@ import com.jadaptive.api.cluster.ClusterNodeConnectedEvent;
 import com.jadaptive.api.cluster.ClusterNodeDisconnectedEvent;
 import com.jadaptive.api.cluster.ClusterService;
 import com.jadaptive.api.cluster.ClusterServiceProvider;
+import com.jadaptive.api.cluster.Net;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.SystemOnlyObjectDatabase;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
+import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.http.HttpHelpers;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.UriRedirect;
@@ -104,12 +104,12 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	public void initCluster() {
 		configuredHostname = hostname = ApplicationProperties.getValue("ha.hostname", "");
 		if (hostname.equals("")) {
-			try {
-				hostname = InetAddress.getLocalHost().getHostName();
-			} catch (UnknownHostException e) {
-				hostname = "localhost";
-			}	
+			hostname = Net.getLocalHostName();
 			LOG.warn("ha.hostname is not set, using a generated ha.hostname of " + hostname);
+		}
+		
+		if(!hostname.contains(".") && !hostname.contains(":")) {
+			LOG.error("ha.hostname is not a fully qualified hostname, nor is it an address. This is almost certainly not what you want in a production environment.");
 		}
 		
 		/* ha.initialNodes and ha.tcpBindPort need to be copied to System Properties
@@ -345,7 +345,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 
 	private void setupEventsProxy(DistributedScheduledExecutor executor) {
 		eventService.registerListener(evt -> {
-			if(evt instanceof SystemEvent sysevt && evt instanceof BroadcastableEvent && !sysevt.isRemote()) {
+			if(evt instanceof SystemEvent sysevt && BroadcastableEvent.isBroadcastable(sysevt) && !sysevt.isRemote()) {
 				
 				/* TODO Really should be an assertion, its mainly to highlight to developers
 				 */
@@ -368,6 +368,17 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				}
 				var fuuuid = uuuid;
 				var tenant = tenantService.getCurrentTenant().getUuid();
+				
+				/* If this is a tenant creation creation event, then the tenant
+				 * we are running as is actually the new tenant. We can't tell
+				 * the remote node to run as this tenant because it does not exist
+				 * yet.
+				 */
+				if(evt instanceof ObjectEvent oe && oe.getObject() instanceof Tenant && oe.getResourceKey().endsWith(".created")) {
+					var sysTenant = tenantService.getSystemTenant().getUuid();
+					LOG.info("Firing event as system tenant {}, as the target tenant {} won't exist on remote nodes yet.", sysTenant, tenant);
+					tenant = sysTenant;
+				}
 				
 				/* Put the actual save on the queue, we don't want to hold up normal local
 				 * event listeners for synchronous events
@@ -486,7 +497,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		 * IP address and TCP bind port for JGroups
 		 */
 		actionUri += "?peerIpAddress=" +
-				URLEncoder.encode(InetAddress.getLocalHost().getHostAddress() + "[" + ApplicationProperties.getValue("ha.tcpBindPort", 7800) + "]", "UTF-8");
+				URLEncoder.encode(Net.getLocalHostAddress() + "[" + ApplicationProperties.getValue("ha.tcpBindPort", 7800) + "]", "UTF-8");
 				;
 		
 		LOG.info("Using token to obtain cluster configuration. {}", actionUri);
@@ -674,15 +685,11 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		 * own details if needed
 		 */
 		if(ApplicationProperties.getValue("ha.props", SchedulerService.JAD_JGROUPS).equals(SchedulerService.JAD_TCP_JGROUPS)) {
-			try {
-				return Stream.concat(
-						getCurrentInitialNodes(),
-						Stream.of(InetAddress.getLocalHost().getHostAddress() + "[" + ApplicationProperties.getValue("ha.tcpBindPort", "7800") + "]")).
-						distinct().
-						toList();
-			} catch (UnknownHostException e) {
-				throw new UncheckedIOException(e);
-			} 
+			return Stream.concat(
+					getCurrentInitialNodes(),
+					Stream.of(Net.getLocalHostAddress() + "[" + ApplicationProperties.getValue("ha.tcpBindPort", "7800") + "]")).
+					distinct().
+					toList();
 		}
 		else {
 			return Collections.emptyList();
@@ -717,8 +724,11 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	}
 
 	private Stream<String> getCurrentInitialNodes() {
-		return Arrays.asList(ApplicationProperties.getValue("ha.initialNodes", "").split(",")).
-			stream().
-			filter(f -> !f.equals(""));
+		return Stream.concat(
+			Arrays.asList(ApplicationProperties.getValue("ha.initialNodes", "").split(",")).
+				stream().
+				filter(f -> !f.equals("")),
+			Stream.of(Net.getLocalHostAddress())
+			).distinct();
 	}
 }

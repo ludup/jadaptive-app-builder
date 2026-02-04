@@ -36,5 +36,10 @@ public class ClusterNodeConnectedEvent extends ObjectEvent<ClusterNode> {
 	public ClusterNode getObject() {
 		return object;
 	}
+
+	@Override
+	public void setObject(ClusterNode object) {
+		this.object = object;
+	}
 	
 }

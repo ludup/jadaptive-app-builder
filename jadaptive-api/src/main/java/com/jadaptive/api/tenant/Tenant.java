@@ -1,5 +1,6 @@
 package com.jadaptive.api.tenant;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -10,6 +11,7 @@ import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.NamedUUIDEntity;
+import com.jadaptive.api.template.BroadcastEvent;
 import com.jadaptive.api.template.CreateURL;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -28,11 +30,12 @@ import com.jadaptive.utils.Utils;
 	system = true, creatable = true, defaultColumn = "name")
 @ObjectServiceBean(bean = TenantService.class)
 @GenerateEventTemplates(value = Tenant.RESOURCE_KEY)
+@BroadcastEvent
 @ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)
 @TableView(defaultColumns = { "name", "hostname", "lastLogin", "code", "database" })
 @CreateURL(value = "/app/ui/wizards/setupTenant", i18n = "wizard.name")
 @TableAction(bundle = Tenant.RESOURCE_KEY, defaultAction = true, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}")
-public class Tenant extends NamedUUIDEntity implements NamedDocument {
+public class Tenant extends NamedUUIDEntity implements NamedDocument, Serializable {
 
 	private static final long serialVersionUID = 1567817173441528990L;
 

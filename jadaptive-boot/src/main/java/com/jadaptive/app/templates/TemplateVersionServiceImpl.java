@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.ConfigHelper;
 import com.jadaptive.api.app.ResourcePackage;
+import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractObject;
@@ -67,6 +68,7 @@ import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.TransactionAdapter;
 import com.jadaptive.api.repository.UUIDDocument;
+import com.jadaptive.api.template.BroadcastEvent;
 import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldTemplate;
 import com.jadaptive.api.template.FieldType;
@@ -562,7 +564,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 				loadCached = template.getHash() != null && Objects.equals(hash, template.getHash());
 			}
 			
-			if(!loadCached) {
+			if(!loadCached || Boolean.getBoolean("jadaptive.alwaysRebuildTemplates")) {
 				log.info("No cached template, rebuilding for {}", clz.getName());
 				
 				Class<?> baseClass = TemplateUtils.getBaseClass(clz);
@@ -835,10 +837,13 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			log.debug("Generating event templates and class for {}", clz.getSimpleName());
 		}
 		try {
-			
-			var b = new ByteBuddy().subclass(genericType, ConstructorStrategy.Default.DEFAULT_CONSTRUCTOR)
+			var b = new ByteBuddy()
+						.subclass(genericType, ConstructorStrategy.Default.DEFAULT_CONSTRUCTOR)
 					  .name(String.format("com.jadaptive.events.%s.%s", group, className));
 			
+			if(clz.getAnnotation(BroadcastEvent.class) != null) {
+				b = b.implement(BroadcastableEvent.class);
+			}
 			
 			 b = b.annotateType(AnnotationDescription.Builder.ofType(ObjectDefinition.class)
 	                  .define("resourceKey", eventKey)
@@ -878,13 +883,16 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 					  .define("type", ValidationType.RESOURCE_KEY)
 					  .define("value", resourceKey).build())
 			  .defineMethod("getObject", clz, Visibility.PUBLIC)
-	          .intercept(FieldAccessor.ofField("object"))
-	          .defineConstructor(Visibility.PUBLIC)
-			  .withParameters(clz, Throwable.class)
-			  .intercept(MethodCall
-			               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class, Throwable.class))
-			               .onSuper().with(eventKey, group).withArgument(1)
-			               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)));
+		          .intercept(FieldAccessor.ofField("object"))
+		      .defineMethod("setObject", void.class, Visibility.PUBLIC)
+		            .withParameters(clz)
+		            .intercept(FieldAccessor.ofField("object").setsArgumentAt(0))  
+		      .defineConstructor(Visibility.PUBLIC)
+				  .withParameters(clz, Throwable.class)
+				  .intercept(MethodCall
+				               .invoke(ObjectEvent.class.getDeclaredConstructor(String.class, String.class, Throwable.class))
+				               .onSuper().with(eventKey, group).withArgument(1)
+				               .andThen(FieldAccessor.ofField("object").setsArgumentAt(0)));
 			 
 			var type = b.make().load(classService.getClassLoader());
 			var dynamicType = type.getLoaded();
@@ -909,7 +917,8 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		}
 		try {
 			
-			var b = new ByteBuddy().subclass(genericType, ConstructorStrategy.Default.DEFAULT_CONSTRUCTOR)
+			var b = new ByteBuddy().
+						subclass(genericType, ConstructorStrategy.Default.DEFAULT_CONSTRUCTOR)
 					  .name(String.format("com.jadaptive.events.%s.%s", group, className));
 			
 			

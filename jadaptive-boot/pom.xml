@@ -278,7 +278,10 @@
 					<attach>true</attach>
 				</configuration>
 			</plugin>
-			<plugin>
+			
+			<!-- BPS: I don't think we need this anymore. Commenting out to see if 
+			          anything breaks or anyone complains -->
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -301,7 +304,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin>-->
 		</plugins>
 	</build>
 

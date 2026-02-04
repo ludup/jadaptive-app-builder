@@ -36,5 +36,10 @@ public class SchedulerTaskCompleteEvent extends ObjectEvent<SchedulerTask> {
 	public SchedulerTask getObject() {
 		return object;
 	}
+
+	@Override
+	public void setObject(SchedulerTask object) {
+		this.object = object;
+	}
 	
 }

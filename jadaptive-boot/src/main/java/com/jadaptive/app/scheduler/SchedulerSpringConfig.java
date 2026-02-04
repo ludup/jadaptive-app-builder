@@ -1,7 +1,11 @@
 package com.jadaptive.app.scheduler;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -23,9 +27,12 @@ import com.jadaptive.api.app.App;
 import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.cluster.ClusterEvent;
 import com.jadaptive.api.db.ClassLoaderService;
+import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.SystemEvent;
+import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.scheduler.TenantTask;
+import com.jadaptive.api.tenant.Tenant;
 import com.sshtools.gardensched.ClusterID;
 import com.sshtools.gardensched.DistributedTask;
 import com.sshtools.gardensched.ObjectStore;
@@ -43,7 +50,7 @@ import com.sshtools.gardensched.spring.PeriodicTriggerSerializer;
 import com.sshtools.gardensched.spring.TriggerAdapter;
 
 @Configuration
-public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandler {
+public class SchedulerSpringConfig implements TaskErrorHandler, TaskSuccessHandler {
 	
 	@Autowired
 	private ClassLoaderService classLoader;
@@ -95,8 +102,15 @@ public class ScheduleSpringConfig implements TaskErrorHandler, TaskSuccessHandle
 				allowIfSubType(PeriodicTrigger.class).
 				allowIfSubType(ClusterEvent.class).
 				allowIfSubType(Date.class).
+				allowIfSubType(Tenant.class).
+				allowIfSubType(ArrayList.class).
+				allowIfSubType(HashSet.class).
+				allowIfSubType(HashMap.class).
+				allowIfSubType(LinkedHashSet.class).
 				allowIfBaseType(Enum.class).
+				allowIfBaseType(ObjectEvent.class).
 				allowIfBaseType(SystemEvent.class).
+				allowIfBaseType(UUIDEntity.class).
 				allowIfBaseType(BroadcastableEvent.class).
 				allowIfBaseType(TenantTask.class).
 				allowIfBaseType(DistributedTask.class).

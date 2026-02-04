@@ -147,7 +147,12 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				stream().
 				sorted((o1,o2) -> o2.getStartupPosition().compareTo(o1.getStartupPosition())).
 				forEach(StartupAware::onAfterApplicationStartup);
-			
+
+			eventService.deleted(Tenant.class, tevt -> {
+				if(tevt.isRemote()) {
+					resetCache(tevt.getObject());
+				}
+			});
 			eventService.saved(Tenant.class, tevt -> {
 				if(tevt.getObject().getUuid().equals(systemTenant.getUuid())) {
 					systemTenant = tevt.getObject();

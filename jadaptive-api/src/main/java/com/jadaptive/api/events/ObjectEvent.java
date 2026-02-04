@@ -30,6 +30,8 @@ public abstract class ObjectEvent<T extends UUIDEntity> extends UserGeneratedEve
 	}
 
 	public abstract T getObject();
+
+	public abstract void setObject(T object);
 	
 	@Override
 	public boolean async() { return false; }
