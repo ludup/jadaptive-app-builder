@@ -24,6 +24,7 @@ public class OptionsFormInput {
 		
 		Element optionsElement;
 		rootElement.appendChild(optionsElement =new Element("div")
+				.attr("id", field.getFormVariable())
 				.addClass("row"));
 		
 		optionsElement.appendChild(Html.div("col-12 mb-3")
