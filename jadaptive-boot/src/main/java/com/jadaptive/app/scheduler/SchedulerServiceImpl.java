@@ -183,6 +183,9 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 			var annotation = task.getClass().getAnnotation(ScheduledTaskConfig.class);
 			if(annotation != null) {
 				cron = annotation.value();
+				if(annotation.systemOnly() && !tenant.isSystem()) {
+					continue;
+				}
 			}
 			
 			UUID uuid;
