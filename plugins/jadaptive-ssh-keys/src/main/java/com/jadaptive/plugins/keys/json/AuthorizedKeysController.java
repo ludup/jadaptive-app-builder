@@ -110,9 +110,8 @@ public class AuthorizedKeysController extends AuthenticatedController{
 		void doOperation(AuthorizedKey key);
 	}
 	
-	@RequestMapping(value = { "/generate/personal/key" }, produces = { "application/json" })
 	@ResponseBody
-	@PostMapping
+	@PostMapping(value = { "/generate/personal/key" }, produces = { "application/json" })
 	public RequestStatus generatePersonalKey(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam int type,
 			@RequestParam String passphrase,
@@ -129,9 +128,8 @@ public class AuthorizedKeysController extends AuthenticatedController{
 		
 	}
 	
-	@RequestMapping(value = { "/generate/user/key" }, produces = { "application/json" })
 	@ResponseBody
-	@PostMapping
+	@PostMapping(value = { "/generate/user/key" }, produces = { "application/json" })
 	public RequestStatus generateUserKey(HttpServletRequest request, HttpServletResponse response,
 			@RequestParam int type,
 			@RequestParam String name,
@@ -149,8 +147,7 @@ public class AuthorizedKeysController extends AuthenticatedController{
 		
 	}
 	
-	@RequestMapping(value = { "/generate/download" }, produces = { "application/octet-stream" })
-	@GetMapping
+	@GetMapping(value = { "/generate/download" }, produces = { "application/octet-stream" })
 	public void downloadKey(HttpServletRequest request, HttpServletResponse response) throws IOException, AccessDeniedException, UnauthorizedException {
 		
 		File file = (File) request.getSession().getAttribute(KEY_DOWNLOAD);
