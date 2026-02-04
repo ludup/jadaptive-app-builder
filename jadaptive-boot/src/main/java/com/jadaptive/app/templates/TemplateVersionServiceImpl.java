@@ -1315,7 +1315,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 		t.setBundle(StringUtils.isBlank(field.bundle()) ? bundle : field.bundle());
 		t.setWeight(field.weight());
 		
-		switch(field.type()) {
+		switch(t.getFieldType()) {
 		case OBJECT_EMBEDDED:
 		{
 			Class<?> clz = ReflectionUtils.getObjectType(f);

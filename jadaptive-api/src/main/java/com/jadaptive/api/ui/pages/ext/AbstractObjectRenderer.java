@@ -921,6 +921,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			break; 
 		}
+		case HTML:
+			
+			element.append(i18nService.format(currentTemplate.get().getBundle(), Locale.getDefault(), fieldView.getResourceKey() + ".html"));
+			element.child(0).attr("id", fieldView.getFormVariable());
+			break;
 		case TEXT:
 		{
 			switch(fieldView.getRenderer()) {

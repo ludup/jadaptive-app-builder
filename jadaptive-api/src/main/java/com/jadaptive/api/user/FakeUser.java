@@ -9,7 +9,7 @@ public class FakeUser extends User {
 	String username;
 	public FakeUser(String username) {
 		this.username = username;
-		this.enabled = true;
+		setEnabled(true);
 	}
 	
 	@Override

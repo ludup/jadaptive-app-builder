@@ -1,5 +1,6 @@
 package com.jadaptive.api.entity;
 
+import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 

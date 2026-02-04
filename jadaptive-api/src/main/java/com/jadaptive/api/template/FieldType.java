@@ -24,7 +24,8 @@ public enum FieldType {
 	ATTACHMENT, 
 	TEMPLATE_REFERENCE, 
 	ISO_CURRENCY,
-	AUTO;
+	AUTO,
+	HTML;
 	
 	ValidationType[] options;
 	boolean canDefault = false;

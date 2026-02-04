@@ -42,7 +42,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.ui.Feedback;
-import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.MongoEntity;
 import com.jadaptive.utils.FileUtils;
@@ -130,7 +130,7 @@ public class ObjectUploadServlet extends HttpServlet {
 		    } catch(ValidationException ex) { 
 				Feedback.error(ex.getMessage());
 				json.writer().writeValue(resp.getOutputStream(), new RequestStatusImpl(false, ex.getMessage()));
-			} catch (UriRedirect e) {
+			} catch (Redirect e) {
 				json.writer().writeValue(resp.getOutputStream(), new RedirectStatus(e.getUri()));
 			} catch (ObjectException e) {
 				Feedback.error(e.getMessage());

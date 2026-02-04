@@ -59,12 +59,12 @@ submit : function(form, callback, invalid) {
 		       return xhr;
 		   }
          });
-	}, function() {
+	}, function(e) {
 		
 		if(invalid) {
-			invalid();
-		}
-		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
+			invalid(e);
+		} 
+		window.location.reload();
 	});
 	
     }

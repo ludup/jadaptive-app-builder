@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,13 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		if(Objects.nonNull(form)) {
 			String action = form.attr("action");
 			document.selectFirst("#form").attr("action", action.replace("${page.template.resourceKey}", template.getResourceKey()));
+		}
+		
+		for(Element e : document.select("a")) {
+			String href = e.attr("href");
+			if(StringUtils.isNotBlank(href)) {
+				e.attr("href", href.replace("${page.template.resourceKey}", template.getResourceKey()));
+			}
 		}
 		
 	}
