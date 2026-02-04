@@ -1,5 +1,7 @@
 package com.jadaptive.app.json;
 
+import java.util.Objects;
+
 import javax.lang.model.UnknownEntityException;
 
 import org.slf4j.Logger;
@@ -20,6 +22,8 @@ import com.jadaptive.api.json.EntityStatus;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
+import com.jadaptive.api.ui.Feedback;
+import com.jadaptive.utils.Utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -56,6 +60,25 @@ public class TenantController {
 			return new EntityStatus<>(Boolean.FALSE);
 		} catch(ObjectNotFoundException e) {
 			return new EntityStatus<>(Boolean.TRUE);
+		}
+		
+	}
+	
+	@RequestMapping(value="/app/api/tenant/scheduleDelete/{uuid}", method = RequestMethod.DELETE)
+	public void scheduleDelete(HttpServletRequest request, @PathVariable String uuid) throws RepositoryException, UnknownEntityException, ObjectException {
+		
+		try {
+			Tenant tenant = tenantService.getTenantByUUID(uuid);
+			if(Objects.nonNull(tenant.getDeletionDate())) {
+				Feedback.info(Tenant.RESOURCE_KEY, "deletion.alreadyScheduled", 
+						tenant.getName(), 
+						Utils.formatDate(tenant.getDeletionDate()));
+			} else {
+				tenantService.scheduleDelete(tenant);
+				Feedback.info(Tenant.RESOURCE_KEY, "deletion.scheduled", tenant.getName());
+			}
+		} catch(Throwable e) {
+			Feedback.error(e.getMessage());
 		}
 		
 	}

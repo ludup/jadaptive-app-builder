@@ -11,6 +11,7 @@ import java.util.Stack;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,8 +193,7 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 		setCurrentTenant(tenant);
 		
 		try {
-	
-			
+
 			applicationService.getBeans(TenantAware.class).
 			stream().
 			sorted((o1,o2) -> o1.getOrder().compareTo(o2.getOrder())).
@@ -326,6 +326,18 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			return;
 		}
 		tenants.pop();
+	}
+	
+	@Override
+	public void scheduleDelete(Tenant tenant) {
+		
+		tenant.setDeletionDate(DateUtils.addDays(Utils.today(), 7));
+		saveOrUpdate(tenant);
+		
+		applicationService.getBeans(TenantAware.class).
+		stream().
+		sorted((o1, o2) -> o1.getOrder().compareTo(o2.getOrder())).
+		forEach(aware -> aware.deleteScheduled(tenant));
 	}
 
 	@Override
@@ -747,9 +759,16 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 	@Override
 	public void recordLastLogin() {
 		Tenant t = getCurrentTenant();
+		boolean deleteScheduled = Objects.nonNull(t.getDeletionDate());
 		t.setLastLogin(Utils.now());
 		saveOrUpdate(t);
 		
+		if(deleteScheduled) {
+			applicationService.getBeans(TenantAware.class).
+			stream().
+			sorted((o1, o2) -> o1.getOrder().compareTo(o2.getOrder())).
+			forEach(aware -> aware.deleteCancelled(t));
+		}
 	}
 
 }

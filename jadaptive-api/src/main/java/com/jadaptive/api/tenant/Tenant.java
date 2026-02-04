@@ -29,9 +29,10 @@ import com.jadaptive.utils.Utils;
 @ObjectServiceBean(bean = TenantService.class)
 @GenerateEventTemplates(value = Tenant.RESOURCE_KEY)
 @ObjectViewDefinition(value = Tenant.DOMAINS_VIEW, bundle = Tenant.RESOURCE_KEY)
-@TableView(defaultColumns = { "name", "hostname", "lastLogin", "code", "database" })
+@TableView(defaultColumns = { "name", "hostname", "lastLogin", "database", "ownerName", "ownerEmail", "deletionDate" })
 @CreateURL(value = "/app/ui/wizards/setupTenant", i18n = "wizard.name")
 @TableAction(bundle = Tenant.RESOURCE_KEY, defaultAction = true, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}")
+@TableAction(bundle = Tenant.RESOURCE_KEY, deleteAction = true, confirmationRequired = true, icon = "", resourceKey = "scheduleDelete", target = Target.ROW, url = "/app/api/tenant/scheduleDelete/{uuid}")
 public class Tenant extends NamedUUIDEntity implements NamedDocument {
 
 	private static final long serialVersionUID = 1567817173441528990L;
@@ -63,6 +64,9 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 	
 	@ObjectField(type = FieldType.TIMESTAMP, readOnly = true)
 	Date lastLogin;
+	
+	@ObjectField(type = FieldType.DATE)
+	Date deletionDate;
 	
 	public Tenant() {
 		
@@ -161,5 +165,14 @@ public class Tenant extends NamedUUIDEntity implements NamedDocument {
 
 	public void setLastLogin(Date lastLogin) {
 		this.lastLogin = lastLogin;
+		this.deletionDate = null;
+	}
+
+	public Date getDeletionDate() {
+		return deletionDate;
+	}
+
+	public void setDeletionDate(Date deletionDate) {
+		this.deletionDate = deletionDate;
 	}
 }
