@@ -296,7 +296,15 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 					/* NOTE: my hunch is it better not to interrupt if this does happen, let it fail if the realm if gone and the task needs it.
 					 The task is best place to deal with this as it sees fit.
 					*/  
-					future.cancel(false);
+					try {
+						future.cancel(false);
+					}
+					catch(Exception e) {
+						if(LOG.isDebugEnabled())
+							LOG.warn("Error while cancelling tenants scheduled tasks.", e);
+						else
+							LOG.warn("Error while cancelling tenants scheduled tasks. {}", e.getMessage());
+					}
 //					future.cancel(true);
 				}
 			}
