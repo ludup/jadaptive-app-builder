@@ -94,6 +94,10 @@ public class ProjectApi extends AuthenticatedController {
 - The plugin runtime registers these as Spring beans; retrieve all implementations via `ApplicationServiceImpl.getInstance().getBeans(MyExtension.class)` or `App.beans(MyExtension.class)`.
 - This is the preferred mechanism for pluggable behaviours (menus, providers, handlers) inside plugins.
 
+## Table actions with filters
+
+- Use `@TableAction` to surface row actions in search results. You can gate visibility via an `ActionFilter` implementation that inspects the serialized `AbstractObject` (e.g., check `object.get("draft")`). Example: show an "authorize" action only when `draft == true`.
+
 ## Events
 
 - `EventService` lets you listen to entity lifecycle and custom system events. Register handlers early (e.g., `StartupAware.onApplicationStartup`).
@@ -188,8 +192,9 @@ public class ReportTasks extends AuthenticatedController {
 - Resource mapping: place `SimpleName.html`, `SimpleName.css`, `SimpleName.js` (and optional `SimpleNameHelp.html`) in `src/main/resources/<package path>/`. Inline styles/`style` attributes are not allowed; use the CSS file.
 - Lifecycle hooks: override `beforeProcess` / `afterProcess` for pre/post processing; `onCreated` for initialization; `documentComplete` runs after content/extensions are applied. `isCacheable`/`getMaxAge` control cache headers.
 - Content flow (GET): load HTML resource → process page dependencies → extenders `processStart` → `generateContent` (page-specific) → extenders `generateContent` → inject feedback → process page extensions (scripts/styles/processors) → `documentComplete` → extenders `processEnd` → `afterProcess`.
-- POST handling: if implementing `FormProcessor`, `doPost` proxies request params into the form interface (`processForm`). Otherwise override `processPost`.
+- POST handling: if implementing `FormProcessor`, `doPost` proxies request params into the form interface via (`processForm`). Otherwise override `processPost`.
 - `@RequestPage("path/{uuid}")`: binds path variables to private fields with matching names (e.g., `private String uuid;`).
+- To handle POST on a page, implement `FormProcessor<MyForm>` and declare a nested interface `MyForm` matching form fields; the framework instantiates and populates it, calling `processForm(Document, MyForm)` on POST to the same URI. No need for @Override annotation on processForm as its found via reflection.
 - `@PageDependencies(extensions = {"bootstrap", "fontawesome", "jadaptive-utils", "jadaptive-forms", ...})` pulls required PageExtension names (strings match extension `getName()`). `jquery` exists but modern pages should prefer vanilla JS.
 - `@PageProcessors(extensions = {"i18n", "help", ...})`: run processors after generation. `i18n` resolves `jad:bundle` / `jad:i18n` attributes into localized text. `help` wires `SimpleNameHelp.html` into the help system.
 - Extenders: Any `HtmlPageExtender` with `isExtending` true runs `processStart`, `generateContent`, `processEnd` around your page.
