@@ -482,7 +482,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 				row.appendChild(Html.i("fa-solid", "fa-clock","text-primary"));
 				break;
 			}
-			row.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "schedulerTask."+ status.name()).addClass("ms-3"));
+			row.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "schedulerTask."+ status.name()).addClass("small"));
 			return row;
 		}
 		return Html.span("");

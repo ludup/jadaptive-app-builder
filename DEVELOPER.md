@@ -341,6 +341,7 @@ Rules:
 - Resources live at `src/main/resources/<package path>/`: `SimpleName.html`, `SimpleName.css`, `SimpleName.js`, optional `SimpleNameHelp.html`. No inline CSS or `style` attributes—use the CSS file.
 - `@RequestPage("path/{uuid}")` binds `{uuid}` to a private field named `uuid` when the page loads; do not fetch path variables from `Request` manually.
 - For POST handling on pages, implement `FormProcessor<MyForm>` and declare an interface `MyForm` with getters for form fields. The framework instantiates and populates it, then calls `processForm(Document, MyForm)` on POST to the same URI. No need for @Override annotation on processForm as its found via reflection.
+- For request-scoped state that must persist across POSTs (queues, wizard progress), use the servlet session obtained via `Request.get().getSession()`; the `Session` helper does not store data in `HttpSession`.
 - `@PageDependencies` lists required `PageExtension` names (e.g., `bootstrap`, `fontawesome`, `jadaptive-utils`, `jadaptive-forms`; `jquery` exists but prefer vanilla JS).
 - `@PageProcessors`: post-generation processors (e.g., `i18n` to resolve `jad:bundle` / `jad:i18n`; `help` to wire `SimpleNameHelp.html`).
 - Lifecycle: `beforeProcess` → dependencies → extenders `processStart` → `generateContent` → extenders `generateContent` → feedback injection → scripts/styles/processors → `documentComplete` → extenders `processEnd` → `afterProcess`. Override `isCacheable`/`getMaxAge` to adjust caching; `onCreated` for init; `processPost` or `FormProcessor` for POST handling.
