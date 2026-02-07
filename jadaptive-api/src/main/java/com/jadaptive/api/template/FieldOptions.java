@@ -56,5 +56,10 @@ public enum FieldOptions {
 	 * The field is automatically encrypted when saved to the document, but requires manual decryption
 	 * to access the value. 
 	 */
-	MANUAL_ENCRYPTION
+	MANUAL_ENCRYPTION, 
+	
+	/**
+	 * When added to a reference field the reference will not be validated when the object is saved.
+	 */
+	DISABLE_REFERENCE_VALIDATION
 }

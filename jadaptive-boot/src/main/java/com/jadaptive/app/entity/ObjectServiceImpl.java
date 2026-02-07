@@ -387,6 +387,9 @@ public class ObjectServiceImpl extends AuthenticatedService implements ObjectSer
 			for(FieldTemplate t : fields) {
 				switch(t.getFieldType()) {
 				case OBJECT_REFERENCE:
+					if(t.getOptions().contains(FieldOptions.DISABLE_REFERENCE_VALIDATION)) {
+						continue;
+					}
 					if(t.getCollection()) {
 						Collection<AbstractObject> values = (Collection<AbstractObject>)entity.getObjectCollection(t.getResourceKey());
 						if(Objects.nonNull(values)) {

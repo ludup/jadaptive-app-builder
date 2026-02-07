@@ -232,8 +232,13 @@ Authentication now uses provider+UUIDReference wiring (no `AuthenticationModule`
 - Implement `AuthenticationProvider` (extends `ExtensionPoint`) and annotate with `@Extension`.
 - Return a stable UUID from `getAuthenticatorUUID()` and a short key from `getAuthenticatorKey()` (used to resolve pages and i18n). Supply display text via `getName()` and enrollment/management endpoints via `getEnrollmentUri()` / `getManagementUri()`.
 - Implement `hasSufficientCredentials(User)` and `supportsMultipleCredentials()`; optionally override `supportsCredentialReset()`.
+- Register the provider and its primary `AuthenticationPage` with `AuthenticationService.registerAuthenticationPage(provider, Page.class)` during startup (e.g., from a `StartupAware` bean) so policies can resolve the page via the provider key.
 
-2) **Authentication page**
+2) **Configuration singleton (if applicable)**
+- For authenticators with a singleton settings object, annotate it with `@AuthenticationConfig(resourceKey=..., icon=..., iconGroup=...)` so it surfaces on the Authentication Policies page for view/edit. The configuration’s i18n bundle must contain `<resourceKey>.name` and `<resourceKey>.desc`.
+- If the authenticator instead relies on a system-level configuration, annotate that singleton with `@ConfigurationItem(resourceKey=..., icon=..., iconGroup=..., bundle=..., system=true)` so it appears on the System Configuration pages. Provide `<resourceKey>.name` and `<resourceKey>.desc` in that bundle. Use either `@AuthenticationConfig` or `@ConfigurationItem`, not both on the same class.
+
+3) **Authentication page**
 - Create an `AuthenticationPage<?>` subclass for the user-facing flow. Its `getAuthenticatorUUID()` must match the provider UUID. Use the provider key when resolving titles/bodies (i18n keys `<key>.verifyIdentity.title|body`).
 - If you need code entry or device selection, follow the pattern in existing pages: pull the provider with `authenticationService.getAuthenticationProviderByUUID(getAuthenticatorUUID())`, gate missing providers, and use provider metadata (key, UUID) for redirects.
 - Register the page for the provider during startup: `authenticationService.registerAuthenticationPage(provider, MyAuthPage.class);`. This lets `AuthenticationService.getAuthenticationPage(key)` resolve to your page.
@@ -367,13 +372,14 @@ public class ApprovePlanPage extends AuthenticatedPage {
 
 Rules:
 - Extend `HtmlPage` or `AuthenticatedPage` (requires login). Mark as `@Component` with a unique URI served at `/app/ui/<uri>`.
-- Resources live at `src/main/resources/<package path>/`: `SimpleName.html`, `SimpleName.css`, `SimpleName.js`, optional `SimpleNameHelp.html`. No inline CSS or `style` attributes—use the CSS file.
+- Resources live at `src/main/resources/<package path>/`: `SimpleName.html`, `SimpleName.css`, `SimpleName.js`, optional `SimpleNameHelp.html`. If the files match the page class name and package, the framework finds them automatically—only override `getHtmlResource`/`getCssResource`/`getJsResource` when you intentionally move/rename the resources. No inline CSS or `style` attributes—use the CSS file.
 - `@RequestPage("path/{uuid}")` binds `{uuid}` to a private field named `uuid` when the page loads; do not fetch path variables from `Request` manually.
 - For POST handling on pages, implement `FormProcessor<MyForm>` and declare an interface `MyForm` with getters for form fields. The framework instantiates and populates it, then calls `processForm(Document, MyForm)` on POST to the same URI. No need for @Override annotation on processForm as its found via reflection.
 - For request-scoped state that must persist across POSTs (queues, wizard progress), use the servlet session obtained via `Request.get().getSession()`; the `Session` helper does not store data in `HttpSession`.
+- For request-scoped state that must persist across POSTs (queues, wizard progress), use the servlet session obtained via `Request.get().getSession()`; the `Session` helper does not store data in `HttpSession`. On authentication pages, use `AuthenticationState.getUser()` for the authenticating principal because a full session user may not yet exist.
 - Internationalize visible strings in page HTML by moving them into the appropriate bundle (e.g., `src/main/resources/i18n/<bundle>.properties`) and annotating elements with `jad:bundle="<bundle>"` and `jad:i18n="<key>"`. Avoid hard-coded text in templates; the `i18n` processor will replace these attributes at render time.
 - Parameterize i18n strings with standard Java MessageFormat placeholders (`{0}`, `{1}`, ...); supply values in HTML via `jad:attr0`, `jad:attr1`, etc., alongside `jad:bundle`/`jad:i18n`.
-- `@PageDependencies` lists required `PageExtension` names (e.g., `bootstrap`, `fontawesome`, `jadaptive-utils`, `jadaptive-forms`; `jquery` exists but prefer vanilla JS).
+- `@PageDependencies` lists required `PageExtension` names (e.g., `bootstrap`, `fontawesome`, `jadaptive-utils`, `jadaptive-forms`). Include `bootstrap` on standard pages because the UI depends on it. `jquery` exists but only include it when your JS actually uses jQuery; prefer vanilla JS otherwise.
 - `@PageProcessors`: post-generation processors (e.g., `i18n` to resolve `jad:bundle` / `jad:i18n`; `help` to wire `SimpleNameHelp.html`).
 - Lifecycle: `beforeProcess` → dependencies → extenders `processStart` → `generateContent` → extenders `generateContent` → feedback injection → scripts/styles/processors → `documentComplete` → extenders `processEnd` → `afterProcess`. Override `isCacheable`/`getMaxAge` to adjust caching; `onCreated` for init; `processPost` or `FormProcessor` for POST handling.
 - Extenders: any `HtmlPageExtender` with `isExtending` true runs `processStart`, `generateContent`, `processEnd` around the page.

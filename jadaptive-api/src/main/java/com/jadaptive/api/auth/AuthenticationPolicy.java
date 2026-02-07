@@ -15,6 +15,7 @@ import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.template.DynamicColumn;
+import com.jadaptive.api.template.FieldOptions;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -36,7 +37,6 @@ import com.jadaptive.api.template.Validator;
 @GenerateEventTemplates(AuthenticationPolicy.RESOURCE_KEY)
 @LicensedFeature(value = AuthenticationPolicy.FEATURE_NAME, group = FeatureGroup.PROFESSIONAL, excludeProducts = ProductId.PASSWORD_EXPRESS_ONPREM)
 @LicensedFeature(value = AuthenticationPolicy.FEATURE_NAME, group = FeatureGroup.FREE, includeProducts = ProductId.PASSWORD_EXPRESS_ONPREM)
-
 @UniqueIndex(columns = { "resourceKey", "weight"})
 public abstract class AuthenticationPolicy extends AssignableUUIDEntity implements NamedDocument {
 
@@ -54,14 +54,14 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 	@Validator(type = ValidationType.REQUIRED)
 	private String name;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = UUIDReference.RESOURCE_KEY, view = "factors")
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = UUIDReference.RESOURCE_KEY, view = "factors", weight = 0, meta = "url=/app/api/authentication/providers", options = FieldOptions.DISABLE_REFERENCE_VALIDATION)
 	private Collection<UUIDReference> requiredAuthenticators = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.INTEGER, view = "optional", weight = 0)
 	@Validator(type = ValidationType.RANGE, value = "0-" + Integer.MAX_VALUE)
 	private Integer optionalRequired = 0;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = UUIDReference.RESOURCE_KEY, view = "optional", weight = 10)
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = UUIDReference.RESOURCE_KEY, view = "optional", weight = 10, meta = "url=/app/api/authentication/providers", options = FieldOptions.DISABLE_REFERENCE_VALIDATION)
 	private Collection<UUIDReference> optionalAuthenticators = new ArrayList<>();
 
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "0")	
