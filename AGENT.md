@@ -196,6 +196,8 @@ public class ReportTasks extends AuthenticatedController {
 - `@RequestPage("path/{uuid}")`: binds path variables to private fields with matching names (e.g., `private String uuid;`).
 - To handle POST on a page, implement `FormProcessor<MyForm>` and declare a nested interface `MyForm` matching form fields; the framework instantiates and populates it, calling `processForm(Document, MyForm)` on POST to the same URI. No need for @Override annotation on processForm as its found via reflection.
 - When you need per-user state across page posts, store it in the HTTP session via `Request.get().getSession()`; the `Session` helper is not backed by `HttpSession` and cannot hold per-request data.
+- Internationalize all visible text in page HTML: move literals into an i18n bundle (e.g., `src/main/resources/i18n/aiContext.properties`) and reference them with `jad:bundle="<bundleName>"` and `jad:i18n="<key>"` on the element that renders the text.
+- Parameterize i18n strings with Java MessageFormat placeholders (`{0}`, `{1}`, ...); provide values via `jad:attr0`, `jad:attr1`, etc., alongside `jad:bundle`/`jad:i18n` in the HTML.
 - `@PageDependencies(extensions = {"bootstrap", "fontawesome", "jadaptive-utils", "jadaptive-forms", ...})` pulls required PageExtension names (strings match extension `getName()`). `jquery` exists but modern pages should prefer vanilla JS.
 - `@PageProcessors(extensions = {"i18n", "help", ...})`: run processors after generation. `i18n` resolves `jad:bundle` / `jad:i18n` attributes into localized text. `help` wires `SimpleNameHelp.html` into the help system.
 - Extenders: Any `HtmlPageExtender` with `isExtending` true runs `processStart`, `generateContent`, `processEnd` around your page.
