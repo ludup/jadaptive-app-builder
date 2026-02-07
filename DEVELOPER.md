@@ -224,6 +224,35 @@ Use PF4J to make plugin behaviours pluggable:
 - The plugin runtime registers them as Spring beans; fetch all implementations with `ApplicationServiceImpl.getInstance().getBeans(MyExtension.class)` or the shortcut `App.beans(MyExtension.class)`.
 - This pattern powers menus, providers, and other extensible hooks inside plugins.
 
+## Building an authentication mechanism
+
+Authentication now uses provider+UUIDReference wiring (no `AuthenticationModule` persistence). To add a new authenticator:
+
+1) **Provider implementation**
+- Implement `AuthenticationProvider` (extends `ExtensionPoint`) and annotate with `@Extension`.
+- Return a stable UUID from `getAuthenticatorUUID()` and a short key from `getAuthenticatorKey()` (used to resolve pages and i18n). Supply display text via `getName()` and enrollment/management endpoints via `getEnrollmentUri()` / `getManagementUri()`.
+- Implement `hasSufficientCredentials(User)` and `supportsMultipleCredentials()`; optionally override `supportsCredentialReset()`.
+
+2) **Authentication page**
+- Create an `AuthenticationPage<?>` subclass for the user-facing flow. Its `getAuthenticatorUUID()` must match the provider UUID. Use the provider key when resolving titles/bodies (i18n keys `<key>.verifyIdentity.title|body`).
+- If you need code entry or device selection, follow the pattern in existing pages: pull the provider with `authenticationService.getAuthenticationProviderByUUID(getAuthenticatorUUID())`, gate missing providers, and use provider metadata (key, UUID) for redirects.
+- Register the page for the provider during startup: `authenticationService.registerAuthenticationPage(provider, MyAuthPage.class);`. This lets `AuthenticationService.getAuthenticationPage(key)` resolve to your page.
+
+3) **Enrollment/management UX**
+- Provider `getEnrollmentUri()` should point to a controller or page that enrolls credentials; `getManagementUri()` should manage existing credentials. Both typically expect a `returnTo` parameter for navigation.
+- In manage-credentials flows, the framework renders cards using provider key/UUID and `hasSufficientCredentials`. Ensure your provider returns accurate enrollment/support flags so UI badges are correct.
+
+4) **Policy wiring and references**
+- Policies store `Collection<UUIDReference>` for required/optional authenticators. Construct references with the provider UUID/name or fetch them via `authenticationService.getAuthenticationModuleByUUID(uuid)` / `getAuthenticationModuleByResourceKey(key)` (these return `UUIDReference`).
+- `AuthenticationState` tracks required/optional selections by `UUIDReference`; pages should avoid using legacy `AuthenticationModule` lookups.
+
+5) **Optional/temporary flows**
+- Optional authenticator selection uses provider UUIDs in cookies/forms. If you emit redirects or defaults, store the provider UUID (not the resource key).
+- Temporary flows use `authenticationService.launchTemporaryAuthentication(name, redirectURI, UUIDReference...)`; pass provider references when starting SMS/email/phone verification, etc.
+
+6) **Internationalization**
+- Provide i18n entries under your authenticator key: `<key>.verifyIdentity.title`, `<key>.verifyIdentity.body`, and any validation/enrollment text your pages render. Enrollment dropdowns and cards use these keys.
+
 ## Plugin POMs and wiring
 
 Most development happens in PF4J plugins (one Maven module per plugin). Use `jadaptive-common/jadaptive-sample-plugin/pom.xml` as the template and adjust IDs and metadata.

@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.jsoup.nodes.Document;
 
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.ui.AuthenticationPage;
@@ -88,11 +89,11 @@ public interface AuthenticationService {
 
 	void validateModules(AuthenticationPolicy policy);
 
-	Iterable<AuthenticationModule> getAuthenticationModules();
+	Iterable<UUIDReference> getAuthenticationModules();
 
-	AuthenticationModule getAuthenticationModuleByUUID(String uuid);
-	
-	AuthenticationModule getAuthenticationModuleByResourceKey(String uuid);
+	UUIDReference getAuthenticationModuleByUUID(String uuid);
+    
+	UUIDReference getAuthenticationModuleByResourceKey(String uuid);
 
 	AuthenticationState createAuthenticationState(AuthenticationPolicy policy) throws FileNotFoundException;
 
@@ -112,7 +113,7 @@ public interface AuthenticationService {
 
 	void clearLoginThesholds();
 
-	void launchTemporaryAuthentication(String name, String redirectURI, AuthenticationModule... modules)
+	void launchTemporaryAuthentication(String name, String redirectURI, UUIDReference... modules)
 			throws FileNotFoundException;
 
 	void registerAuthenticationPage(AuthenticationProvider provider, @SuppressWarnings("unchecked") Class<? extends AuthenticationPage<?>>... pages);
@@ -121,7 +122,7 @@ public interface AuthenticationService {
 
 	void setupPostAuthentication(AuthenticationState state);
 
-	Collection<AuthenticationModule> resolveUserModules(User user);
+	Collection<UUIDReference> resolveUserModules(User user);
 
 	int countUserCredentials(User user);
 

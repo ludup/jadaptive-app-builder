@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
@@ -25,9 +26,9 @@ public class AuthenticationState {
 	public static final String PROCESS_POST_AUTHENTICATION = "processedPOSTAuthentication";
 
 	private User user;
-	private Map<Class<? extends Page>,AuthenticationModule> requiredAuthenticationModulez = new HashMap<>();
+	private Map<Class<? extends Page>,UUIDReference> requiredAuthenticationModulez = new HashMap<>();
 	private List<Class<? extends Page>> requiredAuthenticationPages = new ArrayList<>();
-	private Map<Class<? extends Page>,AuthenticationModule> optionalAuthentications = new HashMap<>();
+	private Map<Class<? extends Page>,UUIDReference> optionalAuthentications = new HashMap<>();
 	private List<PostAuthenticatorPage> postAuthenticationPages = new ArrayList<>();
 	private int currentPageIndex = 0;
 	private String remoteAddress;
@@ -44,7 +45,7 @@ public class AuthenticationState {
 	private String attemptedUsername;
 	private Class<? extends Page> optionalSelectionPage;
 	private Class<? extends Page> selectedPage = null;
-	private AuthenticationModule selectedAuthenticator = null;
+	private UUIDReference selectedAuthenticator = null;
 	private List<Class<? extends Page>> completedOptionsPages = new ArrayList<>();
 	private boolean passwordEnabled;
 	private int optionalCompleted = 0;
@@ -127,7 +128,7 @@ public class AuthenticationState {
 		}
 	}
 	
-	public AuthenticationModule getCurrentAuthenticator() {
+	public UUIDReference getCurrentAuthenticator() {
 		if(!isRequiredAuthenticationComplete()) {
 			return  requiredAuthenticationModulez.get(requiredAuthenticationPages.get(currentPageIndex));
 		} if(!isOptionalComplete()) { 
@@ -208,7 +209,7 @@ public class AuthenticationState {
 		return requiredAuthenticationPages;
 	}
 	
-	public Collection<AuthenticationModule> getOptionalAuthentications() {
+	public Collection<UUIDReference> getOptionalAuthentications() {
 		return optionalAuthentications.values();
 	}
 	
@@ -385,7 +386,7 @@ public class AuthenticationState {
 		requiredAuthenticationPages.clear();
 	}
 
-	public void addRequiredAuthentication(Class<? extends Page> clz, AuthenticationModule authenticationModule) {
+	public void addRequiredAuthentication(Class<? extends Page> clz, UUIDReference authenticationModule) {
 		requiredAuthenticationModulez.put(clz, authenticationModule);
 		requiredAuthenticationPages.add(clz);
 	}
@@ -394,7 +395,7 @@ public class AuthenticationState {
 		optionalAuthentications.clear();
 	}
 	
-	public void addOptionalAuthentication(Class<? extends Page> clz, AuthenticationModule authenticationModule) {
+	public void addOptionalAuthentication(Class<? extends Page> clz, UUIDReference authenticationModule) {
 		optionalAuthentications.put(clz, authenticationModule);
 	}
 

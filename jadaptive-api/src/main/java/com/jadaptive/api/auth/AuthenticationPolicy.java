@@ -13,6 +13,7 @@ import com.jadaptive.api.permissions.LicensedFeature;
 import com.jadaptive.api.product.ProductService.ProductId;
 import com.jadaptive.api.repository.AssignableUUIDEntity;
 import com.jadaptive.api.repository.NamedDocument;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.template.DynamicColumn;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
@@ -53,15 +54,15 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 	@Validator(type = ValidationType.REQUIRED)
 	private String name;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY, view = "factors")
-	private Collection<AuthenticationModule> requiredAuthenticators = new ArrayList<>();
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = UUIDReference.RESOURCE_KEY, view = "factors")
+	private Collection<UUIDReference> requiredAuthenticators = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.INTEGER, view = "optional", weight = 0)
 	@Validator(type = ValidationType.RANGE, value = "0-" + Integer.MAX_VALUE)
 	private Integer optionalRequired = 0;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY, view = "optional", weight = 10)
-	private Collection<AuthenticationModule> optionalAuthenticators = new ArrayList<>();
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = UUIDReference.RESOURCE_KEY, view = "optional", weight = 10)
+	private Collection<UUIDReference> optionalAuthenticators = new ArrayList<>();
 
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "0")	
 	private Integer weight = 0;
@@ -98,11 +99,11 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 		return getPasswordRequired();
 	}
 	
-	public Collection<AuthenticationModule> getRequiredAuthenticators() {
+	public Collection<UUIDReference> getRequiredAuthenticators() {
 		return requiredAuthenticators;
 	}
 
-	public void setRequiredAuthenticators(Collection<AuthenticationModule> requiredAuthenticators) {
+	public void setRequiredAuthenticators(Collection<UUIDReference> requiredAuthenticators) {
 		this.requiredAuthenticators = requiredAuthenticators;
 	}
 
@@ -114,11 +115,11 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 		this.optionalRequired = optionalRequired;
 	}
 
-	public Collection<AuthenticationModule> getOptionalAuthenticators() {
+	public Collection<UUIDReference> getOptionalAuthenticators() {
 		return optionalAuthenticators;
 	}
 
-	public void setOptionalAuthenticators(Collection<AuthenticationModule> optionalAuthenticators) {
+	public void setOptionalAuthenticators(Collection<UUIDReference> optionalAuthenticators) {
 		this.optionalAuthenticators = optionalAuthenticators;
 	}
 

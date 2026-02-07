@@ -94,6 +94,14 @@ public class ProjectApi extends AuthenticatedController {
 - The plugin runtime registers these as Spring beans; retrieve all implementations via `ApplicationServiceImpl.getInstance().getBeans(MyExtension.class)` or `App.beans(MyExtension.class)`.
 - This is the preferred mechanism for pluggable behaviours (menus, providers, handlers) inside plugins.
 
+## Authentication provider quick path
+
+- Authentication is provider-based: implement `AuthenticationProvider` (PF4J `ExtensionPoint`) and expose a stable `getAuthenticatorUUID()` plus a short `getAuthenticatorKey()` string. `getName()` supplies the display label; enrollment/management URIs come from `getEnrollmentUri()` / `getManagementUri()`.
+- Policies store `UUIDReference` objects, not `AuthenticationModule` entities. Anywhere you need an authenticator reference, use `new UUIDReference(provider.getAuthenticatorUUID(), provider.getName())` or retrieve existing references from `AuthenticationService` helper methods.
+- Each authenticator must have at least one `AuthenticationPage` (extends `AuthenticationPage<?>`) that returns the same UUID from `getAuthenticatorUUID()` and uses the provider key to pick the page via `AuthenticationService.getAuthenticationPage(key)`. Register the page against the provider by calling `authenticationService.registerAuthenticationPage(provider, MyPage.class)` (often done from a `StartupAware` or similar extension).
+- Optional and temporary flows rely on provider UUIDs: `AuthenticationState` tracks `UUIDReference` for required/optional steps, and `AuthenticationService.launchTemporaryAuthentication(name, redirectURI, UUIDReference...)` expects provider references.
+- For enrollment/management UIs, keep the provider UUID stable and bundle i18n at `<authenticatorKey>.verifyIdentity.*` for cards/buttons; optional pages expect these keys for titles/bodies.
+
 ## Table actions with filters
 
 - Use `@TableAction` to surface row actions in search results. You can gate visibility via an `ActionFilter` implementation that inspects the serialized `AbstractObject` (e.g., check `object.get("draft")`). Example: show an "authorize" action only when `draft == true`.

@@ -1,12 +1,12 @@
 package com.jadaptive.api.auth.events;
 
-import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.AuditedObject;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.UserGeneratedEvent;
 import com.jadaptive.api.session.Session;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.template.FieldType;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
@@ -24,12 +24,12 @@ public class AuthenticationSuccessEvent extends UserGeneratedEvent {
 
 	public static final String RESOURCE_KEY = "authenticationSuccess";
 
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = AuthenticationModule.RESOURCE_KEY, view = ObjectEvent.OBJECT_VIEW)
-	AuthenticationModule authenticationModule;
+	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = UUIDReference.RESOURCE_KEY, view = ObjectEvent.OBJECT_VIEW)
+	UUIDReference authenticationModule;
 	
 	public AuthenticationSuccessEvent() { }
 	
-	public AuthenticationSuccessEvent(AuthenticationModule authenticationModule, String username, String name, String remoteAddress) {
+	public AuthenticationSuccessEvent(UUIDReference authenticationModule, String username, String name, String remoteAddress) {
 		super(RESOURCE_KEY, "authentication");
 		setUsername(username);
 		setName(name);
@@ -38,11 +38,11 @@ public class AuthenticationSuccessEvent extends UserGeneratedEvent {
 		this.authenticationModule = authenticationModule;
 	}
 
-	public AuthenticationModule getAuthenticationModule() {
+	public UUIDReference getAuthenticationModule() {
 		return authenticationModule;
 	}
 
-	public void setAuthenticationModule(AuthenticationModule authenticationModule) {
+	public void setAuthenticationModule(UUIDReference authenticationModule) {
 		this.authenticationModule = authenticationModule;
 	}
 

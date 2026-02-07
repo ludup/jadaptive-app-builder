@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.StartupAware;
-import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.auth.AuthenticationPolicy;
 import com.jadaptive.api.auth.AuthenticationPolicyService;
 import com.jadaptive.api.auth.AuthenticationProvider;
@@ -38,8 +37,6 @@ import com.jadaptive.api.auth.TemporaryAuthenticationPolicy;
 import com.jadaptive.api.auth.UserLoginAuthenticationPolicy;
 import com.jadaptive.api.auth.events.AuthenticationFailedEvent;
 import com.jadaptive.api.auth.events.AuthenticationSuccessEvent;
-import com.jadaptive.api.db.SearchField;
-import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
@@ -49,6 +46,7 @@ import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.quotas.IPQuota;
 import com.jadaptive.api.quotas.QuotaService;
 import com.jadaptive.api.quotas.QuotaThreshold;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionService;
@@ -96,8 +94,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	@Autowired
 	private App applicationService;
 	
-	@Autowired
-	private TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
 
 	@Autowired
 	private AuthenticationPolicyService policyService;
@@ -132,18 +128,21 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 	
 	@Override
-	public Collection<AuthenticationModule> resolveUserModules(User user) {
-		
+	public Collection<UUIDReference> resolveUserModules(User user) {
+
 		if(permissionService.isAdministrator(user)) {
-			return moduleDatabase.searchObjects(AuthenticationModule.class);
+			// Admins: all registered providers
+			return authenticationProvidersByUUID.values().stream()
+					.map(p -> new UUIDReference(p.getAuthenticatorUUID(), p.getName()))
+					.toList();
 		}
-		
-		Set<AuthenticationModule> modules = new HashSet<>();
+
+		Set<UUIDReference> modules = new HashSet<>();
 		for(AuthenticationPolicy policy : policyService.getAssignedPolicies(user)) {
 			modules.addAll(policy.getRequiredAuthenticators());
 			modules.addAll(policy.getOptionalAuthenticators());
 		}
-		
+
 		return modules;
 	}
 	
@@ -170,16 +169,12 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 //	}
 		
 	@SuppressWarnings("unused")
-	private Collection<AuthenticationModule> resolveMissingModules(User user, Collection<AuthenticationModule> modules) {
-		
-		List<AuthenticationModule> missing = new ArrayList<>();
-		for(AuthenticationModule m : modules) {
-
-			AuthenticationProvider provider = getAuthenticationProviderByUUID(m.getUuid());
-			
-			boolean enrolled = provider.hasSufficientCredentials(user);
-			if(!enrolled) {
-				missing.add(m);
+	private Collection<UUIDReference> resolveMissingModules(User user, Collection<UUIDReference> modules) {
+		List<UUIDReference> missing = new ArrayList<>();
+		for(UUIDReference ref : modules) {
+			AuthenticationProvider provider = getAuthenticationProviderByUUID(ref.getUuid());
+			if(provider == null || !provider.hasSufficientCredentials(user)) {
+				missing.add(ref);
 			}
 		}
 		return missing;
@@ -189,12 +184,9 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	public int countUserCredentials(User user) {
 		
 		int count = 0;
-		for(AuthenticationModule m : resolveUserModules(user)) {
-
-			AuthenticationProvider provider = getAuthenticationProviderByUUID(m.getUuid());
-			
-			boolean enrolled = provider.hasSufficientCredentials(user);
-			if(!enrolled) {
+		for(UUIDReference ref : resolveUserModules(user)) {
+			AuthenticationProvider provider = getAuthenticationProviderByUUID(ref.getUuid());
+			if(provider == null || !provider.hasSufficientCredentials(user)) {
 				count++;
 			}
 		}
@@ -358,21 +350,25 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		if(page.isPresent()) {
 			Page p = page.get();
-			if(state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage()
-					|| (p instanceof AuthenticatorPage 
-							&& PASSWORD_MODULE_UUID.equals(((AuthenticatorPage)p).getAuthenticatorUUID()))) {
-				
-				AuthenticationModule module = getPasswordAuthenticationModule();
-				eventService.publishEvent(new AuthenticationSuccessEvent(module, 
-						Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
-						Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
-				
-			} else if(p instanceof AuthenticatorPage) {
-				AuthenticationModule module = moduleDatabase.get(((AuthenticatorPage)p).getAuthenticatorUUID(), AuthenticationModule.class);
-				eventService.publishEvent(new AuthenticationSuccessEvent(module, 
-						Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
-						Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
-			}
+			    if(state.isFirstPage() && state.getPolicy().getPasswordOnFirstPage()
+				    || (p instanceof AuthenticatorPage 
+					    && PASSWORD_MODULE_UUID.equals(((AuthenticatorPage)p).getAuthenticatorUUID()))) {
+                
+				var moduleRef = new UUIDReference(PASSWORD_MODULE_UUID, "password");
+				eventService.publishEvent(new AuthenticationSuccessEvent(moduleRef, 
+					Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
+					Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+                
+			    } else if(p instanceof AuthenticatorPage) {
+				String uuid = ((AuthenticatorPage)p).getAuthenticatorUUID();
+				AuthenticationProvider provider = authenticationProvidersByUUID.get(uuid);
+				if(provider != null) {
+				    var moduleRef = new UUIDReference(provider.getAuthenticatorUUID(), provider.getName());
+				    eventService.publishEvent(new AuthenticationSuccessEvent(moduleRef, 
+					    Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
+					    Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+				}
+			    }
 		}
 		
 		if (state.completePage()) {
@@ -474,18 +470,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		};
 
 	}
-
-	private AuthenticationModule getPasswordAuthenticationModule() {
-		
-		AuthenticationModule m = new AuthenticationModule();
-		m.setUuid(PASSWORD_MODULE_UUID);
-		m.setAuthenticatorKey(PASSWORD);
-		m.setName("Password");
-		m.setSystem(true);
-		
-		return m;
-	}	
-	
 	@Override
 	public boolean requiresPostAuthentication(AuthenticationPolicy policy, User user) {
 		
@@ -576,11 +560,14 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			}
 		}
 		
-		for(AuthenticationModule m : policy.getRequiredAuthenticators()) {
-			
-			Class<? extends Page> page = registeredAuthenticationPages.get(m.getAuthenticatorKey());
+		for(UUIDReference ref : policy.getRequiredAuthenticators()) {
+			AuthenticationProvider provider = authenticationProvidersByUUID.get(ref.getUuid());
+			if(provider == null) {
+				throw new AccessDeniedException(AuthenticationPolicy.RESOURCE_KEY, "missingCredentials.text");
+			}
+
+			Class<? extends Page> page = registeredAuthenticationPages.get(provider.getAuthenticatorKey());
 			if(state.hasUser() && !policy.isTemporary()) {
-			
 				if(AuthenticationPage.class.isAssignableFrom(page)) {
 					AuthenticationPage<?> nextPage = (AuthenticationPage<?>) pageCache.getPage(page);
 					if(!nextPage.canAuthenticate(state)) {
@@ -590,10 +577,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 					}
 				}
 			}
-			
-			state.addRequiredAuthentication(
-					page,
-					m);
+
+			state.addRequiredAuthentication(page, ref);
 		}
 		
 		state.setPasswordEnabled(policy.getPasswordOnFirstPage() || policy.getPasswordRequired() || policy.getPasswordProvided());
@@ -606,10 +591,13 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		validateModules(policy);
 	}
 
-	private void configueOptional(AuthenticationState state, AuthenticationPolicy policy, Collection<AuthenticationModule> modules, int i) {
-		
-		for(AuthenticationModule m : modules) {
-			state.addOptionalAuthentication(getAuthenticationPage(m.getAuthenticatorKey()), m);
+	private void configueOptional(AuthenticationState state, AuthenticationPolicy policy, Collection<UUIDReference> modules, int i) {
+		for(UUIDReference ref : modules) {
+			AuthenticationProvider provider = authenticationProvidersByUUID.get(ref.getUuid());
+			if(provider == null) {
+				throw new IllegalStateException("Missing authentication provider for uuid " + ref.getUuid());
+			}
+			state.addOptionalAuthentication(getAuthenticationPage(provider.getAuthenticatorKey()), ref);
 		}
 		state.setOptionalCompleted(0);
 		state.setOptionalRequired(Math.min(i, state.getOptionalAuthentications().size()));
@@ -647,8 +635,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		
 		boolean hasSecret = false;
 
-		for (AuthenticationModule module : policy.getRequiredAuthenticators()) {
-			AuthenticationProvider provider = authenticationProvidersByKey.get(module.getAuthenticatorKey());
+		for (UUIDReference ref : policy.getRequiredAuthenticators()) {
+			AuthenticationProvider provider = authenticationProvidersByUUID.get(ref.getUuid());
+			if(provider == null) {
+				throw new IllegalStateException("Missing authentication provider for uuid " + ref.getUuid());
+			}
 			hasSecret |= provider.isSecretCapture();
 		}
 
@@ -702,18 +693,22 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public AuthenticationModule getAuthenticationModuleByUUID(String uuid) {
-		return moduleDatabase.get(uuid, AuthenticationModule.class);
+	public UUIDReference getAuthenticationModuleByUUID(String uuid) {
+		AuthenticationProvider provider = authenticationProvidersByUUID.get(uuid);
+		return provider == null ? null : new UUIDReference(provider.getAuthenticatorUUID(), provider.getName());
 	}
-	
+    
 	@Override
-	public AuthenticationModule getAuthenticationModuleByResourceKey(String resourceKey) {
-		return moduleDatabase.get(AuthenticationModule.class, SearchField.eq("authenticatorKey", resourceKey));
+	public UUIDReference getAuthenticationModuleByResourceKey(String resourceKey) {
+		AuthenticationProvider provider = authenticationProvidersByKey.get(resourceKey);
+		return provider == null ? null : new UUIDReference(provider.getAuthenticatorUUID(), provider.getName());
 	}
 
 	@Override
-	public Iterable<AuthenticationModule> getAuthenticationModules() {
-		return moduleDatabase.list(AuthenticationModule.class);
+	public Iterable<UUIDReference> getAuthenticationModules() {
+		return authenticationProvidersByUUID.values().stream()
+				.map(p -> new UUIDReference(p.getAuthenticatorUUID(), p.getName()))
+				.toList();
 	}
 
 	@Override
@@ -750,40 +745,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	public void initializeTenant(Tenant tenant, boolean newSchema) {
-		
-		if(moduleDatabase.count(AuthenticationModule.class, SearchField.eq("uuid", PASSWORD_MODULE_UUID)) > 0) {
-			for(AuthenticationPolicy policy : policyService.allObjects()) {
-				boolean remove = false;
-				AuthenticationModule toRemove = null;
-				for(AuthenticationModule m : policy.getRequiredAuthenticators()) {
-					if(PASSWORD.equals(m.getAuthenticatorKey())) {
-						remove = true;
-						toRemove = m;
-					}
-				}
-				if(remove) {
-					policy.getRequiredAuthenticators().remove(toRemove);
-					policy.setPasswordRequired(true);
-				}
-				remove = false;
-				toRemove = null;
-				for(AuthenticationModule m : policy.getOptionalAuthenticators()) {
-					if(PASSWORD.equals(m.getAuthenticatorKey())) {
-						remove = true;
-						toRemove = m;
-					}
-				}
-				if(remove) {
-					policy.getOptionalAuthenticators().remove(toRemove);
-				}
-				policyService.saveOrUpdate(policy);
-			}
-			
-			AuthenticationModule m = moduleDatabase.get(PASSWORD_MODULE_UUID, AuthenticationModule.class);
-			m.setSystem(false);
-			moduleDatabase.saveOrUpdate(m);
-			moduleDatabase.delete(m);
-		}
+		// AuthenticationModule seeding is deprecated; nothing to initialize.
 		
 		if(!quotaService.hasKey(FAILED_LOGIN_ATTEMPTS_UUID)) {
 			quotaService.registerKey(FAILED_LOGIN_ATTEMPTS_UUID, "Failed Login Attempts");
@@ -805,8 +767,7 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 	}
 
 	@Override
-	public void launchTemporaryAuthentication(String name, String redirectURI, AuthenticationModule... modules) throws FileNotFoundException {
-		
+	public void launchTemporaryAuthentication(String name, String redirectURI, UUIDReference... modules) throws FileNotFoundException {
 		AuthenticationPolicy temporaryPolicy = new TemporaryAuthenticationPolicy();
 		temporaryPolicy.setName(name);
 		temporaryPolicy.getRequiredAuthenticators().addAll(Arrays.asList(modules));
@@ -816,7 +777,6 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		state.setCancelURL(redirectURI);
 		state.disableStartAgain();
 		throw state.nextRedirectOrFinish(pageCache);
-
 	}
 
 	@Override

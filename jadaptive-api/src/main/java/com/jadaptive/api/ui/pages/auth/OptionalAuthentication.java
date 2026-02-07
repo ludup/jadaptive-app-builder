@@ -10,10 +10,8 @@ import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.jadaptive.api.auth.AuthenticationModule;
 import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.auth.AuthenticationState;
-import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.ui.AuthenticationPage;
@@ -41,9 +39,6 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 	
 	@Autowired
 	private AuthenticationService authenticationService; 
-	
-	@Autowired
-	private TenantAwareObjectDatabase<AuthenticationModule> moduleDatabase;
 	
 	public OptionalAuthentication() {
 		super(OptionalAuthenticationForm.class);
@@ -78,8 +73,12 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 		}
 		
 		var pages = new ArrayList<AuthenticationPage<?>>();
-		for(AuthenticationModule m : state.getOptionalAuthentications()) {
-			Class<? extends Page> pageClass = authenticationService.getAuthenticationPage(m.getAuthenticatorKey());
+		for(var authenticatorRef : state.getOptionalAuthentications()) {
+			var provider = authenticationService.getAuthenticationProviderByUUID(authenticatorRef.getUuid());
+			if(Objects.isNull(provider)) {
+				continue;
+			}
+			Class<? extends Page> pageClass = authenticationService.getAuthenticationPage(provider.getAuthenticatorKey());
 			AuthenticationPage<?> page = (AuthenticationPage<?>)pageCache.resolvePage(pageClass);
 			if(!state.hasCompleted(pageClass) && page.canAuthenticate(state)) {
 				if(Objects.nonNull(defaultAuthenticator) && page.getAuthenticatorUUID().equals(defaultAuthenticator) && state.getAttribute(TRIED_DEFAULT) != Boolean.TRUE) {
@@ -119,8 +118,10 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 
 		Element authenticators = doc.selectFirst("#authenticators");
 		for(AuthenticationPage<?> page : pages) {
-			
-			AuthenticationModule module = authenticationService.getAuthenticationModuleByUUID(page.getAuthenticatorUUID());
+			var provider = authenticationService.getAuthenticationProviderByUUID(page.getAuthenticatorUUID());
+			if(Objects.isNull(provider)) {
+				continue;
+			}
 			if(!state.hasCompleted(page.getClass()) && page.canAuthenticate(state)) {
 				
 				authenticators.appendChild(Html.div("card my-3")
@@ -128,10 +129,10 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 						.appendChild(new Element("h6")
 								.addClass("card-title mb-1")
 								.appendChild(Html.i(page.getIconGroup(), page.getIcon(), "me-2"))
-								.appendChild(Html.i18n(page.getBundle(), module.getAuthenticatorKey() + ".verifyIdentity.title")))
+								.appendChild(Html.i18n(page.getBundle(), provider.getAuthenticatorKey() + ".verifyIdentity.title")))
 						.appendChild(new Element("span")
 								.addClass("card-text")
-								.appendChild(Html.i18n(page.getBundle(), module.getAuthenticatorKey() + ".verifyIdentity.body")
+								.appendChild(Html.i18n(page.getBundle(), provider.getAuthenticatorKey() + ".verifyIdentity.body")
 										.addClass("small")))
 						.appendChild(Html.a("#").addClass("select stretched-link float-end")
 								.attr("data-authenticator", page.getAuthenticatorUUID()))
@@ -155,12 +156,15 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
 		
-		AuthenticationModule module = moduleDatabase.get(form.getAuthenticator(), AuthenticationModule.class);
-		state.setSelectedPage(authenticationService.getAuthenticationPage(module.getAuthenticatorKey()));
+		var provider = authenticationService.getAuthenticationProviderByUUID(form.getAuthenticator());
+		if(Objects.isNull(provider)) {
+			throw new AccessDeniedException("Requested authenticator is not available");
+		}
+		state.setSelectedPage(authenticationService.getAuthenticationPage(provider.getAuthenticatorKey()));
 		
 		
 		if(form.getMakeDefault()) {
-			Cookie c = new Cookie(DEFAULT_COOKIE_NAME, module.getUuid());
+			Cookie c = new Cookie(DEFAULT_COOKIE_NAME, provider.getAuthenticatorUUID());
 			c.setHttpOnly(true);
 			c.setDomain(Request.get().getServerName());
 			c.setSecure(true);
