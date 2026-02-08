@@ -1,6 +1,5 @@
 package com.jadaptive.api.ui.renderers.form;
 
-import java.io.IOException;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +27,7 @@ public class SingleAttachmentInput extends FormInputRender {
 		return "file";
 	}
 	
-	protected void afterInput(Element rootElement, String value) throws IOException {
+	protected void afterInput(Element rootElement, String value) {
 		
 		FileAttachment att = null;
 		if(StringUtils.isNotBlank(value)) {

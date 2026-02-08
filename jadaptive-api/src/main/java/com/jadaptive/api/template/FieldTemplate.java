@@ -94,6 +94,9 @@ public class FieldTemplate extends TemplateUUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	String bundle;
 	
+	@ObjectField(type = FieldType.TEXT)
+	String widget;
+	
 	public FieldTemplate() {
 	}
 
@@ -397,5 +400,13 @@ public class FieldTemplate extends TemplateUUIDEntity {
 			default:
 			throw new IllegalStateException("Unsupported field type " + fieldType.name());
 		}
+	}
+
+	public String getWidget() {
+		return widget;
+	}
+
+	public void setWidget(String widget) {
+		this.widget = widget;
 	}
 }

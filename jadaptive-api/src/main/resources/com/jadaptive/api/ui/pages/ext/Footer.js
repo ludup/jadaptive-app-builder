@@ -403,6 +403,24 @@ $(function() {
 		}
 	}
 	
+	function checkTabVisibility(tab) {
+			
+			var hasVisible = false;
+			tab.children('.fields').each(function() {
+				if(!$(this).hasClass('d-none')) {
+					hasVisible = true;
+				}
+			});
+			
+			if(hasVisible){ 
+				tab.removeClass('d-none');
+				$('a[href="#' + tab.attr('id') + '"]').removeClass('d-none');
+			} else {
+				tab.addClass('d-none');
+				$('a[href="#' + tab.attr('id') + '"]').addClass('d-none');
+			}
+		}
+	
 	$('input').change(function(e) {
 		$(this).addClass('dirty');
 		$('.processDepends').each(function() {
@@ -450,6 +468,10 @@ $(function() {
 			$('.fields').each(function() {
 				checkRowVisibility($(this));
 			});
+		});
+		
+		$('.tab-pane').each(function() {
+			checkTabVisibility($(this));	
 		});
 	});
 	

@@ -25,6 +25,10 @@ public abstract class FieldInputRender implements PageResources {
 	boolean labelOnly = false;
 	boolean disableIDAttribute = false;
 	
+	protected FieldInputRender() {
+
+	}
+
 	public FieldInputRender(TemplateViewField field) {
 		this.resourceKey = field.getResourceKey();
 		this.formVariable = field.getFormVariable();
@@ -44,6 +48,13 @@ public abstract class FieldInputRender implements PageResources {
 	}
 	
 	public FieldInputRender(String resourceKey,String formVariable, String bundle) {
+		this.resourceKey = resourceKey;
+		this.formVariable = formVariable;
+		this.bundle = bundle;
+		this.formVariableWithParents = formVariable;
+	}
+	
+	public void init(String resourceKey,String formVariable, String bundle) {
 		this.resourceKey = resourceKey;
 		this.formVariable = formVariable;
 		this.bundle = bundle;
@@ -80,25 +91,30 @@ public abstract class FieldInputRender implements PageResources {
 		this.labelOnly = true;
 	}
 	
-	public abstract void renderInput(Element rootElement, String value, boolean readOnly, String... classes) throws IOException;
+	public final void renderInput(Element rootElement, String value, boolean readOnly, String... classes) {
+		load(rootElement);
+		onRender(rootElement, value, readOnly, classes);
+	}
 	
-	protected void load(Element e) throws IOException {
+	protected abstract void onRender(Element rootElement, String value, boolean readOnly, String... classes);
+	
+	public void load(Element e) {
 		
 		URL url = getClass().getResource(getClass().getSimpleName()+ ".html");
-		if(Objects.isNull(url)) {
-			throw new IOException("Missing resource file " + getClass().getSimpleName() + ".html");
-		}
-		try(InputStream in = url.openStream()) {
-			Document doc = Jsoup.parse(IOUtils.toString(in, "UTF-8"));
-			Element body = doc.selectFirst("body");
-			for(Element child : body.children()) {
-				e.appendChild(child);
+		if(Objects.nonNull(url)) {
+			try(InputStream in = url.openStream()) {
+				Document doc = Jsoup.parse(IOUtils.toString(in, "UTF-8"));
+				Element body = doc.selectFirst("body");
+				for(Element child : body.children()) {
+					e.appendChild(child);
+				}
+			} catch(IOException ex) {
+				throw new IllegalStateException("Unable to load resource file " + getClass().getSimpleName() + ".html");
 			}
 		}
-		
 		url = getClass().getResource(getJsResource());
 		if(Objects.nonNull(url)) {
-			PageHelper.appendHeadScript(e.ownerDocument(), "/app/script/" + getResourceClass().getPackageName().replace('.', '/') + "/" + getJsResource());
+			PageHelper.appendBodyScript(e.ownerDocument(), "/app/script/" + getResourceClass().getPackageName().replace('.', '/') + "/" + getJsResource());
 		}
 		
 		url = getClass().getResource(getCssResource());

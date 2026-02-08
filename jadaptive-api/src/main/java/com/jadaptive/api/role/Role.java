@@ -47,6 +47,10 @@ public class Role extends NamedUUIDEntity {
 			type = FieldType.BOOL, view = OPTIONS_VIEW)
 	boolean allUsers;
 	
+	@ObjectField(defaultValue = "false", readOnly = true,
+			type = FieldType.BOOL, view = OPTIONS_VIEW)
+	Boolean managed;
+	
 	@ObjectField(type = FieldType.TEXT, hidden = true)
 	Collection<String> userTemplates = new ArrayList<>();
 	
@@ -70,6 +74,14 @@ public class Role extends NamedUUIDEntity {
 		return RESOURCE_KEY;
 	}
 	
+	public Boolean getManaged() {
+		return managed;
+	}
+
+	public void setManaged(Boolean managed) {
+		this.managed = managed;
+	}
+
 	public Collection<String> getPermissions() {
 		return permissions;
 	}

@@ -7,11 +7,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.jgroups.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -71,6 +73,9 @@ public class RoleServiceImpl extends AbstractUUIDObjectServceImpl<Role> implemen
 		
 		MessageDigest m = DigestUtils.getSha256Digest();
 		
+		if(Objects.isNull(role.getUuid())) {
+			role.setUuid(UUID.randomUUID().toString());
+		}
 		m.update(Utils.getUTF8Bytes(role.getUuid()));
 		m.update(Utils.getUTF8Bytes(role.getName()));
 		for(String uuid : uuids) {

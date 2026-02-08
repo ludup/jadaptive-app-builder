@@ -24,7 +24,7 @@ public class TextAreaFormInput extends FieldInputRender {
 
 
 	@Override
-	public void renderInput(Element rootElement, String value, boolean readOnly, String... classes) {
+	protected void onRender(Element rootElement, String value, boolean readOnly, String... classes) {
 
 
 		rootElement.appendChild(new Element("div")

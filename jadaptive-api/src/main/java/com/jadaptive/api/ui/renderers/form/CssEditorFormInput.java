@@ -25,7 +25,7 @@ public class CssEditorFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String value, boolean readOnly, String... classes) throws IOException {
+	protected void onRender(Element rootElement, String value, boolean readOnly, String... classes)  {
 
 
 		scripts(document, "codemirror", "lib/codemirror.js");

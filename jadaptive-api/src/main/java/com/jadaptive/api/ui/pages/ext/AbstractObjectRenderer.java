@@ -59,6 +59,7 @@ import com.jadaptive.api.ui.PageHelper;
 import com.jadaptive.api.ui.renderers.I18nOption;
 import com.jadaptive.api.ui.renderers.IconWithDropdownInput;
 import com.jadaptive.api.ui.renderers.ReplacementDropdown;
+import com.jadaptive.api.ui.renderers.Widget;
 import com.jadaptive.api.ui.renderers.form.BooleanFormInput;
 import com.jadaptive.api.ui.renderers.form.BootstrapBadgeRender;
 import com.jadaptive.api.ui.renderers.form.CollectionSearchFormInput;
@@ -67,6 +68,7 @@ import com.jadaptive.api.ui.renderers.form.CssEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownMenu;
+import com.jadaptive.api.ui.renderers.form.FieldInputRender;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.ImageFormInput;
@@ -140,6 +142,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	protected ThreadLocal<String> formHandler = new ThreadLocal<>();
 	protected ThreadLocal<Element> currentElement = new ThreadLocal<>(); 
 	protected ThreadLocal<Page> currentPage = new ThreadLocal<>(); 
+	
+	protected Map<String,Class<? extends Widget>> fieldRenderers = new HashMap<>();
 	
 	public ObjectTemplate getCurrentTemplate() {
 		return currentTemplate.get();
@@ -378,8 +382,31 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				}
 			}
 		}
+		
+		checkTabVisibility(element);
 	}
 	
+	private void checkTabVisibility(Element element) {
+		
+		for(Element tab : element.select(".tab-pane")) {
+			String target = tab.attr("id");
+
+			boolean visible = false;
+			for(Element e : tab.select(".fields")) {
+				if(!e.hasClass("d-none")) {
+					visible = true;
+					break;
+				}
+			}
+			if(!visible) {
+				tab.addClass("d-none");
+				element.ownerDocument().selectFirst(String.format("a[href=\"#%s\"]" ,target)).addClass("d-none");
+			}
+			
+		};
+		
+	}
+
 	private void createTabOutline(Element element) {
 		element.appendChild(new Element("ul").attr("class", "nav nav-tabs pt-4"));
 		element.appendChild(new Element("div").attr("class", "tab-content panel col-12 py-4"));
@@ -431,7 +458,17 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		try {
 			FieldTemplate field = fieldView.getField();
 			boolean decorate = field.getMetaValueBool("decorate", true);
-			if(field.getCollection()) {
+			
+			if(StringUtils.isNotBlank(field.getWidget())) {
+				Widget render = lookupWidget(field.getWidget());
+				if(Objects.nonNull(render)) {
+					render.init(fieldView.getResourceKey(), fieldView.getFormVariable(), fieldView.getBundle());
+					render.renderInput(element,getFieldValue(fieldView, obj), field.isReadOnly()); 
+					return;
+				} else {
+					log.warn("Cannot find custom widget {} for field {}", field.getWidget(), field.getResourceKey());
+				}
+			} else if(field.getCollection()) {
 				renderCollection(element, obj, fieldView, scope, panel); 
 			} else {
 				switch(field.getFieldType()) {
@@ -554,6 +591,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					thisElement.attr("readonly", "readonly");
 				}
 			}
+			
+			
 			Elements thisElement = element.select("#" + field.getResourceKey());
 			processDynamicElements(thisElement, fieldView, obj);
 			
@@ -570,8 +609,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 					}
 				}
 			}
-			
-			
 			
 			if(fieldView.isHidden()) {
 				element.addClass("d-none");
@@ -600,6 +637,25 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 	}
 	
+	private Widget lookupWidget(String widget) {
+		
+			try {
+				Class<? extends Widget> cls = fieldRenderers.get(widget);
+				if(Objects.isNull(cls)) {
+					applicationService.getBeans(Widget.class).stream().filter(b -> b.getClass().getSimpleName().equals(widget)).findFirst().ifPresent(b -> {
+						fieldRenderers.put(widget, b.getClass());
+					});
+				} 
+				if(fieldRenderers.containsKey(widget)) {
+					cls = fieldRenderers.get(widget);
+					return (Widget) applicationService.autowire(cls.getConstructors()[0].newInstance());
+				}
+			} catch (Exception e) {
+				log.error("Error loading custom widget class", e);
+			}
+		throw new IllegalStateException(String.format("Cannot find widget for %s", widget));
+	}
+
 	private void renderCollection(Element element, AbstractObject obj, TemplateViewField fieldView,
 			FieldView view, TemplateView panel) throws IOException {
 		

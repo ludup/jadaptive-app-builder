@@ -26,7 +26,7 @@ public class TextEditorInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String value, boolean readOnly, String... classes) throws IOException {
+	protected void onRender(Element rootElement, String value, boolean readOnly, String... classes) {
 		
 		rootElement.appendChild(new Element("label")
 				.attr("for", getFormVariable())

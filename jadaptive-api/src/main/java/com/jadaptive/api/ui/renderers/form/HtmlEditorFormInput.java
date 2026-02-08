@@ -12,6 +12,7 @@ import org.jsoup.nodes.Element;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageHelper;
+import com.jadaptive.utils.Utils;
 
 @PageDependencies(extensions = {"codemirror"})
 public class HtmlEditorFormInput extends FieldInputRender {
@@ -31,7 +32,7 @@ public class HtmlEditorFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String value, boolean readOnly, String... classes) throws IOException {
+	protected void onRender(Element rootElement, String value, boolean readOnly, String... classes) {
 		
 		scripts(document, "codemirror", 
 			"lib/codemirror.js",
@@ -54,7 +55,7 @@ public class HtmlEditorFormInput extends FieldInputRender {
 				.appendChild(input = new Element("textarea")
 						.attr("name", getFormVariableWithParents())
 						.addClass(getResourceKey() + " form-control")
-						.val(Base64.getEncoder().encodeToString(value.getBytes("UTF-8"))))
+						.val(Base64.getEncoder().encodeToString(Utils.getUTF8Bytes(value))))
 				.appendChild(new Element("small")
 						.addClass("form-text")
 						.addClass("text-muted")

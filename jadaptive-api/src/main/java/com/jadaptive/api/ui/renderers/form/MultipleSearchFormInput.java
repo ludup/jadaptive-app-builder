@@ -26,7 +26,7 @@ public class MultipleSearchFormInput {
 //		this.idField = idField;
 //	}
 
-	public void renderInput(TemplateView panel, Element rootElement, 
+	protected void onRender(TemplateView panel, Element rootElement, 
 			Collection<NamePairValue> selectedValues,
 			boolean nameIsResourceKey, boolean readOnly) {
 		

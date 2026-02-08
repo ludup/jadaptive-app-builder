@@ -39,5 +39,7 @@ public @interface ObjectField {
 		
 		FieldRenderer renderer() default FieldRenderer.DEFAULT;
 
+		String widget() default "";
+		
 		String bundle() default "";
 }

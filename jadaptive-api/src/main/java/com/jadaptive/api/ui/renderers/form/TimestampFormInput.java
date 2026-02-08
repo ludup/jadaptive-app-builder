@@ -16,7 +16,7 @@ public class TimestampFormInput extends FieldInputRender {
 		super(resourceKey, formVariable, bundle);
 	}
 
-	public final void renderInput(Element rootElement, String value, boolean readOnly, String... classes) {
+	protected void onRender(Element rootElement, String value, boolean readOnly, String... classes) {
 		
 		Element input;
 		rootElement.appendChild(new Element("div")

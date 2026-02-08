@@ -29,7 +29,7 @@ public class DropdownFormInput extends FieldInputRender {
 	}
 
 	@Override
-	public void renderInput(Element rootElement, String defaultValue, boolean readOnly, String... classes) {
+	protected void onRender(Element rootElement, String defaultValue, boolean readOnly, String... classes) {
 
 		
 		Element e;

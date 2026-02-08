@@ -19,7 +19,7 @@ public class MultipleTextFormInput {
 //		this.field = field;
 //	}
 
-	public void renderInput(TemplateView panel, Element rootElement, 
+	protected void onRender(TemplateView panel, Element rootElement, 
 			Collection<String> selectedValues, boolean readOnly) {
 		
 		rootElement.appendChild(new Element("div").addClass("row mb-3 multipleTextInput")
