@@ -35,6 +35,52 @@ This framework stores entities in MongoDB with annotated POJOs that drive valida
 - Field i18n: `<field>.name` and `<field>.desc` as above.
 - Additional i18n entries are required for custom views/tabs (`<view>.name`).
 
+## Seeded email templates (messages)
+
+- Location and versioning: add a JSON seed in `src/main/resources/system/shared/objects` named `<key>_<version>.json` (e.g., `email_0.0.1.json`). Files run in ascending version order; the TemplateVersionService records the version per key so later files can add new messages without rerunning prior versions.
+- Entity shape: each JSON object maps to `com.jadaptive.plugins.email.Message` (see AGENT basics). Set `resourceKey` (e.g., `emailMessages`), `group` (shared grouping label), `name` (unique message name), `enabled`, `archive`, `system` (usually true for seeded messages), and a stable `uuid` meaningful to the context.
+- UUID constants: if the plugin has a `MessageTemplates` interface in its base package, add a `public static final String` for the message UUID; if absent, create the interface and add the constant (e.g., `String TICKET_REJECTED = "ticketService.rejected";`).
+- Content: add a single `content` entry for locale `DEFAULT` with `MessageContent` shape, a new random content `uuid`, a subject, `htmlTemplate` pointing to the default template, `htmlText` pointing to the HTML resource (`resource://<file>.html`), `enabled`, and `system`.
+- HTML resource: place the HTML body in `src/main/resources/defaultMessages/<file>.html`. Reference it from `htmlText` as `resource://<file>.html`.
+- Execution: seeds are picked up automatically on startup; TemplateVersionService creates/updates the database entries according to the versioned key.
+- Example: CRM seed `01conversationMessages_0.0.2.json` defines message UUID `ticketService.rejected` with `htmlText` `resource://rejected.html` backed by `src/main/resources/defaultMessages/rejected.html`.
+
+## Sending email messages
+
+- Build a resolver (e.g., `StaticResolver`) that implements `ITokenResolver`, populate it with tokens your template expects (user object, displayName, dates, links, etc.).
+- Call `messageService.sendMessage(<MessageTemplates constant>, resolver, new RecipientHolder(user))`; other overloads support multiple recipients.
+- Example:
+
+```java
+StaticResolver data = new StaticResolver();
+data.addToken("user", user);
+data.addToken("displayName", user.getDisplayName());
+data.addToken("expiryDate", Utils.formatDate(expiryDate));
+data.addToken("resetUrl", resetUrl);
+
+messageService.sendMessage(MessageTemplates.PASSWORD_EXPIRING, data, new RecipientHolder(user));
+```
+
+## Scheduled jobs (@TaskConfig, @ScheduledTaskConfig, @TenantTaskConfig)
+
+- Implement `ScheduledTask` (and optionally `TenantTask` when multi-tenant or user-triggered) and annotate the class with:
+  - `@TaskConfig`: core metadata (key, bundle/i18n, `affinity` for cluster placement, `onConflict` policy, optional `id`, `dontPersist`).
+  - `@ScheduledTaskConfig`: cadence via cron string or `ScheduledTask` constants (e.g., `EVERY_MINUTE`, `AT_MIDNIGHT`); `systemOnly=true` hides it from tenant scheduling.
+  - `@TenantTaskConfig`: UI/runtime flags such as `allowRunNow`, `allowTenantRunNow`, `logging`.
+- I18n: add `<key>.name` and `<key>.desc` to the declared bundle (e.g., `express.properties`). Without these, the job won’t render cleanly in UI.
+- Mark as `@Extension` so PF4J registers it; implement `execute()` and use `TaskContext.get().progress()` for progress messages.
+- Example:
+
+```java
+@Extension
+@TaskConfig(affinity = Affinity.ANY, bundle = MyBundle.RESOURCE_KEY, key = "myJob")
+@ScheduledTaskConfig(ScheduledTask.AT_MIDNIGHT)
+@TenantTaskConfig(allowRunNow = true, allowTenantRunNow = true)
+public class MyJob implements TenantTask, ScheduledTask {
+  public void execute() throws Exception { TaskContext.get().progress().message("myJob.start"); }
+}
+```
+
 ## Rendering rules (AbstractObjectRenderer highlights)
 
 - Forms and tables are generated from `ObjectTemplate` and `TemplateView` definitions. If no views exist, a single dynamic view is created using all fields.

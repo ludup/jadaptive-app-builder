@@ -1,5 +1,6 @@
 package com.jadaptive.api.user;
 
+import java.util.Date;
 import java.util.Set;
 
 import org.pf4j.ExtensionPoint;
@@ -51,4 +52,6 @@ public interface UserDatabase extends ExtensionPoint {
 	User findUser(String username);
 
 	boolean canChangePassword(User currentUser);
+
+	Date getPasswordExpiry(User user);
 }

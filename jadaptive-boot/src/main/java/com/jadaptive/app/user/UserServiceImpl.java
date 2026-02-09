@@ -2,6 +2,7 @@ package com.jadaptive.app.user;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -484,5 +485,12 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		UserDatabase database = getDatabase(getCurrentUser());
 		
 		return database.canChangePassword(getCurrentUser());
+	}
+
+	@Override
+	public Date getPasswordExpiryDate(User user) {
+		
+		UserDatabase database = getDatabase(user);
+		return database.getPasswordExpiry(user);
 	}
 }

@@ -1,6 +1,7 @@
 package com.jadaptive.api.user;
 
 import java.util.Collection;
+import java.util.Date;
 
 import com.jadaptive.api.avatar.AvatarProvider;
 import com.jadaptive.api.db.SearchField;
@@ -69,4 +70,6 @@ public interface UserService extends UUIDObjectService<User>, AvatarProvider, Dy
 	void configureEmailAddress(User user, String emailAddress, boolean primary);
 
 	boolean supportsPasswordChange();
+
+	Date getPasswordExpiryDate(User user);
 }

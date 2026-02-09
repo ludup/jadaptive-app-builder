@@ -2,6 +2,7 @@ package com.jadaptive.plugins.builtin;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -156,6 +157,11 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 	@Override
 	public boolean canChangePassword(User currentUser) {
 		return true; 
+	}
+	
+	@Override
+	public Date getPasswordExpiry(User user) {
+		return null;
 	}
 
 }

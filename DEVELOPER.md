@@ -77,6 +77,58 @@ Key points:
 - Indexing: `@UniqueIndex` for unique compound indexes; `searchable = true` on fields for non-unique index + search dropdown; `@Index` is available but searchable is preferred.
 - CRUD pages: COLLECTION entities automatically get search/create/update/delete pages.
 
+### Seeding email templates (messages)
+
+Use versioned seeds so new messages can be added without rerunning earlier ones.
+
+1) Create a JSON seed in `src/main/resources/system/shared/objects` named `<key>_<version>.json` (e.g., `email_0.0.1.json`). Files run in ascending version order; TemplateVersionService records versions per key.
+2) Each JSON object maps to `com.jadaptive.plugins.email.Message`: set `resourceKey` (e.g., `emailMessages`), `group` (shared grouping label), `name` (unique message name), `enabled`, `archive`, `system` (typically true), and a stable, meaningful `uuid`.
+3) UUID constants: if the plugin has `MessageTemplates` in its base package, add a `public static final String` for the message UUID; if missing, create `MessageTemplates` and add the constant (e.g., `String TICKET_REJECTED = "ticketService.rejected";`).
+4) Content: include one `content` item for locale `DEFAULT` with a new random content `uuid`, subject, `htmlTemplate` pointing to the default template, `htmlText` pointing to the HTML resource (`resource://<file>.html`), plus `enabled` and `system` flags.
+5) HTML: place the body in `src/main/resources/defaultMessages/<file>.html` and reference it from `htmlText` as `resource://<file>.html`.
+6) Startup: seeds are auto-applied on application start; TemplateVersionService creates/updates messages according to the versioned key.
+7) Example: CRM seed `01conversationMessages_0.0.2.json` defines message UUID `ticketService.rejected` with `htmlText` `resource://rejected.html` backed by `src/main/resources/defaultMessages/rejected.html`.
+
+### Sending email messages
+
+- Build a resolver implementing `ITokenResolver` (e.g., `StaticResolver`), adding tokens the template needs (user, displayName, dates, links).
+- Invoke `messageService.sendMessage(<MessageTemplates constant>, resolver, new RecipientHolder(user))`; overloaded variants support multiple recipients.
+- Example:
+
+```java
+StaticResolver data = new StaticResolver();
+data.addToken("user", user);
+data.addToken("displayName", user.getDisplayName());
+data.addToken("expiryDate", Utils.formatDate(expiryDate));
+data.addToken("resetUrl", resetUrl);
+
+messageService.sendMessage(MessageTemplates.PASSWORD_EXPIRING, data, new RecipientHolder(user));
+```
+
+### Scheduled jobs (@TaskConfig, @ScheduledTaskConfig, @TenantTaskConfig)
+
+- Implement `ScheduledTask`; add `TenantTask` when tenant-aware or when you want Run Now in tenant UI.
+- Annotate the job class with:
+    - `@TaskConfig`: core metadata — `key` (identifier), `bundle` (i18n bundle), `affinity` (cluster placement), `onConflict` (conflict handling), optional `id`, `dontPersist`.
+    - `@ScheduledTaskConfig`: schedule via cron or `ScheduledTask` constants (e.g., `EVERY_MINUTE`, `AT_MIDNIGHT`); `systemOnly=true` hides it from tenant scheduling.
+    - `@TenantTaskConfig`: runtime/UI flags — `allowRunNow`, `allowTenantRunNow`, `logging`, etc.
+- I18n: add `<key>.name` and `<key>.desc` in the declared bundle so the scheduler UI can label the task.
+- Register with PF4J using `@Extension`; implement `execute()` and use `TaskContext.get().progress()` for progress reporting/messages.
+- Example:
+
+```java
+@Extension
+@TaskConfig(affinity = Affinity.ANY, bundle = MyBundle.RESOURCE_KEY, key = "myJob")
+@ScheduledTaskConfig(ScheduledTask.AT_MIDNIGHT)
+@TenantTaskConfig(allowRunNow = true, allowTenantRunNow = true)
+public class MyJob implements TenantTask, ScheduledTask {
+        @Override
+        public void execute() throws Exception {
+                TaskContext.get().progress().message("myJob.start");
+        }
+}
+```
+
 ### Object references
 
 ```java

@@ -3,6 +3,7 @@ package com.jadaptive.app.user;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -125,5 +126,10 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	@Override
 	public boolean canChangePassword(User currentUser) {
 		return true; 
+	}
+
+	@Override
+	public Date getPasswordExpiry(User user) {
+		return null;
 	}
 }
