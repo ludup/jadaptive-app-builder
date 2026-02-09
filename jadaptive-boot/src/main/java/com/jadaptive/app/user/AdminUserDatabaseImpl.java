@@ -121,4 +121,9 @@ public class AdminUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imple
 	public User findUser(String username) {
 		return objectDatabase.get(AdminUser.class, SearchField.eq("username", username));
 	}
+	
+	@Override
+	public boolean canChangePassword(User currentUser) {
+		return true; 
+	}
 }

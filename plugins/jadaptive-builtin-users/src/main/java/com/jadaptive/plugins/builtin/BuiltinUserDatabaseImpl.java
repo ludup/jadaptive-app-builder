@@ -152,5 +152,10 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 	public User findUser(String username) {
 		return objectDatabase.get(BuiltinUser.class, SearchField.eq("username", username));
 	}
+	
+	@Override
+	public boolean canChangePassword(User currentUser) {
+		return true; 
+	}
 
 }

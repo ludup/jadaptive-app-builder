@@ -588,6 +588,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 		}
 		
 		scanForPermissions(getClass().getClassLoader(), "com.jadaptive.app", newSchema);
+		scanForPermissions(getClass().getClassLoader(), "com.jadaptive.api", newSchema);
 	}
 
 	private void scanForPermissions(ClassLoader classloader, String name, boolean newSchema) {

@@ -49,4 +49,6 @@ public interface UserDatabase extends ExtensionPoint {
 	void registerLogin(User user);
 
 	User findUser(String username);
+
+	boolean canChangePassword(User currentUser);
 }

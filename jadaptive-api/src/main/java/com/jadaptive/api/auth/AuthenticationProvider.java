@@ -16,7 +16,7 @@ public interface AuthenticationProvider extends ExtensionPoint {
 		return "/app/api/start-temporary-auth/" + getAuthenticatorUUID();
 	}
 	
-	public String getManagementUri();
+	public default String getManagementUri() { return null; }
 	
 	public String getAuthenticatorUUID();
 	
@@ -29,4 +29,6 @@ public interface AuthenticationProvider extends ExtensionPoint {
 	public String getName();
 	
 	public default void resetCredentials() { throw new UnsupportedOperationException(); }
+
+	public default boolean supportsUserManagement() { return true; }
 }

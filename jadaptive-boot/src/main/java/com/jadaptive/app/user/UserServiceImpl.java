@@ -477,4 +477,12 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		
 		saveOrUpdate(user);
 	}
+
+	@Override
+	public boolean supportsPasswordChange() {
+		
+		UserDatabase database = getDatabase(getCurrentUser());
+		
+		return database.canChangePassword(getCurrentUser());
+	}
 }

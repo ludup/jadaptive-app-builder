@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.permissions.FeatureGroup;
 import com.jadaptive.api.permissions.LicensedFeature;
+import com.jadaptive.api.permissions.Permissions;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.DynamicColumn;
@@ -31,11 +32,10 @@ import com.sshtools.gardensched.Schedule;
 		@DynamicColumn(resourceKey = "displayName", service = SchedulerService.class),
 		@DynamicColumn(resourceKey = "status", service = SchedulerService.class),
 		@DynamicColumn(resourceKey = "details", service = SchedulerService.class), }, multipleDelete = false)
-
+@Permissions(keys = { "ViewScheduler" })
 @TableAction(bundle = SchedulerTask.RESOURCE_KEY, defaultAction = true, icon = "fa-person-running-fast", resourceKey = "runTaskNow", target = Target.ROW, url = "/app/api/scheduled-tasks/run-now/{uuid}", filter = SchedulerTaskRunNowActionFilter.class)
 @TableAction(bundle = SchedulerTask.RESOURCE_KEY, defaultAction = false, icon = "fa-trash", resourceKey = "cancelTask", target = Target.ROW, url = "/app/api/scheduled-tasks/cancel/{uuid}", filter = SchedulerTaskCancelActionFilter.class)
-@PageMenu(parent = ApplicationMenuService.REPORTING_MENU_UUID, icon = "fa-list-check", weight = 2000
-																									)
+@PageMenu(parent = ApplicationMenuService.REPORTING_MENU_UUID, icon = "fa-list-check", weight = 2000, withPermission = "ViewScheduler")
 @LicensedFeature(group = FeatureGroup.FREE, value = Session.RESOURCE_KEY)
 public final class SchedulerTask extends UUIDEntity {
 

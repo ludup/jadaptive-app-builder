@@ -67,4 +67,6 @@ public interface UserService extends UUIDObjectService<User>, AvatarProvider, Dy
 	void configureTelephone(User user, String phone, boolean primary);
 
 	void configureEmailAddress(User user, String emailAddress, boolean primary);
+
+	boolean supportsPasswordChange();
 }

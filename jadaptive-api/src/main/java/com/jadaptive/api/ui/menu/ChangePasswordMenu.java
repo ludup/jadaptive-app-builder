@@ -5,6 +5,9 @@ import java.util.Collection;
 
 import org.springframework.stereotype.Component;
 
+import com.jadaptive.api.app.App;
+import com.jadaptive.api.user.UserService;
+
 @Component
 public class ChangePasswordMenu implements ApplicationMenu {
 
@@ -47,5 +50,12 @@ public class ChangePasswordMenu implements ApplicationMenu {
 	public Integer weight() {
 		return 100;
 	}
+
+	@Override
+	public boolean isVisible() {
+		return App.bean(UserService.class).supportsPasswordChange();
+	}
+	
+	
 
 }
