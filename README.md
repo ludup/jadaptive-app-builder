@@ -10,9 +10,9 @@
 The Adaptive Application Builder is a plugin-first platform for building secure, multi-tenant applications. Entities are annotated POJOs stored in MongoDB; templates generate CRUD UI, validation, and permissions automatically. Plugins package features behind PF4J with Spring wiring, keeping dependencies isolated per module while sharing common runtime services.
 
 Key docs:
-- [DEVELOPER_SETUP_GUIDE.md](DEVELOPER_SETUP_GUIDE.md) â€” environment setup and tooling.
-- [AGENT.md](AGENT.md) â€” concise rules for entities, services, controllers, plugins, and events.
-- [DEVELOPER.md](DEVELOPER.md) â€” in-depth manual with patterns, examples, and best practices.
+- [DEVELOPER_SETUP_GUIDE.md](DEVELOPER_SETUP_GUIDE.md) environment setup and tooling.
+- [agent.md](.github/agents/jadaptive.agent.md)€” concise rules for entities, services, controllers, plugins, and events.
+- [DEVELOPER.md](DEVELOPER.md) in-depth manual with patterns, examples, and best practices.
 
 What the framework provides
 - Auto-generated CRUD UI and REST for annotated entities, with search, validation, i18n, and permissions baked in.
