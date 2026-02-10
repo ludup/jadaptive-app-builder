@@ -105,19 +105,19 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		menus.addAll(applicationService.getBeans(ApplicationMenu.class));
 		
 		/* Remove duplicate IDs */
-		var ids = new HashSet<String>();
-		var it = menus.stream().sorted((o1, o2) -> o1.weight().compareTo(o2.weight())).iterator();
-		while(it.hasNext()) {
-			var nxt = it.next();
-			var id = nxt.getI18n();
-			if(ids.contains(id)) {
-				menus.remove(nxt);
-				continue;
-			}
-			else {
-				ids.add(id);
-			}
-		}
+//		var ids = new HashSet<String>();
+//		var it = menus.stream().sorted((o1, o2) -> o1.weight().compareTo(o2.weight())).iterator();
+//		while(it.hasNext()) {
+//			var nxt = it.next();
+//			var id = nxt.getI18n();
+//			if(ids.contains(id)) {
+//				menus.remove(nxt);
+//				continue;
+//			}
+//			else {
+//				ids.add(id);
+//			}
+//		}
 		
 		for(ApplicationMenu menu :  menus) {
 			boolean extended = false;

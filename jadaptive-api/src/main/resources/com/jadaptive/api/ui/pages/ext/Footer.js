@@ -3,6 +3,7 @@ $(function() {
 	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
 	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
+	/*
 	$(document).on('click', '[role=dropdown-menu-item-select]', function(e) {
 		e.preventDefault();
 		var sel = $(this);
@@ -24,6 +25,7 @@ $(function() {
 		$(this).closest(".dropdown").find('.dropdown-menu').removeClass('show');
 		$(this).closest(".dropdown").find('input[type="hidden"]').val($(this).data('resourcekey')).change();
 	});
+	*/
 
 	$(document).on('click', '.replacement-item', function(e) {
 		e.preventDefault();
@@ -32,6 +34,7 @@ $(function() {
 		$(this).closest(".input-group").find('.dropdown-menu').removeClass('show');
 	});
 
+	/*
 	$(document).on('click keyup', '.jdropdown', function(e) {
 		e.stopPropagation();
 		var el = $(this).closest(".dropdown");
@@ -40,6 +43,7 @@ $(function() {
 		const dropdownList = new bootstrap.Dropdown(dropdownToggleEl);
 		dropdownList.toggle();
 	});
+	*/
 	
 	function duplicate(text, list) {
 		var found = false;
@@ -319,6 +323,7 @@ $(function() {
 
 	});
 	
+	/*
 	$('.filter-dropdown').on('keypress', function(e) {
 		var text = $(this).val().trim().toLowerCase();
 		$(this).parent().find('.dropdown-menu a').each(function(idx, obj) {
@@ -344,7 +349,8 @@ $(function() {
 			return;
 		}
 				
-	});
+	})
+	*/;
 
 	$('#footer input[name="theme"]').on('change', function(e) {
 		document.cookie = "userTheme=" + $(this).val() + '; path=/; expires=Tue, 01 Jan 2038 00:00:00 UTC;';

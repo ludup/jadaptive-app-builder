@@ -1,5 +1,7 @@
 package com.jadaptive.api.ui.renderers.form;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -9,21 +11,20 @@ import org.jsoup.nodes.Element;
 import com.jadaptive.api.app.I18N;
 import com.jadaptive.api.repository.NamedDocument;
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.NamePairValue;
-import com.jadaptive.api.ui.PageHelper;
 
 public class DropdownFormInput extends FieldInputRender {
-	
-	Element dropdownMenu;
-	Element dropdownInput;
-	Element nameElement;
-	Element valueElement;
-	
+
+	private Element componentElement;
+	private Element dropdownMenu;
+	private Element dropdownInput;
+	private Element nameElement;
+	private Element valueElement;
+
 	public DropdownFormInput(TemplateViewField field) {
 		super(field);
 	}
-	
+
 	public DropdownFormInput(String resourceKey, String formVariable, String bundle) {
 		super(resourceKey, formVariable, bundle);
 	}
@@ -31,53 +32,48 @@ public class DropdownFormInput extends FieldInputRender {
 	@Override
 	protected void onRender(Element rootElement, String defaultValue, boolean readOnly, String... classes) {
 
+		componentElement = rootElement.getElementsByClass("dropdown-form-field").last();
+
+		ofNullable(componentElement.getElementsByAttributeValue("jad:role", "label").first()).ifPresent(lbl -> {
+			if(decorate) {
+				lbl.removeAttr("jad:role");
+				lbl.attr("for", getFormVariable());
+				lbl.attr("jad:bundle", getBundle());
+				lbl.attr("jad:i18n", String.format("%s.name", getResourceKey()));
+			}
+			else {
+				lbl.remove();
+			}
+		});
 		
-		Element e;
-		rootElement.appendChild( e =new Element("div"));
-		e.addClass("dropdownInput");
-		
-		if(decorate) {
-				
-				e.appendChild(new Element("label")
-						.attr("for", getFormVariable())
-						.addClass("form-label")
-						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.name", getResourceKey())));
-		}
-		
-		e.appendChild(dropdownInput = new Element("div")
-				.addClass(String.format("%sDropdown", getResourceKey()) + " input-group position-relative dropdown")
-			.appendChild(valueElement = new Element("input")
-					.addClass(resourceKey)
-					.attr("name", getFormVariableWithParents())
-					.attr("type", "hidden"))
-			.appendChild(nameElement = new Element("input")
-					.attr("data-display", "static")
-					.attr("name",String.format("%sText", getFormVariableWithParents()))
-					.addClass(String.format("%sText", getResourceKey()) + " form-control dropdown-toggle filter-dropdown")
-					.attr("type", "text")
-					.attr("data-bs-toggle", "dropdown")
-					.attr("aria-haspopup", "true")
-					.attr("aria-expanded", "false"))
-			.appendChild(new Element("span")
-								.attr("class", "jdropdown input-group-text")
-							.appendChild(new Element("i")
-									.attr("class", "fa-solid fa-chevron-down"))));
-		
-		if(decorate) {
-			e.appendChild(new Element("small")
-						.addClass("form-text")
-						.addClass("text-muted")
-						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
-		}
-		
+		dropdownInput = elementForRole(componentElement, "component");
+		dropdownInput.addClass(String.format("%sDropdown", getResourceKey()));
+
+		valueElement = elementForRole(componentElement, "reference");
+		valueElement.attr("name", getFormVariableWithParents());
+		valueElement.addClass(resourceKey);
+
+		nameElement = elementForRole(componentElement, "input");
+		nameElement.attr("name", getFormVariableWithParents() + "Text");
+		nameElement.addClass(resourceKey + "Text");
+
+		elementForRoleOr(componentElement, "help").ifPresent(dsc -> {
+			if(decorate) {
+				dsc.removeAttr("jad:role");
+				dsc.attr("jad:bundle", getBundle());
+				dsc.attr("jad:i18n", String.format("%s.desc", getResourceKey()));
+			}
+			else {
+				dsc.remove();
+			}
+		});
+
 		if(!disableIDAttribute) {
 			dropdownInput.attr("id", String.format("%sDropdown", getResourceKey()));
 			valueElement.attr("id", resourceKey);
 			nameElement.attr("id", String.format("%sText", getResourceKey()));
 		}
-		
+
 		if(readOnly) {
 			nameElement.attr("disabled", "disabled");
 		}
@@ -85,14 +81,9 @@ public class DropdownFormInput extends FieldInputRender {
 	}
 
 	public void renderValues(Enum<?>[] values, String defaultValue, boolean readOnly) {
-		
-		if(!readOnly) {
-			dropdownInput.appendChild(dropdownMenu = new Element("div")
-					.addClass("dropdown-menu dropdown-size")
-					.attr("aria-labelledby", String.format("%sDropdown", getResourceKey())));
-			
-		}
-		
+
+		setupValues(readOnly);
+
 		Enum<?> selected = null;
 		for(Enum<?> value : values) {
 			if(Objects.isNull(selected)) {
@@ -105,15 +96,17 @@ public class DropdownFormInput extends FieldInputRender {
 				selected = value;
 			}
 		}
-		
+
 		if(readOnly) {
 			nameElement.attr("disabled", "disabled");
 		}
 		nameElement.val(processEnumName(selected.name()));
 		valueElement.val(selected.name());
 	}
-	
+
 	public void renderValues(Collection<String> values, String defaultValue) {
+
+		setupValues(false);
 		
 		String selected = null;
 		for(String value : values) {
@@ -125,29 +118,33 @@ public class DropdownFormInput extends FieldInputRender {
 				selected = value;
 			}
 		}
-		
+
 		nameElement.val(processEnumName(selected));
 		valueElement.val(String.valueOf(selected));
 	}
-	
+
 	public void renderValues(Map<String,String> values, String defaultValue) {
+
+		setupValues(false);
 		
 		Map.Entry<String,String> selected = null;
 		for(Map.Entry<String,String> value : values.entrySet()) {
-			
+
 			addInputValue(value.getKey(), value.getValue());
 			if(value.getKey().equals(defaultValue)) {
 				selected = value;
 			}
 		}
-		
+
 		if(Objects.nonNull(selected)) {
 			nameElement.val(selected.getValue());
 			valueElement.val(selected.getKey());
 		}
 	}
-	
+
 	public void renderCollectionValues(Collection<? extends NamedDocument> values, String defaultValue) {
+
+		setupValues(false);
 		
 		NamedDocument selected = null;
 		for(NamedDocument value : values) {
@@ -156,29 +153,27 @@ public class DropdownFormInput extends FieldInputRender {
 				selected = value;
 			}
 		}
-		
+
 		if(Objects.nonNull(selected)) {
 			nameElement.val(selected.getName());
 			valueElement.val(selected.getUuid());
 		}
 	}
-	
+
 	private String processEnumName(String name) {
 		return name.replace('_', ' ');
 	}
-	
+
 	public void addInputValue(String value, String name) {
+		setupValues(false);
 		
-		if(Objects.isNull(dropdownMenu)) {
-			dropdownInput.appendChild(dropdownMenu = new Element("div")
-					.addClass("dropdown-menu dropdown-size")
-					.attr("aria-labelledby", String.format("%sDropdown", getResourceKey())));
-		}
-		dropdownMenu.appendChild(PageHelper.createAnchor("#", name)
-				.attr("data-resourcekey", value)
-				.addClass("jdropdown-item dropdown-item"));
+		var anchor = elementForRole(componentElement, "value").firstElementChild().clone();
+		anchor.attr("data-resourcekey", value);
+		anchor.text(name);
+		
+		dropdownMenu.appendChild(anchor);
 	}
-	
+
 	public void setSelectedValue(String value, String name) {
 		nameElement.val(name);
 		valueElement.val(value);
@@ -186,23 +181,24 @@ public class DropdownFormInput extends FieldInputRender {
 
 	public void addI18nValue(String value, String i18n) {
 		
-		if(Objects.isNull(dropdownMenu)) {
-			dropdownInput.appendChild(dropdownMenu = new Element("div")
-					.addClass("dropdown-menu dropdown-size")
-					.attr("aria-labelledby", String.format("%sDropdown", getResourceKey())));
-		}
-		dropdownMenu.appendChild(Html.a("#").attr("jad:bundle", bundle)
-				.attr("jad:i18n", i18n)
-				.attr("data-resourcekey", value)
-				.addClass("jdropdown-item dropdown-item"));
+		setupValues(false);
+
+		var anchor = elementForRole(componentElement, "value").firstElementChild().clone();
+		anchor.attr("data-resourcekey", value);
+		anchor.attr("jad:bundle", bundle);
+		anchor.attr("jad:i18n", i18n);
+		
+		dropdownMenu.appendChild(anchor);
 	}
 
 	public void setSelectedI18nValue(String key, String value) {
 		nameElement.val(I18N.getResource(bundle, key));
 		valueElement.val(value);
     }
-    
+
 	public void renderNamePairValues(Collection<NamePairValue> values, String defaultValue) {
+
+		setupValues(false);
 		
 		NamePairValue selected = null;
 		for(NamePairValue value : values) {
@@ -211,12 +207,23 @@ public class DropdownFormInput extends FieldInputRender {
 				selected = value;
 			}
 		}
-		
+
 		if(Objects.nonNull(selected)) {
 			nameElement.val(selected.getName());
 			valueElement.val(selected.getValue());
 		}
 	}
 
-	
+	private void setupValues(boolean readOnly) {
+		if(dropdownMenu == null) {
+			dropdownMenu = elementForRole(componentElement, "values");
+			if(readOnly) {
+				dropdownMenu.remove();
+			}
+			else {
+				dropdownMenu.attr("aria-labelledby", String.format("%sDropdown", getResourceKey()));
+			}
+		}
+	}
+
 }
