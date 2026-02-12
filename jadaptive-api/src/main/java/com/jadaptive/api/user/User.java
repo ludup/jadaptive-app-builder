@@ -60,6 +60,7 @@ public abstract class User extends AbstractUUIDEntity implements NamedDocument {
 
 	@ObjectField(searchable = true, type = FieldType.TEXT, unique = true, view = DETAILS_VIEW)
 	@Validator(type = ValidationType.REQUIRED)
+	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9@_\\-\\.]{2,128}$", bundle = RESOURCE_KEY, i18n = "username.invalid")
 	private String username;
 
 	@ObjectField(searchable = true, type = FieldType.TEXT, nameField = true, view = DETAILS_VIEW)
