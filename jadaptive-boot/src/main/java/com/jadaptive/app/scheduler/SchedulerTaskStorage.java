@@ -101,11 +101,22 @@ public class SchedulerTaskStorage implements TaskStore {
 		tenantService.asSystem(() -> {
 			for(var tenant : tenantService.allObjects()) {
 				LOG.info("Gathering tasks for tenant {} ({})", tenant.getUuid(), tenant.getName());
-				tenantService.executeAs(tenant, () -> {
-					l.addAll(schedulerService.streamAll().map(st -> {
-						return schedulerTaskToEntry(st);
-					}).toList());
-				});
+				try {
+					tenantService.executeAs(tenant, () -> {
+						l.addAll(schedulerService.streamAll().map(st -> {
+							return schedulerTaskToEntry(st);
+						}).toList());
+					});
+				}
+				catch(Exception e) {
+					if (e.getMessage() != null && e.getMessage().contains("no such class found")) {
+						LOG.error("Failed to gather tasks for tenant {} ({}). It looks like this may be because the task was created by a plugin that doesn't exist. Skipping. {}", tenant.getUuid(),
+								tenant.getName(), e.getMessage());
+					} else {
+						LOG.error("Failed to gather tasks for tenant {} ({}). Skipping. {}", tenant.getUuid(),
+								tenant.getName(), e.getMessage());
+					}
+				}
 			}
 		});
 		return l.stream();
