@@ -39,6 +39,8 @@ import com.jadaptive.utils.Instrumentation;
 @Service
 public class ApplicationMenuServiceImpl extends AuthenticatedService implements ApplicationMenuService { 
 	
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ApplicationMenuServiceImpl.class);
+	
 	public static final String MENU_CACHE = "menuCache";
 	@Autowired
 	private App applicationService; 
@@ -95,6 +97,9 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 							} catch (IllegalArgumentException | SecurityException e) {
 							}
 						}
+						if(Boolean.getBoolean("jadaptive.development")) {
+							log.info("Adding menu {} with path {} and bundle {}", i18n, path, bundle);
+						}
 						annotatedMenus.add(new DynamicMenu(m, path, bundle, uuid, i18n));
 					}
 				}
@@ -105,19 +110,19 @@ public class ApplicationMenuServiceImpl extends AuthenticatedService implements 
 		menus.addAll(applicationService.getBeans(ApplicationMenu.class));
 		
 		/* Remove duplicate IDs */
-		var ids = new HashSet<String>();
-		var it = menus.stream().sorted((o1, o2) -> o1.weight().compareTo(o2.weight())).iterator();
-		while(it.hasNext()) {
-			var nxt = it.next();
-			var id = nxt.getI18n();
-			if(ids.contains(id)) {
-				menus.remove(nxt);
-				continue;
-			}
-			else {
-				ids.add(id);
-			}
-		}
+//		var ids = new HashSet<String>();
+//		var it = menus.stream().sorted((o1, o2) -> o1.weight().compareTo(o2.weight())).iterator();
+//		while(it.hasNext()) {
+//			var nxt = it.next();
+//			var id = nxt.getI18n();
+//			if(ids.contains(id)) {
+//				menus.remove(nxt);
+//				continue;
+//			}
+//			else {
+//				ids.add(id);
+//			}
+//		}
 		
 		for(ApplicationMenu menu :  menus) {
 			boolean extended = false;
