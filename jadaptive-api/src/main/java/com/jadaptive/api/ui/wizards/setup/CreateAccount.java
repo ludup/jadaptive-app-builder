@@ -19,7 +19,7 @@ public class CreateAccount extends WizardUUIDEntity {
 
 	@ObjectField(type = FieldType.TEXT, renderer = FieldRenderer.SET_PASSWORD)
 	@Validator(type = ValidationType.REQUIRED)
-	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9@_\\-\\.]{4,128}$", bundle = RESOURCE_KEY, i18n = "username.invalid")
+	@Validator(type = ValidationType.REGEX, value = "^[a-zA-Z0-9@_\\-\\.]{2,128}$", bundle = RESOURCE_KEY, i18n = "username.invalid")
 	String username;
 
 	@ObjectField(type = FieldType.TEXT, renderer = FieldRenderer.SET_PASSWORD)
