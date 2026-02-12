@@ -22,6 +22,7 @@ import com.jadaptive.api.ui.PageDependencies;
 import com.jadaptive.api.ui.PageProcessors;
 import com.jadaptive.api.ui.PageRedirect;
 import com.jadaptive.api.ui.pages.auth.OptionalAuthentication.OptionalAuthenticationForm;
+import com.jadaptive.api.user.FakeUser;
 
 import jakarta.servlet.http.Cookie;
 
@@ -64,6 +65,7 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			throw new PageRedirect(pageCache.resolvePage(Login.class));
 		}
 		
+		boolean isFake = state.getUser() instanceof FakeUser;
 		String defaultAuthenticator = null;
 		Page defaultPage = null;
 		for(Cookie c : Request.get().getCookies()) {
@@ -80,7 +82,7 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			}
 			Class<? extends Page> pageClass = authenticationService.getAuthenticationPage(provider.getAuthenticatorKey());
 			AuthenticationPage<?> page = (AuthenticationPage<?>)pageCache.resolvePage(pageClass);
-			if(!state.hasCompleted(pageClass) && page.canAuthenticate(state)) {
+			if(!state.hasCompleted(pageClass) && (page.canAuthenticate(state) || isFake)) {
 				if(Objects.nonNull(defaultAuthenticator) && page.getAuthenticatorUUID().equals(defaultAuthenticator) && state.getAttribute(TRIED_DEFAULT) != Boolean.TRUE) {
 					state.setSelectedPage(page.getClass());
 					state.setAttribute(TRIED_DEFAULT, Boolean.TRUE);
@@ -122,7 +124,7 @@ public class OptionalAuthentication extends AuthenticationPage<OptionalAuthentic
 			if(Objects.isNull(provider)) {
 				continue;
 			}
-			if(!state.hasCompleted(page.getClass()) && page.canAuthenticate(state)) {
+			if(!state.hasCompleted(page.getClass()) && (page.canAuthenticate(state) || isFake)) {
 				
 				authenticators.appendChild(Html.div("card my-3")
 					.appendChild(Html.div("card-body")

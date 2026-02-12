@@ -628,12 +628,8 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 
 	@Override
 	public void validateModules(AuthenticationPolicy policy) {
-
-		if(policy.getPasswordRequired() || policy.getPasswordProvided() || policy.isSecondaryOnly()) {
-			return;
-		}
 		
-		boolean hasSecret = false;
+		boolean hasSecret = policy.getPasswordRequired() || policy.getPasswordProvided();
 
 		for (UUIDReference ref : policy.getRequiredAuthenticators()) {
 			AuthenticationProvider provider = authenticationProvidersByUUID.get(ref.getUuid());
@@ -643,17 +639,19 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 			hasSecret |= provider.isSecretCapture();
 		}
 
-		if (policy.getOptionalAuthenticators().size() < policy.getOptionalRequired()) {
+		if (policy.getOptionalRequired() > 0 && policy.getOptionalAuthenticators().size() < policy.getOptionalRequired()) {
 			throw new IllegalStateException(
 					"Invalid authentication policy! Minumum number of optional factors exceeds available optional factors");
 		}
 
 		if (!hasSecret && policy.getOptionalRequired() == 0) {
-			throw new IllegalStateException("Invalid authentication policy! No secret capture modules are configured");
+			throw new IllegalStateException("Invalid authentication policy! This policy would enable a user to login without providing any credentials.");
 		}
 
-		if (policy.getRequiredAuthenticators().isEmpty() && (policy.getOptionalAuthenticators().isEmpty() || policy.getOptionalRequired() == 0)) {
-			throw new IllegalStateException("Invalid authentication policy! No valid modules");
+		if(!hasSecret) {
+			if (policy.getRequiredAuthenticators().isEmpty() && (policy.getOptionalAuthenticators().isEmpty() || policy.getOptionalRequired() == 0)) {
+				throw new IllegalStateException("Invalid authentication policy! This policy would enable a user to login without providing any credentials.");
+			}
 		}
 	}
 
