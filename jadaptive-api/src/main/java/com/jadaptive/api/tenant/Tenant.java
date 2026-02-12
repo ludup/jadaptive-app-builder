@@ -35,7 +35,6 @@ import com.jadaptive.utils.Utils;
 @TableView(defaultColumns = { "name", "hostname", "lastLogin", "database", "ownerName", "ownerEmail", "deletionDate" })
 @CreateURL(value = "/app/ui/wizards/setupTenant", i18n = "wizard.name")
 @TableAction(bundle = Tenant.RESOURCE_KEY, defaultAction = true, icon = "fa-magnifying-glass", resourceKey = "inspect", target = Target.ROW, url = "/app/ui/impersonate/{uuid}")
-
 @TableAction(bundle = Tenant.RESOURCE_KEY, deleteAction = true, confirmationRequired = true, icon = "", resourceKey = "scheduleDelete", target = Target.ROW, url = "/app/api/tenant/scheduleDelete/{uuid}")
 public class Tenant extends NamedUUIDEntity implements NamedDocument, Serializable {
 
