@@ -590,6 +590,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				if(field.isReadOnly() || scope == FieldView.READ) {
 					thisElement.attr("readonly", "readonly");
 				}
+				
+				String script = field.getMetaValue("onchange", "");
+				if(Objects.nonNull(obj) && StringUtils.isNotBlank(script)) {
+					thisElement.attr("onchange", script);
+				}
 			}
 			
 			
