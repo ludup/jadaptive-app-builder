@@ -7,5 +7,5 @@ public enum UserDatabaseCapabilities {
 	UPDATE,
 	DELETE, 
 	LOGON,
-	IMPORT
+	DYNAMIC_IMPORT
 }

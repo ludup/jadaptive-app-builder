@@ -145,7 +145,7 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		}
 
 		for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {
-			if(userDatabase.getCapabilities().contains(UserDatabaseCapabilities.IMPORT)) {
+			if(userDatabase.getCapabilities().contains(UserDatabaseCapabilities.DYNAMIC_IMPORT)) {
 				try {
 					User user = userDatabase.importUser(username);
 					if(Objects.nonNull(user)) {
