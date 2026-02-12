@@ -5,7 +5,9 @@ import java.util.Date;
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectType;
 import com.jadaptive.api.events.GenerateEventTemplates;
+import com.jadaptive.api.template.ExcludeView;
 import com.jadaptive.api.template.FieldType;
+import com.jadaptive.api.template.FieldView;
 import com.jadaptive.api.template.ObjectDefinition;
 import com.jadaptive.api.template.ObjectField;
 import com.jadaptive.api.template.ObjectServiceBean;
@@ -35,6 +37,7 @@ public class BuiltinUser extends PasswordEnabledUser {
 	PasswordEncryptionType encodingType;
 
 	@ObjectField(defaultValue = "false", type = FieldType.BOOL, view = "passwordOptions")
+	@ExcludeView(values = FieldView.CREATE)
 	boolean passwordChangeRequired;
 
 	@ObjectField(type = FieldType.TEXT, hidden = true)
