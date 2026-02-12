@@ -1,9 +1,12 @@
 package com.jadaptive.api.ui.renderers.form;
 
+import static java.util.Optional.ofNullable;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
@@ -59,6 +62,14 @@ public abstract class FieldInputRender implements PageResources {
 		this.formVariable = formVariable;
 		this.bundle = bundle;
 		this.formVariableWithParents = formVariable;
+	}
+	
+	public Element elementForRole(Element parent, String role) {
+		return elementForRoleOr(parent, role).orElseThrow(() -> new IllegalStateException("No element with role:" + role + " in template."));
+	}
+
+	public Optional<Element> elementForRoleOr(Element parent, String role) {
+		return ofNullable(parent.getElementsByAttributeValue("jad:role", role).first());
 	}
 	
 	public void disableDecoration() {

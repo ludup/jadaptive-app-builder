@@ -21,7 +21,7 @@ public interface DashboardWidget extends ExtensionPoint {
 	
 	String getName();
 	
-	void renderWidget(Document document, Element element) throws IOException;
+	void renderWidget(Document document, Element element, Element widgetAccessories) throws IOException;
 
 	Integer weight();
 

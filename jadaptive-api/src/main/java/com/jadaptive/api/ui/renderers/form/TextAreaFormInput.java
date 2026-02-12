@@ -3,19 +3,18 @@ package com.jadaptive.api.ui.renderers.form;
 import org.jsoup.nodes.Element;
 
 import com.jadaptive.api.template.TemplateViewField;
-import com.jadaptive.api.ui.Html;
 
 public class TextAreaFormInput extends FieldInputRender {
 
-	int rows;
-	Element input;
-	
+	private int rows;
+	private Element input;
+
 	public TextAreaFormInput(TemplateViewField field, int rows) {
 		super(field);
 		this.rows = rows;
 	}
-	
-	
+
+
 
 	public TextAreaFormInput(String resourceKey, String formVariable, String bundle, int rows) {
 		super(resourceKey, formVariable, bundle);
@@ -26,23 +25,20 @@ public class TextAreaFormInput extends FieldInputRender {
 	@Override
 	protected void onRender(Element rootElement, String value, boolean readOnly, String... classes) {
 
+		elementForRole(rootElement, "label")
+				.attr("for", getFormVariable())
+				.attr("jad:bundle", getBundle())
+				.attr("jad:i18n", String.format("%s.name", getResourceKey()));
 
-		rootElement.appendChild(new Element("div")
-				.appendChild(new Element("label")
-						.attr("for", getFormVariable())
-						.addClass("form-label")
-						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.name", getResourceKey())))
-				.appendChild(Html.div("input-group").appendChild(input = new Element("textarea")
-						.attr("name", getFormVariableWithParents())
-						.attr("rows", String.valueOf(rows))
-						.addClass(getResourceKey() + " form-control")
-						.val(value)))
-				.appendChild(new Element("small")
-						.addClass("form-text")
-						.addClass("text-muted")
-						.attr("jad:bundle", getBundle())
-						.attr("jad:i18n", String.format("%s.desc", getResourceKey()))));
+		input = elementForRole(rootElement, "input")
+				.attr("name", getFormVariableWithParents())
+				.attr("rows", String.valueOf(rows))
+				.addClass(getResourceKey() + " form-control")
+				.val(value);
+
+		elementForRole(rootElement, "help")
+				.attr("jad:bundle", getBundle())
+				.attr("jad:i18n", String.format("%s.desc", getResourceKey()));
 
 		if(!disableIDAttribute) {
 			input.attr("id", getResourceKey());

@@ -387,8 +387,7 @@ public class TemplateVersionServiceImpl extends AbstractLoggingServiceImpl imple
 			});
 
 		} catch (Throwable e) {
-			log.error(String.format("Failed to process template %s", resourceKey), e);
-			System.exit(0);
+			throw new IllegalStateException(String.format("Failed to process template %s", resourceKey), e);
 		}
 	}
 	

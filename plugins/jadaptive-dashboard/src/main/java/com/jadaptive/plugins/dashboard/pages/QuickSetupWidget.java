@@ -40,7 +40,7 @@ public class QuickSetupWidget implements DashboardWidget {
 	}
 
 	@Override
-	public void renderWidget(Document document, Element element) {
+	public void renderWidget(Document document, Element element, Element widgetAccessories) {
 		
 
 		element.appendChild(new Element("h6").addClass("card-title")

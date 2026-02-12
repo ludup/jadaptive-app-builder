@@ -158,7 +158,9 @@ public class UserInterfaceController extends AuthenticatedController {
 		Page page = pageCache.resolvePage(resourceUri, true);
 		
 		if(page.isBackStop()) {
-			log.info("REMOVEME: Setting back stop to {}", request.getRequestURI() + StringUtils.defaultIfBlank(request.getQueryString(), ""));
+			if(Boolean.getBoolean("jadaptive.development") || Boolean.getBoolean("jadaptive.showBackstopWarning")) {
+				log.info("REMOVEME: Setting back stop to {}", request.getRequestURI() + StringUtils.defaultIfBlank(request.getQueryString(), ""));
+			}
 			request.getSession().setAttribute(Session.BACK_URL, request.getRequestURI() + StringUtils.defaultIfBlank(request.getQueryString(), ""));
 		}
 	

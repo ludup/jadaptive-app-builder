@@ -225,8 +225,8 @@ public class Dashboard extends AuthenticatedPage {
 		}
 		
 		try {
-			widget.renderWidget(document, w);
 			row.appendChild(e);
+			widget.renderWidget(document, w, help);
 			
 			URL stylesheet = widget.getClass().getResource(widget.getClass().getSimpleName() + ".css");
 			if(Objects.nonNull(stylesheet)) {

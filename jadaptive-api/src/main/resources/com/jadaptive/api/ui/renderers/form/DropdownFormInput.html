@@ -1,0 +1,25 @@
+<html lang="en" xmlns:jad="https://jadaptive.com/jad">
+<body>
+	<div class="dropdown-form-field">
+		<label jad:role="label" class="form-label">Label</label>
+		<div jad:role="component" class="input-group position-relative">
+			<!-- NOTE: data-bs-toggle is needed to prevent script errors 
+				 (bootstrap always looks for dropdown-menu class, but we 
+				 want to control that manually, creating our own Dropdown 
+				 triggers and managing the instances created) -->
+			<input data-bs-toggle="dropdown" jad:role="reference" type="hidden" /> 
+			<input jad:role="input" data-display="static" type="text" class="form-control filter-dropdown" aria-expanded="false" /> 
+			<span
+				class="jdropdown input-group-text">
+				<a href="#" jad:role="toggle-menu" aria-expanded="false"><i class="fa-solid fa-chevron-down"></i></a>
+			</span>
+			<div jad:role="values" class="dropdown-menu dropdown-size"></div>
+		</div>
+		<small jad:role="help" class="form-text text-muted"></small>
+		
+		<template jad:role="value">
+		    <a href="#" class="dropdown-form-field-item dropdown-item"></a>
+		</template>
+	</div>
+</body>
+</html>
