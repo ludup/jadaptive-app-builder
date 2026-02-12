@@ -1,6 +1,8 @@
 package com.jadaptive.api.ui.pages.ext;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,7 +17,9 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -68,7 +72,6 @@ import com.jadaptive.api.ui.renderers.form.CssEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.DateFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownFormInput;
 import com.jadaptive.api.ui.renderers.form.DropdownMenu;
-import com.jadaptive.api.ui.renderers.form.FieldInputRender;
 import com.jadaptive.api.ui.renderers.form.FieldSearchFormInput;
 import com.jadaptive.api.ui.renderers.form.HtmlEditorFormInput;
 import com.jadaptive.api.ui.renderers.form.ImageFormInput;
@@ -233,6 +236,8 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				dropdown.renderValues(options, "");
 				dropdown.setName(parent.getBundle(), "extendWith.name");		
 			}
+			
+			renderResources(contents, templateService.getTemplateClass(template.getResourceKey()));
 			
 			List<TemplateView> views = templateService.getViews(template, disable);
 			if(Objects.isNull(views)) {
@@ -589,11 +594,6 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				}
 				if(field.isReadOnly() || scope == FieldView.READ) {
 					thisElement.attr("readonly", "readonly");
-				}
-				
-				String script = field.getMetaValue("onchange", "");
-				if(Objects.nonNull(obj) && StringUtils.isNotBlank(script)) {
-					thisElement.attr("onchange", script);
 				}
 			}
 			
@@ -1646,6 +1646,21 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	}
 
 
+	public void renderResources(Document document, Class<?> templateClz) throws IOException {
+		
+		String jsResource = templateClz.getSimpleName() + ".js";
+		URL url = templateClz.getResource(jsResource);
+		if(Objects.nonNull(url)) {
+			PageHelper.appendBodyScript(document, "/app/script/" + templateClz.getPackageName().replace('.', '/') + "/" + jsResource);
+		}
+		
+		String cssResource = templateClz.getSimpleName() + ".css";
+		url = templateClz.getResource(cssResource);
+		if(Objects.nonNull(url)) {
+			PageHelper.appendStylesheet(document,  "/app/style/" + templateClz.getPackageName().replace('.', '/') + "/" + cssResource);
+		}
+		
+	}
 	
 	
 }
