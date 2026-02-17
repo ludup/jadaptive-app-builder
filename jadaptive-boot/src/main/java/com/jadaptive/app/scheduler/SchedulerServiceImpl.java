@@ -133,6 +133,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 				withDeferStorageUntilStarted().
 				withPersistentByDefault().
 				withStartPaused().
+                withAlwaysDistribute().
 				withObjectStore(objectStore).
 				withCloseTimeout(Duration.ofMinutes(ApplicationProperties.getValue("ha.shutdownTimeout", Integer.MAX_VALUE))).
 				withSchedulerThreads(
