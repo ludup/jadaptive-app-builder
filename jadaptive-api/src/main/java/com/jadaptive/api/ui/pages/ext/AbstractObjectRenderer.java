@@ -1536,6 +1536,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		
 		rootElement.selectFirst(".tab-content").appendChild(div = new Element("div")
 														.attr("id", view.getResourceKey())
+														.attr("role", "tabpanel")
 														.addClass("px-3")
 														.addClass("tab-pane")
 														.addClass("panel-body")
