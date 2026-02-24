@@ -21,5 +21,7 @@ public interface FileAttachmentStorage extends ExtensionPoint {
 
 	InputStream getInputstream(String path) throws IOException;
 	
-	OutputStream getOutputStream(String path) throws IOException;
+	void deleteAttachment(FileAttachment object) throws IOException;
+
+	OutputStream getOutputStream(String path, String contentType) throws IOException;
 }

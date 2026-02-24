@@ -19,8 +19,10 @@ public interface FileAttachmentService {
 
 	public void markForRemoval(String encoded);
 
-	OutputStream getOutputStream(String path) throws IOException;
-
 	InputStream getInputStream(String path) throws IOException;
+
+	public void deleteAttachment(FileAttachment attachment) throws IOException;
+
+	OutputStream getOutputStream(String path, String contentType) throws IOException;
 
 }
