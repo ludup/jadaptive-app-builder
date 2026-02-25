@@ -89,18 +89,6 @@ public class OAuth2ServiceImpl implements OAuth2Service, StartupAware {
 	public void onApplicationStartup() {
 	}
 
-	private Map<String, PendingDevice> getPendingDevicesByDeviceCode() {
-		return cacheService.clusteredCacheOrCreate("pendingDevicesByDeviceCode", String.class, PendingDevice.class);
-	}
-
-	private Map<String, PendingDevice> getPendingDevicesByUserCode() {
-		return cacheService.clusteredCacheOrCreate("pendingDevicesByUserCode", String.class, PendingDevice.class);
-	}
-
-	private Map<String, OAuth2AuthCodeRequest> getOauth2AuthCodeRequests() {
-		return cacheService.clusteredCacheOrCreate("oauth2AuthCodeRequests", String.class, OAuth2AuthCodeRequest.class);
-	}
-
 	@Override
 	public OAuth2AuthCodeRequest getAuthCodeRequest(String code) {
 		OAuth2AuthCodeRequest req = getOauth2AuthCodeRequests().get(code);
@@ -216,6 +204,8 @@ public class OAuth2ServiceImpl implements OAuth2Service, StartupAware {
 		else {
 			pending.setStatus(Status.REJECTED);
 			puc.put(userCode, pending);
+			
+			getPendingDevicesByDeviceCode().put(pending.getDeviceCode(), pending);
 		}
 	}
 
@@ -228,7 +218,22 @@ public class OAuth2ServiceImpl implements OAuth2Service, StartupAware {
 		else {
 			pending.setUser(user.getUsername());
 			pending.setStatus(Status.APPROVED);
+			
 			puc.put(userCode, pending);
+			
+			getPendingDevicesByDeviceCode().put(pending.getDeviceCode(), pending);
 		}
+	}
+
+	private Map<String, PendingDevice> getPendingDevicesByDeviceCode() {
+		return cacheService.clusteredCacheOrCreate("pendingDevicesByDeviceCode", String.class, PendingDevice.class);
+	}
+
+	private Map<String, PendingDevice> getPendingDevicesByUserCode() {
+		return cacheService.clusteredCacheOrCreate("pendingDevicesByUserCode", String.class, PendingDevice.class);
+	}
+
+	private Map<String, OAuth2AuthCodeRequest> getOauth2AuthCodeRequests() {
+		return cacheService.clusteredCacheOrCreate("oauth2AuthCodeRequests", String.class, OAuth2AuthCodeRequest.class);
 	}
 }
