@@ -12,8 +12,20 @@ import java.util.Optional;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
-public class OAuth2Request {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+@JsonSerialize()
+@JsonDeserialize(builder = OAuth2Request.Builder.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class OAuth2Request implements java.io.Serializable {
 	
+	private static final long serialVersionUID = -4316064084478195725L;
+
+	@JsonPOJOBuilder(withPrefix = "with")
 	public final static class Builder {
 		
 		private String codeChallenge;
@@ -60,12 +72,14 @@ public class OAuth2Request {
 			return this;
 		}
 		
+		@JsonProperty("code_challenge")
 		public Builder withCodeChallenge(String codeChallenge) {
 			this.codeChallenge = codeChallenge;
 			return this;
 		}
 
 
+		@JsonProperty("state")
 		public Builder withState() {
 			return withState(OAuth2AuthorizationService.genToken());
 		}
@@ -75,6 +89,7 @@ public class OAuth2Request {
 			return this;
 		}
 
+		@JsonProperty("base_uri")
 		public Builder withBaseUri(String baseUri) {
 			this.baseUri = baseUri;
 			return this;
@@ -109,51 +124,61 @@ public class OAuth2Request {
 			}
 		}
 
+		@JsonProperty("redirect_uri")
 		public Builder withRedirectUri(String redirectUri) {
 			this.redirectUri = redirectUri;
 			return this;
 		}
 
+		@JsonProperty("client_id")
 		public Builder withClientId(String clientId) {
 			this.clientId = clientId;
 			return this;
 		}
 
+		@JsonProperty("user_code")
 		public Builder withUserCode(String userCode) {
 			this.userCode = userCode;
 			return this;
 		}
 
+		@JsonProperty("client_secret")
 		public Builder withClientSecret(String clientSecret) {
 			this.clientSecret = clientSecret;
 			return this;
 		}
 
+		@JsonProperty("code_verifier")
 		public Builder withCodeVerifier(String codeVerifier) {
 			this.codeVerifier = codeVerifier;
 			return this;
 		}
 
+		@JsonProperty("scopes")
 		public Builder withScopes(String[] scopes) {
 			this.scopes = scopes;
 			return this;
 		}
 
+		@JsonProperty("response_type")
 		public Builder withResponseType(String responseType) {
 			this.responseType = responseType;
 			return this;
 		}
 
+		@JsonProperty("grant_type")
 		public Builder withGrantType(String grantType) {
 			this.grantType = grantType;
 			return this;
 		}
 
+		@JsonProperty("nonce")
 		public Builder withNonce(String nonce) {
 			this.nonce = nonce;
 			return this;
 		}
 
+		@JsonProperty("code_challenge_method")
 		public Builder withCodeChallengeMethod(String codeChallengeMethod) {
 			this.codeChallengeMethod = codeChallengeMethod;
 			return this;
@@ -234,52 +259,64 @@ public class OAuth2Request {
 		}
 	}
 
+	@JsonProperty("user_code")
 	public String userCode() {
 		return userCode;
 	}
 
+	@JsonProperty("nonce")
 	public String requestedNonce() {
 		return nonce;
 	}
 
+	@JsonProperty("code_challenge")
 	public String requestedCodeChallenge() {
 		return codeChallenge;
 	}
 
+	@JsonProperty("code_challenge_method")
 	public String requestedCodeChallengeMethod() {
 		return codeChallengeMethod;
 	}
 
+	@JsonProperty("response_type")
 	public String requestedResponseType() {
 		return responseType;
 	}
 
+	@JsonProperty("grant_type")
 	public String requestedGrantType() {
 		return grantType;
 	}
 
+	@JsonProperty("scopes")
 	public String[] requestedScopes() {
 		if(scopes == null)
 			throw new IllegalStateException("Cannot get requested scopes on server side.");
 		return scopes;
 	}
 
+	@JsonProperty("code_verifier")
 	public String codeVerifier() {
 		return codeVerifier;
 	}
 
+	@JsonProperty("state")
 	public String state() {
 		return state;
 	}
 
+	@JsonProperty("redirect_uri")
 	public String redirectUri() {
 		return redirectUri;
 	}
 
+	@JsonProperty("client_id")
 	public String clientId() {
 		return clientId;
 	}
 
+	@JsonProperty("base_uri")
 	public String baseUri() {
 		return baseUri;
 	}

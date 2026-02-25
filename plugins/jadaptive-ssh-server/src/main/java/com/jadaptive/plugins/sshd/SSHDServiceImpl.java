@@ -219,6 +219,15 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 					break;
 				}
 			});
+		} catch (IOException e) {
+			LOG.error("SSHD service failed to start", e);
+		}
+	}
+	
+	@Override
+	public void onAfterApplicationStartup() {
+
+		try {
 
 			if(getEngine().getContext().getListeningInterfaces().length > 0)
 				start(true);
@@ -231,7 +240,7 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 			initialised = true;
 		}
 	}
-	
+
 	@Override
 	public void setSoftwareVersionComments(String softwareVersionComments) {
 		this.softwareVersionComments = softwareVersionComments;

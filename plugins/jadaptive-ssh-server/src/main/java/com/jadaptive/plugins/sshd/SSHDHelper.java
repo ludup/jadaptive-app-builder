@@ -23,13 +23,13 @@ public abstract class SSHDHelper {
 	}
 
 	@Autowired
-	private TenantService tenantService;
+	protected TenantService tenantService;
 
 	@Autowired
 	private PermissionService permissionService;
 
 	@Autowired
-	private UserService userService;
+	protected UserService userService;
 
 	@Autowired
 	protected App applicationService;

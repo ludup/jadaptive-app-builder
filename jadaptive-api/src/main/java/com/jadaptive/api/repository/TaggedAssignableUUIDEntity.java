@@ -1,5 +1,6 @@
 package com.jadaptive.api.repository;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -18,7 +19,7 @@ public abstract class TaggedAssignableUUIDEntity extends AssignableUUIDEntity im
 	protected String name;
 
 	@ObjectField(type = FieldType.TEXT, searchable = true, renderer = FieldRenderer.TAGS)
-	private Collection<String> tags;
+	private Collection<String> tags = new ArrayList<>();
 	
 	public String getName() {
 		return name;

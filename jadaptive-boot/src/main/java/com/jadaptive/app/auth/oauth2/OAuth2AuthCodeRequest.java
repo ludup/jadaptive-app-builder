@@ -1,25 +1,33 @@
 package com.jadaptive.app.auth.oauth2;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.Serializable;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.jadaptive.api.auth.oauth2.OAuth2AuthorizationService;
 import com.jadaptive.api.auth.oauth2.OAuth2Scope;
 import com.jadaptive.api.user.User;
 
-public class OAuth2AuthCodeRequest {
+public class OAuth2AuthCodeRequest implements Serializable {
 	
-	private final String token = OAuth2AuthorizationService.genToken();
-	private final Set<OAuth2Scope> scopes;
-	private final User principal;
-	private final String nonce;
-	private final String codeChallenge;
-	private final String codeChallengeMethod;
+	private static final long serialVersionUID = 370849847916918626L;
+	
+	private String token;
+	private Set<String> scopes;
+	private User principal;
+	private String nonce;
+	private String codeChallenge;
+	private String codeChallengeMethod;
+	
+	public OAuth2AuthCodeRequest() {
+		token = OAuth2AuthorizationService.genToken();
+		scopes = new LinkedHashSet<>();
+	}
 
 	public OAuth2AuthCodeRequest(Set<OAuth2Scope> scopes, String redirectUri, User principal, String nonce, String codeChallenge, String codeChallengeMethod) {
-		this.scopes = scopes;
+		token = OAuth2AuthorizationService.genToken();
+		this.scopes = scopes.stream().map(s -> s.getId()).sorted().collect(Collectors.toSet());
 		this.codeChallengeMethod = codeChallengeMethod == null ? "plain" : codeChallengeMethod;
 		this.principal = principal;
 		this.nonce = nonce;
@@ -27,11 +35,7 @@ public class OAuth2AuthCodeRequest {
 	}
 	
 	public String[] getScopeNames() {
-		List<String> n = new ArrayList<>();
-		for(OAuth2Scope scope : scopes)
-			n.add(scope.getId());
-		Collections.sort(n);
-		return n.toArray(new String[0]);
+		return scopes.toArray(new String[0]);
 	}
 	
 	public String getCodeChallengeMethod() {
@@ -52,10 +56,6 @@ public class OAuth2AuthCodeRequest {
 
 	public String getAuthCode() {
 		return token;
-	}
-
-	public Set<OAuth2Scope> getScopes() {
-		return scopes;
 	}
 
 }

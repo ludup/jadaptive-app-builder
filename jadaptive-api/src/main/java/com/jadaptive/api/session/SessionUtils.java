@@ -162,7 +162,6 @@ public class SessionUtils {
 			}
 			if(!formIdentifier.equals(form)) {
 				log.warn("CSRF token mistmatch for {} from {}", formIdentifier, request.getRequestURI());
-				log.debug("REMOVEME: Request token {}", requestToken);
 				debugRequest(request);
 				throw new UnauthorizedException(String.format("CSRF token mistmatch from %s", request.getRequestURI()));
 			}
@@ -374,7 +373,7 @@ public class SessionUtils {
 		registerCSRFToken(request, formIdentifier, token);
 		
 		if(log.isDebugEnabled()) {
-			log.debug("REMOVEME: Setting CSRF token for page {} to {}", request.getRequestURI(), token);
+			log.debug("Setting CSRF token for page {} to {}", request.getRequestURI(), token);
 		}
 		return token;
 	}

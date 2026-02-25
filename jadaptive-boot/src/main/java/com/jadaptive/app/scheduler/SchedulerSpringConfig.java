@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.cluster.BroadcastableEvent;
 import com.jadaptive.api.cluster.ClusterEvent;
@@ -124,6 +125,7 @@ public class SchedulerSpringConfig implements TaskErrorHandler, TaskSuccessHandl
 				
 		var om = JsonMapper.builder()
 			    .addModule(new Jdk8Module())
+			    .addModule(new JavaTimeModule())
 			    .addModule(sm)
 			    .configure(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS, true)
 			    .activateDefaultTyping(ptv, 

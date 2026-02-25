@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pf4j.Extension;
@@ -39,7 +40,9 @@ import com.jadaptive.api.permissions.AuthenticatedContext;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.session.UnauthorizedException;
+import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;
+import com.jadaptive.api.user.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -60,7 +63,11 @@ public class OAuth2TokenController extends AuthenticatedController {
 	@Autowired
 	private AuthenticationService authenticationService;
 	@Autowired
-	private SingletonObjectDatabase<OAuth2Configuration> config;
+	private SingletonObjectDatabase<OAuth2Configuration> config; 
+	@Autowired
+	private TenantService tenantService; 
+	@Autowired
+	private UserService userService;
 
 	@RequestMapping(value = "pair", method = RequestMethod.GET)
 	public void pair(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -237,7 +244,7 @@ public class OAuth2TokenController extends AuthenticatedController {
 					
 					var pending = oauth.getPendingDeviceByDeviceCode(deviceCode);
 					if(pending != null) {
-						switch(pending.status()) {
+						switch(pending.getStatus()) {
 						case PENDING:
 							return new OAuth2ErrorResponse("authorization_pending");
 						case REJECTED:
@@ -249,7 +256,14 @@ public class OAuth2TokenController extends AuthenticatedController {
 							}
 						case APPROVED:
 							try {
-								return createToken(application, pending.user(), null, pending.request().requestedScopes(), oauth2Config);
+								var fapplication = application;
+								return tenantService.executeAs(tenantService.getObjectByUUID(pending.getTenant()), new Callable<>() {
+									@Override
+									public OAuth2Response call() throws Exception {
+										return createToken(fapplication, userService.getUser(pending.getUser()), 
+												null, pending.getRequest().requestedScopes(), oauth2Config);
+									}
+								});
 							}
 							finally {
 								oauth.removeDevice(deviceCode);

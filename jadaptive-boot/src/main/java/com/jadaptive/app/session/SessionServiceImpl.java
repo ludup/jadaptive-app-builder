@@ -93,7 +93,9 @@ public class SessionServiceImpl extends AuthenticatedService implements SessionS
 	}
 	
 	protected Map<String,Session> getCache(Tenant tenant) {
-		return cacheService.getCacheOrCreate(String.format("%s-sessions", tenant.getUuid()), String.class, Session.class);
+		try(var asTenant = tenantService.tenant(tenant)) {
+			return cacheService.getCacheOrCreate("sessions", String.class, Session.class);
+		}
 	}
 	
 	@Override

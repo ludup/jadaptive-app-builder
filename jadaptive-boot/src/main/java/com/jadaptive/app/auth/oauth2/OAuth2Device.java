@@ -85,8 +85,8 @@ public class OAuth2Device extends AuthenticatedPage implements FormProcessor<OAu
 				LOG.warn("User rejected device without any user code, client will still be waiting unless device approval URL is visited again.");
 			}
 			else {
-				LOG.info("Reject OAuth device {} [{}]", pendingDevice.deviceCode(), pendingDevice.userCode());
-				oAuth2Service.rejectUserCode(pendingDevice.userCode());
+				LOG.info("Reject OAuth device {} [{}]", pendingDevice.getDeviceCode(), pendingDevice.getUserCode());
+				oAuth2Service.rejectUserCode(pendingDevice.getUserCode());
 		    	Feedback.info("oauth2", "info.rejectedDevice");
 			}
 			throw new PageRedirect(pageCache.getHomePage());
@@ -103,7 +103,7 @@ public class OAuth2Device extends AuthenticatedPage implements FormProcessor<OAu
 			var pendingDevice = checkTenant(oAuth2Service.getPendingDevice(uc));
 			if(pendingDevice == null)
 				throw new IllegalStateException("No such pending device.");
-			var strictness = Strictness.forScopes(oAuth2Service.getScopes(pendingDevice.request().requestedScopes()));
+			var strictness = Strictness.forScopes(oAuth2Service.getScopes(pendingDevice.getRequest().requestedScopes()));
 			if(strictness != Strictness.STRICT) {
 				approve(uc, pendingDevice); 
 			}
@@ -133,7 +133,7 @@ public class OAuth2Device extends AuthenticatedPage implements FormProcessor<OAu
 	}
 	
 	private PendingDevice checkTenant(PendingDevice pendingDevice) {
-		if (pendingDevice != null && !pendingDevice.tenant().equals(tenantService.getCurrentTenant())) {
+		if (pendingDevice != null && !pendingDevice.getTenant().equals(tenantService.getCurrentTenant().getUuid())) {
 			throw new IllegalStateException(
 					"Pending device is on a different tenant. Are you authorizing the "
 					+ "device using the same tenant as was used on the requesting device. "
@@ -144,7 +144,7 @@ public class OAuth2Device extends AuthenticatedPage implements FormProcessor<OAu
 	}
 
 	private void approve(String userCode, PendingDevice pendingDevice) throws FileNotFoundException {
-		LOG.info("Approving OAuth device {}", pendingDevice.deviceCode());
+		LOG.info("Approving OAuth device {}", pendingDevice.getDeviceCode());
 		
 		/* Update the oauth request in the session so that it has a redirect
 		 * URI that points back to the home page when the approval is finished.
@@ -155,7 +155,7 @@ public class OAuth2Device extends AuthenticatedPage implements FormProcessor<OAu
 		 * removed after approval (or rejection)
 		 */
 		var newOauthRequest = new OAuth2Request.Builder().
-				forOAuthRequest(pendingDevice.request()).
+				forOAuthRequest(pendingDevice.getRequest()).
 				withRedirectUri(PageCache.getPageURL(pageCache.getHomePage())).
 				withUserCode(userCode).
 				build();

@@ -164,13 +164,10 @@ public abstract class AuthenticationPage<T> extends HtmlPage implements FormProc
 		    	Feedback.error("default", "error.invalidCredentials");
 			}
     	} catch(AccessDeniedException e) {
-    		log.error("REMOVEME:", e);
     		Feedback.error(e.getMessage());
     	} catch(ObjectNotFoundException e) {	
-    		log.error("REMOVEME:", e);
     		Feedback.error("userInterface","error.invalidCredentials");
     	} catch (UnauthorizedException e) {
-    		log.error("REMOVEME:", e);
     		Feedback.error("userInterface","error.invalidCredentials");
     	} finally {
     		if(!isAllowFormExternalRedirect()) {

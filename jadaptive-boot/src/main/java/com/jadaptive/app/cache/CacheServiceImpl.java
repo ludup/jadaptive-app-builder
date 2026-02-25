@@ -49,22 +49,25 @@ public class CacheServiceImpl extends AuthenticatedService implements CacheServi
 
 	@SuppressWarnings("unchecked")
 	private <K,V> Map<K, V> cache(String name, Class<K> key, Class<V> value, long expiryTime){
+		
 		var cname = generateName(name);
-		Map<K, V> cache = (Map<K, V>) caches.get(cname);
-		if(cache==null) {
-
-			cache = (Map<K, V>) Caffeine.newBuilder()
-	            .expireAfterWrite(expiryTime, TimeUnit.MILLISECONDS)
-	            .maximumSize(ApplicationProperties.getValue("cache." + name + ".size", ApplicationProperties.getValue("cache.size", 1000)))
-	            .build()
-	            .asMap();
-			
-			caches.put(cname, cache);
-			
-			LOG.info("Creating new cache {} [`{}`]. There are now {} caches.", name, cname, caches.size());
-			
+		synchronized (caches) {
+			Map<K, V> cache = (Map<K, V>) caches.get(cname);
+			if(cache==null) {
+	
+				cache = (Map<K, V>) Caffeine.newBuilder()
+		            .expireAfterWrite(expiryTime, TimeUnit.MILLISECONDS)
+		            .maximumSize(ApplicationProperties.getValue("cache." + name + ".size", ApplicationProperties.getValue("cache.size", 1000)))
+		            .build()
+		            .asMap();
+				
+				caches.put(cname, cache);
+				
+				LOG.info("Creating new cache {} [`{}`]. There are now {} caches.", name, cname, caches.size());
+				
+			}
+			return cache;
 		}
-		return cache;
 	}
 	
 	@Override
@@ -90,53 +93,64 @@ public class CacheServiceImpl extends AuthenticatedService implements CacheServi
 	@SuppressWarnings("unchecked")
 	private <K,V> Map<K, V> clusteredCache(String name, Class<K> key, Class<V> value, long expiryTime){
 		var cname = generateName(name);
-		Map<K, V> cache = (Map<K, V>) clusteredCaches.get(cname);
-		if(cache==null) {
-
-			var executor = ApplicationServiceImpl.getInstance().getBean( SchedulerService.class);
-
-			cache = new AbstractMap<K, V>() {
-				@Override
-				public Set<Entry<K, V>> entrySet() {
-					throw new UnsupportedOperationException();
-				}
-
-				@Override
-				public V get(Object key) {
-					return (V) executor.get(cname, (Serializable)key);
-				}
-
-				@Override
-				public V put(K key, V value) {
-					/* TODO find out if anybody cares about previous value and
-					 * avoid this retrieval for no reason */
-					var was = get(key);
-					executor.put(cname, (Serializable)key, (Serializable)value);
-					return was;
-				}
-
-				@Override
-				public V remove(Object key) {
-					/* TODO find out if anybody cares about previous value and
-					 * avoid this retrieval for no reason */
-					var was = get(key);
-					if(was != null) {
-						executor.remove(cname, (Serializable)key);
+		synchronized (clusteredCaches) {
+			Map<K, V> cache = (Map<K, V>) clusteredCaches.get(cname);
+			if(cache==null) {
+	
+				var executor = ApplicationServiceImpl.getInstance().getBean( SchedulerService.class);
+	
+				cache = new AbstractMap<K, V>() {
+					@Override
+					public Set<Entry<K, V>> entrySet() {
+						throw new UnsupportedOperationException();
 					}
-					return was;
-				}
-			};
-			
-			clusteredCaches.put(cname, cache);
-			
-			LOG.info("Creating new clustered cache {} [`{}`]. There are now {} clustered caches.", name, cname, caches.size());
-			
+	
+					@Override
+					public boolean containsKey(Object key) {
+						return get(key) != null;
+					}
+	
+					@Override
+					public V get(Object key) {
+						return (V) executor.get(cname, (Serializable)key);
+					}
+	
+					@Override
+					public V put(K key, V value) {
+						if(value == null) {
+							throw new IllegalArgumentException("Null values are not allowed in clustered caches.");
+						}
+						
+						/* TODO find out if anybody cares about previous value and
+						 * avoid this retrieval for no reason */
+						var was = get(key);
+						executor.put(cname, (Serializable)key, (Serializable)value);
+						return was;
+					}
+	
+					@Override
+					public V remove(Object key) {
+						/* TODO find out if anybody cares about previous value and
+						 * avoid this retrieval for no reason */
+						var was = get(key);
+						if(was != null) {
+							executor.remove(cname, (Serializable)key);
+						}
+						return was;
+					}
+				};
+				
+				clusteredCaches.put(cname, cache);
+				
+				LOG.info("Creating new clustered cache {} [`{}`]. There are now {} clustered caches.", name, cname, caches.size());
+				
+			}
+			return cache;
 		}
-		return cache;
 	}
 
 	private String generateName(String name) {
 		Tenant ten = getCurrentTenant();
-		return String.format("%s-%s", name, ten == null ? tenantService.getSystemTenant().getUuid() : ten.getUuid());
+		return String.format("%s/%s", ten == null ? tenantService.getSystemTenant().getUuid() : ten.getUuid(), name);
 	}
 }
