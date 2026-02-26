@@ -191,5 +191,7 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 			roleService.saveOrUpdate(role);
 		}
 	}
+	
+	 public Integer getOrder() { return Integer.MAX_VALUE - 1; }
 
 }

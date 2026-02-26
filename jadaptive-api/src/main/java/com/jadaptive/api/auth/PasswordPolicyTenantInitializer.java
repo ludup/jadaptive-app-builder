@@ -46,6 +46,8 @@ public class PasswordPolicyTenantInitializer implements TenantAware, StartupAwar
         passwordPolicyService.createIfNotExisting(policy);
     }
     
+    public Integer getOrder() { return Integer.MAX_VALUE; }
+    
     @Override
 	public void onApplicationStartup() {
 		
