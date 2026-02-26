@@ -7,7 +7,8 @@ This framework stores entities in MongoDB with annotated POJOs that drive valida
 - `@ObjectDefinition`: Defines an entity. Types: COLLECTION (default, multi), SINGLETON (one per tenant), EMBEDDED (inline, not stored separately). Scopes: GLOBAL (default), ASSIGNED (can be linked to users/roles), PERSONAL (owned per user). `resourceKey` is the template/collection name; inherited classes can override but the topmost parent’s key determines the actual collection.
 - `@UniqueIndex` (class-level): Adds a Mongo unique index. Use for compound uniqueness. For non-unique indexes prefer `searchable=true` on fields; alternatively use `@Index`.
 - `@TableView`: Controls the generated search/listing page for COLLECTION entities (default columns, dynamic columns, sort, multi-delete, parent/child column inclusion). CRUD pages (search/create/update/delete) are auto-provisioned for COLLECTION objects.
-- `@GenerateEvents`: Auto-generates event objects for auditing.
+- `@GenerateEventTemplates`: Auto-generates event objects for auditing.
+- `@TableAction`: Surface row actions in search results; can be gated by an `ActionFilter` that inspects the serialized object. Actions can be Target.ROW for row-level or Target.TABLE for table level actions.
 
 ## Fields
 
@@ -92,12 +93,30 @@ public class MyJob implements TenantTask, ScheduledTask {
 ## Services, database access, and dynamic columns
 
 - Create a Spring service per entity by extending an `AbstractUUIDObjectService` variant. The common base `AbstractUUIDObjectServceImpl` injects `TenantAwareObjectDatabase` as `objectDatabase`; override `getResourceClass()` and add custom methods that compose `SearchField` constraints and call `objectDatabase` queries.
+- Annotate the entity with @ObjectServiceBean to link the entity to the service. The bean attribute will point to the service class (if you created separate service implementation and interface, you should point to the interface, otherwise the service class).
 - Override hooks when you need lifecycle logic: `beforeSave` and `afterSave` wrap `saveOrUpdate`; `beforeDelete` wraps `deleteObject`/`deleteObjectByUUID`; `setupDefaults` runs during `createNew`; `createIfNotExisting` is available to idempotently insert pre-seeded records (throws if UUID is blank).
-- `TenantAwareObjectDatabase` helpers: `list`/`stream`, `get`/`getOr`, `saveOrUpdate`, `delete`/`deleteIfExists`, `count`, `searchObjects`/`searchTable`/`table`, `searchCount`, `sumLongValues`/`sumDoubleValues`, `max`/`min`, `stashObject`, `deleteAll`. Pass `SearchField` varargs to filter, or `SortOrder` + `sortField` where supported.
+- When extending `AbstractAssignableUUIDObjectServiceImpl`, always implement `createNew(ObjectTemplate)` yourself (it has no default); return a new instance of your resource class (e.g., `return new MyEntity();`).
+- `TenantAwareObjectDatabase` helpers: `list`/`stream`, `get`/`getOr`, `saveOrUpdate`, `delete`/`deleteIfExists`, `count`, `searchObjects`/`searchTable`/`table`, `searchCount`, `sumLongValues`/`sumDoubleValues`, `countDistinct`, `max`/`min`, `stashObject`, `deleteAll`. Pass `SearchField` varargs to filter, or `SortOrder` + `sortField` where supported. Prefer `sumDoubleValues`/`countDistinct` for aggregates instead of iterating over collections.
 - `SearchField` builders: `eq`, `not`, `like`, `in`, `all`, `gt`, `gte`, `lt`, `lte`, plus logical `or(...)` / `and(...)`; use `_id` (or `UUID`) for the primary key. `SearchField.add(...)` appends filters; `.process` lets a `SearchTransformer` rewrite values; `.mark` tags fields for downstream logic. Use collections helper `SearchField.filter(stream, filters)` for in-memory filtering.
 - Use the extended service bases when they match your entity type: `AbstractAssignableUUIDObjectServiceImpl` (assignable objects via `AssignableObjectDatabase`), `AbstractPersonalUUIDObjectServceImpl` (per-user `PersonalUUIDEntity` with owner validation and personal database), and `AbstractUUIDObjectServceImpl` (default UUID entities). These wire the correct database abstraction and life-cycle hooks.
 - Implement `DynamicColumnService` when dynamic columns are needed, and add `@DynamicColumn` to `@TableView` to surface those columns.
 
+## Dashboard widgets
+
+- Implement `DashboardWidget` with `@Extension`; pick a bucket via `BasicDashboardTypes` (e.g., `INSIGHTS` or `SERVER_INFORMATION`) and guard visibility with `PermissionService.assertAdministrator()` when appropriate.
+- Resource mapping: place `SimpleName.html`, `SimpleName.css`, `SimpleName.js` (and optional `SimpleNameHelp.html`) in `src/main/resources/<package path>/`. Inline styles/`style` attributes are not allowed; use the CSS file.
+- Build the widget UI with jsoup `Element` helpers (e.g., `Html.div`) and Bootstrap utility classes; add i18n via `jad:bundle`/`jad:i18n` attributes on elements.
+- When injecting scripts, use `PageHelper.appendHeadScript` and loosen CSP via `SessionUtils.addContentSecurityPolicy` if inline scripts are required.
+
+
+## Menus
+
+- Prefer `@PageMenu` on the entity (or page/controller) to surface it in the navigation; only create a standalone `ApplicationMenu` when `@PageMenu` cannot cover the use case.
+
+## Tenant bootstrap / default data
+
+- Implement `TenantAware` on a Spring component to seed default data. Use `initializeTenant(Tenant tenant, boolean newSchema)` (or `initializeSystem` helper) and call your service’s `createIfNotExisting(...)` with a stable UUID on the seed object—this runs each startup, no `newSchema` guard needed.
+- Assign defaults to required roles/users via services (e.g., `RoleService.getRoleByUUID(...)`) before invoking `createIfNotExisting`.
 ## Controllers
 
 - Normal CRUD JSON/UI is generated automatically from templates. Only add controllers for custom APIs or flows.
@@ -234,7 +253,7 @@ public class ReportTasks extends AuthenticatedController {
 4. Add getters/setters.
 5. Provide i18n entries: template `name/names`, each field `name/desc`, any custom view names.
 6. Add a service (AbstractUUIDObjectService-derived) and optional DynamicColumn support.
-7. Consider `@GenerateEvents` if auditing is desired.
+7. Consider `@GenerateEventTemplates` if auditing is desired or someone may need to extend behaviour via events.
 8. For embedded objects, ensure parent templates include fields with `FieldType.OBJECT_EMBEDDED` pointing to the child template’s `resourceKey`.
 
 ## Additional rules
