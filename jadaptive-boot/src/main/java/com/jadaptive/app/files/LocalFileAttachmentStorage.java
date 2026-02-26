@@ -95,8 +95,14 @@ public class LocalFileAttachmentStorage implements FileAttachmentStorage {
 	}
 
 	@Override
-	public OutputStream getOutputStream(String path) throws IOException {
+	public OutputStream getOutputStream(String path, String contentType) throws IOException {
 		return  new FileOutputStream(new File(FILES, path));
+	}
+
+	@Override
+	public void deleteAttachment(FileAttachment object) throws IOException {
+		new File(LOCATION, object.getUuid()).delete();
+		
 	}
 
 }
