@@ -358,16 +358,21 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 				eventService.publishEvent(new AuthenticationSuccessEvent(moduleRef, 
 					Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
 					Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
-                
+				
+                	state.setHasPasswordSecretAuthentication(true);
+			    
 			    } else if(p instanceof AuthenticatorPage) {
-				String uuid = ((AuthenticatorPage)p).getAuthenticatorUUID();
-				AuthenticationProvider provider = authenticationProvidersByUUID.get(uuid);
-				if(provider != null) {
-				    var moduleRef = new UUIDReference(provider.getAuthenticatorUUID(), provider.getName());
-				    eventService.publishEvent(new AuthenticationSuccessEvent(moduleRef, 
-					    Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
-					    Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
-				}
+					String uuid = ((AuthenticatorPage)p).getAuthenticatorUUID();
+					AuthenticationProvider provider = authenticationProvidersByUUID.get(uuid);
+					if(provider != null) {
+						if(provider.isSecretCapture()) {
+							state.setHasPasswordSecretAuthentication(true);
+						}
+					    var moduleRef = new UUIDReference(provider.getAuthenticatorUUID(), provider.getName());
+					    eventService.publishEvent(new AuthenticationSuccessEvent(moduleRef, 
+						    Objects.nonNull(state.getUser()) ? state.getUser().getUsername() : state.getAttemptedUsername(),
+						    Objects.nonNull(state.getUser()) ? state.getUser().getName() : "", Request.getRemoteAddress()));
+					}
 			    }
 		}
 		

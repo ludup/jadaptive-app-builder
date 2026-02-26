@@ -65,7 +65,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriUtils;
 
-import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.repository.NamedDocument;
 
 public class Utils {

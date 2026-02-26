@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.util.List;
-import java.util.concurrent.Callable;
-
 import jakarta.servlet.http.HttpSession;
 
 public interface WebSocketClient<T extends WebSocketOutput> extends Closeable {

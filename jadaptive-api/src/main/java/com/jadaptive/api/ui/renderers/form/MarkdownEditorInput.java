@@ -2,7 +2,6 @@ package com.jadaptive.api.ui.renderers.form;
 
 import static com.jadaptive.utils.Npm.scripts;
 
-import java.io.IOException;
 import java.util.Objects;
 
 import org.jsoup.nodes.Document;

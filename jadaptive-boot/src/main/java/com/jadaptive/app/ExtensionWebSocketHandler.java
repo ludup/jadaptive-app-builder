@@ -52,12 +52,16 @@ public class ExtensionWebSocketHandler implements WebSocketHandler, HandshakeInt
 		ts.setCurrentTenant(Utils.before(socket.getUri().getHost(), ":"));
 		try {
 			HttpSession httpSession = (HttpSession) socket.getAttributes().get(HTTP_SESSION);
-			if(Objects.isNull(httpSession) || !J.b(SessionUtils.class).isLoggedOn()) {
-				r.run(httpSession);
+			if(Objects.isNull(httpSession)) {
+				r.run(null);
 			} else {
-				J.b(SessionUtils.class).doInSession(httpSession, ()->{
-					r.run(httpSession);
-				});
+				if(!J.b(SessionUtils.class).isLoggedOn(httpSession)) {
+					r.run(null);
+				} else {
+					J.b(SessionUtils.class).doInSession(httpSession, ()->{
+						r.run(httpSession);
+					});
+				}
 			}
 		} finally {
 			ts.clearCurrentTenant();

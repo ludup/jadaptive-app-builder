@@ -54,7 +54,6 @@ import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.user.User;
 import com.jadaptive.app.AbstractLoggingServiceImpl;
 import com.jadaptive.utils.Utils;
-
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
@@ -363,7 +362,7 @@ public class PermissionServiceImpl extends AbstractLoggingServiceImpl implements
 			clearUserContext();
 		}
 	}
-	
+
 	private synchronized void registerPermission(String permission, String... aliases) {
 		
 		Tenant tenant = tenantService.getCurrentTenant();	

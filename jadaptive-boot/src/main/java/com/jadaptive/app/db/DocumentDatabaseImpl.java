@@ -562,6 +562,54 @@ public class DocumentDatabaseImpl extends AbstractTenantAwareDatabase implements
 //	}
 
 	@Override
+	public Long countDistinct(String table, String database, String group, SearchField... fields) {
+		MongoCollection<Document> collection = getCollection(table, database);
+		
+		Transaction transaction = getCurrentSession();
+		
+		if(fields.length > 0) {
+		
+			if(Objects.nonNull(transaction)) {
+				
+				Document result = collection.aggregate(transaction.session(database), Arrays.asList(
+						Aggregates.match(buildFilter(fields)),
+					    Aggregates.group("$" + group),
+					    Aggregates.count("totalDistinct")
+					)).first();
+				
+				return (long) ((result != null) ? result.getInteger("totalDistinct") : 0);
+			} else {
+				Document result = collection.aggregate(Arrays.asList(
+						Aggregates.match(buildFilter(fields)),
+					    Aggregates.group("$" + group),
+					    Aggregates.count("totalDistinct")
+					)).first();
+				
+				return (long) ((result != null) ? result.getInteger("totalDistinct") : 0);
+			}
+			
+		} else {
+			if(Objects.nonNull(transaction)) {
+				Document result = collection.aggregate(transaction.session(database), Arrays.asList(
+					    Aggregates.group("$" + group),
+					    Aggregates.count("totalDistinct")
+					)).first();
+				
+				return (long) ((result != null) ? result.getInteger("totalDistinct") : 0);
+			} else {
+				Document result = collection.aggregate(Arrays.asList(
+					    Aggregates.group("$" + group),
+					    Aggregates.count("totalDistinct")
+					)).first();
+				
+				return (long) ((result != null) ? result.getInteger("totalDistinct") : 0);
+			}
+			
+		}
+		
+	}
+		
+	@Override
 	public Long count(String table, String database, SearchField... fields) {
 		MongoCollection<Document> collection = getCollection(table, database);
 		

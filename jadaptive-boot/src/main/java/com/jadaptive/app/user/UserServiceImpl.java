@@ -30,7 +30,6 @@ import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDObjectService;
-import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
@@ -50,7 +49,7 @@ import com.jadaptive.api.user.VerifyPasswordEvent;
 import com.jadaptive.utils.Utils;
 
 @Service
-public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implements UserService, ResourceService, TenantAware, UUIDObjectService<User> {
+public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implements UserService, TenantAware, UUIDObjectService<User> {
 
 	private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 	
@@ -107,12 +106,20 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		if(Objects.isNull(user)) {
 			throw new ObjectNotFoundException(String.format("User with id %s not found", uuid));
 		}
+		
+		if(!getDatabase(user).isEnabled()) {
+			throw new ObjectNotFoundException(String.format("User database for user with id %s is not enabled", uuid));
+		}
 		return user;
 	}
 
 	@Override
 	public boolean verifyPassword(User user, char[] password) {
 		try {
+			UserDatabase database = getDatabase(user);
+			if(!database.isEnabled()) {
+				return false;
+			}
 			return !(user instanceof FakeUser) && getDatabase(user).verifyPassword(user, password);
 		} catch(ObjectNotFoundException e) {
 			return false;
@@ -122,6 +129,9 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override 
 	public void enableUser(User user) {
 		
+		if(!getDatabase(user).isEnabled()) {
+			throw new ObjectNotFoundException(String.format("User database for user %s is not enabled", user.getUsername()));
+		}
 		permissionService.assertWrite(User.RESOURCE_KEY);
 		getDatabase(user).enableUser(user);
 	}
@@ -129,6 +139,9 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override 
 	public void disableUser(User user) {
 		
+		if(!getDatabase(user).isEnabled()) {
+			throw new ObjectNotFoundException(String.format("User database for user %s is not enabled", user.getUsername()));
+		}
 		permissionService.assertWrite(User.RESOURCE_KEY);
 		getDatabase(user).disableUser(user);
 	}
@@ -140,12 +153,14 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 
 		for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {
 			try {
-				return userDatabase.findUser(username);
+				if(userDatabase.isEnabled()) {
+					return userDatabase.findUser(username);
+				}
 			} catch(ObjectNotFoundException e) { }
 		}
 
 		for(UserDatabase userDatabase : applicationService.getBeans(UserDatabase.class)) {
-			if(userDatabase.getCapabilities().contains(UserDatabaseCapabilities.DYNAMIC_IMPORT)) {
+			if(userDatabase.getCapabilities().contains(UserDatabaseCapabilities.DYNAMIC_IMPORT) && userDatabase.isEnabled()) {
 				try {
 					User user = userDatabase.importUser(username);
 					if(Objects.nonNull(user)) {
@@ -163,10 +178,17 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 
 	@Override
 	public void setPassword(User user, char[] newPassword, boolean passwordChangeRequired) {
+		if(!getDatabase(user).isEnabled()) {
+			throw new ObjectNotFoundException(String.format("User database for user %s is not enabled", user.getUsername()));
+		}
 		setPassword(user, newPassword, passwordChangeRequired, true);
 	}
 	@Override
 	public void setPassword(User user, char[] newPassword, boolean passwordChangeRequired, boolean log) {
+		
+		if(!getDatabase(user).isEnabled()) {
+			throw new ObjectNotFoundException(String.format("User database for user %s is not enabled", user.getUsername()));
+		}
 		
 		assertPasswordRules(user, newPassword, true);
 		
@@ -198,6 +220,10 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override
 	public void changePassword(User user, char[] oldPassword, char[] newPassword) {
 		
+		if(!getDatabase(user).isEnabled()) {
+			throw new ObjectNotFoundException(String.format("User database for user %s is not enabled", user.getUsername()));
+		}
+		
 		assertPasswordRules(user, newPassword, false);
 		
 		try {
@@ -220,6 +246,10 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	
 	@Override
 	public void changePassword(User user, char[] newPassword, boolean passwordChangeRequired) {
+		
+			if(!getDatabase(user).isEnabled()) {
+				throw new ObjectNotFoundException(String.format("User database for user %s is not enabled", user.getUsername()));
+			}
 		
 			assertPasswordRules(user, newPassword, false);
 			
@@ -276,6 +306,10 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	@Override
 	public void deleteUser(User user) {
 		
+		if(!getDatabase(user).isEnabled()) {
+			throw new ObjectNotFoundException(String.format("User database for user %s is not enabled", user.getUsername()));
+		}
+		
 		assertWrite(USER_RESOURCE_KEY);
 		assertCapability(user, UserDatabaseCapabilities.DELETE);
 		
@@ -288,6 +322,11 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 
 	@Override
 	public void updateUser(User user) {
+		
+		if(!getDatabase(user).isEnabled()) {
+			throw new ObjectNotFoundException(String.format("User database for user %s is not enabled", user.getUsername()));
+		}
+		
 		assertWrite(USER_RESOURCE_KEY);
 		assertCapability(user, UserDatabaseCapabilities.UPDATE);
 		getDatabase(user).updateUser(user);
@@ -295,6 +334,11 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 
 	@Override
 	public void createUser(User user, char[] password, boolean forceChange) {
+		
+		if(!getDatabase(user).isEnabled()) {
+			throw new ObjectNotFoundException(String.format("User database for user %s is not enabled", user.getUsername()));
+		}
+		
 		assertWrite(USER_RESOURCE_KEY);
 		assertCapability(user, UserDatabaseCapabilities.CREATE);
 		getDatabase(user).createUser(user, password, forceChange);
@@ -308,7 +352,10 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 	
 	@Override
 	public boolean supportsLogin(User user) {
-		return user instanceof FakeUser || getDatabase(user).getCapabilities().contains(UserDatabaseCapabilities.LOGON);
+		UserDatabase db = getDatabase(user);
+		return user instanceof FakeUser || 
+				(db.isEnabled() &&
+				db.getCapabilities().contains(UserDatabaseCapabilities.LOGON));
 	}
 
 	@Override
@@ -323,21 +370,6 @@ public class UserServiceImpl extends AbstractUUIDObjectServceImpl<User> implemen
 		}
 
 		return user.getUuid();
-	}
-
-	@Override
-	public long getTotalResources() {
-		return userRepository.count(User.class);
-	}
-
-	@Override
-	public String getResourceKey() {
-		return "users";
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return true;
 	}
 
 	@Override

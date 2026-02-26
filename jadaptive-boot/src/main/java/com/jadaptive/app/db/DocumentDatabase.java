@@ -69,5 +69,7 @@ public interface DocumentDatabase {
 
 	void doInTransaction(String database, Runnable r);
 
+	Long countDistinct(String table, String database, String group, SearchField... fields);
+
 
 }

@@ -1,6 +1,5 @@
 package com.jadaptive.api.ui.renderers.form;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.jsoup.nodes.Element;

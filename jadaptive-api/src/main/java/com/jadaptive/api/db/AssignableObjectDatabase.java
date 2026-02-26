@@ -7,7 +7,7 @@ import com.jadaptive.api.repository.AssignableDocument;
 import com.jadaptive.api.template.SortOrder;
 import com.jadaptive.api.user.User;
 
-public interface AssignableObjectDatabase<T extends AssignableDocument> {
+public interface AssignableObjectDatabase<T extends AssignableDocument>  {
 
 	@Deprecated(forRemoval = true, since = "0.6.0")
 	Iterable<T> getAssignedObjects(Class<T> resourceClass, User user, SearchField... fields);
@@ -24,6 +24,17 @@ public interface AssignableObjectDatabase<T extends AssignableDocument> {
 	@Deprecated(forRemoval = true, since = "0.6.0")
 	T getAssignedObject(Class<T> resourceClass, User user, SearchField... fields);
 
+	/**
+	 * Streeam all, or specific objects.
+	 * 
+	 * @param class1 type
+	 * @param fields search fields, or none for all
+	 * @return iterable
+	 */
+	default Stream<T> streamAssignedObjects(Class<T> class1, User user, SearchField... fields) {
+		return StreamSupport.stream(getAssignedObjectsA(class1, user, fields).spliterator(), false);
+	}
+	
 	/**
 	 * Streeam all, or specific objects.
 	 * 
@@ -48,9 +59,9 @@ public interface AssignableObjectDatabase<T extends AssignableDocument> {
 
 	long countObjects(Class<T> resourceClass, SearchField... fields);
 
-	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields);
-
 	T max(Class<T> clz, String column);
+
+	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SearchField... fields);
 
 	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SortOrder order, String sortField,
 			SearchField... fields);

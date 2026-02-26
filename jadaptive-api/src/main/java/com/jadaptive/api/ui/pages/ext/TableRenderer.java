@@ -36,7 +36,6 @@ import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.repository.ReflectionUtils;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.template.ActionFilter;
 import com.jadaptive.api.template.CreateURL;

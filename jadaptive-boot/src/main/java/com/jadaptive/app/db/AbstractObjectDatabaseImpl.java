@@ -1019,6 +1019,16 @@ public abstract class AbstractObjectDatabaseImpl implements AbstractObjectDataba
 		}
 	}
 	
+	protected <T extends UUIDDocument> Long countDistinct(String database, Class<T> clz, String group, SearchField... fields) throws RepositoryException, ObjectException {
+		
+		try {
+			return db.countDistinct(getCollectionName(clz), database, group, processFields(clz, fields));			
+		} catch (Throwable e) {
+			checkException(e);
+			throw new RepositoryException(String.format("%s: ", clz.getSimpleName(), e.getMessage()), e);
+		}
+	}
+	
 	
 	protected <T extends UUIDDocument> Long sumLongValues(String database, Class<T> clz, String groupBy, SearchField... fields) throws RepositoryException, ObjectException {
 		try {

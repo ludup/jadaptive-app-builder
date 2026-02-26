@@ -13,10 +13,9 @@ import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.stats.ResourceService;
 
 @Service
-public class SSHInterfaceServiceImpl extends AbstractUUIDObjectServceImpl<SSHInterface> implements SSHInterfaceService, ResourceService {
+public class SSHInterfaceServiceImpl extends AbstractUUIDObjectServceImpl<SSHInterface> implements SSHInterfaceService {
 
 	static Logger log = LoggerFactory.getLogger(SSHInterfaceServiceImpl.class);
 	
@@ -92,22 +91,8 @@ public class SSHInterfaceServiceImpl extends AbstractUUIDObjectServceImpl<SSHInt
 	}
 
 	@Override
-	public long getTotalResources() {
-		return repository.count(SSHInterface.class);
-	}
-
-	@Override
-	public String getResourceKey() {
-		return "sshInterface";
-	}
-
-	@Override
 	protected Class<SSHInterface> getResourceClass() {
 		return SSHInterface.class;
 	}
 
-	@Override
-	public boolean isEnabled() {
-		return true;
-	}
 }

@@ -13,21 +13,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.db.TenantAwareObjectDatabase;
 import com.jadaptive.api.entity.ObjectException;
+import com.jadaptive.api.entity.ObjectNotFoundException;
+import com.jadaptive.api.role.Role;
+import com.jadaptive.api.role.RoleService;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
+import com.jadaptive.api.tenant.Tenant;
+import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.user.PasswordEnabledUserDatabaseImpl;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserDatabaseCapabilities;
 import com.jadaptive.api.user.UserService;
 
 @Extension
-public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl implements BuiltinUserDatabase {
+public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl implements BuiltinUserDatabase, TenantAware {
+
+	private static final String BUILT_IN_USERS_ROLE = "255a5fee-685b-4447-a1be-f912d77ebe5c";
 
 	@Autowired
 	private TenantAwareObjectDatabase<BuiltinUser> objectDatabase;
 	
 	@Autowired
 	private TemplateService templateService; 
+	
+	@Autowired
+	private RoleService roleService;
 	
 	private final Set<UserDatabaseCapabilities> capabilities = new HashSet<>(
 			Arrays.asList(UserDatabaseCapabilities.MODIFY_PASSWORD,
@@ -162,6 +172,24 @@ public class BuiltinUserDatabaseImpl extends PasswordEnabledUserDatabaseImpl imp
 	@Override
 	public Date getPasswordExpiry(User user) {
 		return null;
+	}
+	
+	@Override
+	public void initializeTenant(Tenant tenant, boolean newSchema) {
+		
+
+		try {
+			roleService.getRoleByUUID(BUILT_IN_USERS_ROLE);
+		} catch(ObjectNotFoundException e) {
+			
+			Role role = new Role();
+			role.setUuid(BUILT_IN_USERS_ROLE);
+			role.setName("Built-in Users");
+			role.setSystem(true);
+			role.setAllUsers(false);
+			
+			roleService.saveOrUpdate(role);
+		}
 	}
 
 }

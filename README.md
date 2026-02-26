@@ -11,7 +11,7 @@ The Adaptive Application Builder is a plugin-first platform for building secure,
 
 Key docs:
 - [DEVELOPER_SETUP_GUIDE.md](DEVELOPER_SETUP_GUIDE.md) environment setup and tooling.
-- [agent.md](.github/agents/jadaptive.agent.md)€” concise rules for entities, services, controllers, plugins, and events.
+- [agent.md](.github/agents/jadaptive.agent.md)ï¿½ï¿½ concise rules for entities, services, controllers, plugins, and events.
 - [DEVELOPER.md](DEVELOPER.md) in-depth manual with patterns, examples, and best practices.
 
 What the framework provides

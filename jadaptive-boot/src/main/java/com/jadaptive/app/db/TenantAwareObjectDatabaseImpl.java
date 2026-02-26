@@ -126,6 +126,11 @@ public class TenantAwareObjectDatabaseImpl<T extends UUIDEntity>
 	}
 	
 	@Override
+	public long countDistinct(Class<T> resourceClass, String group, SearchField... fields) {
+		return countDistinct(getCurrentTenant().getUuid(), resourceClass, group, fields);
+	}
+	
+	@Override
 	public Collection<T> searchTable(Class<T> resourceClass, int start, int length, SortOrder order, String sortField, SearchField... fields) {
 		return searchTable(getCurrentTenant().getUuid(), resourceClass, start, length, order, sortField, fields);
 	}

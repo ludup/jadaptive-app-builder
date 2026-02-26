@@ -21,7 +21,6 @@ import com.jadaptive.api.db.SearchField;
 import com.jadaptive.api.entity.AbstractUUIDObjectServceImpl;
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.permissions.Permissions;
-import com.jadaptive.api.stats.ResourceService;
 import com.jadaptive.api.user.User;
 import com.jadaptive.utils.Utils;
 import com.sshtools.common.publickey.SshKeyPairGenerator;
@@ -33,7 +32,7 @@ import com.sshtools.common.ssh.components.SshPublicKey;
 
 @Service
 @Permissions(keys = { AuthorizedKeyService.AUTHORIZED_KEY_ASSIGN })
-public class AuthorizedKeyServiceImpl extends AbstractUUIDObjectServceImpl<AuthorizedKey> implements AuthorizedKeyService, ResourceService {
+public class AuthorizedKeyServiceImpl extends AbstractUUIDObjectServceImpl<AuthorizedKey> implements AuthorizedKeyService {
 	
 	@Autowired
 	private PersonalObjectDatabase<AuthorizedKey> objectDatabase; 
@@ -196,23 +195,6 @@ public class AuthorizedKeyServiceImpl extends AbstractUUIDObjectServceImpl<Autho
 	@Override
 	protected Class<AuthorizedKey> getResourceClass() {
 		return AuthorizedKey.class;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return true;
-	}
-
-	@Override
-	public String getResourceKey() {
-		return AuthorizedKey.RESOURCE_KEY;
-	}
-
-	@Override
-	public long getTotalResources() {
-		return objectDatabase.allObjectsCount(AuthorizedKey.class, 
-				SearchField.or(SearchField.eq("expires", null),
-						SearchField.gt("expires", Utils.today())));
 	}
 
 	@Override

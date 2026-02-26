@@ -1,8 +1,6 @@
 package com.jadaptive.api.db;
 
 import java.util.Collection;
-import java.util.function.Consumer;
-
 import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.repository.UUIDEntity;

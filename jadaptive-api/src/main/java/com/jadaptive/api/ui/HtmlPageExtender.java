@@ -17,4 +17,8 @@ public interface HtmlPageExtender extends ExtensionPoint {
 	default void generateContent(Document document, Page htmlPage) throws IOException { };
 
 	default void processPost(Document doc, Page htmlPage) throws IOException { };
+
+	default void afterDocumentExtensions(Document document, Page htmlPage)  throws IOException { };
+
+	default void afterPageProcessors(Document document, Page htmlPage)  throws IOException { };
 }

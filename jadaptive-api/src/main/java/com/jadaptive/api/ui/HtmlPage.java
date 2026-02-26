@@ -9,6 +9,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -153,7 +155,7 @@ public abstract class HtmlPage implements Page {
 			}
 
 			try(var timed = timed("HtmlPage.generateHTMLDocument#processPageExtensions(" + uri + ")")) {
-				processPageExtensions(uri, document);
+				processPageExtensions(uri, document, exts);
 			}
 
 			try(var timed = timed("HtmlPage.generateHTMLDocument#documentComplete(" + uri + ")")) {
@@ -196,11 +198,21 @@ public abstract class HtmlPage implements Page {
 	};
 	
 	@SuppressWarnings("unused")
-	private void processPageExtensions(String uri, Document document) throws IOException {
+	private void processPageExtensions(String uri, Document document, Collection<HtmlPageExtender> exts) throws IOException {
 		
 
 		try(var timed = timed("HtmlPage.processPageExtensions#processDocumentExtensions(" + uri + ")")) {
 			processDocumentExtensions(document);
+		}
+		
+		if(Objects.nonNull(exts)) {
+			try(var timed = timed("HtmlPage.generateHTMLDocument#extender.generateContent(" + uri + ")")) {
+				for(HtmlPageExtender ext : exts) {
+					try(var timed2 = timed(ext.getClass().getName())) {
+						ext.afterDocumentExtensions(document, this);
+					}
+				}
+			}
 		}
 
 		try(var timed = timed("HtmlPage.processPageExtensions#resolveScript(" + uri + ")")) {
@@ -213,6 +225,16 @@ public abstract class HtmlPage implements Page {
 
 		try(var timed = timed("HtmlPage.processPageExtensions#processPageProcessors(" + uri + ")")) {
 			processPageProcessors(document);
+		}
+		
+		if(Objects.nonNull(exts)) {
+			try(var timed = timed("HtmlPage.generateHTMLDocument#extender.generateContent(" + uri + ")")) {
+				for(HtmlPageExtender ext : exts) {
+					try(var timed2 = timed(ext.getClass().getName())) {
+						ext.afterPageProcessors(document, this);
+					}
+				}
+			}
 		}
 	}
 
@@ -361,7 +383,7 @@ public abstract class HtmlPage implements Page {
 				}
 			}
 			injectFeedback(doc, request);
-			processPageExtensions(uri, doc);
+			processPageExtensions(uri, doc, Collections.emptyList());
 			
 			documentComplete(doc);
 			

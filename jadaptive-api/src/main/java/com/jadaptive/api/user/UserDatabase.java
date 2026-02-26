@@ -5,7 +5,10 @@ import java.util.Set;
 
 import org.pf4j.ExtensionPoint;
 
+import com.jadaptive.api.app.J;
 import com.jadaptive.api.template.ObjectTemplate;
+import com.jadaptive.api.templates.TemplateUtils;
+import com.jadaptive.api.tenant.FeatureEnablementService;
 
 public interface UserDatabase extends ExtensionPoint {
 
@@ -54,4 +57,13 @@ public interface UserDatabase extends ExtensionPoint {
 	boolean canChangePassword(User currentUser);
 
 	Date getPasswordExpiry(User user);
+
+	default boolean isEnabled() { 
+		if(J.b(FeatureEnablementService.class).isFeature(TemplateUtils.lookupClassResourceKey(getUserClass()))) {
+			return J.b(FeatureEnablementService.class).isEnabled(TemplateUtils.lookupClassResourceKey(getUserClass()));
+		} else {
+			return true;
+		}
+	}
+
 }

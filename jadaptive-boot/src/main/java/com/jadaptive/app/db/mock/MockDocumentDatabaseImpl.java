@@ -228,4 +228,10 @@ public class MockDocumentDatabaseImpl implements DocumentDatabase {
 		return null;
 	}
 
+	@Override
+	public Long countDistinct(String table, String database, String group, SearchField... fields) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

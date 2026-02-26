@@ -465,5 +465,9 @@ public class SessionUtils {
 	public boolean isLoggedOn() {
 		return Session.getOr().isPresent();
 	}
+	
+	public boolean isLoggedOn(HttpSession session) {
+		return Session.getOr(session).isPresent();
+	}
 
 }

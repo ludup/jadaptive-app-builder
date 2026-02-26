@@ -68,4 +68,6 @@ public interface TenantAwareObjectDatabase<T extends UUIDDocument> {
 
 	Double sumDoubleValues(Class<T> resourceClass, String groupBy, SearchField... fields);
 
+	long countDistinct(Class<T> resourceClass, String group, SearchField... fields);
+
 }

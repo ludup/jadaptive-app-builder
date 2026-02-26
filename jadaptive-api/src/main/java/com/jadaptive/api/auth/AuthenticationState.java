@@ -55,6 +55,8 @@ public class AuthenticationState {
 	private boolean noPolicyProtection = false;
 	
 	private AuthenticationPolicy policy;
+
+	private boolean hasPassedSecretAuthentication = false;
 	
 	public AuthenticationState(AuthenticationPolicy policy) {
 		this.policy = policy;
@@ -421,5 +423,13 @@ public class AuthenticationState {
 
 	public void setNoPolicyProtection(boolean noPolicyProtection) {
 		this.noPolicyProtection = noPolicyProtection;
+	}
+
+	public boolean hasPassedSecretAuthentication() {
+		return hasPassedSecretAuthentication;
+	}
+
+	public void setHasPasswordSecretAuthentication(boolean hasPassedSecretAuthentication) {
+		this.hasPassedSecretAuthentication = hasPassedSecretAuthentication;
 	}
 }
