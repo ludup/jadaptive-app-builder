@@ -185,40 +185,40 @@ public class SSHDServiceImpl extends SshServer implements SSHDService, StartupAw
 						new SSHDInterface<>(factory, iface));
 			}
 			
-			EventServiceImplementation.getInstance().addListener((evt) -> {
-				
-				SshConnection con = (SshConnection)evt.getAttribute(EventCodes.ATTRIBUTE_CONNECTION);
-				switch(evt.getId()) {
-				
-				case EventCodes.EVENT_AUTHENTICATION_COMPLETE:
-				{
-					Tenant tenant = (Tenant) con.getProperty(SSHDService.TENANT);
-					User user = (User) con.getProperty(SSHDService.USER);
-					if(Objects.nonNull(tenant)) {
-						tenantService.executeAs(tenant, ()->{
-							con.setProperty(SSHDService.SESSION, sessionService.createSession(tenant, user, 
-									con.getRemoteIPAddress(), con.getRemoteIdentification(), SessionType.SSH, null));
-						});
-					}
-					
-					break;
-				}
-				case EventCodes.EVENT_DISCONNECTED:
-				{
-					Tenant tenant = (Tenant) con.getProperty(SSHDService.TENANT);
-					Session session = (Session) con.getProperty(SSHDService.SESSION);
-					
-					if(Objects.nonNull(tenant)) {
-						tenantService.executeAs(tenant, ()->{
-							sessionService.closeSession(session);
-						});
-					}
-					break;
-				}
-				default:
-					break;
-				}
-			});
+//			EventServiceImplementation.getInstance().addListener((evt) -> {
+//				
+//				SshConnection con = (SshConnection)evt.getAttribute(EventCodes.ATTRIBUTE_CONNECTION);
+//				switch(evt.getId()) {
+//				
+//				case EventCodes.EVENT_AUTHENTICATION_COMPLETE:
+//				{
+//					Tenant tenant = (Tenant) con.getProperty(SSHDService.TENANT);
+//					User user = (User) con.getProperty(SSHDService.USER);
+//					if(Objects.nonNull(tenant)) {
+//						tenantService.executeAs(tenant, ()->{
+//							con.setProperty(SSHDService.SESSION, sessionService.createSession(tenant, user, 
+//									con.getRemoteIPAddress(), con.getRemoteIdentification(), SessionType.SSH, null));
+//						});
+//					}
+//					
+//					break;
+//				}
+//				case EventCodes.EVENT_DISCONNECTED:
+//				{
+//					Tenant tenant = (Tenant) con.getProperty(SSHDService.TENANT);
+//					Session session = (Session) con.getProperty(SSHDService.SESSION);
+//					
+//					if(Objects.nonNull(tenant)) {
+//						tenantService.executeAs(tenant, ()->{
+//							sessionService.closeSession(session);
+//						});
+//					}
+//					break;
+//				}
+//				default:
+//					break;
+//				}
+//			});
 		} catch (IOException e) {
 			LOG.error("SSHD service failed to start", e);
 		}
