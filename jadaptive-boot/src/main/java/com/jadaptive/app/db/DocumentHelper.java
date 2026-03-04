@@ -524,11 +524,12 @@ public class DocumentHelper {
 	
 				break;
 			case OBJECT_REFERENCE:
+			case AUTHENTICATION_PROVIDER:
 			{
 				String[] names = parameters.get(String.format("%sText", formVariable));
 				for(int i=0;i<values.length;i++) {
 					Document doc = new Document();
-					convertObjectToDocument(generateReference(values[i], names[i]), doc);
+					convertObjectToDocument(generateReference(values[i], names != null ? names[i] : values[i]), doc);
 					result.add(doc);
 				}
 				break;
@@ -985,6 +986,7 @@ public class DocumentHelper {
 		case TIME:
 		case COUNTRY:
 		case ISO_CURRENCY:
+		case AUTHENTICATION_PROVIDER:
 		{
 			return DocumentValidator.validate(def,value);
 		}

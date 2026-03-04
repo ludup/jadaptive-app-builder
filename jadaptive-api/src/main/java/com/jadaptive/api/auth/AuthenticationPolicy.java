@@ -45,6 +45,9 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 	public static final String RESOURCE_KEY = "authenticationPolicy";
 	public static final String FEATURE_NAME = "Authentication Policies";
 	
+	private static final String IGNORE_PASSWORD_MODULE = "ignoreUUIDs=" + AuthenticationService.PASSWORD_MODULE_UUID;
+	
+	
 	@Override
 	public String getResourceKey() {
 		return RESOURCE_KEY;
@@ -54,14 +57,14 @@ public abstract class AuthenticationPolicy extends AssignableUUIDEntity implemen
 	@Validator(type = ValidationType.REQUIRED)
 	private String name;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = UUIDReference.RESOURCE_KEY, view = "factors", weight = 0, meta = "url=/app/api/authentication/providers", options = FieldOptions.DISABLE_REFERENCE_VALIDATION)
+	@ObjectField(type = FieldType.AUTHENTICATION_PROVIDER, references = UUIDReference.RESOURCE_KEY, view = "factors", weight = 0, meta = IGNORE_PASSWORD_MODULE)
 	private Collection<UUIDReference> requiredAuthenticators = new ArrayList<>();
 	
 	@ObjectField(type = FieldType.INTEGER, view = "optional", weight = 0)
 	@Validator(type = ValidationType.RANGE, value = "0-" + Integer.MAX_VALUE)
 	private Integer optionalRequired = 0;
 	
-	@ObjectField(type = FieldType.OBJECT_REFERENCE, references = UUIDReference.RESOURCE_KEY, view = "optional", weight = 10, meta = "url=/app/api/authentication/providers", options = FieldOptions.DISABLE_REFERENCE_VALIDATION)
+	@ObjectField(type = FieldType.AUTHENTICATION_PROVIDER, references = UUIDReference.RESOURCE_KEY, view = "optional", weight = 10, meta = IGNORE_PASSWORD_MODULE)
 	private Collection<UUIDReference> optionalAuthenticators = new ArrayList<>();
 
 	@ObjectField(type = FieldType.INTEGER, defaultValue = "0")	

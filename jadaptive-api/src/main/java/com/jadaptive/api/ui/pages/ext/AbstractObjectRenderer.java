@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.SecurityPropertyService;
 import com.jadaptive.api.app.SecurityScope;
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.countries.Country;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.db.ClassLoaderService;
@@ -36,6 +37,7 @@ import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.entity.ObjectService;
 import com.jadaptive.api.i18n.I18nService;
 import com.jadaptive.api.permissions.PermissionService;
+import com.jadaptive.api.repository.UUIDReference;
 import com.jadaptive.api.servlet.Request;
 import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.SessionUtils;
@@ -90,6 +92,7 @@ import com.jadaptive.api.ui.renderers.form.TextEditorInput;
 import com.jadaptive.api.ui.renderers.form.TextFormInput;
 import com.jadaptive.api.ui.renderers.form.TimeFormInput;
 import com.jadaptive.api.ui.renderers.form.TimestampFormInput;
+import com.jadaptive.utils.ObjectUtils;
 import com.jadaptive.utils.Utils;
 
 public abstract class AbstractObjectRenderer extends AbstractPageExtension {
@@ -128,6 +131,9 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	
 	@Autowired
 	private TenantService tenantService; 
+	
+	@Autowired
+	private AuthenticationService authenticationService;
 
 	protected ThreadLocal<Document> currentDocument = new ThreadLocal<>();
 	protected ThreadLocal<ObjectTemplate> currentTemplate = new ThreadLocal<>();
@@ -815,11 +821,24 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 		}
 		case PASSWORD:
 			break;
+		case AUTHENTICATION_PROVIDER:
+			
+			List<NamePairValue> providers = new ArrayList<>();
+			
+			authenticationService.getAuthenticationModules().forEach(m -> {
+				providers.add(new NamePairValue(m.getUuid(), m.getName()));
+			});
+
+			new OptionsFormInput(fieldView).renderInput(element, 
+					ObjectUtils.toNamePairValueCollection(obj.getObjectCollection(field.getResourceKey())),
+					providers,
+					field.getMetaValue("ignoreUUIDs", "").split(","));
+			break;
 		case OPTIONS:
 			
 			new OptionsFormInput(fieldView).renderInput(element, 
-					obj.getObjectCollection(field.getResourceKey()),
-					objectService.list(field.getValidationValue(ValidationType.RESOURCE_KEY)),
+					ObjectUtils.toNamePairValueCollection(obj.getObjectCollection(field.getResourceKey())),
+					ObjectUtils.toNamePairValueCollection(objectService.list(field.getValidationValue(ValidationType.RESOURCE_KEY))),
 					field.getMetaValue("ignoreUUIDs", "").split(","));
 			
 			break;
@@ -956,6 +975,24 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			}
 			for(Currency currency : Currency.getAvailableCurrencies()) {
 				dropdown.addInputValue(currency.getCurrencyCode(), currency.getCurrencyCode());
+			}
+			String code = getFieldValue(fieldView, obj);
+			if(StringUtils.isNotBlank(code)) {
+				dropdown.setSelectedValue(code, code);
+			}
+			break; 
+		}
+		case AUTHENTICATION_PROVIDER:
+		{
+			DropdownFormInput dropdown = new DropdownFormInput(fieldView);
+			dropdown.renderInput(element, "", view == FieldView.READ);
+			if(!decorate) {
+				dropdown.disableDecoration();
+			}
+			for(UUIDReference ref : authenticationService.getAuthenticationModules()) {
+				if(!fieldView.getField().getMetaValue("ignoreUUIDs", "").contains(ref.getUuid())) {
+					dropdown.addInputValue(ref.getUuid(), ref.getName());
+				}
 			}
 			String code = getFieldValue(fieldView, obj);
 			if(StringUtils.isNotBlank(code)) {

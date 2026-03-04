@@ -7,7 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import com.jadaptive.api.app.App;
 import com.jadaptive.api.app.ApplicationServiceImpl;
+import com.jadaptive.api.auth.AuthenticationService;
 import com.jadaptive.api.countries.InternationalService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectService;
@@ -165,6 +167,34 @@ public class DefaultWizardSection extends WizardSection {
 					}
 				}
 				break;
+			case AUTHENTICATION_PROVIDER:
+				if(field.getCollection()) {
+					Collection<AbstractObject> values = object.getObjectCollection(field.getResourceKey());
+					
+					row.appendChild(new Element("div")
+							.attr("id", "summary-field-" + field.getResourceKey())
+							.addClass("col-3")
+							.addClass("summary-row-" + field.getResourceKey())
+							.appendChild(new Element("span")
+											.attr("jad:bundle", template.getBundle())
+											.attr("jad:i18n", String.format("%s.name", field.getResourceKey()))))
+						.appendChild(new Element("div")
+							.attr("id", "summary-values-" + field.getResourceKey())
+							.addClass("col-9")
+							.addClass("summary-row-" + field.getResourceKey())
+							.appendChild(new Element("span")
+									.appendChild(new Element("strong").attr("id", "summary-value-" + field.getResourceKey())
+									.text(createAuthenticatorCSVString(values, field)))));
+				} else {
+					
+					AbstractObject obj = object.getChild(field);
+					if(Objects.nonNull(obj)) {
+						renderObject(obj, 
+								ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(obj.getResourceKey()), 
+								row, renderBlankValues);
+					}
+				}
+				break;
 			case COUNTRY:
 
 				row.appendChild(new Element("div")
@@ -224,6 +254,18 @@ public class DefaultWizardSection extends WizardSection {
 				buf.append(", ");
 			}
 			buf.append(value.getValue("name"));
+		}
+		return buf.toString();
+	}
+	
+	protected String createAuthenticatorCSVString(Collection<AbstractObject> values, FieldTemplate field) {
+		
+		StringBuffer buf = new StringBuffer();
+		for(AbstractObject value : values) {
+			if(buf.length() > 0) {
+				buf.append(", ");
+			}
+			buf.append(App.bean(AuthenticationService.class).getAuthenticationModuleByUUID(value.getUuid()).getName());
 		}
 		return buf.toString();
 	}

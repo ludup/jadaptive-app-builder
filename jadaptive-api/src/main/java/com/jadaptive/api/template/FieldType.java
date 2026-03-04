@@ -25,7 +25,8 @@ public enum FieldType {
 	TEMPLATE_REFERENCE, 
 	ISO_CURRENCY,
 	AUTO,
-	HTML;
+	HTML,
+	AUTHENTICATION_PROVIDER;
 	
 	ValidationType[] options;
 	boolean canDefault = false;

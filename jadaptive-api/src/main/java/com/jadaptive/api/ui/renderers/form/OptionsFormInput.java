@@ -2,13 +2,14 @@ package com.jadaptive.api.ui.renderers.form;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 import java.util.List;
 
 import org.jsoup.nodes.Element;
 
-import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.template.TemplateViewField;
 import com.jadaptive.api.ui.Html;
+import com.jadaptive.api.ui.NamePairValue;
 
 public class OptionsFormInput {
 
@@ -18,7 +19,7 @@ public class OptionsFormInput {
 		this.field = field;
 	}
 
-	public void renderInput(Element rootElement, Collection<AbstractObject> values, Iterable<AbstractObject> options, String... ignore) {
+	public void renderInput(Element rootElement, Collection<NamePairValue> values, Iterable<NamePairValue> options, String... ignore) {
 		
 		List<String> ignoreValues = Arrays.asList(ignore);
 		
@@ -27,10 +28,12 @@ public class OptionsFormInput {
 				.attr("id", field.getFormVariable())
 				.addClass("row"));
 		
+		Set<String> valueIds = values.stream().map(NamePairValue::getName).collect(java.util.stream.Collectors.toSet());
+		
 		optionsElement.appendChild(Html.div("col-12 mb-3")
 				.appendChild(Html.i18n(field.getBundle(), String.format("%s.name", field.getResourceKey()))));
-		for(AbstractObject option : options) {
-			if(ignoreValues.contains(option.getUuid())) {
+		for(NamePairValue option : options) {
+			if(ignoreValues.contains(option.getName())) {
 				continue;
 			}
 			optionsElement.appendChild(new Element("div")
@@ -39,13 +42,13 @@ public class OptionsFormInput {
 					.attr("id", field.getFormVariable() + "_input")
 					.attr("name", field.getFormVariable())
 					.attr("type", "checkbox")
-					.val(option.getUuid()))
+					.val(option.getName()))
 						.appendChild(new Element("label")
 								.attr("for", field.getFormVariable() + "_input")
 								.addClass("form-label ms-2")
-								.text((String)option.getValue("name"))));
+								.text((String)option.getValue())));
 		
-			if(values.contains(option)) {
+			if(valueIds.contains(option.getName())) {
 				input.attr("checked", "checked");
 			}
 		}
