@@ -2,6 +2,31 @@
 
 This framework stores entities in MongoDB with annotated POJOs that drive validation, storage, and auto-generated UI. Follow these rules when adding or modifying entities, fields, and views.
 
+## Product implementation (one per app)
+
+- Purpose: `Product` identifies the running product for metadata, licensing flags, branding, and PAYG toggles. Only one `Product` bean should exist at runtime; `ProductServiceImpl` pulls the first `Product` bean from the PF4J/Spring context and falls back to a default no-op product if none is registered ([ProductServiceImpl](jadaptive-app-builder/jadaptive-boot/src/main/java/com/jadaptive/app/product/ProductServiceImpl.java#L20-L113)).
+- Defaults: see [Product defaults](jadaptive-app-builder/jadaptive-api/src/main/java/com/jadaptive/api/product/Product.java#L8-L60). Override anything that differs from the generic "Jadaptive App Builder" defaults. Key flags: `requiresRegistration()` defaults true; `isTenantLicensing()` false; `isUserLicensing()` true; `isRevenueGenerating()` true; `supportsPAYG()` false; `getProductId()` defaults to `ProductId.FRAMEWORK`.
+- Mandatory overrides for a real product: `getName()`, `getProductCode()` (short stable code), `getProductId()` (pick from `ProductService.ProductId`—add a new enum entry there for new products), and usually `getVendor()` / `getPoweredBy()` / `getVersion()` (often `ApplicationVersion.getVersion()`). Keep `getProductCode()` and `ProductId` unique to the product.
+- Registration: annotate the implementation with `@Extension` (PF4J) in the plugin module so the host sees it. There must be exactly one `Product` implementation loaded; remove/disable extras to avoid ambiguous branding.
+- Branding assets: `getLogoResource()` and `getFaviconResource()` return classpath resources for PNG/SVG/ICO. `ProductServiceImpl.getLogoResource()` first looks for a `ProductLogoSource` bean and base64-encodes its result; otherwise it uses `ApplicationProperties` overrides `app.logo` / `app.favicon` before falling back to the product defaults ([logo resolution](jadaptive-app-builder/jadaptive-boot/src/main/java/com/jadaptive/app/product/ProductServiceImpl.java#L42-L59)). Implement `ProductLogoSource#getProductLogo()` to return the logo path when you want custom logos without changing `ApplicationProperties`.
+- Configuration overrides: operators can override `getName()`, `getPoweredBy()`, `getProductCode()`, `getVendor()`, `getLogoResource()`, `getFaviconResource()` via `ApplicationProperties` keys `app.name`, `app.power`, `app.code`, `app.vendor`, `app.logo`, `app.favicon` ([property lookup](jadaptive-app-builder/jadaptive-boot/src/main/java/com/jadaptive/app/product/ProductServiceImpl.java#L62-L98)). Ensure your defaults are sensible when these keys are absent.
+- Licensing flags: set `isTenantLicensing()` true for multi-tenant licensed deployments; set `isUserLicensing()` (defaults true) to indicate per-user licensing applies; set `isRevenueGenerating()` false for non-commercial/bundled products (e.g., free companion apps); set `supportsPAYG()` true only when PAYG billing is available for the product.
+- Example minimal implementation:
+
+```java
+@Extension
+public class MyProduct implements Product, ProductLogoSource {
+  public String getName() { return "My Product"; }
+  public String getProductCode() { return "MYPROD"; }
+  public ProductId getProductId() { return ProductId.SSH_PROXY_ONPREM; }
+  public String getVendor() { return "Acme Ltd"; }
+  public String getPoweredBy() { return "Powered by Acme"; }
+  public String getLogoResource() { return "/app/content/images/myprod-logo.png"; }
+  public String getFaviconResource() { return "/app/content/images/myprod-favicon.png"; }
+  public String getProductLogo() { return getLogoResource(); }
+}
+```
+
 ## Core entity annotations
 
 - `@ObjectDefinition`: Defines an entity. Types: COLLECTION (default, multi), SINGLETON (one per tenant), EMBEDDED (inline, not stored separately). Scopes: GLOBAL (default), ASSIGNED (can be linked to users/roles), PERSONAL (owned per user). `resourceKey` is the template/collection name; inherited classes can override but the topmost parent’s key determines the actual collection.
