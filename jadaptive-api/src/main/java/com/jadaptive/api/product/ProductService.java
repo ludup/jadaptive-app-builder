@@ -17,7 +17,8 @@ public interface ProductService {
 		GABBLE_CLOUD,
 		SSH_TEAM_CLOUD,
 		SUPPORT_CALLBACK,
-		NODAL_CLOUD
+		NODAL_CLOUD, 
+		CHANGELOG_ARCHITECT
 	}
 	
 	ProductId getProductId(); 

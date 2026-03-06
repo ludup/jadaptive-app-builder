@@ -55,6 +55,26 @@ public class MyProduct implements Product, ProductLogoSource {
 - `view` on fields places them into tabs/sections; add `<view>.name` in `src/main/resources/i18n/<template>.properties` when using custom views.
 - For each field add i18n entries `<field>.name` and `<field>.desc` in `src/main/resources/i18n/<template>.properties`.
 
+## Spring Autowiring
+
+The plugin system allows for flexible dependency management. In order for a plugin to utilise components and services in another plugin it must declare a 'provided' scope dependency on that plugin in its `pom.xml` and add the plugin id to the <plugin.dependencies> section of the `pom.xml` <properties>. 
+
+Once a plugin dependency has been added, the PF4J/Spring context will be aware of the relationship and allow for Spring's `@Autowired` annotation to resolve dependencies across plugins. However, due to limitations of the Spring context
+architecture, you can only use `@Autowired` on the FIRST plugin in the list of 
+<plugin.dependencies>. For example, with the configuration <plugin.dependencies>plugin-a,plugin-b,plugin-c</plugin.dependencies> declared in plugin-z only plugin-a can be autowired into plugin-z. To autowire components and services fro plugin-b or plugin-c, you MUST use the `@AutowiredExtension` annotation instead of `@Autowired`. This annotation is designed to work around the Spring context limitations and allows you to inject dependencies from any plugin in the list of <plugin.dependencies>.
+
+## Dependencies
+
+The plugin system allows for sandboxed dependency management, with dependencies declared in each plugin's `pom.xml` and isolated from the host and other plugins. However, there are some exceptions, any dependencies of jadaptive-boot and jadaptive-api are effectively shared across all plugins and the host application. This means that if you add a dependency to jadaptive-boot or jadaptive-api, it will be available to all plugins without needing to declare it in their `pom.xml`. 
+
+When adding dependencies to your plugin, you should generally prefer to declare them in your plugin's `pom.xml`. If you need to use a dependency that is already included in jadaptive-boot or jadaptive-api, you can simply use it in your plugin without declaring it again.
+
+You need to be careful with transitive dependencies, if you add a dependency to your plugin that has its own dependencies, those transitive dependencies will also be included in your plugin's classpath. This can lead to conflicts if different plugins within your plugins dependencies and/or jadpative-api/jadaptive-boot include different versions of the same transitive dependency. 
+
+If a dependency exists in both the transitive dependencies of your plugin and jadaptive-boot/jadaptive-api, you MUST use exclusions and use the version declared in jadaptive-boot/jadaptive-api to ensure that there is only one version of the dependency in the classpath.
+
+Common examples where problems can arise include logging frameworks (e.g., Log4j, SLF4J) and JSON libraries (e.g., Jackson). If you find that you need to use a different version of a common library than the one included in jadaptive-boot/jadaptive-api, you should first check if the version in jadaptive-boot/jadaptive-api is compatible with your plugin. 
+
 ## Templates and i18n
 
 - Every template needs `<template>.name` (singular) and `<template>.names` (plural) i18n entries in `src/main/resources/i18n/<template>.properties`.
