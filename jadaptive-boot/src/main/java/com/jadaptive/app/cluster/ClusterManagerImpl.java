@@ -384,8 +384,9 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 				 * event listeners for synchronous events
 				 */
 				/* Send event */
-				LOG.info("Sending event {} to cluster as {} @ {}", 
+				LOG.info("Sending event {} [{}] to cluster as {} @ {}", 
 						sysevt.getResourceKey(),
+						sysevt.getState(),
 						fuuuid,
 						tenant);
 				var cevt = new ClusterEvent(
