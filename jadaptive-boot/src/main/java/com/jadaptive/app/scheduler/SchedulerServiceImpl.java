@@ -439,18 +439,23 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 
 			var odiv = Html.div();
 			
-			switch(tsk.getSchedule()) {
+			switch (tsk.getSchedule()) {
 			case TRIGGER:
-				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.trigger", info.spec().trigger().toString()));
+				odiv.appendChild(
+						Html.i18n(SchedulerTask.RESOURCE_KEY, "details.trigger", info.spec().trigger().toString()));
 				break;
 			case NOW:
 				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.now"));
 				break;
 			case FIXED_DELAY:
-				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedDelay", formatDisplayDuration(Duration.ofMillis(info.spec().initialDelay())), formatDisplayDuration(Duration.ofMillis(info.spec().period()))));
+				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedDelay",
+						formatDisplayDuration(Duration.of(info.spec().initialDelay(), info.spec().unit().toChronoUnit())),
+						formatDisplayDuration(Duration.of(info.spec().period(), info.spec().unit().toChronoUnit()))));
 				break;
 			case FIXED_RATE:
-				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedDelay", formatDisplayDuration(Duration.ofMillis(info.spec().initialDelay())), formatDisplayDuration(Duration.ofMillis(info.spec().period()))));
+				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedRate",
+						formatDisplayDuration(Duration.of(info.spec().initialDelay(), info.spec().unit().toChronoUnit())),
+						formatDisplayDuration(Duration.of(info.spec().period(), info.spec().unit().toChronoUnit()))));
 				break;
 			case ONE_SHOT:
 				break;

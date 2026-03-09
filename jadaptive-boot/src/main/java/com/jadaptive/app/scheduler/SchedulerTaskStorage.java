@@ -26,6 +26,7 @@ import com.sshtools.gardensched.ClusterID;
 import com.sshtools.gardensched.DistributedCallable;
 import com.sshtools.gardensched.DistributedRunnable;
 import com.sshtools.gardensched.DistributedTask;
+import com.sshtools.gardensched.PayloadFilter;
 import com.sshtools.gardensched.PayloadSerializer;
 import com.sshtools.gardensched.SerializableCallable;
 import com.sshtools.gardensched.SerializableRunnable;
@@ -47,6 +48,9 @@ public class SchedulerTaskStorage implements TaskStore {
 	
 	@Autowired
 	private PayloadSerializer payloadSerializer;
+	
+	@Autowired
+	private PayloadFilter payloadFilter;
 
 	@Override
 	public void store(TaskEntry entry) {
@@ -133,7 +137,10 @@ public class SchedulerTaskStorage implements TaskStore {
 	private TaskEntry schedulerTaskToEntry(SchedulerTask tsk) {
 		try {
 			var job = payloadSerializer.deserializeFromString(Serializable.class, tsk.getTask());
+			job = payloadFilter.filter(job);
+			
 			var trigger = (TaskTrigger)payloadSerializer.deserializeFromString(TaskTrigger.class, tsk.getTrigger());
+			
 			var spec = new TaskSpec(tsk.getSubmitted().toInstant(), tsk.getSchedule(), tsk.getInitialDelay(), tsk.getPeriod(), tsk.getTimeUnit(), trigger);
 			
 			/* TODO is a string list (name=value) our best choice here (Map appears not supported by entity system? check with ludup */

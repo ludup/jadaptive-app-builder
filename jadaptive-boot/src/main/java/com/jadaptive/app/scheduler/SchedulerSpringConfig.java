@@ -102,14 +102,17 @@ public class SchedulerSpringConfig implements TaskErrorHandler, TaskSuccessHandl
 		var sm = new SimpleModule();
 		sm.addSerializer(CronTrigger.class, new CronTriggerSerializer());
 		sm.addSerializer(PeriodicTrigger.class, new PeriodicTriggerSerializer());
+
+		var ptvBldr = BasicPolymorphicTypeValidator.builder();
 		
 		App.beans(SchedulerSerializationProvider.class).forEach((b) -> {
 			LOG.info("Registering custom serializer for type {}", b.getType().getName());
 			sm.addSerializer(b.getType(), b.getSerializer());
 			sm.addDeserializer(b.getType(), b.getDeserializer());
+			ptvBldr.allowIfSubType(b.getType());
 		});
 
-		var ptv = BasicPolymorphicTypeValidator.builder().
+		var ptv = ptvBldr.
 				allowIfSubType(TriggerAdapter.class).
 				allowIfSubType(TenantJobRunner.class).
 				allowIfSubType(CronTrigger.class).
