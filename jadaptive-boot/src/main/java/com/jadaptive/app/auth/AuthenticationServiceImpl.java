@@ -600,9 +600,11 @@ public class AuthenticationServiceImpl extends AuthenticatedService implements A
 		for(UUIDReference ref : modules) {
 			AuthenticationProvider provider = authenticationProvidersByUUID.get(ref.getUuid());
 			if(provider == null) {
-				throw new IllegalStateException("Missing authentication provider for uuid " + ref.getUuid());
+				log.warn("Missing authentication provider for optional module with uuid {}", ref.getUuid());
 			}
-			state.addOptionalAuthentication(getAuthenticationPage(provider.getAuthenticatorKey()), ref);
+			else {
+				state.addOptionalAuthentication(getAuthenticationPage(provider.getAuthenticatorKey()), ref);
+			}
 		}
 		state.setOptionalCompleted(0);
 		state.setOptionalRequired(Math.min(i, state.getOptionalAuthentications().size()));
