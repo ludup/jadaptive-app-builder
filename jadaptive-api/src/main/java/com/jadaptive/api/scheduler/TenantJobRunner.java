@@ -1,4 +1,4 @@
-package com.jadaptive.app.scheduler;
+package com.jadaptive.api.scheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.jobs.TaskRunnerContext;
 import com.jadaptive.api.permissions.PermissionService;
-import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.user.User;

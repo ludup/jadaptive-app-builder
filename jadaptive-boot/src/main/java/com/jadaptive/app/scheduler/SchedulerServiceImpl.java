@@ -12,6 +12,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,6 +43,7 @@ import com.jadaptive.api.scheduler.SchedulerService;
 import com.jadaptive.api.scheduler.SchedulerTask;
 import com.jadaptive.api.scheduler.SchedulerTask.SchedulerTaskStatus;
 import com.jadaptive.api.scheduler.SchedulerTaskCompleteEvent;
+import com.jadaptive.api.scheduler.TenantJobRunner;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.scheduler.TenantTaskConfig;
 import com.jadaptive.api.template.ObjectTemplate;
@@ -554,22 +556,32 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 
 	@Override
 	public boolean has(String path, Serializable key) {
-		return executor.has(path, key);
+		return executor.objectStore().has(path, key);
 	}
 
 	@Override
-	public Serializable get(String path, Serializable key) {
-		return executor.get(path, key);
+	public <T extends Serializable> T get(String path, Serializable key) {
+		return executor.objectStore().get(path, key);
 	}
 
 	@Override
 	public void put(String path, Serializable key, Serializable value) {
-		executor.put(path, key, value);
+		executor.objectStore().put(path, key, value);
+	}
+
+	@Override
+	public <T extends Serializable> Set<T> keySet(String path) {
+		return executor.objectStore().keySet(path);
+	}
+
+	@Override
+	public int size(String path) {
+		return executor.objectStore().size(path);
 	}
 
 	@Override
 	public boolean remove(String path, Serializable key) {
-		return executor.remove(path, key);
+		return executor.objectStore().remove(path, key);
 	}
 
 	@Override

@@ -37,6 +37,34 @@ public class CacheServiceImpl extends AuthenticatedService implements CacheServi
 	}
 
 	@Override
+	public void deleteCache(String name) {
+		var cname = generateName(name);
+		synchronized (caches) {
+			if(caches.remove(cname) != null) {
+				LOG.info("Deleted cache {} [`{}`]. There are now {} caches.", name, cname, caches.size());
+			}
+			else {
+				LOG.warn("Cache {} [`{}`] does not exist. No cache deleted.", name, cname);
+			}
+		}
+		
+	}
+
+	@Override
+	public void deleteClusteredCache(String name) {
+		var cname = generateName(name);
+		synchronized (clusteredCaches) {
+			if(clusteredCaches.remove(cname) != null) {
+				LOG.info("Deleted clustered cache {} [`{}`]. There are now {} caches.", name, cname, clusteredCaches.size());
+			}
+			else {
+				LOG.warn("Clustered cache {} [`{}`] does not exist. No cache deleted.", name, cname);
+			}
+		}
+		
+	}
+
+	@Override
 	public <K,V> Map<K, V> getCacheOrCreate(String name,Class<K> key, Class<V> value,long expiryTime){
 		return cache(name, key, value, expiryTime);
 	}
@@ -102,9 +130,21 @@ public class CacheServiceImpl extends AuthenticatedService implements CacheServi
 				cache = new AbstractMap<K, V>() {
 					@Override
 					public Set<Entry<K, V>> entrySet() {
-						throw new UnsupportedOperationException();
+						return keySet().stream()
+							.map(k -> new SimpleEntry<>(k, get(k)))
+							.collect(java.util.stream.Collectors.toSet());
 					}
 	
+					@Override
+					public Set<K> keySet() {
+						return (Set<K>) executor.keySet(cname);
+					}
+
+					@Override
+					public int size() {
+						return executor.size(cname);
+					}
+
 					@Override
 					public boolean containsKey(Object key) {
 						return get(key) != null;

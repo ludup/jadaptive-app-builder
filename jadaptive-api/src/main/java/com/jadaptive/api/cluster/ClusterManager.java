@@ -11,7 +11,7 @@ import com.jadaptive.api.template.DynamicColumnService;
 import com.sshtools.gardensched.DistributedScheduledExecutor;
 
 public interface ClusterManager extends Closeable, AbstractUUIDObjectService<ClusterNode>, DynamicColumnService {
-
+	
 	String getServerId();
 
 	Set<ClusterService> getServices();
