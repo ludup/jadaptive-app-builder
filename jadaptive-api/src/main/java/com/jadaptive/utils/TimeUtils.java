@@ -1,8 +1,17 @@
-package com.jadaptive.app.scheduler;
+package com.jadaptive.utils;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
-public class Jobs {
+public final class TimeUtils {
+
+	public static Duration periodToDuration(long period, TimeUnit unit) {
+		return Duration.of(period, unit.toChronoUnit());
+	}
+
+	public final static String formatPeriod(long period, TimeUnit unit) {
+		return formatDisplayDuration(periodToDuration(period, unit));
+	}
 
 	public final static String formatDisplayDuration(Duration duration) {
 		var ms = duration.toMillis();

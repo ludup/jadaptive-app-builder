@@ -1,6 +1,7 @@
 package com.jadaptive.app.scheduler;
 
-import static com.jadaptive.app.scheduler.Jobs.formatDisplayDuration;
+import static com.jadaptive.utils.TimeUtils.formatDisplayDuration;
+import static com.jadaptive.utils.TimeUtils.formatPeriod;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -405,7 +406,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 								"displayName.failedAtTaken", 
 								info.lastError().get().getMessage(),
 								endTime,
-								Jobs.formatDisplayDuration(tkn)));
+								formatDisplayDuration(tkn)));
 						}, () -> {
 							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
 								info.lastCompleted().isPresent() 
@@ -424,7 +425,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 						
 						taken.ifPresentOrElse(tkn -> {
 							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
-								"displayName.completedAtTaken", endTime, Jobs.formatDisplayDuration(tkn)));
+								"displayName.completedAtTaken", endTime, formatDisplayDuration(tkn)));
 						}, () -> {
 							errDiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, 
 								"displayName.completedAt", endTime));
@@ -449,13 +450,15 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 				break;
 			case FIXED_DELAY:
 				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedDelay",
-						formatDisplayDuration(Duration.of(info.spec().initialDelay(), info.spec().unit().toChronoUnit())),
-						formatDisplayDuration(Duration.of(info.spec().period(), info.spec().unit().toChronoUnit()))));
+					formatPeriod(info.spec().period(), info.spec().unit()),
+					formatPeriod(info.spec().initialDelay(), info.spec().unit())
+				));
 				break;
 			case FIXED_RATE:
 				odiv.appendChild(Html.i18n(SchedulerTask.RESOURCE_KEY, "details.fixedRate",
-						formatDisplayDuration(Duration.of(info.spec().initialDelay(), info.spec().unit().toChronoUnit())),
-						formatDisplayDuration(Duration.of(info.spec().period(), info.spec().unit().toChronoUnit()))));
+					formatPeriod(info.spec().period(), info.spec().unit()),
+					formatPeriod(info.spec().initialDelay(), info.spec().unit())
+				));
 				break;
 			case ONE_SHOT:
 				break;
@@ -531,7 +534,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 				});
 			});
 		}, () -> {
-			LOG.warn("Task has no classifiers so tenant UUID cannot be determined.");
+			LOG.warn("Task {} [{}] has no classifiers so tenant UUID cannot be determined.", id, SchedulerTaskStorage.toUuid(id));
 		});
 	}
 	
