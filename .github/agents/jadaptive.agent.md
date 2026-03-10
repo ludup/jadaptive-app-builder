@@ -326,7 +326,7 @@ public class ReportTasks extends AuthenticatedController {
 - Extenders: Any `HtmlPageExtender` with `isExtending` true runs `processStart`, `generateContent`, `processEnd` around your page.
 
 ## Caching
-- Obtain local caches `Map<K,V>` from `CacheService.getCacheOrCreate` and `CacheService.clusteredCacheIfExists` methods (underlying cache is based on "Caffein").
+- Obtain local caches `Map<K,V>` from `CacheService.getCacheOrCreate` and `CacheService.clusteredCacheIfExists` methods (underlying cache is based on "Caffeine").
 - Obtain cluster wide shared caches of `Map<K,V>` from `CacheService.clusteredCacheOrCreate` and `CacheService.clusteredCacheIfExists`. The underlying mechanism uses JGroup. Not all `Map` methods are implemented, and some may be implemented inefficiently.
 
 ## Serialization In A Cluster
