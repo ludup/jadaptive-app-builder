@@ -38,6 +38,7 @@ import com.jadaptive.api.entity.ObjectNotFoundException;
 import com.jadaptive.api.events.EventService;
 import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.i18n.I18nService;
+import com.jadaptive.api.scheduler.LocalTenantJobRunner;
 import com.jadaptive.api.scheduler.ScheduledTask;
 import com.jadaptive.api.scheduler.ScheduledTaskConfig;
 import com.jadaptive.api.scheduler.SchedulerService;
@@ -52,9 +53,10 @@ import com.jadaptive.api.tenant.Tenant;
 import com.jadaptive.api.tenant.TenantAware;
 import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.user.User;
-import com.jadaptive.utils.Utils;
 import com.sshtools.gardensched.ClusterID;
 import com.sshtools.gardensched.ConflictResolution;
+import com.sshtools.gardensched.DistributedMachine;
+import com.sshtools.gardensched.DistributedObjectStore;
 import com.sshtools.gardensched.DistributedRunnable;
 import com.sshtools.gardensched.DistributedRunnable.Builder;
 import com.sshtools.gardensched.DistributedScheduledExecutor;
@@ -68,6 +70,7 @@ import com.sshtools.gardensched.TaskCompletionContext;
 import com.sshtools.gardensched.TaskInfo;
 import com.sshtools.gardensched.TaskSpec;
 import com.sshtools.gardensched.TaskStore;
+import com.sshtools.gardensched.ThrowingRunnable;
 import com.sshtools.gardensched.spring.GardenSchedTaskScheduler;
 
 @Service
@@ -77,6 +80,8 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	private static Logger LOG = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 	
 	private DistributedScheduledExecutor executor;	
+	private DistributedMachine machine;
+	private DistributedObjectStore distributedObjectStore;
 	
 	@Autowired
 	private App applicationService; 
@@ -127,9 +132,38 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 		var poolThreads = ApplicationProperties.getValue("ha.poolThreads", Runtime.getRuntime().availableProcessors());
 		LOG.info("Schedule Threads: {}", poolThreads);
 		
-		var bldr = new DistributedScheduledExecutor.Builder().
+		/* First create the DistributedMachine that deals with all the comms 
+		 * for distributed components such as scheduler, events and cache  */
+		var machineBldr = new DistributedMachine.Builder().
 				withPayloadSerializer(taskSerializer).
 				withPayloadFilter(taskFilter).
+				withCloseTimeout(Duration.ofMinutes(ApplicationProperties.getValue("ha.shutdownTimeout", Integer.MAX_VALUE)));
+		
+		var haProps = ApplicationProperties.getValue("ha.props", SchedulerService.JAD_JGROUPS);
+		machineBldr.withJGroupsProps(haProps);
+		LOG.info("JGroups Properties: {}", haProps);
+		
+		var haClusterName = ApplicationProperties.getValue("ha.clusterName", clusterManager.getServerId());
+		machineBldr.withClusterName(haClusterName);
+			LOG.info("Cluster Name: {}", haClusterName);
+		
+		var haGroupName = ApplicationProperties.getValue("ha.groupName", "");
+		if(!haGroupName.equals("")) {
+			machineBldr.withGroupName(haGroupName);
+		}
+		
+		try {
+			machine = machineBldr.build();
+		} catch(RuntimeException re) {
+			throw re;
+		} catch (Exception e) {
+			throw new IllegalStateException("Failed to start distributed scheduler.", e);
+		}
+		
+		/* Now create the distributed scheduler */
+		
+		try {
+			executor = new DistributedScheduledExecutor.Builder(machine).
 				withTaskStore(taskStore).
 				withTaskErrorHandler(this).
 				withTaskSuccessHandler(this).
@@ -137,36 +171,30 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 				withPersistentByDefault().
 				withStartPaused().
                 withAlwaysDistribute().
-				withObjectStore(objectStore).
-				withCloseTimeout(Duration.ofMinutes(ApplicationProperties.getValue("ha.shutdownTimeout", Integer.MAX_VALUE))).
 				withSchedulerThreads(
 					poolThreads
-				);
-		
-		var haProps = ApplicationProperties.getValue("ha.props", SchedulerService.JAD_JGROUPS);
-		bldr.withJGroupsProps(haProps);
-		LOG.info("JGroups Properties: {}", haProps);
-		
-		var haClusterName = ApplicationProperties.getValue("ha.clusterName", clusterManager.getServerId());
-			bldr.withClusterName(haClusterName);
-			LOG.info("Cluster Name: {}", haClusterName);
-		
-		var haGroupName = ApplicationProperties.getValue("ha.groupName", "");
-		if(!haGroupName.equals("")) {
-			bldr.withGroupName(haGroupName);
-		}
-		
-		try {
-			executor = bldr.build();
+				).build();
 		} catch(RuntimeException re) {
 			throw re;
 		} catch (Exception e) {
 			throw new IllegalStateException("Failed to start distributed scheduler.", e);
 		}
 		
+		/* And the spring wrapper around it */
 		taskScheduler = new GardenSchedTaskScheduler(executor);
 		
-		clusterManager.setupCluster(executor);
+		/* Now the shared object store */
+		try {
+			distributedObjectStore = new DistributedObjectStore.Builder(machine, objectStore).
+					build();
+		} catch(RuntimeException re) {
+			throw re;
+		} catch (Exception e) {
+			throw new IllegalStateException("Failed to start distributed scheduler.", e);
+		}
+		
+		/* Notify cluster manager we can continue */
+		clusterManager.setupCluster(machine);
 		
 		initializeTenant(getCurrentTenant(), newSchema);
 	}
@@ -228,16 +256,20 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	}
 	
 	@Override
-	public void runNow(Runnable task) {
-		var tenant = getCurrentTenant();
-		taskScheduler.schedule(DistributedRunnable.local(new TenantJobRunner(tenant, () -> task.run()), tenant.getUuid()), Instant.now());
+	public void runLocallyNow(ThrowingRunnable task) {
+		if(task instanceof TenantTask ttask) {
+			runNow(ttask);
+			return;
+		}
+		else {
+			var tenant = getCurrentTenant();
+			taskScheduler.schedule(new LocalTenantJobRunner(tenant, task), Instant.now());
+		}
 	}
 	
 	@Override
-	public void runAs(User user, Runnable task) {
-		taskScheduler.schedule(DistributedRunnable.local(new TenantJobRunner(getCurrentTenant(), () -> {
-			task.run();
-		},  user)), Instant.now());
+	public void runLocallyAs(User user, ThrowingRunnable task) {
+		taskScheduler.schedule(new LocalTenantJobRunner(getCurrentTenant(), task,  user), Instant.now());
 	}
 	
 	@Override
@@ -317,17 +349,14 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 	}
 
 	@Override
-	public void scheduleIn(Runnable task, Duration duration, User user) {
+	public void scheduleLocallyIn(ThrowingRunnable task, Duration duration, User user) {
 		var tenant = getCurrentTenant();
-		taskScheduler.schedule(DistributedRunnable.local(new TenantJobRunner(tenant, () -> {
-			task.run();
-		}), tenant.getUuid()), Utils.now().toInstant().plus(duration));
-
+		taskScheduler.schedule(new LocalTenantJobRunner(tenant, task), Instant.now().plus(duration));
 	}
 
 	@Override
-	public void scheduleIn(Runnable task, Duration duration) {
-		scheduleIn(task, duration, null);
+	public void scheduleLocallyIn(ThrowingRunnable task, Duration duration) {
+		scheduleLocallyIn(task, duration, null);
 	}
 
 	@Override
@@ -564,32 +593,32 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 
 	@Override
 	public boolean has(String path, Serializable key) {
-		return executor.objectStore().has(path, key);
+		return distributedObjectStore.has(path, key);
 	}
 
 	@Override
 	public <T extends Serializable> T get(String path, Serializable key) {
-		return executor.objectStore().get(path, key);
+		return distributedObjectStore.get(path, key);
 	}
 
 	@Override
 	public void put(String path, Serializable key, Serializable value) {
-		executor.objectStore().put(path, key, value);
+		distributedObjectStore.put(path, key, value);
 	}
 
 	@Override
 	public <T extends Serializable> Set<T> keySet(String path) {
-		return executor.objectStore().keySet(path);
+		return distributedObjectStore.keySet(path);
 	}
 
 	@Override
 	public int size(String path) {
-		return executor.objectStore().size(path);
+		return distributedObjectStore.size(path);
 	}
 
 	@Override
 	public boolean remove(String path, Serializable key) {
-		return executor.objectStore().remove(path, key);
+		return distributedObjectStore.remove(path, key);
 	}
 
 	@Override
@@ -599,7 +628,7 @@ public class SchedulerServiceImpl extends AbstractUUIDObjectServceImpl<Scheduler
 
 	@Override
 	public boolean isLeader() {
-		return executor.leader();
+		return machine.leader();
 	}
 
 	private SchedulerTaskStatus calcStatus(IdentifiableFuture<?> future, TaskInfo info) {

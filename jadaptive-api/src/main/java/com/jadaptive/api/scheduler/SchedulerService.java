@@ -14,6 +14,7 @@ import com.sshtools.gardensched.IdentifiableFuture;
 import com.sshtools.gardensched.ObjectStore;
 import com.sshtools.gardensched.TaskErrorHandler;
 import com.sshtools.gardensched.TaskSuccessHandler;
+import com.sshtools.gardensched.ThrowingRunnable;
 
 public interface SchedulerService extends AbstractUUIDObjectService<SchedulerTask>, DynamicColumnService, TaskSuccessHandler, TaskErrorHandler, ObjectStore {
 
@@ -32,13 +33,13 @@ public interface SchedulerService extends AbstractUUIDObjectService<SchedulerTas
 
 	void schedule(TenantTask task, Date startTime, String taskUUID);
 
-	void runNow(Runnable task);
+	void runLocallyNow(ThrowingRunnable task);
 
-	void runAs(User currentUser, Runnable task);
+	void runLocallyAs(User currentUser, ThrowingRunnable task);
 
-	void scheduleIn(Runnable task, Duration duration, User user);
+	void scheduleLocallyIn(ThrowingRunnable task, Duration duration, User user);
 
-	void scheduleIn(Runnable runnable, Duration ofMinutes);
+	void scheduleLocallyIn(ThrowingRunnable runnable, Duration ofMinutes);
 
 	ScheduledExecutorService getExecutor();
 

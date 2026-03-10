@@ -66,7 +66,8 @@ import com.jadaptive.api.ui.Html;
 import com.jadaptive.api.ui.UriRedirect;
 import com.jadaptive.api.user.User;
 import com.jadaptive.api.user.UserService;
-import com.sshtools.gardensched.DistributedScheduledExecutor;
+import com.sshtools.gardensched.DistributedEvents;
+import com.sshtools.gardensched.DistributedMachine;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -176,11 +177,13 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 	}
 
 	@Override
-	public void setupCluster(DistributedScheduledExecutor executor) {
+	public void setupCluster(DistributedMachine machine) {
 		
-		setupEventsProxy(executor);
+		var distEvents = new DistributedEvents(machine);
+		
+		setupEventsProxy(distEvents, machine);
 			
-		var currentMembers = executor.view().getMembers().stream().map(Address::toString).toList();
+		var currentMembers = machine.view().getMembers().stream().map(Address::toString).toList();
 		for(var node : clusterNodes.list(ClusterNode.class)) {
 			if(ClusterNodeStatus.ONLINE.equals(node.getStatus()) && 
 				!node.getUuid().equals(serverId) && 
@@ -189,7 +192,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 			}
 		}
 		
-		executor.addListener((leftMembers, joinedMembers) -> {
+		machine.addListener((leftMembers, joinedMembers) -> {
 			for(var left : leftMembers) {
 				LOG.info("{} left the cluster", left);
 				try {
@@ -213,7 +216,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		
 		ClusterNode thisNode = getObjectByUUID(serverId);
 		thisNode.setStatus(ClusterNodeStatus.ONLINE);
-		thisNode.setGroupAddress(executor.address().toString());
+		thisNode.setGroupAddress(machine.address().toString());
 		saveOrUpdate(thisNode);
 	}
 	
@@ -343,7 +346,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		return Html.span("");
 	}
 
-	private void setupEventsProxy(DistributedScheduledExecutor executor) {
+	private void setupEventsProxy(DistributedEvents executor, DistributedMachine machine) {
 		eventService.registerListener(evt -> {
 			if(evt instanceof SystemEvent sysevt && BroadcastableEvent.isBroadcastable(sysevt) && !sysevt.isRemote()) {
 				
@@ -402,7 +405,7 @@ public class ClusterManagerImpl extends AbstractUUIDObjectServceImpl<ClusterNode
 		
 		executor.addBroadcastListener((sndr, evt) -> {
 			var cevt = (ClusterEvent)evt;
-			if(!sndr.equals(executor.address())) {
+			if(!sndr.equals(machine.address())) {
 				LOG.info("Received broadcast event {} as tenant {} and user {}", cevt.getEvent().getResourceKey(), cevt.getTenant(), cevt.getUser());
 				
 				/* Re-fire, in context of original tenant and user */

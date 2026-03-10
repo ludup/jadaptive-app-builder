@@ -68,7 +68,7 @@
             <dependency>
                 <groupId>com.sshtools</groupId>
                 <artifactId>garden-sched-lib</artifactId>
-                <version>0.9.2</version>
+                <version>0.9.6</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
@@ -79,7 +79,7 @@
             <dependency>
                 <groupId>com.sshtools</groupId>
                 <artifactId>garden-sched-spring</artifactId>
-                <version>0.9.2</version>
+                <version>0.9.6</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>

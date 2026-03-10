@@ -2,6 +2,8 @@ package com.jadaptive.api.db;
 
 import java.io.Closeable;
 
+import com.sshtools.gardensched.ThrowingRunnable;
+
 public interface TransactionService {
 	
 	@FunctionalInterface
@@ -10,11 +12,6 @@ public interface TransactionService {
 		void close();
 	}
 	
-	@FunctionalInterface
-	public interface ThrowingRunnable {
-		void run() throws Exception;
-	}
-
 	@FunctionalInterface
 	public interface TX {
 		void undoable(ThrowingRunnable rollback);
