@@ -23,7 +23,7 @@ public class ExtensionAutowireHelper {
 			try {
 				field.setAccessible(true);
 				if(Objects.isNull(field.get(bean))) {
-					field.set(bean, findExtension(field.getType(), parentContexts));
+					field.set(bean, findExtension(bean, field.getType(), parentContexts));
 					if(log.isDebugEnabled()) {
 						log.info("Autowired {} Extension on {}", field.getType().getSimpleName(), bean.getClass().getSimpleName());
 					}
@@ -34,7 +34,7 @@ public class ExtensionAutowireHelper {
 		}
 	}
 
-	public static Object findExtension(Class<?> type, List<ApplicationContext> parentContexts) {
+	public static Object findExtension(Object bean, Class<?> type, List<ApplicationContext> parentContexts) {
 		
 		for(ApplicationContext ctx : parentContexts) {
 			try {
@@ -43,7 +43,11 @@ public class ExtensionAutowireHelper {
 			}
 		}
 		
-		throw new IllegalStateException("Cannot find a instance of " + type.getSimpleName() + " within the extensions parent application contexts");
+		throw new IllegalStateException("Cannot find a instance of " 
+				+ type.getSimpleName() 
+				+ " for @AutowiredExtension in " 
+				+ bean.getClass().getSimpleName() 
+				+ " within the extensions parent application contexts");
 	}
 	
 	/**
