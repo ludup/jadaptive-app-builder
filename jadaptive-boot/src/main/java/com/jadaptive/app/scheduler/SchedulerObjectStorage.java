@@ -1,6 +1,7 @@
 package com.jadaptive.app.scheduler;
 
 import java.io.Serializable;
+import java.util.Set;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,25 @@ public class SchedulerObjectStorage implements ObjectStore {
 		);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Serializable get(String path, Serializable key) {
+	public <T extends Serializable> Set<T> keySet(String path) {
+		return (Set<T>) doWithTenant(path, (ppath) ->
+			cachService.getCacheOrCreate(ppath, Serializable.class, Serializable.class).keySet()
+		);
+	}
+
+	@Override
+	public int size(String path) {
 		return doWithTenant(path, (ppath) ->
+			cachService.getCacheOrCreate(ppath, Serializable.class, Serializable.class).size()
+		);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T extends Serializable> T get(String path, Serializable key) {
+		return (T)doWithTenant(path, (ppath) ->
 			cachService.getCacheOrCreate(ppath, Serializable.class, Serializable.class).get(key)
 		);
 	}

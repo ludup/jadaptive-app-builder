@@ -107,8 +107,33 @@ data.addToken("resetUrl", resetUrl);
 messageService.sendMessage(MessageTemplates.PASSWORD_EXPIRING, data, new RecipientHolder(user));
 ```
 
+## Caching
+- Obtain local caches `Map<K,V>` from `CacheService.getCacheOrCreate` and `CacheService.clusteredCacheIfExists` methods (underlying cache is based on "Caffeine").
+- Obtain cluster wide shared caches of `Map<K,V>` from `CacheService.clusteredCacheOrCreate` and `CacheService.clusteredCacheIfExists`. The underlying mechanism uses JGroup. Not all `Map` methods are implemented, and some may be implemented inefficiently.
+
+## Serialization In A Cluster
+- Both cluster wide shared caches and the clustered scheduler need to serialize objects. JSON serialization is used. 
+- All member variables of basic serialized objects must have getters and setters, and cannot be final. 
+- Custom serialization and deserialization can be implemented using Jackson annotations. 
+- For example of non-standard serialization see `OAuth2Request`.
+- Serialization configuration happens in `SchedulerSpringConfig.createObjectMapper()`. Sometimes you will need to add new types here.
+- Plugins can contribute custom serializers by implementing the `SchedulerSerializationProvider` interface. For example see `IpAddressSerialization` in the Nodal VPN project.
+
 ## Scheduled jobs (@TaskConfig, @ScheduledTaskConfig, @TenantTaskConfig)
 
+- Whether the server is clustered or not does not matter, the scheduler treats the server as a cluster of at least one.
+- The clustered scheduler handles "Jobs" (which are generally concrete classes) and "Tasks" which can be lambdas or unserializable `Runnable` or `Callable`.
+- "Jobs" can run on any and all nodes, "Tasks" can only run on the local node.
+- For this reason, any jobs that have any kind of parameters passed to them (usually in a constructor at construction time) must be entirely serializable.
+- It is recommended you always create a separate class file for you job. Inner classes are fine, but make sure they are `public` and `static`.
+- There are two main sub-types of jobs, "Scheduled Jobs" and "Ad-hoc Jobs". The base interface is `SerializableJob`, all jobs types implement this ultimately.
+- All job types can be configured using the `@TaskConfig` annotation.
+- "Scheduled Jobs" implement `ScheduledTask` and will be automatically scheduled on start-up of any node.
+- All `ScheduledTask` implementations can be configured using the `@ScheduledTaskConfig` annotation.
+- Most job types also implement `TenantTask`. This ensure the job is run in the context of the tenant it was created under. You nearly always want to do this.
+- All `TenantTask` implementations can be configuration using `@TenantTaskConfig` annotation.
+- "Ad-hoc" jobs must be manually triggered using one of the methods in `SchedulerService` using the `schedule` methods.
+- "Tasks" should used `SchedulerService.scheduleIn`, `SchedulerService.runAs` or `SchedulerService.runNow`.
 - Implement `ScheduledTask` (and optionally `TenantTask` when multi-tenant or user-triggered) and annotate the class with:
   - `@TaskConfig`: core metadata (key, bundle/i18n, `affinity` for cluster placement, `onConflict` policy, optional `id`, `dontPersist`).
   - `@ScheduledTaskConfig`: cadence via cron string or `ScheduledTask` constants (e.g., `EVERY_MINUTE`, `AT_MIDNIGHT`); `systemOnly=true` hides it from tenant scheduling.
@@ -156,7 +181,13 @@ public class MyJob implements TenantTask, ScheduledTask {
 
 ## Menus
 
-- Prefer `@PageMenu` on the entity (or page/controller) to surface it in the navigation; only create a standalone `ApplicationMenu` when `@PageMenu` cannot cover the use case.
+- Prefer `@PageMenu` on the entity (or page/controller) to surface it in the navigation; only create a standalone `ApplicationMenu` when `@Pag
+	private String identifier;
+
+	public IpLease() {
+	}
+
+	public IpLease(C ipAddress, Instant leased, Duration eMenu` cannot cover the use case.
 
 ## Tenant bootstrap / default data
 
@@ -324,3 +355,4 @@ public class ReportTasks extends AuthenticatedController {
 - `@PageDependencies(extensions = {"bootstrap", "fontawesome", "jadaptive-utils", "jadaptive-forms", ...})` pulls required PageExtension names (strings match extension `getName()`). `jquery` exists but modern pages should prefer vanilla JS.
 - `@PageProcessors(extensions = {"i18n", "help", ...})`: run processors after generation. `i18n` resolves `jad:bundle` / `jad:i18n` attributes into localized text. `help` wires `SimpleNameHelp.html` into the help system.
 - Extenders: Any `HtmlPageExtender` with `isExtending` true runs `processStart`, `generateContent`, `processEnd` around your page.
+

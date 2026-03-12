@@ -43,6 +43,10 @@
                     <groupId>com.fasterxml.jackson.datatype</groupId>
                     <artifactId>jackson-datatype-jdk8</artifactId>
                 </exclusion>-->
+                <exclusion>
+                	<groupId>org.springframework</groupId>
+                	<artifactId>spring-context</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         

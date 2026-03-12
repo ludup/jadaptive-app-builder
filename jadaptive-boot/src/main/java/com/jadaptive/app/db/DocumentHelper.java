@@ -934,7 +934,7 @@ public class DocumentHelper {
 				return;
 			}
 		}
-		throw new IllegalStateException(String.format("Invalid object for field %s", type));
+		throw new IllegalStateException(String.format("Invalid object for field %s (of %s)", type, String.join(", ", Arrays.asList(types).stream().map(FieldType::name).toList())));
 	}
 
 

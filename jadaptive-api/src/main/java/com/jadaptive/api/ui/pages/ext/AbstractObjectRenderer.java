@@ -1369,15 +1369,29 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				break;
 			}
 			default:
+				
 				Class<?> values;
 				try {
+					
 					values = classLoader.findClass(field.getValidationValue(ValidationType.OBJECT_TYPE));
-					DropdownFormInput render = new DropdownFormInput(fieldView);
-					if(!decorate) {
-						render.disableDecoration();
+					if(fieldView.getRenderer() == FieldRenderer.DROPDOWN_MENU) {
+						DropdownMenu dropdown = new DropdownMenu(fieldView);
+						if(!decorate) {
+							dropdown.disableDecoration();
+						}
+
+						dropdown.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
+						for(Enum<?> resourceKey : filterEnums((Enum<?>[])values.getEnumConstants(), field)) {
+							dropdown.addI18nValue(resourceKey.name(), resourceKey.name() + ".name");
+						}
+					} else {
+						DropdownFormInput render = new DropdownFormInput(fieldView);
+						if(!decorate) {
+							render.disableDecoration();
+						}
+						render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
+						render.renderValues(filterEnums((Enum<?>[])values.getEnumConstants(), field), getFieldValue(fieldView, obj), view == FieldView.READ);
 					}
-					render.renderInput(element, getFieldValue(fieldView, obj), view == FieldView.READ);
-					render.renderValues(filterEnums((Enum<?>[])values.getEnumConstants(), field), getFieldValue(fieldView, obj), view == FieldView.READ);
 				} catch (ClassNotFoundException e) {
 					throw new IllegalStateException(e.getMessage(), e);
 				}

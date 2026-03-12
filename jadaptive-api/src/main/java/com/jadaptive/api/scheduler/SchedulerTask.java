@@ -3,8 +3,11 @@ package com.jadaptive.api.scheduler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.jadaptive.api.entity.ObjectScope;
 import com.jadaptive.api.permissions.FeatureGroup;
@@ -110,6 +113,22 @@ public final class SchedulerTask extends UUIDEntity {
 	@ObjectField(type = FieldType.TEXT)
 	private Collection<String> attributes = new ArrayList<>();
 
+	public Map<String,String> getAttributesAsMap() {
+	    Map<String,String> map = new LinkedHashMap<>();
+	    for (String entry : attributes) {
+	        int idx = entry.indexOf('=');
+	        if (idx > 0) {
+	            map.put(entry.substring(0, idx), entry.substring(idx + 1));
+	        }
+	    }
+	    return map;
+	}
+	
+	public void setAttributesFromMap(Map<String,String> map) {
+	    attributes = map.entrySet().stream()
+	        .map(e -> e.getKey() + "=" + e.getValue())
+	        .collect(Collectors.toList());
+	}
 
 	public Collection<String> getAttributes() {
 		return attributes;

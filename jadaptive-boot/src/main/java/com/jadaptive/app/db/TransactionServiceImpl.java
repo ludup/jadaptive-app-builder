@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.jadaptive.api.db.TransactionService;
 import com.jadaptive.api.tenant.TenantService;
+import com.sshtools.gardensched.ThrowingRunnable;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {

@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +33,9 @@ import com.jadaptive.api.db.ClassLoaderService;
 import com.jadaptive.api.events.ObjectEvent;
 import com.jadaptive.api.events.SystemEvent;
 import com.jadaptive.api.repository.UUIDEntity;
+import com.jadaptive.api.scheduler.SchedulerSerializationProvider;
 import com.jadaptive.api.scheduler.SchedulerService;
+import com.jadaptive.api.scheduler.TenantJobRunner;
 import com.jadaptive.api.scheduler.TenantTask;
 import com.jadaptive.api.tenant.Tenant;
 import com.sshtools.gardensched.ClusterID;
@@ -52,6 +56,8 @@ import com.sshtools.gardensched.spring.TriggerAdapter;
 
 @Configuration
 public class SchedulerSpringConfig implements TaskErrorHandler, TaskSuccessHandler {
+	
+	private final static Logger LOG = LoggerFactory.getLogger(SchedulerSpringConfig.class);
 	
 	@Autowired
 	private ClassLoaderService classLoader;
@@ -91,12 +97,22 @@ public class SchedulerSpringConfig implements TaskErrorHandler, TaskSuccessHandl
 		appService.getBean(SchedulerService.class).handleSuccess(id, spec, task, context);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private ObjectMapper createObjectMapper() {
 		var sm = new SimpleModule();
 		sm.addSerializer(CronTrigger.class, new CronTriggerSerializer());
 		sm.addSerializer(PeriodicTrigger.class, new PeriodicTriggerSerializer());
 
-		var ptv = BasicPolymorphicTypeValidator.builder().
+		var ptvBldr = BasicPolymorphicTypeValidator.builder();
+		
+		App.beans(SchedulerSerializationProvider.class).forEach((b) -> {
+			LOG.info("Registering custom serializer for type {}", b.getType().getName());
+			sm.addSerializer(b.getType(), b.getSerializer());
+			sm.addDeserializer(b.getType(), b.getDeserializer());
+			ptvBldr.allowIfSubType(b.getType());
+		});
+
+		var ptv = ptvBldr.
 				allowIfSubType(TriggerAdapter.class).
 				allowIfSubType(TenantJobRunner.class).
 				allowIfSubType(CronTrigger.class).
