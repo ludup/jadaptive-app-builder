@@ -62,9 +62,13 @@ submit : function(form, callback, invalid) {
 	}, function(e) {
 		
 		if(invalid) {
-			invalid(e);
+			invalid(e);		
 		} 
-		window.location.reload();
+		
+		// BPS: Partial reverse of https://github.com/ludup/jadaptive-app-builder/commit/f5f4469a96667746924125645d28e3c4332ef65a
+		// caused regression  https://gitlab.logonbox.com/jadaptive/password-express/-/issues/54
+		//window.location.reload();
+		JadaptiveUtils.stopAwesomeSpin($('#saveButton i'), 'fa-save');
 	});
 	
     }
