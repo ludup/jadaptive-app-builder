@@ -188,6 +188,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 				.id("formFor" + page.getClass().getSimpleName())
 				.attr("autocomplete", "off")
 				.attr("data-resourcekey", template.getResourceKey())
+				.attr("data-parentkey", template.getParentTemplate())
 				.attr("enctype", "multipart/form-data")
 				.attr("action", getActionURL())
 				.appendChild(new Element("input")

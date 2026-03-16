@@ -32,7 +32,11 @@ submit : function(form, callback, invalid) {
 	               if(data.redirect) {
 	                	window.location = data.location;
 	               } else if(data.success) {
-	                   window.location = '/app/ui/search/' + form.data('resourcekey');
+					   var parent = form.data('parentkey');
+					   if(parent)
+						   window.location = '/app/ui/search/' + parent;
+					   else
+		                   window.location = '/app/ui/search/' + form.data('resourcekey');
 	               } else {
 	               	   JadaptiveUtils.error($("#feedback"), data.message);
 	               }

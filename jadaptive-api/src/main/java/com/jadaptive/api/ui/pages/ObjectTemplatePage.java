@@ -62,6 +62,9 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		Element body = document.selectFirst("body");
 		if(Objects.nonNull(body)) {
 			body.attr("data-resourcekey", template.getResourceKey());
+			if(template.hasParent()) {
+				body.attr("data-parentresourcekey", template.getParentTemplate());
+			}
 		}
 		
 		Element element = document.selectFirst("#cancelButton");
@@ -69,6 +72,9 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		if(Objects.nonNull(element)) {
 			element.attr("href", getCancelURI());
 			element.attr("data-resourcekey", template.getCollectionKey());
+			if(template.hasParent()) {
+				element.attr("data-parentresourcekey", template.getParentTemplate());
+			}
 		}
 	}
 	
