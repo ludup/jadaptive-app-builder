@@ -117,8 +117,10 @@ public class ObjectRenderer extends AbstractObjectRenderer {
 			
 			if(displayTemplate.getCapabilities().contains(ObjectTemplateCapability.JSON_OBJECT_POST) ||
 			 ( containsFiles && !displayTemplate.getCapabilities().contains(ObjectTemplateCapability.BASIC_OBJECT_POST))) {	
+				handlerPrefix.set("json-");
 				formHandler.set("json-" + handler);
 			} else  {
+				handlerPrefix.set("");
 				formHandler.set(handler);	
 			}
 

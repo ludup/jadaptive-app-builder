@@ -146,6 +146,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	
 	protected ThreadLocal<RenderScope> formRenderer = new ThreadLocal<>();
 	protected ThreadLocal<String> formHandler = new ThreadLocal<>();
+	protected ThreadLocal<String> handlerPrefix = new ThreadLocal<>();
 	protected ThreadLocal<Element> currentElement = new ThreadLocal<>(); 
 	protected ThreadLocal<Page> currentPage = new ThreadLocal<>(); 
 	
@@ -1481,7 +1482,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			
 			if(fieldView.isAutoSave()) {
 				row.addClass("processAutosave");
-				row.attr("data-action", String.format("/app/api/form/stash/%s", obj.getResourceKey()));
+				row.attr("data-action", String.format("/app/api/form/json-stash/%s", obj.getResourceKey()));
 			}
 		}
 	}

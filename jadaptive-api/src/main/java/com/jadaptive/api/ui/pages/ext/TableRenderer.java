@@ -484,7 +484,7 @@ public class TableRenderer {
 					dropdown.addI18nAnchorWithIconValue("default", "edit.name", url, "fa-solid", "fa-edit");
 				} else {
 					dropdown.addI18nAnchorWithIconValue("default", "edit.name", "#", "fa-solid", "fa-edit", "stash")
-						.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+						.attr("data-action", replaceVariables("/app/api/form/json-stash/{resourceKey}", parentObject))
 						.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + field.getResourceKey() + "/" + obj.getUuid());	
 				}
 			}
@@ -701,7 +701,7 @@ public class TableRenderer {
 		element.appendChild(
 				new Element("a").attr("href", "#")
 				.attr("data-action", 
-						replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+						replaceVariables("/app/api/form/json-stash/{resourceKey}", parentObject))
 				.attr("data-url",
 						replaceVariables("/app/ui/object-" + resourceKey + "/{resourceKey}", parentObject) + "/" + field.getResourceKey() + "/" + field.getValidationValue(ValidationType.RESOURCE_KEY))
 				.addClass(StringUtils.join(classes, " "))
@@ -742,7 +742,7 @@ public class TableRenderer {
 						.attr("href", "#")
 						.attr("jad:bundle", action.getBundle())
 						.attr("data-action", 
-								replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+								replaceVariables("/app/api/form/json-stash/{resourceKey}", parentObject))
 						.attr("data-url",
 								replaceVariables("/app/ui/object-create/{resourceKey}", parentObject) 
 								+ "/" + field.getResourceKey() + "/" + action.getResourceKey())
@@ -839,7 +839,7 @@ public class TableRenderer {
 					return Html.a(url, "underline").appendChild(processFieldValue(obj, template, field, fieldView));
 				} else {
 					return Html.a("#", "underline", "stash")
-							.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+							.attr("data-action", replaceVariables("/app/api/form/json-stash/{resourceKey}", parentObject))
 							.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + this.field.getResourceKey() + "/" + obj.getUuid())
 							.appendChild(processFieldValue(obj, template, field, fieldView));
 				}
@@ -858,7 +858,7 @@ public class TableRenderer {
 					return Html.a(url, "underline").appendChild(processFieldValue(obj, template, field, fieldView));
 				} else {
 					return Html.a("#", "underline", "stash")
-							.attr("data-action", replaceVariables("/app/api/form/stash/{resourceKey}", parentObject))
+							.attr("data-action", replaceVariables("/app/api/form/json-stash/{resourceKey}", parentObject))
 							.attr("data-url", replaceVariables("/app/ui/object-update/{resourceKey}/{uuid}", parentObject) + "/" + this.field.getResourceKey() + "/" + obj.getUuid())
 							.appendChild(processFieldValue(obj, template, field, fieldView));
 				}

@@ -46,7 +46,7 @@ public class Update extends StashedObjectPage {
 		Element element = document.selectFirst("#saveButton");
 		if(Objects.nonNull(element)) {
 			element.attr("data-url", returnURL)
-				.attr("data-action", String.format("/app/api/form/stash-child/%s/%s/%s",
+				.attr("data-action", String.format("/app/api/form/json-stash-child/%s/%s/%s",
 						template.getResourceKey(),
 						childResourceKey, 
 						fieldName));
