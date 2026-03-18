@@ -19,6 +19,7 @@ import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.tenant.TenantService;
 import com.jadaptive.api.ui.AuthenticatedPage;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -123,6 +124,27 @@ public abstract class TemplatePage extends AuthenticatedPage {
 			}
 		}
 		
+		
+	}
+
+	protected void processElementsWithJADRoles(Document document) {
+		/* For correct HTML form behaviour the form submit button must in
+		 * the <form> element. Usage of standard HTML submit semantics is preferable
+		 * for assistive technologies and for general simplicity and maintainability.
+		 * 
+		 * So look for the submit button (and cancel button) template element which
+		 * has a jad:role of form-button-bar and move it inside the form element. 
+		 */
+
+		Element form = document.selectFirst("form");
+		if(form == null) {
+			return;
+		}
+		Element buttonBar = document.selectFirst("[jad:role=form-buttons]");
+		if(buttonBar != null) {
+			buttonBar.removeAttr("jad:role");
+			form.appendChild(buttonBar);
+		}
 	}
 
 	
@@ -147,6 +169,7 @@ public abstract class TemplatePage extends AuthenticatedPage {
 		super.documentComplete(document);
 		
 		setupCSRFToken(document);
+		processElementsWithJADRoles(document);
 	}
 
 	protected void setupCSRFToken(Document document) {

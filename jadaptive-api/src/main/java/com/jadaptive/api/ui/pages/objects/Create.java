@@ -33,6 +33,7 @@ public class Create extends ObjectTemplatePage {
 	}
 
 	protected void beforeGenerateContent(Document document) {
+		super.beforeGenerateContent(document);
 
 		//if(Objects.isNull(object)) {
 			if(!uiService.canCreate(template)) {

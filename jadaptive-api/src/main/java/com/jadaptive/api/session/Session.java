@@ -197,8 +197,6 @@ public class Session extends AbstractUUIDEntity {
 	}
 
 	public static final String MENU_CACHE = "menuCache";
-
-	public static final String BACK_URL = "backURL";
 	
 	public void setImpersonatingUser(User impersonatingUser) {
 		this.impersonatingUser = impersonatingUser;

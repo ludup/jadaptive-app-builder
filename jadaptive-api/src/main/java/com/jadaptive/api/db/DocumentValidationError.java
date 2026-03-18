@@ -2,31 +2,29 @@ package com.jadaptive.api.db;
 
 public class DocumentValidationError {
 
-	String formVariable;
-	
-	String error;
+	private String formVariable;
+	private String error;
+	private String offendingValue;
 	
 	public DocumentValidationError() { }
 
-	public DocumentValidationError(String formVariable, String error) {
+	public DocumentValidationError(String offendingValue, String formVariable, String error) {
 		super();
 		this.formVariable = formVariable;
 		this.error = error;
+		this.offendingValue = offendingValue;
 	}
 
 	public String getFormVariable() {
 		return formVariable;
 	}
 
-	public void setFormVariable(String formVariable) {
-		this.formVariable = formVariable;
-	}
-
 	public String getError() {
 		return error;
 	}
 
-	public void setError(String error) {
-		this.error = error;
+	public String getOffendingValue() {
+		return offendingValue;
 	}
+
 }

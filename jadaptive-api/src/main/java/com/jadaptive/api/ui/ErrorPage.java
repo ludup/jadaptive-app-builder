@@ -97,7 +97,7 @@ public class ErrorPage extends HtmlPage {
 		}
 		Throwable e = (Throwable) Request.get().getSession().getAttribute(THROWABLE);
 		if(Objects.isNull(e)) {
-			Feedback feedback = (Feedback) Request.get().getSession().getAttribute("feedback");
+			Feedback feedback = Feedback.get();
 			if(Objects.nonNull(feedback)) {
 				Request.get().getSession().removeAttribute("feedback");
 				document.selectFirst("#message").appendChild(Html.i18n(feedback.getBundle(),

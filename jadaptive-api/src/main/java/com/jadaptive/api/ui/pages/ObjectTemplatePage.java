@@ -16,9 +16,9 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.PermissionService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.ui.ObjectPage;
+import com.jadaptive.api.ui.PageStack;
 
 public abstract class ObjectTemplatePage extends TemplatePage implements ObjectPage {
 	
@@ -56,6 +56,16 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 		}
 	}
 	
+//	@Override
+//	protected void processPost(Document document, String uri, HttpServletRequest request, HttpServletResponse response) throws IOException {
+//		try {
+//			var handler = "basic-multipart";
+//			request.getRequestDispatcher(String.format("/app/api/form/%s/%s", handler, getResourceKey())).forward(request, response);
+//		} catch (ServletException e) {
+//			throw new IOException(e.getMessage(), e);
+//		} 
+//	}
+	
 	@Override
 	protected void doGenerateTemplateContent(Document document) throws FileNotFoundException, IOException {
 		
@@ -79,7 +89,8 @@ public abstract class ObjectTemplatePage extends TemplatePage implements ObjectP
 	}
 	
 	protected final String getCancelURI() {
-		return (String) Request.get().getSession().getAttribute(Session.BACK_URL);
+		return PageStack.get().previous();
+//		return (String) Request.get().getSession().getAttribute(Session.BACK_URL);
 	}
 
 	public void onCreate() throws FileNotFoundException {

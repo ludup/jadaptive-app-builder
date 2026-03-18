@@ -1,5 +1,9 @@
 package com.jadaptive.api.ui;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import com.jadaptive.api.db.DocumentValidationError;
 import com.jadaptive.api.servlet.Request;
 
 public class Feedback {
@@ -45,7 +49,17 @@ public class Feedback {
 	}
 
 	public static boolean isSet() {
-		return Request.get().getSession().getAttribute("feedback") != null;
+		return get() != null;
+	}
+	
+	public static Feedback get() {
+		return (Feedback)Request.get().getSession().getAttribute("feedback");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Collection<DocumentValidationError> getValidationErrors() {
+		Collection<DocumentValidationError> errs = (Collection<DocumentValidationError>)Request.get().getSession().getAttribute("validationErrors");
+		return errs == null ? Collections.<DocumentValidationError>emptyList() : errs;
 	}
 	
 	public static void success(String bundle, String i18n, Object...args) {
@@ -78,6 +92,19 @@ public class Feedback {
 
 	public static void error(String message) {
 		Request.get().getSession().setAttribute("feedback", new ErrorFeedback(message));
+	}
+
+	public static void errorWithValidationErrors(String message, Collection<DocumentValidationError> collection) {
+		error(message);
+		Request.get().getSession().setAttribute("validationErrors", collection);
+	}
+
+	public static void clearValidation() {
+		Request.get().getSession().removeAttribute("validationErrors");
+	}
+
+	public static void clear() {
+		Request.get().getSession().removeAttribute("feedback");
 	}
 	
 }

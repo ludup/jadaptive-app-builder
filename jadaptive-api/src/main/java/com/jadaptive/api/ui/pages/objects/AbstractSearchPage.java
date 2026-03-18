@@ -438,10 +438,5 @@ public abstract class AbstractSearchPage extends BaseSearchPage<SearchForm> {
 		}
 		return SearchUtils.generateSearch(searchField, searchValue, useRegex, searchFieldTemplates);
 	}
-	
-	@Override
-	public boolean isBackStop() {
-		return true;
-	}
 
 }

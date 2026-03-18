@@ -56,9 +56,7 @@ public class UploadFormInput extends FieldInputRender {
 							.attr("jad:i18n", String.format("%s.desc", getResourceKey())));
 		}
 		
-		load(form);
-		
-		form.select("input[type='file']")
+		rootElement.select("input[type='file']")
 			.addClass("mfiles")
 			.attr("name", formVariable);
 	}

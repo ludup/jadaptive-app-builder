@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jadaptive.api.app.ApplicationServiceImpl;
 import com.jadaptive.api.db.ClassLoaderService;
-import com.jadaptive.api.db.DocumentValidationError;
 import com.jadaptive.api.encrypt.EncryptionService;
 import com.jadaptive.api.entity.AbstractObject;
 import com.jadaptive.api.entity.ObjectException;
@@ -67,6 +66,7 @@ import com.jadaptive.api.template.TemplateService;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.template.ValidationType;
 import com.jadaptive.api.templates.TemplateUtils;
+import com.jadaptive.api.ui.pages.ext.ValidationHelper;
 //import com.jadaptive.app.ClassLoaderServiceImpl;
 //import com.jadaptive.app.encrypt.EncryptionServiceImpl;
 //import com.jadaptive.app.entity.MongoEntity;
@@ -82,8 +82,6 @@ public class DocumentHelper {
 	
 	static Map<String,String> classNameChanges = new HashMap<>();
 	
-	static ThreadLocal<List<DocumentValidationError>> validationErrors = ThreadLocal.withInitial(()->new ArrayList<>());
-	static ThreadLocal<Boolean> multipleValidation = ThreadLocal.withInitial(()->Boolean.FALSE);
 	
 	public static String getTemplateResourceKey(Class<?> clz) {
 		ObjectDefinition template = (ObjectDefinition) clz.getAnnotation(ObjectDefinition.class);
@@ -91,14 +89,6 @@ public class DocumentHelper {
 			return template.resourceKey();
 		}
 		return clz.getSimpleName();
-	}
-	
-	public static void enableMultipleValidation() {
-		multipleValidation.set(Boolean.TRUE);
-	}
-	
-	public static void disableMultipleValidation() {
-		multipleValidation.set(Boolean.FALSE);
 	}
 	
 	public static void convertObjectToDocument(UUIDDocument obj, Document document) throws RepositoryException, ObjectException {
@@ -324,8 +314,10 @@ public class DocumentHelper {
 		if(log.isDebugEnabled()) {
 			log.debug("Building object {} using template {}", resourceKey, template.getResourceKey());
 		}
-		
-		validationErrors.get().clear();
+
+		if(ValidationHelper.isMultipleValidationEnabled()) {
+			ValidationHelper.clear();
+		}
 		
 		AbstractObject obj = ApplicationServiceImpl.getInstance().getBean(ObjectService.class).createNew(resourceKey);
 		String uuid = getParameter(parameters, formVariablePrefix + "uuid");
@@ -490,10 +482,10 @@ public class DocumentHelper {
 				return fromString(field, value);
 			}
 		} catch(ValidationException e) {
-			if(!multipleValidation.get()) {
+			if(!ValidationHelper.isMultipleValidationEnabled()) {
 				throw e;
 			}
-			validationErrors.get().add(new DocumentValidationError(formVariable, e.getMessage()));
+			ValidationHelper.addError(value, formVariable, e.getMessage());
 			return null;
 		}
 	}
@@ -503,12 +495,14 @@ public class DocumentHelper {
 		String formVariable = formVariablePrefix + field.getFormVariable();
 		List<Object> result = new ArrayList<>();
 		
+		String[] values = getParameters(parameters, formVariable);   
+		if(Objects.isNull(values) || values.length == 0) {
+			return result;
+		}
+		
+		String currentValue = null;
+		
 		try {
-			
-			String[] values = getParameters(parameters, formVariable);   
-			if(Objects.isNull(values) || values.length == 0) {
-				return result;
-			}
 			
 			switch(field.getFieldType()) {
 			case OBJECT_EMBEDDED:
@@ -517,6 +511,7 @@ public class DocumentHelper {
 	
 				for(String value : values) {
 					if(StringUtils.isNotBlank(value)) {
+						currentValue = value;
 						String json = new String(Base64.getUrlDecoder().decode(value), "UTF-8");
 						result.add(mapper.readValue(json, MongoEntity.class).getDocument());
 					}
@@ -528,6 +523,7 @@ public class DocumentHelper {
 			{
 				String[] names = parameters.get(String.format("%sText", formVariable));
 				for(int i=0;i<values.length;i++) {
+					currentValue = values[i];
 					Document doc = new Document();
 					convertObjectToDocument(generateReference(values[i], names != null ? names[i] : values[i]), doc);
 					result.add(doc);
@@ -540,6 +536,7 @@ public class DocumentHelper {
 				ObjectTemplate template = ApplicationServiceImpl.getInstance().getBean(TemplateService.class).get(field.getValidationValue(ValidationType.RESOURCE_KEY));
 				ObjectService service = ApplicationServiceImpl.getInstance().getBean(ObjectService.class);
 				for(int i=0;i<values.length;i++) {
+					currentValue = values[i];
 					AbstractObject obj = service.get(template, values[i]);
 					Document doc = new Document();
 					convertObjectToDocument(generateReference(values[i], (String) obj.getValue(nameField)), doc);
@@ -553,6 +550,7 @@ public class DocumentHelper {
 				String[] names = getParameters(parameters, formVariablePrefix + field.getFormVariable() + "_name");
 				
 				for(int i=0;i<uuids.length;i++) { 
+					currentValue = values[i];
 					Document doc = new Document();
 					convertObjectToDocument(generateReference(uuids[i], names[i]), doc);
 					result.add(doc);
@@ -563,6 +561,7 @@ public class DocumentHelper {
 			default:
 			{
 				for(String value : values) {
+					currentValue = value;
 					result.add(fromString(field, value));
 				}
 				break;
@@ -575,10 +574,10 @@ public class DocumentHelper {
 			
 			return result;
 		} catch(ValidationException e) {
-			if(!multipleValidation.get()) {
+			if(!ValidationHelper.isMultipleValidationEnabled()) {
 				throw e;
 			}
-			validationErrors.get().add(new DocumentValidationError(formVariable, e.getMessage()));
+			ValidationHelper.addError(currentValue, formVariable, e.getMessage());
 			return result;
 		}
 	}
@@ -1099,14 +1098,6 @@ public class DocumentHelper {
 	public static void generateObjectHash(ObjectTemplate template, Document entity, SHA256Digest sha2) throws UnsupportedEncodingException {
 
 
-	}
-
-	public static boolean hasErrors() {
-		return !validationErrors.get().isEmpty();
-	}
-	
-	public static Collection<DocumentValidationError> getErrors() {
-		return validationErrors.get();
 	}
 
 }

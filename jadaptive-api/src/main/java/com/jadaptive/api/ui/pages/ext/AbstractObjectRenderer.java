@@ -316,7 +316,7 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 			int usedCols = 0;
 			for(TemplateViewField fieldView : view.getFields()) {
 				FieldTemplate field = fieldView.getField();
-
+				
 				if(field.getResourceKey().equals("lastLogin")) {
 					System.out.println();
 				}
@@ -1523,6 +1523,11 @@ public abstract class AbstractObjectRenderer extends AbstractPageExtension {
 	private String getFieldValue(TemplateViewField field, AbstractObject obj) {
 		if(Objects.isNull(obj)) {
 			return getDefaultValue(field);
+		}
+		
+		String offendingValue = ValidationHelper.getOffendingValue(field.getField().getFormVariable());
+		if(offendingValue != null) {
+			return offendingValue;
 		}
 	
 		List<FieldTemplate> parents = field.getParentFields();
