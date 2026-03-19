@@ -10,6 +10,7 @@ import com.jadaptive.api.entity.ObjectException;
 import com.jadaptive.api.template.ObjectTemplate;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.ui.Feedback;
+import com.jadaptive.api.ui.PageStack;
 import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.pages.ext.ValidationHelper;
 
@@ -58,7 +59,12 @@ public class BasicObjectUploadServlet extends AbstractObjectUploadServlet {
 				resp.sendRedirect(String.format("/app/ui/search/%s", template.getParentTemplate()));
 				 //
 			} else {
-				resp.sendRedirect(String.format("/app/ui/search/%s", template.getCollectionKey()));
+				if(template.getCollectionKey().equals(template.getResourceKey())) {
+					resp.sendRedirect(PageStack.get().previous());
+				}
+				else {
+					resp.sendRedirect(String.format("/app/ui/search/%s", template.getCollectionKey()));
+				}
 			}		
 
 			return;

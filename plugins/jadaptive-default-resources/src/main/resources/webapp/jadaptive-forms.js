@@ -77,6 +77,7 @@ if(action && action.indexOf("/json-") != -1) {
 	   pre-validation and auto-stashing */
 	
 	var saveButton = $('#saveButton');
+	debugger;
 
 	if(saveButton.attr('type') == 'submit') {
 		/* The form has been converted to new style submit-button-inside-form */
