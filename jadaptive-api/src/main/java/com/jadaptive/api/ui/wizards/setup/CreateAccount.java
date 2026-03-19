@@ -29,12 +29,10 @@ public class CreateAccount extends WizardUUIDEntity {
 
 	@ObjectField(type = FieldType.PASSWORD, renderer = FieldRenderer.SET_PASSWORD)
 	@Validator(type = ValidationType.REQUIRED)
-	@Validator(bundle = CreateAccount.RESOURCE_KEY, type = ValidationType.REGEX, i18n = "invalid.password", value = "^(?=^.{8,}$)(?=.*\\d)|(?=.*\\W+)(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$")
 	String firstPassword;
 
 	@ObjectField(type = FieldType.PASSWORD, renderer = FieldRenderer.SET_PASSWORD)
 	@Validator(type = ValidationType.REQUIRED)
-	@Validator(bundle = CreateAccount.RESOURCE_KEY, type = ValidationType.REGEX, i18n = "invalid.password", value = "^(?=^.{8,}$)(?=.*\\d)|(?=.*\\W+)(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$")
 	String secondPassword;
 
 	public String getUsername() {

@@ -38,4 +38,6 @@ public interface PasswordPolicyService extends AbstractUUIDObjectService<Passwor
 	void verifyPassword(User user, char[] password);
 
 	PasswordValidationResult validatePassword(char[] password, PasswordPolicy policy);
+
+	PasswordPolicy getDefaultPolicy();
 }

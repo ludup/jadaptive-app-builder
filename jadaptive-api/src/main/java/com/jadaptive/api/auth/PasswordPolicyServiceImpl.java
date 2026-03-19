@@ -133,4 +133,9 @@ public class PasswordPolicyServiceImpl extends AbstractAssignableUUIDObjectServi
 				policy.getMinimumNumeric() > effectivePolicy.getMinimumNumeric() ||
 				policy.getMinimumSpecial() > effectivePolicy.getMinimumSpecial();
 	}
+
+	@Override
+	public PasswordPolicy getDefaultPolicy() {
+		return getObjectByUUID(PasswordPolicyTenantInitializer.DEFAULT_POLICY_UUID);
+	}
 }
