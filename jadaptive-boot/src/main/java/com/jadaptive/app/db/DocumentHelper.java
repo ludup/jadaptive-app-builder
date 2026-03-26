@@ -875,37 +875,37 @@ public class DocumentHelper {
 
 	public static Object fromString(Class<?> type, FieldType t, String value) {
 		if(type.equals(boolean.class)) {
-			assertType(t, FieldType.BOOL);
+			assertType(t, FieldType.BOOL, FieldType.AUTO);
 			return Boolean.parseBoolean(StringUtils.defaultIfEmpty(value, "false"));
 		} else if(type.equals(Boolean.class)) {
-			assertType(t, FieldType.BOOL);
+			assertType(t, FieldType.BOOL, FieldType.AUTO);
 			return Boolean.valueOf(Boolean.parseBoolean(StringUtils.defaultIfEmpty(value, "false")));
 		} else if(type.equals(int.class)) {
-			assertType(t, FieldType.INTEGER);
+			assertType(t, FieldType.INTEGER, FieldType.AUTO);
 			return Integer.parseInt(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Integer.class)) {
-			assertType(t, FieldType.INTEGER);
+			assertType(t, FieldType.INTEGER, FieldType.AUTO);
 			return Integer.valueOf(Integer.parseInt(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(long.class)) {
-			assertType(t, FieldType.LONG);
+			assertType(t, FieldType.LONG, FieldType.AUTO);
 			return Long.parseLong(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Long.class)) {
-			assertType(t, FieldType.LONG);
+			assertType(t, FieldType.LONG, FieldType.AUTO);
 			return Long.valueOf(Long.parseLong(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(float.class)) {
-			assertType(t, FieldType.DECIMAL);
+			assertType(t, FieldType.DECIMAL, FieldType.AUTO);
 			return Float.parseFloat(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Float.class)) {
-			assertType(t, FieldType.DECIMAL);
+			assertType(t, FieldType.DECIMAL, FieldType.AUTO);
 			return Float.valueOf(Float.parseFloat(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(double.class)) {
-			assertType(t, FieldType.DECIMAL);
+			assertType(t, FieldType.DECIMAL, FieldType.AUTO);
 			return Double.parseDouble(StringUtils.defaultIfEmpty(value, "0"));
 		} else if(type.equals(Double.class)) {
-			assertType(t, FieldType.DECIMAL);
+			assertType(t, FieldType.DECIMAL, FieldType.AUTO);
 			return Double.valueOf(Double.parseDouble(StringUtils.defaultIfEmpty(value, "0")));
 		} else if(type.equals(Date.class)) {
-			if(t==FieldType.TIMESTAMP) {
+			if(t==FieldType.TIMESTAMP || t==FieldType.AUTO) {
 				if(StringUtils.isNotBlank(value)) {
 					try {
 						return Utils.parseTimestamp(value);
