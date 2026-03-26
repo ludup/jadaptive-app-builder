@@ -792,4 +792,10 @@ $(function() {
 		}
 
 	});
+	
+
+	$(document).on('click', function(){ 
+		/* TODO  find all elements with class of "toast-container" and remove it's parent */
+		$('.toast-container').parent().remove();
+	});	
 });

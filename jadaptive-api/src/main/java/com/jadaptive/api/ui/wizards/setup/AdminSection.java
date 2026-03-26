@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.jadaptive.api.auth.PasswordPolicyService;
 import com.jadaptive.api.repository.UUIDEntity;
 import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.tenant.TenantService;
@@ -24,6 +25,9 @@ public class AdminSection extends DefaultWizardSection {
 	
 	@Autowired
 	private TenantService tenantService; 
+
+	@Autowired
+	private PasswordPolicyService passwordPolicy;
 	
 	private boolean setOwner;
 	
@@ -68,6 +72,15 @@ public class AdminSection extends DefaultWizardSection {
 			throw new ValidationException(CreateAccount.RESOURCE_KEY, "passwords.dontMatch");
 		}
 
+
+		/*
+		 * We don't have a user yet, so we can't do a real password validation (via the
+		 * event), but we can at least check the policy rules
+		 */
+		var res = passwordPolicy.validatePassword(obj.getFirstPassword().toCharArray(), passwordPolicy.getDefaultPolicy());
+		if(!res.isValid()) {
+			throw new ValidationException(CreateAccount.RESOURCE_KEY, "password.invalid", String.join(", ", res.getErrors()));
+		}
 	}
 	
 	@Override

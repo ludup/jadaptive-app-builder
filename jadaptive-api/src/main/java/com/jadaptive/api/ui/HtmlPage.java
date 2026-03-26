@@ -404,7 +404,7 @@ public abstract class HtmlPage implements Page {
 			
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException
 					| IllegalArgumentException e) {
-			clearFeedback();
+			Feedback.clear();
 			if(e.getCause() instanceof Redirect) {
 				throw (Redirect) e.getCause();
 			}
@@ -415,54 +415,53 @@ public abstract class HtmlPage implements Page {
 		}
 	}
 	
-	protected void clearFeedback() {
-		Feedback feedback = (Feedback) Request.get().getSession().getAttribute("feedback");
-		if(Objects.nonNull(feedback)) {
-			Request.get().getSession().removeAttribute("feedback");
-		}
-	}
-
 	protected void beforeForm(Document doc, HttpServletRequest request, HttpServletResponse response) {
 		
 	}
 
 	protected void injectFeedback(Document doc, HttpServletRequest request) {
-		Feedback feedback = (Feedback) request.getSession().getAttribute("feedback");
-		if(Objects.nonNull(feedback) && Objects.nonNull(feedback.getI18n())) {
-			request.getSession().removeAttribute("feedback");
-			Element element = doc.selectFirst("header");
-			if(Objects.isNull(element)) {
-					element = doc.selectFirst("body");
-			} 
+		Feedback feedback = Feedback.get();
+		if(feedback != null && feedback.getI18n() != null) {
 			
-			var bdy = Html.div("toast-body");
-
-			if(feedback.getIcon() != null) {
-				bdy.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"));
+			try {
+	
+				Element element = doc.selectFirst("header");
+				if(Objects.isNull(element)) {
+						element = doc.selectFirst("body");
+				} 
+				
+				var bdy = Html.div("toast-body");
+	
+				if(feedback.getIcon() != null) {
+					bdy.appendChild(Html.i("fa-solid", feedback.getIcon(), "me-2"));
+				}
+				
+				bdy.appendChild(getTextElement(feedback));
+				
+				var btn = Html.button("btn-close", "btn-close-white", "me-2", "m-auto");
+				btn.dataset().put("bs-dismiss", "toast");
+				btn.attr("aria-label", "Close");
+				
+				var fbox = Html.div("d-flex");
+				fbox.appendChild(bdy);
+				fbox.appendChild(btn);
+				var toast = Html.div("toast", "align-items-center", "text-bg-" + feedback.getAlert(), "border-0", "show");
+				toast.attr("role", "alert");
+				toast.attr("aria-live", "assertive");
+				toast.attr("aria-atomic", "true");
+				toast.appendChild(fbox);
+				
+				var cnt = Html.div("toast-container", "p-3", "top-0", "start-50", "translate-middle-x");
+				cnt.appendChild(toast);
+				
+				var out = Html.div("position-relative");
+				out.appendChild(cnt);
+				
+				element.after(out);
 			}
-			
-			bdy.appendChild(getTextElement(feedback));
-			
-			var btn = Html.button("btn-close", "btn-close-white", "me-2", "m-auto");
-			btn.dataset().put("bs-dismiss", "toast");
-			btn.attr("aria-label", "Close");
-			
-			var fbox = Html.div("d-flex");
-			fbox.appendChild(bdy);
-			fbox.appendChild(btn);
-			var toast = Html.div("toast", "align-items-center", "text-bg-" + feedback.getAlert(), "border-0", "show");
-			toast.attr("role", "alert");
-			toast.attr("aria-live", "assertive");
-			toast.attr("aria-atomic", "true");
-			toast.appendChild(fbox);
-			
-			var cnt = Html.div("toast-container", "p-3", "top-0", "start-50", "translate-middle-x");
-			cnt.appendChild(toast);
-			
-			var out = Html.div("position-relative");
-			out.appendChild(cnt);
-			
-			element.after(out);
+			finally {
+				Feedback.clear();
+			}
 			
 		}
 		

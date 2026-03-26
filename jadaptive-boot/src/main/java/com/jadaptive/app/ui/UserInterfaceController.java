@@ -38,7 +38,6 @@ import com.jadaptive.api.permissions.AccessDeniedException;
 import com.jadaptive.api.permissions.AuthenticatedController;
 import com.jadaptive.api.repository.RepositoryException;
 import com.jadaptive.api.servlet.Request;
-import com.jadaptive.api.session.Session;
 import com.jadaptive.api.session.UnauthorizedException;
 import com.jadaptive.api.ui.ErrorPage;
 import com.jadaptive.api.ui.Feedback;
@@ -46,6 +45,7 @@ import com.jadaptive.api.ui.MessagePage;
 import com.jadaptive.api.ui.Page;
 import com.jadaptive.api.ui.PageCache;
 import com.jadaptive.api.ui.PageExtension;
+import com.jadaptive.api.ui.PageStack;
 import com.jadaptive.api.ui.Redirect;
 import com.jadaptive.api.ui.editor.ReplaceTextContentEdit;
 
@@ -157,12 +157,7 @@ public class UserInterfaceController extends AuthenticatedController {
 		
 		Page page = pageCache.resolvePage(resourceUri, true);
 		
-		if(page.isBackStop()) {
-			if(Boolean.getBoolean("jadaptive.development") || Boolean.getBoolean("jadaptive.showBackstopWarning")) {
-				log.info("REMOVEME: Setting back stop to {}", request.getRequestURI() + StringUtils.defaultIfBlank(request.getQueryString(), ""));
-			}
-			request.getSession().setAttribute(Session.BACK_URL, request.getRequestURI() + StringUtils.defaultIfBlank(request.getQueryString(), ""));
-		}
+		PageStack.get().push(request.getRequestURI() + StringUtils.defaultIfBlank(request.getQueryString(), ""));
 	
 		page.doGet(resourceUri, request, response);
 	}

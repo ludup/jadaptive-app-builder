@@ -10,7 +10,7 @@ validate: function(form, callback, invalid) {
 		
 		$.ajax({
 		   type: "POST",
-		   url: '/app/api/form/validate/' + form.data('resourcekey'),
+		   url: '/app/api/form/json-validate/' + form.data('resourcekey'),
 		   cache: false,
 		   contentType: false,
 		   processData: false,
@@ -23,9 +23,18 @@ validate: function(form, callback, invalid) {
 					}
 	           } else {
 				$('#progressModal').modal('hide');
+				JadaptiveUtils.error($("#feedback"), data.message);
 			     
 			     $.each(data.errors, function(idx, obj) {
-					var field = $('input[name="' + obj.formVariable + '"]').parents(".field").first().find(".form-control");
+					
+					/* This code mirrors server side based field highlighting found in ObjectRenderer.process */
+					 
+					var fieldParent = $('[name="' + obj.formVariable + '"]')
+						.parents(".field")
+						.first();
+						
+					var field = fieldParent.find(".form-control");
+						
 					if(field.length > 0) {
 				     	field.addClass("validation border border-5 border-danger");
 				    } else {
@@ -34,6 +43,18 @@ validate: function(form, callback, invalid) {
 							field.siblings('.tox-tinymce').addClass("validation border border-5 border-danger");
 						}
 					}
+					
+					/* Add feedback text to the field. If there is a label, add it after the label, otherwise add it before the field. */
+					fieldParent.find(".feedback-message").remove();
+					var fieldLabel = fieldParent.find(".form-label").first();
+					if(fieldLabel.length > 0) {
+						fieldLabel.after('<div class="feedback-message text-danger">' + obj.error + '</div>');
+					}
+					else {
+						fieldParent.prepend('<div class="feedback-message text-danger">' + obj.error + '</div>');
+					}
+						
+					
 					if(idx == 0) {
 				        var parentId = field.parents('.tab-pane').first().attr('id');
 						var triggerEl = document.querySelector('a[href="#' + parentId + '"]');

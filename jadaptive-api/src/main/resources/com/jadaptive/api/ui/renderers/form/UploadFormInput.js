@@ -1,3 +1,5 @@
+
+
 Object.defineProperty(Number.prototype,'fileSize',{value:function(a,b,c,d){
 		 return (a=a?[1e3,'k','B']:[1024,'K','iB'],b=Math,c=b.log,
 		 d=c(this)/c(a[0])|0,this/b.pow(a[0],d)).toFixed(2)
@@ -74,7 +76,7 @@ $(function() {
 		row.find("i").addClass('fa-trash').removeClass('fa-trash-undo text-danger');
 	});
 
-	$('.uploadForm').on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
+	$('.dropzone').parent().on('drag dragstart dragend dragover dragenter dragleave drop', function(e) {
     	e.preventDefault();
     	e.stopPropagation();
 	}).on('dragover dragenter', function() {

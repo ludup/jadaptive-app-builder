@@ -173,6 +173,7 @@ public class OAuth2ServiceImpl implements OAuth2Service, StartupAware {
 			synchronized (pdevc) {
 				pdevc.remove(userCode);
 				pudevc.remove(deviceCode);
+				getOauth2AuthCodeRequests().remove(deviceCode);
 			}
 		}, expiry, TimeUnit.SECONDS);
 
@@ -226,14 +227,14 @@ public class OAuth2ServiceImpl implements OAuth2Service, StartupAware {
 	}
 
 	private Map<String, PendingDevice> getPendingDevicesByDeviceCode() {
-		return cacheService.clusteredCacheOrCreate("pendingDevicesByDeviceCode", String.class, PendingDevice.class);
+		return cacheService.clusteredCacheOrCreate("pendingDevicesByDeviceCode", String.class, PendingDevice.class, Long.MAX_VALUE);
 	}
 
 	private Map<String, PendingDevice> getPendingDevicesByUserCode() {
-		return cacheService.clusteredCacheOrCreate("pendingDevicesByUserCode", String.class, PendingDevice.class);
+		return cacheService.clusteredCacheOrCreate("pendingDevicesByUserCode", String.class, PendingDevice.class, Long.MAX_VALUE);
 	}
 
 	private Map<String, OAuth2AuthCodeRequest> getOauth2AuthCodeRequests() {
-		return cacheService.clusteredCacheOrCreate("oauth2AuthCodeRequests", String.class, OAuth2AuthCodeRequest.class);
+		return cacheService.clusteredCacheOrCreate("oauth2AuthCodeRequests", String.class, OAuth2AuthCodeRequest.class, Long.MAX_VALUE);
 	}
 }

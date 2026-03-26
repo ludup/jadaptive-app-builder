@@ -38,8 +38,6 @@ public interface Page extends PageResources, ExtensionPoint {
     void addProcessor(PageExtension ext);
     
 	Document generateHTMLDocument(String uri) throws IOException;
-	
-	default boolean isBackStop() { return false; }
 
 	void addPageEnd(PageEnd end);
 

@@ -56,6 +56,7 @@ import com.jadaptive.api.template.ValidationException;
 import com.jadaptive.api.templates.TemplateVersionService;
 import com.jadaptive.api.ui.Feedback;
 import com.jadaptive.api.ui.UriRedirect;
+import com.jadaptive.api.ui.pages.ext.ValidationHelper;
 import com.jadaptive.app.db.DocumentHelper;
 import com.jadaptive.app.db.MongoEntity;
 import com.jadaptive.utils.ParameterHelper;
@@ -381,7 +382,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 		try {
 
 			ObjectTemplate template = templateService.get(resourceKey);
-			DocumentHelper.enableMultipleValidation();
+			ValidationHelper.enableMultipleValidation();
 			AbstractObject obj = DocumentHelper.buildRootObject(generateFormParameters(request, resourceKey), template.getResourceKey(), template);
 			
 			ObjectTemplate extensionTemplate = templateService.get(extension);
@@ -409,7 +410,7 @@ static Logger log = LoggerFactory.getLogger(ObjectsJsonController.class);
 			}
 			return handleException(e, "POST", resourceKey);
 		} finally {
-			DocumentHelper.disableMultipleValidation();
+			ValidationHelper.disableMultipleValidation();
 		}
 	}
 	

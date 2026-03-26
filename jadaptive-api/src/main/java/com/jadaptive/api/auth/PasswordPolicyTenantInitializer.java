@@ -16,7 +16,8 @@ import com.jadaptive.api.user.VerifyPasswordEvent;
 @Component
 public class PasswordPolicyTenantInitializer implements TenantAware, StartupAware {
 
-    private static final String DEFAULT_POLICY_UUID = "bd7fb558-dadc-4df5-a814-45b76e9f2bb6";
+    static final String DEFAULT_POLICY_UUID = "bd7fb558-dadc-4df5-a814-45b76e9f2bb6";
+    
     private static final String BUILT_IN_USERS_ROLE_UUID = "255a5fee-685b-4447-a1be-f912d77ebe5c";
 
     @Autowired
