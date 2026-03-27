@@ -124,6 +124,16 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		
+		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.15.1</version>
@@ -199,7 +209,7 @@
 			<dependency>
 	            <groupId>com.fasterxml.jackson</groupId>
 	            <artifactId>jackson-bom</artifactId>
-	            <version>2.17.2</version> <type>pom</type>
+	            <version>2.17.3</version> <type>pom</type>
 	            <scope>import</scope>
 	        </dependency>
 			<dependency>
