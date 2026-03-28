@@ -65,4 +65,6 @@ public interface AssignableObjectDatabase<T extends AssignableDocument>  {
 
 	Iterable<T> getAssignedObjectsA(Class<T> resourceClass, User user, SortOrder order, String sortField,
 			SearchField... fields);
+
+	T getAssignedObjectA(Class<T> resourceClass, User user, SearchField... fields);
 }

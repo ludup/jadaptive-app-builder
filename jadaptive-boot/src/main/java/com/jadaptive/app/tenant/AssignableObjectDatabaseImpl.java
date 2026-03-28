@@ -146,6 +146,24 @@ public class AssignableObjectDatabaseImpl<T extends AssignableDocument> implemen
 			}
 		}
 	}
+	
+	@Override
+	public T getAssignedObjectA(Class<T> resourceClass, User user, SearchField... fields) {
+		
+
+		Collection<Role> userRoles = roleService.getRolesByUser(user);
+		
+		if(fields.length > 0) {
+			return objectDatabase.get(resourceClass, SearchField.and(SearchField.and(fields), 
+					SearchField.or(SearchField.all("users.uuid", user.getUuid()),
+									SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles)))));
+		} else {
+			return objectDatabase.get(resourceClass, SearchField.or(
+				SearchField.all("users.uuid", user.getUuid()),
+				SearchField.in("roles.uuid", UUIDObjectUtils.getUUIDs(userRoles))));
+		}
+		
+	}
 
 	@Override
 	public Iterable<T> getObjects(Class<T> resourceClass, SearchField... fields) {
