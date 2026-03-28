@@ -431,7 +431,7 @@ public class SessionFilter implements Filter {
 			if(request.getRequestURI().equals("/")
 					|| request.getRequestURI().equals("/app")
 					|| request.getRequestURI().equals("/app/")) {
-				response.sendRedirect("/app/ui/");
+				response.sendRedirect(properties.getProperty("defaultRedirect", "/app/ui/"));
 				return true;
 			}
 		}
