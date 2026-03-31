@@ -44,6 +44,7 @@ public class ApplicationServiceImpl implements App {
 	
 	Map<Class<?>,Object> testingBeans = new HashMap<>();
 	Map<Class<?>,Object> cachedBeans = new HashMap<>();
+	Map<String,Object> cachedBeansByName = new HashMap<>();
 	Map<Class<?>,Collection<?>> cachedCollections = new HashMap<>();
   	
 	@PostConstruct
@@ -150,6 +151,51 @@ public class ApplicationServiceImpl implements App {
 		
 		cachedBeans.put(clz, tmp.values().iterator().next());
 		return (E) cachedBeans.get(clz);
+	}
+	
+	@Override
+	public Object getBean(String name) {
+		
+		Object cached = cachedBeansByName.get(name);
+		if(Objects.nonNull(cached)) {
+			return cached;
+		}
+		
+		for(PluginWrapper w : pluginManager.getPlugins()) {
+			
+			if(w.getPlugin()==null) {
+				continue;
+			}
+			
+			if(w.getPlugin() instanceof SpringPlugin) {
+				if(log.isInfoEnabled()) {
+					log.info("Scanning plugin {} for beans {}", 
+							w.getPluginId(),
+							name);
+				}
+			
+				try {
+					Object tmp = ((SpringPlugin)w.getPlugin())
+						.getApplicationContext().getBean(name);
+				
+					cachedBeansByName.put(name, tmp);
+					return tmp;
+				} catch(NoSuchBeanDefinitionException e) {
+				}
+			}
+		}
+		
+		if(log.isInfoEnabled()) {
+			log.info("Scanning plugin {} for beans {}", 
+					"applicationContext",
+					name);
+		}
+		
+		Object tmp = context.getBean(name);
+		
+		cachedBeansByName.put(name, tmp);
+		return tmp;
+		
 	}
 	
 	@Override

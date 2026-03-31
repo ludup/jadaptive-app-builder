@@ -117,4 +117,6 @@ public interface TenantService extends UUIDObjectService<Tenant> {
 	void asSytemContext(Tenant tenant, RunnableWithException r);
 
 	void scheduleDelete(Tenant tenant);
+
+	Tenant tenantStarted(Tenant tenant);
 }

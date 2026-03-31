@@ -14,5 +14,5 @@ public interface MessageSubscriber {
 	 * @param metadata
 	 * @param payload
 	 */
-    void onMessage(String sourceId, User user, String platform, Map<String, Object> metadata, String payload);
+    void onMessage(Message message);
 }

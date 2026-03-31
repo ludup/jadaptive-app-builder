@@ -16,5 +16,7 @@ public interface TenantAware {
 	
 	public default void deleteCancelled(Tenant tenant) { };
 
-	public default Integer getOrder() { return Integer.MAX_VALUE; };
+	public default Integer getOrder() { return Integer.MAX_VALUE; }
+
+	public default void tenantStarted(Tenant tenant) { };
 }

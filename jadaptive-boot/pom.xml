@@ -143,6 +143,7 @@
 			<groupId>com.jadaptive</groupId>
 			<artifactId>jadaptive-api</artifactId>
 			<version>${project.version}</version>
+
 		</dependency>
 
 		<dependency>
@@ -341,7 +342,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-
+<!--			<dependency>-->
+<!--				<groupId>commons-io</groupId>-->
+<!--				<artifactId>commons-io</artifactId>-->
+<!--				<version>2.21.0</version>-->
+<!--				<type>pom</type>-->
+<!--				<scope>import</scope>-->
+<!--			</dependency>-->
 		</dependencies>
 	</dependencyManagement>
 

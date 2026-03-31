@@ -48,7 +48,7 @@ public interface Product extends ExtensionPoint {
 	}
 
 	default boolean isRevenueGenerating() {
-		return true;
+		return false;
 	}
 	
 	default boolean supportsPAYG() {

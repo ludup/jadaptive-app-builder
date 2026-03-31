@@ -162,6 +162,16 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 				setupCache(tevt.getObject());
 			});
 			
+			StreamSupport.stream(repository.listTenants().spliterator(), false).
+				parallel().
+				forEach(tenant -> {
+					try(@SuppressWarnings("unused")
+						var ctx2 = permissionService.systemContext()) {
+							runAsTenant(tenant, () -> {
+								tenantStarted(tenant);
+							});
+						}			
+				});
 		} 
 	}
 
@@ -231,6 +241,28 @@ public class TenantServiceImpl implements TenantService, JsonTemplateEnabledServ
 			
 			templateService.loadExtendedTemplates(tenant);
 			templateService.doUpdateOperations();
+		} finally {
+			clearCurrentTenant();
+		}
+		
+		return tenant;
+		
+	}
+	
+	@Override
+	public Tenant tenantStarted(Tenant tenant) {
+		
+		setCurrentTenant(tenant);
+		
+		try {
+
+			applicationService.getBeans(TenantAware.class).
+				stream().
+				sorted((o1,o2) -> o1.getOrder().compareTo(o2.getOrder())).
+				forEach(aware -> {
+					aware.tenantStarted(tenant);
+				});
+
 		} finally {
 			clearCurrentTenant();
 		}

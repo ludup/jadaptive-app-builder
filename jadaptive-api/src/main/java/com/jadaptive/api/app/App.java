@@ -8,6 +8,8 @@ public interface App {
 
 	<E> E getBean(Class<E> clz);
 	
+	Object getBean(String name);
+	
 	void registerTestingBean(Class<?> clz, Object obj);
 
 	<E> Collection<E> getBeans(Class<E> clz);
@@ -28,7 +30,13 @@ public interface App {
 		return ApplicationServiceImpl.getInstance().getBean(clz);
 	}
 	
+	static Object bean(String name) {
+		return ApplicationServiceImpl.getInstance().getBean(name);
+	}
+	
 	static<T> T wire(T obj) {
 		return ApplicationServiceImpl.getInstance().autowire(obj);
 	}
+
+	
 }
