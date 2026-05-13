@@ -312,34 +312,34 @@ public class UserInterfaceController extends AuthenticatedController {
 
 	}
 	
-	@RequestMapping(value="/app/api/i18n/edit", method = RequestMethod.POST, produces = { "application/json"})
-	@ResponseBody
-	public RequestStatus changeText(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam String bundle, @RequestParam String key, @RequestParam String replacementValue) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
-
-		try {
-			ReplaceTextContentEdit edit;
-			
-			try {
-				edit = replacementDatabase.get(ReplaceTextContentEdit.class, 
-						SearchField.eq("bundle", bundle),
-						SearchField.eq("key", key));
-			} catch(ObjectNotFoundException e) {
-				edit = new ReplaceTextContentEdit();
-			}
-			
-			edit.setBundle(bundle);
-			edit.setKey(key);
-			edit.setReplacementText(replacementValue);
-			
-			replacementDatabase.saveOrUpdate(edit);
-			
-			return new RequestStatusImpl(true);
-		} catch(Throwable t) {
-			return new RequestStatusImpl(false);
-		}
-		
-	}
+//	@RequestMapping(value="/app/api/i18n/edit", method = RequestMethod.POST, produces = { "application/json"})
+//	@ResponseBody
+//	public RequestStatus changeText(HttpServletRequest request, HttpServletResponse response,
+//			@RequestParam String bundle, @RequestParam String key, @RequestParam String replacementValue) throws RepositoryException, UnknownEntityException, ObjectException, IOException {
+//
+//		try {
+//			ReplaceTextContentEdit edit;
+//			
+//			try {
+//				edit = replacementDatabase.get(ReplaceTextContentEdit.class, 
+//						SearchField.eq("bundle", bundle),
+//						SearchField.eq("key", key));
+//			} catch(ObjectNotFoundException e) {
+//				edit = new ReplaceTextContentEdit();
+//			}
+//			
+//			edit.setBundle(bundle);
+//			edit.setKey(key);
+//			edit.setReplacementText(replacementValue);
+//			
+//			replacementDatabase.saveOrUpdate(edit);
+//			
+//			return new RequestStatusImpl(true);
+//		} catch(Throwable t) {
+//			return new RequestStatusImpl(false);
+//		}
+//		
+//	}
 	
 	private boolean checkCache(HttpServletRequest request) {
 		
