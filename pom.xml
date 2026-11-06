@@ -23,16 +23,16 @@
 		</license>
 	</licenses>
 
-	<distributionManagement>
-		<repository>
-			<id>libs-releases-local</id>
-			<url>https://artifactory.jadaptive.com/libs-releases-local</url>
-		</repository>
-		<snapshotRepository>
-			<id>libs-snapshots</id>
-			<url>https://artifactory.jadaptive.com/libs-snapshots-local</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>athene-jad-extensions</id>
+            <url>https://athene.jadaptive.com/r/maven/jad-extensions</url>
+        </repository>
+        <snapshotRepository>
+            <id>athene-jad-extensions</id>
+            <url>https://athene.jadaptive.com/r/maven/jad-extensions</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 	<scm>
 		<url>http://github.com/ludup/jadaptive</url>
